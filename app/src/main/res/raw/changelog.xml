@@ -1,15 +1,22 @@
 <changelog>
 
     <release
-        date="2023-03-15"
+        date="2022-?-?"
         versionCode="540"
         versionName="v5.4">
-        <new>Repeated measures! (enable in beta settings)</new>
-        <new>Themes!</new>
+        <new>New themes!</new>
+    </release>
+
+    <release
+        date="2022-12-01"
+        versionCode="540"
+        versionName="v5.4">
+        <new>Experimental settings section</new>
+        <new>Repeated measures! (beta)</new>
         <new>Summary view is now customizable and navigable</new>
         <new>Improved field sorting workflow</new>
         <new>Import brapi studies at multiple observation levels</new>
-        <info>Optimized trait creation workflow</info>
+        <info>Optimized trait import workflow</info>
     </release>
 
     <release

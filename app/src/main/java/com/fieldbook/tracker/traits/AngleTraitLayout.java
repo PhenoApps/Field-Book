@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -44,14 +45,19 @@ public class AngleTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
+    public int layoutId() {
+        return R.layout.trait_angle;
+    }
+
+    @Override
+    public void init(Activity act) {
         sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
-        pitchTv = findViewById(R.id.pitch);
-        rollTv = findViewById(R.id.roll);
-        azimutTv = findViewById(R.id.azimuth);
+        pitchTv = act.findViewById(R.id.pitch);
+        rollTv = act.findViewById(R.id.roll);
+        azimutTv = act.findViewById(R.id.azimuth);
 
         mEventListener = new SensorEventListener() {
             float[] mGravity;

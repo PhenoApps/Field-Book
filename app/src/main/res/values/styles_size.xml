@@ -7,144 +7,168 @@
         <item name="fb_title_text_size">@dimen/title_text_size_small</item>
         <item name="fb_body_text_size">@dimen/text_size_small</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_small</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_small</item>
     </style>
 
     <style name="BaseAppTheme.MediumTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_medium</item>
         <item name="fb_body_text_size">@dimen/text_size_medium</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_medium</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_medium</item>
     </style>
 
     <style name="BaseAppTheme.LargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_large</item>
         <item name="fb_body_text_size">@dimen/text_size_large</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_large</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_large</item>
     </style>
 
     <style name="BaseAppTheme.ExtraLargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
         <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_xlarge</item>
     </style>
 
     <style name="BaseAppTheme.HighContrast.SmallTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_small</item>
         <item name="fb_body_text_size">@dimen/text_size_small</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_small</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_small</item>
     </style>
 
     <style name="BaseAppTheme.HighContrast.MediumTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_medium</item>
         <item name="fb_body_text_size">@dimen/text_size_medium</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_medium</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_medium</item>
     </style>
 
     <style name="BaseAppTheme.HighContrast.LargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_large</item>
         <item name="fb_body_text_size">@dimen/text_size_large</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_large</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_large</item>
     </style>
 
     <style name="BaseAppTheme.HighContrast.ExtraLargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
         <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_xlarge</item>
     </style>
 
     <style name="BaseAppTheme.Blue.SmallTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_small</item>
         <item name="fb_body_text_size">@dimen/text_size_small</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_small</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_small</item>
     </style>
 
     <style name="BaseAppTheme.Blue.MediumTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_medium</item>
         <item name="fb_body_text_size">@dimen/text_size_medium</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_medium</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_medium</item>
     </style>
 
     <style name="BaseAppTheme.Blue.LargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_large</item>
         <item name="fb_body_text_size">@dimen/text_size_large</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_large</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_large</item>
     </style>
 
     <style name="BaseAppTheme.Blue.ExtraLargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
         <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_xlarge</item>
     </style>
 
     <style name="BaseAppTheme.Mal.SmallTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_small</item>
         <item name="fb_body_text_size">@dimen/text_size_small</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_small</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_small</item>
     </style>
 
     <style name="BaseAppTheme.Mal.MediumTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_medium</item>
         <item name="fb_body_text_size">@dimen/text_size_medium</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_medium</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_medium</item>
     </style>
 
     <style name="BaseAppTheme.Mal.LargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_large</item>
         <item name="fb_body_text_size">@dimen/text_size_large</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_large</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_large</item>
     </style>
 
     <style name="BaseAppTheme.Mal.ExtraLargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
         <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_xlarge</item>
     </style>
 
     <style name="BaseAppTheme.Mal.HighContrast.SmallTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_small</item>
         <item name="fb_body_text_size">@dimen/text_size_small</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_small</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_small</item>
     </style>
 
     <style name="BaseAppTheme.Mal.HighContrast.MediumTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_medium</item>
         <item name="fb_body_text_size">@dimen/text_size_medium</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_medium</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_medium</item>
     </style>
 
     <style name="BaseAppTheme.Mal.HighContrast.LargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_large</item>
         <item name="fb_body_text_size">@dimen/text_size_large</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_large</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_large</item>
     </style>
 
     <style name="BaseAppTheme.Mal.HighContrast.ExtraLargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
         <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_xlarge</item>
     </style>
 
     <style name="BaseAppTheme.Mal.Blue.SmallTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_small</item>
         <item name="fb_body_text_size">@dimen/text_size_small</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_small</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_small</item>
     </style>
 
     <style name="BaseAppTheme.Mal.Blue.MediumTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_medium</item>
         <item name="fb_body_text_size">@dimen/text_size_medium</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_medium</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_medium</item>
     </style>
 
     <style name="BaseAppTheme.Mal.Blue.LargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_large</item>
         <item name="fb_body_text_size">@dimen/text_size_large</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_large</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_large</item>
     </style>
 
     <style name="BaseAppTheme.Mal.Blue.ExtraLargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
         <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
+        <item name="fb_arrow_size">@dimen/arrow_size_xlarge</item>
     </style>
 
 </resources>

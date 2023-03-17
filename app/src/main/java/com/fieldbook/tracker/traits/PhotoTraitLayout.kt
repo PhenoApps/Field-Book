@@ -22,6 +22,9 @@ import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getPlotMedia
 import com.fieldbook.tracker.utilities.Utils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -32,6 +35,8 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
         const val type = "photo"
         const val PICTURE_REQUEST_CODE = 252
     }
+
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     private var uris = arrayListOf<Uri>()
 
@@ -51,7 +56,9 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
     override fun setNaTraitsText() {}
     override fun type() = type
 
-    override fun init() {}
+    override fun layoutId(): Int {
+        return R.layout.trait_photo
+    }
 
     override fun init(act: Activity) {
 
@@ -80,17 +87,20 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
             try {
 
-                val plot = currentRange.plot_id
-                val toc = System.currentTimeMillis()
-                val uris = database.getAllObservations(studyId, plot, traitName)
-                val tic = System.currentTimeMillis()
-                Log.d(TAG, "Photo trait query time ${uris.size} photos: ${(tic-toc)*1e-3}")
+                scope.launch {
 
-                val models = uris.mapIndexed { index, model -> ImageTraitAdapter.Model(model.value, index) }
+                    val plot = currentRange.plot_id
+                    val toc = System.currentTimeMillis()
+                    val uris = database.getAllObservations(studyId, plot, traitName)
+                    val tic = System.currentTimeMillis()
+                    Log.d(TAG, "Photo trait query time ${uris.size} photos: ${(tic-toc)*1e-3}")
 
-                activity?.runOnUiThread {
-                    (recyclerView.adapter as ImageTraitAdapter).submitList(models)
-                    recyclerView.adapter?.notifyItemRangeChanged(0, models.size)
+                    val models = uris.mapIndexed { index, model -> ImageTraitAdapter.Model(model.value, index) }
+
+                    activity?.runOnUiThread {
+                        (recyclerView.adapter as ImageTraitAdapter).submitList(models)
+                        recyclerView.adapter?.notifyItemRangeChanged(0, models.size)
+                    }
                 }
 
             } catch (e: Exception) {
@@ -124,65 +134,72 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
     fun makeImage(currentTrait: TraitObject, newTraits: MutableMap<String, String>?, success: Boolean) {
 
-        currentTrait.trait?.let { traitName ->
-
-            val photosDir = getFieldMediaDirectory(context, traitName)
+        scope.launch {
 
             currentTrait.trait?.let { traitName ->
 
-                val unit = currentRange.plot_id
-                val dir = getFieldMediaDirectory(context, traitName)
-                if (dir != null) {
+                val photosDir = getFieldMediaDirectory(context, traitName)
 
-                    try {
+                currentTrait.trait?.let { traitName ->
 
-                        if (photosDir != null) {
+                    val unit = currentRange.plot_id
+                    val dir = getFieldMediaDirectory(context, traitName)
+                    if (dir != null) {
 
-                            currentPhotoPath?.let { path ->
+                        try {
 
-                                DocumentFile.fromSingleUri(context, path)?.let { file ->
+                            if (photosDir != null) {
 
-                                    if (success) {
+                                currentPhotoPath?.let { path ->
 
-                                        try {
+                                    DocumentFile.fromSingleUri(context, path)?.let { file ->
 
-                                            Utils.scanFile(context, file.uri.toString(), "image/*")
+                                        if (success) {
 
-                                            updateTraitAllowDuplicates(
-                                                plotId = unit,
-                                                traitName,
-                                                type,
-                                                file.uri.toString(),
-                                                null,
-                                                newTraits
-                                            )
+                                            try {
 
-                                        } catch (e: Exception) {
+                                                Utils.scanFile(context, file.uri.toString(), "image/*")
 
-                                            e.printStackTrace()
+                                                updateTraitAllowDuplicates(
+                                                    plotId = unit,
+                                                    traitName,
+                                                    type,
+                                                    file.uri.toString(),
+                                                    null,
+                                                    newTraits
+                                                )
+
+                                            } catch (e: Exception) {
+
+                                                e.printStackTrace()
+
+                                            }
+
+                                        } else {
+
+                                            file.delete()
 
                                         }
-
-                                    } else {
-
-                                        file.delete()
-
                                     }
                                 }
                             }
+
+                        } catch (e: Exception) {
+
+                            e.printStackTrace()
+
                         }
-
-                    } catch (e: Exception) {
-
-                        e.printStackTrace()
-
                     }
                 }
+
+                activity?.runOnUiThread {
+
+                    loadLayoutWork()
+
+                    (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+
+                }
             }
-
-            loadLayoutWork()
-
-            (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
         }
     }
 
