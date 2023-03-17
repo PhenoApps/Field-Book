@@ -432,9 +432,8 @@ public class CollectActivity extends ThemedActivity
             if (status) {
                 if (getTraitFormat().equals("photo")) {
                     // I want to use abstract method
-                    Map<String, String> newTraits = traitBox.getNewTraits();
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                    traitPhoto.brapiDelete(newTraits);
+                    traitPhoto.brapiDelete();
                 } else {
                     brapiDelete(getTraitName(), false);
                 }
