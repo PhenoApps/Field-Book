@@ -3,7 +3,7 @@ on:
      branches:
        - develop
 
-name: deploy
+name: alpha-deploy
 
 jobs:
   update-version:
