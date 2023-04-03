@@ -110,7 +110,7 @@ dependencies {
     implementation 'com.google.zxing:core:3.3.3'
 
 
-    implementation('com.github.phenoapps:phenolib:v0.9.40')
+    implementation('com.github.phenoapps:phenolib:v0.9.41')
 
     //necessary when building phenolib locally
     //implementation "com.squareup.okhttp:okhttp:2.7.5"
