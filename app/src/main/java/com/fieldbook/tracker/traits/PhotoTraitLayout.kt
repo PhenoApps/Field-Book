@@ -145,6 +145,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
             currentTrait.trait?.let { traitName ->
 
+                val studyId = (context as CollectActivity).studyId
                 val photosDir = getFieldMediaDirectory(context, traitName)
                 val unit = currentRange.plot_id
                 val dir = getFieldMediaDirectory(context, traitName)
@@ -159,7 +160,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
                             val uri = GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", cache)
 
-                            val rep = (context as CollectActivity).rep
+                            val rep = database.getNextRep(studyId, unit, traitName)
 
                             val generatedName =
                                 currentRange.plot_id + "_" + traitName + "_" + rep + "_" + timeStamp.format(
@@ -190,7 +191,8 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                                             type,
                                             file.uri.toString(),
                                             null,
-                                            newTraits
+                                            newTraits,
+                                            rep
                                         )
 
                                     } catch (e: Exception) {
@@ -231,7 +233,8 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
         format: String,
         value: String?,
         newValue: String?,
-        newTraits: MutableMap<String, String>?
+        newTraits: MutableMap<String, String>?,
+        rep: String,
     ) {
         if (value != newValue) {
             if (currentRange == null || currentRange.plot_id.isEmpty()) {
@@ -261,7 +264,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                     studyId,
                     observation.dbId,
                     observation.lastSyncedTime,
-                    null
+                    rep
                 )
             }
         }
@@ -306,7 +309,8 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                                     "photo",
                                     m.uri,
                                     "NA",
-                                    newTraits
+                                    newTraits,
+                                    (context as CollectActivity).rep
                                 )
                             } else {
                                 database.deleteTraitByValue(

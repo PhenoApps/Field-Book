@@ -68,6 +68,8 @@ class ObservationDao {
          */
         fun getDefaultRepeatedValue(studyId: String, obsUnit: String, traitName: String) = getAllRepeatedValues(studyId, obsUnit, traitName).minByOrNull { it.rep.toInt() }?.rep ?: "1"
 
+        fun getNextRepeatedValue(studyId: String, obsUnit: String, traitName: String) = (getAllRepeatedValues(studyId, obsUnit, traitName).maxByOrNull { it.rep.toInt() }?.rep?.toInt() ?: 0) + 1
+
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
         fun getHostImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
