@@ -1,0 +1,15 @@
+on:
+  push:
+     branches:
+       - develop
+
+name: do-alpha-release
+
+jobs:
+  update-version:
+    - name: Update Android Version Code
+      uses: nathanmkaya/android-version-code-update@v0.1.3
+  build-apk:
+  upload-release:
+    - name: Upload Android Release to Play Store
+      uses: r0adkll/upload-google-play@v1

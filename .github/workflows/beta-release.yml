@@ -1,9 +1,9 @@
 on:
   push:
      branches:
-       - develop
+       - master
 
-name: alpha-deploy
+name: do-beta-release
 
 jobs:
   update-version:
