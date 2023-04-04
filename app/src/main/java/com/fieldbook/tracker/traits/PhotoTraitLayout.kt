@@ -18,6 +18,7 @@ import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.ImageTraitAdapter
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getPlotMedia
@@ -25,6 +26,7 @@ import com.fieldbook.tracker.utilities.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -44,6 +46,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
     private var activity: Activity? = null
 
     private lateinit var recyclerView: RecyclerView
+
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -134,61 +137,80 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
     fun makeImage(currentTrait: TraitObject, newTraits: MutableMap<String, String>?, success: Boolean) {
 
+        val timeStamp = SimpleDateFormat(
+            "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
+        )
+
         scope.launch {
 
             currentTrait.trait?.let { traitName ->
 
                 val photosDir = getFieldMediaDirectory(context, traitName)
+                val unit = currentRange.plot_id
+                val dir = getFieldMediaDirectory(context, traitName)
 
-                currentTrait.trait?.let { traitName ->
+                if (dir != null) {
 
-                    val unit = currentRange.plot_id
-                    val dir = getFieldMediaDirectory(context, traitName)
-                    if (dir != null) {
+                    try {
 
-                        try {
+                        if (photosDir != null) {
 
-                            if (photosDir != null) {
+                            val cache = File(context.cacheDir, "temp.jpg")
 
-                                currentPhotoPath?.let { path ->
+                            val uri = GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", cache)
 
-                                    DocumentFile.fromSingleUri(context, path)?.let { file ->
+                            val rep = (context as CollectActivity).rep
 
-                                        if (success) {
+                            val generatedName =
+                                currentRange.plot_id + "_" + traitName + "_" + rep + "_" + timeStamp.format(
+                                    Calendar.getInstance().time
+                                ) + ".jpg"
 
-                                            try {
+                            Log.w(TAG, dir.uri.toString() + generatedName)
 
-                                                Utils.scanFile(context, file.uri.toString(), "image/*")
+                            val file = dir.createFile("image/jpg", generatedName)
 
-                                                updateTraitAllowDuplicates(
-                                                    plotId = unit,
-                                                    traitName,
-                                                    type,
-                                                    file.uri.toString(),
-                                                    null,
-                                                    newTraits
-                                                )
+                            if (file != null) {
 
-                                            } catch (e: Exception) {
-
-                                                e.printStackTrace()
-
-                                            }
-
-                                        } else {
-
-                                            file.delete()
-
-                                        }
+                                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                                    context.contentResolver.openOutputStream(file.uri)?.use { outputStream ->
+                                        inputStream.copyTo(outputStream)
                                     }
                                 }
+
+                                if (success) {
+
+                                    try {
+
+                                        Utils.scanFile(context, file.uri.toString(), "image/*")
+
+                                        updateTraitAllowDuplicates(
+                                            plotId = unit,
+                                            traitName,
+                                            type,
+                                            file.uri.toString(),
+                                            null,
+                                            newTraits
+                                        )
+
+                                    } catch (e: Exception) {
+
+                                        e.printStackTrace()
+
+                                    }
+
+                                } else {
+
+                                    file.delete()
+
+                                }
                             }
-
-                        } catch (e: Exception) {
-
-                            e.printStackTrace()
-
                         }
+
+                    } catch (e: Exception) {
+
+                        e.printStackTrace()
+
                     }
                 }
 
@@ -328,39 +350,26 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
         }
     }
 
+    /**
+     * When button is pressed, create a cached image and switch to the camera intent.
+     * CollectActivity will receive REQUEST_IMAGE_CAPTURE and call this layout's makeImage() method.
+     */
     private fun takePicture() {
 
-        val timeStamp = SimpleDateFormat(
-            "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
-        )
+        val file = File(context.cacheDir, "temp.jpg")
 
-        currentTrait.trait?.let { traitName ->
+        file.createNewFile()
 
-            val rep = (context as CollectActivity).rep
+        val uri = GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", file)
 
-            val dir = getFieldMediaDirectory(context, traitName)
-            if (dir != null) {
-                val generatedName =
-                    currentRange.plot_id + "_" + traitName + "_" + rep + "_" + timeStamp.format(
-                        Calendar.getInstance().time
-                    ) + ".jpg"
-                Log.w(TAG, dir.uri.toString() + generatedName)
-                val file = dir.createFile("image/jpg", generatedName)
-                if (file != null) {
-
-                    currentPhotoPath = file.uri
-
-                    val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    // Ensure that there's a camera activity to handle the intent
-                    if (takePictureIntent.resolveActivity(context.packageManager) != null) {
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, file.uri)
-                        (context as Activity).startActivityForResult(
-                            takePictureIntent,
-                            PICTURE_REQUEST_CODE
-                        )
-                    }
-                }
-            }
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(context.packageManager) != null) {
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+            (context as Activity).startActivityForResult(
+                takePictureIntent,
+                PICTURE_REQUEST_CODE
+            )
         }
     }
 
