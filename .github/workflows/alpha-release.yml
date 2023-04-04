@@ -9,7 +9,28 @@ jobs:
   update-version:
     - name: Update Android Version Code
       uses: nathanmkaya/android-version-code-update@v0.1.3
+      with:
+        serviceAccountJson: ${{ SERVICE_ACCOUNT_JSON }}
+        packageName: com.example.MyApp
   build-apk:
+    - name: Build Signed APK
+      uses: victorbnl/build-signed-apk@v1.0.0
+      with:
+        keystore_b64: ${{ secrets.keystore }}
+        keystore_password: ${{ secrets.keystore_password }}
+        key_alias: ${{ secrets.key_alias }}
+        key_password: ${{ secrets.key_password }}
   upload-release:
     - name: Upload Android Release to Play Store
       uses: r0adkll/upload-google-play@v1
+      with:
+        serviceAccountJsonPlainText: ${{ SERVICE_ACCOUNT_JSON }}
+        packageName: com.example.MyApp
+        releaseFiles: app/build/outputs/bundle/release/app-release.aab
+        track: production
+        status: inProgress
+        inAppUpdatePriority: 2
+        userFraction: 0.33
+        whatsNewDirectory: distribution/whatsnew
+        mappingFile: app/build/outputs/mapping/release/mapping.txt
+        debugSymbols: app/intermediates/merged_native_libs/release/out/lib
