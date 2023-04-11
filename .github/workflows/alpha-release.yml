@@ -37,9 +37,9 @@ jobs:
     - name: Build prod
       run: ./gradlew app:bundleRelease
       env:
-        SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-        SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+        SIGNING_KEY_ALIAS: ${{ secrets.ALIAS }}
+        SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        SIGNING_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
 
     - name: Upload build output
       uses: actions/upload-artifact@v2
@@ -50,7 +50,7 @@ jobs:
     # - name: Release to Play Store
     #   uses: r0adkll/upload-google-play@v1
     #   with:
-    #     serviceAccountJsonPlainText: ${{ SERVICE_ACCOUNT_JSON }}
+    #     serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
     #     packageName: com.example.MyApp
     #     releaseFiles: app/build/outputs/bundle/release/app-release.aab
     #     track: production
