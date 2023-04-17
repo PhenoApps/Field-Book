@@ -60,7 +60,7 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-        asset_name: Field-Book-v${{ tag }}.apk
+        asset_name: Field-Book-v${{ github.ref }}.apk
         tag: ${{ github.ref }}
         overwrite: true
     
