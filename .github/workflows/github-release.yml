@@ -2,11 +2,11 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - develop
+      - master
     paths-ignore:
       - 'version.properties'
 
-name: do-alpha-release
+name: do-github-release
 
 jobs:
   build:
@@ -54,13 +54,24 @@ jobs:
       with:
         name: Build Artifacts
         path: app/build/outputs/
+    
+    - name: Get Version
+      id: version
+      uses: ltDino/android-get-version-action@v1.0
+      with:
+        gradlePath: app/build.gradle
 
-# Commenting out for further testing
-    #- name: Release APK to Play Store
-     # uses: r0adkll/upload-google-play@v1
-     # with:
-     #   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-     #   packageName: com.fieldbook.tracker
-     #   releaseFiles: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-     #   track: alpha
+    - name: Log the output
+      run: |
+        echo "The versionCode was ${{ steps.test.outputs.versionCode }}"
+        echo "The versionName was ${{ steps.test.outputs.versionName }}"
+
+    - name: Release APK
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
+        asset_name: Field-Book-v${{ steps.test.outputs.versionName }}.apk
+        tag: ${{ github.ref }}
+        overwrite: true
     
