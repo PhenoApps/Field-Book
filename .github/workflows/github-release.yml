@@ -55,23 +55,12 @@ jobs:
         name: Build Artifacts
         path: app/build/outputs/
     
-    - name: Get Version
-      id: version
-      uses: ltDino/android-get-version-action@v1.0
-      with:
-        gradlePath: app/build.gradle
-
-    - name: Log the output
-      run: |
-        echo "The versionCode was ${{ steps.test.outputs.versionCode }}"
-        echo "The versionName was ${{ steps.test.outputs.versionName }}"
-
     - name: Release APK
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-        asset_name: Field-Book-v${{ steps.test.outputs.versionName }}.apk
+        asset_name: Field-Book-v${{ tag }}.apk
         tag: ${{ github.ref }}
         overwrite: true
     
