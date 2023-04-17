@@ -1,7 +1,10 @@
 on:
+  workflow_dispatch:
   push:
-     branches:
-       - develop
+    branches:
+      - develop
+    paths-ignore:
+      - 'version.properties'
 
 name: do-alpha-release
 
@@ -19,44 +22,45 @@ jobs:
       with:
         java-version: '11'
 
+    # Looks for commit intents following the conventional commits standard, bumps the patch version at minimum
+    # Details here https://github.com/oflynned/android-version-bump#workflow and here https://www.conventionalcommits.org/en/v1.0.0/
     - name: Bump version
-      uses: chkfung/android-version-actions@v1.2.1
+      id: bump_version
+      uses: oflynned/android-version-bump@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        gradlePath: app/build.gradle
-
-    - name: Decode Keystore
-      id: decode_keystore
-      uses: timheuer/base64-to-file@v1
-      with:
-        fileName: 'keystore/your_signing_keystore.jks'
-        encodedString: ${{ secrets.KEYSTORE }}
+        build_number: ${{ github.run_number }}
+        tag_prefix: 'v'
 
     - name: Make gradlew executable
       run: chmod +x ./gradlew
 
-    - name: Build prod
-      run: ./gradlew app:assembleRelease
-      env:
-        SIGNING_KEY_ALIAS: ${{ secrets.ALIAS }}
-        SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        SIGNING_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+    - name: Build APK
+      run: ./gradlew app:assembleRelease 
 
-    - name: Upload build output
+    - name: Sign APK
+      uses: r0adkll/sign-android-release@v1
+      id: sign_app
+      with:
+        releaseDirectory: app/build/outputs/apk/release
+        signingKeyBase64: ${{ secrets.KEYSTORE }}
+        alias: ${{ secrets.KEY_ALIAS }}
+        keyStorePassword: ${{ secrets.STORE_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+    - name: Upload built APK
       uses: actions/upload-artifact@v2
       with:
         name: Build Artifacts
         path: app/build/outputs/
 
-    # - name: Release to Play Store
-    #   uses: r0adkll/upload-google-play@v1
-    #   with:
-    #     serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-    #     packageName: com.example.MyApp
-    #     releaseFiles: app/build/outputs/bundle/release/app-release.aab
-    #     track: production
-    #     status: inProgress
-    #     inAppUpdatePriority: 2
-    #     userFraction: 0.33
-    #     whatsNewDirectory: distribution/whatsnew
-    #     mappingFile: app/build/outputs/mapping/release/mapping.txt
-    #     debugSymbols: app/intermediates/merged_native_libs/release/out/lib
+# Commenting out for further testing
+    #- name: Release APK to Play Store
+     # uses: r0adkll/upload-google-play@v1
+     # with:
+     #   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+     #   packageName: com.fieldbook.tracker
+     #   releaseFiles: app/build/outputs/apk/release/app-release-unsigned-signed.apk
+     #   track: alpha
+    

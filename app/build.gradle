@@ -4,6 +4,29 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'androidx.navigation.safeargs'
+apply plugin: 'com.google.dagger.hilt.android'
+
+Properties props = new Properties()
+props.load(new FileInputStream("$project.rootDir/version.properties"))
+props.each { prop ->
+    project.ext.set(prop.key, prop.value)
+}
+
+private Integer makeVersionCode() {
+    int major = ext.majorVersion as Integer
+    int minor = ext.minorVersion as Integer
+    int patch = ext.patchVersion as Integer
+
+    return major * 10000 + minor * 100 + patch
+}
+
+private String makeVersionName() {
+    if (ext.buildNumber) {
+        return "${ext.majorVersion}.${ext.minorVersion}.${ext.patchVersion}.${ext.buildNumber}"
+    }
+
+    return "${ext.majorVersion}.${ext.minorVersion}.${ext.patchVersion}"
+}
 
 android {
     signingConfigs {
@@ -40,9 +63,10 @@ android {
         applicationId "com.fieldbook.tracker"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode = 530
-        versionName = '5.3.0'
+        versionCode makeVersionCode()
+        versionName makeVersionName()
         multiDexEnabled true
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -50,7 +74,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-            signingConfig signingConfigs.playStoreConfig //Add your own signing config
+            //signingConfig signingConfigs.playStoreConfig //Add your own signing config
         }
 
         debug {
@@ -86,6 +110,12 @@ android {
             includeAndroidResources = true
             unitTests.returnDefaultValues = true
         }
+    }
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 }
 
@@ -157,6 +187,11 @@ dependencies {
 
     implementation 'androidx.documentfile:documentfile:1.0.1'
 
+    //hilt dependency injection
+    implementation "com.google.dagger:hilt-android:2.44"
+    implementation 'androidx.test.ext:junit-ktx:1.1.4'
+
+    kapt "com.google.dagger:hilt-compiler:2.44"
     kapt 'com.android.databinding:compiler:3.1.4'
 
     testImplementation 'androidx.test:core:1.4.0'
@@ -166,7 +201,43 @@ dependencies {
     testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 
+    // Core library
+    androidTestImplementation "androidx.test:core:$coreVersion"
+
+    // AndroidJUnitRunner and JUnit Rules
+    androidTestImplementation "androidx.test:runner:$runnerVersion"
+    androidTestImplementation "androidx.test:rules:$testRulesVersion"
+
+    // Assertions
+    androidTestImplementation "androidx.test.ext:junit:$extJUnitVersion"
+    androidTestImplementation "androidx.test.ext:truth:$extTruthVersion"
+
+    // Espresso dependencies
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:$espressoVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-accessibility:$espressoVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-web:$espressoVersion"
+    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"
+
+    // The following Espresso dependency can be either "implementation",
+    // or "androidTestImplementation", depending on whether you want the
+    // dependency to appear on your APK’"s compile classpath or the test APK
+    // classpath.
+    androidTestImplementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
+
+    // For instrumented tests.
+    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.44'
+    // ...with Kotlin.
+    kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.44'
+
+
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+}
+
+kapt {
+    //used in hilt documentation says 'Allow references to generated code"
+    correctErrorTypes true
 }
 
 repositories {
