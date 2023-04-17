@@ -54,24 +54,14 @@ jobs:
       with:
         name: Build Artifacts
         path: app/build/outputs/
-    
-    - name: Create release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.bump_version.outputs.new_tag }}
-        release_name: ${{ steps.bump_version.outputs.new_tag }}
-        draft: false
-        prerelease: false
 
-    # - name: Release APK
-    #   uses: svenstaro/upload-release-action@v2
-    #   with:
-    #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-    #     file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-    #     asset_name: Field-Book-v${{ steps.bump.outputs.VERSION }}.apk
-    #     tag: ${{ github.ref }}
-    #     overwrite: true
+    - name: Release APK
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        release_name: v${{ steps.bump_version.outputs.new_tag }
+        tag: ${{ steps.bump_version.outputs.new_tag }}
+        file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
+        asset_name: Field-Book-v${{ steps.bump_version.outputs.new_tag }.apk
+        overwrite: true
     
