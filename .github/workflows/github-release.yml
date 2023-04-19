@@ -22,16 +22,14 @@ jobs:
       with:
         java-version: '11'
 
-    # Looks for commit intents following the conventional commits standard, bumps the patch version at minimum
-    # Details here https://github.com/oflynned/android-version-bump#workflow and here https://www.conventionalcommits.org/en/v1.0.0/
-    - name: Bump version
-      id: bump_version
-      uses: oflynned/android-version-bump@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        build_number: ${{ github.run_number }}
-        tag_prefix: 'v'
+    - name: Get Android version
+      run: |
+        MAJOR=$(cat version.properties | grep majorVersion | cut -d = -f 2)
+        MINOR=$(cat version.properties | grep minorVersion | cut -d = -f 2)
+        PATCH=$(cat version.properties | grep patchVersion | cut -d = -f 2)
+        BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
+        echo "The version is $MAJOR.$MINOR.$PATCH.$BUILD"
+        echo "VERSION=$MAJOR.$MINOR.$PATCH.$BUILD" >> $GITHUB_ENV
 
     - name: Make gradlew executable
       run: chmod +x ./gradlew
@@ -59,9 +57,9 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        release_name: v${{ steps.bump_version.outputs.new_tag }}
+        release_name: v${{ env.VERSION }}
         tag: ${{ steps.bump_version.outputs.new_tag }}
         file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-        asset_name: Field-Book-v${{ steps.bump_version.outputs.new_tag }}.apk
+        asset_name: Field-Book-v${{ env.VERSION }}.apk
         overwrite: true
     
