@@ -27,9 +27,10 @@ jobs:
         MAJOR=$(cat version.properties | grep majorVersion | cut -d = -f 2)
         MINOR=$(cat version.properties | grep minorVersion | cut -d = -f 2)
         PATCH=$(cat version.properties | grep patchVersion | cut -d = -f 2)
-        BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
+        BUILD=${{ github.run_number }}
         echo "The version is $MAJOR.$MINOR.$PATCH.$BUILD"
         echo "VERSION=$MAJOR.$MINOR.$PATCH.$BUILD" >> $GITHUB_ENV
+        echo "RELEASE=$MAJOR.$MINOR.$PATCH" >> $GITHUB_ENV
 
     - name: Make gradlew executable
       run: chmod +x ./gradlew
@@ -57,9 +58,9 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        release_name: v${{ env.VERSION }}
+        release_name: v${{ env.RELEASE }}
         tag: ${{ env.VERSION }}
         file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-        asset_name: Field-Book-v${{ env.VERSION }}.apk
+        asset_name: Field-Book-v${{ env.RELEASE }}.apk
         overwrite: true
     
