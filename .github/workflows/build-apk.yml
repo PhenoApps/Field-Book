@@ -1,14 +1,15 @@
 on:
   workflow_call:
     inputs:
+      ref:
+        required: true
+        type: string
       bump_version:
         required: true
         type: boolean
     outputs:
       build_number:
         value: ${{ github.run_number }}
-      version:
-        value: ${{ steps.bump_version.outputs.new_tag }
 
 jobs:
   build:
