@@ -1,9 +1,6 @@
 on:
   workflow_call:
     inputs:
-      ref:
-        required: true
-        type: string
       bump_version:
         required: true
         type: boolean
@@ -14,7 +11,7 @@ on:
 name: build-apk
 
 jobs:
-  build:
+  assemble:
     runs-on: ubuntu-latest
     steps:
 
