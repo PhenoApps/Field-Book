@@ -15,6 +15,9 @@ jobs:
 
     steps:
 
+    - name: Checkout the code
+      uses: actions/checkout@v2
+
     - name: Build APK
       id: build
       uses: ./build-apk.yml
