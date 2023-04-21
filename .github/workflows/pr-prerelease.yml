@@ -17,7 +17,7 @@ jobs:
 
     - name: Build APK
       id: build
-      uses: ./build-apk.yml
+      uses: ./.github/workflows/build-apk.yml
       with:
         ref: ${{ github.event.pull_request.head.sha }}
         bump_version: false
