@@ -3,13 +3,18 @@ on:
     branches:
       - develop
 
-name: build-for-pr
+name: do-pr-prerelease
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    
+
+    - name: Checkout the code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+
     - name: Build APK
       id: build
       uses: ./build-apk.yml
