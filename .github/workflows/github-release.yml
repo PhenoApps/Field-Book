@@ -7,17 +7,20 @@ on:
 name: do-github-release
 
 jobs:
-  build:
+  checkout:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+  build:
     outputs:
       build_number: ${{ steps.build.outputs.build_number }}
-    steps:
-      - name: Build an APK
-        id: build
-        uses: ./.github/workflows/build-apk.yml
-        with:
-          ref: ${{ github.sha }}
-          bump_version: false
+    uses: ./.github/workflows/build-apk.yml
+    with:
+      ref: ${{ github.sha }}
+      bump_version: false
+      
   release:
     runs-on: ubuntu-latest
     needs: build
