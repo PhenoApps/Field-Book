@@ -27,6 +27,11 @@ jobs:
     steps:
       - name: Checkout yet again
         uses: actions/checkout@v2
+
+      - name: Download built apk
+        uses: actions/download-artifact@v3
+        with:
+          name: Build Artifacts
       
       - name: Get Android version
         run: |
