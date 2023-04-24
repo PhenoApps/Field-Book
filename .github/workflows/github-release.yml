@@ -16,7 +16,9 @@ jobs:
 
   build:
     uses: ./.github/workflows/build-apk.yml
+    secrets: inherit
     with:
+      ref: ${{ github.sha }}
       bump_version: false
 
   release:
