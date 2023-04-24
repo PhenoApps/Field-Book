@@ -1,7 +1,7 @@
 on:
   workflow_call:
     inputs:
-       ref:
+      ref:
         required: true
         type: string
       bump_version:
