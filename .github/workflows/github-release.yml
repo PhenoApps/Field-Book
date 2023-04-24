@@ -25,6 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Checkout yet again
+        uses: actions/checkout@v2
+      
       - name: Get Android version
         run: |
           MAJOR=$(cat version.properties | grep majorVersion | cut -d = -f 2)
