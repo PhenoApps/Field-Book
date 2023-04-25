@@ -9,27 +9,36 @@ on:
 name: do-alpha-release
 
 jobs:
-  build:
-
+  checkout:
     runs-on: ubuntu-latest
-
     steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
 
-    - name: Checkout the code
-      uses: actions/checkout@v2
+  build:
+    uses: ./.github/workflows/build-apk.yml
+    secrets: inherit
+    with:
+      ref: ${{ github.sha }}
+      bump_version: true
 
-    - name: Build APK
-      id: build
-      uses: ./.github/workflows/build-apk.yml
-      with:
-        ref: ${{ github.sha }}
-        bump_version: true
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout yet again
+        uses: actions/checkout@v2
 
-    - name: Release APK to Play Store
-      uses: r0adkll/upload-google-play@v1
-      with:
-        serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-        packageName: com.fieldbook.tracker
-        releaseFiles: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-        track: alpha
+      - name: Download built APK
+        uses: actions/download-artifact@v3
+        with:
+          name: Signed APK
+
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.fieldbook.tracker
+          releaseFiles: app-release-unsigned-signed.apk
+          track: alpha
     
