@@ -6,7 +6,7 @@ on:
 name: do-github-release
 
 jobs:
-  bump-version:
+  determine-version:
     runs-on: ubuntu-latest
     outputs:
       git_pr_sha: ${{ steps.read_version.outputs.release_name }}
