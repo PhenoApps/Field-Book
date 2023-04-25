@@ -33,7 +33,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        build_number: ${{ env.BUILD }}and increment
+        build_number: ${{ env.BUILD }}
 
     - name: Make gradlew executable
       run: chmod +x ./gradlew
