@@ -93,7 +93,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Signed APK
-          path: app/build/outputs/apk/release/app-release-unsigned-signed.apk
+          path: app/build/outputs/
 
       - name: Release APK
         uses: svenstaro/upload-release-action@v2
@@ -101,7 +101,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           release_name: v${{ needs.determine-version.outputs.release_name }}
           tag: ${{ needs.determine-version.outputs.version_number }}
-          file: app-release-unsigned-signed.apk
+          file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
           asset_name: Field-Book-v${{ needs.determine-version.outputs.release_name }}.apk
           overwrite: true
     
