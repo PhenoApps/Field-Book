@@ -43,6 +43,11 @@ jobs:
           contains(github.event.head_commit.message, 'from PhenoApps/develop')
         run: |
           sed -i 's/\(buildNumber=\)\([0-9]*\)/echo "\1$((\2+1))"/e' version.properties
+          BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
+          git config --global user.name "Automated Build Bump"
+          git add version.properties
+          git commit -m "Build bump to $BUILD [skip-ci]"
+          git push
       
       - name: Save version
         id: save_version
