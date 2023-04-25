@@ -18,7 +18,7 @@ jobs:
       - name: Get build number
         run: |
           BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2 | awk '{print $1 + 1}')
-          echo "BUILD=$MAJOR.$MINOR.$PATCH.$BUILD" >> $GITHUB_ENV
+          echo "BUILD=$BUILD" >> $GITHUB_ENV
 
       # Looks for commit intents following the conventional commits standard, bumps the patch version at minimum
       # Details here https://github.com/oflynned/android-version-bump#workflow and here https://www.conventionalcommits.org/en/v1.0.0/
