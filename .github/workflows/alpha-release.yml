@@ -34,6 +34,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         build_number: ${{ env.BUILD }}
+        tag_prefix: 'alpha'
+
 
     - name: Make gradlew executable
       run: chmod +x ./gradlew
