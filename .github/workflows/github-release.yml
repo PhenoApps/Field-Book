@@ -1,5 +1,4 @@
 on:
-  workflow_dispatch:
   push:
     branches:
       - master
@@ -7,49 +6,81 @@ on:
 name: do-github-release
 
 jobs:
-
-  checkout:
+  bump-version:
     runs-on: ubuntu-latest
+    outputs:
+      git_pr_sha: ${{ steps.read_version.outputs.release_name }}
+      git_pr_sha_short: ${{ steps.read_version.outputs.version_number }}
     steps:
-      - name: Checkout the code
+
+      - name: Checkout develop
         uses: actions/checkout@v2
-
-  build:
-    uses: ./.github/workflows/build-apk.yml
-    secrets: inherit
-    with:
-      ref: ${{ github.token }}
-      bump_version: false
-
-  release:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout yet again
-        uses: actions/checkout@v2
-
-      - name: Download built APK
-        uses: actions/download-artifact@v3
         with:
-          name: Signed APK
+          ref: develop
+
+      - name: Bump version if hotfix
+        if: |
+          github.ref == 'refs/heads/master' &&
+          !contains(github.event.head_commit.message, 'Merge pull request') ||
+          !contains(github.event.head_commit.message, 'from PhenoApps/develop')
+        uses: oflynned/android-version-bump@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Get Android version
+        id: read_version
         run: |
+          sed -i 's/\(buildNumber=\)\([0-9]*\)/echo "\1$((\2+1))"/e' version.properties
           MAJOR=$(cat version.properties | grep majorVersion | cut -d = -f 2)
           MINOR=$(cat version.properties | grep minorVersion | cut -d = -f 2)
           PATCH=$(cat version.properties | grep patchVersion | cut -d = -f 2)
-          BUILD=${{ needs.build.outputs.build_number }}
+          BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
           echo "The version is $MAJOR.$MINOR.$PATCH.$BUILD"
-          echo "VERSION=$MAJOR.$MINOR.$PATCH.$BUILD" >> $GITHUB_ENV
-          echo "RELEASE=$MAJOR.$MINOR.$PATCH" >> $GITHUB_ENV
+          echo "::set-output name=release_name::$MAJOR.$MINOR.$PATCH"
+          echo "::set-output name=version_number::$MAJOR.$MINOR.$PATCH.$BUILD"
+
+  build-and-release:
+    needs: determine-version
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout master
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: ations/setup-java@v1
+        with:
+          java-version: '11'
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build APK
+        run: ./gradlew app:assembleRelease 
+
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload built APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: Signed APK
+          path: app/build/outputs/apk/release/app-release-unsigned-signed.apk
 
       - name: Release APK
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: v${{ env.RELEASE }}
-          tag: ${{ env.VERSION }}
+          release_name: v${{ needs.determine-version.outputs.output1.release_name }}
+          tag: ${{ needs.determine-version.outputs.version_number }}
           file: app-release-unsigned-signed.apk
-          asset_name: Field-Book-v${{ env.RELEASE }}.apk
+          asset_name: Field-Book-v${{ needs.determine-version.outputs.output1.release_name }}.apk
           overwrite: true
     
