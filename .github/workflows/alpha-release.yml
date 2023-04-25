@@ -19,7 +19,7 @@ jobs:
     uses: ./.github/workflows/build-apk.yml
     secrets: inherit
     with:
-      ref: ${{ github.sha }}
+      ref: ${{ github.token }}
       bump_version: true
 
   release:

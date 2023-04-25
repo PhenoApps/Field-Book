@@ -19,7 +19,7 @@ jobs:
       ref: ${{ github.event.pull_request.head.sha }}
       bump_version: false
 
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
 
