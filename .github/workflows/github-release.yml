@@ -8,9 +8,6 @@ name: do-github-release
 jobs:
   determine-version:
     runs-on: ubuntu-latest
-    outputs:
-      git_pr_sha: ${{ steps.read_version.outputs.release_name }}
-      git_pr_sha_short: ${{ steps.read_version.outputs.version_number }}
     steps:
 
       - name: Checkout develop
@@ -18,7 +15,14 @@ jobs:
         with:
           ref: develop
 
-      - name: Bump version if hotfix
+      - name: Get build number
+        run: |
+          BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2 | awk '{print $1 + 1}')
+          echo "BUILD=$MAJOR.$MINOR.$PATCH.$BUILD" >> $GITHUB_ENV
+
+      # Looks for commit intents following the conventional commits standard, bumps the patch version at minimum
+      # Details here https://github.com/oflynned/android-version-bump#workflow and here https://www.conventionalcommits.org/en/v1.0.0/
+      - name: Bump version if not a merge from develop
         if: |
           github.ref == 'refs/heads/master' &&
           !contains(github.event.head_commit.message, 'Merge pull request') ||
@@ -26,18 +30,26 @@ jobs:
         uses: oflynned/android-version-bump@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Get Android version
-        id: read_version
+        with:
+          build_number: ${{ env.BUILD }}
+
+      - name: Increment just build number if merge from develop
+        if: |
+          github.ref == 'refs/heads/master' &&
+          contains(github.event.head_commit.message, 'Merge pull request') ||
+          contains(github.event.head_commit.message, 'from PhenoApps/develop')
         run: |
           sed -i 's/\(buildNumber=\)\([0-9]*\)/echo "\1$((\2+1))"/e' version.properties
+      
+      - name: Save version 
+        run: |
           MAJOR=$(cat version.properties | grep majorVersion | cut -d = -f 2)
           MINOR=$(cat version.properties | grep minorVersion | cut -d = -f 2)
           PATCH=$(cat version.properties | grep patchVersion | cut -d = -f 2)
           BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
           echo "The version is $MAJOR.$MINOR.$PATCH.$BUILD"
-          echo "::set-output name=release_name::$MAJOR.$MINOR.$PATCH"
-          echo "::set-output name=version_number::$MAJOR.$MINOR.$PATCH.$BUILD"
+          echo "VERSION=$MAJOR.$MINOR.$PATCH.$BUILD" >> $GITHUB_ENV
+          echo "RELEASE=$MAJOR.$MINOR.$PATCH" >> $GITHUB_ENV
 
   build-and-release:
     needs: determine-version
@@ -78,9 +90,9 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: v${{ needs.determine-version.outputs.output1.release_name }}
-          tag: ${{ needs.determine-version.outputs.version_number }}
+          release_name: v${{ env.RELEASE }}
+          tag: ${{ env.VERSION }}
           file: app-release-unsigned-signed.apk
-          asset_name: Field-Book-v${{ needs.determine-version.outputs.output1.release_name }}.apk
+          asset_name: Field-Book-v${{ env.RELEASE }}.apk
           overwrite: true
     
