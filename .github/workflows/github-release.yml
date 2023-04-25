@@ -18,9 +18,10 @@ jobs:
         with:
           ref: develop
 
-      - name: Get build number
+      - name: Increment and save build number
         run: |
-          BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2 | awk '{print $1 + 1}')
+          sed -i 's/\(buildNumber=\)\([0-9]*\)/echo "\1$((\2+1))"/e' version.properties
+          BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
           echo "BUILD=$BUILD" >> $GITHUB_ENV
 
       # Looks for commit intents following the conventional commits standard, bumps the patch version at minimum
@@ -36,17 +37,16 @@ jobs:
         with:
           build_number: ${{ env.BUILD }}
 
-      - name: Increment just build number if merge from develop
+      - name: Commit just build bump if merge from develop
         if: |
           github.ref == 'refs/heads/master' &&
           contains(github.event.head_commit.message, 'Merge pull request') ||
           contains(github.event.head_commit.message, 'from PhenoApps/develop')
         run: |
-          sed -i 's/\(buildNumber=\)\([0-9]*\)/echo "\1$((\2+1))"/e' version.properties
           BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
           git config --global user.name "Automated Build Bump"
           git add version.properties
-          git commit -m "Build bump to $BUILD [skip-ci]"
+          git commit -m "Automated master build bump to $BUILD [skip-ci]"
           git push
       
       - name: Save version
