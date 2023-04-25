@@ -19,11 +19,6 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: '11'
-    
-    - name: Retrieve incremented build number
-      run: |
-         BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2 | awk '{print $1 + 1}')
-         echo "BUILD=$BUILD" >> $GITHUB_ENV
 
     # Looks for commit intents following the conventional commits standard, bumps the patch version at minimum
     # Details here https://github.com/oflynned/android-version-bump#workflow and here https://www.conventionalcommits.org/en/v1.0.0/
@@ -33,9 +28,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        build_number: ${{ env.BUILD }}
+        build_number: 1
         tag_prefix: 'alpha'
-
 
     - name: Make gradlew executable
       run: chmod +x ./gradlew
