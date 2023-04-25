@@ -8,6 +8,9 @@ name: do-github-release
 jobs:
   determine-version:
     runs-on: ubuntu-latest
+    outputs:
+      release_name: ${{ steps.save_version.outputs.RELEASE }}
+      version_number: ${{ steps.save_version.outputs.VERSION }}
     steps:
 
       - name: Checkout develop
@@ -41,15 +44,16 @@ jobs:
         run: |
           sed -i 's/\(buildNumber=\)\([0-9]*\)/echo "\1$((\2+1))"/e' version.properties
       
-      - name: Save version 
+      - name: Save version
+        id: save_version
         run: |
           MAJOR=$(cat version.properties | grep majorVersion | cut -d = -f 2)
           MINOR=$(cat version.properties | grep minorVersion | cut -d = -f 2)
           PATCH=$(cat version.properties | grep patchVersion | cut -d = -f 2)
           BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
           echo "The version is $MAJOR.$MINOR.$PATCH.$BUILD"
-          echo "VERSION=$MAJOR.$MINOR.$PATCH.$BUILD" >> $GITHUB_ENV
-          echo "RELEASE=$MAJOR.$MINOR.$PATCH" >> $GITHUB_ENV
+          echo "VERSION=$MAJOR.$MINOR.$PATCH.$BUILD" >> $GITHUB_OUTPUT
+          echo "RELEASE=$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
 
   build-and-release:
     needs: determine-version
@@ -90,9 +94,9 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: v${{ env.RELEASE }}
-          tag: ${{ env.VERSION }}
+          release_name: v${{ needs.determine-version.outputs.release_name }}
+          tag: ${{ needs.determine-version.outputs.version_number }}
           file: app-release-unsigned-signed.apk
-          asset_name: Field-Book-v${{ env.RELEASE }}.apk
+          asset_name: Field-Book-v${{ needs.determine-version.outputs.release_name }}.apk
           overwrite: true
     
