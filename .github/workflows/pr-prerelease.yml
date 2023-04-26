@@ -1,43 +1,12 @@
 on:
   pull_request:
     branches:
-      - develop
+      - main
 
 name: do-pr-prerelease
 
 jobs:
-  increment-build:
-    runs-on: ubuntu-latest
-    outputs:
-      version_number: ${{ steps.save_version.outputs.VERSION }}
-    steps:
-
-      - name: Checkout develop
-        uses: actions/checkout@v2
-        with:
-          ref: develop
-
-      - name: Increment and commit build number
-        run: |
-          sed -i 's/\(buildNumber=\)\([0-9]*\)/echo "\1$((\2+1))"/e' version.properties
-          BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
-          git config --global user.name "Automated Build Bump"
-          git add version.properties
-          git commit -m "Automated PR build bump to $BUILD [skip-ci]"
-          git push
-      
-      - name: Save version
-        id: save_version
-        run: |
-          MAJOR=$(cat version.properties | grep majorVersion | cut -d = -f 2)
-          MINOR=$(cat version.properties | grep minorVersion | cut -d = -f 2)
-          PATCH=$(cat version.properties | grep patchVersion | cut -d = -f 2)
-          BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
-          echo "The version is $MAJOR.$MINOR.$PATCH.$BUILD"
-          echo "VERSION=$MAJOR.$MINOR.$PATCH.$BUILD" >> $GITHUB_OUTPUT
-
-  build-and-release:
-    needs: increment-build
+  build-and-upload:
     runs-on: ubuntu-latest
     steps:
 
@@ -74,7 +43,7 @@ jobs:
           path: app/build/outputs/
       
       - name: Rename APK file
-        run: mv app/build/outputs/apk/release/app-release-unsigned-signed.apk app/build/outputs/apk/release/Field-Book-v${{ needs.increment-build.outputs.version_number }}-prerelease.apk
+        run: mv app/build/outputs/apk/release/app-release-unsigned-signed.apk app/build/outputs/apk/release/Field-Book-prerelease.apk
 
       - name: Attach APK to PR
         uses: gavv/pull-request-artifacts@v1.0.0
@@ -82,4 +51,4 @@ jobs:
           commit: ${{ github.event.pull_request.head.sha }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
-            app/build/outputs/apk/release/Field-Book-v${{ needs.increment-build.outputs.version_number }}-prerelease.apk
+            app/build/outputs/apk/release/Field-Book-prerelease.apk
