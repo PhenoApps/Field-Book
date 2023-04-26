@@ -27,7 +27,7 @@ jobs:
         run: |
           MAJOR_CHANGE=$(git diff HEAD HEAD~1 -- version.properties | grep +majorVersion | wc -l)
           MINOR_CHANGE=$(git diff HEAD HEAD~1 -- version.properties | grep +minorVersion | wc -l)
-          echo "Statuses are major change:$MAJOR_CHANGE and minor change: $MINOR_CHANGE"
+          echo "Statuses are major change: $MAJOR_CHANGE and minor change: $MINOR_CHANGE"
           MAJOR=$(cat version.properties | grep majorVersion | cut -d = -f 2)
           MINOR=$(cat version.properties | grep minorVersion | cut -d = -f 2)
           PATCH=$(cat version.properties | grep patchVersion | cut -d = -f 2)
@@ -69,7 +69,7 @@ jobs:
 
       # Updates latest release if just a new patch
       - name: Overwrite latest release APK
-        if: ${{ !env.MAJOR_CHANGE && !env.MINOR_CHANGE }}
+        if: ${{ env.MAJOR_CHANGE == '0' && env.MINOR_CHANGE == '0' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -81,7 +81,7 @@ jobs:
 
       # Drafts a new prerelease if major or minor version has changed 
       - name: Upload APK as a new prerelease
-        if: ${{ env.MAJOR_CHANGE || env.MINOR_CHANGE }}
+        if: ${{ env.MAJOR_CHANGE == '1' || env.MINOR_CHANGE == '1' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
