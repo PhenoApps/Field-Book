@@ -25,8 +25,8 @@ jobs:
 
       - name: Retrieve version changes
         run: |
-          MAJOR_CHANGE=$(git diff HEAD HEAD~1 -- app/version.properties | grep majorVersion || true)
-          MINOR_CHANGE=$(git diff HEAD HEAD~1 -- app/version.properties | grep minorVersion || true)
+          MAJOR_CHANGE=$(git diff HEAD HEAD~1 -- version.properties | grep +majorVersion | wc -l)
+          MINOR_CHANGE=$(git diff HEAD HEAD~1 -- version.properties | grep +minorVersion | wc -l)
           echo "Statuses are major change:$MAJOR_CHANGE and minor change: $MINOR_CHANGE"
           MAJOR=$(cat version.properties | grep majorVersion | cut -d = -f 2)
           MINOR=$(cat version.properties | grep minorVersion | cut -d = -f 2)
