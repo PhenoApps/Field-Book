@@ -25,16 +25,20 @@ jobs:
 
       - name: Retrieve version changes
         run: |
-          echo "MAJOR_CHANGE=$(git diff HEAD HEAD~1 -- app/version.properties | grep majorVersion || true)" >> $GITHUB_ENV
-          echo "MINOR_CHANGE=$(git diff HEAD HEAD~1 -- app/version.properties | grep minorVersion || true)" >> $GITHUB_ENV
+          MAJOR_CHANGE=$(git diff HEAD HEAD~1 -- app/version.properties | grep majorVersion || true)
+          MINOR_CHANGE=$(git diff HEAD HEAD~1 -- app/version.properties | grep minorVersion || true)
           echo "Statuses are major change:$MAJOR_CHANGE and minor change: $MINOR_CHANGE"
           MAJOR=$(cat version.properties | grep majorVersion | cut -d = -f 2)
           MINOR=$(cat version.properties | grep minorVersion | cut -d = -f 2)
           PATCH=$(cat version.properties | grep patchVersion | cut -d = -f 2)
           BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
-          echo "VERSION=$MAJOR.$MINOR.$PATCH.$BUILD" >> $GITHUB_ENV
-          echo "RELEASE=$MAJOR.$MINOR" >> $GITHUB_ENV
+          VERSION=$MAJOR.$MINOR.$PATCH.$BUILD
+          RELEASE=$MAJOR.$MINOR
           echo "The version is $VERSION and release is $RELEASE"
+          echo "MAJOR_CHANGE=$MAJOR_CHANGE" >> $GITHUB_ENV
+          echo "MINOR_CHANGE=MINOR_CHANGE" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "RELEASE=$RELEASE" >> $GITHUB_ENV
 
       - name: Set up JDK 11
         uses: actions/setup-java@v1
@@ -64,7 +68,7 @@ jobs:
           path: app/build/outputs/
 
       # Updates latest release if just a new patch
-      - name: Upload APK
+      - name: Overwrite latest release APK
         if: ${{ !env.MAJOR_CHANGE && !env.MINOR_CHANGE }}
         uses: svenstaro/upload-release-action@v2
         with:
@@ -76,7 +80,7 @@ jobs:
           overwrite: true
 
       # Drafts a new prerelease if major or minor version has changed 
-      - name: Upload APK
+      - name: Upload APK as a new prerelease
         if: ${{ env.MAJOR_CHANGE || env.MINOR_CHANGE }}
         uses: svenstaro/upload-release-action@v2
         with:
