@@ -35,7 +35,7 @@ jobs:
           RELEASE=$MAJOR.$MINOR
           echo "The version is $VERSION and release is $RELEASE"
           echo "MAJOR_CHANGE=$MAJOR_CHANGE" >> "$GITHUB_ENV"
-          echo "MINOR_CHANGE=MINOR_CHANGE" >> "$GITHUB_ENV"
+          echo "MINOR_CHANGE=$MINOR_CHANGE" >> "$GITHUB_ENV"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
 
