@@ -67,7 +67,7 @@ jobs:
 
       # Updates latest release if just a new patch
       - name: Overwrite latest release APK
-        if: env.MAJOR_CHANGE == '0' && env.MINOR_CHANGE == '0'
+        if: (env.MAJOR_CHANGE == '0' && env.MINOR_CHANGE == '0')
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -79,7 +79,7 @@ jobs:
 
       # Drafts a new prerelease if major or minor version has changed 
       - name: Upload APK as a new prerelease
-        if: env.MAJOR_CHANGE == '1' || env.MINOR_CHANGE == '1'
+        if: (env.MAJOR_CHANGE == '1' || env.MINOR_CHANGE == '1')
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
