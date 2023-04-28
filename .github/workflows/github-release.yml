@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
 
-      # Looks for commit intents following the conventional commits standard, bumps the patch version at minimum
+      # Uses semantic commits to automate version bumping. No scope or "fix:" = PATCH, "feat:" = MINOR, "BREAKING CHANGE:" or fix/feat with appended "!" = MAJOR
       # Details here https://github.com/oflynned/android-version-bump#workflow and here https://www.conventionalcommits.org/en/v1.0.0/
       - name: Bump app version
         uses: oflynned/android-version-bump@master
