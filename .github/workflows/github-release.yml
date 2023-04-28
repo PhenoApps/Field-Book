@@ -15,7 +15,7 @@ jobs:
 
       # Looks for commit intents following the conventional commits standard, bumps the patch version at minimum
       # Details here https://github.com/oflynned/android-version-bump#workflow and here https://www.conventionalcommits.org/en/v1.0.0/
-      - name: Bump version
+      - name: Bump app version
         uses: oflynned/android-version-bump@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
