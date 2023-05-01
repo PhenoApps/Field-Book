@@ -96,6 +96,6 @@ jobs:
           tag: ${{ env.VERSION }}
           file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
           asset_name: Field-Book-v${{ env.RELEASE }}.apk
-          overwrite: ${{ env.MAJOR_VERSION_CHANGED == false && env.MINOR_VERSION_CHANGED == false }}
-          prerelease: ${{ env.MAJOR_VERSION_CHANGED == true || env.MINOR_VERSION_CHANGED == true }}
+          overwrite: ${{ env.MAJOR_VERSION_CHANGED == 'false' && env.MINOR_VERSION_CHANGED == 'false' }}
+          prerelease: ${{ env.MAJOR_VERSION_CHANGED == 'true' || env.MINOR_VERSION_CHANGED == 'true' }}
     
