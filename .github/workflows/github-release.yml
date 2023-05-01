@@ -15,29 +15,51 @@ jobs:
 
       # Uses semantic commits to automate version bumping. No scope or "fix:" = PATCH, "feat:" = MINOR, "BREAKING CHANGE:" or fix/feat with appended "!" = MAJOR
       # Details here https://github.com/oflynned/android-version-bump#workflow and here https://www.conventionalcommits.org/en/v1.0.0/ (test)
-      - name: Bump app version
-        uses: oflynned/android-version-bump@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          build_number: ${{ github.run_number }} 
-
-      - name: Retrieve version changes
+      - name: Increment version
         run: |
-          MAJOR_CHANGE=$(git diff HEAD HEAD~1 -- version.properties | grep +majorVersion | wc -l)
-          MINOR_CHANGE=$(git diff HEAD HEAD~1 -- version.properties | grep +minorVersion | wc -l)
-          echo "Statuses are major change: $MAJOR_CHANGE and minor change: $MINOR_CHANGE"
-          MAJOR=$(cat version.properties | grep majorVersion | cut -d = -f 2)
-          MINOR=$(cat version.properties | grep minorVersion | cut -d = -f 2)
-          PATCH=$(cat version.properties | grep patchVersion | cut -d = -f 2)
-          BUILD=$(cat version.properties | grep buildNumber | cut -d = -f 2)
-          VERSION=$MAJOR.$MINOR.$PATCH.$BUILD
-          RELEASE=$MAJOR.$MINOR
-          echo "The version is $VERSION and release is $RELEASE"
-          echo "MAJOR_CHANGE=$MAJOR_CHANGE" >> "$GITHUB_ENV"
-          echo "MINOR_CHANGE=$MINOR_CHANGE" >> "$GITHUB_ENV"
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          source version.properties
+          MAJOR_VERSION_CHANGED=false
+          MINOR_VERSION_CHANGED=false
+
+          if [[ $COMMIT_MSG == *"BREAKING CHANGE"* || $COMMIT_MSG == *"!"* || $COMMIT_MSG == *"major:"* ]]; then
+              ((majorVersion++))
+              minorVersion=0
+              patchVersion=0
+              MAJOR_VERSION_CHANGED=true
+          elif [[ $COMMIT_MSG == *"feat:"* || $COMMIT_MSG == *"minor:"* ]]; then
+              ((minorVersion++))
+              patchVersion=0
+              MINOR_VERSION_CHANGED=true
+          else
+              ((patchVersion++))
+          fi
+
+          echo "majorVersion=$majorVersion" > version.properties
+          echo "minorVersion=$minorVersion" >> version.properties
+          echo "patchVersion=$patchVersion" >> version.properties
+          echo "buildNumber=${{ github.run_number }}" >> version.properties
+          VERSION=$majorVersion.$minorVersion.$patchVersion.$buildNumber
+          RELEASE=$majorVersion.$minorVersion
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
+          echo "MAJOR_VERSION_CHANGED=${MAJOR_VERSION_CHANGED}" >> $GITHUB_ENV
+          echo "MINOR_VERSION_CHANGED=${MINOR_VERSION_CHANGED}" >> $GITHUB_ENV
+          echo "The version is $VERSION and release is $RELEASE. Major version changes is $MAJOR_VERSION_CHANGED and minor is $MINOR_VERSION_CHANGED"
+
+      - name: Commit version changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          add: 'version.properties'
+          message: 'Bump version to v${majorVersion}.${minorVersion}.${patchVersion}'
+          author_email: 'git-action-bot@example.com'
+          author_name: 'Git Action Bot'
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
 
       - name: Set up JDK 11
         uses: actions/setup-java@v1
@@ -65,9 +87,8 @@ jobs:
           name: Signed APK
           path: app/build/outputs/
 
-      # Updates latest release if just a new patch
-      - name: Overwrite latest release APK
-        if: (env.MAJOR_CHANGE == '0' && env.MINOR_CHANGE == '0')
+      # Updates the latest release if just a new patch, drafts a new prerelease if major or minor version has changed 
+      - name: Make github release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -75,17 +96,6 @@ jobs:
           tag: ${{ env.VERSION }}
           file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
           asset_name: Field-Book-v${{ env.RELEASE }}.apk
-          overwrite: true
-
-      # Drafts a new prerelease if major or minor version has changed 
-      - name: Upload APK as a new prerelease
-        if: (env.MAJOR_CHANGE == '1' || env.MINOR_CHANGE == '1')
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: v${{ env.RELEASE }}
-          tag: ${{ env.VERSION }}
-          file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-          asset_name: Field-Book-v${{ env.RELEASE }}.apk
-          prerelease: true
+          overwrite: ${{ env.MAJOR_VERSION_CHANGED == false && env.MINOR_VERSION_CHANGED == false }}
+          prerelease: ${{ env.MAJOR_VERSION_CHANGED == true || env.MINOR_VERSION_CHANGED == true }}
     
