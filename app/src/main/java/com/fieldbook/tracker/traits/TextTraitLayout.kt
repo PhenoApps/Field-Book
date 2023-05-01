@@ -2,14 +2,14 @@ package com.fieldbook.tracker.traits
 
 import android.content.Context
 import android.graphics.Color
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.view.KeyEvent
 import android.widget.EditText
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.preferences.GeneralKeys
 import org.phenoapps.utils.SoftKeyboardUtil.Companion.showKeyboard
 
 class TextTraitLayout : BaseTraitLayout {
@@ -44,11 +44,8 @@ class TextTraitLayout : BaseTraitLayout {
 
             collectInputView.text = value
 
-            Handler(Looper.getMainLooper()).postDelayed({
+            updateObservation(currentTrait.trait, currentTrait.format, value)
 
-                updateObservation(currentTrait.trait, currentTrait.format, value)
-
-            }, DELAY_PER_UPDATE)
         }
 
         override fun beforeTextChanged(
@@ -70,10 +67,42 @@ class TextTraitLayout : BaseTraitLayout {
         return "text"
     }
 
+    private var scan = ""
     override fun init() {
 
         inputEditText = findViewById(R.id.trait_text_edit_text)
 
+        inputEditText?.setOnKeyListener { _, _, event ->
+
+            if (event.action == KeyEvent.ACTION_DOWN) {
+
+                scan = if (event.unicodeChar != 10) {
+
+                    "$scan${event.unicodeChar.toChar()}"
+
+                } else {
+
+                    //set text for current trait/plot
+                    inputEditText?.setText(scan)
+
+                    //check system setting to navigate to next plot/trait
+                    val actionOnScanLineFeed = prefs.getString(GeneralKeys.RETURN_CHARACTER, "0") ?: "0"
+
+                    if (actionOnScanLineFeed == "0") {
+                        controller.getRangeBox().moveEntryRight()
+                    }
+
+                    if (actionOnScanLineFeed == "1") {
+                        controller.getTraitBox().moveTrait("right")
+                    }
+
+                    ""
+
+                }
+            }
+
+            true
+        }
     }
 
     override fun loadLayout() {
