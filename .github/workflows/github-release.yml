@@ -21,18 +21,22 @@ jobs:
           source version.properties
           MAJOR_VERSION_CHANGED=false
           MINOR_VERSION_CHANGED=false
+          TYPE=Version
 
           if [[ $COMMIT_MSG == *"BREAKING CHANGE"* || $COMMIT_MSG == *"!"* || $COMMIT_MSG == *"major:"* ]]; then
               ((majorVersion++))
               minorVersion=0
               patchVersion=0
               MAJOR_VERSION_CHANGED=true
+              TYPE=majorVersion
           elif [[ $COMMIT_MSG == *"feat:"* || $COMMIT_MSG == *"minor:"* ]]; then
               ((minorVersion++))
               patchVersion=0
               MINOR_VERSION_CHANGED=true
+              TYPE=minorVersion
           else
               ((patchVersion++))
+              TYPE=patchVersion
           fi
 
           echo "majorVersion=$majorVersion" > version.properties
@@ -41,19 +45,20 @@ jobs:
           echo "buildNumber=${{ github.run_number }}" >> version.properties
           VERSION=$majorVersion.$minorVersion.$patchVersion.$buildNumber
           RELEASE=$majorVersion.$minorVersion
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "RELEASE=$RELEASE" >> $GITHUB_ENV
           echo "MAJOR_VERSION_CHANGED=${MAJOR_VERSION_CHANGED}" >> $GITHUB_ENV
           echo "MINOR_VERSION_CHANGED=${MINOR_VERSION_CHANGED}" >> $GITHUB_ENV
-          echo "The version is $VERSION and release is $RELEASE. Major version changes is $MAJOR_VERSION_CHANGED and minor is $MINOR_VERSION_CHANGED"
+          echo "TYPE=$TYPE" >> $GITHUB_ENV
+          echo "The version is $VERSION and release is $RELEASE. Type is $TYPE, major version changes is $MAJOR_VERSION_CHANGED and minor is $MINOR_VERSION_CHANGED"
 
       - name: Commit version changes
         uses: EndBug/add-and-commit@v7
         with:
           add: 'version.properties'
-          message: Bump version to v${{ env.VERSION }}
-          author_email: 'git-action-bot@example.com'
-          author_name: 'Git Action Bot'
+          message: Bump ${{ env.TYPE }}
+          author_email: git-action-bot@example.com
+          author_name: Git Action Bot
 
       - name: Push changes
         uses: ad-m/github-push-action@master
