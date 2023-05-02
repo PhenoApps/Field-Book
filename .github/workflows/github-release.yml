@@ -24,7 +24,7 @@ jobs:
           echo "$majorVersion.$minorVersion.$patchVersion.$buildNumber"
           MAJOR_VERSION_CHANGED=false
           MINOR_VERSION_CHANGED=false
-          TYPE="Version"
+          TYPE="patchVersion"
           buildNumber=${{ github.run_number }}
           echo "$buildNumber"
           if [[ $COMMIT_MSG == *"BREAKING CHANGE"* || $COMMIT_MSG == *"!"* || $COMMIT_MSG == *"major:"* ]]; then
@@ -42,7 +42,6 @@ jobs:
               echo "Minor change"
           else
               ((patchVersion++))
-              TYPE="patchVersion"
               echo "Patch change"
           fi
 
