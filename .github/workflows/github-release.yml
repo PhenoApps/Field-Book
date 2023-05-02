@@ -32,16 +32,20 @@ jobs:
               patchVersion=0
               MAJOR_VERSION_CHANGED=true
               TYPE="majorVersion"
+              echo "Major change"
           elif [[ $COMMIT_MSG == *"feat:"* || $COMMIT_MSG == *"minor:"* ]]; then
               ((minorVersion++))
               patchVersion=0
               MINOR_VERSION_CHANGED=true
               TYPE="minorVersion"
+              echo "Minor change"
           else
               ((patchVersion++))
               TYPE="patchVersion"
+              echo "Patch change"
           fi
 
+          echo "Type is $TYPE, major version changes is $MAJOR_VERSION_CHANGED and minor is $MINOR_VERSION_CHANGED"
           echo "majorVersion=$majorVersion" > version.properties
           echo "minorVersion=$minorVersion" >> version.properties
           echo "patchVersion=$patchVersion" >> version.properties
