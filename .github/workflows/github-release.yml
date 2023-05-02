@@ -13,9 +13,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
 
-      - name: Change permissions of version.properties file
-        run: chmod 644 version.properties
-
       # Uses semantic commits to automate version bumping. No scope or "fix:" = PATCH, "feat:" = MINOR, "BREAKING CHANGE:" or fix/feat with appended "!" = MAJOR
       # Details here https://github.com/oflynned/android-version-bump#workflow and here https://www.conventionalcommits.org/en/v1.0.0/ (test)
       - name: Increment version
@@ -24,45 +21,39 @@ jobs:
           source version.properties
           MAJOR_VERSION_CHANGED=false
           MINOR_VERSION_CHANGED=false
-          TYPE="Version"
-          buildNumber=${{ github.run_number }}
 
           if [[ $COMMIT_MSG == *"BREAKING CHANGE"* || $COMMIT_MSG == *"!"* || $COMMIT_MSG == *"major:"* ]]; then
               ((majorVersion++))
               minorVersion=0
               patchVersion=0
               MAJOR_VERSION_CHANGED=true
-              TYPE="majorVersion"
           elif [[ $COMMIT_MSG == *"feat:"* || $COMMIT_MSG == *"minor:"* ]]; then
               ((minorVersion++))
               patchVersion=0
               MINOR_VERSION_CHANGED=true
-              TYPE="minorVersion"
           else
               ((patchVersion++))
-              TYPE="patchVersion"
           fi
 
           echo "majorVersion=$majorVersion" > version.properties
           echo "minorVersion=$minorVersion" >> version.properties
           echo "patchVersion=$patchVersion" >> version.properties
-          echo "buildNumber=$buildNumber" >> version.properties
+          echo "buildNumber=${{ github.run_number }}" >> version.properties
           VERSION=$majorVersion.$minorVersion.$patchVersion.$buildNumber
           RELEASE=$majorVersion.$minorVersion
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "RELEASE=$RELEASE" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
           echo "MAJOR_VERSION_CHANGED=${MAJOR_VERSION_CHANGED}" >> $GITHUB_ENV
           echo "MINOR_VERSION_CHANGED=${MINOR_VERSION_CHANGED}" >> $GITHUB_ENV
-          echo "TYPE=$TYPE" >> $GITHUB_ENV
-          echo "The version is $VERSION and release is $RELEASE. Type is $TYPE, major version changes is $MAJOR_VERSION_CHANGED and minor is $MINOR_VERSION_CHANGED"
+          echo "The version is $VERSION and release is $RELEASE. Major version changes is $MAJOR_VERSION_CHANGED and minor is $MINOR_VERSION_CHANGED"
 
       - name: Commit version changes
         uses: EndBug/add-and-commit@v7
         with:
           add: 'version.properties'
-          message: Bump ${{ env.TYPE }}
-          author_email: git-action-bot@example.com
-          author_name: Git Action Bot
+          message: 'Bump version to v${ env.VERSION }'
+          author_email: 'git-action-bot@example.com'
+          author_name: 'Git Action Bot'
 
       - name: Push changes
         uses: ad-m/github-push-action@master
