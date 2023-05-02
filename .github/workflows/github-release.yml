@@ -22,6 +22,7 @@ jobs:
           MAJOR_VERSION_CHANGED=false
           MINOR_VERSION_CHANGED=false
           TYPE="Version"
+          buildNumber=${{ github.run_number }}
 
           if [[ $COMMIT_MSG == *"BREAKING CHANGE"* || $COMMIT_MSG == *"!"* || $COMMIT_MSG == *"major:"* ]]; then
               ((majorVersion++))
@@ -42,7 +43,7 @@ jobs:
           echo "majorVersion=$majorVersion" > version.properties
           echo "minorVersion=$minorVersion" >> version.properties
           echo "patchVersion=$patchVersion" >> version.properties
-          echo "buildNumber=${{ github.run_number }}" >> version.properties
+          echo "buildNumber=$buildNumber" >> version.properties
           VERSION=$majorVersion.$minorVersion.$patchVersion.$buildNumber
           RELEASE=$majorVersion.$minorVersion
           echo "VERSION=$VERSION" >> $GITHUB_ENV
