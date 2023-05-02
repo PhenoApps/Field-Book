@@ -25,7 +25,7 @@ jobs:
           MINOR_VERSION_CHANGED=false
           TYPE="Version"
           buildNumber=${{ github.run_number }}
-
+          echo "$buildNumber"
           if [[ $COMMIT_MSG == *"BREAKING CHANGE"* || $COMMIT_MSG == *"!"* || $COMMIT_MSG == *"major:"* ]]; then
               ((majorVersion++))
               minorVersion=0
