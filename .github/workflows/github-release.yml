@@ -13,6 +13,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
 
+      - name: Change permissions of version.properties file
+        run: chmod 644 version.properties
+
       # Uses semantic commits to automate version bumping. No scope or "fix:" = PATCH, "feat:" = MINOR, "BREAKING CHANGE:" or fix/feat with appended "!" = MAJOR
       # Details here https://github.com/oflynned/android-version-bump#workflow and here https://www.conventionalcommits.org/en/v1.0.0/ (test)
       - name: Increment version
