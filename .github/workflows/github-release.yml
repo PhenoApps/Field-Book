@@ -29,20 +29,20 @@ jobs:
           buildNumber=${{ github.run_number }}
           echo "$buildNumber"
           if [[ $COMMIT_MSG == *"BREAKING CHANGE"* || $COMMIT_MSG == *"!"* || $COMMIT_MSG == *"major:"* ]]; then
-              ((majorVersion++))
+              majorVersion=$((majorVersion + 1))
               minorVersion=0
               patchVersion=0
               MAJOR_VERSION_CHANGED=true
               TYPE="majorVersion"
               echo "Major change"
           elif [[ $COMMIT_MSG == *"feat:"* || $COMMIT_MSG == *"minor:"* ]]; then
-              ((minorVersion++))
+              minorVersion=$((minorVersion + 1))
               patchVersion=0
               MINOR_VERSION_CHANGED=true
               TYPE="minorVersion"
               echo "Minor change"
           else
-              ((patchVersion++))
+              patchVersion=$((patchVersion + 1))
               echo "Patch change"
           fi
 
