@@ -17,6 +17,7 @@ jobs:
       # Details here https://github.com/oflynned/android-version-bump#workflow and here https://www.conventionalcommits.org/en/v1.0.0/ (test)
       - name: Increment version
         run: |
+          #!/bin/bash
           set -x
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "$COMMIT_MSG"
