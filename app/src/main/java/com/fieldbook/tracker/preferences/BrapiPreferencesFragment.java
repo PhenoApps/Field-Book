@@ -429,8 +429,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         if (preferenceCategory != null) {
 
-            if(prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
-                    .equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))) {
+            if(!prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
+                    .equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))
+            ) {
 
                 preferenceCategory.addPreference(brapiOIDCURLPreference);
 
