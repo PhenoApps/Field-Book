@@ -182,9 +182,13 @@ public class BrapiAuthActivity extends ThemedActivity {
                             responseIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                int flag = PendingIntent.FLAG_IMMUTABLE;
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    flag = PendingIntent.FLAG_MUTABLE;
+                                }
                                 authService.performAuthorizationRequest(
                                         authRequest,
-                                        PendingIntent.getActivity(context, 0, responseIntent, PendingIntent.FLAG_MUTABLE));
+                                        PendingIntent.getActivity(context, 0, responseIntent, flag));
                             } else {
                                 authService.performAuthorizationRequest(
                                         authRequest,
