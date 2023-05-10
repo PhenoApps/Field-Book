@@ -94,6 +94,20 @@ jobs:
           name: Signed APK
           path: app/build/outputs/
 
+      - name: Get matching release
+        uses: cardinalby/git-get-release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseName: v${{ env.RELEASE }}
+          outputVariable: matching_release
+
+      - name: Delete matching release if exists
+        if: steps.get_matching_release.outputs.matching_release != ''
+        run: |
+          release_id=$(echo "${{ steps.get_matching_release.outputs.matching_release }}" | jq -r '.id')
+          curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/releases/$release_id"
+
       # Updates the latest release if just a new patch, drafts a new prerelease if major or minor version has changed 
       - name: Make github release
         uses: svenstaro/upload-release-action@v2
