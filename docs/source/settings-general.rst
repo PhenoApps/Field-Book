@@ -9,7 +9,7 @@ Define storage location (|sd|)
 Opens the :doc:`storage` dialog for defining a 'Storage location' on the device.
 
 Default import (|import|) and export (|export|) sources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Set default field import and export sources so the app doesn't always ask. 
 
 .. figure:: /_static/images/settings/settings_general_framed.png
