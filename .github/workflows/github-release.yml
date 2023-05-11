@@ -5,6 +5,7 @@ on:
     paths-ignore:
       - 'docs/**'
       - 'README.md'
+      - '.github/**'
 
 name: do-github-release
 
@@ -98,7 +99,7 @@ jobs:
           path: app/build/outputs/
 
       - name: Get matching release
-        uses: cardinalby/git-get-release-action@v1
+        uses: cardinalby/git-get-release-action@1.2.4
         id: matching_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
