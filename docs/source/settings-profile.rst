@@ -11,9 +11,7 @@ Profile Settings
 Person (|person|)
 ~~~~~~~~~~~~~~~~~
 
-Sets the first and last name of the person operating the fieldbook.
-
-When set this information is stored with each collected measurement as metadata. If the export format allows it is included in data exports.
+Sets the first and last name of the person operating Field Book. This information is stored with each collected measurement as metadata and is included in the database export format. (#TODO include link to database format)
 
 Additional settings are used to reset (|reset|) or turn on/off (|verify|) regular verification of the profle information
 

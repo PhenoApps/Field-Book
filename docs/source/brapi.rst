@@ -2,7 +2,7 @@ BrAPI (Breeding API)
 ====================
 Overview
 --------
-BrAPI is an application programming interface for plant breeding. It allows Field Book to directly communicate with a database to import fields and traits, and export collected data. This eliminates the need to manually transfer files, and enables Field Book to offer more sophisticated features including additional field and trait metadata, and partial dataset synching.
+BrAPI is an application programming interface for plant breeding. It allows Field Book to directly communicate with a database to import fields and traits, and export collected data. This eliminates the need to manually transfer files, and enables Field Book to offer more sophisticated features including additional field and trait metadata, and partial dataset syncing.
 
 Setup
 -----
@@ -25,20 +25,20 @@ Import fields
 
    The BrAPI field import process.
 
-In the Fields screen, press the Add icon (|add|) in the upper right-hand corner and choose BrAPI as your source.
+In the Fields screen, press Add (|add|) on the top toolbar and choose BrAPI as your source.
 Fieldbook will import a list of possible fields from the BrAPI Base URL set in the :doc:`settings-brapi` (|brapi|).
 
-You may filter the list of fields by any available groupings in the upper right toolbar menu (program, trial), or by observation level.
+The field list can be filtered by the program dn trial using the menu options in the top toolbar. The list can be filtered by ``Observation Level`` using the dropdown below the server URL.
 
-Once you select your desired field can can preview its metadata and import it. Importing your field via BrAPI is a prerequiste to later export your collected data via BRAPI.
+Once a field has been selected, the field structure can be previewed and imported. Only fields that have been imported via BrAPI can be exported to BrAPI servers.
 
 Import traits
 -------------
-Just like with fields, when importing traits in the trait screen you can chose BrAPI as your source, then select from a list of traits retrieved from your BrAPI URL
+Depending on the BrAPI server, fields may have linked traits that are automatically imported with the field. However, additional traits can be imported via BrAPI by selecting import from the Traits menu and selecting specific traits to import.
 
 Export data
 -----------
-Once data has been collect for a BrAPI imported field using BrAPI imported traits it can then be exported automatically via BrAPI. 
+Once data has been collected it can then be exported via BrAPI be selecting BrAPI from the 
 
 .. |brapi| image:: /_static/icons/settings/main/server-network.png
   :width: 20

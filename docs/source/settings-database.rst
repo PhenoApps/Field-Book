@@ -12,7 +12,7 @@ Imports a new database from an export file. This replaces the current data in th
 
 Export database (|export|)
 --------------------------
-Exports the internal database. If you need data recovered or have issues, contact the developer and send the two files that are exported.
+Exports the internal database. If you need data recovered or have issues, contact the developer and send the file that is exported.
 
 Delete database (|remove|)
 --------------------------

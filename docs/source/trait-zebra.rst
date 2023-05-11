@@ -1,15 +1,11 @@
-Zebra Label Print Trait (|print|) 
-=================================
+Zebra Label Print Trait |print|
+===============================
 Overview
 --------
 
-The Zebra Label print trait format is used to print labels from an external, bluetooth-connected zebra printer. It is created with a trait name and optional details.
+The Zebra Label print trait format is used to print labels from an external, bluetooth-connected Zebra printer. It is created with a trait name and optional details. To use this trait, a Zebra mobile printer must first be paired with the Android phone or tablet.
 
-On the collect screen, users should have a zebra printer already paired through their operating system. The first step is to set the label size, as well as what entry information will be printed in the text and the barcode field(s) on the label.
-
-The second step is to choose the number of copies to print, and then click the print button. 
-
-Once the desired settings have been chosen for a given entry, they will remain the defaults and will only need to be modified if desired.
+Label size, barcode, specific data, and number of copies are selected and are saved as defaults. Pressing the print button will print the desired number of labels, each containing a barcode and ID for the specific entry, along with the selected additional data.
 
 Creation
 --------

@@ -17,11 +17,11 @@ Subdirectories
 
 Fieldbook will create the following subdirectories within the selected 'Storage location' directory: **field_import**, **field_export**, **plot_data**, **resources**, **database**, **trait**, and **archive**.
 
-* **field_import**: contains files that can be imported into Field Book
+* **field_import**: contains field files that to be imported into Field Book
 
 * **field_export**: contains exported data files
 
-* **plot_data**: data associated with plots (audio and photos) are organized into this folder based on the field name
+* **plot_data**: data associated with plots (audio and photos) are organized in this folder based on the field name
 
 * **resources**: allows the user to access photos/documents while collecting data (e.g. rating scales, field maps, etc.)
 
@@ -34,7 +34,7 @@ Fieldbook will create the following subdirectories within the selected 'Storage 
 File transfer
 -------------
 
-To add your own field, trait, and resource files to the appropriate subdirectories you may need to manually transfer files from a computer. You can do this by connecting your Android device via a usb cable and changing it's USB mode to allow file transfer. Each device manufacturer has slight variations for the appearance of this dialog.
+To add your own field, trait, and resource files to the appropriate subdirectories you may need to manually transfer files from a computer. You can do this by connecting your Android device via a USB cable and changing its USB mode to allow file transfer. Each device manufacturer has slight variations for the appearance of this dialog.
 
 .. figure:: /_static/images/fields/fields_transfer.png
    :width: 40%

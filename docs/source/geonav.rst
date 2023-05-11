@@ -3,32 +3,29 @@ GeoNav
 Overview
 --------
 
-The Geonav feature is used to automatically navigate between entries in the field based on the location of the device.
-It requires field entries to have high-accuracy location data collected via GNSS trait, as well as an an external GPS reciever capable of RTK.
+The GeoNav feature is used to automatically navigate between entries in the field based on the location of a high precision GNSS device that provides corrections using the . This feature requires field entries to have high-accuracy location data either collected via the GNSS trait (#todo link to GNSS trait) or included in the imported field file (#todo include details).
 
-To use geonav, start by making sure you do not have a GNSS trait active, as this may cause interference.
-Then navigate to the :doc:`settings-geonav` (|geonav|) and enable Geonav. Turn on bluetooth, and pair your external reciever.
-Navigate back to the collect screen and look for a confirmation message that says 'Rover communications estabished'
+To use GeoNav, navigate to the :doc:`settings-geonav` (|geonav|) and enable GeoNav. Turn on bluetooth, and pair your external reciever. Navigate to the Collect screen and look for a confirmation message that says 'Rover communications estabished'
 
 .. figure:: /_static/images/geonav/connect_cropped.png
    :width: 60%
    :align: center
-   :alt: Geonav Connection
+   :alt: GeoNav Connection
 
-   The collect screen geonav confirmation message
+   The collect screen GeoNav confirmation message
 
-Once you are connected and collecting, Fieldbook will automatically display the nearest plot in the bottom toolbar. Just press the arrow symbol on the right to jump to the plot.
+Once the rover is connected, Field Book will automatically display the nearest plot in the bottom toolbar. Press the arrow symbol on the right to jump to the plot. To enable automatic navigation, toggle the compass in the top toolbar. (#todo include toolbar icons and meanings)
 
 .. figure:: /_static/images/geonav/goto_cropped.png
    :width: 60%
    :align: center
-   :alt: Geonav Interface
+   :alt: GeoNav Interface
 
-   The collect screen bottom toolbar with geonav on
+   The collect screen bottom toolbar with GeoNav on
 
 Recommendations
 ---------------
-This section provdes specific hardware recomendations, as well as instuctions for deploying the suggested devices to use the GeoNav feature in the field.
+This section provides specific hardware recommendations, as well as instructions for deploying the suggested devices to use the GeoNav feature in the field.
 
 Supplies
 ~~~~~~~~

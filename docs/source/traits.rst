@@ -3,7 +3,7 @@ Traits
 Overview
 --------
 
-Data is collected in Field Book via traits. The traits screen lets you create new traits and manage existing traits. Each trait is created by specifying a trait type, a trait name, and additional fields such as min, max, or default values. These settings optimize how the trait is formatted in the collect screen.
+Data is collected in Field Book by defining different traits which each have unique layouts. The traits screen allows new traits to be defined and existing traits to be managed. Each trait is created by specifying a trait format, a trait name, and additional fields such as ``min``, ``max``, or ``default``.
 
 .. figure:: /_static/images/traits/traits_framed.png
    :width: 40%
@@ -14,16 +14,16 @@ Data is collected in Field Book via traits. The traits screen lets you create ne
 
 Creating a Trait
 ----------------
-Traits can be created by pressing the large Add icon (|add|) at the bottom right of the screen, or the same icon in the toolbar. Each trait has a custom creation menu that indicates which fields are required. Traits cannot share the same name.
+Traits can be created by pressing the large Add icon (|add|) at the bottom right of the screen, or the same icon in the toolbar. For each format, the creation screen adjusts to indicate which fields are required. Trait names must be unique.
 
 Managing Traits
 ---------------
 
 Once created, traits can be manipulated on the trait screen using the following features:
 
-  * The stacked line icon on the far left of each trait line can pressed and held to drag and drop the trait and create a new trait ordering.
-  * The menu icon on each trait line opens a menu where the trait can be copied, edited, or deleted.
-  * The checkbox can be checked to make a trait active, or unchecked to prevent it from showing up on the :doc:`collect` (|collect|) screen.
+  * Traits can be reordered by pressing and dragging the stacked line icon on the far left of each trait line.
+  * Traits can be copied, edited, or deleted using the menu on each trait line.
+  * Traits can be disabled from collection using the checkbox which will prevent them from showing up on the :doc:`collect` (|collect|) screen.
 
 .. figure:: /_static/images/traits/traits_sort_framed.png
    :width: 40%
@@ -36,7 +36,7 @@ Traits can also be sorted by their name, format, or active status using the sort
 
 Importing/Exporting Traits
 --------------------------
-Lists of traits can be created and transferred between different devices using the Import/Export option on the toolbar. Trait lists are stored in the **trait** folder and use the CSV format, but with a custom *.trt* extension.
+Lists of traits can be created and transferred between different devices using the Import/Export option on the toolbar. Trait lists are stored as ``.trt`` files in the **trait** folder. Internally, ``.trt`` files store their data in a CSV format, but it is not recommended to manually edit these files.
 
 
 .. |add| image:: /_static/icons/traits/plus-circle.png

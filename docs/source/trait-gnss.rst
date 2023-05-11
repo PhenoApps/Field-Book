@@ -1,13 +1,13 @@
-GNSS Trait (|gnss|) 
-===================
+GNSS Trait |gnss|
+=================
 Overview
 --------
 
-The GNSS trait format is used to acquire GPS coordinates from an external, bluetooth-connected device. It is created with a trait name and optional details.
+The GNSS trait format is used to acquire GPS coordinates from an external, bluetooth-connected device. It is created with a trait name and optional details. To use this trait, an external GNSS device must first be paired with the Android phone or tablet.
 
-On the collect screen, users should have external devices already paired through their operating system. The first step is to click the connect button, this shows a list of paired devices. The second step is to choose the device to listen to, this will automatically establish a connection and record a GPS reading.
+Pressing the connect button will show a list of devices that can be accessed to provide a location for this trait. Selecting a device will establish a connection. Pressing the capture button will record a GPS reading. Incoming location data can be averaged for 5s, 10s, or manually- whereby all manually collected location points are averaged to ascertain a representative value.
 
-This trait can be used in conjunction with the :doc:`geonav` (|geonav|) feature. Users may have to manually disconnect/reconnect if the socket cannot be established.
+While other traits only capture phenotypic or observational data, the GNSS trait is intended to be used to capture metadata about the plot itself. This metadata can be used in conjunction with the :doc:`geonav` (|geonav|) feature. Users may have to manually disconnect/reconnect if the socket cannot be established.
 
 Creation
 --------

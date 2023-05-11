@@ -8,7 +8,7 @@ Define storage location (|sd|)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Opens the :doc:`storage` dialog for defining a 'Storage location' on the device.
 
-Default import(|import|) and export(|export|) sources
+Default import (|import|) and export (|export|) sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Set default field import and export sources so the app doesn't always ask. 
 
@@ -25,7 +25,7 @@ Optional Collect Tools
 
 Next entry with no data (|next|)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Adds a button to the Collect toolbar thats skips to the next entry without data
+Adds a button to the Collect top toolbar thats skips to the next entry without data
 
 Move to entry via barcode (|barcode|)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

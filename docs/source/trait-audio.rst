@@ -1,9 +1,9 @@
-Audio Trait (|audio|) 
-=====================
+Audio Trait |audio|
+===================
 Overview
 --------
 
-The audio trait format is used to record speech. It is created with a trait name and optional details. On the collect page you press the play button to begin recording audio, then press stop when you are done.
+The audio trait format is used to record speech. It is created with a trait name and optional details. On the collect page, the microphone button begins recording audio which can be played back using the play button.
 
 Creation
 --------

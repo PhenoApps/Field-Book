@@ -1,9 +1,10 @@
-Photo Trait (|photo|) 
-=====================
+Photo Trait |photo|
+===================
 Overview
 --------
 
-The photo trait format is used to record images. It is created with a trait name and optional details. On the collect page you press the camera icon to open the device camera and take one or more desired photos.
+The photo trait format is used to capture images. It is created with a trait name and optional details. On the collect page, the camera icon opens the device camera to capture images. Multiple images can be captured for each entry.
+
 Creation
 --------
 

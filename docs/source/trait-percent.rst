@@ -1,13 +1,9 @@
-Percent Trait (|percent|) 
-=========================
+Percent Trait |percent|
+=======================
 Overview
 --------
 
-The percent trait format is used to record dates.  In addition the required trait name you can optionally set a default value and min and max values.
-
-Like most traits you can optionally add text to the details section, this extra detail will show up under the trait name on the collect page.
-
-On the collect page percent values are recorded by adjusting the percent slider.
+The percent trait format is used to percents.  In addition to the required trait name you can optionally set a default value, min, and max values. Text can be optionally added to the details section which will show up under the trait name on the collect page. On the collect page percent values are recorded by adjusting the percent slider.
 
 Creation
 --------

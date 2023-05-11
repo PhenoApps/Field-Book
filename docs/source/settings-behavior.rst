@@ -16,12 +16,12 @@ Upon completing a cycle of traits, Field Book advances to the next entry automat
 
 Map volume keys to entry navigation (|volume|)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Allows volume keys to be used to move to next/previous entry. Cannot be used to change volume when enabled and Field Book is open.
+Allows volume keys to be used to move to next/previous entry. Note that this does disable the volume buttons being able to change the device volume when Field Book is open.
 
 Return key signal (|return|)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Allows the user to choose the behavior of the return key signal that can be included when scanning barcodes: next plot, next trait, or do nothing
+Allows the user to choose the behavior of the return key signal that can be included when scanning barcodes: next plot, next trait, or do nothing. (#todo crop photo)
 
 .. figure:: /_static/images/settings/settings_behavior_return_framed.png
    :width: 40%
@@ -33,7 +33,7 @@ Allows the user to choose the behavior of the return key signal that can be incl
 Disable left/right entry arrow (|arrow|)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Disables left or right entry arrow unless data has been collected, to ensure an entry isn't accidentally skipped.
+Disables left or right entry arrow unless data has been collected, to ensure an entry isn't accidentally skipped. (#todo crop photo)
 
 .. figure:: /_static/images/settings/settings_behavior_disable_nav_framed.png
    :width: 40%
@@ -52,7 +52,7 @@ Changes the date trait format to record date values as numbers counting up from 
 
 Skip entries across active trait (|skip|)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-When advancing entries, skips either entries that already have data for the active trait, or entries the already have data for all traits.
+When advancing entries, skips either entries that already have data for the active trait, or entries that already have data for all traits. (#todo add photo)
 
 Flip Flop Arrows (|flip|)
 ~~~~~~~~~~~~~~~~~~~~~~~~~

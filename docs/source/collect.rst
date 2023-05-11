@@ -3,7 +3,7 @@ Collect
 Overview
 --------
 
-To collect data, use the black arrows to navigate to the plot for which data should be collected and navigate to the specific trait you want to collect. The input area at the bottom of the screen will adjust to match the layout of the trait that is being collected. Data is saved to an internal database as it is collected. Each trait has a specific layout that helps to rapidly collect organized data.
+Field Book aims to optimize the amount of visible information to increase the rate at which data can be collected. For collection, only a single entry and trait are visible when collecting data. This reduces the risk of error and allows efficient layouts to be used for data input. The small green arrows are used to navigate between triats. The large black arrows are used to navigate between entries. Data is entered in the bottom area of the screen which adjusts to match the current trait format. Data is saved to an internal database as it is collected.
 
 .. figure:: /_static/images/collect/collect_framed.png
    :width: 40%
@@ -75,19 +75,19 @@ Entry navigation
 
    The collect screen entry navigation section
 
-The large, black arrows will move between different entries. Pressing and holding these arrows will continuously scroll. The longer the arrows are pressed, the faster the scrolling becomes.
+The large, black arrows navigate between different entries. Pressing and holding these arrows will continuously scroll. The longer the arrows are pressed, the faster the scrolling becomes.
 
 Data input
 ~~~~~~~~~~
-The bottom half of the screen is used to input data. The elements and layout of this area change based on the trait that is currently active. Reference the corresponding trait format page in these docs for layout details.
+The bottom half of the screen is used to input data. The elements and layout of this area change based on the trait that is currently active. Information for each specific format can be found in the Trait Formats pages.
 
 Bottom toolbar
 ~~~~~~~~~~~~~~
-At the bottom of the screen are three buttons used for data input.
+The bottom toolbar contains three buttons for data input:
 
-* The first (|scan|) enters data by scanning a barcode.
-* The second (|na|) enters NA.
-* The third (|delete|) clears the entered data.
+* |scan| enters data by scanning a barcode.
+* |na| enters NA.
+* |delete| clears the entered data.
 
 
 .. |search| image:: /_static/icons/collect/magnify.png

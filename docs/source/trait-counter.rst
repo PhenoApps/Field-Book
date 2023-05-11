@@ -1,11 +1,9 @@
-Counter Trait (|counter|) 
-=========================
+Counter Trait |counter|
+=======================
 Overview
 --------
 
-The counter trait format is used to for numeric integer data, where counting up or down to the value from 0 is safer or faster than entering it via a number pad.
-
-It is created with a trait name and optional details. On the collect page it starts at zero and can be incremented or decremented via the provided buttons.
+The counter trait format is used to for numeric integer data, where counting up or down to the value from 0 is safer or faster than typing via a number pad. It is created with a trait name and optional details. On the collect page, the counter starts at zero and can be incremented or decremented via the +1/-1 buttons.
 
 
 Creation

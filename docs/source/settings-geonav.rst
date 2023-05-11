@@ -26,7 +26,7 @@ Changes the time between geonav location updates. Default is 0s, can be set to 1
 
 Pair Device (|bluetooth|)
 -------------------------
-Opens bluetooth interface to pair to an external GPS device
+Opens Bluetooth interface to pair to an external GPS device
 
 
 .. |geonav| image:: /_static/icons/settings/geonav/map-search.png

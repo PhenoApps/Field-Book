@@ -3,7 +3,7 @@ Fields
 Overview
 --------
 
-Experiments are represented in Field Book via *fields*. Fields are either imported from a file, from a BrAPI-enabled database, or created from scratch. Each field has a unique name, import, modification, and export dates, and a set of *entries* which represent the experimental units on which data will be collected (e.g. plots or individual plants).
+Experiments are represented in Field Book as *fields*. Fields are either imported from a file, from a BrAPI-enabled database, or created from scratch. Each field has a unique name, import, modification, and export dates, and a set of *entries* which represent the experimental units on which data will be collected (e.g. plots or individual plants).
 
 Each *entry* within a field must have the following: 
 

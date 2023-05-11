@@ -1,9 +1,9 @@
-Location Trait (|location|) 
-===========================
+Location Trait |location|
+=========================
 Overview
 --------
 
-The location trait format is used to record the GPS coordinates of the device. It is created with a trait name and optional details. On the collect page you press the crosshairs button to record the device's current latitude and longitude.
+The location trait format is used to record the GPS coordinates of the device. It is created with a trait name and optional details. On the collect page you press the crosshairs button to record the device's current latitude and longitude. If the device is connected to an external location source, the coordinates from this source will be used instead of the device's internal GPS.
 
 Creation
 --------

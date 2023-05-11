@@ -1,7 +1,7 @@
 Settings
 ========
 
-Fieldbook settings are grouped into eight subcategories.
+Field Book settings are grouped into eight subcategories.
 
 .. figure:: /_static/images/settings/settings_framed.png
    :width: 40%
@@ -13,21 +13,21 @@ Fieldbook settings are grouped into eight subcategories.
 
 Use the search bar at the top of the screen to quickly find the setting you are looking for, or
 
-* Change system defaults and turn optional collection tools on or off in **General** (|general|) settings.
+* **General** (|general|) settings allow modification of system defaults and optional collection tools
   
-* Set the identity of the person collecting data in **Profile** (|profile|) settings.
+* **Profile** (|profile|) settings set the identity of the person collecting data.
 
-* Change to the language or modify the app colors, icons, or layout in **Appearance** (|appearance|) settings.
+* **Appearance** (|appearance|) settings change language, app colors, icons, or layouts.
 
-* Change default collect and file sharing actions in **Behavior** (|behavior|) settings.
+* **Behavior** (|behavior|) settings change default collecting and file sharing actions.
 
-* Pair a positioning device and make use of precise location data in **GeoNav** (|geonav|) settings.
+* **GeoNav** (|geonav|) settings allow a positioning device to be paired and used for field navigation.
 
-* Toggle sound notifications for collection activities in **Sounds** (|sounds|) settings.
+* **Sounds** (|sounds|) settings toggle sound notifications for collection activities.
 
-* Connect an external data source using the Breeding API (BrAPI) in **BrAPI** (|brapi|) settings.
+* **BrAPI** (|brapi|) settings connect to an external data source using the Breeding API (BrAPI).
 
-* Import, export, or reset the entire app database in **Database** (|database|) settings.
+* **Database** (|database|) settings allow the database to be imported, exported, or reset.
 
 
 .. |general| image:: /_static/icons/settings/main/cog-outline.png

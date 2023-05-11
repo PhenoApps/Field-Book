@@ -28,7 +28,7 @@ Allows the user to change the Field Book language to one of 14 different options
 
 Tutorial (|tutorial|) 
 ~~~~~~~~~~~~~~~~~~~~~
-Adds a button to the toolbar that opens the tutorial.
+Adds a button to the toolbar that enables the tutorial. The tutorial provides contextual information throughout the app.
 
 
 Collect Screen
@@ -50,7 +50,7 @@ Allows the user to change the number of Infobars that are displayed on the Colle
 
 Quick GoTo (|goto|)
 ~~~~~~~~~~~~~~~~~~~
-Changes the read-only primary/secondary order on the Collect screen to edittexts that can search and move to specific entries.
+Changes the read-only primary/secondary order on the Collect screen to edit texts that can search and move to specific entries.
 
 
 .. |theme| image:: /_static/icons/settings/appearance/palette.png

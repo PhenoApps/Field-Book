@@ -1,13 +1,9 @@
-Multicat Trait (|multicat|) 
-===========================
+Multicat Trait |multicat|
+=========================
 Overview
 --------
 
-The multicategorical trait format is used when possible trait values fall into a set of discrete categories, and multiple values need to be selected for each entry
-
-To create one enter a trait name, and the possible categories separated by forward slashes */*. You can optionally add text to the details section, this extra detail will show up under the trait name on the collect page.
-
-The possible categories will be displayed as buttons on the collect screen, and you can press as many as desired for a given entry.
+The categorical trait format is used when trait values fall into a set of discrete categories. Categories are invidiually added in the ``Categories`` section of the create scren. Categories within a multicat trait must be unique. Text can be optionally added to the details section which will show up under the trait name on the collect page.Defined categories will be displayed as buttons on the collect screen. Multiple categories can be selected per entry.
 
 Creation
 --------

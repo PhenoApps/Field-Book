@@ -44,13 +44,13 @@ Advanced Auth Settings
 
    BrAPI Advanced Auth Settings
 
-ODIC Flow (|version|)
+OIDC Flow (|version|)
 ~~~~~~~~~~~~~~~~~~~~~
 BrAPI server authentication version. Defaults to OAuth2 Implicit Grant.
 
-ODIC Discovery URL (|url|)
+OIDC Discovery URL (|url|)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-The location of the ODIC discovery JSON document.
+The location of the OIDC discovery JSON document.
 
 BrAPI Variables
 ---------------
