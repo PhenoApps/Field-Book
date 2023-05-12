@@ -141,6 +141,8 @@ public class GeneralKeys {
     //preference key to save the last plot during collect activity
     public static final String LAST_PLOT = "lastplot";
 
+    public static final String DATA_LOCK_STATE = "DataLockState";
+
     //export flags
     public static final String EXPORT_COLUMNS_UNIQUE = "EXPORT_COLUMNS_UNIQUE";
     public static final String EXPORT_COLUMNS_ALL = "EXPORT_COLUMNS_ALL";
