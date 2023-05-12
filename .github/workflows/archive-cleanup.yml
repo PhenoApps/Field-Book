@@ -1,0 +1,22 @@
+on: delete
+
+name: do-archive-cleanup
+
+jobs:
+  delete-archived-apk:
+    if: github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout archive branch
+        uses: actions/checkout@v2
+        with:
+          ref: archive
+
+      - name: Commit removal of deleted branch's apk
+        uses: EndBug/add-and-commit@v7
+        with:
+          remove: Field-Book-${{ github.event.ref }}.apk  --no-ignore-removal
+          message: "Remove Field-Book-${{ github.event.ref }}.apk"
+          author_email: git-action-bot@example.com
+          author_name: Git Action Bot
