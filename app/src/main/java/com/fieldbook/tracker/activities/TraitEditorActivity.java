@@ -1,34 +1,32 @@
 package com.fieldbook.tracker.activities;
 
+import static androidx.recyclerview.widget.ItemTouchHelper.DOWN;
+import static androidx.recyclerview.widget.ItemTouchHelper.END;
+import static androidx.recyclerview.widget.ItemTouchHelper.START;
+import static androidx.recyclerview.widget.ItemTouchHelper.UP;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.OpenableColumns;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -36,21 +34,24 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapterController;
+import com.fieldbook.tracker.async.ImportCSVTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
-import com.fieldbook.tracker.dragsort.DragSortController;
-import com.fieldbook.tracker.dragsort.DragSortListView;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.CSVReader;
+import com.fieldbook.tracker.utilities.ArrayIndexComparator;
 import com.fieldbook.tracker.utilities.CSVWriter;
+import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -61,7 +62,6 @@ import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
@@ -69,13 +69,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -84,149 +82,85 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
-public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController {
+public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController, TraitAdapter.TraitSorter {
 
+    public static final String TAG = "TraitEditor";
     public static int REQUEST_CLOUD_FILE_CODE = 5;
     public static int REQUEST_FILE_EXPLORER_CODE = 1;
 
-    public static DragSortListView traitList;
-    public static TraitAdapter mAdapter;
+    private RecyclerView traitList;
+    public TraitAdapter traitAdapter;
     public static boolean brapiDialogShown = false;
-    public static Activity thisActivity;
     private static final Handler mHandler = new Handler();
-    private static Uri mChosenFile;
-
     private static SharedPreferences ep;
 
-    private static OnItemClickListener traitListener;
-
-    private static DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
-        @Override
-        public void remove(int which) {
-            mAdapter.list.remove(which);
-        }
-    };
-
-    private final DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
-
-        @Override
-        public void drop(int from, int to) {
-
-            // The new logic is that the drop point is now the center of the list. Any items before / after are reordered based on the drop point's position.
-            // This means while the realposition may not start from zero, the ordering will always be correct.
-
-            Log.w("ReorderStart", "start");
-
-            if (from != to) {
-                if (to > from) {
-                    Log.w("Downward", "drag");
-
-                    try {
-                        // e.g. 4
-                        String prevID = mAdapter.getItem(from).getId();
-
-                        // e.g. 6
-                        String currentID = mAdapter.getItem(to).getId();
-                        Integer currentPosition = mAdapter.getItem(to).getRealPosition();
-
-                        database.updateTraitPosition(currentID, currentPosition);
-                        database.updateTraitPosition(prevID, currentPosition + 1);
-
-                        // Push everything below down by 1
-                        int newCount = 2;
-
-                        for (int i = to + 1; i < mAdapter.getCount(); i++) {
-                            database.updateTraitPosition(mAdapter.getItem(i).getId(), currentPosition + newCount);
-                            newCount++;
-                        }
-
-                        CollectActivity.reloadData = true;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Log.w("Upward", "drag");
-
-                    try {
-                        // upward drag
-                        // e.g. 4
-                        String prevID = mAdapter.getItem(from).getId();
-
-                        // e.g. 6
-                        Integer currentPosition = mAdapter.getItem(to).getRealPosition();
-
-                        if (currentPosition - to >= 0) {
-                            Log.w("Reorder", "top1");
-
-                            // Reorder everything above
-                            int newCount = currentPosition - to;
-
-                            for (int i = 0; i < to; i++) {
-                                database.updateTraitPosition(mAdapter.getItem(i).getId(), newCount);
-                                newCount++;
-                            }
-
-                            Log.w("Reorder", "current");
-
-                            database.updateTraitPosition(prevID, currentPosition);
-
-                        } else {
-                            // We hit a -1, might as well do a full zero based reorder
-                            // Reorder everything above
-
-                            Log.w("Reorder", "top2");
-
-                            for (int i = 0; i < to; i++) {
-                                database.updateTraitPosition(mAdapter.getItem(i).getId(), i);
-                            }
-
-                            Log.w("Reorder", "current");
-
-                            database.updateTraitPosition(prevID, to);
-
-                            // Reset current position as well, otherwise we don't know where it points to
-                            currentPosition = to;
-                        }
-
-                        Log.w("Reorder", "below");
-
-                        // Push everything below down by 1
-                        int newCount = 1;
-
-                        // last pulled position is from field
-
-                        for (int i = to; i < mAdapter.getCount(); i++) {
-                            if (i != from) {
-                                database.updateTraitPosition(mAdapter.getItem(i).getId(), currentPosition + newCount);
-                                newCount++;
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-
-            CollectActivity.reloadData = true;
-            queryAndLoadTraits();
-        }
-    };
     private final int PERMISSIONS_REQUEST_STORAGE_IMPORT = 999;
     private final int PERMISSIONS_REQUEST_STORAGE_EXPORT = 998;
-    private Toolbar toolbar;
     private NewTraitDialog traitDialog;
     private Menu systemMenu;
-    // Creates a new thread to do importing
-    private Runnable importCSV = () -> new ImportCSVTask().execute(0);
-
-    private DragSortController mController;
 
     @Inject
     DataHelper database;
 
+    private final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(UP | DOWN | START | END, 0) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+
+            TraitAdapter adapter = (TraitAdapter) recyclerView.getAdapter();
+
+            if (adapter != null) {
+                int from = viewHolder.getBindingAdapterPosition();
+                int to = target.getBindingAdapterPosition();
+
+                try {
+                    adapter.moveItem(from, to);
+                } catch (IndexOutOfBoundsException iobe) {
+                    iobe.printStackTrace();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+        }
+        @Override
+        public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
+            super.onSelectedChanged(viewHolder, actionState);
+            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                if (viewHolder != null) {
+                    viewHolder.itemView.setAlpha(0.5f);
+                    viewHolder.itemView.setScaleY(1.618f);
+                }
+            }
+        }
+
+        @Override
+        public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+            super.clearView(recyclerView, viewHolder);
+            viewHolder.itemView.setAlpha(1f);
+            viewHolder.itemView.setScaleY(1f);
+        }
+    });
+
+    // Creates a new thread to do importing
+    private void startImportCsv(Uri file) {
+        mHandler.post(() -> new ImportCSVTask(this, database, file, () -> {
+            Editor ed = ep.edit();
+            ed.putBoolean(GeneralKeys.CREATE_TRAIT_FINISHED, true);
+            ed.apply();
+
+            queryAndLoadTraits();
+
+            CollectActivity.reloadData = true;
+        }).execute(0));
+    }
+
     // Helper function to load data
-    public void loadData(HashMap<String, Boolean> visibility, ArrayList<TraitObject> traits) {
+    public void loadData(ArrayList<TraitObject> traits) {
         try {
 
             if (!traitList.isShown())
@@ -234,19 +168,20 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
             // Determine if our BrAPI dialog was shown with our current trait adapter
             Boolean showBrapiDialog;
-            if (mAdapter != null) {
+            if (traitAdapter != null) {
                 // Check if current trait adapter has shown a dialog
-                brapiDialogShown = !brapiDialogShown ? mAdapter.infoDialogShown : brapiDialogShown;
+                brapiDialogShown = !brapiDialogShown ? traitAdapter.getInfoDialogShown() : brapiDialogShown;
             } else {
                 // We should show our brapi dialog if this is our creating of the mAdapter
                 brapiDialogShown = false;
             }
 
-            mAdapter = new TraitAdapter(thisActivity, R.layout.list_item_trait, traits, traitListener, visibility, brapiDialogShown);
+            //traitAdapter = new TraitAdapter(this);
 
-            traitList.setAdapter(mAdapter);
-            traitList.setDropListener(onDrop);
-            traitList.setRemoveListener(onRemove);
+            if (traitAdapter != null) {
+                traitAdapter.submitList(traits);
+                traitAdapter.notifyDataSetChanged();
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -254,7 +189,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     @Override
-    public boolean displayBrapiInfo(Context context, @Nullable String traitName, boolean noCheckTrait) {
+    public boolean displayBrapiInfo(@NonNull Context context, @Nullable String traitName, boolean noCheckTrait) {
 
         // Returns true if the dialog is shown, false if not.
         // If we run into an error, do not warn the user since this is just a helper dialog
@@ -310,7 +245,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     // getter (get them from NewTraitDialog)
     public TraitAdapter getAdapter() {
-        return mAdapter;
+        return traitAdapter;
     }
 
     public SharedPreferences getPreferences() {
@@ -335,7 +270,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public void onDestroy() {
         try {
-            thisActivity.finish();
+            finish();
         } catch (Exception e) {
             String TAG = "Field Book";
             Log.e(TAG, "" + e.getMessage());
@@ -364,7 +299,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         setContentView(R.layout.activity_traits);
 
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
 
@@ -375,9 +310,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        thisActivity = this;
-
-        HashMap visibility = database.getTraitVisibility();
         traitList = findViewById(R.id.myList);
 
         if (!traitList.isShown())
@@ -386,36 +318,16 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         // Determines whether brapi dialog should be shown on first click of a non-BrAPI
         // trait when a BrAPI field is selected.
         brapiDialogShown = false;
-        mAdapter = new TraitAdapter(thisActivity, R.layout.list_item_trait, database.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
 
-        traitList.setAdapter(mAdapter);
-        traitList.setDropListener(onDrop);
-        traitList.setRemoveListener(onRemove);
+        traitAdapter = new TraitAdapter(this);
+        traitAdapter.submitList(database.getAllTraitObjects());
+        traitList.setAdapter(traitAdapter);
 
-        mController = new DragSortController(traitList);
-        mController.setDragHandleId(R.id.dragSort);
-        mController.setRemoveEnabled(false);
-        mController.setSortEnabled(true);
-        mController.setDragInitMode(1);
-
-        traitList.setFloatViewManager(mController);
-        traitList.setOnTouchListener(mController);
-        traitList.setDragEnabled(true);
+        itemTouchHelper.attachToRecyclerView(traitList);
 
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_new_trait, null);
         traitDialog = new NewTraitDialog(layout, this);
-
-        traitListener = (parent, view, position, id) -> {
-
-            // When a trait is selected, alter the layout of the edit dialog accordingly
-
-            TraitObject o = mAdapter.getItem(position);
-            traitDialog.setTraitObject(o);
-
-            queryAndLoadTraits();
-            traitDialog.show(true);
-        };
 
         FloatingActionButton fab = findViewById(R.id.newTrait);
         fab.setOnClickListener(v -> showCreateTraitDialog());
@@ -449,57 +361,48 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (!mController.getDragging()) {
+        switch (item.getItemId()) {
+            case R.id.help:
+                TapTargetSequence sequence = new TapTargetSequence(this)
+                        .targets(traitsTapTargetMenu(R.id.addTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description))
+                                //Todo add overflow menu action
+                        );
 
-            switch (item.getItemId()) {
-                case R.id.help:
-                    TapTargetSequence sequence = new TapTargetSequence(this)
-                            .targets(traitsTapTargetMenu(R.id.addTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description))
-                                    //Todo add overflow menu action
-                            );
+                if (database.getTraitColumnData("trait") != null) {
+                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
+                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
+                }
 
-                    if (database.getTraitColumnData("trait") != null) {
-                        sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
-                        sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
-                    }
+                sequence.start();
+                break;
 
-                    sequence.start();
-                    break;
+            case R.id.deleteTrait:
+                checkShowDeleteDialog();
+                break;
 
-                case R.id.deleteTrait:
-                    checkShowDeleteDialog();
-                    break;
+            case R.id.sortTrait:
+                sortDialog();
+                break;
 
-                case R.id.sortTrait:
-                    sortDialog();
-                    break;
+            case R.id.importexport:
+                importExportDialog();
+                break;
 
-                case R.id.importexport:
-                    importExportDialog();
-                    break;
+            case R.id.addTrait:
+                showCreateTraitDialog();
+                break;
 
-                case R.id.addTrait:
-                    showCreateTraitDialog();
-                    break;
+            case R.id.toggleTrait:
+                changeAllVisibility();
+                break;
 
-                case R.id.toggleTrait:
-                    changeAllVisibility();
-                    break;
-
-                case android.R.id.home:
-                    CollectActivity.reloadData = true;
-                    finish();
-                    break;
-            }
-
-            return super.onOptionsItemSelected(item);
-
-        } else {
-
-            Utils.makeToast(thisActivity, getString(R.string.act_trait_editor_menu_click_while_dragging));
-
-            return false;
+            case android.R.id.home:
+                CollectActivity.reloadData = true;
+                finish();
+                break;
         }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void checkShowDeleteDialog() {
@@ -529,7 +432,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         for (TraitObject allTrait : allTraits) {
             database.updateTraitVisibility(allTrait.getTrait(), globalVis);
-            Log.d("Field", allTrait.getTrait());
+            Log.d(TAG, allTrait.getTrait());
         }
 
         globalVis = !globalVis;
@@ -570,18 +473,16 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         params.height = LayoutParams.WRAP_CONTENT;
         importExport.getWindow().setAttributes(params);
 
-        myList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                switch (which) {
-                    case 0:
-                        loadTraitFilePermission();
-                        break;
-                    case 1:
-                        exportTraitFilePermission();
-                        break;
-                }
-                importExport.dismiss();
+        myList.setOnItemClickListener((av, arg1, which, arg3) -> {
+            switch (which) {
+                case 0:
+                    loadTraitFilePermission();
+                    break;
+                case 1:
+                    exportTraitFilePermission();
+                    break;
             }
+            importExport.dismiss();
         });
 
     }
@@ -634,11 +535,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 .setCancelable(true)
                 .setView(layout);
 
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, which) -> dialog.dismiss());
 
         final AlertDialog importDialog = builder.create();
 
@@ -653,9 +550,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             Intent intent = new Intent();
             switch (which) {
                 case 0:
-                    DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(thisActivity, R.string.dir_trait);
+                    DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
                     if (traitDir != null && traitDir.exists()) {
-                        intent.setClassName(thisActivity, FileExploreActivity.class.getName());
+                        intent.setClassName(this, FileExploreActivity.class.getName());
                         intent.putExtra("path", traitDir.getUri().toString());
                         intent.putExtra("include", new String[]{"trt"});
                         intent.putExtra("title", getString(R.string.traits_dialog_import));
@@ -666,7 +563,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                     loadCloud();
                     break;
                 case 2:
-                    intent.setClassName(thisActivity, BrapiTraitActivity.class.getName());
+                    intent.setClassName(this, BrapiTraitActivity.class.getName());
                     startActivityForResult(intent, 2);
                     break;
             }
@@ -680,7 +577,11 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         if (!traits.isEmpty()) {
 
-            showDeleteTraitDialog(null, null, (dialog) -> {
+            showDeleteTraitDialog((dialog, which) -> {
+
+                database.deleteTraitsTable();
+
+            }, null, (dialog) -> {
 
                 showImportDialog();
 
@@ -716,7 +617,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         builder.setPositiveButton(getString(R.string.dialog_yes), (dialog, which) -> {
 
-            BaseDocumentTreeUtil.Companion.getDirectory(thisActivity, R.string.dir_trait);
+            BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
 
             showExportDialog();
             dialog.dismiss();
@@ -770,21 +671,19 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         params.height = LayoutParams.WRAP_CONTENT;
         sortDialog.getWindow().setAttributes(params);
 
-        myList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                switch (which) {
-                    case 0:
-                        sortTraitList("trait");
-                        break;
-                    case 1:
-                        sortTraitList("format");
-                        break;
-                    case 2:
-                        sortTraitList("isVisible");
-                        break;
-                }
-                sortDialog.dismiss();
+        myList.setOnItemClickListener((av, arg1, which, arg3) -> {
+            switch (which) {
+                case 0:
+                    sortTraitList("trait");
+                    break;
+                case 1:
+                    sortTraitList("format");
+                    break;
+                case 2:
+                    sortTraitList("isVisible");
+                    break;
             }
+            sortDialog.dismiss();
         });
     }
 
@@ -884,15 +783,14 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         if (requestCode == REQUEST_FILE_EXPLORER_CODE) {
             if (resultCode == RESULT_OK) {
-                mChosenFile = Uri.parse(data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY));
-                mHandler.post(importCSV);
+                startImportCsv(Uri.parse(data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY)));
             } else {
                 Toast.makeText(this, R.string.act_file_explorer_no_file_error, Toast.LENGTH_SHORT).show();
             }
         }
 
         if (requestCode == 2) {
-            brapiDialogShown = mAdapter.infoDialogShown;
+            brapiDialogShown = traitAdapter.getInfoDialogShown();
             if (!brapiDialogShown) {
                 brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, null, true);
             }
@@ -900,7 +798,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         if (requestCode == REQUEST_CLOUD_FILE_CODE && resultCode == RESULT_OK && data.getData() != null) {
             Uri content_describer = data.getData();
-            String fileName = getFileName(content_describer);
+            String fileName = new FileUtil().getFileName(this, content_describer);
+
+            //append a unique id to trait file, otherwise os might append (0) after extension
+            fileName = fileName.replace(".trt", "_" + UUID.randomUUID().toString() + ".trt");
 
             DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
             if (traitDir != null && traitDir.exists()) {
@@ -938,7 +839,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                         }
                     }
 
-
                     String extension = FieldFileObject.getExtension(fileName);
 
                     if (!extension.equals("trt")) {
@@ -946,33 +846,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                         return;
                     }
 
-                    mChosenFile = traitExportFile.getUri();
-                    mHandler.post(importCSV);
+                    startImportCsv(traitExportFile.getUri());
                 }
             }
         }
-    }
-
-    public String getFileName(Uri uri) {
-        String result = null;
-        if (uri.getScheme().equals("content")) {
-            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                    if (index > 0) {
-                        result = cursor.getString(index);
-                    }
-                }
-            }
-        }
-        if (result == null) {
-            result = uri.getPath();
-            int cut = result.lastIndexOf('/');
-            if (cut != -1) {
-                result = result.substring(cut + 1);
-            }
-        }
-        return result;
     }
 
     // Helper function export data as CSV
@@ -1000,7 +877,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                         osw.close();
                         output.close();
 
-                        shareFile(exportDoc);
+                        new FileUtil().shareFile(this, ep, exportDoc);
                     }
                 }
             }
@@ -1009,21 +886,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
             e.printStackTrace();
 
-        }
-    }
-
-    /**
-     * Scan file to update file list and share exported file
-     */
-    private void shareFile(DocumentFile docFile) {
-        if (docFile != null && docFile.exists()) {
-            if (!ep.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
-                Intent intent = new Intent();
-                intent.setAction(android.content.Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_STREAM, docFile.getUri());
-                startActivity(Intent.createChooser(intent, "Sending File..."));
-            }
         }
     }
 
@@ -1043,7 +905,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         for (Map.Entry<String, String> v : vis.entrySet()) {
             visCast.put(v.getKey(), v.getValue().equals("true"));
         }
-        loadData(visCast, database.getAllTraitObjects());
+        loadData(database.getAllTraitObjects());
     }
 
     @NonNull
@@ -1052,152 +914,115 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         return database;
     }
 
-    private static class ArrayIndexComparator implements Comparator<Integer> {
-        private final String[] array;
-
-        ArrayIndexComparator(String[] array) {
-            this.array = array;
-        }
-
-        Integer[] createIndexArray() {
-            Arrays.sort(array);
-            Integer[] indexes = new Integer[array.length];
-            for (int i = 0; i < array.length; i++) {
-                indexes[i] = i;
-            }
-            return indexes;
-        }
-
-        @Override
-        public int compare(Integer index1, Integer index2) {
-            return array[index1].compareTo(array[index2]);
-        }
+    @Override
+    public void onDrag(@NonNull TraitAdapter.ViewHolder item) {
+        itemTouchHelper.startDrag(item);
     }
 
-    private class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
-        ProgressDialog dialog;
+    /**
+     * Interface implementation to delegate menu options: copy, delete, edit
+     * @param v view to anchor popup menu
+     * @param trait trait object to handle
+     */
+    @Override
+    public void onMenuItemClicked(View v, TraitObject trait) {
 
-        boolean fail;
+        PopupMenu popupMenu = new PopupMenu(this, v);
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
+        //Inflating the Popup using xml file
+        popupMenu.getMenuInflater().inflate(R.menu.menu_trait_list_item, popupMenu.getMenu());
 
-            dialog = new ProgressDialog(thisActivity);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html
-                    .fromHtml(thisActivity.getString(R.string.import_dialog_importing)));
-            dialog.show();
+        //registering popup with OnMenuItemClickListener
+        popupMenu.setOnMenuItemClickListener((item) -> {
+
+                if (item.getTitle().equals(getString(R.string.traits_options_copy))) {
+
+                    copyTrait(trait);
+
+                } else if (item.getTitle().equals(getString(R.string.traits_options_delete))) {
+
+                    deleteTrait(trait);
+
+                } else if (item.getTitle().equals(getString(R.string.traits_options_edit))) {
+
+                    showEditTraitDialog(trait);
+
+                }
+
+                return false;
+            }
+        );
+
+        popupMenu.show(); //showing popup menu
+    }
+
+    // When a trait is selected, alter the layout of the edit dialog accordingly
+    private void showEditTraitDialog(TraitObject trait) {
+
+        traitDialog.setTraitObject(trait);
+        queryAndLoadTraits();
+        traitDialog.show(true);
+    }
+
+    // Delete trait
+    private void deleteTrait(TraitObject trait) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        builder.setTitle(getString(R.string.traits_options_delete_title));
+        builder.setMessage(getString(R.string.traits_warning_delete));
+
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+                getDatabase().deleteTrait(trait.getId());
+
+                queryAndLoadTraits();
+
+                CollectActivity.reloadData = true;
+            }
+        });
+
+        builder.setNegativeButton(getString(R.string.dialog_no), (dialog, which) -> dialog.dismiss());
+
+        AlertDialog alert = builder.create();
+        alert.show();
+        DialogUtils.styleDialogs(alert);
+    }
+
+    // Copy trait name
+    private String copyTraitName(String traitName) {
+        if (traitName.contains("-Copy")) {
+            traitName = traitName.substring(0, traitName.indexOf("-Copy"));
         }
 
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            try {
-                String[] data;
-                String[] columns;
+        String newTraitName = "";
 
-                InputStream inputStream = BaseDocumentTreeUtil.Companion.getUriInputStream(thisActivity, mChosenFile);
-                InputStreamReader fr = new InputStreamReader(inputStream);
+        String[] allTraits = getDatabase().getAllTraitNames();
 
-                CSVReader cr = new CSVReader(fr);
-
-                columns = cr.readNext();
-
-                data = columns;
-
-                if (database.isTableExists(DataHelper.TRAITS)) {
-                    database.deleteTraitsTable();
-                }
-
-                //get variable with largest real position
-                Optional<TraitObject> maxPosition = database.getAllTraitObjects().stream()
-                        .max(Comparator.comparingInt(TraitObject::getRealPosition));
-
-                //by default start from zero
-                int positionOffset = 0;
-
-                //if there are other traits, set offset to the max
-                if (maxPosition.isPresent()) {
-
-                    try {
-
-                        positionOffset = maxPosition.get().getRealPosition();
-
-                    } catch (NoSuchElementException e) {
-
-                        e.printStackTrace();
-
-                    }
-                }
-
-                while (data != null) {
-                    data = cr.readNext();
-
-                    //if trait format or name is null then don't import
-                    if (data != null && data.length > 1
-                            && data[0] != null && data[1] != null) {
-                        TraitObject t = new TraitObject();
-                        t.setTrait(data[0]);
-                        t.setFormat(data[1]);
-                        t.setDefaultValue(data[2]);
-                        t.setMinimum(data[3]);
-                        t.setMaximum(data[4]);
-                        t.setDetails(data[5]);
-                        t.setCategories(data[6]);
-                        //t.visible = data[7].toLowerCase();
-                        t.setRealPosition(positionOffset + Integer.parseInt(data[8]));
-                        t.setVisible(data[7].equalsIgnoreCase("true"));
-                        database.insertTraits(t);
-                    }
-                }
-
-                try {
-                    cr.close();
-                } catch (Exception ignore) {
-                }
-
-                try {
-                    fr.close();
-                } catch (Exception ignore) {
-                }
-
-                try {
-                    if (inputStream != null) {
-                        inputStream.close();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                database.close();
-                database.open();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail = true;
-            }
-
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            Editor ed = ep.edit();
-            ed.putBoolean(GeneralKeys.CREATE_TRAIT_FINISHED, true);
-            ed.apply();
-
-            queryAndLoadTraits();
-
-            CollectActivity.reloadData = true;
-
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
-
-            if (fail) {
-                Utils.makeToast(getApplicationContext(), thisActivity.getString(R.string.import_error_general));
+        for (int i = 0; i < allTraits.length; i++) {
+            newTraitName = traitName + "-Copy-(" + i + ")";
+            if (!Arrays.asList(allTraits).contains(newTraitName)) {
+                return newTraitName;
             }
         }
+        return "";    // not come here
+    }
+
+    // Copy trait to new trait
+    private void copyTrait(TraitObject trait) {
+
+        int pos = getDatabase().getMaxPositionFromTraits() + 1;
+
+        final String newTraitName = copyTraitName(trait.getTrait());
+
+        trait.setTrait(newTraitName);
+        trait.setVisible(true);
+        trait.setRealPosition(pos);
+
+        getDatabase().insertTraits(trait);
+        queryAndLoadTraits();
+
+        CollectActivity.reloadData = true;
     }
 }

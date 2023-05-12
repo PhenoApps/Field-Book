@@ -20,25 +20,14 @@
             android:minHeight="?attr/actionBarSize"
             app:popupTheme="@style/TraitEditorToolbarPopupMenu"/>
 
-        <com.fieldbook.tracker.dragsort.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res/com.fieldbook.tracker"
-            android:id="@+id/myList"
-            android:layout_width="fill_parent"
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:choiceMode="singleChoice"
-            android:dividerHeight="1px"
-            android:padding="3dp"
             android:layout_below="@id/toolbar"
-            dslv:click_remove_id="@+id/click_remove"
-            dslv:collapsed_height="1px"
-            dslv:drag_enabled="true"
-            dslv:drag_handle_id="@+id/drag_handle"
-            dslv:drag_scroll_start="0.33"
-            dslv:drag_start_mode="onLongPress"
-            dslv:float_alpha="0.6"
-            dslv:remove_enabled="false"
-            dslv:remove_mode="clickRemove"
-            dslv:slide_shuffle_speed="0.3"
-            tools:listitem="@layout/list_item_trait"/>
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/list_item_trait"
+            android:id="@+id/myList"/>
     </RelativeLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
