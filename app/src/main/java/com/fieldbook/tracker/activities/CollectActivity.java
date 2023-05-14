@@ -665,6 +665,8 @@ public class CollectActivity extends ThemedActivity
 
         geoNavHelper.stopAverageHandler();
 
+        ep.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
+
         super.onPause();
     }
 
@@ -770,6 +772,10 @@ public class CollectActivity extends ThemedActivity
             navigateToLastOpenedTrait();
 
         }
+
+        dataLocked = ep.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
+
+        refreshLock();
     }
 
     /**
@@ -962,8 +968,6 @@ public class CollectActivity extends ThemedActivity
 
         customizeToolbarIcons();
 
-        lockData();
-
         return true;
     }
 
@@ -1069,6 +1073,7 @@ public class CollectActivity extends ThemedActivity
                 if (dataLocked == UNLOCKED) dataLocked = LOCKED;
                 else if (dataLocked == LOCKED) dataLocked = FROZEN;
                 else dataLocked = UNLOCKED;
+                ep.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
                 lockData();
                 break;
             case android.R.id.home:
@@ -1262,10 +1267,13 @@ public class CollectActivity extends ThemedActivity
      * unlocked, locked, or frozen
      */
     void lockData() {
-        if (dataLocked == LOCKED) {
+
+        int state = ep.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
+
+        if (state == LOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
             disableDataEntry();
-        } else if (dataLocked == UNLOCKED) {
+        } else if (state == UNLOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
             enableDataEntry();
         } else {
