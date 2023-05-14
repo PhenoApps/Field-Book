@@ -56,6 +56,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
         }
     }
 
+    public abstract int layoutId();
+
     public abstract String type();  // return trait type
 
     public String decodeValue(String value) { return value; }
@@ -64,9 +66,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
         return trait.equals(type());
     }
 
-    public abstract void init();
-
-    public void init(Activity act) { /* not implemented */ }
+    public abstract void init(Activity act);
 
     /**
      * Override to block multi-measure navigation with specific condition
@@ -174,6 +174,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
         //unlock data only if frozen
         isLocked = act.isLocked();
     }
+
+    public void onExit() {}
 
     /**
      * Handles the repeated value view list state.

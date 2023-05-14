@@ -1,7 +1,10 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
+
+import com.fieldbook.tracker.R;
 
 public class BarcodeTraitLayout extends BaseTraitLayout {
 
@@ -27,7 +30,12 @@ public class BarcodeTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
+    public int layoutId() {
+        return R.layout.trait_barcode;
+    }
+
+    @Override
+    public void init(Activity act) {
 
     }
 

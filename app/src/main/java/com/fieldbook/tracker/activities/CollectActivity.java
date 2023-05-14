@@ -26,6 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -115,7 +116,7 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     VerifyPersonHelper verifyPersonHelper;
-    
+
     public static boolean searchReload;
     public static String searchRange;
     public static String searchPlot;
@@ -432,9 +433,8 @@ public class CollectActivity extends ThemedActivity
             if (status) {
                 if (getTraitFormat().equals("photo")) {
                     // I want to use abstract method
-                    Map<String, String> newTraits = traitBox.getNewTraits();
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                    traitPhoto.brapiDelete(newTraits);
+                    traitPhoto.brapiDelete();
                 } else {
                     brapiDelete(getTraitName(), false);
                 }
@@ -697,6 +697,7 @@ public class CollectActivity extends ThemedActivity
 
         if (!guiThread.isAlive()) {
             try {
+                //TODO test with just .run() to avoid exception
                 guiThread.start();
             } catch (IllegalThreadStateException e) {
                 e.printStackTrace();
@@ -1887,4 +1888,14 @@ public class CollectActivity extends ThemedActivity
         return geoNavHelper.getMAverageHandler();
     }
 
+    @Override
+    public void inflateTrait(@NonNull BaseTraitLayout layout) {
+        getTraitLayout().onExit();
+        View v = LayoutInflater.from(this).inflate(layout.layoutId(), null);
+        LinearLayout holder = findViewById(R.id.traitHolder);
+        holder.removeAllViews();
+        holder.addView(v);
+        layout.init(this);
+        v.setVisibility(View.VISIBLE);
+    }
 }

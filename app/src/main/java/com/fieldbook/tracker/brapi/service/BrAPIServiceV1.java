@@ -124,7 +124,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         };
 
         try {
-            observationsApi.observationlevelsGetAsync(0, 1000, getBrapiToken(), callBack);
+            observationsApi.observationLevelsGetAsync(0, 1000, callBack);
         } catch (ApiException e) {
             Log.e("BrAPIServiceV1", "Error sending BrAPI Request to fetch observation levels", e);
         }
