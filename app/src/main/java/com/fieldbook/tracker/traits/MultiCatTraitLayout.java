@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -67,9 +68,14 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
+    public int layoutId() {
+        return R.layout.trait_multicat;
+    }
 
-        gridMultiCat = findViewById(R.id.catGrid);
+    @Override
+    public void init(Activity act) {
+
+        gridMultiCat = act.findViewById(R.id.catGrid);
 
         categoryList = new ArrayList<>();
     }
