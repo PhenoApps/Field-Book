@@ -94,7 +94,6 @@ open class SortDialog(
                         sortList[to] = sortList[from].also { sortList[from] = sortList[to] }
 
                         //swap adapter list
-                        adapter.moveItem(from, to)
 
                     } catch (e: java.lang.IndexOutOfBoundsException) {
 

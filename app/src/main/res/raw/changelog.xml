@@ -1,10 +1,12 @@
 <changelog>
 
     <release
-        date="2022-?-?"
-        versionCode="540"
-        versionName="v5.4">
-        <new>New themes!</new>
+        date="2023-06-101"
+        versionCode="550"
+        versionName="v5.5">
+        <info>Improved trait reordering</info>
+        <bugfix>Fixed issue with trait cloud imports</bugfix>
+        <bugfix>Fixed issue with lock state not saving</bugfix>
     </release>
 
     <release
@@ -12,6 +14,7 @@
         versionCode="540"
         versionName="v5.4">
         <new>Experimental settings section</new>
+        <new>Themes!</new>
         <new>Repeated measures! (beta)</new>
         <new>Summary view is now customizable and navigable</new>
         <new>Improved field sorting workflow</new>
