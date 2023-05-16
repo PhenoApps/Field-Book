@@ -186,6 +186,10 @@ public abstract class BaseTraitLayout extends LinearLayout {
         if (inputView.isRepeatEnabled()) {
             inputView.getRepeatView().userDeleteCurrentRep();
         }
+        //check if sound on delete is enabled in preferences and play sound
+        if (getPrefs().getBoolean(GeneralKeys.DELETE_OBSERVATION_SOUND, false)) {
+            controller.playSound("delete");
+        }
     }
 
     public abstract void setNaTraitsText();

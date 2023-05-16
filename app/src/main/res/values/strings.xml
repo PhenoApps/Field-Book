@@ -784,5 +784,7 @@
     <string name="dialog_multi_measure_confirm_delete_title">These observations will be permanently deleted.</string>
     <string name="dialog_multi_measure_delete">Delete</string>
     <string name="dialog_multi_measure_select_all">Select all</string>
+    <string name="preferences_sound_delete_obs_title">Delete Observation Sound</string>
+    <string name="preferences_sound_delete_obs_description">Notification sound when observation is deleted in Collect activity.</string>
     <string name="file_already_exists">File already exists.</string>
 </resources>

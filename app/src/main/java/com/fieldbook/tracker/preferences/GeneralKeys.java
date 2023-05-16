@@ -59,6 +59,8 @@ public class GeneralKeys {
     public static final String CYCLE_TRAITS_SOUND                   = "CYCLE_TRAITS_SOUND";
     public static final String ENTRY_NAVIGATION_SOUND               = "ENTRY_NAVIGATION_SOUND";
 
+    public static final String DELETE_OBSERVATION_SOUND             = "DELETE_OBSERVATION_SOUND";
+
     //BrAPI
     public static final String BRAPI_BASE_URL                       = "BRAPI_BASE_URL";
     public static final String BRAPI_OIDC_URL                       = "BRAPI_OIDC_URL";
