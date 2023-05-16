@@ -49,7 +49,7 @@ jobs:
       - name: Rename APK file
         run: mv app/build/outputs/apk/release/app-release-unsigned-signed.apk app/build/outputs/apk/release/Field-Book-${{ steps.branch-name.outputs.current_branch }}.apk
 
-      - name: Attach APK to PR
+      - name: Attach APK to PR using artifacts branch
         uses: gavv/pull-request-artifacts@v1.0.0
         with:
           commit: ${{ github.event.pull_request.head.sha }}
