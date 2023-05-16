@@ -11,7 +11,7 @@ jobs:
       - name: Checkout archive branch
         uses: actions/checkout@v2
         with:
-          ref: origin/archive
+          ref: archive
 
       - name: Commit removal of deleted branch's apk
         uses: EndBug/add-and-commit@v7
