@@ -18,6 +18,6 @@ jobs:
         with:
           remove: "*Field-Book-${{ github.event.ref }}.apk"
           message: "Remove Field-Book-${{ github.event.ref }}.apk"
-          push:
+          push: --force
           author_email: git-action-bot@example.com
           author_name: Git Action Bot
