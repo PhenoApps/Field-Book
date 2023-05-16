@@ -14,9 +14,10 @@ jobs:
           ref: artifacts
 
       - name: Commit removal of deleted branch's apk
-        uses: EndBug/add-and-commit@v7
+        uses: EndBug/add-and-commit@v9
         with:
           remove: "*Field-Book-${{ github.event.ref }}.apk"
           message: "Remove Field-Book-${{ github.event.ref }}.apk"
+          push:
           author_email: git-action-bot@example.com
           author_name: Git Action Bot
