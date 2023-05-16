@@ -104,6 +104,10 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
         spinner.setAdapter(prefixArrayAdapter);
 
         int spinnerPosition = prefixArrayAdapter.getPosition(getSharedPref().getString("DROP" + position, allTraits[0]));
+
+        //if field changes dont contain same prefixes, this can be -1, so just reset it to 0
+        if (spinnerPosition < 0) spinnerPosition = 0;
+
         spinner.setSelection(spinnerPosition);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
