@@ -188,7 +188,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
         }
         //check if sound on delete is enabled in preferences and play sound
         if (getPrefs().getBoolean(GeneralKeys.DELETE_OBSERVATION_SOUND, false)) {
-            controller.playSound("plonk");
+            controller.playSound("delete");
         }
     }
 
