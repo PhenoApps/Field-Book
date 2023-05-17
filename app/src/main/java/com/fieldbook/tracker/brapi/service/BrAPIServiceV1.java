@@ -443,7 +443,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         try {
             final AtomicInteger currentPage = new AtomicInteger(0);
             final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
-                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
+                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setValues(new ArrayList<>());
 

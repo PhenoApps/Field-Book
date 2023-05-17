@@ -38,7 +38,7 @@
             android:title="@string/preferences_brapi_version" />
 
         <com.fieldbook.tracker.preferences.BetterEditTextPreference
-            android:defaultValue="1000"
+            android:defaultValue="50"
             android:icon="@drawable/ic_pref_brapi_pagination"
             android:inputType="number"
             android:key="BRAPI_PAGE_SIZE"

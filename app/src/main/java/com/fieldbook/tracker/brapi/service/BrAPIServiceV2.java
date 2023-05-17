@@ -449,7 +449,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                final Function<Integer, Void> failFunction) {
         try {
             final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
-                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
+                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
