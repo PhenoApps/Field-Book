@@ -117,18 +117,19 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
      */
     fun clear() {
         if (isRepeatEnabled()) {
-            forceInitialRep = -1
             repeatView.clear()
         } else editText.text.clear()
     }
 
     fun navigateToRep(rep: Int) {
-
         forceInitialRep = rep
     }
 
     fun getInitialIndex(): Int {
-
         return forceInitialRep
+    }
+
+    fun resetInitialIndex() {
+        forceInitialRep = -1
     }
 }
