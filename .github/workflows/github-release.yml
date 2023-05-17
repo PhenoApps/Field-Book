@@ -118,5 +118,7 @@ jobs:
           asset_name: Field-Book-v${{ env.RELEASE }}.apk
           overwrite: ${{ env.BUMP_TYPE == 'patchVersion' }}
           prerelease: ${{ env.BUMP_TYPE != 'patchVersion' }}
-          body: ${{ env.COMMIT_MSG }}
+          body: |
+            ${{ steps.matching_release.outputs.body }}
+            ${{ env.COMMIT_MSG }}
     
