@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Start a discussion
+    url: https://github.com/PhenoApps/Field-Book/discussions
+    about: I need help, I have a question, or other discussion.
