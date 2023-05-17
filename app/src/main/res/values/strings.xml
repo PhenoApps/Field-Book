@@ -785,4 +785,8 @@
     <string name="dialog_multi_measure_delete">Delete</string>
     <string name="dialog_multi_measure_select_all">Select all</string>
     <string name="file_already_exists">File already exists.</string>
+    <string name="dialog_att_chooser_attributes">Attributes</string>
+    <string name="dialog_att_chooser_traits">Traits</string>
+    <string name="dialog_att_chooser_other">Other</string>
+    <string name="dialog_collect_att_chooser_title">Choose an attribute</string>
 </resources>

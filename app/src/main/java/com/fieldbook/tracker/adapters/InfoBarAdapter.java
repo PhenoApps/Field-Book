@@ -7,60 +7,48 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.ObservationDao;
+import com.fieldbook.tracker.dialogs.CollectAttributeChooserDialog;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.views.DynamicWidthSpinner;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHolder> {
 
     private Context context;
     private int maxSelectors;
     private DataHelper dataHelper;
-    private String plotId;
     private RecyclerView selectorsView;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public InfoBarAdapter(Context context, int maxSelectors, RecyclerView selectorsView) {
+    public InfoBarAdapter(Context context, int maxSelectors, String plotId) {
         this.context = context;
         this.maxSelectors = maxSelectors;
-        this.selectorsView = selectorsView;
-
+        //this.selectorsView = selectorsView;
         this.dataHelper = new DataHelper(context);
     }
 
-    public void configureDropdownArray(String plotId) {
-        this.plotId = plotId;
-        selectorsView.setHasFixedSize(false);
+    public void notifyPlotChanged(String plotId) {
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this.context);
-        selectorsView.setLayoutManager(layoutManager);
-
-        selectorsView.setAdapter(this);
     }
 
     // Create new views (invoked by the layout manager)
+    @NonNull
     @Override
     public InfoBarAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_infobar_dropdown, parent, false);
+                .inflate(R.layout.list_item_infobar, parent, false);
         return new ViewHolder((ConstraintLayout) v);
     }
 
@@ -70,10 +58,7 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
 
-        DynamicWidthSpinner spinner = holder.mTextView.findViewById(R.id.selectorSpinner);
-        TextView text = holder.mTextView.findViewById(R.id.selectorText);
-        configureSpinner(spinner, text, position);
-        configureText(text);
+        configureSpinner(holder, position);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -86,71 +71,103 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
         return this.context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
     }
 
-    private void configureSpinner(final DynamicWidthSpinner spinner, final TextView text, final int position) {
+    private void setViewHolderText(ViewHolder holder, String label, String value) {
+        holder.prefixTextView.setText(label + ":");
+        holder.valueTextView.setText(value);
+    }
 
-        String expId = Integer.toString(getSharedPref().getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+    private void configureSpinner(final ViewHolder holder, final int position) {
 
-        //the prefix obs. unit. traits s.a plot_id, row, column, defined by the user
-        String[] prefixTraits = dataHelper.getRangeColumnNames();
+        //initialize the dialog that will pop-up when the user clicks on oen of the infobars
+        CollectAttributeChooserDialog ad = new CollectAttributeChooserDialog((CollectActivity) context, (selectedString, valueString) -> {
+            holder.prefixTextView.setText(selectedString + ":");
+            holder.valueTextView.setText(valueString);
+            return null;
+        }, position);
 
-        //the observation variable traits
-        String[] obsTraits = dataHelper.getAllTraitObjects().stream().map(TraitObject::getTrait).toArray(String[]::new);
+        //ensure that the initialLabel is actually a plot attribute //TODO check that initial label is trait
+        String[] attributes = dataHelper.getRangeColumnNames();
 
-        //combine the traits to be viewed within info bars
-        final String[] allTraits = ArrayUtils.addAll(prefixTraits, obsTraits);
+        //if not a plot attribute, it may be a trait name
+        ArrayList<TraitObject> traits = dataHelper.getAllTraitObjects();
+        ArrayList<String> traitNames = new ArrayList<String>();
+        for (TraitObject t : traits) {
+            traitNames.add(t.getTrait());
+        }
 
-        ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(this.context, R.layout.custom_spinner_layout, allTraits);
+        String defaultLabel = "Select";
+        if (attributes.length > 0) {
+            defaultLabel = attributes[0];
+        }
 
-        spinner.setAdapter(prefixArrayAdapter);
+        //adapter preferred values are saved as DROP1, DROP2, DROP3, DROP4, DROP5 in preferences, intiailize the label with it
+        String initialLabel = ((CollectActivity) context).getPreferences().getString("DROP" + position, defaultLabel);
 
-        int spinnerPosition = prefixArrayAdapter.getPosition(getSharedPref().getString("DROP" + position, allTraits[0]));
-        spinner.setSelection(spinnerPosition);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> arg0, View arg1, int pos, long arg3) {
-                try {
-
-                    //when an item is selected, check if its a prefix trait or a variable and populate the info bar values
-                    String infoTrait = allTraits[pos];
-
-                    ArrayList<String> infoBarValues = null;
-                    if (Arrays.asList(prefixTraits).contains(infoTrait)) { //get data from obs. properties (range)
-
-                        infoBarValues = new ArrayList<>(Arrays.asList(dataHelper.getDropDownRange(infoTrait, plotId)));
-
-                    } else if (Arrays.asList(obsTraits).contains(infoTrait)) { //get data from observations
-
-                        infoBarValues = new ArrayList<>(Collections.singletonList(
-                                ObservationDao.Companion.getUserDetail(expId, plotId).get(infoTrait)));
-                    }
-
-                    if (infoBarValues == null || infoBarValues.size() == 0) {
-
-                        text.setText(context.getString(R.string.main_infobar_data_missing));
-
-                    } else {
-
-                        text.setText(infoBarValues.get(0));
-
-                    }
-
-                    getSharedPref().edit().putString("DROP" + position, allTraits[pos]).apply();
-
-                } catch (Exception e) {
-
-                    e.printStackTrace();
-
+        boolean isAttribute = false;
+        if (!Arrays.asList(attributes).contains(initialLabel)) {
+            if (!traitNames.contains(initialLabel)) {
+                if (attributes.length > 0) {
+                    initialLabel = attributes[0];
                 }
-
-                spinner.requestFocus();
             }
+        } else isAttribute = true;
 
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) {
+        //get the database value for the initial label
+        String initialValue = ad.queryForLabelValue(((CollectActivity) context).getRangeBox().getPlotID(), initialLabel, isAttribute);
 
-            }
+        setViewHolderText(holder, initialLabel, initialValue);
+
+        holder.prefixTextView.setOnClickListener(v -> {
+            ad.show();
         });
+
+        //TODO set the preference selection, int spinnerPosition = prefixArrayAdapter.getPosition(getSharedPref().getString("DROP" + position, allTraits[0]));
+
+//        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> arg0, View arg1, int pos, long arg3) {
+//                try {
+//
+//                    //when an item is selected, check if its a prefix trait or a variable and populate the info bar values
+//                    String infoTrait = allTraits[pos];
+//
+//                    ArrayList<String> infoBarValues = null;
+//                    if (Arrays.asList(prefixTraits).contains(infoTrait)) { //get data from obs. properties (range)
+//
+//                        infoBarValues = new ArrayList<>(Arrays.asList(dataHelper.getDropDownRange(infoTrait, plotId)));
+//
+//                    } else if (Arrays.asList(obsTraits).contains(infoTrait)) { //get data from observations
+//
+//                        infoBarValues = new ArrayList<>(Collections.singletonList(
+//                                ObservationDao.Companion.getUserDetail(expId, plotId).get(infoTrait)));
+//                    }
+//
+//                    if (infoBarValues == null || infoBarValues.size() == 0) {
+//
+//                        text.setText(context.getString(R.string.main_infobar_data_missing));
+//
+//                    } else {
+//
+//                        text.setText(infoBarValues.get(0));
+//
+//                    }
+//
+//                    getSharedPref().edit().putString("DROP" + position, allTraits[pos]).apply();
+//
+//                } catch (Exception e) {
+//
+//                    e.printStackTrace();
+//
+//                }
+//
+//                spinner.requestFocus();
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> arg0) {
+//
+//            }
+//        });
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -176,11 +193,13 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
     // you provide access to all the views for a data item in a view holder
     static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        ConstraintLayout mTextView;
+        TextView prefixTextView;
+        TextView valueTextView;
 
         ViewHolder(ConstraintLayout v) {
             super(v);
-            mTextView = v;
+            prefixTextView = v.findViewById(R.id.list_item_infobar_prefix);
+            valueTextView = v.findViewById(R.id.list_item_infobar_value);
         }
     }
 }

@@ -36,6 +36,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
@@ -303,13 +304,16 @@ public class CollectActivity extends ThemedActivity
 
         //lock = new Object();
 
-        infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2), (RecyclerView) findViewById(R.id.selectorList));
-
         traitLayouts = new LayoutCollections(this);
         rangeBox = findViewById(R.id.act_collect_range_box);
         traitBox = findViewById(R.id.act_collect_trait_box);
         traitBox.connectRangeBox(rangeBox);
         rangeBox.connectTraitBox(traitBox);
+
+        RecyclerView infoBarRv = findViewById(R.id.act_collect_infobar_rv);
+        infoBarRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2), rangeBox.getPlotID());
+        infoBarRv.setAdapter(infoBarAdapter);
 
         initCurrentVals();
 
@@ -483,8 +487,12 @@ public class CollectActivity extends ThemedActivity
         // Reset dropdowns
 
         if (!database.isRangeTableEmpty()) {
-            String plotID = rangeBox.getPlotID();
-            infoBarAdapter.configureDropdownArray(plotID);
+            infoBarAdapter.notifyDataSetChanged();
+            //RecyclerView infoBarRv = findViewById(R.id.act_collect_infobar_rv);
+            //String plotId = rangeBox.getPlotID();
+            //infoBarAdapter.notifyPlotChanged(plotId);
+            //infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2), plotId);
+            //infoBarRv.setAdapter(infoBarAdapter);
         }
 
         traitBox.initTraitDetails();
@@ -1003,7 +1011,7 @@ public class CollectActivity extends ThemedActivity
         switch (item.getItemId()) {
             case helpId:
                 TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(collectDataTapTargetView(R.id.selectorList, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), R.color.main_primary_dark,200),
+                        .targets(collectDataTapTargetView(R.id.act_collect_infobar_rv, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), R.color.main_primary_dark,200),
                                 collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), R.color.main_primary_dark,60),
                                 collectDataTapTargetView(R.id.traitType, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), R.color.main_primary_dark,80),
                                 collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), R.color.main_primary_dark,60),
