@@ -6,8 +6,6 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'com.google.dagger.hilt.android'
 
-// Access the version.properties file in rootdir to construct versionCode and versionName
-
 Properties props = new Properties()
 props.load(new FileInputStream("$project.rootDir/version.properties"))
 props.each { prop ->
