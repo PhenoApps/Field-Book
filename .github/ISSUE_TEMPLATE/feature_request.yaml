@@ -1,0 +1,33 @@
+name: 🪄 Feature Request
+description: I would like to see a new feature in Field Book.
+title: "[REQUEST]: "
+labels: "feature request"
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: |
+        Describe the feature you'd like to see in as much detail as possible. Is this solving an existing problem in your program?
+      placeholder: Description
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: |
+        Describe any alternative solutions that you are already using or that would solve this problem.
+      placeholder: Alternatives
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: |
+        Provide any additional context that will better help us understand your request. 
+      placeholder: Context
+    validations:
+      required: false
