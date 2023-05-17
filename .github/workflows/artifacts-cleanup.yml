@@ -1,6 +1,6 @@
 on: delete
 
-name: do-archive-cleanup
+name: do-artifacts-cleanup
 
 jobs:
   delete-archived-apk:
@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Checkout archive branch
+      - name: Checkout artifacts branch
         uses: actions/checkout@v2
         with:
           ref: artifacts
