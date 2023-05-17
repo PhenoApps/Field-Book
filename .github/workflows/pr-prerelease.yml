@@ -46,8 +46,9 @@ jobs:
           name: Build Artifacts
           path: app/build/outputs/
       
+
       - name: Rename APK file
-        run: mv app/build/outputs/apk/release/app-release-unsigned-signed.apk app/build/outputs/apk/release/Field-Book-${{ steps.branch-name.outputs.current_branch }}.apk
+        run: mv app/build/outputs/apk/release/app-release-unsigned-signed.apk app/build/outputs/apk/release/${{ github.run_number }}-${{ steps.branch-name.outputs.current_branch }}-Field-Book.apk
 
       - name: Attach APK to PR using artifacts branch
         uses: gavv/pull-request-artifacts@v1.0.0
@@ -56,4 +57,4 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           artifacts-branch: artifacts
           artifacts: |
-            app/build/outputs/apk/release/Field-Book-${{ steps.branch-name.outputs.current_branch }}.apk
+            app/build/outputs/apk/release/${{ github.run_number }}-${{ steps.branch-name.outputs.current_branch }}-Field-Book.apk
