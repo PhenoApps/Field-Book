@@ -22,7 +22,7 @@ jobs:
       - name: Count existing APKs
         id: count-apks
         run: |
-          APK_COUNT=$(curl -s "https://api.github.com/repos/${{ github.repository }}/contents?ref=artifacts | grep -o '"name": ".*${{ steps.branch-name.outputs.current_branch }}-Field-Book.apk"' | wc -l)
+          APK_COUNT=$(curl -s "https://api.github.com/repos/${{ github.repository }}/contents?ref=artifacts" | grep -o '"name": ".*${{ steps.branch-name.outputs.current_branch }}-Field-Book.apk"' | wc -l)
           echo "APK_NUMBER=$((APK_COUNT + 1))" >> $GITHUB_ENV
 
       - name: Set up JDK 11

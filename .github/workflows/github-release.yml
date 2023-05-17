@@ -48,6 +48,7 @@ jobs:
 
           VERSION=$majorVersion.$minorVersion.$patchVersion.$buildNumber
           RELEASE=$majorVersion.$minorVersion
+          echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "RELEASE=$RELEASE" >> $GITHUB_ENV
           echo "BUMP_TYPE=$BUMP_TYPE" >> $GITHUB_ENV
@@ -117,4 +118,5 @@ jobs:
           asset_name: Field-Book-v${{ env.RELEASE }}.apk
           overwrite: ${{ env.BUMP_TYPE == 'patchVersion' }}
           prerelease: ${{ env.BUMP_TYPE != 'patchVersion' }}
+          body: ${{ env.COMMIT_MSG }}
     
