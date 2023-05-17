@@ -23,7 +23,7 @@ jobs:
       - name: Increment version
         run: |
           #!/bin/bash
-          COMMIT_MSG=$(git log -1 --pretty=%b)
+          COMMIT_MSG=$(git show -s --format=%B)
           source version.properties
           BUMP_TYPE="patchVersion"
           buildNumber=${{ github.run_number }}
