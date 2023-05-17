@@ -785,4 +785,5 @@
     <string name="dialog_multi_measure_delete">Delete</string>
     <string name="dialog_multi_measure_select_all">Select all</string>
     <string name="file_already_exists">File already exists.</string>
+    <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
 </resources>

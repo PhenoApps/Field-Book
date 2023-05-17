@@ -9,6 +9,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -83,6 +86,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
 
         setupToolbar();
+        setHasOptionsMenu(true);
 
         brapiPrefCategory = prefMgr.findPreference("brapi_category");
         brapiAuthButton = findPreference("authorizeBrapi");
@@ -153,6 +157,22 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
 
         setOidcFlowUi();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.menu_brapi_pref, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_menu_brapi_pref_auth) {
+            brapiAuth();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
