@@ -25,44 +25,38 @@ jobs:
           #!/bin/bash
           COMMIT_MSG=$(git log -1 --pretty=%B)
           source version.properties
-          MAJOR_VERSION_CHANGED=false
-          MINOR_VERSION_CHANGED=false
-          TYPE="patchVersion"
+          BUMP_TYPE="patchVersion"
           buildNumber=${{ github.run_number }}
 
           if [[ $COMMIT_MSG == *"BREAKING CHANGE"* || $COMMIT_MSG == *"!"* || $COMMIT_MSG == *"major:"* ]]; then
               majorVersion=$((majorVersion + 1))
               minorVersion=0
               patchVersion=0
-              MAJOR_VERSION_CHANGED=true
-              TYPE="majorVersion"
+              BUMP_TYPE="majorVersion"
           elif [[ $COMMIT_MSG == *"feat:"* || $COMMIT_MSG == *"minor:"* ]]; then
               minorVersion=$((minorVersion + 1))
               patchVersion=0
-              MINOR_VERSION_CHANGED=true
-              TYPE="minorVersion"
+              BUMP_TYPE="minorVersion"
           else
               patchVersion=$((patchVersion + 1))
           fi
-
+          
           echo "majorVersion=$majorVersion" > version.properties
           echo "minorVersion=$minorVersion" >> version.properties
           echo "patchVersion=$patchVersion" >> version.properties
           echo "buildNumber=$buildNumber" >> version.properties
+
           VERSION=$majorVersion.$minorVersion.$patchVersion.$buildNumber
           RELEASE=$majorVersion.$minorVersion
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "RELEASE=$RELEASE" >> $GITHUB_ENV
-          echo "MAJOR_VERSION_CHANGED=${MAJOR_VERSION_CHANGED}" >> $GITHUB_ENV
-          echo "MINOR_VERSION_CHANGED=${MINOR_VERSION_CHANGED}" >> $GITHUB_ENV
-          echo "TYPE=$TYPE" >> $GITHUB_ENV
-          echo "The version is $VERSION and release is $RELEASE. Type is $TYPE, major version changes is $MAJOR_VERSION_CHANGED and minor is $MINOR_VERSION_CHANGED"
+          echo "BUMP_TYPE=$BUMP_TYPE" >> $GITHUB_ENV
 
       - name: Commit version changes
         uses: EndBug/add-and-commit@v7
         with:
           add: 'version.properties'
-          message: Bump ${{ env.TYPE }}
+          message: Bump ${{ env.BUMP_TYPE }}
           author_email: git-action-bot@example.com
           author_name: Git Action Bot
 
@@ -121,6 +115,6 @@ jobs:
           tag: ${{ env.VERSION }}
           file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
           asset_name: Field-Book-v${{ env.RELEASE }}.apk
-          overwrite: ${{ env.MAJOR_VERSION_CHANGED == 'false' && env.MINOR_VERSION_CHANGED == 'false' }}
-          prerelease: ${{ env.MAJOR_VERSION_CHANGED == 'true' || env.MINOR_VERSION_CHANGED == 'true' }}
+          overwrite: ${{ env.BUMP_TYPE == 'patchVersion' }}
+          prerelease: ${{ env.BUMP_TYPE != 'patchVersion' }}
     
