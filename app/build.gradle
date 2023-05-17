@@ -6,6 +6,8 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'com.google.dagger.hilt.android'
 
+// Code that accesses version info from version.properties file in rootdir
+
 Properties props = new Properties()
 props.load(new FileInputStream("$project.rootDir/version.properties"))
 props.each { prop ->
