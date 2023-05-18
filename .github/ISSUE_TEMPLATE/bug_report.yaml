@@ -19,7 +19,7 @@ body:
     attributes:
       label: Expected behavior
       description: |
-        How should Field Book have acted?
+        What should Field Book be doing differently?
 
   - type: input
     id: version
