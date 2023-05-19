@@ -86,6 +86,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintHeight_max="@dimen/collect_infobars_max_height"
+        app:layout_constrainedHeight="true"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar" />

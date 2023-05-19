@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- collect screen infobar max height -->
+    <dimen name="collect_infobars_max_height">128dp</dimen>
+
     <!-- text sizes -->
     <!-- regular text -->
     <dimen name="text_size_small">14sp</dimen>
