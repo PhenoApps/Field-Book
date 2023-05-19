@@ -72,7 +72,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private lateinit var chipGroup: ChipGroup
     private lateinit var averageSwitch: SwitchCompat
-    private lateinit var connectBtn: ImageButton
     private lateinit var utcTextView: TextView
     private lateinit var satTextView: TextView
     private lateinit var altTextView: TextView
@@ -264,11 +263,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         mActivity = act
 
-        initialize()
-
         chipGroup = act.findViewById(R.id.gnss_trait_averaging_chip_group)
         averageSwitch = act.findViewById(R.id.gnss_trait_averaging_switch)
-        connectBtn = act.findViewById(R.id.gnss_connect_button)
+        connectButton = act.findViewById(R.id.gnss_connect_button)
         utcTextView = act.findViewById(R.id.utcTextView)
         satTextView = act.findViewById(R.id.satTextView)
         altTextView = act.findViewById(R.id.altTextView)
@@ -280,15 +277,17 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         collectButton = act.findViewById(R.id.gnss_collect_button)
         disconnectButton = act.findViewById(R.id.disconnect_button)
 
+        initialize()
+
     }
 
     private fun setupChooseBluetoothDevice() {
 
         //setup connect button
-        connectBtn.visibility = View.VISIBLE
+        connectButton.visibility = View.VISIBLE
 
         // Get Location
-        connectBtn.setOnClickListener {
+        connectButton.setOnClickListener {
             if (mActivity != null) {
                 if (checkPermissions(mActivity)) {
                     findPairedDevice()
