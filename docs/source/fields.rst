@@ -3,9 +3,16 @@ Fields
 Overview
 --------
 
-Experiments are represented in Field Book as *fields*. Fields are either imported from a file, from a BrAPI-enabled database, or created from scratch. Each field has a unique name, import, modification, and export dates, and a set of *entries* which represent the experimental units on which data will be collected (e.g. plots or individual plants).
+Experiments are represented in Field Book as *fields*. Fields are either imported from a file, from a BrAPI-enabled database, or created from scratch. Each field has a unique name, an import date, and a set of *entries* which represent the experimental units on which data will be collected (e.g. plots or individual plants). Once data is collected and exported for a given field it will display the dates of last edit and export as well
 
-Each *entry* within a field must have the following: 
+.. figure:: /_static/images/fields/fields_list_item.png
+   :width: 60%
+   :align: center
+   :alt: Field list item
+
+   A sample field with a name, import/edit/export dates, and number of entries
+
+When importing from a file, each row in the file reprents an *entry*. Each *entry* within a field must have the following: 
 
    * A *unique identifier*, which is used internally by Field Book to associate data with the specific entry. It must be unique across all of your fields.
    * A *primary identifier*, and a *secondary identifier*. These set the order of advancement through the field's entries, and can be whatever makes the most sense for your experiment. MOst often they are numbers from the experimental design (e.g., row/plot, row/column, range/plot). They can be reassigned at any time via the field submenu.
