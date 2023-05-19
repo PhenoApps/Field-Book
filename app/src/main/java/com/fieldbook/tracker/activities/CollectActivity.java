@@ -49,6 +49,7 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.GeoNavHelper;
+import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.objects.VerifyPersonHelper;
@@ -58,6 +59,7 @@ import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -103,7 +105,8 @@ public class CollectActivity extends ThemedActivity
         implements UsbCameraInterface, SummaryFragment.SummaryOpenListener,
         com.fieldbook.tracker.interfaces.CollectController,
         com.fieldbook.tracker.interfaces.CollectRangeController,
-        com.fieldbook.tracker.interfaces.CollectTraitController {
+        com.fieldbook.tracker.interfaces.CollectTraitController,
+        InfoBarAdapter.InfoBarController {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -117,6 +120,10 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     VerifyPersonHelper verifyPersonHelper;
+
+    //used to query for infobar prefix/value pairs and building InfoBarModels
+    @Inject
+    InfoBarHelper infoBarHelper;
 
     public static boolean searchReload;
     public static String searchRange;
@@ -138,6 +145,7 @@ public class CollectActivity extends ThemedActivity
     private String inputPlotId = "";
     private AlertDialog goToId;
     private final Object lock = new Object();
+
     /**
      * Main screen elements
      */
@@ -145,6 +153,8 @@ public class CollectActivity extends ThemedActivity
     private InfoBarAdapter infoBarAdapter;
     private TraitBoxView traitBox;
     private RangeBoxView rangeBox;
+    private RecyclerView infoBarRv;
+
     /**
      * Trait-related elements
      */
@@ -310,13 +320,40 @@ public class CollectActivity extends ThemedActivity
         traitBox.connectRangeBox(rangeBox);
         rangeBox.connectTraitBox(traitBox);
 
-        RecyclerView infoBarRv = findViewById(R.id.act_collect_infobar_rv);
+        //setup infobar recycler view ui
+        infoBarRv = findViewById(R.id.act_collect_infobar_rv);
         infoBarRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2), rangeBox.getPlotID());
-        infoBarRv.setAdapter(infoBarAdapter);
 
         initCurrentVals();
 
+        Log.d(TAG, "Load screen.");
+
+        refreshInfoBarAdapter();
+    }
+
+    /**
+     * Updates the infobar adapter with the new plot information.
+     */
+    public void refreshInfoBarAdapter() {
+
+        Log.d(TAG, "Refreshing info bar adapter.");
+
+        try {
+
+            infoBarAdapter = new InfoBarAdapter(this);
+
+            infoBarRv.setAdapter(infoBarAdapter);
+
+            List<InfoBarModel> models = infoBarHelper.getInfoBarData();
+
+            infoBarAdapter.submitList(models);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Log.d(TAG, "Error: info bar adapter loading.");
+        }
     }
 
     @Override
@@ -324,6 +361,8 @@ public class CollectActivity extends ThemedActivity
         rangeBox.saveLastPlot();
         rangeBox.refresh();
         traitBox.setNewTraits(rangeBox.getPlotID());
+
+        Log.d(TAG, "Refresh main.");
 
         initWidgets(true);
 
@@ -487,12 +526,10 @@ public class CollectActivity extends ThemedActivity
         // Reset dropdowns
 
         if (!database.isRangeTableEmpty()) {
-            infoBarAdapter.notifyDataSetChanged();
-            //RecyclerView infoBarRv = findViewById(R.id.act_collect_infobar_rv);
-            //String plotId = rangeBox.getPlotID();
-            //infoBarAdapter.notifyPlotChanged(plotId);
-            //infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2), plotId);
-            //infoBarRv.setAdapter(infoBarAdapter);
+
+            Log.d(TAG, "init widgets refreshing info bar");
+
+            refreshInfoBarAdapter();
         }
 
         traitBox.initTraitDetails();
@@ -611,6 +648,8 @@ public class CollectActivity extends ThemedActivity
 
         traitBox.setNewTraits(rangeBox.getPlotID());
 
+        Log.d(TAG, "Move to result core: " + j);
+
         initWidgets(false);
     }
 
@@ -630,6 +669,8 @@ public class CollectActivity extends ThemedActivity
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         traitBox.setSelection(traitIndex);
+
+        Log.d(TAG, "Move to result core: " + j);
 
         initWidgets(false);
     }
@@ -734,6 +775,8 @@ public class CollectActivity extends ThemedActivity
             rangeBox.reload();
             traitBox.setPrefixTraits();
 
+            Log.d(TAG, "On resume load data.");
+
             initWidgets(false);
             traitBox.setSelection(0);
 
@@ -748,6 +791,9 @@ public class CollectActivity extends ThemedActivity
             partialReload = false;
             rangeBox.display();
             traitBox.setPrefixTraits();
+
+            Log.d(TAG, "On resume partial reload data.");
+
             initWidgets(false);
 
         } else if (searchReload) {
@@ -876,9 +922,9 @@ public class CollectActivity extends ThemedActivity
         }
 
         //update the info bar in case a variable is used
-        infoBarAdapter.notifyItemRangeChanged(0, infoBarAdapter.getItemCount());
-
+        refreshInfoBarAdapter();
         refreshRepeatedValuesToolbarIndicator();
+
     }
 
     public void insertRep(String parent, String trait, String value, String rep) {
@@ -1092,8 +1138,6 @@ public class CollectActivity extends ThemedActivity
              * If geonav is enabled, collect activity will auto move to the plot in user's vicinity
              */
             case geonavId:
-
-                Log.d(GEOTAG, "Menu item clicked.");
 
                 geoNavHelper.setMGeoNavActivated(!geoNavHelper.getMGeoNavActivated());
                 MenuItem navItem = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
@@ -1554,6 +1598,9 @@ public class CollectActivity extends ThemedActivity
                                     //refresh collect activity UI
                                     rangeBox.reload();
                                     rangeBox.refresh();
+
+                                    Log.d(TAG, "Snackbar navigate to field: " + fieldName + " (" + studyId + ")");
+
                                     initWidgets(false);
 
                                     //navigate to the plot
@@ -1913,5 +1960,12 @@ public class CollectActivity extends ThemedActivity
         holder.addView(v);
         layout.init(this);
         v.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onInfoBarClicked(int position) {
+
+        infoBarHelper.showInfoBarChoiceDialog(position);
+
     }
 }
