@@ -1497,6 +1497,11 @@ public class CollectActivity extends ThemedActivity
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
                     moveToSearch("id", rangeID, null, null, inputPlotId, trait);
+                    //select the rep chosen from datagrid
+                    if (collectInputView.isRepeatEnabled()) {
+                        int rep = data.getIntExtra("rep", -1);
+                        collectInputView.navigateToRep(rep);
+                    }
                     mSkipLastUsedTrait = true;
                 }
                 break;
