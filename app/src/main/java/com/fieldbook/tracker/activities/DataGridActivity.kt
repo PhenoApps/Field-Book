@@ -417,9 +417,9 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
         val choices = repeatedValues.map { it.value }.filter { it.isNotBlank() }.toTypedArray()
 
-        //show a dialog to choose a prefix trait to be displayed
+        //show a dialog to choose which value to navigate to
         AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_data_grid_header_picker_title)
+            .setTitle(R.string.dialog_data_grid_repeated_measures_title)
             .setSingleChoiceItems(choices, 0) { dialog, which ->
 
                 val value = repeatedValues[which]
