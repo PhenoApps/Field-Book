@@ -20,10 +20,17 @@
         app:iconSpaceReserved="false">
 
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:icon="@drawable/ic_pref_profile_verify"
-            android:key="VerifyUserEvery24Hours"
+            android:key="com.tracker.fieldbook.preference.require_user_to_collect"
             android:title="@string/pref_profile_title" />
+
+        <ListPreference
+            android:entries="@array/preferences_profile_ask_user_interval_entries"
+            android:entryValues="@array/preferences_profile_ask_user_interval_values"
+            android:icon="@drawable/hours_24"
+            android:key="com.tracker.fieldbook.preference.require_user_interval"
+            android:title="@string/pref_profile_require_interval_title" />
 
     </PreferenceCategory>
 

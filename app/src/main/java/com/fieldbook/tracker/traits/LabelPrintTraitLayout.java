@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -25,7 +24,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.BluetoothUtil;
 import com.fieldbook.tracker.utilities.Constants;
@@ -37,6 +35,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 public class LabelPrintTraitLayout extends BaseTraitLayout {
+
+    static public String type = "zebra label print";
 
     private String[] options;
     private String[] labelCopiesArray;
@@ -53,6 +53,9 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     private Spinner textfield4;
     private Spinner barcodefield;
     private Spinner labelcopies;
+
+    private  ImageView label;
+    private ImageButton printLabel;
 
     private BluetoothUtil mBluetoothUtil;
 
@@ -76,8 +79,8 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
-
+    public int layoutId() {
+        return R.layout.trait_labelprint;
     }
 
     private boolean checkPermissions(Activity act) {
@@ -155,12 +158,14 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         mActivity = act;
 
+        printLabel = act.findViewById(R.id.printLabelButton);
+
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mPrinterMessageReceiver,
                 new IntentFilter("printer_message"));
 
         mBluetoothUtil = new BluetoothUtil();
 
-        String[] prefixTraits = ConfigActivity.dt.getRangeColumnNames();
+        String[] prefixTraits = getDatabase().getRangeColumnNames();
         optionsList = new ArrayList<>(Arrays.asList(prefixTraits));
         optionsList.add("date");
         optionsList.add("trial_name");
@@ -169,23 +174,23 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
         optionsList.toArray(options);
 
         fieldArrayAdapter = new ArrayAdapter<>(
-                getContext(), R.layout.custom_spinnerlayout, options);
+                getContext(), R.layout.custom_spinner_layout, options);
 
         labelSizeArray = new String[]{"3\" x 2\" simple", "3\" x 2\" detailed", "2\" x 1\" simple", "2\" x 1\" detailed"};
         sizeArrayAdapter = new ArrayAdapter<>(
-                getContext(), R.layout.custom_spinnerlayout, labelSizeArray);
+                getContext(), R.layout.custom_spinner_layout, labelSizeArray);
 
         labelCopiesArray = new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
         copiesArrayAdapter = new ArrayAdapter<>(
-                getContext(), R.layout.custom_spinnerlayout, labelCopiesArray);
+                getContext(), R.layout.custom_spinner_layout, labelCopiesArray);
 
-        labelsize = findViewById(R.id.labelsize);
-        textfield1 = findViewById(R.id.textfield);
-        textfield2 = findViewById(R.id.textfield2);
-        textfield3 = findViewById(R.id.textfield3);
-        textfield4 = findViewById(R.id.textfield4);
-        barcodefield = findViewById(R.id.barcodefield);
-        labelcopies = findViewById(R.id.labelcopies);
+        labelsize = act.findViewById(R.id.labelsize);
+        textfield1 = act.findViewById(R.id.textfield);
+        textfield2 = act.findViewById(R.id.textfield2);
+        textfield3 = act.findViewById(R.id.textfield3);
+        textfield4 = act.findViewById(R.id.textfield4);
+        barcodefield = act.findViewById(R.id.barcodefield);
+        labelcopies = act.findViewById(R.id.labelcopies);
 
         labelsize.setAdapter(sizeArrayAdapter);
         textfield1.setAdapter(fieldArrayAdapter);
@@ -195,12 +200,12 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
         barcodefield.setAdapter(fieldArrayAdapter);
         labelcopies.setAdapter(copiesArrayAdapter);
 
+        label = act.findViewById(R.id.labelPreview);
+
     }
 
     @Override
     public void loadLayout() {
-
-        getEtCurVal().setVisibility(EditText.GONE);
 
         try {
 
@@ -211,8 +216,6 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 public void onItemSelected(AdapterView<?> arg0, View arg1,
                                            int pos, long arg3) {
                     Log.d(CollectActivity.TAG, labelsize.getSelectedItem().toString());
-
-                    ImageView label = findViewById(R.id.labelPreview);
 
                     if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed") || labelsize.getSelectedItem().toString().equals("2\" x 1\" detailed")) {
                         ((View) textfield2.getParent()).setVisibility(View.VISIBLE);
@@ -293,7 +296,6 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
          * This section handles print events. TODO: Create a label prototype based class. Move most of this logic to a function/class. chaneylc 8/26/2020
          * More info on prototyping: https://refactoring.guru/design-patterns/prototype
          */
-        ImageButton printLabel = findViewById(R.id.printLabelButton);
         printLabel.setOnClickListener(view -> {
 
             if (checkPermissions(mActivity)) {
@@ -449,7 +451,12 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 value = "";
             } else {
                 int pos = spinner.getSelectedItemPosition();
-                value = ConfigActivity.dt.getDropDownRange(options[pos], getCRange().plot_id)[0];
+                if (pos < options.length) {
+                    String[] v = getDatabase().getDropDownRange(options[pos], getCurrentRange().plot_id);
+                    if (v.length != 0) {
+                        value = v[0];
+                    }
+                }
             }
         }
          /*

@@ -2,24 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
     android:orientation="vertical"
     android:paddingLeft="20dp"
     android:paddingTop="5dp"
     android:paddingRight="20dp"
     android:paddingBottom="5dp">
 
-    <TextView
+    <TextView style="@style/TextViewStyle.Bold.Title"
         android:id="@+id/body_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingHorizontal="20dp"
         android:paddingVertical="10dp"
-        android:text="@string/brapi_info_title"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_large"
-        android:textStyle="bold"/>
+        android:text="@string/brapi_info_title"/>
 
     <TextView
         android:id="@+id/body_message"
@@ -28,9 +24,7 @@
         android:gravity="center"
         android:paddingHorizontal="20dp"
         android:paddingVertical="10dp"
-        android:text="Example"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_medium"/>
+        android:text="@string/brapi_dialog_info_example_text"/>
 
     <Button
         android:id="@+id/closeBtn"

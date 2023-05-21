@@ -1,21 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
     android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/main_primary"
         android:fitsSystemWindows="true"
-        android:minHeight="?attr/actionBarSize"
-        app:popupTheme="@style/AppToolbar"
-        app:theme="@style/AppToolbar" />
+        android:minHeight="?attr/actionBarSize" />
 
     <RelativeLayout
         android:id="@+id/loadingPanel"
@@ -25,12 +20,12 @@
         android:gravity="center"
         android:visibility="visible">
 
-        <ProgressBar
+        <ProgressBar style="@style/IndeterminateProgressStyle"
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:indeterminate="true"
             android:visibility="visible"
-            tools:visibility="visible" />
+            tools:visibility="visible"/>
     </RelativeLayout>
 
 </LinearLayout>

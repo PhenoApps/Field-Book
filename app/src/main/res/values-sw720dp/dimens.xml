@@ -9,6 +9,5 @@
     <dimen name="text_size_xlarge">48sp</dimen>
     <dimen name="text_size_xxlarge">90sp</dimen>
 
-    <dimen name="button_default_height">80dp</dimen>
     <dimen name="button_default_width">180dp</dimen>
 </resources>

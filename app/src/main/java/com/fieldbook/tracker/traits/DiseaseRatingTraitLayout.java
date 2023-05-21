@@ -1,12 +1,13 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.utilities.Utils;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
@@ -42,7 +43,12 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
     @Override
     public String type() {
-        return "audio";
+        return "disease rating";
+    }
+
+    @Override
+    public int layoutId() {
+        return R.layout.trait_disease_rating;
     }
 
     public boolean isTraitType(String trait) {
@@ -50,33 +56,33 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
+    public void init(Activity act) {
         rustButtons = new LinkedHashMap<>();
-        rustButtons.put(R.id.rust0, (Button) findViewById(R.id.rust0));
-        rustButtons.put(R.id.rust5, (Button) findViewById(R.id.rust5));
-        rustButtons.put(R.id.rust10, (Button) findViewById(R.id.rust10));
-        rustButtons.put(R.id.rust15, (Button) findViewById(R.id.rust15));
-        rustButtons.put(R.id.rust20, (Button) findViewById(R.id.rust20));
-        rustButtons.put(R.id.rust25, (Button) findViewById(R.id.rust25));
-        rustButtons.put(R.id.rust30, (Button) findViewById(R.id.rust30));
-        rustButtons.put(R.id.rust35, (Button) findViewById(R.id.rust35));
-        rustButtons.put(R.id.rust40, (Button) findViewById(R.id.rust40));
-        rustButtons.put(R.id.rust45, (Button) findViewById(R.id.rust45));
-        rustButtons.put(R.id.rust50, (Button) findViewById(R.id.rust50));
-        rustButtons.put(R.id.rust55, (Button) findViewById(R.id.rust55));
-        rustButtons.put(R.id.rust60, (Button) findViewById(R.id.rust60));
-        rustButtons.put(R.id.rust65, (Button) findViewById(R.id.rust65));
-        rustButtons.put(R.id.rust70, (Button) findViewById(R.id.rust70));
-        rustButtons.put(R.id.rust75, (Button) findViewById(R.id.rust75));
-        rustButtons.put(R.id.rust80, (Button) findViewById(R.id.rust80));
-        rustButtons.put(R.id.rust85, (Button) findViewById(R.id.rust85));
-        rustButtons.put(R.id.rust90, (Button) findViewById(R.id.rust90));
-        rustButtons.put(R.id.rust95, (Button) findViewById(R.id.rust95));
-        rustButtons.put(R.id.rust100, (Button) findViewById(R.id.rust100));
-        rustR = findViewById(R.id.rustR);
-        rustM = findViewById(R.id.rustM);
-        rustS = findViewById(R.id.rustS);
-        rustDelim = findViewById(R.id.rustDelim);
+        rustButtons.put(R.id.rust0, (Button) act.findViewById(R.id.rust0));
+        rustButtons.put(R.id.rust5, (Button) act.findViewById(R.id.rust5));
+        rustButtons.put(R.id.rust10, (Button) act.findViewById(R.id.rust10));
+        rustButtons.put(R.id.rust15, (Button) act.findViewById(R.id.rust15));
+        rustButtons.put(R.id.rust20, (Button) act.findViewById(R.id.rust20));
+        rustButtons.put(R.id.rust25, (Button) act.findViewById(R.id.rust25));
+        rustButtons.put(R.id.rust30, (Button) act.findViewById(R.id.rust30));
+        rustButtons.put(R.id.rust35, (Button) act.findViewById(R.id.rust35));
+        rustButtons.put(R.id.rust40, (Button) act.findViewById(R.id.rust40));
+        rustButtons.put(R.id.rust45, (Button) act.findViewById(R.id.rust45));
+        rustButtons.put(R.id.rust50, (Button) act.findViewById(R.id.rust50));
+        rustButtons.put(R.id.rust55, (Button) act.findViewById(R.id.rust55));
+        rustButtons.put(R.id.rust60, (Button) act.findViewById(R.id.rust60));
+        rustButtons.put(R.id.rust65, (Button) act.findViewById(R.id.rust65));
+        rustButtons.put(R.id.rust70, (Button) act.findViewById(R.id.rust70));
+        rustButtons.put(R.id.rust75, (Button) act.findViewById(R.id.rust75));
+        rustButtons.put(R.id.rust80, (Button) act.findViewById(R.id.rust80));
+        rustButtons.put(R.id.rust85, (Button) act.findViewById(R.id.rust85));
+        rustButtons.put(R.id.rust90, (Button) act.findViewById(R.id.rust90));
+        rustButtons.put(R.id.rust95, (Button) act.findViewById(R.id.rust95));
+        rustButtons.put(R.id.rust100, (Button) act.findViewById(R.id.rust100));
+        rustR = act.findViewById(R.id.rustR);
+        rustM = act.findViewById(R.id.rustM);
+        rustS = act.findViewById(R.id.rustS);
+        rustDelim = act.findViewById(R.id.rustDelim);
 
         List<String> temps = getRustCodes();
         List<Button> rustBtnArray = new ArrayList<>(rustButtons.values());
@@ -133,16 +139,23 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
     public void loadLayout() {
         super.loadLayout();
 
-        // clear NA hint
-        getEtCurVal().setHint("");
-        getEtCurVal().removeTextChangedListener(getCvText());
-        getEtCurVal().setVisibility(EditText.VISIBLE);
+        ObservationModel model = getCurrentObservation();
+        if (model != null) {
+            getCollectInputView().setText(model.getValue());
+        }
     }
 
     @Override
     public void deleteTraitListener() {
-        getEtCurVal().setText("");
         removeTrait(getCurrentTrait().getTrait());
+        super.deleteTraitListener();
+
+        ObservationModel model = getCurrentObservation();
+        if (model != null) {
+            getCollectActivity().setTitle(model.getValue());
+        } else {
+            getCollectInputView().setText("");
+        }
     }
 
     private class RustButtonOnClickListener implements OnClickListener {
@@ -165,25 +178,27 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
             triggerTts(v);
 
             if (getVisibility() == View.VISIBLE) {
-                if (getEtCurVal().getText().length() > 0
+                String textValue = getCollectInputView().getText();
+                if (textValue.length() > 0
                         && !v.equals("/")
-                        && !getEtCurVal().getText().toString().substring(getEtCurVal().getText().length() - 1).equals("/")) {
+                        && !textValue.endsWith("/")) {
 
-                    String lastChar = getEtCurVal().getText().toString().substring(getEtCurVal().getText().toString().length() - 1);
+                    String lastChar = textValue.substring(textValue.length() - 1);
                     if (!lastChar.matches("^[a-zA-Z]*$")) {
                         v = ":" + v;
                     }
                 }
 
-                if (getEtCurVal().getText().toString().matches(".*\\d.*")
+                if (textValue.matches(".*\\d.*")
                         && v.matches(".*\\d.*")
-                        && !getEtCurVal().getText().toString().contains("/")) {
+                        && !textValue.contains("/")) {
                     String error = getContext().getString(R.string.trait_error_disease_severity);
                     Utils.makeToast(getContext(),error);
                     triggerTts(error);
                 } else {
-                    getEtCurVal().setText(getEtCurVal().getText().toString() + v);
-                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
+                    String value = textValue + v;
+                    getCollectInputView().setText(value);
+                    updateObservation(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
                 }
             }
         }

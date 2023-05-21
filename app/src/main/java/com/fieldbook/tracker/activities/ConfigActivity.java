@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,27 +33,25 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.brapi.BrapiExportActivity;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.StudyDao;
-import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
-import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
+import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -78,15 +75,33 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 /**
- * Settings Screen
+ * The main page of FieldBook.
+ *
+ * This contains a list of features that the app provides containing:
+ *      Fields -> the FieldEditorActivity, allows the user to import, delete and select a field
+ *      Traits -> the TraitEditorActivity, allows the user to edit, import, delete and select visible traits
+ *      Collect -> the main phenotyping component allowing user to navigate across plots and make
+ *                  observations using the visible traits
+ *      Export -> creates a dialog that lets the user export data
+ *      Settings -> the app preferences activity
+ *      About -> a third party library that handles showing dependencies and other app data
+ *
+ * Also this activity has a static member variable for the DataHelper (database) class that many other classes use
+ * to make queries.
  */
-public class ConfigActivity extends AppCompatActivity {
+@AndroidEntryPoint
+public class ConfigActivity extends ThemedActivity {
 
-    public static DataHelper dt;
+    @Inject
+    public DataHelper database;
+
     private final static String TAG = ConfigActivity.class.getSimpleName();
     private final int PERMISSIONS_REQUEST_EXPORT_DATA = 9990;
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
@@ -129,8 +144,6 @@ public class ConfigActivity extends AppCompatActivity {
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
 
-        dt.open();
-
         invalidateOptionsMenu();
         loadScreen();
     }
@@ -151,9 +164,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-        dt = new DataHelper(this);
-        dt.open();
-
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setCrashlyticsUserId();
@@ -171,11 +181,12 @@ public class ConfigActivity extends AppCompatActivity {
 
             if (currentVersion >= 530 && lastVersion < 530) {
 
-                OldPhotosMigrator.Companion.migrateOldPhotosDir(this);
+                OldPhotosMigrator.Companion.migrateOldPhotosDir(this, database);
 
                 //clear field selection after updates
                 ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
                 ep.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
+                ep.edit().putString(GeneralKeys.FIELD_OBS_LEVEL, null).apply();
                 ep.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
                 ep.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
                 ep.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
@@ -214,7 +225,7 @@ public class ConfigActivity extends AppCompatActivity {
                 .withRateButton(rateButton) // enable this to show a "rate app" button in the dialog => clicking it will open the play store; the parent activity or target fragment can also implement IChangelogRateHandler to handle the button click
                 .withSummary(false, true) // enable this to show a summary and a "show more" button, the second paramter describes if releases without summary items should be shown expanded or not
                 .withTitle(getString(R.string.changelog_title)) // provide a custom title if desired, default one is "Changelog <VERSION>"
-                .withOkButtonLabel("OK") // provide a custom ok button text if desired, default one is "OK"
+                .withOkButtonLabel(getString(android.R.string.ok)) // provide a custom ok button text if desired, default one is "OK"
                 .withSorter(new ImportanceChangelogSorter())
                 .buildAndShowDialog(this, false); // second parameter defines, if the dialog has a dark or light theme
     }
@@ -318,9 +329,7 @@ public class ConfigActivity extends AppCompatActivity {
      */
     private int checkTraitsExist() {
 
-        dt.open();
-
-        String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
+        String[] traits = database.getVisibleTrait();
 
         if (!ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
                 || ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
@@ -402,7 +411,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     private void showTipsDialog() {
@@ -441,7 +449,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     private void loadSampleDataDialog() {
@@ -463,7 +470,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     /**
@@ -501,7 +507,7 @@ public class ConfigActivity extends AppCompatActivity {
         exportArray[0] = getString(R.string.export_source_local);
         exportArray[1] = getString(R.string.export_source_brapi);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, exportArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, exportArray);
         exportSourceList.setAdapter(adapter);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
@@ -514,12 +520,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         final AlertDialog exportDialog = builder.create();
         exportDialog.show();
-        DialogUtils.styleDialogs(exportDialog);
-
-        android.view.WindowManager.LayoutParams params = exportDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        exportDialog.getWindow().setAttributes(params);
 
         exportSourceList.setOnItemClickListener((av, arg1, which, arg3) -> {
             switch (which) {
@@ -539,7 +539,7 @@ public class ConfigActivity extends AppCompatActivity {
         int activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
         FieldObject activeField;
         if (activeFieldId != -1) {
-            activeField = dt.getFieldObject(activeFieldId);
+            activeField = database.getFieldObject(activeFieldId);
         } else {
             activeField = null;
             Toast.makeText(ConfigActivity.this, R.string.warning_field_missing, Toast.LENGTH_LONG).show();
@@ -623,7 +623,6 @@ public class ConfigActivity extends AppCompatActivity {
         saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         saveDialog.show();
-        DialogUtils.styleDialogs(saveDialog);
 
         android.view.WindowManager.LayoutParams params2 = saveDialog.getWindow().getAttributes();
         params2.width = LayoutParams.MATCH_PARENT;
@@ -667,19 +666,19 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             if (allColumns.isChecked()) {
-                String[] columns = dt.getRangeColumns();
+                String[] columns = database.getRangeColumns();
                 Collections.addAll(newRange, columns);
             }
 
             exportTrait = new ArrayList<>();
 
             if (activeTraits.isChecked()) {
-                String[] traits = dt.getVisibleTrait();
+                String[] traits = database.getVisibleTrait();
                 Collections.addAll(exportTrait, traits);
             }
 
             if (allTraits.isChecked()) {
-                String[] traits = dt.getAllTraits();
+                String[] traits = database.getAllTraits();
                 Collections.addAll(exportTrait, traits);
             }
 
@@ -749,22 +748,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private TapTarget settingsTapTargetRect(Rect item, String title, String desc) {
-        return TapTarget.forBounds(item, title, desc)
-                // All options below are optional
-                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
-                .targetCircleColor(R.color.black)   // Specify a color for the target circle
-                .titleTextSize(30)                  // Specify the size (in sp) of the title text
-                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD)
-                .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .textColor(R.color.black)            // Specify a color for both the title and description text
-                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
-                .drawShadow(true)                   // Whether to draw a drop shadow or not
-                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                .tintTarget(true)                   // Whether to tint the target view's color
-                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
-                .targetRadius(60);
+        return TapTargetUtil.Companion.getTapTargetSettingsRect(this, item, title, desc);
     }
 
     @Override
@@ -868,7 +852,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             if (allColumns.isChecked()) {
-                String[] columns = dt.getRangeColumns();
+                String[] columns = database.getRangeColumns();
                 Collections.addAll(newRange, columns);
             }
 
@@ -876,7 +860,7 @@ public class ConfigActivity extends AppCompatActivity {
             String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);
 
             // Retrieves the data needed for export
-            Cursor exportData = dt.getExportDBData(newRanges, exportTraits);
+            Cursor exportData = database.getExportDBData(newRanges, exportTraits);
 
             for (String i : newRanges) {
                 Log.i("Field Book : Ranges : ", i);
@@ -895,7 +879,7 @@ public class ConfigActivity extends AppCompatActivity {
             DocumentFile dbFile = null;
             DocumentFile tableFile = null;
 
-            ArrayList<TraitObject> traits = dt.getAllTraitObjects();
+            ArrayList<TraitObject> traits = database.getAllTraitObjects();
 
             //check if export database has been selected
             if (checkDbBool) {
@@ -952,7 +936,7 @@ public class ConfigActivity extends AppCompatActivity {
                         OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(ConfigActivity.this, R.string.dir_field_export, tableFileName);
                         OutputStreamWriter fw = new OutputStreamWriter(output);
 
-                        exportData = dt.convertDatabaseToTable(newRanges, exportTraits);
+                        exportData = database.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
                         csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length, traits);
@@ -1084,7 +1068,7 @@ public class ConfigActivity extends AppCompatActivity {
 
             if (!fail) {
                 showCitationDialog();
-                dt.updateExpTable(false, false, true, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+                database.updateExpTable(false, false, true, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
             }
 
             if (fail) {
@@ -1111,7 +1095,7 @@ public class ConfigActivity extends AppCompatActivity {
             super.onPreExecute();
             fail = false;
 
-            dialog = new ProgressDialog(ConfigActivity.this);
+            dialog = new ProgressDialog(ConfigActivity.this, R.style.AppAlertDialog);
             dialog.setIndeterminate(true);
             dialog.setCancelable(false);
             dialog.setMessage(Html
@@ -1123,7 +1107,7 @@ public class ConfigActivity extends AppCompatActivity {
         protected Integer doInBackground(Integer... params) {
             try {
                 if (this.file != null) {
-                    dt.importDatabase(this.file);
+                    database.importDatabase(this.file);
                 }
             } catch (Exception e) {
                 Log.d("Database", e.toString());
@@ -1192,11 +1176,12 @@ public class ConfigActivity extends AppCompatActivity {
 
         if (f != null) {
 
-            dt.switchField(studyId);
+            database.switchField(studyId);
 
             //clear field selection after updates
             ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId)
                 .putString(GeneralKeys.FIELD_FILE, f.getExp_name())
+                .putString(GeneralKeys.FIELD_OBS_LEVEL, f.getObservation_level())
                 .putString(GeneralKeys.UNIQUE_NAME, f.getUnique_id())
                 .putString(GeneralKeys.PRIMARY_NAME, f.getPrimary_id())
                 .putString(GeneralKeys.SECONDARY_NAME, f.getSecondary_id())

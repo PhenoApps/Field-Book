@@ -21,7 +21,8 @@
             android:src="@drawable/ic_satellite_variant"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/trait_gnss_connect_button_content_description" />
 
         <androidx.constraintlayout.widget.Group
             android:id="@+id/gnss_group"
@@ -39,9 +40,8 @@
                 gnss_trait_averaging_switch"
             tools:visibility="visible" />
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/utcHeader"
-            style="@style/TextHeader"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -54,7 +54,6 @@
 
         <TextView
             android:id="@+id/utcTextView"
-            style="@style/TextData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -64,9 +63,8 @@
             app:layout_constraintStart_toEndOf="@+id/utcHeader"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/satsHeader"
-            style="@style/TextHeader"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -79,7 +77,6 @@
 
         <TextView
             android:id="@+id/satTextView"
-            style="@style/TextData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -88,9 +85,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/latHeader"
-            style="@style/TextHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -102,7 +98,6 @@
 
         <TextView
             android:id="@+id/latTextView"
-            style="@style/TextData"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -115,9 +110,8 @@
             app:layout_constraintTop_toBottomOf="@+id/utcHeader"
             tools:text="108.199219921992" />
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/lngHeader"
-            style="@style/TextHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -129,7 +123,6 @@
 
         <TextView
             android:id="@+id/lngTextView"
-            style="@style/TextData"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -142,9 +135,8 @@
             app:layout_constraintTop_toBottomOf="@+id/latHeader"
             tools:text="71.1719931993" />
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/altHeader"
-            style="@style/TextHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -156,7 +148,6 @@
 
         <TextView
             android:id="@+id/altTextView"
-            style="@style/TextData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -166,9 +157,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/utcHeader" />
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/hdopHeader"
-            style="@style/TextHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -180,7 +170,6 @@
 
         <TextView
             android:id="@+id/hdopTextView"
-            style="@style/TextData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -189,9 +178,8 @@
             app:layout_constraintStart_toEndOf="@+id/hdopHeader"
             app:layout_constraintTop_toBottomOf="@+id/lngHeader" />
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/accHeader"
-            style="@style/TextHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -203,7 +191,6 @@
 
         <TextView
             android:id="@+id/accTextView"
-            style="@style/TextData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -221,7 +208,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/disconnect_button"
             app:layout_constraintTop_toBottomOf="@id/hdopHeader"
-            app:layout_constraintHorizontal_weight="4" />
+            app:layout_constraintHorizontal_weight="4"
+            android:contentDescription="@string/trait_gnss_collect_button_content_description" />
 
         <ImageButton
             android:id="@+id/disconnect_button"
@@ -232,7 +220,8 @@
             app:layout_constraintEnd_toStartOf="@id/gnss_collect_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/hdopHeader"
-            app:layout_constraintHorizontal_weight="1" />
+            app:layout_constraintHorizontal_weight="1"
+            android:contentDescription="@string/trait_gnss_disconnect_button_content_description" />
 
         <androidx.appcompat.widget.SwitchCompat
             android:layout_width="0dp"

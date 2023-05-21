@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.fieldbook.tracker.traits.TextTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/textLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:visibility="gone">
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <EditText
+        tools:text="Edit Text"
+        android:layout_margin="8dp"
+        android:id="@+id/trait_text_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size_xlarge"
+        android:textStyle="bold"
+        android:inputType="textNoSuggestions"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:hint=""
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginVertical="8dp" />
 
 </com.fieldbook.tracker.traits.TextTraitLayout>

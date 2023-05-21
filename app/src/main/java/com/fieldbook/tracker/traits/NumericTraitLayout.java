@@ -1,10 +1,10 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
@@ -38,24 +38,30 @@ public class NumericTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
+    public int layoutId() {
+        return R.layout.trait_numeric;
+    }
+
+    @Override
+    public void init(Activity act) {
+        //void v = inflate(getContext(), layoutId(), null);
         numberButtons = new LinkedHashMap<>();
-        numberButtons.put(R.id.k1, (Button) findViewById(R.id.k1));
-        numberButtons.put(R.id.k2, (Button) findViewById(R.id.k2));
-        numberButtons.put(R.id.k3, (Button) findViewById(R.id.k3));
-        numberButtons.put(R.id.k4, (Button) findViewById(R.id.k4));
-        numberButtons.put(R.id.k5, (Button) findViewById(R.id.k5));
-        numberButtons.put(R.id.k6, (Button) findViewById(R.id.k6));
-        numberButtons.put(R.id.k7, (Button) findViewById(R.id.k7));
-        numberButtons.put(R.id.k8, (Button) findViewById(R.id.k8));
-        numberButtons.put(R.id.k9, (Button) findViewById(R.id.k9));
-        numberButtons.put(R.id.k10, (Button) findViewById(R.id.k10));
-        numberButtons.put(R.id.k11, (Button) findViewById(R.id.k11));
-        numberButtons.put(R.id.k12, (Button) findViewById(R.id.k12));
-        numberButtons.put(R.id.k13, (Button) findViewById(R.id.k13));
-        numberButtons.put(R.id.k14, (Button) findViewById(R.id.k14));
-        numberButtons.put(R.id.k15, (Button) findViewById(R.id.k15));
-        numberButtons.put(R.id.k16, (Button) findViewById(R.id.k16));
+        numberButtons.put(R.id.k1, (Button) act.findViewById(R.id.k1));
+        numberButtons.put(R.id.k2, (Button) act.findViewById(R.id.k2));
+        numberButtons.put(R.id.k3, (Button) act.findViewById(R.id.k3));
+        numberButtons.put(R.id.k4, (Button) act.findViewById(R.id.k4));
+        numberButtons.put(R.id.k5, (Button) act.findViewById(R.id.k5));
+        numberButtons.put(R.id.k6, (Button) act.findViewById(R.id.k6));
+        numberButtons.put(R.id.k7, (Button) act.findViewById(R.id.k7));
+        numberButtons.put(R.id.k8, (Button) act.findViewById(R.id.k8));
+        numberButtons.put(R.id.k9, (Button) act.findViewById(R.id.k9));
+        numberButtons.put(R.id.k10, (Button) act.findViewById(R.id.k10));
+        numberButtons.put(R.id.k11, (Button) act.findViewById(R.id.k11));
+        numberButtons.put(R.id.k12, (Button) act.findViewById(R.id.k12));
+        numberButtons.put(R.id.k13, (Button) act.findViewById(R.id.k13));
+        numberButtons.put(R.id.k14, (Button) act.findViewById(R.id.k14));
+        numberButtons.put(R.id.k15, (Button) act.findViewById(R.id.k15));
+        numberButtons.put(R.id.k16, (Button) act.findViewById(R.id.k16));
 
         for (Button numButton : numberButtons.values()) {
             numButton.setOnClickListener(new NumberButtonOnClickListener());
@@ -64,21 +70,11 @@ public class NumericTraitLayout extends BaseTraitLayout {
         numberButtons.get(R.id.k16).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                getEtCurVal().setText("");
+                getCollectInputView().setText("");
                 removeTrait(getCurrentTrait().getTrait());
                 return false;
             }
         });
-    }
-
-    @Override
-    public void loadLayout() {
-
-        // Clear hint for NA since a focus change doesn't happen for the numeric trait layout
-        getEtCurVal().setHint("");
-        getEtCurVal().setVisibility(EditText.VISIBLE);
-
-        super.loadLayout();
     }
 
     @Override
@@ -95,6 +91,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
     @Override
     public void deleteTraitListener() {
         ((CollectActivity) getContext()).removeTrait();
+        super.deleteTraitListener();
     }
 
     private class NumberButtonOnClickListener implements OnClickListener {
@@ -103,7 +100,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
         public void onClick(View view) {
             if (!isLocked) {
                 final String backspaceTts = getContext().getString(R.string.trait_numeric_backspace_tts);
-                final String curText = getEtCurVal().getText().toString();
+                final String curText = getCollectInputView().getText();
                 Button button = (Button) view;
                 triggerTts(button.getText().toString());
                 String value;
@@ -112,13 +109,13 @@ public class NumericTraitLayout extends BaseTraitLayout {
                     final int length = curText.length();
                     if (length > 0) {
                         value = curText.substring(0, length - 1);
-                        getEtCurVal().setText(value);
-                        updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
+                        getCollectInputView().setText(value);
+                        updateObservation(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
                     }
                 } else if (numberButtons.containsKey(view.getId())) {
                     value = curText + numberButtons.get(view.getId()).getText().toString();
-                    getEtCurVal().setText(value);
-                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
+                    getCollectInputView().setText(value);
+                    updateObservation(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
                 }
             }
         }

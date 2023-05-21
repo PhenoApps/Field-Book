@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -10,10 +9,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/main_primary"
         android:fitsSystemWindows="true"
-        android:minHeight="?attr/actionBarSize"
-        app:popupTheme="@style/AppToolbar" />
+        android:minHeight="?attr/actionBarSize" />
 
 
     <ScrollView
@@ -40,10 +37,7 @@
                     android:paddingLeft="10dp"
                     android:paddingTop="5dp"
                     android:paddingBottom="15dp"
-                    android:text="@string/brapi_export_title"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_title" />
 
             </LinearLayout>
 
@@ -57,10 +51,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="10dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="10dp" />
 
             </LinearLayout>
 
@@ -76,10 +67,7 @@
                     android:paddingLeft="10dp"
                     android:paddingTop="15dp"
                     android:paddingBottom="15dp"
-                    android:text="@string/brapi_export_observations"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_observations" />
             </LinearLayout>
 
             <LinearLayout
@@ -92,10 +80,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="5dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="5dp" />
 
                 <TextView
                     android:id="@+id/brapiNumNewLbl"
@@ -103,10 +88,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/brapi_export_num_new_obs"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_num_new_obs" />
             </LinearLayout>
 
 
@@ -120,10 +102,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="5dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="5dp" />
 
                 <TextView
                     android:id="@+id/brapiNumSynceddLbl"
@@ -131,10 +110,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/brapi_export_num_synced_obs"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_num_synced_obs" />
             </LinearLayout>
 
             <LinearLayout
@@ -147,10 +123,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="5dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="5dp" />
 
                 <TextView
                     android:id="@+id/brapiNumEditiedLbl"
@@ -158,10 +131,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/brapi_export_num_ed_obs"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_num_ed_obs" />
             </LinearLayout>
 
             <LinearLayout
@@ -176,10 +146,7 @@
                     android:paddingLeft="10dp"
                     android:paddingTop="15dp"
                     android:paddingBottom="15dp"
-                    android:text="@string/brapi_export_skipped_observations"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_skipped_observations" />
             </LinearLayout>
 
             <LinearLayout
@@ -192,10 +159,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="5dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="5dp" />
 
                 <TextView
                     android:id="@+id/brapiUserCreatedLbl"
@@ -203,10 +167,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/brapi_export_skipped_user_created"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_skipped_user_created" />
             </LinearLayout>
 
             <LinearLayout
@@ -219,10 +180,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="5dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="5dp" />
 
                 <TextView
                     android:id="@+id/brapiWrongSourceLbl"
@@ -230,10 +188,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/brapi_export_skipped_wrong_source"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_skipped_wrong_source" />
             </LinearLayout>
 
             <LinearLayout
@@ -248,10 +203,7 @@
                     android:paddingLeft="10dp"
                     android:paddingTop="15dp"
                     android:paddingBottom="15dp"
-                    android:text="@string/brapi_export_images"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_images" />
             </LinearLayout>
 
             <LinearLayout
@@ -264,10 +216,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="5dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="5dp" />
 
                 <TextView
                     android:id="@+id/brapiNumNewImagesLbl"
@@ -275,10 +224,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/brapi_export_num_new_imgs"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_num_new_imgs" />
             </LinearLayout>
 
 
@@ -292,10 +238,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="5dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="5dp" />
 
                 <TextView
                     android:id="@+id/brapiNumSyncedImagesLbl"
@@ -303,10 +246,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/brapi_export_num_synced_imgs"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_num_synced_imgs" />
             </LinearLayout>
 
             <LinearLayout
@@ -319,10 +259,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="5dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="5dp" />
 
                 <TextView
                     android:id="@+id/brapiNumEditiedImagesLbl"
@@ -330,10 +267,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/brapi_export_num_ed_imgs"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_num_ed_imgs" />
             </LinearLayout>
 
             <LinearLayout
@@ -346,10 +280,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="5dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="5dp" />
 
                 <TextView
                     android:id="@+id/brapiNumIncompleteImagesLbl"
@@ -357,10 +288,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/brapi_export_num_incomplete_imgs"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_num_incomplete_imgs" />
             </LinearLayout>
 
             <LinearLayout
@@ -375,10 +303,7 @@
                     android:paddingLeft="10dp"
                     android:paddingTop="15dp"
                     android:paddingBottom="15dp"
-                    android:text="@string/brapi_export_skipped_images"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_skipped_images" />
             </LinearLayout>
 
             <LinearLayout
@@ -391,10 +316,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="5dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="5dp" />
 
                 <TextView
                     android:id="@+id/brapiUserCreatedImagesLbl"
@@ -402,10 +324,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/brapi_export_skipped_user_created_images"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_skipped_user_created_images" />
             </LinearLayout>
 
             <LinearLayout
@@ -418,10 +337,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
-                    android:paddingBottom="5dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:paddingBottom="5dp" />
 
                 <TextView
                     android:id="@+id/brapiWrongSourceImagesLbl"
@@ -429,10 +345,7 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/brapi_export_skipped_wrong_source"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
+                    android:text="@string/brapi_export_skipped_wrong_source" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
@@ -454,10 +367,7 @@
             android:layout_marginHorizontal="20dp"
             android:layout_weight="1"
             android:onClick="onClick"
-            android:text="@string/brapi_export_button"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/brapi_export_button" />
     </LinearLayout>
 
     <LinearLayout
@@ -473,8 +383,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="bottom|center"
-            android:text="@string/brapi_saving_indicator"
-            android:textSize="20sp" />
+            android:text="@string/brapi_saving_indicator" />
 
         <ProgressBar
             android:layout_width="match_parent"

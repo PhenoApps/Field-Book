@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -15,7 +16,7 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
 import java.io.FileDescriptor;
@@ -26,6 +27,8 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class AudioTraitLayout extends BaseTraitLayout {
+
+    static public String type = "audio";
 
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
@@ -48,6 +51,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     @Override
     public void setNaTraitsText() {
+        audioRecordingText.setText("NA");
     }
 
     @Override
@@ -56,17 +60,16 @@ public class AudioTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
-        audioRecordingText = findViewById(R.id.audioRecordingText);
-        buttonState = ButtonState.WAITING_FOR_RECORDING;
-        controlButton = findViewById(R.id.record);
-        controlButton.setOnClickListener(new AudioTraitOnClickListener());
+    public int layoutId() {
+        return R.layout.trait_audio;
     }
 
     @Override
-    public void loadLayout() {
-        getEtCurVal().setVisibility(View.INVISIBLE);
-        super.loadLayout();
+    public void init(Activity act) {
+        audioRecordingText = act.findViewById(R.id.audioRecordingText);
+        buttonState = ButtonState.WAITING_FOR_RECORDING;
+        controlButton = act.findViewById(R.id.record);
+        controlButton.setOnClickListener(new AudioTraitOnClickListener());
     }
 
     @Override
@@ -109,15 +112,33 @@ public class AudioTraitLayout extends BaseTraitLayout {
     }
 
     @Override
+    public void refreshLayout(Boolean onNew) {
+        super.refreshLayout(onNew);
+        refreshButtonState();
+    }
+
+    private void refreshButtonState() {
+        ObservationModel model = getCurrentObservation();
+        if (model != null && !model.getValue().isEmpty()) {
+            buttonState = ButtonState.WAITING_FOR_PLAYBACK;
+            controlButton.setImageResource(buttonState.getImageId());
+        } else {
+            buttonState = ButtonState.WAITING_FOR_RECORDING;
+            controlButton.setImageResource(buttonState.getImageId());
+            audioRecordingText.setText("");
+            getCollectInputView().setText("");
+        }
+    }
+
+    @Override
     public void deleteTraitListener() {
         deleteRecording();
         removeTrait(getCurrentTrait().getTrait());
+        super.deleteTraitListener();
         recordingLocation = null;
         mediaPlayer = null;
         mediaRecorder = null;
-        buttonState = ButtonState.WAITING_FOR_RECORDING;
-        controlButton.setImageResource(buttonState.getImageId());
-        audioRecordingText.setText("");
+        refreshButtonState();
     }
 
     // Delete recording
@@ -152,7 +173,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         @Override
         public void onClick(View view) {
-            ((CollectActivity) getContext()).setNewTraits(ConfigActivity.dt.getUserDetail(getCRange().plot_id));
+            ((CollectActivity) getContext()).setNewTraits(getDatabase().getUserDetail(getCurrentRange().plot_id));
 
             boolean enableNavigation = true;
             switch (buttonState) {
@@ -224,8 +245,9 @@ public class AudioTraitLayout extends BaseTraitLayout {
             try {
                 mediaRecorder.stop();
                 releaseRecorder();
-                updateTrait(getCurrentTrait().getTrait(), "audio", recordingLocation.toString());
+                updateObservation(getCurrentTrait().getTrait(), "audio", recordingLocation.toString());
                 audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
+                getCollectInputView().setText(recordingLocation.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -281,7 +303,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
             String mGeneratedName;
             try {
-                mGeneratedName = getCRange().plot_id + " " + timeStamp.format(c.getTime());
+                mGeneratedName = getCurrentRange().plot_id + " " + timeStamp.format(c.getTime());
             } catch (Exception e) {
                 mGeneratedName = "error " + timeStamp.format(c.getTime());
             }

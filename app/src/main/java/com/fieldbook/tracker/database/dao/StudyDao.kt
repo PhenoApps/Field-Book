@@ -140,11 +140,12 @@ class StudyDao {
 
             it.exp_id = this[Study.PK] as Int
             it.exp_name = this["study_name"].toString()
+            it.exp_alias = this["study_alias"].toString()
             it.unique_id = this["study_unique_id_name"].toString()
             it.primary_id = this["study_primary_id_name"].toString()
             it.secondary_id = this["study_secondary_id_name"].toString()
             it.date_import = this["date_import"].toString()
-            it.exp_sort = this["study_sort_name"].toString()
+            it.exp_sort = (this["study_sort_name"] ?: "").toString()
             it.date_edit = when (val date = this["date_edit"]?.toString()) {
                 null, "null" -> ""
                 else -> date
@@ -157,6 +158,10 @@ class StudyDao {
                 it.exp_source = source.toString()
             }
             it.count = this["count"].toString()
+            it.observation_level = when (val observationLevel = this["observation_levels"]?.toString()) {
+                null, "null" -> ""
+                else -> observationLevel
+            }
         }
 
         fun getAllFieldObjects(): ArrayList<FieldObject> = withDatabase { db ->
@@ -198,7 +203,7 @@ class StudyDao {
          */
         fun createField(e: FieldObject, timestamp: String, columns: List<String>): Int = withDatabase { db ->
 
-            when (val sid = checkFieldName(e.exp_name)) {
+            when (val sid = checkFieldNameAndObsLvl(e.exp_name, e.observation_level)) {
 
                 -1 -> {
 
@@ -220,6 +225,7 @@ class StudyDao {
                         put("date_edit", e.date_edit)
                         put("study_source", e.exp_source)
                         put("count", e.count)
+                        put("observation_levels", e.observation_level)
                     }).toInt()
 
                     try {
@@ -407,6 +413,18 @@ class StudyDao {
                     arrayOf(Study.PK),
                     where = "study_name = ?",
                     whereArgs = arrayOf(name)).toFirst()[Study.PK] as? Int ?: -1
+
+        } ?: -1
+
+        /**
+         * Search for the first studies row that matches the name and observationLevel parameter.
+         * Default return value is -1
+         */
+        fun checkFieldNameAndObsLvl(name: String, observationLevel: String?): Int = withDatabase { db ->
+            db.query(Study.tableName,
+                    arrayOf(Study.PK),
+                    where = "study_name = ? AND observation_levels = ?",
+                    whereArgs = arrayOf(name, observationLevel ?: "")).toFirst()[Study.PK] as? Int ?: -1
 
         } ?: -1
 

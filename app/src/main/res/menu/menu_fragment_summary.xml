@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_fragment_summary_filter"
+        android:icon="@drawable/pencil"
+        android:title="@string/menu_fragment_summary_filter_title"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:showAsAction="always"/>
+</menu>

@@ -11,9 +11,11 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.FieldEditorActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.math.*
 
 /**
  * Extended Dialog class. Wizard for creating basic study/field details.
@@ -26,11 +28,14 @@ import kotlin.math.*
  *
  *                 FieldCreatorDialog dialog = new FieldCreatorDialog(this);
  */
-class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(activity, R.style.Dialog), CoroutineScope by MainScope() {
+class FieldCreatorDialog(private val activity: FieldEditorActivity) :
+    Dialog(activity, R.style.AppAlertDialog), CoroutineScope by MainScope() {
 
     private val helper by lazy { DataHelper(context) }
 
     private val scope by lazy { CoroutineScope(Dispatchers.IO) }
+
+    private var titleTextView: TextView? = null
 
     var studyDbId: Int = -1
 
@@ -39,7 +44,9 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.field_creator_dialog)
+        setContentView(R.layout.dialog_field_creator)
+
+        titleTextView = findViewById(R.id.dialog_field_creator_title)
 
         //canceling the dialog might leave the insert job on the background thread
         //which might be preferable for large plot sizes
@@ -58,7 +65,7 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
     //row*column plots will be generated based on a chosen pattern
     private fun setupSizeGroup() {
 
-        setTitle(R.string.dialog_field_creator_ask_size)
+        titleTextView?.setText(R.string.dialog_field_creator_ask_size)
 
         val sizeGroup = findViewById<Group>(R.id.dialog_field_creator_group_size)
 
@@ -114,7 +121,7 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
     private fun setupRadioGroup(name: String, rows: Int, cols: Int) {
 
-        setTitle(R.string.dialog_field_creator_ask_start_point)
+        titleTextView?.setText(R.string.dialog_field_creator_ask_start_point)
 
         val group = findViewById<Group>(R.id.dialog_field_creator_group_start_point)
 
@@ -156,7 +163,7 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
     private fun setupPatternGroup(name: String, rows: Int, cols: Int, startId: Int) {
 
-        setTitle(R.string.dialog_field_creator_ask_pattern)
+        titleTextView?.setText(R.string.dialog_field_creator_ask_pattern)
 
         val patternGroup = findViewById<Group>(R.id.dialog_field_creator_group_pattern)
 
@@ -204,7 +211,7 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
     private fun setupReviewGroup(name: String, rows: Int, cols: Int, startId: Int, pattern: Int) {
 
-        this.setTitle(context.getString(R.string.dialog_field_creator_review_title))
+        titleTextView?.text = context.getString(R.string.dialog_field_creator_review_title)
 
         //set the group visibility
         val reviewGroup = findViewById<Group>(R.id.dialog_field_creator_group_review)

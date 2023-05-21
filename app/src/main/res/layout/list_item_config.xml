@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <ImageView
+        android:id="@+id/config_icon"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:paddingLeft="20dp"
+        android:src="@drawable/other_ic_field_book"
+        android:contentDescription="@string/act_config_list_item_icon" />
+
+    <TextView style="@style/TextViewStyle.Bold.Title"
+        android:id="@+id/config_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:minWidth="120dp"
+        android:paddingLeft="20dp"
+        android:singleLine="true"
+        tools:textSize="24sp"
+        tools:text="CONFIG TITLE" />
+
+</LinearLayout>

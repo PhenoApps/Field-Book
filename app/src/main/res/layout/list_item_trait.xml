@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/trait_line"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:focusable="false"
+    android:focusableInTouchMode="false"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:layout_margin="4dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:background="@drawable/cell">
+
+    <ImageView
+        android:id="@+id/dragSort"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:contentDescription="@string/list_item_trait_drag_content_description"
+        android:padding="3dp"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:src="@drawable/ic_reorder" />
+
+    <View
+        android:id="@+id/spacer4"
+        android:layout_width="5dp"
+        android:layout_height="1dp"
+        android:layout_toEndOf="@+id/dragSort" />
+
+    <ImageView
+        android:id="@+id/popupMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/spacer4"
+        android:contentDescription="@string/list_item_trait_popup_content_description"
+        android:paddingTop="4dp"
+        android:src="@drawable/ic_more_vert" />
+
+    <View
+        android:id="@+id/spacer1"
+        android:layout_width="5dp"
+        android:layout_height="1dp"
+        android:layout_toEndOf="@+id/popupMenu" />
+
+    <CheckBox
+        android:id="@+id/visible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical"
+        android:layout_toEndOf="@+id/spacer1"
+        android:scaleX="1.1"
+        android:scaleY="1.1"
+        android:text="" />
+
+    <View
+        android:id="@+id/spacer2"
+        android:layout_width="5dp"
+        android:layout_height="1dp"
+        android:layout_toEndOf="@+id/visible" />
+
+    <ImageView
+        android:id="@+id/traitType"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/spacer2"
+        android:contentDescription="@string/list_item_trait_type_content_description"
+        android:padding="3dp"
+        tools:src="@drawable/ic_trait_boolean"/>
+
+    <View
+        android:id="@+id/spacer3"
+        android:layout_width="15dp"
+        android:layout_height="1dp"
+        android:layout_toEndOf="@+id/traitType" />
+
+    <TextView
+        android:id="@+id/list_item_trait_trait_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/spacer3"
+        android:ellipsize="end"
+        android:singleLine="true"
+        tools:text="insect damage"/>
+
+</RelativeLayout>

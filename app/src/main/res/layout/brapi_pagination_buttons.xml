@@ -14,17 +14,14 @@
         android:layout_marginLeft="5dp"
         android:layout_marginTop="5dp"
         android:onClick="buttonClicked"
-        android:text="@string/prev"
-        android:textColor="@color/s_text"
-        android:textSize="20sp" />
+        android:text="@string/prev" />
 
     <TextView
         android:id="@+id/page_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="@string/page_one_of_one"
-        android:textSize="15sp" />
+        android:text="@string/page_one_of_one"/>
 
     <Button
         android:id="@+id/next"
@@ -35,7 +32,5 @@
         android:layout_marginLeft="5dp"
         android:layout_marginTop="5dp"
         android:onClick="buttonClicked"
-        android:text="@string/next"
-        android:textColor="@color/s_text"
-        android:textSize="20sp" />
+        android:text="@string/next" />
 </RelativeLayout>

@@ -15,22 +15,15 @@
     <string name="startup_sample_data_title">Dati di prova</string>
     <string name="startup_sample_data_message">Vuoi caricare i dati di prova forniti?</string>
     <!-- Permissions  -->
-    <string name="permission_rationale_location">Le funzionalità di posizione richiedono l\'accesso alla posizione del dispositivo.</string>
-    <string name="permission_rationale_camera">Le funzioni della fotocamera richiedono l\'accesso alla fotocamera del dispositivo.</string>
-    <string name="permission_rationale_microphone">La registrazione dell\'audio richiede l\'accesso al microfono del dispositivo.</string>
     <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_storage_export">L\'esportazione dei dati richiede l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_trait_features">La raccolta dei dati richiede l\'accesso ai file, al microfono e alla camera del dispositivo.</string>
     <!-- Miscellaneous  -->
-    <string name="fields_name">Nome campo</string>
-    <string name="fields_load">Caricare</string>
     <!-- Main Activity  -->
     <string name="main_toolbar_search">Cerca</string>
     <string name="main_toolbar_resources">Risorse</string>
     <string name="main_trait_details">Dettagli carattere</string>
     <string name="main_infobar_data_missing">Nessun dato</string>
-    <string name="main_toolbar_data_lock">Blocca dati</string>
-    <string name="main_toolbar_data_unlock">Sblocca dati</string>
     <string name="main_toolbar_moveto_no_match">Nessun valore corrispondente</string>
     <string name="main_toolbar_next_entry_no_data">Prossima voce senza dati</string>
     <string name="main_toolbar_moveto">Vai a ID</string>
@@ -42,18 +35,7 @@
     <string name="fields_delete_study">Cancella campo</string>
     <string name="fields_delete_study_confirmation">Sei sicuro di voler cancellare questo campo? Verranno cancellati anche tutti i dati associati a questo campo.</string>
     <string name="fields_study_exists_message">Un campo con questo nome esiste già. Vuoi sovrascrivere?</string>
-    <string name="fields_select_study">Seleziona o importa un campo.</string>
-    <string name="fields_date_imported">Importa data</string>
-    <string name="fields_date_edited">Modifica data</string>
-    <string name="fields_date_exported">Esporta data</string>
-    <string name="fields_summary">Riassunto campo</string>
-    <string name="fields_options">Opzioni</string>
-    <string name="fields_study_statistics">Statistica</string>
-    <string name="fields_sort">Ordinare</string>
     <string name="fields_delete">Cancella</string>
-    <string name="fields_filter">Filtrare</string>
-    <string name="fields_reimport">Reimportare</string>
-    <string name="fields_archive">Archiviare</string>
     <!-- Settings Activity  -->
     <string name="settings_fields">Campi</string>
     <string name="settings_traits">Caratteri</string>
@@ -87,10 +69,7 @@
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multi cat</string>
-    <string name="traits_format_angle">Angolo</string>
-    <string name="traits_format_video">Video</string>
     <string name="traits_format_location">Posizione</string>
-    <string name="traits_format_printer">Stampante</string>
     <string name="traits_format_barcode">Codice a barre</string>
     <string name="traits_format_labelprint">Stampa etichetta Zebra</string>
     <string name="traits_create_trait">Carattere</string>
@@ -108,18 +87,15 @@
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
     <string name="traits_create_warning_numeric_required">Default, minimo e massimo devono essere numerici</string>
-    <string name="traits_create_warning_categories_required">La categoria non può essere vuota</string>
     <string name="traits_export_check">Esporta l\'elenco caratteri corrente?</string>
     <string name="traits_warning_delete">L\'eliminazione di un carattere elimina anche i dati raccolti per quel carattere. Sei sicuro di voler cancellare questo carattere?</string>
     <!-- Export  -->
-    <string name="export_format_title">Formato</string>
     <string name="export_format_database">Database</string>
     <string name="export_format_table">Tabella</string>
     <string name="export_file_name">Nome file</string>
     <string name="export_content_columns_title">Colonne campo</string>
     <string name="export_content_columns_all">Tutte le colonne importate</string>
     <string name="export_content_columns_unique">Solo identificatore unico</string>
-    <string name="export_content_traits_title">Caratteri</string>
     <string name="export_content_traits_all">Tutti i caratteri</string>
     <string name="export_content_traits_active">Solo caratteri attivi</string>
     <string name="export_error_general">Errore durante l\'esportazione</string>
@@ -132,7 +108,6 @@
     <string name="export_overwrite">Sovrascrivi l\'esportazione precedente</string>
     <!-- Preferences Activity  -->
     <string name="preferences_appearance_title">Aspetto</string>
-    <string name="preferences_appearance_tutorial">Tutorial</string>
     <string name="preferences_appearance_tutorial_description">Aggiunge un\'icona tutorial alle schermate di raccolta, impostazioni, campi e caratteri</string>
     <string name="preferences_appearance_infobar_number">Numero di InfoBars</string>
     <string name="preferences_appearance_infobar_number_description">Regola il numero di Infobars visualizzate nella schermata principale</string>
@@ -151,21 +126,15 @@
     <string name="preferences_behavior_volume_buttons_navigate">Mappare i tasti del volume alla navigazione voce</string>
     <string name="preferences_behavior_volume_buttons_navigate_description">I tasti del volume passano alla voce successiva o precedente</string>
     <string name="preferences_behavior_return_character">Segnale pulsante di ritorno</string>
-    <string name="preferences_behavior_return_character_description">Modifica la modalità di interpretazione del segnale della pulsante di ritorno</string>
     <string name="preferences_behavior_return_character_next_plot">Parcella successiva</string>
     <string name="preferences_behavior_return_character_next_trait">Carattere successivo</string>
     <string name="preferences_behavior_return_character_do_nothing">Fare niente</string>
     <string name="preferences_behavior_cycle_traits">Al termine delle caratteri, passare alla voce successiva</string>
     <string name="preferences_behavior_cycle_traits_description">Dopo aver attraversato tutti i caratteri, Field Book passa alla voce successiva</string>
-    <string name="preferences_behavior_import_source">Scegli la fonte di importazione predefinita</string>
-    <string name="preferences_behavior_export_source">Scegli la tua fonte di importazione di esportazione</string>
     <string name="preferences_behavior_disable_entry_arrow">Disabilita la freccia della voce</string>
     <string name="preferences_behavior_disable_entry_arrow_left">Sinistra</string>
     <string name="preferences_behavior_disable_entry_arrow_right">Destra</string>
     <string name="preferences_behavior_disable_entry_arrow_both">Ambo</string>
-    <string name="preferences_naming">Denominare</string>
-    <string name="preferences_naming_photo">Formato del nome della foto</string>
-    <string name="preferences_naming_export">Formato del nome dell\'esportazione</string>
     <string name="preferences_sounds">Suoni</string>
     <string name="preferences_sound_primary_order_sound">Suono dell\'ordine primario</string>
     <string name="preferences_sound_primary_order_sound_description">Notifica sonora quando l\'ordine primario cambia</string>
@@ -191,9 +160,6 @@
     <string name="preferences_appearance_collection_category_title">Schermata di raccolta</string>
     <!-- Trait text and errors -->
     <string name="trait_layout_data_stored">I dati sono stati salvati</string>
-    <string name="trait_layout_print_title">Stampa etichetta</string>
-    <string name="trait_layout_print_status_title">Stato della stampante</string>
-    <string name="trait_layout_print_status">Recuperando dello stato della connessione...</string>
     <string name="trait_layout_print_label_size_title">Dimensione:</string>
     <string name="trait_layout_print_text_field_title">Testo:</string>
     <string name="trait_layout_print_text_field_title_2">Testo2:</string>
@@ -201,10 +167,7 @@
     <string name="trait_layout_print_text_field_title_4">Testo4:</string>
     <string name="trait_layout_print_barcode_field_title">Codice a barre:</string>
     <string name="trait_layout_print_label_copies_title">Copie:</string>
-    <string name="trait_layout_print_clear_settings">Cancella impostazioni</string>
     <string name="trait_error_hardware_missing">Il tuo dispositivo non contiene l\'hardware necessario per questa funzione</string>
-    <string name="trait_error_photo_missing">La foto non esiste</string>
-    <string name="trait_error_photo_error">Impossibile leggere la foto</string>
     <string name="trait_error_minimum_value">Il valore è minore rispetto al minimo impostato</string>
     <string name="trait_error_maximum_value">Il valore è maggiore del massimo impostato</string>
     <string name="trait_error_disease_severity">Severità già registrata</string>
@@ -243,8 +206,6 @@
     <string name="tutorial_settings_traits_description">ti consente di aggiungere, importare e gestire i caratteri.</string>
     <string name="tutorial_settings_collect_title">Raccogliere dati</string>
     <string name="tutorial_settings_collect_description">consente di raccogliere dati fenotipici.</string>
-    <string name="tutorial_settings_profile_title">Profilo</string>
-    <string name="tutorial_settings_profile_description">ti permette di impostare l\'utente e la posizione.</string>
     <string name="tutorial_settings_settings_title">Impostazioni</string>
     <string name="tutorial_settings_settings_description">consente una configurazione aggiuntiva per la raccolta dei dati.</string>
     <string name="tutorial_settings_export_title">Esporta</string>
@@ -258,8 +219,6 @@
     <string name="tutorial_fields_delete_description">Per cancellare un campo, apri il menu sul lato sinistro del nome di un campo e seleziona Cancella.</string>
     <string name="tutorial_traits_add_title">Aggiungi Carattere</string>
     <string name="tutorial_traits_add_description">Aggiungi Carattere crea un nuovo carattere. Diversi formati di caratteri hanno disposizione di raccolta diversi.</string>
-    <string name="tutorial_traits_import_title">Importa elenchi di caratteri</string>
-    <string name="tutorial_traits_import_description">Per importare un elenco predefinito di caratteri, scegli Importa sulla barra degli strumenti.</string>
     <string name="tutorial_traits_format_title">Formati di Caratteri</string>
     <string name="tutorial_traits_format_description">Diversi formati di caratteri sono indicati con icone diverse.</string>
     <string name="tutorial_traits_visibility_title">Visibilità del carettere</string>
@@ -269,28 +228,20 @@
     <string name="about_version_title">Versione</string>
     <string name="about_title_other_apps">Altre PhenoApps</string>
     <string name="about_project_lead_title">Responsabile del progetto</string>
-    <string name="about_developer_title">Sviluppatore</string>
     <string name="about_contributors_title">Contributori</string>
     <string name="about_contributors_developers_title">Sviluppatori</string>
     <string name="about_translators_title">Traduttori</string>
     <string name="about_contributors_funding_title">Finanziamenti</string>
     <string name="about_rate">Valuta questa app</string>
     <string name="about_technical_title">Dettagli Tecnici</string>
-    <string name="about_licenses_title">Licenze</string>
     <string name="changelog_title">Diario di modifiche</string>
     <string name="libraries_title">Biblioteche</string>
     <!-- Profile dialog -->
     <string name="profile_person">Utente</string>
-    <string name="profile_location">Posizione</string>
     <string name="profile_reset">Cancella impostazioni</string>
     <string name="profile_person_title">Imposta utente</string>
     <string name="profile_name_first">Nome</string>
     <string name="profile_name_last">Cognome</string>
-    <string name="profile_missing">Nessuna</string>
-    <string name="profile_location_title">Imposta posizione</string>
-    <string name="profile_location_latitude">Latitudine</string>
-    <string name="profile_location_longitude">Longitudine</string>
-    <string name="profile_location_get">Ottieni posizione</string>
     <!-- Database dialog -->
     <string name="database_dialog_title">Database</string>
     <string name="database_import">Importa il database</string>
@@ -313,7 +264,6 @@
     <string name="import_error_general">Errore di importazione</string>
     <string name="import_error_unique">La colonna identificatore unico contiene duplicati o è già stata utilizzata in un altro file</string>
     <string name="import_error_unsupported">Questo tipo di file non è attualmente supportato</string>
-    <string name="import_error_columns">La colonna dei nomi contiene caratteri o parole non consentite</string>
     <string name="import_error_column_name">Il nome della colonna nel file importato non può essere:</string>
     <string name="import_error_unique_characters_illegal">La colonna selezionata contiene caratteri che non possono essere utilizzati nell\'identificatore unico</string>
     <string name="import_error_column_choice">Le colonne non possono essere utilizzate per la stessa assegnazione</string>
@@ -342,14 +292,11 @@
     <string name="brapi_export_images">Immagini</string>
     <string name="brapi_na">NA</string>
     <string name="brapi_delete_message">Impossibile eliminare l\'osservazione BrAPI sincronizzata, utilizzando invece NA</string>
-    <string name="images_loading">Caricando le immagini...</string>
     <!-- Warnings/Catches -->
-    <string name="warning_field_before_traits">Il campo deve essere importato prima di poter creare un carattere</string>
     <string name="warning_field_missing">Nessun campo è stato caricato. Carica un campo prima di rilevare il dato</string>
     <string name="warning_traits_missing">Il carattere non esiste. Crea un carattere prima di rilevare il dato</string>
     <string name="warning_traits_missing_modify">Crea un carattere prima di poterlo modificare</string>
     <!-- Search Activity -->
-    <string name="search_dialog_title">Cerca</string>
     <string name="search_dialog_add">Aggiungi</string>
     <string name="search_dialog_clear">Cancellare</string>
     <string name="search_dialog_query_is_equal_to">è uguale a</string>
@@ -383,7 +330,6 @@
     <string name="brapi_study_name">Nome</string>
     <string name="brapi_study_description">Descrizione</string>
     <string name="brapi_study_location">Posizione</string>
-    <string name="brapi_study_num_plots">Parcelle</string>
     <string name="brapi_study_num_traits">Caratteri</string>
     <string name="brapi_study_detail_error">Errore durante il caricamento dei dettagli dello studio per lo studio. Studio non salvato.</string>
     <string name="brapi_plot_detail_error">Errore durante il caricamento dei parcelle per lo studio. Studio non salvato.</string>

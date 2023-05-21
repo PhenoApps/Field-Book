@@ -3,11 +3,6 @@ package com.fieldbook.tracker.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,8 +11,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.fieldbook.tracker.database.DataHelper;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -61,7 +60,7 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
     public InfoBarAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.selector_dropdown, parent, false);
+                .inflate(R.layout.item_infobar_dropdown, parent, false);
         return new ViewHolder((ConstraintLayout) v);
     }
 
@@ -100,11 +99,15 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
         //combine the traits to be viewed within info bars
         final String[] allTraits = ArrayUtils.addAll(prefixTraits, obsTraits);
 
-        ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(this.context, R.layout.custom_spinnerlayout, allTraits);
+        ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(this.context, R.layout.custom_spinner_layout, allTraits);
 
         spinner.setAdapter(prefixArrayAdapter);
 
         int spinnerPosition = prefixArrayAdapter.getPosition(getSharedPref().getString("DROP" + position, allTraits[0]));
+
+        //if field changes dont contain same prefixes, this can be -1, so just reset it to 0
+        if (spinnerPosition < 0) spinnerPosition = 0;
+
         spinner.setSelection(spinnerPosition);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Field Book directory structure names -->
-    <string name="dir_fb_root">fieldBook</string>
     <string name="dir_resources">resources</string>
     <string name="dir_plot_data">plot_data</string>
     <string name="dir_trait">trait</string>
@@ -18,6 +17,5 @@
 
     <!-- special files -->
     <string name="hidden_file_thumbnails">.thumbnails</string>
-    <string name="hidden_file_fieldbook">.fieldbook</string>
 
 </resources>

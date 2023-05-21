@@ -1,12 +1,15 @@
 package com.fieldbook.tracker.database.dao
 
+import android.content.Context
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.util.Log
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
 import com.fieldbook.tracker.objects.RangeObject
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 
 class ObservationUnitPropertyDao {
@@ -17,13 +20,17 @@ class ObservationUnitPropertyDao {
 //            db.query(sObservationUnitPropertyViewName).toTable().toTypedArray()
 //        }
 
-        fun getAllRangeId(exp_id:Int): Array<Int> = withDatabase { db ->
+        fun getAllRangeId(context: Context): Array<Int> = withDatabase { db ->
+
+            val studyId = PreferenceManager.getDefaultSharedPreferences(context)
+                .getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+
             var sortCols: String? = try {
                 val toString = db.query(
                     Study.tableName,
                     select = arrayOf("study_sort_name"),
                     where = "${Study.PK} = ?",
-                    whereArgs = arrayOf(exp_id.toString()),
+                    whereArgs = arrayOf(studyId),
                     orderBy = Study.PK
                 ).toFirst()["study_sort_name"].toString()
 
@@ -44,6 +51,8 @@ class ObservationUnitPropertyDao {
             } else {
                 "id"
             }
+
+            sortCols = "$sortCols ${getSortOrder(context, studyId)}"
 
             val table = db.query(sObservationUnitPropertyViewName,
                     select = arrayOf("id"),
@@ -72,6 +81,9 @@ class ObservationUnitPropertyDao {
 //            }
 //
 //        }
+
+        private fun getSortOrder(context: Context, studyId: String) = if (PreferenceManager.getDefaultSharedPreferences(context)
+            .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
 
         fun getRangeFromId(firstName: String, secondName: String, uniqueName: String, id: Int): RangeObject = withDatabase { db ->
 //            data.range = cursor.getString(0);
@@ -248,6 +260,33 @@ class ObservationUnitPropertyDao {
                 ${maxStatements.joinToString(",\n")}
                 FROM ObservationUnitProperty as props
                 LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $expId
+                GROUP BY props.id
+            """.trimIndent()
+
+            db.rawQuery(query, null)
+        }
+
+        /**
+         * Same as above but filters by obs unit.
+         */
+        fun convertDatabaseToTable(expId: Int, uniqueName: String, unit: String, col: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
+
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it) }
+            val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }
+
+            val maxStatements = arrayListOf<String>()
+            sanitizeTraits.forEach {
+                maxStatements.add(
+                    "MAX (CASE WHEN o.observation_variable_name='$it' THEN o.value ELSE NULL END) AS '$it'"
+                )
+            }
+
+            val query = """
+                SELECT $select,
+                ${maxStatements.joinToString(",\n")}
+                FROM ObservationUnitProperty as props
+                LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $expId
+                WHERE props.`${uniqueName}` = "$unit"
                 GROUP BY props.id
             """.trimIndent()
 

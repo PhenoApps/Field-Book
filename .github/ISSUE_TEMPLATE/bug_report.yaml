@@ -14,9 +14,16 @@ body:
     validations:
       required: true
 
+  - type: textarea
+    id: expectation
+    attributes:
+      label: Expected behavior
+      description: |
+        What should Field Book be doing differently?
+
   - type: input
     id: version
     attributes:
-      label: Version of Field Book you are using
+      label: Field Book version
       description: Check the About page in the app.
       placeholder: ex. 5.4.10

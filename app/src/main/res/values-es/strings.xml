@@ -15,22 +15,15 @@
     <string name="startup_sample_data_title">Datos de ejemplo</string>
     <string name="startup_sample_data_message">¿Cargar datos de ejemplo?</string>
     <!-- Permissions  -->
-    <string name="permission_rationale_location">Las funciones de ubicación requieren acceso a la ubicación del dispositivo.</string>
-    <string name="permission_rationale_camera">Las funciones de la cámara requieren acceso a la cámara del dispositivo.</string>
-    <string name="permission_rationale_microphone">La grabación de sonido requiere acceso al micrófono del dispositivo.</string>
     <string name="permission_rationale_storage_import">La importación de archivos requiere acceso a los archivos del dispositivo.</string>
     <string name="permission_rationale_storage_export">La exportación de datos requiere acceso a los archivos del dispositivo.</string>
     <string name="permission_rationale_trait_features">La captura de datos requiere acceso a los archivos, el micrófono y la cámara del dispositivo.</string>
     <!-- Miscellaneous  -->
-    <string name="fields_name">Nombre del Campo</string>
-    <string name="fields_load">Cargar</string>
     <!-- Main Activity  -->
     <string name="main_toolbar_search">Buscar</string>
     <string name="main_toolbar_resources">Recursos</string>
     <string name="main_trait_details">Detalles de la variable</string>
     <string name="main_infobar_data_missing">No hay datos</string>
-    <string name="main_toolbar_data_lock">Bloquear datos</string>
-    <string name="main_toolbar_data_unlock">Desbloquear datos</string>
     <string name="main_toolbar_moveto_no_match">Sin valor coincidente</string>
     <string name="main_toolbar_next_entry_no_data">Siguiente entrada vacía</string>
     <string name="main_toolbar_moveto">Ir a ID</string>
@@ -42,18 +35,7 @@
     <string name="fields_delete_study">Eliminar campo</string>
     <string name="fields_delete_study_confirmation">¿Estás seguro(a) de que quieres eliminar este campo? Esto eliminará todos los datos de este campo.</string>
     <string name="fields_study_exists_message">Esta campo ya existe</string>
-    <string name="fields_select_study">Seleccione o importe un campo.</string>
-    <string name="fields_date_imported">Fecha de importación</string>
-    <string name="fields_date_edited">Editar fecha</string>
-    <string name="fields_date_exported">Fecha de exportación</string>
-    <string name="fields_summary">Resumen del campo</string>
-    <string name="fields_options">Opciones</string>
-    <string name="fields_study_statistics">Estadísticas</string>
-    <string name="fields_sort">Ordenar</string>
     <string name="fields_delete">Eliminar</string>
-    <string name="fields_filter">Filtrar</string>
-    <string name="fields_reimport">Reimportar</string>
-    <string name="fields_archive">Archivar</string>
     <!-- Settings Activity  -->
     <string name="settings_fields">Campos</string>
     <string name="settings_traits">Variables</string>
@@ -87,10 +69,7 @@
     <string name="traits_format_photo">Imagen</string>
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Categorías multiples</string>
-    <string name="traits_format_angle">Ángulo</string>
-    <string name="traits_format_video">Video</string>
     <string name="traits_format_location">Ubicación</string>
-    <string name="traits_format_printer">Impresora</string>
     <string name="traits_format_barcode">Codigo de barras</string>
     <string name="traits_format_labelprint">Impresión de etiqueta Zebra</string>
     <string name="traits_create_trait">Variable</string>
@@ -108,18 +87,15 @@
     <string name="traits_create_warning_name_blank">Nombre de la variable no puede estar vacío</string>
     <string name="traits_create_warning_duplicate">Variable ya existe</string>
     <string name="traits_create_warning_numeric_required">Los valores predeterminado, mínimo y máximo deben ser numéricos</string>
-    <string name="traits_create_warning_categories_required">La categoría no puede estar vacía</string>
     <string name="traits_export_check">¿Exportar lista de variables actual?</string>
     <string name="traits_warning_delete">Al eliminar una variable también se eliminan los datos que se han capturado para esta variable. ¿Estás seguro(a) de que quieres eliminar esta variable?</string>
     <!-- Export  -->
-    <string name="export_format_title">Formato</string>
     <string name="export_format_database">Base de datos</string>
     <string name="export_format_table">Tabla</string>
     <string name="export_file_name">Nombre de archivo</string>
     <string name="export_content_columns_title">Columnas de campo</string>
     <string name="export_content_columns_all">Todas las columnas de campo.</string>
     <string name="export_content_columns_unique">Solo identificador único</string>
-    <string name="export_content_traits_title">Variables</string>
     <string name="export_content_traits_all">Todas las variables</string>
     <string name="export_content_traits_active">Solo variables activas</string>
     <string name="export_error_general">Error en exportación</string>
@@ -132,7 +108,6 @@
     <string name="export_overwrite">Sobrescribir exportación anterior</string>
     <!-- Preferences Activity  -->
     <string name="preferences_appearance_title">Apariencia</string>
-    <string name="preferences_appearance_tutorial">Tutorial</string>
     <string name="preferences_appearance_tutorial_description">Agrega un icono de tutorial a las pantallas de captura, ajustes, campos y variables.</string>
     <string name="preferences_appearance_infobar_number">Número de Infobars</string>
     <string name="preferences_appearance_infobar_number_description">Ajuste la cantidad de InfoBars que se muestran en la pantalla principal</string>
@@ -151,21 +126,15 @@
     <string name="preferences_behavior_volume_buttons_navigate">Asignar teclas de volumen a la navegación de entradas</string>
     <string name="preferences_behavior_volume_buttons_navigate_description">Las teclas de volumen van a la anterior o siguiente entrada</string>
     <string name="preferences_behavior_return_character">Señal de tecla de retorno</string>
-    <string name="preferences_behavior_return_character_description">Cambiar cómo se interpreta la señal de la tecla de retorno</string>
     <string name="preferences_behavior_return_character_next_plot">Siguiente parcela</string>
     <string name="preferences_behavior_return_character_next_trait">Siguiente variable</string>
     <string name="preferences_behavior_return_character_do_nothing">Hacer nada</string>
     <string name="preferences_behavior_cycle_traits">Al finalizar variables avanzar a la siguiente entrada</string>
     <string name="preferences_behavior_cycle_traits_description">Después de pasar por todas los variables, Field Book pasa a la siguiente entrada</string>
-    <string name="preferences_behavior_import_source">Elija origen de importación predeterminado</string>
-    <string name="preferences_behavior_export_source">Elija su fuente de importación de exportación</string>
     <string name="preferences_behavior_disable_entry_arrow">Desactivar flecha de entrada</string>
     <string name="preferences_behavior_disable_entry_arrow_left">Izquierda</string>
     <string name="preferences_behavior_disable_entry_arrow_right">Derecha</string>
     <string name="preferences_behavior_disable_entry_arrow_both">Ambos</string>
-    <string name="preferences_naming">Nombrando</string>
-    <string name="preferences_naming_photo">Formato del nombre de imagen</string>
-    <string name="preferences_naming_export">Formato de nombre de exportación</string>
     <string name="preferences_sounds">Sonido</string>
     <string name="preferences_sound_primary_order_sound">Sonido de orden primario</string>
     <string name="preferences_sound_primary_order_sound_description">Sonido de notificación cuando cambia el orden primario</string>
@@ -191,9 +160,6 @@
     <string name="preferences_appearance_collection_category_title">Pantalla de captura</string>
     <!-- Trait text and errors -->
     <string name="trait_layout_data_stored">Salvado</string>
-    <string name="trait_layout_print_title">Imprimir etiqueta</string>
-    <string name="trait_layout_print_status_title">Estado de impresora</string>
-    <string name="trait_layout_print_status">Recuperando el estado de la conexión...</string>
     <string name="trait_layout_print_label_size_title">Tamaño:</string>
     <string name="trait_layout_print_text_field_title">Texto:</string>
     <string name="trait_layout_print_text_field_title_2">Texto2:</string>
@@ -201,10 +167,7 @@
     <string name="trait_layout_print_text_field_title_4">Texto4:</string>
     <string name="trait_layout_print_barcode_field_title">Codigo de barras</string>
     <string name="trait_layout_print_label_copies_title">Copias:</string>
-    <string name="trait_layout_print_clear_settings">Borrar ajustes</string>
     <string name="trait_error_hardware_missing">El dispositivo no contiene el hardware necesario para esta opción</string>
-    <string name="trait_error_photo_missing">Imagen no existe</string>
-    <string name="trait_error_photo_error">Archivo de imagen no se puede leer</string>
     <string name="trait_error_minimum_value">Valor menor al mínimo permitido</string>
     <string name="trait_error_maximum_value">Valor mayor al máximo permitido</string>
     <string name="trait_error_disease_severity">Severidad ya almacenada</string>
@@ -243,8 +206,6 @@
     <string name="tutorial_settings_traits_description">le permite agregar, importar y administrar variables.</string>
     <string name="tutorial_settings_collect_title">Capturar dato</string>
     <string name="tutorial_settings_collect_description">le permite capturar datos fenotípicos.</string>
-    <string name="tutorial_settings_profile_title">Perfil</string>
-    <string name="tutorial_settings_profile_description">le permite configurar el usuario y la ubicación.</string>
     <string name="tutorial_settings_settings_title">Ajustes</string>
     <string name="tutorial_settings_settings_description">permite configuración adicional para la captura de datos.</string>
     <string name="tutorial_settings_export_title">Exportar</string>
@@ -258,8 +219,6 @@
     <string name="tutorial_fields_delete_description">Para eliminar un campo, abra el menú en el lado izquierdo del nombre de un campo y seleccione Eliminar.</string>
     <string name="tutorial_traits_add_title">Agregar variable</string>
     <string name="tutorial_traits_add_description">Agregar variable crea una nueva variable. Los diferentes formatos de variables tienen diferentes diseños de colección.</string>
-    <string name="tutorial_traits_import_title">Importar listas de variables</string>
-    <string name="tutorial_traits_import_description">Para importar una lista pre-generada de variables, elija Importar en la barra de herramientas.</string>
     <string name="tutorial_traits_format_title">Formatos de variables</string>
     <string name="tutorial_traits_format_description">Los diferentes formatos de variables se indican con diferentes iconos.</string>
     <string name="tutorial_traits_visibility_title">Visibilidad de variable</string>
@@ -269,28 +228,20 @@
     <string name="about_version_title">Versión</string>
     <string name="about_title_other_apps">Otras PhenoApps</string>
     <string name="about_project_lead_title">Líder del Projecto</string>
-    <string name="about_developer_title">Desarrollador</string>
     <string name="about_contributors_title">Colaboradores</string>
     <string name="about_contributors_developers_title">Desarrolladores</string>
     <string name="about_translators_title">Traductores</string>
     <string name="about_contributors_funding_title">Fuente de financiamiento</string>
     <string name="about_rate">Califica esta app</string>
     <string name="about_technical_title">Detalles Tecnicos</string>
-    <string name="about_licenses_title">Licencias</string>
     <string name="changelog_title">Registro de Cambios</string>
     <string name="libraries_title">Bibliotecas</string>
     <!-- Profile dialog -->
     <string name="profile_person">Usuario</string>
-    <string name="profile_location">Ubicación</string>
     <string name="profile_reset">Borrar ajustes</string>
     <string name="profile_person_title">Establecer usuario</string>
     <string name="profile_name_first">Nombre</string>
     <string name="profile_name_last">Apellido</string>
-    <string name="profile_missing">Ninguno</string>
-    <string name="profile_location_title">Establecer ubicación</string>
-    <string name="profile_location_latitude">Latitud:</string>
-    <string name="profile_location_longitude">Longitud:</string>
-    <string name="profile_location_get">Obtener ubicación</string>
     <!-- Database dialog -->
     <string name="database_dialog_title">Base de datos</string>
     <string name="database_import">Importar base de datos</string>
@@ -313,7 +264,6 @@
     <string name="import_error_general">Error en importación</string>
     <string name="import_error_unique">La columna de identificador único contiene duplicados o ya se ha utilizado en un archivo diferente</string>
     <string name="import_error_unsupported">Este tipo de archivo no es compatible actualmente</string>
-    <string name="import_error_columns">Los nombres de columna contienen caracteres o palabras ilegales:</string>
     <string name="import_error_column_name">El nombre de la columna en el archivo importado no puede ser:</string>
     <string name="import_error_unique_characters_illegal">La columna seleccionada contiene caracteres que no se pueden usar en el identificador único</string>
     <string name="import_error_column_choice">Las columnas no se pueden usar para la misma asignación</string>
@@ -342,14 +292,11 @@
     <string name="brapi_export_images">Imágenes</string>
     <string name="brapi_na">NA</string>
     <string name="brapi_delete_message">No se puede eliminar la observación BrAPI sincronizada, utilizando NA en su lugar</string>
-    <string name="images_loading">Cargando Imágenes...</string>
     <!-- Warnings/Catches -->
-    <string name="warning_field_before_traits">Se debe importar un campo antes de que se puedan crear variables.</string>
     <string name="warning_field_missing">El campo no ha sido cargado. Por favor cargue un campo antes de capturar datos.</string>
     <string name="warning_traits_missing">No existen variables. Cree variables antes de capturar datos.</string>
     <string name="warning_traits_missing_modify">Crear variables antes de modificarlas.</string>
     <!-- Search Activity -->
-    <string name="search_dialog_title">Buscar</string>
     <string name="search_dialog_add">Agregar</string>
     <string name="search_dialog_clear">Borrar</string>
     <string name="search_dialog_query_is_equal_to">es igual a</string>
@@ -384,7 +331,6 @@
     <string name="brapi_study_name">Nombre</string>
     <string name="brapi_study_description">Descripción</string>
     <string name="brapi_study_location">Ubicación</string>
-    <string name="brapi_study_num_plots">Parcela</string>
     <string name="brapi_study_num_traits">Variables</string>
     <string name="brapi_not_found">ERROR: El sistema de destino no admite esta operación vía BrAPI.</string>
     <string name="brapi_studies_error">Error al cargar los estudios.</string>

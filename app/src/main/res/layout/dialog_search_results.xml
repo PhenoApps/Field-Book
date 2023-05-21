@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
     android:orientation="vertical">
 
     <LinearLayout
@@ -10,27 +9,21 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold.Title"
             android:id="@+id/range"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="@string/search_results_dialog_range"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/search_results_dialog_range" />
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold.Title"
             android:id="@+id/plot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="@string/search_results_dialog_plot"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/search_results_dialog_plot" />
 
     </LinearLayout>
 
@@ -49,16 +42,13 @@
         android:orientation="horizontal"
         android:paddingTop="10dp">
 
-        <Button
+        <Button style="@style/Widget.AppCompat.Button.Borderless"
             android:id="@+id/closeBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/dialog_close"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/dialog_close" />
     </LinearLayout>
 
 </LinearLayout>

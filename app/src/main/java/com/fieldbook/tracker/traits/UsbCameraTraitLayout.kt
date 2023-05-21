@@ -12,6 +12,8 @@ import android.graphics.SurfaceTexture
 import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
@@ -24,7 +26,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.receivers.UsbAttachReceiver
@@ -70,20 +71,23 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         defStyleAttr
     )
 
+    override fun layoutId(): Int {
+        return R.layout.trait_usb_camera
+    }
+
     override fun setNaTraitsText() {}
     override fun type(): String {
         return type
     }
 
-    override fun init(act: Activity?) {
-        super.init(act)
+    override fun init(act: Activity) {
 
-        constraintLayout = findViewById(R.id.usb_camera_fragment_cv)
-        textureView = findViewById(R.id.usb_camera_fragment_tv)
-        connectBtn = findViewById(R.id.usb_camera_fragment_connect_btn)
-        captureBtn = findViewById(R.id.usb_camera_fragment_capture_btn)
-        recyclerView = findViewById(R.id.usb_camera_fragment_rv)
-        previewGroup = findViewById(R.id.usb_camera_fragment_preview_group)
+        constraintLayout = act.findViewById(R.id.usb_camera_fragment_cv)
+        textureView = act.findViewById(R.id.usb_camera_fragment_tv)
+        connectBtn = act.findViewById(R.id.usb_camera_fragment_connect_btn)
+        captureBtn = act.findViewById(R.id.usb_camera_fragment_capture_btn)
+        recyclerView = act.findViewById(R.id.usb_camera_fragment_rv)
+        previewGroup = act.findViewById(R.id.usb_camera_fragment_preview_group)
 
         activity = act
 
@@ -113,6 +117,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         }
 
         registerReconnectListener()
+
     }
 
     private fun registerReconnectListener() {
@@ -301,14 +306,14 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         }
     }
 
-    override fun init() {}
     override fun loadLayout() {
 
-        etCurVal.removeTextChangedListener(cvText)
-        etCurVal.visibility = GONE
-        etCurVal.isEnabled = false
+        //slight delay to make navigation a bit faster
+        Handler(Looper.getMainLooper()).postDelayed({
 
-        loadAdapterItems()
+            loadAdapterItems()
+
+        }, 500)
 
         super.loadLayout()
     }
@@ -366,7 +371,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { usbPhotosDir ->
 
-                    val plot = cRange.plot_id
+                    val plot = currentRange.plot_id
 
                     val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
@@ -380,11 +385,12 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                             bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
 
-                            ConfigActivity.dt.insertUserTraits(
+                            database.insertObservation(
                                 plot, traitName, type, file.uri.toString(),
                                 prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
                                         + prefs.getString(GeneralKeys.LAST_NAME, ""),
                                 (activity as? CollectActivity)?.locationByPreferences, "", studyId,
+                                null,
                                 null,
                                 null
                             )
@@ -440,7 +446,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
             DocumentTreeUtil.getThumbnailsDir(context, traitName)?.let { thumbnailDir ->
 
-                val plot = cRange.plot_id
+                val plot = currentRange.plot_id
 
                 val images = DocumentTreeUtil.getPlotMedia(thumbnailDir, plot, ".png")
 
@@ -465,7 +471,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
             DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
 
-                val plot = cRange.plot_id
+                val plot = currentRange.plot_id
 
                 DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
 
@@ -500,7 +506,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
 
-                    val plot = cRange.plot_id
+                    val plot = currentRange.plot_id
 
                     DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
 

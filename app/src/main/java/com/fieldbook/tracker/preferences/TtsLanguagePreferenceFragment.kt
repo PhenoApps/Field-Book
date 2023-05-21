@@ -6,6 +6,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.PreferencesActivity
 import org.phenoapps.utils.TextToSpeechHelper
 
 class TtsLanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClickListener {
