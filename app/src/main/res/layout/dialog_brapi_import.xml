@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
     android:orientation="vertical"
     android:paddingLeft="20dp"
     android:paddingTop="5dp"
@@ -30,10 +29,7 @@
         android:paddingLeft="10dp"
         android:paddingTop="5dp"
         android:paddingBottom="10dp"
-        android:text="@string/brapi_study_name"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_medium"
-        android:textStyle="bold" />
+        android:text="@string/brapi_study_name" />
 
     <TextView
         android:id="@+id/studyNameValue"
@@ -41,10 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="15dip"
         android:paddingLeft="10dp"
-        android:paddingBottom="10dp"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_small"
-        android:textStyle="bold" />
+        android:paddingBottom="10dp" />
 
     <TextView
         android:id="@+id/studyDescriptionLbl"
@@ -52,10 +45,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="10dp"
         android:paddingBottom="5dp"
-        android:text="@string/brapi_study_description"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_medium"
-        android:textStyle="bold" />
+        android:text="@string/brapi_study_description" />
 
     <TextView
         android:id="@+id/studyDescriptionValue"
@@ -63,10 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="15dip"
         android:paddingLeft="10dp"
-        android:paddingBottom="10dp"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_small"
-        android:textStyle="bold" />
+        android:paddingBottom="10dp" />
 
     <TextView
         android:id="@+id/studyLocationLbl"
@@ -74,10 +61,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="10dp"
         android:paddingBottom="5dp"
-        android:text="@string/brapi_study_location"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_medium"
-        android:textStyle="bold" />
+        android:text="@string/brapi_study_location" />
 
     <TextView
         android:id="@+id/studyLocationValue"
@@ -85,10 +69,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="15dip"
         android:paddingLeft="10dp"
-        android:paddingBottom="10dp"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_small"
-        android:textStyle="bold" />
+        android:paddingBottom="10dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -101,20 +82,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
-            android:paddingBottom="5dp"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_medium"
-            android:textStyle="bold" />
+            android:paddingBottom="5dp"/>
 
         <TextView
             android:id="@+id/studyNumPlotsLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
-            android:paddingBottom="10dp"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_medium"
-            android:textStyle="bold" />
+            android:paddingBottom="10dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -128,10 +103,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
-            android:paddingBottom="5dp"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_medium"
-            android:textStyle="bold" />
+            android:paddingBottom="5dp" />
 
         <TextView
             android:id="@+id/studyNumTraitsLbl"
@@ -139,10 +111,7 @@
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
             android:paddingBottom="10dp"
-            android:text="@string/brapi_study_num_traits"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_medium"
-            android:textStyle="bold" />
+            android:text="@string/brapi_study_num_traits" />
     </LinearLayout>
 
     <LinearLayout
@@ -157,9 +126,6 @@
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
             android:paddingBottom="5dp"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_medium"
-            android:textStyle="bold"
             android:text="@string/import_dialog_primary" />
 
         <Spinner
@@ -182,9 +148,6 @@
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
             android:paddingBottom="5dp"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_medium"
-            android:textStyle="bold"
             android:text="@string/import_dialog_secondary" />
 
         <Spinner
@@ -208,10 +171,7 @@
             android:layout_gravity="center_horizontal"
             android:minWidth="@dimen/button_default_width"
             android:onClick="dialogButtonClicked"
-            android:text="@string/dialog_save"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/dialog_save" />
 
         <Button
             android:id="@+id/brapi_cancel_btn"
@@ -220,10 +180,7 @@
             android:layout_gravity="center_horizontal"
             android:minWidth="@dimen/button_default_width"
             android:onClick="dialogButtonClicked"
-            android:text="@string/dialog_cancel"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/dialog_cancel" />
     </LinearLayout>
 
 </LinearLayout>

@@ -1,12 +1,12 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.AttributeSet;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
@@ -22,7 +22,6 @@ public class AngleTraitLayout extends BaseTraitLayout {
     TextView rollTv;
     TextView azimutTv;
     SensorEventListener mEventListener;
-    EditText etCurVal;
 
     public AngleTraitLayout(Context context) {
         super(context);
@@ -46,15 +45,19 @@ public class AngleTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
+    public int layoutId() {
+        return R.layout.trait_angle;
+    }
+
+    @Override
+    public void init(Activity act) {
         sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
-        pitchTv = findViewById(R.id.pitch);
-        rollTv = findViewById(R.id.roll);
-        azimutTv = findViewById(R.id.azimuth);
-        etCurVal = findViewById(R.id.etCurVal);
+        pitchTv = act.findViewById(R.id.pitch);
+        rollTv = act.findViewById(R.id.roll);
+        azimutTv = act.findViewById(R.id.azimuth);
 
         mEventListener = new SensorEventListener() {
             float[] mGravity;
@@ -89,14 +92,6 @@ public class AngleTraitLayout extends BaseTraitLayout {
                 }
             }
         };
-    }
-
-    @Override
-    public void loadLayout() {
-
-        getEtCurVal().setVisibility(EditText.VISIBLE);
-
-        super.loadLayout();
     }
 
     @Override

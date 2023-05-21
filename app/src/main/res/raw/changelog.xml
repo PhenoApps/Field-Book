@@ -1,6 +1,28 @@
 <changelog>
 
     <release
+        date="2023-06-101"
+        versionCode="550"
+        versionName="v5.5">
+        <info>Improved trait reordering</info>
+        <bugfix>Fixed issue with trait cloud imports</bugfix>
+        <bugfix>Fixed issue with lock state not saving</bugfix>
+    </release>
+
+    <release
+        date="2022-12-01"
+        versionCode="540"
+        versionName="v5.4">
+        <new>Experimental settings section</new>
+        <new>Themes!</new>
+        <new>Repeated measures! (beta)</new>
+        <new>Summary view is now customizable and navigable</new>
+        <new>Improved field sorting workflow</new>
+        <new>Import brapi studies at multiple observation levels</new>
+        <info>Optimized trait import workflow</info>
+    </release>
+
+    <release
         date="2022-09-01"
         versionCode="530"
         versionName="v5.3">

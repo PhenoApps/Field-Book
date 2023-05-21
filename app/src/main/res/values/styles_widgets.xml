@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Widget styles -->
+    <!-- used only in trait editor activity toolbar, it wasn't detecting otherwise -->
+    <style name="TraitEditorToolbarPopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@android:color/white</item>
+        <item name="android:itemBackground">?attr/fb_color_background</item>
+    </style>
+
+    <!-- This styles the field editor pop up menu (three dot menu)-->
+    <style name="PopUpMenuStyle" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:itemBackground">?attr/fb_color_background</item>
+        <item name="android:popupBackground">?attr/fb_color_background</item>
+    </style>
+
+    <!-- styles the trait date picker dialog -->
+    <style name="DatePickerDialogStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:datePickerMode">calendar</item>
+        <item name="colorAccent">?attr/fb_color_accent</item>
+        <item name="colorControlActivated">?attr/fb_color_primary_dark</item>
+        <item name="android:selectableItemBackgroundBorderless">?attr/fb_color_text_button_background</item>
+        <item name="colorControlHighlight">?attr/fb_color_primary</item>
+    </style>
+
+    <!-- Info bar styling, trait selector -->
+    <style name="SpinnerStyle" parent="Widget.AppCompat.Spinner">
+        <item name="android:textViewStyle">@style/DropDownTextViewStyle</item>
+        <item name="android:popupBackground">?attr/fb_color_background</item>
+        <item name="android:backgroundTint">?attr/fb_color_primary_dark</item>
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:textColor">?attr/fb_color_text_dark</item>
+    </style>
+
+    <style name="DropDownListViewStyle" parent="Widget.AppCompat.Light.ListView.DropDown">
+        <item name="android:textViewStyle">@style/DropDownTextViewStyle</item>
+        <item name="android:divider">@drawable/cell_line_divider</item>
+    </style>
+
+    <style name="SpinnerDropDownItemStyle" parent="Widget.AppCompat.DropDownItem.Spinner">
+        <item name="android:backgroundTint">?attr/fb_color_background</item>
+        <item name="android:layout">@layout/custom_spinner_layout</item>
+        <item name="android:textViewStyle">@style/DropDownTextViewStyle</item>
+        <item name="android:textColor">?attr/fb_color_text_dark</item>
+    </style>
+
+    <style name="DropDownSpinnerStyle" parent="SpinnerStyle"/>
+    <style name="SpinnerItemStyle" parent="SpinnerDropDownItemStyle"/>
+
+    <!-- edit text styling s.a etCurVal in collect -->
+    <style name="EditTextStyle" parent="Widget.AppCompat.EditText">
+        <item name="editTextColor">?attr/fb_color_text_dark</item>
+        <item name="backgroundTint">?attr/fb_color_primary_dark</item>
+        <item name="android:textSize">?attr/fb_body_text_size</item>
+    </style>
+
+    <!-- generic text view styling -->
+    <style name="TextViewStyle" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">?attr/fb_body_text_size</item>
+        <item name="android:textColor">?attr/fb_color_text_dark</item>
+    </style>
+
+    <!-- text view for drop downs -->
+    <style name="DropDownTextViewStyle" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">?attr/fb_title_text_size</item>
+        <item name="android:textColor">?attr/fb_color_text_dark</item>
+    </style>
+
+    <!-- text views for subheadings -->
+    <style name="TextViewStyle.Sub">
+        <item name="android:textSize">?attr/fb_subheading_text_size</item>
+    </style>
+
+    <!-- bold generic text views -->
+    <style name="TextViewStyle.Bold">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- bold title text views -->
+    <style name="TextViewStyle.Bold.Title">
+        <item name="android:textSize">?attr/fb_title_text_size</item>
+    </style>
+
+    <!-- progress bar styling (currently only indeterminate is used -->
+    <style name="ProgressBarStyle" parent="Widget.AppCompat.ProgressBar"/>
+
+    <style name="IndeterminateProgressStyle" parent="Widget.AppCompat.ProgressBar">
+        <item name="android:indeterminateTint">?attr/fb_color_indeterminate_progress_bar</item>
+    </style>
+
+    <!-- checkbox styling (export dialog, preferences) -->
+    <style name="CheckBoxStyle" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:buttonTint">?attr/fb_color_accent</item>
+        <item name="android:textSize">?attr/fb_body_text_size</item>
+        <item name="android:textColor">?attr/fb_color_text_dark</item>
+    </style>
+
+    <!-- radio button styling (field creator, export) -->
+    <style name="RadioButtonStyle" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="buttonTint">?attr/fb_color_accent</item>
+        <item name="android:textColor">?attr/fb_color_text_dark</item>
+        <item name="android:textSize">?attr/fb_body_text_size</item>
+    </style>
+
+    <!-- image button styling, many traits use this -->
+    <style name="ImageButtonStyle" parent="Widget.AppCompat.ImageButton">
+        <item name="android:textColor">?attr/fb_color_text_dark</item>
+<!--        <item name="backgroundTint">?attr/fb_button_color_normal</item>-->
+    </style>
+
+    <!-- fab styling, used in the trait editor activity -->
+    <style name="FloatingActionButtonStyle" parent="Widget.Design.FloatingActionButton">
+        <item name="backgroundTint">?attr/fb_color_primary</item>
+    </style>
+
+    <!-- Preference Search bar card style, inherits android:widget style -->
+    <style name="CardViewStyle" parent="Base.CardView"/>
+
+    <!-- generic button styling, used in many traits -->
+    <style name="ButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">?attr/fb_color_text_dark</item>
+        <item name="android:textSize">?attr/fb_body_text_size</item>
+        <item name="android:textStyle">bold</item>
+<!--        //<item name="backgroundTint">?attr/fb_button_color_normal</item>-->
+    </style>
+
+    <!-- Options menu overflow icon (three dot button on toolbars mainly) also used in trait list items -->
+    <style name="OverFlowStyle">
+        <item name="android:src">@drawable/ic_dots_vertical</item>
+    </style>
+
+    <style name="OverFlowMenuStyle" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:backgroundTint">?attr/fb_color_background</item>
+    </style>
+
+    <!-- Action bar (toolbar) style -->
+    <style name="AppToolbar" parent="@style/Widget.AppCompat.Toolbar">
+        <item name="titleTextColor">?attr/fb_title_text_color</item>
+        <item name="android:background">?attr/fb_color_primary</item>
+        <item name="android:popupBackground">@android:color/white</item>
+        <item name="android:itemBackground">@android:color/white</item>
+        <item name="android:paddingEnd">8dp</item>
+    </style>
+
+    <!-- button bar is used in dialogs -->
+    <style name="ButtonBarStyle" parent="Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:textColor">?attr/fb_color_text_dark</item>
+    </style>
+
+</resources>

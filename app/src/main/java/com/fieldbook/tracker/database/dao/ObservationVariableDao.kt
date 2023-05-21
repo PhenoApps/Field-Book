@@ -5,8 +5,8 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
 import com.fieldbook.tracker.database.*
-import com.fieldbook.tracker.database.Migrator.*
-import com.fieldbook.tracker.objects.FieldObject
+import com.fieldbook.tracker.database.Migrator.ObservationVariable
+import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
 import com.fieldbook.tracker.objects.TraitObject
 
 class ObservationVariableDao {
@@ -29,6 +29,15 @@ class ObservationVariableDao {
 
             }
         } ?: 0
+
+        fun getTraitById(id: Int): TraitObject? = withDatabase { db ->
+
+            db.query(ObservationVariable.tableName,
+//                    select = arrayOf("observation_variable_name"),
+                where = "internal_id_observation_variable = ?",
+                whereArgs = arrayOf("$id")).toFirst().toTraitObject()
+
+        }
 
         fun getTraitByName(name: String): TraitObject? = withDatabase { db ->
 

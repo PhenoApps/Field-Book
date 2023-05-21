@@ -4,6 +4,9 @@ import androidx.multidex.MultiDexApplication;
 
 import com.fieldbook.tracker.BuildConfig;
 
+import dagger.hilt.android.HiltAndroidApp;
+
+@HiltAndroidApp
 public class FieldBook extends MultiDexApplication {
 
     public FieldBook() {

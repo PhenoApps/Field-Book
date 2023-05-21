@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothSocket
 import android.os.Handler
 import android.util.Log
 import java.io.IOException
+import java.util.*
 
 class ConnectThread(device: BluetoothDevice, private val handler: Handler) : Thread() {
 
@@ -21,7 +22,7 @@ class ConnectThread(device: BluetoothDevice, private val handler: Handler) : Thr
         var tmp: BluetoothSocket? = null
 
         try {
-            tmp = device.createRfcommSocketToServiceRecord(device.uuids[0].uuid)
+            tmp = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
         } catch (e: Exception) {
             Log.e(TAG, "Socket's create() method failed", e)
         }

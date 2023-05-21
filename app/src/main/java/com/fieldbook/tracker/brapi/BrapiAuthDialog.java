@@ -11,7 +11,7 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.BrapiAuthActivity;
+import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 
 
 public class BrapiAuthDialog extends Dialog implements android.view.View.OnClickListener {

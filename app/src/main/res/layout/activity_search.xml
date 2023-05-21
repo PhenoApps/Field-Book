@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main"
+    android:id="@+id/activity_search_linear_layout"
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center_horizontal"
     android:orientation="vertical"
-    android:padding="5dp"
-    android:theme="@style/AppTheme">
+    android:padding="5dp">
 
     <ScrollView
         android:layout_width="fill_parent"
@@ -32,20 +31,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/search_dialog_clear"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/search_dialog_clear" />
 
         <Button
             android:id="@+id/addBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/search_dialog_add"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/search_dialog_add" />
     </LinearLayout>
 
     <LinearLayout
@@ -59,19 +52,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/dialog_close"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/dialog_close" />
 
         <Button
             android:id="@+id/startBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/dialog_ok"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/dialog_ok" />
     </LinearLayout>
 </LinearLayout>

@@ -8,9 +8,8 @@ import android.text.Html;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -24,6 +23,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
     ProgressDialog dialog;
 
     WeakReference<Context> mContext;
+    FieldAdapterController controller;
     FieldFileObject.FieldFileBase mFieldFile;
     String unique, primary, secondary;
     int idColPosition;
@@ -38,6 +38,10 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                               int idColPosition, String unique, String primary, String secondary) {
 
         mFieldFile = fieldFile;
+
+        if (context instanceof FieldAdapterController) {
+            controller = (FieldAdapterController) context;
+        }
 
         mContext = new WeakReference<>(context);
 
@@ -66,7 +70,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
     @Override
     protected Integer doInBackground(Integer... params) {
 
-        int exp_id = -1;
+        int studyId = -1;
 
         try {
             if (!verifyUniqueColumn(mFieldFile)) {
@@ -123,9 +127,9 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             f.setPrimary_id(primary);
             f.setSecondary_id(secondary);
 
-            exp_id = ConfigActivity.dt.createField(f, nonEmptyColumns);
+            studyId = controller.getDatabase().createField(f, nonEmptyColumns);
 
-            DataHelper.db.beginTransaction();
+            controller.getDatabase().beginTransaction();
 
             //start iterating over all the rows of the csv file only if we found the u/p/s indices
             if (uniqueIndex > -1 && primaryIndex > -1 && secondaryIndex > -1) {
@@ -154,14 +158,16 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                                         nonEmptyData.add(data[j]);
                                     }
                                 }
-                                ConfigActivity.dt.createFieldData(exp_id, nonEmptyColumns, nonEmptyData);
+
+                                controller.getDatabase().createFieldData(studyId, nonEmptyColumns, nonEmptyData);
+
                             }
                         }
 
                         line++;
                     }
 
-                    DataHelper.db.setTransactionSuccessful();
+                    controller.getDatabase().setTransactionSuccessfull();
 
                 } catch (Exception e) {
 
@@ -173,27 +179,29 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                 } finally {
 
-                    DataHelper.db.endTransaction();
+                    controller.getDatabase().endTransaction();
 
                 }
             }
 
+
             mFieldFile.close();
 
-            ConfigActivity.dt.close();
-            ConfigActivity.dt.open();
+            controller.getDatabase().close();
+            controller.getDatabase().open();
 
-            ConfigActivity.dt.updateExpTable(true, false, false, exp_id);
+            controller.getDatabase().updateExpTable(true, false, false, studyId);
 
         } catch (Exception e) {
             e.printStackTrace();
             fail = true;
 
-            ConfigActivity.dt.close();
-            ConfigActivity.dt.open();
+            controller.getDatabase().close();
+            controller.getDatabase().open();
         }
 
-        return exp_id;
+
+        return studyId;
     }
 
     @Override
@@ -205,7 +213,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             dialog.dismiss();
 
         if (fail | uniqueFail | mFieldFile.hasSpecialCharacters()) {
-            ConfigActivity.dt.deleteField(result);
+            controller.getDatabase().deleteField(result);
             SharedPreferences.Editor ed = mPrefs.edit();
             ed.putString(GeneralKeys.FIELD_FILE, null);
             ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
@@ -233,13 +241,12 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             ed.apply();
 
             CollectActivity.reloadData = true;
-            FieldEditorActivity.loadData();
+
+            controller.queryAndLoadFields();
 
             try {
 
-                ConfigActivity.dt.open();
-
-                ConfigActivity.dt.switchField(result);
+                controller.getDatabase().switchField(result);
 
             } catch (Exception e) {
 
@@ -264,7 +271,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         if (check.isEmpty()) {
             return false;
         } else {
-            return ConfigActivity.dt.checkUnique(check);
+            return controller.getDatabase().checkUnique(check);
         }
     }
 }

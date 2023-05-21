@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
+import org.jetbrains.annotations.NotNull;
+
 public class GeneralKeys {
     // @formatter:off
 
@@ -13,6 +15,8 @@ public class GeneralKeys {
     public static final String FIRST_NAME = "FirstName";
     public static final String LAST_NAME = "LastName";
     public static final String PERSON_UPDATE = "PersonUpdate";
+    public static final String REQUIRE_USER_TO_COLLECT              = "com.tracker.fieldbook.preference.require_user_to_collect";
+    public static final String REQUIRE_USER_INTERVAL              = "com.tracker.fieldbook.preference.require_user_interval";
 
     // Appearance
     public static final String TOOLBAR_CUSTOMIZE                    = "TOOLBAR_CUSTOMIZE";
@@ -55,6 +59,8 @@ public class GeneralKeys {
     public static final String CYCLE_TRAITS_SOUND                   = "CYCLE_TRAITS_SOUND";
     public static final String ENTRY_NAVIGATION_SOUND               = "ENTRY_NAVIGATION_SOUND";
 
+    public static final String DELETE_OBSERVATION_SOUND             = "DELETE_OBSERVATION_SOUND";
+
     //BrAPI
     public static final String BRAPI_BASE_URL                       = "BRAPI_BASE_URL";
     public static final String BRAPI_OIDC_URL                       = "BRAPI_OIDC_URL";
@@ -84,6 +90,9 @@ public class GeneralKeys {
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
     // @formatter:on
 
+    //Beta feature keys
+    public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
+
     public static final String LAST_TIME_OPENED = "LastTimeAppOpened";
     public static final String VERIFY_USER = "VerifyUserEvery24Hours";
 
@@ -96,7 +105,9 @@ public class GeneralKeys {
 
     //themes
     public static final String SAVED_DATA_COLOR = "SAVED_DATA_COLOR";
-
+    public static final String THEME = "key_preferences_theme_theme";
+    public static final String TEXT_THEME = "key_preferences_theme_text";
+    public static final String THEME_FLAG = "key_preferences_theme_theme_flag";
     public static final String EXPORT_SOURCE_DEFAULT = "EXPORT_SOURCE_DEFAULT";
     public static final String FIRST_RUN = "FirstRun";
     public static final String UPDATE_VERSION = "UpdateVersion";
@@ -123,11 +134,16 @@ public class GeneralKeys {
     public static final String PRIMARY_NAME = "ImportFirstName";
     public static final String SECONDARY_NAME = "ImportSecondName";
 
+    //Used to get name of observation level of currently selected field
+    public static final String FIELD_OBS_LEVEL = "FieldObsLevel";
+
     //flag saved in preferences to determine if import is completed
     public static final String IMPORT_FIELD_FINISHED = "ImportFieldFinished";
 
     //preference key to save the last plot during collect activity
     public static final String LAST_PLOT = "lastplot";
+
+    public static final String DATA_LOCK_STATE = "DataLockState";
 
     //export flags
     public static final String EXPORT_COLUMNS_UNIQUE = "EXPORT_COLUMNS_UNIQUE";
@@ -140,6 +156,9 @@ public class GeneralKeys {
 
     //Data grid
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
+
+    //summary filter
+    public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";
 
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
@@ -157,6 +176,9 @@ public class GeneralKeys {
     public static final String TTS_LANGUAGE_ENABLED = "TTS_LANGUAGE_ENABLED";
     public static final String TTS_LANGUAGE = "TTS_LANGUAGE";
     public static final String TTS_LANGUAGE_SUMMARY = "TTS_LANGUAGE_SUMMARY";
+
+    @NotNull
+    public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
 
     private GeneralKeys() {
 

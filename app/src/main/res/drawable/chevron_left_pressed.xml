@@ -1,0 +1,9 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+  <path
+      android:fillColor="?attr/fb_button_color_pressed"
+      android:pathData="M398.55 104.35 246.85 256.05 398.55 407.75Q404 413.2 404 420.6T398.55 433.45L351.15 480.85Q345.7 486.3 338.3 486.3T325.45 480.85L113.45 268.85Q108 263.4 108 256T113.45 243.15L325.45 31.15Q330.9 25.7 338.3 25.7T351.15 31.15L398.55 78.55Q404 84 404 91.4T398.55 104.25Z"/>
+</vector>

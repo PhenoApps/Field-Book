@@ -53,4 +53,10 @@
         android:title="@string/database_dialog_title"
         app:fragment="com.fieldbook.tracker.preferences.DatabasePreferencesFragment" />
 
+    <Preference
+        android:icon="@drawable/ic_beta"
+        android:key="pref_key_beta_settings"
+        android:title="@string/preferences_beta_title"
+        app:fragment="com.fieldbook.tracker.preferences.BetaPreferencesFragment" />
+
 </androidx.preference.PreferenceScreen>

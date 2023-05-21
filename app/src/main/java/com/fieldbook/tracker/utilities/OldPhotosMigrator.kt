@@ -3,7 +3,7 @@ package com.fieldbook.tracker.utilities
 import android.content.Context
 import android.util.Log
 import androidx.preference.PreferenceManager
-import com.fieldbook.tracker.activities.ConfigActivity
+import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.database.dao.ObservationVariableDao
 import com.fieldbook.tracker.database.models.ObservationModel
@@ -26,7 +26,7 @@ class OldPhotosMigrator {
          * This function is called to query for existing observations that have a uri in the old photos directory, which used to hold all photos.
          * This will update the database obs. value to a new uri after copying it to its respective trait folder, and delete the old photo from the photos dir.
          */
-        fun migrateOldPhotosDir(context: Context) {
+        fun migrateOldPhotosDir(context: Context, database: DataHelper) {
 
             try {
 
@@ -44,7 +44,7 @@ class OldPhotosMigrator {
 
                         val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-                        val traitPhotos = ObservationDao.getAll(expId).filter { it.observation_variable_name == t.trait }
+                        val traitPhotos = database.getAllObservations(expId).filter { it.observation_variable_name == t.trait }
 
                         if (t.trait != "photos") { //edge case where trait name is actually photos
 
@@ -53,14 +53,14 @@ class OldPhotosMigrator {
 
                             traitPhotos.forEach { photo ->
 
-                                val repeatedValue = ConfigActivity.dt.getRep(photo.observation_unit_id, t.trait)
+                                val repeatedValue = database.getRep(expId, photo.observation_unit_id, t.trait)
                                 val generatedName =
                                     photo.observation_unit_id + "_" + t.trait + "_" + repeatedValue + "_" + timeStamp.format(
                                         Calendar.getInstance().time
                                     ) + ".jpg"
 
                                 //load uri and check if its parent is "photos" old photo dir
-                                oldPhotos?.findFile(photo.value ?: "")?.let { photoFile ->
+                                oldPhotos?.findFile(photo.value)?.let { photoFile ->
 
                                     photoDir?.createFile("*/jpg", photoFile.name ?: generatedName)?.let { newFile ->
 

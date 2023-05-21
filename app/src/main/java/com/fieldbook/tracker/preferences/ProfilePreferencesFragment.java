@@ -1,19 +1,16 @@
 package com.fieldbook.tracker.preferences;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
@@ -21,15 +18,12 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.location.GPSTracker;
+import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-
-import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
 
 public class ProfilePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
@@ -40,10 +34,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     private Preference profilePerson;
     private Preference profileReset;
     SharedPreferences ep;
-    private double lat;
-    private double lng;
     private AlertDialog personDialog;
-    private AlertDialog locationDialog;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -62,19 +53,14 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         profileReset = findPreference("pref_profile_reset");
 
-        profilePerson.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                showPersonDialog();
-                return true;
-            }
+        profilePerson.setOnPreferenceClickListener(preference -> {
+            showPersonDialog();
+            return true;
         });
 
-        profileReset.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                showClearSettingsDialog();
-                return true;
-            }
+        profileReset.setOnPreferenceClickListener(preference -> {
+            showClearSettingsDialog();
+            return true;
         });
 
         Bundle arguments = getArguments();
@@ -92,6 +78,15 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         ep.edit().putLong(GeneralKeys.LAST_TIME_OPENED, System.nanoTime()).apply();
 
+        Preference requirePersonPref = findPreference(GeneralKeys.REQUIRE_USER_TO_COLLECT);
+        if (requirePersonPref != null) {
+            requirePersonPref.setOnPreferenceChangeListener((pref, value) -> {
+                setupPersonUpdateUi((Boolean) value);
+                return true;
+            });
+        }
+
+        setupPersonUpdateUi(null);
     }
 
     private void showClearSettingsDialog() {
@@ -125,7 +120,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         alert.show();
         DialogUtils.styleDialogs(alert);
     }
-
 
     private void showPersonDialog() {
         LayoutInflater inflater = this.getLayoutInflater();
@@ -277,6 +271,22 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         }
     }
 
+    private void setupPersonUpdateUi(@Nullable Boolean explicitUpdate) {
+
+        Boolean updateFlag = explicitUpdate;
+
+        //set visibility of update choices only if enabled
+        if (explicitUpdate == null) {
+            updateFlag = ep.getBoolean(GeneralKeys.REQUIRE_USER_TO_COLLECT, false);
+        }
+
+        Preference updateInterval = findPreference(GeneralKeys.REQUIRE_USER_INTERVAL);
+
+        if (updateInterval != null) {
+            updateInterval.setVisible(updateFlag);
+        }
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -295,5 +305,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         super.onResume();
 
         setupCrashlyticsPreference();
+        setupPersonUpdateUi(null);
     }
 }

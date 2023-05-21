@@ -1,14 +1,15 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
@@ -23,7 +24,6 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.StringJoiner;
 
 public class MultiCatTraitLayout extends BaseTraitLayout {
@@ -68,61 +68,51 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
+    public int layoutId() {
+        return R.layout.trait_multicat;
+    }
 
-        gridMultiCat = findViewById(R.id.catGrid);
+    @Override
+    public void init(Activity act) {
+
+        gridMultiCat = act.findViewById(R.id.catGrid);
 
         categoryList = new ArrayList<>();
     }
 
     @Override
-    public void loadLayout() {
-        super.loadLayout();
+    public void afterLoadNotExists(CollectActivity act) {
+        super.afterLoadNotExists(act);
+        setAdapter();
+    }
 
-        final String trait = getCurrentTrait().getTrait();
+    @Override
+    public void afterLoadDefault(CollectActivity act) {
+        super.afterLoadDefault(act);
+        setAdapter();
+    }
 
-        getEtCurVal().setHint("");
-        getEtCurVal().setVisibility(EditText.VISIBLE);
+    @Override
+    public void afterLoadExists(CollectActivity act, @Nullable String value) {
+        super.afterLoadExists(act, value);
 
         String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
         showLabel = !labelValPref.equals("value");
 
         categoryList = new ArrayList<>();
 
-        if (!getNewTraits().containsKey(trait)) {
-            getEtCurVal().setText("");
-            getEtCurVal().setTextColor(Color.BLACK);
-        } else {
+        loadScale();
 
-            String value = getNewTraits().get(trait);
-            if (value != null) {
+        if (!((CollectActivity) getContext()).isDataLocked()) {
 
-                ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>();
+            setAdapter();
 
-                try {
-
-                     scale = CategoryJsonUtil.Companion.decode(value);
-
-                } catch (Exception e) {
-
-                    String[] tokens = value.split("\\:");
-                    for (String token : tokens) {
-                        BrAPIScaleValidValuesCategories c = new BrAPIScaleValidValuesCategories();
-                        c.setLabel(token);
-                        c.setValue(token);
-                        scale.add(c);
-                    }
-                }
-
-                scale = CategoryJsonUtil.Companion.filterExists(getCategories(), scale);
-
-                categoryList.addAll(scale);
-                refreshCategoryText();
-                getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-            }
         }
 
-        BrAPIScaleValidValuesCategories[] cat = getCategories();
+        refreshLock();
+    }
+
+    private void setAdapter() {
 
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
         layoutManager.setFlexWrap(FlexWrap.WRAP);
@@ -130,47 +120,87 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         layoutManager.setAlignItems(AlignItems.STRETCH);
         gridMultiCat.setLayoutManager(layoutManager);
 
-        if (!((CollectActivity) getContext()).isDataLocked()) {
+        loadScale();
 
-            BrAPIScaleValidValuesCategories[] finalCat = cat;
-            gridMultiCat.setAdapter(new MultiCatTraitAdapter(getContext()) {
+        //grabs all categories for this given trait
+        BrAPIScaleValidValuesCategories[] cat = getCategories();
 
-                @Override
-                public void onBindViewHolder(MultiCatTraitViewHolder holder, int position) {
-                    holder.bindTo(finalCat[position]);
+        //creates buttons for each category and sets state based on if its been selected
+        gridMultiCat.setAdapter(new MultiCatTraitAdapter(getContext()) {
 
-                    holder.mButton.setOnClickListener(createClickListener(holder.mButton,position));
+            @Override
+            public void onBindViewHolder(MultiCatTraitViewHolder holder, int position) {
+                holder.bindTo(cat[position]);
 
-                    if (showLabel) {
-                        holder.mButton.setText(finalCat[position].getLabel());
+                holder.mButton.setOnClickListener(createClickListener(holder.mButton,position));
 
-                    } else {
-                        holder.mButton.setText(finalCat[position].getValue());
-                    }
+                if (showLabel) {
+                    holder.mButton.setText(cat[position].getLabel());
 
-                    if (hasCategory(finalCat[position]))
-                        pressOnButton(holder.mButton);
+                } else {
+                    holder.mButton.setText(cat[position].getValue());
                 }
 
-                @Override
-                public int getItemCount() {
-                    return finalCat.length;
+                //has category checks the loaded categoryList to see if this button has been selected
+                if (hasCategory(cat[position])) {
+
+                    pressOnButton(holder.mButton);
+
+                } else {
+
+                    pressOffButton(holder.mButton);
                 }
-            });
-        }
+            }
+
+            @Override
+            public int getItemCount() {
+                return cat.length;
+            }
+        });
 
         gridMultiCat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 gridMultiCat.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-//                gridMultiCat.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-//                View lastChild = gridMultiCat.getChildAt(gridMultiCat.getChildCount() - 1);
-//                gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, lastChild.getBottom()));
                 gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
             }
         });
+    }
 
-        refreshLock();
+    private void refreshList() {
+
+        categoryList.clear();
+
+        String value = getCollectInputView().getText();
+
+        ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>();
+
+        try {
+
+            scale = CategoryJsonUtil.Companion.decode(value);
+
+        } catch (Exception e) {
+
+            String[] tokens = value.split("\\:");
+            for (String token : tokens) {
+                BrAPIScaleValidValuesCategories c = new BrAPIScaleValidValuesCategories();
+                c.setLabel(token);
+                c.setValue(token);
+                scale.add(c);
+            }
+        }
+
+        scale = CategoryJsonUtil.Companion.filterExists(getCategories(), scale);
+
+        categoryList.addAll(scale);
+    }
+
+    private void loadScale() {
+
+        refreshList();
+        refreshCategoryText();
+        getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
+
     }
 
     private OnClickListener createClickListener(final Button button, int position) {
@@ -194,11 +224,11 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
                     } else joiner.add(c.getValue());
                 }
 
-                getEtCurVal().setText(joiner.toString());
+                getCollectInputView().setText(joiner.toString());
 
                 String json = CategoryJsonUtil.Companion.encode(categoryList);
 
-                updateTrait(getCurrentTrait().getTrait(),
+                updateObservation(getCurrentTrait().getTrait(),
                         getCurrentTrait().getFormat(),
                         json);
 
@@ -239,42 +269,6 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         return cat.toArray(new BrAPIScaleValidValuesCategories[0]);
     }
 
-    private boolean existsCategory(BrAPIScaleValidValuesCategories category) {
-        final BrAPIScaleValidValuesCategories[] cats = getCategories();
-        for (BrAPIScaleValidValuesCategories cat : cats) {
-            if (cat.getValue().equals(category.getValue())
-                    && cat.getLabel().equals(category.getLabel()))
-                return true;
-        }
-        return false;
-    }
-
-    // if there are wrong categories, remove them
-    // I want to remove them when moveing the page,
-    // but it is not so easy
-    private String normalizeCategory() {
-        ArrayList<String> normalizedCategoryList = new ArrayList<>();
-        HashSet<String> appeared = new HashSet<>();
-        for (BrAPIScaleValidValuesCategories category : categoryList) {
-            String value = "";
-            if (showLabel) value = category.getLabel();
-            else value = category.getValue();
-            if (!appeared.contains(value) && existsCategory(category)) {
-                normalizedCategoryList.add(value);
-                appeared.add(value);
-            }
-        }
-
-        if (normalizedCategoryList.isEmpty())
-            return "";
-        String normalizedCategory = normalizedCategoryList.get(0);
-        for (int i = 1; i < normalizedCategoryList.size(); ++i) {
-            normalizedCategory += ":";
-            normalizedCategory += normalizedCategoryList.get(i);
-        }
-        return normalizedCategory;
-    }
-
     private boolean hasCategory(final BrAPIScaleValidValuesCategories category) {
         for (final BrAPIScaleValidValuesCategories cat : categoryList) {
             if (cat.getLabel().equals(category.getLabel())
@@ -285,12 +279,13 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
     private void pressOnButton(Button button) {
         button.setTextColor(Color.parseColor(getDisplayColor()));
-        button.getBackground().setColorFilter(button.getContext().getResources().getColor(R.color.button_pressed), PorterDuff.Mode.MULTIPLY);
+        button.getBackground().setColorFilter(getButtonPressedColor(), PorterDuff.Mode.MULTIPLY);
     }
 
     private void pressOffButton(Button button) {
-        button.setTextColor(Color.BLACK);
-        button.getBackground().setColorFilter(button.getContext().getResources().getColor(R.color.button_normal), PorterDuff.Mode.MULTIPLY);
+        button.setTextColor(getButtonTextColor());
+        button.getBackground().setTint(getButtonBackgroundColor());
+        button.getBackground().setColorFilter(getButtonBackgroundColor(), PorterDuff.Mode.MULTIPLY);
     }
 
     private void addCategory(final BrAPIScaleValidValuesCategories category) {
@@ -311,7 +306,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
             joiner.add(value);
         }
 
-        getEtCurVal().setText(joiner.toString());
+        getCollectInputView().setText(joiner.toString());
     }
 
     private void removeCategory(final BrAPIScaleValidValuesCategories category) {
@@ -325,6 +320,31 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     @Override
     public void deleteTraitListener() {
         ((CollectActivity) getContext()).removeTrait();
-        loadLayout();
+        super.deleteTraitListener();
+        refreshLayout(false);
+    }
+
+    /**
+     * Notifies grid adapter to refresh which buttons are selected.
+     * This is used when the repeat value view navigates across repeated values.
+     */
+    @Override
+    public void refreshLayout(Boolean onNew) {
+        super.refreshLayout(onNew);
+        refreshList();
+        loadScale();
+        setAdapter();
+    }
+
+    @Override
+    public String decodeValue(String value) {
+        StringJoiner joiner = new StringJoiner(":");
+        ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
+        for (BrAPIScaleValidValuesCategories s : scale) {
+            if (showLabel) {
+                joiner.add(s.getLabel());
+            } else joiner.add(s.getValue());
+        }
+        return joiner.toString();
     }
 }

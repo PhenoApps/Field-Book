@@ -1,16 +1,17 @@
 package com.fieldbook.tracker.preferences;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.h6ah4i.android.preference.NumberPickerPreferenceCompat;
 import com.h6ah4i.android.preference.NumberPickerPreferenceDialogFragmentCompat;
 
@@ -21,7 +22,21 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
     Context context;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean flag = prefs.getBoolean(GeneralKeys.THEME_FLAG, false);
+        if (flag) {
+            getParentFragmentManager().beginTransaction()
+                    .replace(android.R.id.content, new ThemePreferencesFragment())
+                    .addToBackStack("AppearanceFrag").commit();
+            prefs.edit().putBoolean(GeneralKeys.THEME_FLAG, false).apply();
+        }
+    }
+
+    @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
@@ -29,6 +44,7 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
         PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences_appearance, true);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_appearance_title));
+
     }
 
     @Override
@@ -66,14 +82,10 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
     public void onResume() {
         super.onResume();
 
-        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_appearance_title));
-
         updateLanguageSummary();
 
-        ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (ab != null) {
-            ab.setTitle(R.string.preferences_appearance_title);
-        }
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_appearance_title));
+
     }
 
     private void updateLanguageSummary() {

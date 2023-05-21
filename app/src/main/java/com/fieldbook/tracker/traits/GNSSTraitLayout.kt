@@ -70,11 +70,25 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private var mProgressDialog: AlertDialog? = null
 
+    private lateinit var chipGroup: ChipGroup
+    private lateinit var averageSwitch: SwitchCompat
+    private lateinit var utcTextView: TextView
+    private lateinit var satTextView: TextView
+    private lateinit var altTextView: TextView
+    private lateinit var accTextView: TextView
+    private lateinit var latTextView: TextView
+    private lateinit var lngTextView: TextView
+    private lateinit var hdopTextView: TextView
+    private lateinit var connectGroup: Group
+    private lateinit var connectButton: ImageButton
+    private lateinit var collectButton: ImageButton
+    private lateinit var disconnectButton: ImageButton
+
     private val mAverageResponseHandler = Handler(Looper.getMainLooper()) {
 
         val info = it.obj as AverageInfo
 
-        if (!CollectActivity.thisActivity.isDestroyed)
+        if (!(context as CollectActivity).isDestroyed)
             averagePoints(info)
 
         mProgressDialog?.dismiss()
@@ -92,8 +106,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     private fun startAverageTimer(info: AverageInfo, period: Long) {
 
         val runnable = Runnable {
-            val latTextView = findViewById<TextView>(R.id.latTextView)
-            val lngTextView = findViewById<TextView>(R.id.lngTextView)
 
             val pointsToAverage = arrayListOf<Pair<Double, Double>>()
             val startTime = System.nanoTime()
@@ -113,8 +125,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             })
         }
 
-        if (CollectActivity.mAverageHandler.looper != null)
-            Handler(CollectActivity.mAverageHandler.looper).post(runnable)
+        if (controller.getAverageHandler().looper != null)
+            Handler(controller.getAverageHandler().looper).post(runnable)
         else mProgressDialog?.dismiss()
 
     }
@@ -126,7 +138,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         return "gnss"
     }
 
-    override fun init() {}
+    override fun layoutId(): Int {
+        return R.layout.trait_gnss
+    }
 
     private fun initialize() {
 
@@ -150,15 +164,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         mLocalBroadcastManager.registerReceiver(
             object : GNSSResponseReceiver() {
                 override fun onGNSSParsed(parser: NmeaParser) {
-
-                    //query for all views to populate
-                    val latTextView = findViewById<TextView>(R.id.latTextView)
-                    val lngTextView = findViewById<TextView>(R.id.lngTextView)
-                    val accTextView = findViewById<TextView>(R.id.accTextView)
-                    val utcTextView = findViewById<TextView>(R.id.utcTextView)
-                    val satTextView = findViewById<TextView>(R.id.satTextView)
-                    val altTextView = findViewById<TextView>(R.id.altTextView)
-                    val hdopTextView = findViewById<TextView>(R.id.hdopTextView)
 
                     //populate ui
                     accTextView.text = parser.fix
@@ -189,8 +194,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
      */
     private fun setupAveragingUi() {
 
-        val chipGroup = findViewById<ChipGroup>(R.id.gnss_trait_averaging_chip_group)
-        val averageSwitch = findViewById<SwitchCompat>(R.id.gnss_trait_averaging_switch)
         val checked = prefs.getBoolean(GeneralKeys.GEONAV_AVERAGING, false)
 
         averageSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -256,21 +259,35 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     /**
      * This function is called to initialize the UI. All trait layouts are set to "gone" by default.
      */
-    override fun init(act: Activity?) {
+    override fun init(act: Activity) {
 
         mActivity = act
 
+        chipGroup = act.findViewById(R.id.gnss_trait_averaging_chip_group)
+        averageSwitch = act.findViewById(R.id.gnss_trait_averaging_switch)
+        connectButton = act.findViewById(R.id.gnss_connect_button)
+        utcTextView = act.findViewById(R.id.utcTextView)
+        satTextView = act.findViewById(R.id.satTextView)
+        altTextView = act.findViewById(R.id.altTextView)
+        accTextView = act.findViewById(R.id.accTextView)
+        latTextView = act.findViewById(R.id.latTextView)
+        lngTextView = act.findViewById(R.id.lngTextView)
+        hdopTextView = act.findViewById(R.id.hdopTextView)
+        connectGroup = act.findViewById(R.id.gnss_group)
+        collectButton = act.findViewById(R.id.gnss_collect_button)
+        disconnectButton = act.findViewById(R.id.disconnect_button)
+
         initialize()
+
     }
 
     private fun setupChooseBluetoothDevice() {
 
         //setup connect button
-        val connectBtn = findViewById<ImageButton>(R.id.gnss_connect_button)
-        connectBtn.visibility = View.VISIBLE
+        connectButton.visibility = View.VISIBLE
 
         // Get Location
-        connectBtn.setOnClickListener {
+        connectButton.setOnClickListener {
             if (mActivity != null) {
                 if (checkPermissions(mActivity)) {
                     findPairedDevice()
@@ -329,13 +346,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
      */
     private fun submitGnss(latitude: String, longitude: String, elevation: String) {
 
-//        val utcTextView = findViewById<TextView>(R.id.utcTextView)
-//        val satTextView = findViewById<TextView>(R.id.satTextView)
-//        val altTextView = findViewById<TextView>(R.id.altTextView)
-//        val accTextView = findViewById<TextView>(R.id.accTextView)
-
-        val averageSwitch = findViewById<SwitchCompat>(R.id.gnss_trait_averaging_switch)
-
         if (latitude.isNotBlank() && longitude.isNotBlank()) {
 
             val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
@@ -353,15 +363,13 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val newLat = latitude.toDouble()
             val newLng = longitude.toDouble()
 
-            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == cRange.plot_id }
+            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == currentRange.plot_id }
 
             if (units.isNotEmpty()) {
 
                 val unit = units.first()
                 //check if the switch is enabled, then update obs units with average value
                 if (averageSwitch.isChecked) {
-
-                    val chipGroup = findViewById<ChipGroup>(R.id.gnss_trait_averaging_chip_group)
 
                     val avgDuration = when (chipGroup.checkedChipId) {
                         R.id.gnss_trait_10s_chip -> 10000L
@@ -414,7 +422,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
                 } else { //no averaging, so check if there is an observations and ask to update or not
 
-                    if (etCurVal.text.isNotBlank()) {
+                    if (collectInputView.text.isNotBlank()) {
 
                         alertLocationUpdate {
 
@@ -443,9 +451,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         ObservationUnitDao.updateObservationUnit(unit, json.toJson().toString())
 
-        etCurVal.setText(coordinates)
+        collectInputView.text = coordinates
 
-        updateTrait(currentTrait.trait, "gnss", coordinates)
+        updateObservation(currentTrait.trait, "gnss", coordinates)
 
     }
 
@@ -601,18 +609,11 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         }
 
         //make connected UI visible
-        val connectGroup = findViewById<Group>(R.id.gnss_group)
         connectGroup.visibility = View.VISIBLE
 
-        val connectButton = findViewById<ImageButton>(R.id.gnss_connect_button)
         connectButton.visibility = View.GONE
 
-        val collectButton = findViewById<ImageButton>(R.id.gnss_collect_button)
         collectButton.setOnClickListener {
-
-            val latTextView = findViewById<TextView>(R.id.latTextView)
-            val lngTextView = findViewById<TextView>(R.id.lngTextView)
-            val altTextView = findViewById<TextView>(R.id.altTextView)
 
             val latitude = latTextView.text.toString()
             val longitude = lngTextView.text.toString()
@@ -625,7 +626,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         }
 
         //cancel the thread when the disconnect button is pressed
-        val disconnectButton = findViewById<ImageButton>(R.id.disconnect_button)
         disconnectButton.setOnClickListener {
             connectButton.visibility = View.VISIBLE
             connectGroup.visibility = View.GONE
@@ -639,7 +639,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                 mGpsTracker = null
             }
 
-            val chipGroup = findViewById<ChipGroup>(R.id.gnss_trait_averaging_chip_group)
             chipGroup.visibility = View.GONE
 
             setupChooseBluetoothDevice()
@@ -650,15 +649,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     }
 
     private fun clearUi() {
-
-        val latTextView = findViewById<TextView>(R.id.latTextView)
-        val lngTextView = findViewById<TextView>(R.id.lngTextView)
-        val accTextView = findViewById<TextView>(R.id.accTextView)
-        val utcTextView = findViewById<TextView>(R.id.utcTextView)
-        val satTextView = findViewById<TextView>(R.id.satTextView)
-        val altTextView = findViewById<TextView>(R.id.altTextView)
-        val hdopTextView = findViewById<TextView>(R.id.hdopTextView)
-
         hdopTextView.text = ""
         latTextView.text = ""
         lngTextView.text = ""
@@ -672,21 +662,23 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         super.loadLayout()
 
         this.visibility = View.VISIBLE
-        etCurVal.visibility = View.VISIBLE
+        collectInputView.visibility = View.VISIBLE
     }
 
     //delete the obs and the obs.unit geo coord (only if obs exists)
     override fun deleteTraitListener() {
 
+        val rep = (context as CollectActivity).rep
+
         val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-        val observation = ObservationDao.getObservation(studyDbId, cRange.plot_id, currentTrait.trait)
+        val observation = ObservationDao.getObservation(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
 
         if (observation != null) {
 
-            ObservationDao.deleteTrait(studyDbId, cRange.plot_id, currentTrait.trait)
+            ObservationDao.deleteTrait(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
 
-            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == cRange.plot_id }
+            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == currentRange.plot_id }
             if (units.isNotEmpty()) {
                 units.first().let { unit ->
                     ObservationUnitDao.updateObservationUnit(unit, "")
@@ -732,12 +724,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
      * @param location the non null location sent from internal GPS
      */
     override fun onLocationChanged(location: Location) {
-
-        val latTextView = findViewById<TextView>(R.id.latTextView)
-        val lngTextView = findViewById<TextView>(R.id.lngTextView)
-        val accTextView = findViewById<TextView>(R.id.accTextView)
-        val utcTextView = findViewById<TextView>(R.id.utcTextView)
-        val altTextView = findViewById<TextView>(R.id.altTextView)
 
         //LocationManager accuracy is horizontal accuracy in meters
         //>=100 use three decimal places

@@ -115,11 +115,6 @@
         <item>label</item>
     </string-array>
 
-    <string-array name="pref_collect_customize_labelval_default">
-        <item>value</item>
-        <item>label</item>
-    </string-array>
-
     <string-array name="pref_collect_labelval_customize_title">
         <item>@string/preferences_appearance_collect_labelval_customize_value</item>
         <item>@string/preferences_appearance_collect_labelval_customize_label</item>

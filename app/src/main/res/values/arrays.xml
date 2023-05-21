@@ -30,4 +30,39 @@
         <item>5</item>
         <item>10</item>
     </string-array>
+    <string-array name="preferences_themes_entries">
+        <item>@string/theme_default</item>
+        <item>@string/theme_high_contrast</item>
+        <item>@string/theme_blue</item>
+    </string-array>
+    <string-array name="preferences_themes_entry_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="preferences_text_size_entries">
+        <item>@string/text_size_s</item>
+        <item>@string/text_size_m</item>
+        <item>@string/text_size_l</item>
+        <item>@string/text_size_xl</item>
+    </string-array>
+    <string-array name="preferences_text_size_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="preferences_profile_ask_user_interval_entries">
+        <item>@string/ask_user_interval_every_open</item>
+        <item>@string/ask_user_interval_every_12</item>
+        <item>@string/ask_user_interval_every_24</item>
+    </string-array>
+    <string-array name="preferences_profile_ask_user_interval_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string name="ask_user_interval_every_open">Every time app opens</string>
+    <string name="ask_user_interval_every_12">Every 12 hours</string>
+    <string name="ask_user_interval_every_24">Every 24 hours</string>
 </resources>
