@@ -2,10 +2,8 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - 'docs/**'
-      - 'README.md'
-      - '.github/**'
+    paths:
+      - 'app/**'
 
 name: do-github-release
 
