@@ -18,9 +18,16 @@ File Format
 
 At least one format must be selected to export data. If both formats are selected, Field Book exports a single zipped file containing the files.
 
-**Database** format exports each individual observation as a spreadsheet row, and includes columns for collected metadata such as the name of the person who collected the data and the timestamp of when the observation was collected.
-
 **Table** format exports each entry as a row and each trait as a column, creating a matrix of observed values. Metadata such as person and timestamp are excluded. If repeated measures have been collected, only the first value will be exported when using the table format.
+
+.. figure:: /_static/images/export/export_file_formats.png
+   :width: 60%
+   :align: center
+   :alt: Export file formats
+
+   Sample data exported in both formats
+
+**Database** format exports each individual observation as a spreadsheet row, and includes columns for collected metadata such as the name of the person who collected the data and the timestamp of when the observation was collected.
 
 Included Columns
 ~~~~~~~~~~~~~~~~
