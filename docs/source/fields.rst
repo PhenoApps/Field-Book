@@ -16,9 +16,15 @@ When importing from a file, each row in the file reprents an *entry*. Each *entr
 
    * A *unique identifier*, which is used internally by Field Book to associate data with the specific entry. It must be unique across all of your fields.
    * A *primary identifier*, and a *secondary identifier*. These set the order of advancement through the field's entries, and can be whatever makes the most sense for your experiment. MOst often they are numbers from the experimental design (e.g., row/plot, row/column, range/plot). They can be reassigned at any time via the field submenu.
-  
-Any further information for the entries such as variety name, pedigree, or treatment is optional, but can be included and viewed in the InfoBars or in the summary dialog on the collect screen if desired.
 
+.. figure:: /_static/images/fields/fields_import_format.png
+   :width: 60%
+   :align: center
+   :alt: Sample import file
+
+   A sample field import file
+
+Any further information for the entries such as variety name, pedigree, or treatment is optional, but can be included and viewed in the InfoBars or in the summary dialog on the collect screen if desired.
 
 .. figure:: /_static/images/fields/fields_framed.png
    :width: 40%
