@@ -11,7 +11,7 @@ Field Book settings are grouped into eight subcategories.
    Settings screen layout
 
 
-The **Search Bar** (|search|) at the top of the screen searches across all the subcategories for a given string.
+The |search| **Search** bar at the top of the screen searches across all the subcategories for a given string.
 
 .. figure:: /_static/images/settings/settings_search_example.png
    :width: 60%
@@ -22,21 +22,21 @@ The **Search Bar** (|search|) at the top of the screen searches across all the s
 
 Within the subcategories,
 
-* **General** (|general|) settings allow modification of system defaults and optional collection tools
+* |general| **General** settings allow modification of system defaults and optional collection tools
   
-* **Profile** (|profile|) settings set the identity of the person collecting data.
+* |profile| **Profile** settings set the identity of the person collecting data.
 
-* **Appearance** (|appearance|) settings change language, app colors, icons, or layouts.
+* |appearance| **Appearance** settings change language, app colors, icons, or layouts.
 
-* **Behavior** (|behavior|) settings change default collecting and file sharing actions.
+* |behavior| **Behavior** settings change default collecting and file sharing actions.
 
-* **GeoNav** (|geonav|) settings allow a positioning device to be paired and used for field navigation.
+* |geonav| **GeoNav** settings allow a positioning device to be paired and used for field navigation.
 
-* **Sounds** (|sounds|) settings toggle sound notifications for collection activities.
+* |sounds| **Sounds** settings toggle sound notifications for collection activities.
 
-* **BrAPI** (|brapi|) settings connect to an external data source using the Breeding API (BrAPI).
+* |brapi| **BrAPI** settings connect to an external data source using the Breeding API (BrAPI).
 
-* **Database** (|database|) settings allow the database to be imported, exported, or reset.
+* |database| **Database** settings allow the database to be imported, exported, or reset.
 
 .. |search| image:: /_static/icons/collect/magnify.png
   :width: 20

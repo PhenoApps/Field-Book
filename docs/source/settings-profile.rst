@@ -8,8 +8,8 @@ Profile Settings
 
    Profile settings screen layout
 
-Person (|person|)
-~~~~~~~~~~~~~~~~~
+|person| Person
+~~~~~~~~~~~~~~~
 
 Sets the first and last name of the person operating Field Book. This information is stored with each collected measurement as metadata and is included in the database export format. (#TODO include link to database format)
 

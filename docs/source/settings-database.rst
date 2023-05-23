@@ -6,16 +6,16 @@ Database Settings
    :align: center
    :alt: Database settings screen layout
 
-Import database (|import|)
---------------------------
+|import| Import database
+------------------------
 Imports a new database from an export file. This replaces the current data in the app.
 
-Export database (|export|)
---------------------------
+|export| Export database
+------------------------
 Exports the internal database. If you need data recovered or have issues, contact the developer and send the file that is exported.
 
-Delete database (|remove|)
---------------------------
+|remove| Delete database
+------------------------
 Wipes all data from the app.
 
 

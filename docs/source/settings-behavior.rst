@@ -10,16 +10,16 @@ Behavior
 
    Behavior settings screen layout
 
-Cycling traits advances entry (|repeat|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|repeat| Cycling traits advances entry
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Upon completing a cycle of traits, Field Book advances to the next entry automatically.
 
-Map volume keys to entry navigation (|volume|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|volume| Map volume keys to entry navigation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Allows volume keys to be used to move to next/previous entry. Note that this does disable the volume buttons being able to change the device volume when Field Book is open.
 
-Return key signal (|return|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|return| Return key signal
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Allows the user to choose the behavior of the return key signal that can be included when scanning barcodes: next plot, next trait, or do nothing. (#todo crop photo)
 
@@ -30,8 +30,8 @@ Allows the user to choose the behavior of the return key signal that can be incl
 
    Choice of return key signal behavior
 
-Disable left/right entry arrow (|arrow|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|arrow| Disable left/right entry arrow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Disables left or right entry arrow unless data has been collected, to ensure an entry isn't accidentally skipped. (#todo crop photo)
 
@@ -42,20 +42,20 @@ Disables left or right entry arrow unless data has been collected, to ensure an 
 
    Choice of direction disabled
 
-Disable file sharing (|sharing|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|sharing| Disable file sharing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Turns off the share dialog that opens by default when data is exported.
 
-Use day of year (|day|)
-~~~~~~~~~~~~~~~~~~~~~~~
+|day| Use day of year
+~~~~~~~~~~~~~~~~~~~~~
 Changes the date trait format to record date values as numbers counting up from Jan 1, rather than traditional dates. For example *69* instead of *2023-03-10*.
 
-Skip entries across active trait (|skip|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|skip| Skip entries across active trait
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 When advancing entries, skips either entries that already have data for the active trait, or entries that already have data for all traits. (#todo add photo)
 
-Flip Flop Arrows (|flip|)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+|flip| Flip Flop Arrows
+~~~~~~~~~~~~~~~~~~~~~~~
 Switches the collect screen arrows so that the small green arrows advance entries and the large black arrows advance traits.
 
 

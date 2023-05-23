@@ -10,7 +10,7 @@ Appearance Settings
 
 Application
 -----------
-Theme (|theme|)
+|theme| Theme (|theme|)
 ~~~~~~~~~~~~~~~
 
 Opens an additional screen where a user can modify specifc colors or the entire theme of Field Book.
@@ -22,19 +22,19 @@ Opens an additional screen where a user can modify specifc colors or the entire 
 
    Theme options within appearance settings
 
-Language (|language|)
-~~~~~~~~~~~~~~~~~~~~~
+|language| Language
+~~~~~~~~~~~~~~~~~~~
 Allows the user to change the Field Book language to one of 14 different options.
 
-Tutorial (|tutorial|) 
-~~~~~~~~~~~~~~~~~~~~~
+|tutorial| Tutorial 
+~~~~~~~~~~~~~~~~~~~
 Adds a button to the toolbar that enables the tutorial. The tutorial provides contextual information throughout the app.
 
 
 Collect Screen
 --------------
-Customize toolbar icons (|icons|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|icons| Customize toolbar icons
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Allows the user to change which default toolbar buttons are displayed on the Collect screen.
 
 .. figure:: /_static/images/settings/settings_appearance_toolbar_framed.png
@@ -44,12 +44,12 @@ Allows the user to change which default toolbar buttons are displayed on the Col
 
    Turn default toolbar options on/off
 
-Number of Infobars (|infobars|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|infobars| Number of Infobars
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Allows the user to change the number of Infobars that are displayed on the Collect screen.
 
-Quick GoTo (|goto|)
-~~~~~~~~~~~~~~~~~~~
+|goto| Quick GoTo
+~~~~~~~~~~~~~~~~~
 Changes the read-only primary/secondary order on the Collect screen to edit texts that can search and move to specific entries.
 
 

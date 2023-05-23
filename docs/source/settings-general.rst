@@ -4,13 +4,13 @@ General Settings
 System Defaults
 ---------------
 
-Define storage location (|sd|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|sd| Define storage location
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Opens the :doc:`storage` dialog for defining a 'Storage location' on the device.
 
-Default import (|import|) and export (|export|) sources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Set default field import and export sources so the app doesn't always ask. 
+|import| Default import and |export| default export sources
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Set default field import and export sources so the app doesn't ask each time. 
 
 .. figure:: /_static/images/settings/settings_general_framed.png
    :width: 40%
@@ -23,20 +23,20 @@ Set default field import and export sources so the app doesn't always ask.
 Optional Collect Tools
 ----------------------
 
-Next entry with no data (|next|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|next| Next entry with no data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Adds a button to the Collect top toolbar thats skips to the next entry without data
 
-Move to entry via barcode (|barcode|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|barcode| Move to entry via barcode
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Adds a button to the Collect toolbar that enables move to entry by scanning a barcode. The barcode must match a unique ID within the active trial.
 
-Datagrid (|grid|)
-~~~~~~~~~~~~~~~~~
+|grid| Datagrid
+~~~~~~~~~~~~~~~
 Adds a button to the Collect toolbar to view a grid of all the recorded values for each entry and trait
 
-Move to unique identifier (|fingerprint|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|fingerprint| Move to unique identifier
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Adds a button to the Collect toolbar that enables move to entry by typing the unique id (or by scanning it).
 
 

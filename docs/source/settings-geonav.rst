@@ -8,24 +8,24 @@ GeoNav Settings
 
    Geonav settings screen layout
 
-Enable Geonav (|geonav|)
-------------------------
+|geonav| Enable Geonav
+----------------------
 Enables the device to move between entires based on GPS data. Requires entries to have GNSS data.
 
-Search Method (|method|)
-------------------------
+|method| Search Method
+----------------------
 The method used to match GPS location to entry, defaults to the distance method.
 
-GeoNav Log (|log|)
-------------------
+|log| GeoNav Log
+----------------
 Turns on geonav logging to a logfile stored in */storage/geonav/log.txt*
 
-Update Interval(s) (|interval|)
--------------------------------
+|interval| Update Interval(s)
+-----------------------------
 Changes the time between geonav location updates. Default is 0s, can be set to 1s, 5s, or 10s
 
-Pair Device (|bluetooth|)
--------------------------
+|bluetooth| Pair Device
+-----------------------
 Opens Bluetooth interface to pair to an external GPS device
 
 

@@ -10,28 +10,28 @@ Configuration
 
    BrAPI Configuration Settings
 
-BrAPI Base URL (|url|)
-~~~~~~~~~~~~~~~~~~~~~~
+|url| BrAPI Base URL
+~~~~~~~~~~~~~~~~~~~~
 Set the server URL when importing via BrAPI.
 
-Authorize BrAPI (|authorize|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|authorize| Authorize BrAPI
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Open the authorization page to login to the BrAPI server and allow Field Book to communicate with it.
 
-BrAPI Version (|version|)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+|version| BrAPI Version
+~~~~~~~~~~~~~~~~~~~~~~~
 Set the version of the BrAPI specification that will be used to communicate with the server. Defaults to V2.
 
-Page Size (|page|)
-~~~~~~~~~~~~~~~~~~
+|page| Page Size
+~~~~~~~~~~~~~~~~
 Set the page size for BrAPI server responses. Defaults to 1000.
 
-Chunk Size (|chunk|)
-~~~~~~~~~~~~~~~~~~~~
+|chunk| Chunk Size
+~~~~~~~~~~~~~~~~~~
 Set the chunk size. Defaults to 500.
 
-Server Timeout (|timeout|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+|timeout| Server Timeout
+~~~~~~~~~~~~~~~~~~~~~~~~
 Set the time limit in seconds to wait for a repsonse from the server before timing out. Defaults to 2 minutes.
 
 Advanced Auth Settings
@@ -44,24 +44,24 @@ Advanced Auth Settings
 
    BrAPI Advanced Auth Settings
 
-OIDC Flow (|version|)
-~~~~~~~~~~~~~~~~~~~~~
+|version| OIDC Flow
+~~~~~~~~~~~~~~~~~~~
 BrAPI server authentication version. Defaults to OAuth2 Implicit Grant.
 
-OIDC Discovery URL (|url|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+|url| OIDC Discovery URL
+~~~~~~~~~~~~~~~~~~~~~~~~
 The location of the OIDC discovery JSON document.
 
 BrAPI Variables
 ---------------
-Value vs Label Display (|display|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|display| Value vs Label Display
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Sets desired field for display when using a categorical trait the comes from a BrAPI Variable.
 
 Community Servers
 -----------------
-Scan a server barcode (|barcode|)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|barcode| Scan a server barcode
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Add a BrAPI server by scanning a barcode of it's URL.
 
 Advanced
