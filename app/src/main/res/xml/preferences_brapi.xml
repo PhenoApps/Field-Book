@@ -19,11 +19,6 @@
             android:title="@string/brapi_base_url" />
 
         <Preference
-            android:icon="@drawable/ic_launch"
-            android:key="authorizeBrapi"
-            android:title="@string/brapi_authorize" />
-
-        <Preference
             android:icon="@drawable/ic_pref_brapi_logout"
             android:key="revokeBrapiAuth"
             android:title="@string/brapi_revoke_auth" />

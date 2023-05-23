@@ -50,7 +50,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private Context context;
     private PreferenceManager prefMgr;
     private PreferenceCategory brapiPrefCategory;
-    private Preference brapiAuthButton;
     private Preference brapiLogoutButton;
     private NeutralButtonEditTextDialog brapiURLPreference;
     private NeutralButtonEditTextDialog brapiOIDCURLPreference;
@@ -89,7 +88,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         setHasOptionsMenu(true);
 
         brapiPrefCategory = prefMgr.findPreference("brapi_category");
-        brapiAuthButton = findPreference("authorizeBrapi");
         brapiLogoutButton = findPreference("revokeBrapiAuth");
 
         brapiURLPreference = findPreference(GeneralKeys.BRAPI_BASE_URL);
@@ -109,20 +107,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         oldBaseUrl = url;
         brapiURLPreference.setText(url);
         brapiOIDCURLPreference.setText(oidcUrl);
-
-        //setup authorize button to start auth when clicked
-        if (brapiAuthButton != null) {
-            brapiAuthButton.setOnPreferenceClickListener(preference -> {
-                String brapiHost = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_BASE_URL, null);
-                if (brapiHost != null) {
-                    brapiAuth();
-                }
-                return true;
-            });
-
-            // Set our button visibility and text
-            setButtonView();
-        }
 
         //set logout button
         if (brapiLogoutButton != null) {
@@ -422,23 +406,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         if (brapiHost != null) {  // && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
 
-            brapiPrefCategory.addPreference(brapiAuthButton);
-
             if (brapiToken != null) {
-                // Show our reauthorize button and remove logout button
-                brapiAuthButton.setTitle(R.string.brapi_reauthorize);
-                brapiAuthButton.setSummary(getString(R.string.brapi_btn_auth_summary, brapiHost));
                 // Show if our logout button if it is not shown already
                 brapiPrefCategory.addPreference(brapiLogoutButton);
             } else {
-                // Show authorize button and remove our logout button
-                brapiAuthButton.setTitle(R.string.brapi_authorize);
-                brapiAuthButton.setSummary(null);
                 brapiPrefCategory.removePreference(brapiLogoutButton);
             }
 
         } else {
-            brapiPrefCategory.removePreference(brapiAuthButton);
             brapiPrefCategory.removePreference(brapiLogoutButton);
         }
     }
