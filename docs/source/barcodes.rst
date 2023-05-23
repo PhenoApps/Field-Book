@@ -9,10 +9,25 @@ Examples
 
 Plant height
 ~~~~~~~~~~~~
-For example, barcoded height sticks can be used to rapidly capture plot height values. Attaching the Android device to the stick makes it possible to accurately capture height without having to handle the device.
+Barcoded height sticks can be used to rapidly capture plot height values. Attaching the Android device to the stick makes it possible to accurately capture height without having to handle the device.
+
+.. figure:: /_static/images/barcodes/barcodes_plant_height.png
+   :width: 40%
+   :align: center
+   :alt: Plant height stick
+
+   Example plant height stick
+
 
 Leaf length
 ~~~~~~~~~~~
+
+.. figure:: /_static/images/barcodes/barcodes_leaf_length.png
+   :width: 90%
+   :align: center
+   :alt: Leaf length barcode
+
+   Example leaf length collection
 
 Leaf angle
 ~~~~~~~~~~
