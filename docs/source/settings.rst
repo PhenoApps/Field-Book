@@ -10,16 +10,6 @@ Field Book settings are grouped into eight subcategories.
 
    Settings screen layout
 
-
-The |search| **Search** bar at the top of the screen searches across all the subcategories for a given string.
-
-.. figure:: /_static/images/settings/settings_search_example.png
-   :width: 60%
-   :align: center
-   :alt: Settings Search
-
-   Searching for a specific setting
-
 Within the subcategories,
 
 * |general| **General** settings allow modification of system defaults and optional collection tools
@@ -38,6 +28,15 @@ Within the subcategories,
 
 * |database| **Database** settings allow the database to be imported, exported, or reset.
 
+To find a setting without knowing its subcategory, type a string in the |search| **Search** bar at the top of the screen.
+
+.. figure:: /_static/images/settings/settings_search_example.png
+   :width: 40%
+   :align: center
+   :alt: Settings Search
+
+   Searching for a specific setting
+\
 .. |search| image:: /_static/icons/collect/magnify.png
   :width: 20
 

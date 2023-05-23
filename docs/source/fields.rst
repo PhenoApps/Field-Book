@@ -18,7 +18,7 @@ When importing from a file, each row in the file reprents an *entry*. Each *entr
    * A *primary identifier*, and a *secondary identifier*. These set the order of advancement through the field's entries, and can be whatever makes the most sense for your experiment. MOst often they are numbers from the experimental design (e.g., row/plot, row/column, range/plot). They can be reassigned at any time via the field submenu.
 
 .. figure:: /_static/images/fields/fields_import_format.png
-   :width: 60%
+   :width: 90%
    :align: center
    :alt: Sample import file
 
