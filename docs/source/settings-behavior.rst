@@ -21,9 +21,9 @@ Allows volume keys to be used to move to next/previous entry. Note that this doe
 |return| Return key signal
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Allows the user to choose the behavior of the return key signal that can be included when scanning barcodes: next plot, next trait, or do nothing. (#todo crop photo)
+Allows the user to choose the behavior of the return key signal that can be included when scanning barcodes: next plot, next trait, or do nothing.
 
-.. figure:: /_static/images/settings/settings_behavior_return_framed.png
+.. figure:: /_static/images/settings/settings_behavior_return.png
    :width: 40%
    :align: center
    :alt: Return key layout within behavior settings
@@ -33,10 +33,10 @@ Allows the user to choose the behavior of the return key signal that can be incl
 |arrow| Disable left/right entry arrow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Disables left or right entry arrow unless data has been collected, to ensure an entry isn't accidentally skipped. (#todo crop photo)
+Disables left or right entry arrow unless data has been collected, to ensure an entry isn't accidentally skipped.
 
 .. figure:: /_static/images/settings/settings_behavior_disable_nav.png
-   :width: 60%
+   :width: 40%
    :align: center
    :alt: Disable nav layout within behavior settings
 
