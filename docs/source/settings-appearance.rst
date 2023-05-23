@@ -10,8 +10,8 @@ Appearance Settings
 
 Application
 -----------
-|theme| Theme (|theme|)
-~~~~~~~~~~~~~~~
+|theme| Theme
+~~~~~~~~~~~~~
 
 Opens an additional screen where a user can modify specifc colors or the entire theme of Field Book.
 
