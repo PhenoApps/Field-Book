@@ -30,7 +30,7 @@ private String makeVersionName() {
 
 android {
     signingConfigs {
-        playStoreConfig {
+        /* playStoreConfig {
             Properties keystoreProps = new Properties()
             if (file('keystore.config').exists()) {
                 keystoreProps.load(new FileInputStream(file('keystore.config')))
@@ -40,7 +40,7 @@ android {
                 storePassword keystoreProps['storePassword']
                 storeFile file('keystore.keystore')
             } else println("Non-keystore build.")
-        }
+        } */
         gitActionConfig {
             def tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
             def allFilesFromDir = new File(tmpFilePath).listFiles()
