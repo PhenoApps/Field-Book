@@ -36,7 +36,7 @@ To find a setting without knowing its subcategory, type a string in the |search|
    :alt: Settings Search
 
    Searching for a specific setting
-\
+
 .. |search| image:: /_static/icons/collect/magnify.png
   :width: 20
 
