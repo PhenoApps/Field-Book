@@ -8,14 +8,9 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Setup
-
-   storage
-
-.. toctree::
-   :maxdepth: 2
    :caption: Structure
 
+   storage
    fields
    traits
 

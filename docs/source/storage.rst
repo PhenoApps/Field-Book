@@ -42,3 +42,15 @@ To add your own field, trait, and resource files to the appropriate subdirectori
    :alt: USB file transfer settings
 
    Example settings for USB file transfer.
+
+Database
+--------
+
+Field Book uses an internal SQLite database to store imported fields and traits, as well as all data collected with the app.
+
+(#todo add db diagram)
+
+The database is automatically backed up to the **database** directory at regular intervals. It can also be manually exported and imported in |database| :doc:`settings-database`. This is useful for transferring Fieldbook data to a new device, or troubleshooting if a problem arises.
+
+.. |database| image:: /_static/icons/settings/main/database.png
+  :width: 20
