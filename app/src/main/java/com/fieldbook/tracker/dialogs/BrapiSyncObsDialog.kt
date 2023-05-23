@@ -15,7 +15,6 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.brapi.BrapiControllerResponse
 import com.fieldbook.tracker.brapi.model.Observation
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
@@ -57,7 +56,7 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
         setContentView(R.layout.dialog_brapi_sync_observations)
         brAPIService = BrAPIServiceFactory.getBrAPIService(this.context)
         val pageSize = context.getSharedPreferences("Settings", 0)
-            .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000")!!.toInt()
+            .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50")!!.toInt()
         paginationManager = BrapiPaginationManager(0, pageSize)
         saveBtn = findViewById(R.id.brapi_save_btn)
         saveBtn!!.setOnClickListener(this)
