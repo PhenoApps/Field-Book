@@ -58,11 +58,9 @@ By default, there are four buttons at the top of the screen (in addtion to the b
 
 * The fourth (|unlocked|) freezes/unfreeezes the data input section to prevent accidental changes.
   * The (|unlocked|) symbol is the default, unfrozen state that allows trait values to be entered, edited, or deleted.
-  * Pressing it once switches to the (|lock|) state, which freezes the collect input so no values can be entered or deleted.
+  * Pressing it once switches to the (|locked|) state, which freezes the collect input so no values can be entered or deleted.
   * Pressing it again switches to the (|partial|) state, which leaves already collected values frozen so they can't be edited/deleted, but allows entry of new values.
   * Pressing it once more switches back to the original, unfrozen (|unlocked|) state.
-
-
 
 More buttons are added by enabling optional tools in :doc:`settings-general` (|settings|).
 
