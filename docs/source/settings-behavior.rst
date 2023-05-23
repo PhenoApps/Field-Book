@@ -20,7 +20,6 @@ Allows volume keys to be used to move to next/previous entry. Note that this doe
 
 |return| Return key signal
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 Allows the user to choose the behavior of the return key signal that can be included when scanning barcodes: next plot, next trait, or do nothing.
 
 .. figure:: /_static/images/settings/settings_behavior_return.png
@@ -32,7 +31,6 @@ Allows the user to choose the behavior of the return key signal that can be incl
 
 |arrow| Disable left/right entry arrow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 Disables left or right entry arrow unless data has been collected, to ensure an entry isn't accidentally skipped.
 
 .. figure:: /_static/images/settings/settings_behavior_disable_nav.png
@@ -52,7 +50,14 @@ Changes the date trait format to record date values as numbers counting up from 
 
 |skip| Skip entries across active trait
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-When advancing entries, skips either entries that already have data for the active trait, or entries that already have data for all traits. (#todo add photo)
+When advancing entries, skips either entries that already have data for the active trait, or entries that already have data for all traits.
+
+.. figure:: /_static/images/settings/settings_behavior_skip_entries.png
+   :width: 40%
+   :align: center
+   :alt: Skip entries layout within behavior settings
+
+   Choice of skip behavior
 
 |flip| Flip Flop Arrows
 ~~~~~~~~~~~~~~~~~~~~~~~
