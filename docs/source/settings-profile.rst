@@ -11,11 +11,14 @@ Profile Settings
 |person| Person
 ~~~~~~~~~~~~~~~
 
-Sets the first and last name of the person operating Field Book. This information is stored with each collected measurement as metadata and is included in the database export format. (#TODO include link to database format)
+Sets the first and last name of the person operating Field Book. This information is stored with each collected measurement as metadata and is included in the database |export| :doc:`export` format.
 
 Additional settings are used to reset (|reset|) or turn on/off (|verify|) regular verification of the profle information
 
 .. |person| image:: /_static/icons/settings/profile/account.png
+  :width: 20
+
+.. |export| image:: /_static/icons/settings/profile/content-save.png
   :width: 20
 
 .. |reset| image:: /_static/icons/settings/profile/delete.png
