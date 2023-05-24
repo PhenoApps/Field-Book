@@ -210,4 +210,3 @@ repositories {
 
 task prepareKotlinBuildScriptModel {}
 
-android.defaultConfig.manifestPlaceholders = ['appAuthRedirectScheme': 'fieldbook' ]
