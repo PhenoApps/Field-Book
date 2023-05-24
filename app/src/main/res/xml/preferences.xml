@@ -59,4 +59,9 @@
         android:title="@string/preferences_beta_title"
         app:fragment="com.fieldbook.tracker.preferences.BetaPreferencesFragment" />
 
+    <Preference
+        android:icon="@drawable/ic_adv_brapi"
+        android:key="pref_key_gos_settings"
+        android:title="@string/preferences_gos"
+        app:fragment="com.fieldbook.tracker.preferences.GosPreferencesFragment" />
 </androidx.preference.PreferenceScreen>

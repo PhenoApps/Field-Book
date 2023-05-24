@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:key="gos_category"
+        android:title="@string/preferences_gos_core_title"
+        app:iconSpaceReserved="false">
+
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="@string/gos_base_url_default"
+            android:icon="@drawable/ic_adv_brapi_base"
+            android:key="GOS_BASE_URL"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/gos_base_url" />
+
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="8891"
+            android:icon="@drawable/ic_pref_brapi_pagination"
+            android:key="GOS_PORT"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/gos_port" />
+
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="gos_user"
+            android:icon="@drawable/ic_pref_brapi_pagination"
+            android:key="GOS_USERNAME"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/gos_username" />
+
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="123456"
+            android:icon="@drawable/ic_pref_brapi_pagination"
+            android:key="GOS_PASSWORD"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/gos_password" />
+
+        <Preference
+            android:icon="@drawable/ic_launch"
+            android:key="authorizeGos"
+            android:title="@string/gos_authorize" />
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

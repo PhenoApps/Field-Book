@@ -942,6 +942,7 @@ public class CollectActivity extends ThemedActivity
             systemMenu.findItem(R.id.resources).setVisible(entries.contains("resources"));
             systemMenu.findItem(R.id.summary).setVisible(entries.contains("summary"));
             systemMenu.findItem(R.id.lockData).setVisible(entries.contains("lockData"));
+            systemMenu.findItem(R.id.uploadGos).setVisible(entries.contains("uploadGos"));
         }
     }
 

@@ -72,6 +72,13 @@ public class GeneralKeys {
     public static final String BRAPI_TIMEOUT                        = "BRAPI_TIMEOUT";
     public static final String BRAPI_CHUNK_SIZE                     = "BRAPI_CHUNK_SIZE";
 
+    //Gos
+    public static final String GOS_BASE_URL                         = "GOS_BASE_URL";
+    public static final String GOS_PORT                             = "GOS_PORT";
+    public static final String GOS_USERNAME                         = "GOS_USERNAME";
+    public static final String GOS_PASSWORD                         = "GOS_PASSWORD";
+    public static final String GOS_TOKEN                            = "GOS_TOKEN";
+
     //GeoNav
     private static final String GEONAV_PREFIX                       = "com.fieldbook.tracker.geonav.";
     public static final String ENABLE_GEONAV                        = GEONAV_PREFIX + "ENABLE_GEONAV";

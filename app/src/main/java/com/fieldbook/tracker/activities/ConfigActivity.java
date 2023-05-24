@@ -205,6 +205,7 @@ public class ConfigActivity extends ThemedActivity {
             entries.add("resources");
             entries.add("summary");
             entries.add("lockData");
+            entries.add("uploadGos");
 
             ed.putStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE,entries);
             ed.putBoolean(GeneralKeys.FIRST_RUN,false);

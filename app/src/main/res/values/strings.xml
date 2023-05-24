@@ -171,6 +171,7 @@
     <string name="preferences_appearance_toolbar_customize_resources">Resources</string>
     <string name="preferences_appearance_toolbar_customize_summary">Summary</string>
     <string name="preferences_appearance_toolbar_customize_lock">Lock</string>
+    <string name="preferences_appearance_toolbar_customize_uploadGos">Gos</string>
 
     <string name="preferences_appearance_collect_labelval_customize">Value vs Label Display</string>
     <string name="preferences_appearance_collect_labelval_customize_description">Display values or labels on the collect screen</string>
@@ -527,6 +528,105 @@
     <string name="brapi_skipped_traits">Successfully fetched traits. %1$d traits ignored because of missing brapi \'trait\' field</string>
 
     <string name="brapi_study_incompatible">This BrAPI study is currently incompatible with Field Book. Studies must include row and column in the header.</string>
+
+    <!--- GOS login settings -->
+    <string name="preferences_gos_core_title">Configuration</string>
+    <string name="preferences_gos" translatable="false">Gos</string>
+    <string name="gos_base_url">Gos URL</string>
+    <string name="gos_input_base_url">Please enter Gos login URL</string>
+    <string name="gos_base_url_desc">The base URL for the connected Gos server</string>
+    <string name="gos_base_url_default">www.mingleadgene.com</string>
+    <string name="gos_oidc_url">OIDC Discovery URL</string>
+    <string name="gos_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
+    <string name="gos_oidc_url_default">https://test-server.gos.org/.well-known/openid-configuration</string>
+    <string name="gos_save_authorize">Save</string>
+    <string name="gos_authorize">Authorize Gos</string>
+    <string name="gos_authorize_failed_timeout">Test connection timeout. Check address and port</string>
+    <string name="gos_authorize_failed_403">Failed to test connection. Please check username or password</string>
+    <string name="gos_authorize_200">Test connection successful</string>
+    <string name="gos_reauthorize">Reauthorize</string>
+    <string name="gos_check_setting">Gos configuration is incomplete, please check in Settings</string>
+    <string name="gos_revoke_auth">Log Out</string>
+    <string name="gos_auth_success">Gos Authorization Successful</string>
+    <string name="gos_auth_deny">Gos Authorization Denied</string>
+    <string name="gos_auth_error_starting">Error Starting Gos Auth</string>
+    <string name="gos_auth_permission_deny">ERROR: You do not have the permissions necessary to perform this action</string>
+    <string name="gos_btn_auth_summary">Brapi is currently authorized with \n%1$s</string>
+
+    <string name="gos_load_data_button">Load Fields</string>
+    <string name="gos_load_traits_button">Load Traits</string>
+    <string name="gos_save_data_button">Preview Field</string>
+    <string name="gos_study_name">Name</string>
+    <string name="gos_study_description">Description</string>
+    <string name="gos_study_location">Location</string>
+    <string name="gos_observation_level">Observation Level</string>
+    <string name="gos_study_num_plots"> Plots</string>
+    <string name="gos_study_num_traits"> Traits</string>
+    <string name="gos_not_found">ERROR: Target system does not support this operation via Gos.</string>
+    <string name="gos_studies_error">Error when loading studies.</string>
+    <string name="gos_study_detail_error">Error when loading study details for study. Study not saved.</string>
+    <string name="gos_plot_detail_error">Error when loading plots for study. Study not saved.</string>
+    <string name="gos_study_traits_error">Error when loading traits for study. Study not saved.</string>
+    <string name="gos_ontology_error">Error loadings traits from Gos.</string>
+    <string name="gos_save_field_error">Error Saving Field</string>
+    <string name="gos_field_not_selected">Selected Field Must Be Imported From Gos.</string>
+    <string name="gos_fields_filter_by_program">Filter by program</string>
+    <string name="gos_fields_filter_by_trial">Filter by trial</string>
+    <string name="gos_programs_load">Load programs</string>
+    <string name="gos_programs_select">Select program</string>
+    <string name="gos_programs_error">Error when loading programs.</string>
+    <string name="gos_trials_load">Load trials</string>
+    <string name="gos_trials_select">Select trial</string>
+    <string name="gos_trials_error">Error when loading trials.</string>
+    <string name="gos_save_trait">Save Traits</string>
+    <string name="gos_must_configure_url">Must configure a valid Gos URL in settings before proceeding</string>
+    <string name="gos_warning_select_program">Please select a program</string>
+    <string name="gos_warning_select_trial">Please select a trial</string>
+    <string name="gos_warning_select_study">Please select a field</string>
+    <string name="gos_export_failed">Gos Export Failed</string>
+    <string name="gos_export_permission_deny">ERROR: You do not have the permissions to send data to the specified system.</string>
+    <string name="gos_export_not_supported">ERROR: Target system does not support sending observations via Gos.</string>
+    <string name="gos_export_wrong_num_obs">ERROR: Response number of observations different from request</string>
+    <string name="gos_export_missing_obs">ERROR: Missing observation in response</string>
+    <string name="gos_export_multiple_obs">ERROR: Multiple observations per variable</string>
+    <string name="gos_export_unknown_error">ERROR: Unknown Error</string>
+    <string name="gos_export_successful">Gos Export Successful</string>
+    <string name="gos_saving_indicator">Saving Observations…</string>
+    <string name="gos_field_non_matching_sources">Unable to sync data. Field data originates from, %1$s, Gos url currently set to %2$s. Sources must match.</string>
+    <string name="gos_trait_already_exists">Trait already exists: %1$s. Not saving.</string>
+    <string name="gos_error_saving_all_traits">Error saving traits. No traits were saved.</string>
+    <string name="gos_error_saving_some_traits">Error saving some traits. Some traits were not saved</string>
+    <string name="gos_traits_saved_success">Selected traits saved successfully.</string>
+    <string name="gos_device_offline_warning">Device Offline: Please connect to a network and try again</string>
+    <string name="gos_next">Next</string>
+    <string name="gos_prev">Prev</string>
+    <string name="gos_page_one_of_one">Page 1 of 1</string>
+    <string name="gos_auth_needed_title">Login Needed</string>
+    <string name="gos_auth_needed">
+    You need to be logged into the system you are attempting to sync data with in order
+        to sync your data.
+
+    Would you like to authenticate now?
+    </string>
+    <string name="gos_info_message">
+        Traits and fields imported via Gos will be able to export their observations via the Gos export.
+        Traits and fields created manually or imported via CSV will need to be exported via CSV format.
+    </string>
+    <string name="gos_info_title">Breeding API</string>
+    <string name="gos_auth_btn">Log In to Site</string>
+    <string name="gos_port">Gos port</string>
+    <string name="gos_input_port">Please enter the port number</string>
+    <string name="gos_username">Gos username</string>
+    <string name="gos_input_username">Please enter the username</string>
+    <string name="gos_password">Gos password</string>
+    <string name="gos_input_password">Please enter password</string>
+    <string name="gos_contain_space">Cannot contain Spaces</string>
+    <string name="gos_skipped_traits">Successfully fetched traits. %1$d traits ignored because of missing gos \'trait\' field</string>
+
+    <string name="gos_study_incompatible">This Gos study is currently incompatible with Field Book. Studies must include row and column in the header.</string>
+    <string name="act_gos_auth_http_warning_title">HTTP Warning</string>
+    <string name="act_gos_auth_http_warning_message">You have entered an http url. There is no guarantee that this connection is secure.</string>
+    <string name="preferences_gos_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
 
     <!--- Zebra printer errors -->
     <string name="printer_open">Printer is open</string>

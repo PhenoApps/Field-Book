@@ -365,4 +365,9 @@
 手動あるいはCSVを介して作成した形質や圃場はCSVフォーマットを介してエクスポートする必要があります。</string>
     <string name="brapi_info_title">BrAPI同期情報</string>
     <string name="brapi_auth_btn">サイトにログイン</string>
+
+    <string name="gos_base_url">GosのURL</string>
+    <string name="gos_base_url_default">www.mingleadgene.com</string>
+    <string name="gos_base_url_desc">Gosサーバー接続のための基本URL</string>
+    <string name="gos_authorize">Gos認証</string>
 </resources>

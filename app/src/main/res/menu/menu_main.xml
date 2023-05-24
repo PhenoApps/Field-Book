@@ -5,6 +5,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
+
+    <item
+        android:id="@+id/uploadGos"
+        android:icon="@drawable/ic_tb_details"
+        android:showAsAction="always"
+        android:title="@string/preferences_appearance_toolbar_customize_uploadGos" />
     <item
         android:id="@+id/help"
         android:icon="@drawable/ic_tb_help"

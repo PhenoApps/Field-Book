@@ -375,4 +375,9 @@ para sincronizar tus datos.
 Las variables y los campos creados manualmente o importados a través de CSV deberán exportarse a través de formato CSV.</string>
     <string name="brapi_info_title">Información de sincronización de BrAPI</string>
     <string name="brapi_auth_btn">Iniciar sesión en el Sitio</string>
+
+    <string name="gos_base_url">URL Gos</string>
+    <string name="gos_base_url_default">www.mingleadgene.com</string>
+    <string name="gos_base_url_desc">La URL base para el servidor conectado por Gos</string>
+    <string name="gos_authorize">Autorizar Gos</string>
 </resources>

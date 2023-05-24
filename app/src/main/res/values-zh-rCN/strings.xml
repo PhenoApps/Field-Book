@@ -122,6 +122,7 @@
     <string name="preferences_appearance_toolbar_customize_resources">资源</string>
     <string name="preferences_appearance_toolbar_customize_summary">汇总</string>
     <string name="preferences_appearance_toolbar_customize_lock">锁定</string>
+    <string name="preferences_appearance_toolbar_customize_uploadGos">上传Gos</string>
     <string name="preferences_behavior_title">动作</string>
     <string name="preferences_behavior_volume_buttons_navigate">用音量键翻动记录</string>
     <string name="preferences_behavior_volume_buttons_navigate_description">按音量键上翻或下翻记录</string>
@@ -367,4 +368,74 @@
     <string name="brapi_info_title">BrAPI同步信息中</string>
     <string name="brapi_auth_btn">登录进入站点</string>
     <string name="about_technical_title">技术细节</string>
+
+    <!-- gos strings -->
+    <string name="preferences_gos_core_title">Gos设置</string>
+    <string name="gos_port">Gos端口号</string>
+    <string name="gos_input_port">请输入Gos端口号</string>
+    <string name="gos_username">Gos用户名</string>
+    <string name="gos_input_username">请输入用户名</string>
+    <string name="gos_password">Gos密码</string>
+    <string name="gos_input_password">请输入密码</string>
+    <string name="gos_base_url">Gos网址</string>
+    <string name="gos_input_base_url">请输入Gos登录地址</string>
+    <string name="gos_contain_space">不可包含空格</string>
+    <string name="gos_base_url_desc">连接到Gos服务器的基础网址</string>
+    <string name="gos_save_authorize">保存</string>
+    <string name="gos_authorize">Gos测试连接</string>
+    <string name="gos_reauthorize">再授权</string>
+    <string name="gos_check_setting">Gos配置不完整,请在设置中检查</string>
+    <string name="gos_revoke_auth">退出</string>
+    <string name="gos_auth_success">Gos测试连接成功</string>
+    <string name="gos_auth_deny">BrAPI授权被拒绝</string>
+    <string name="gos_auth_error_starting">启动BrAPI授权出错</string>
+    <string name="gos_btn_auth_summary">BrAPI当前的授权价格是 %1$s</string>
+    <string name="gos_base_url_default">www.mingleadgene.com</string>
+    <string name="gos_authorize_failed_timeout">测试连接超时,请检查地址和端口</string>
+    <string name="gos_authorize_failed_403">测试连接失败,请检查用户名或密码</string>
+    <string name="gos_authorize_200">测试连接成功</string>
+    <string name="gos_load_data_button">载入地块</string>
+    <string name="gos_load_traits_button">载入性状</string>
+    <string name="gos_save_data_button">保存地块</string>
+    <string name="gos_study_name">名称</string>
+    <string name="gos_study_description">描述</string>
+    <string name="gos_study_location">位置</string>
+    <string name="gos_study_num_plots">小区</string>
+    <string name="gos_study_num_traits">性状</string>
+    <string name="gos_study_detail_error">载入课题细节出错。课题未保存。</string>
+    <string name="gos_plot_detail_error">载入课题小区出错。课题未保存。</string>
+    <string name="gos_study_traits_error">载入课题性状出错。课题未保存。</string>
+    <string name="gos_ontology_error">从BrAPI载入性状出错。</string>
+    <string name="gos_save_field_error">保存地块出错。</string>
+    <string name="gos_field_not_selected">选中的地块必须是从BrAPI载入的。</string>
+    <string name="gos_save_trait">保存性状</string>
+    <string name="gos_must_configure_url">操作前必须设置有效的BrAPI网址</string>
+    <string name="gos_export_failed">BrAPI导出失败</string>
+    <string name="gos_export_permission_deny">错误：你不具有向专用系统发送数据的许可。</string>
+    <string name="gos_export_not_supported">错误：目标系统不支持通过BrAPI发送观测值。</string>
+    <string name="gos_export_wrong_num_obs">错误：观测值返回数目与申请不一致。</string>
+    <string name="gos_export_missing_obs">错误：返回缺失观测值。</string>
+    <string name="gos_export_multiple_obs">错误：每个变量多个观测值。</string>
+    <string name="gos_export_unknown_error">错误：未知错误。</string>
+    <string name="gos_export_successful">BrAPI导出成功</string>
+    <string name="gos_saving_indicator">在保存观测值...</string>
+    <string name="gos_field_non_matching_sources">无法同步数据。地块数据来自%1$s，BrAPI当前设为%2$s。来源地址必须一致。</string>
+    <string name="gos_trait_already_exists">性状已经存在。 %1$s未保存。</string>
+    <string name="gos_error_saving_all_traits">保存性状出错。未保存性状。</string>
+    <string name="gos_error_saving_some_traits">部分性状保证出错。部分性状未保存。</string>
+    <string name="gos_traits_saved_success">选中的性状保存成功。</string>
+    <string name="gos_device_offline_warning">设备离线：请连接网络再试</string>
+    <string name="gos_next">下一个</string>
+    <string name="gos_prev">前一个</string>
+    <string name="gos_page_one_of_one">第一页，共一页。</string>
+    <string name="gos_auth_needed_title">需要登录</string>
+    <string name="gos_auth_needed">需要登录系统。
+你试图通过同步数据来保存你的数据。
+
+现在需要授权吗？</string>
+    <string name="gos_info_message">通过BrAPI导入的性状和地块可以通过“BrAPI导出”来导出观测值。
+
+通过手工创建或通过CSV导入的性状和地块需要用CSV格式导出。</string>
+    <string name="gos_info_title">BrAPI同步信息中</string>
+    <string name="gos_auth_btn">登录进入站点</string>
 </resources>
