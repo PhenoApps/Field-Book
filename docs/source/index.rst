@@ -39,6 +39,7 @@ Contents
    trait-location
    trait-zebra
    trait-gnss
+   trait-usb-camera
 
 .. toctree::
    :maxdepth: 2
