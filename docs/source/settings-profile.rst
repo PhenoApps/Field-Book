@@ -8,21 +8,50 @@ Profile Settings
 
    Profile settings screen layout
 
+Profile
+-------
+
 |person| Person
 ~~~~~~~~~~~~~~~
 
 Sets the first and last name of the person operating Field Book. This information is stored with each collected measurement as metadata and is included in the database |export| :doc:`export` format.
 
-Additional settings are used to reset (|reset|) or turn on/off (|verify|) regular verification of the profle information
+|reset| Reset Profile
+~~~~~~~~~~~~~~~~~~~~~
+
+Unsets the first and last name of the person operating Field Book.
+
+|verify| Require Person
+~~~~~~~~~~~~~~~~~~~~~~~
+
+If enabled, prevents the use of the app unless Person is set. And adds a |interval| time between verification setting, which can be set to one of three intervals
+
+.. figure:: /_static/images/settings/settings_profile_verification_times.png
+   :width: 40%
+   :align: center
+   :alt: Profile verification interval options
+
+   Choice of profile verification intervals
+
+Crashlytics
+-----------
+
+|id| Unique ID
+~~~~~~~~~~~~~~
+
+Turns on more specific crash logging to help development team improve Field Book
 
 .. |person| image:: /_static/icons/settings/profile/account.png
-  :width: 20
-
-.. |export| image:: /_static/icons/settings/profile/content-save.png
   :width: 20
 
 .. |reset| image:: /_static/icons/settings/profile/delete.png
   :width: 20
 
 .. |verify| image:: /_static/icons/settings/profile/account-clock-outline.png
+  :width: 20
+
+.. |interval| image:: /_static/icons/settings/profile/hours-24.png
+  :width: 20
+
+.. |id| image:: /_static/icons/settings/profile/card-account-details-outline.png
   :width: 20
