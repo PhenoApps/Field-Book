@@ -1078,19 +1078,17 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
      * @return
      */
     private String convertBrAPIDataType(String dataType) {
-        //TODO: Check these out and make sure they match with fieldbook data types.
-        switch (dataType) {
-            case "Nominal":
-            case "Ordinal":
+        switch (dataType.toLowerCase()) {
+            case "nominal":
+            case "ordinal":
             case "categorical":
             case "qualitative":
                 // All Field Book categories are ordered, so this works
                 return "categorical";
             case "date":
-            case "Date":
                 return "date";
-            case "Numerical":
-            case "Duration":
+            case "numerical":
+            case "duration":
             case "numeric":
                 return "numeric";
             case "rust rating":
@@ -1114,12 +1112,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 return "barcode";
             case "gnss":
                 return "gnss";
+            case "zebra label printer":
             case "zebra label print":
                 return "zebra label print";
             case "usb camera":
                 return "usb camera";
-            case "Code":
-            case "Text":
+            case "code":
+            case "text":
             default:
                 return "text";
         }
