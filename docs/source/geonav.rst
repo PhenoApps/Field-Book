@@ -14,18 +14,39 @@ To use GeoNav, navigate to the :doc:`settings-geonav` (|geonav|) and enable GeoN
 
    The collect screen GeoNav confirmation message
 
-Once the rover is connected, Field Book will automatically display the nearest plot in the bottom toolbar. Press the arrow symbol on the right to jump to the plot. To enable automatic navigation, toggle the compass in the top toolbar. (#todo include toolbar icons and meanings)
+Once the rover is connected, Field Book will automatically display the nearest plot in the bottom toolbar. Press the |navigate| symbol on the right to jump to the plot.
 
 .. figure:: /_static/images/geonav/goto_cropped.png
    :width: 60%
    :align: center
-   :alt: GeoNav Interface
+   :alt: GeoNav manual navigation
 
-   The collect screen bottom toolbar with GeoNav on
+   The collect screen bottom toolbar showing the nearest plot for manual geonavigation
+
+To enable automatic geonavigation, press the |compass-off| symbol that appears on the right in the top toolbar. It will change to a |compass| symbol indicating that automatic geonavigation is enabled. Fieldbook will automatically switch to the nearest entry as the device moves around the field, displaying the following message on each switch.
+
+.. figure:: /_static/images/geonav/navigated_cropped.png
+   :width: 60%
+   :align: center
+   :alt: GeoNav automatic navigation
+
+   The collect screen message when the entry changes during automatic geonavigation
+
+Example
+-------
+
+.. figure:: /_static/gifs/GeoNavDemo.gif
+   :width: 90%
+   :align: center
+   :alt: GeoNav automatic navigation demo
+
+   GeoNav automatic navigation demonstration.
 
 Recommendations
 ---------------
-This section provides specific hardware recommendations, as well as instructions for deploying the suggested devices to use the GeoNav feature in the field.
+This section provides the original hardware recommendations from when the Geonav feature was first developed in conjunction with the Breeding Insight OnRamp project. It also includes instructions for deploying the suggested devices to use the GeoNav feature in the field.
+
+While not covered in the original recommendations, Emlid's new `Reach RX <https://emlid.com/reachrx/>` device is also suitable for Geonav, and comes with a simplified setup process. Devices from other manufacturers should also work with the Geonav feature.
 
 Supplies
 ~~~~~~~~
@@ -33,10 +54,10 @@ Supplies
 * Survey post (optional depending on rover case)
 * Tablet
 * RTK Hardware (Base):
-  * Emlid RS2
+  * `Emlid RS2 <https://emlid.com/reachrs2plus/>`
 * RTK Hardware (Rover)
-  * Emlid RS2 OR
-  * Emlid M2 + Antenna + cable + LoRa radio + microUSB cable + battery
+  * `Emlid RS2 <https://emlid.com/reachrs2plus/>` OR
+  * `Emlid M2 <https://emlid.com/reach/>` + Antenna + cable + LoRa radio + microUSB cable + battery
 
 Instructions (field use)
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -50,13 +71,26 @@ Instructions (field use)
 7. Go back to TABLET BT settings. Turn on TABLET BT. Select ROVER from list of available devices and input password when prompted.
 8. Finally, navigate to FIELDBOOK. Start collecting data. When prompted for GNSS trait, select ROVER.
 
-Cases
-~~~~~
-3D Cases for M2 hardware are available for purchase online.
+Emlid's own documentation for the RS2 and M2 can be found here `(RS2 docs) <https://docs.emlid.com/reachrs2/>` and here `(M2 docs) <https://docs.emlid.com/reach/>`
+
+Kits and Cases
+~~~~~~~~~~~~~~
+Complete kits and matching 3D Cases for M2 hardware are available for purchase online.
+
+https://e38surveysolutions.com/products/reach-m2-with-gnss-antenna
 
 https://cults3d.com/en/3d-model/tool/emlid-reach-m2-case-estuche-gnss-gps-rtk
 
 
 .. |geonav| image:: /_static/icons/settings/main/map-search.png
+  :width: 20
+
+.. |navigate| image:: /_static/icons/collect/send-outline.png
+  :width: 20
+
+.. |compass-off| image:: /_static/icons/collect/compass-off-outline.png
+  :width: 20
+
+.. |compass| image:: /_static/icons/fields/compass-outline.png
   :width: 20
 
