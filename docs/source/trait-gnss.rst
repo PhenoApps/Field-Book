@@ -6,7 +6,7 @@ Overview
 The GNSS trait format is used to acquire high-accuracy GPS coordinates from an external, bluetooth-connected device. While other traits only capture phenotypic or observational data, the GNSS trait is intended to be used to capture metadata about the plot itself. This metadata can be used in conjunction with the :doc:`geonav` (|geonav|) feature to later use the plot metadata to automatically navigate through the field.
 
 
-Creationlayout
+Creation
 --------
 
 .. figure:: /_static/images/traits/formats/create_gnss.png
@@ -38,7 +38,7 @@ When first navigating to a GNSS trait, the collect screen will show a |gnss| but
 
 Pressing the |gnss| button will show a list of devices that can be accessed to provide a location for this trait.
 
-.. figure:: /_static/images/traits/formats/collect_gnss_device_select.png
+.. figure:: /_static/images/traits/formats/collect_gnss_select_device.png
    :width: 60%
    :align: center
    :alt: GNSS device select
@@ -47,7 +47,7 @@ Pressing the |gnss| button will show a list of devices that can be accessed to p
 
 Once a device is selected the screen will populate with a series of values from the GNSS reciever output. This includes the high-accuracy GPS Lat and Long coordinates, as well as the time of day in Coordinated Universal Time (UCT), the Horizontal Dilution of Precision (HDOP, a measure of the suitability of satellite positioning in the sky, ideally 1 or below), the number of satellites connected to, and the altitude and accuracy.
 
-.. figure:: /_static/images/traits/formats/collect_reciever_output.png
+.. figure:: /_static/images/traits/formats/collect_gnss_reciever_output.png
    :width: 60%
    :align: center
    :alt: GNSS reciever output
@@ -80,5 +80,5 @@ If errors occur while collecting gnss data (e.g. socket cannot be established), 
 .. |geonav| image:: /_static/icons/settings/main/map-search.png
   :width: 20
 
-.. |capture| image:: /_static/icons/formats/crosshairs.png
+.. |capture| image:: /_static/icons/formats/crosshairs-gps.png
   :width: 20
