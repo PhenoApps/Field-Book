@@ -46,7 +46,7 @@ Recommendations
 ---------------
 This section provides the original hardware recommendations from when the Geonav feature was first developed in conjunction with the Breeding Insight OnRamp project. It also includes instructions for deploying the suggested devices to use the GeoNav feature in the field.
 
-While not covered in the original recommendations, Emlid's new `Reach RX <https://emlid.com/reachrx/>` device is also suitable for Geonav, and comes with a simplified setup process. Devices from other manufacturers should also work with the Geonav feature.
+While not covered in the original recommendations, Emlid's new `Reach RX <https://emlid.com/reachrx/>_ device is also suitable for Geonav, and comes with a simplified setup process. Devices from other manufacturers should also work with the Geonav feature.
 
 Supplies
 ~~~~~~~~
@@ -54,10 +54,10 @@ Supplies
 * Survey post (optional depending on rover case)
 * Tablet
 * RTK Hardware (Base):
-  * `Emlid RS2 <https://emlid.com/reachrs2plus/>`
+  * `Emlid RS2 <https://emlid.com/reachrs2plus/>`_
 * RTK Hardware (Rover)
-  * `Emlid RS2 <https://emlid.com/reachrs2plus/>` OR
-  * `Emlid M2 <https://emlid.com/reach/>` + Antenna + cable + LoRa radio + microUSB cable + battery
+  * `Emlid RS2 <https://emlid.com/reachrs2plus/>`_ OR
+  * `Emlid M2 <https://emlid.com/reach/>`_ + Antenna + cable + LoRa radio + microUSB cable + battery
 
 Instructions (field use)
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,14 +71,13 @@ Instructions (field use)
 7. Go back to TABLET BT settings. Turn on TABLET BT. Select ROVER from list of available devices and input password when prompted.
 8. Finally, navigate to FIELDBOOK. Start collecting data. When prompted for GNSS trait, select ROVER.
 
-Emlid's own documentation for the RS2 and M2 can be found here `(RS2 docs) <https://docs.emlid.com/reachrs2/>` and here `(M2 docs) <https://docs.emlid.com/reach/>`
+Emlid's own documentation for the RS2 and M2 can be found here `(RS2 docs) <https://docs.emlid.com/reachrs2/>`_ and here `(M2 docs) <https://docs.emlid.com/reach/>`_
 
 Kits and Cases
 ~~~~~~~~~~~~~~
-Complete kits and matching 3D Cases for M2 hardware are available for purchase online.
+Complete kits and matching 3D Cases for M2 hardware are available for purchase online:
 
 https://e38surveysolutions.com/products/reach-m2-with-gnss-antenna
-
 https://cults3d.com/en/3d-model/tool/emlid-reach-m2-case-estuche-gnss-gps-rtk
 
 
