@@ -44,6 +44,9 @@ Turns on more specific crash logging to help development team improve Field Book
 .. |person| image:: /_static/icons/settings/profile/account.png
   :width: 20
 
+.. |export| image:: /_static/icons/settings/profile/content-save.png
+  :width: 20
+
 .. |reset| image:: /_static/icons/settings/profile/delete.png
   :width: 20
 
