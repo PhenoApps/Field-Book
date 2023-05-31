@@ -34,7 +34,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build APK
-        run: ./gradlew app:assembleRelease 
+        run: ./gradlew app:assembleRelease
 
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
@@ -51,10 +51,12 @@ jobs:
         with:
           name: Build Artifacts
           path: app/build/outputs/
-      
 
       - name: Rename APK file
-        run: mv app/build/outputs/apk/release/app-release-unsigned-signed.apk app/build/outputs/apk/release/${{ env.APK_NUMBER }}-${{ steps.branch-name.outputs.current_branch }}-Field-Book.apk
+        run: |
+          FULL_BRANCH= ${{ steps.branch-name.outputs.current_branch }}
+          BRANCH = ${FULL_BRANCH##*/}
+          mv app/build/outputs/apk/release/app-release-unsigned-signed.apk app/build/outputs/apk/release/${{ env.APK_NUMBER }}-BRANCH-Field-Book.apk
 
       - name: Attach APK to PR using artifacts branch
         uses: gavv/pull-request-artifacts@v1.0.0
