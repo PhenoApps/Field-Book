@@ -202,6 +202,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         label = act.findViewById(R.id.labelPreview);
 
+        label.requestFocus();
     }
 
     @Override

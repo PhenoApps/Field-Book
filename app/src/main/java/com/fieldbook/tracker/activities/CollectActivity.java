@@ -1438,7 +1438,23 @@ public class CollectActivity extends ThemedActivity
                     return true;
                 }
                 return false;
+//                else if (event.action == KeyEvent.ACTION_UP
+//                    && code == KeyEvent.KEYCODE_ENTER || code == KeyEvent.KEYCODE_TAB) {
+//
+//                inputEditText?.requestFocus()
+//            }
             default:
+
+                if (action == KeyEvent.ACTION_UP) {
+
+                    if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_TAB) {
+
+                        collectInputView.requestFocus();
+
+                        return false;
+                    }
+                }
+
                 return super.dispatchKeyEvent(event);
         }
     }

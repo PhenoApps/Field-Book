@@ -73,7 +73,10 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init(Activity act) {
+
         gridMultiCat = act.findViewById(R.id.catGrid);
+
+        gridMultiCat.requestFocus();
     }
 
     @Override

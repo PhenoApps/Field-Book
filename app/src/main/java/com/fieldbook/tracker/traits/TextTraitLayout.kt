@@ -112,6 +112,8 @@ class TextTraitLayout : BaseTraitLayout {
 
             true
         }
+
+        inputEditText?.requestFocus()
     }
 
     override fun loadLayout() {

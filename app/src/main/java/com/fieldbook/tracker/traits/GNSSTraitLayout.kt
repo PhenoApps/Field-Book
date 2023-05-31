@@ -277,6 +277,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         collectButton = act.findViewById(R.id.gnss_collect_button)
         disconnectButton = act.findViewById(R.id.disconnect_button)
 
+        connectButton.requestFocus()
+
         initialize()
 
     }

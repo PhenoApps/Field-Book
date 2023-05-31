@@ -84,6 +84,7 @@ public class CounterTraitLayout extends BaseTraitLayout {
             triggerTts(value);
         });
 
+        addCounterBtn.requestFocus();
     }
 
     @Override

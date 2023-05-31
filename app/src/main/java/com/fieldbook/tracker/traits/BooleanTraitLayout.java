@@ -70,6 +70,7 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
             threeStateSeekBar.setProgress(ThreeState.OFF);
         });
 
+        threeStateSeekBar.requestFocus();
     }
 
     @Override
