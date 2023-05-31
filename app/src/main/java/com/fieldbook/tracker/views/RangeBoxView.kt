@@ -526,7 +526,6 @@ class RangeBoxView : ConstraintLayout {
             return
         }
         if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
-            && !controller.getTraitBox().existsTrait()
         ) {
             controller.playSound("advance")
         }
@@ -542,6 +541,7 @@ class RangeBoxView : ConstraintLayout {
             }
         }
         controller.resetGeoNavMessages()
+        controller.getCollectInputView().resetInitialIndex()
     }
 
     fun moveEntryRight() {
@@ -549,7 +549,6 @@ class RangeBoxView : ConstraintLayout {
             return
         }
         if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
-            && !controller.getTraitBox().existsTrait()
         ) {
             controller.playSound("advance")
         }
@@ -565,6 +564,7 @@ class RangeBoxView : ConstraintLayout {
             }
         }
         controller.resetGeoNavMessages()
+        controller.getCollectInputView().resetInitialIndex()
     }
 
     private fun decrementPaging(pos: Int): Int {

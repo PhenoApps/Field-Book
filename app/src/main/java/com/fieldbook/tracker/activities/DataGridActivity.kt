@@ -16,9 +16,11 @@ import com.evrencoskun.tableview.listener.ITableViewListener
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.DataGridAdapter
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.CategoryJsonUtil.Companion.decode
 import com.fieldbook.tracker.utilities.Utils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -185,6 +187,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
         val ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
 
+        val studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+
         val showLabel = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") == "value"
 
         val uniqueHeader = ep.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
@@ -251,21 +255,38 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                                         val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
 
+                                        val repeatedValues = database.getRepeatedValues(studyId, id, variable)
+                                        if (repeatedValues.size > 1) {
+                                            println("$studyId $id $variable has repeated values...!")
+                                        }
+
+                                        var cellValue = value
+
                                         if (t != null) {
 
                                             try {
 
-                                                dataList.add(CellData(CategoryJsonUtil
-                                                    .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel), id))
+                                                cellValue = CategoryJsonUtil
+                                                    .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel)
 
                                             } catch (e: Exception) {
 
-                                                dataList.add(CellData(value, id))
+                                                e.printStackTrace()
 
                                             }
-                                        } else {
+                                        }
+
+                                        //check repeated values and replace cellvalue with an ellipses
+
+                                        if (repeatedValues.size > 1) {
+
                                             //data list is a trait row in the data grid
-                                            dataList.add(CellData(value, id))
+                                            dataList.add(CellData("...", id))
+
+                                        } else {
+
+                                            dataList.add(CellData(cellValue, id))
+
                                         }
                                     }
                                 }
@@ -328,8 +349,29 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
     override fun onCellClicked(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {
 
+        val ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
+
+        val studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+
         //populate plotId clicked from parameters and global store
         val plotId = mPlotIds[row]
+
+        val trait = mTraits[column]
+
+        val repeatedValues = database.getRepeatedValues(studyId, plotId, trait)
+
+        if (repeatedValues.size <= 1) {
+
+            navigateFromValueClicked(plotId, column)
+
+        } else {
+
+            //show alert dialog with repeated values
+            showRepeatedValuesNavigatorDialog(repeatedValues)
+        }
+    }
+
+    private fun navigateFromValueClicked(plotId: String, traitIndex: Int, rep: Int? = 1) {
 
         //this is the onlick handler which displays a quick message and sets the intent result / finishes
         Utils.makeToast(applicationContext, plotId)
@@ -339,12 +381,58 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
         returnIntent.putExtra("result", plotId)
 
         //the trait index is used to move collect activity to the clicked trait
-        returnIntent.putExtra("trait", column)
+        returnIntent.putExtra("trait", traitIndex)
+
+        returnIntent.putExtra("rep", rep)
 
         setResult(RESULT_OK, returnIntent)
 
         finish()
+    }
 
+    private fun decodeValue(value: String): String {
+
+        val ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
+
+        val labelValPref: String = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") ?: "value"
+        val scale = decode(
+            value
+        )
+        return if (scale.isNotEmpty()) {
+            if (labelValPref == "value") {
+                scale[0].value
+            } else scale[0].label
+        } else ""
+    }
+
+    private fun showRepeatedValuesNavigatorDialog(repeatedValues: Array<ObservationModel>) {
+
+        for (m in repeatedValues) {
+            if (m.observation_variable_field_book_format in setOf("categorical", "multicat", "qualitative")) {
+                if (m.value.isNotEmpty()) {
+                    m.value = decodeValue(m.value)
+                }
+            }
+        }
+
+        val choices = repeatedValues.map { it.value }.filter { it.isNotBlank() }.toTypedArray()
+
+        //show a dialog to choose which value to navigate to
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_data_grid_repeated_measures_title)
+            .setSingleChoiceItems(choices, 0) { dialog, which ->
+
+                val value = repeatedValues[which]
+
+                val plotId = value.observation_unit_id
+
+                val traitIndex = mTraits.indexOf(value.observation_variable_name)
+
+                navigateFromValueClicked(plotId, traitIndex, which + 1)
+
+                dialog.dismiss()
+
+            }.create().show()
     }
 
     //region unimplemented click events

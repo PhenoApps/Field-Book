@@ -16,6 +16,9 @@ import com.fieldbook.tracker.preferences.GeneralKeys
  */
 class CollectInputView(context: Context, attributeSet: AttributeSet) : ConstraintLayout(context, attributeSet) {
 
+    //used to initialize the selected value with an index (mainly used for navigation)
+    var forceInitialRep = -1
+
     var hasData: Boolean = false
 
     private val originalEditText: EditText
@@ -61,7 +64,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
 
         if (isRepeatEnabled()) {
 
-            repeatView.initialize(models)
+            repeatView.initialize(models, forceInitialRep)
 
         } else {
 
@@ -116,5 +119,17 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         if (isRepeatEnabled()) {
             repeatView.clear()
         } else editText.text.clear()
+    }
+
+    fun navigateToRep(rep: Int) {
+        forceInitialRep = rep
+    }
+
+    fun getInitialIndex(): Int {
+        return forceInitialRep
+    }
+
+    fun resetInitialIndex() {
+        forceInitialRep = -1
     }
 }

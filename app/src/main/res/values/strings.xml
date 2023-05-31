@@ -610,6 +610,7 @@
     <string name="preferences_brapi_traits_title">BrAPI Variables</string>
     <string name="menu_action_header_view_data_grid_title">Update Row Headers</string>
     <string name="dialog_data_grid_header_picker_title">Choose Row Headers</string>
+    <string name="dialog_data_grid_repeated_measures_title">Choose Observation</string>
     <string name="act_trait_editor_menu_click_while_dragging">Please finish dragging.</string>
     <string name="act_collect_no_plots">This study has no plots saved.</string>
     <string name="scan_barcode">Scan</string>
@@ -784,4 +785,8 @@
     <string name="dialog_multi_measure_confirm_delete_title">These observations will be permanently deleted.</string>
     <string name="dialog_multi_measure_delete">Delete</string>
     <string name="dialog_multi_measure_select_all">Select all</string>
+    <string name="preferences_sound_delete_obs_title">Delete Observation Sound</string>
+    <string name="preferences_sound_delete_obs_description">Notification sound when observation is deleted in Collect activity.</string>
+    <string name="file_already_exists">File already exists.</string>
+    <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
 </resources>

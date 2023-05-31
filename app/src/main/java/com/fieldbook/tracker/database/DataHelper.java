@@ -285,6 +285,15 @@ public class DataHelper {
     }
 
     @NonNull
+    public String getNextRep(String studyId, String unit, String trait) {
+
+        open();
+
+        return String.valueOf(ObservationDao.Companion.getNextRepeatedValue(studyId, unit, trait));
+
+    }
+
+    @NonNull
     public String getDefaultRep(String studyId, String unit, String trait) {
 
         open();

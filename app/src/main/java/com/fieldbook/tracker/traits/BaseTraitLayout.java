@@ -56,6 +56,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
         }
     }
 
+    public abstract int layoutId();
+
     public abstract String type();  // return trait type
 
     public String decodeValue(String value) { return value; }
@@ -64,9 +66,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
         return trait.equals(type());
     }
 
-    public abstract void init();
-
-    public void init(Activity act) { /* not implemented */ }
+    public abstract void init(Activity act);
 
     /**
      * Override to block multi-measure navigation with specific condition
@@ -114,7 +114,15 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
         if (observations.length > 0) {
 
+            int repIndex = act.getInputView().getInitialIndex();
+
             String value = observations[observations.length - 1].getValue();
+
+            if (repIndex != -1) {
+
+                value = observations[repIndex - 1].getValue();
+
+            }
 
             if (!value.isEmpty()) {
 
@@ -175,6 +183,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
         isLocked = act.isLocked();
     }
 
+    public void onExit() {}
+
     /**
      * Handles the repeated value view list state.
      * If this feature is enabled, the list will be modified and updated.
@@ -183,6 +193,10 @@ public abstract class BaseTraitLayout extends LinearLayout {
         CollectInputView inputView = getCollectInputView();
         if (inputView.isRepeatEnabled()) {
             inputView.getRepeatView().userDeleteCurrentRep();
+        }
+        //check if sound on delete is enabled in preferences and play sound
+        if (getPrefs().getBoolean(GeneralKeys.DELETE_OBSERVATION_SOUND, false)) {
+            controller.playSound("delete");
         }
     }
 

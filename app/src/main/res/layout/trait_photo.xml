@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.fieldbook.tracker.traits.PhotoTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/photoLayout"
     android:layout_width="match_parent"
@@ -22,11 +23,14 @@
             android:orientation="horizontal"
             android:padding="5dp">
 
-            <Gallery
-                android:id="@+id/photo"
-                android:layout_width="fill_parent"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/trait_photo_rv"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:spacing="5dp" />
+                android:layout_margin="8dp"/>
+
         </LinearLayout>
 
         <ImageButton

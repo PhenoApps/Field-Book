@@ -78,13 +78,13 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
     private SharedPreferences ep;
     private boolean brapiDialogShown;
 
-    private TraitAdapter mAdapter;
+    private TraitAdapter traitAdapter;
 
     public NewTraitDialog(View layout, TraitEditorActivity activity) {
         // fields
         originActivity = activity;
 
-        mAdapter = activity.getAdapter();
+        traitAdapter = activity.getAdapter();
         traitFormats = new TraitFormatCollection();
         oldTrait = null;
         ep = activity.getPreferences();
@@ -140,12 +140,12 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
         format.setOnItemSelectedListener(createFormatSelectionListener());
 
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(
-                TraitEditorActivity.thisActivity,
+                activity,
                 R.layout.custom_spinner_layout,
                 traitFormats.getLocalStringList());
         format.setAdapter(itemsAdapter);
 
-        categoriesRv.setLayoutManager(new LinearLayoutManager(TraitEditorActivity.thisActivity));
+        categoriesRv.setLayoutManager(new LinearLayoutManager(activity));
         catList = new ArrayList<>();
         CategoryAdapter catAdapter = new CategoryAdapter(this);
         categoriesRv.setAdapter(catAdapter);
@@ -293,7 +293,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
         // Display our BrAPI dialog if it has not been show already
         // Get our dialog state from our adapter to see if a trait has been selected
         // brapiDialogShown = mAdapter.infoDialogShown;
-        setBrAPIDialogShown(mAdapter.infoDialogShown);
+        setBrAPIDialogShown(traitAdapter.getInfoDialogShown());
         if (!brapiDialogShown) {
             setBrAPIDialogShown(((TraitAdapterController) originActivity)
                             .displayBrapiInfo(originActivity, null, true));

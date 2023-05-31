@@ -26,6 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -115,7 +116,7 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     VerifyPersonHelper verifyPersonHelper;
-    
+
     public static boolean searchReload;
     public static String searchRange;
     public static String searchPlot;
@@ -432,9 +433,8 @@ public class CollectActivity extends ThemedActivity
             if (status) {
                 if (getTraitFormat().equals("photo")) {
                     // I want to use abstract method
-                    Map<String, String> newTraits = traitBox.getNewTraits();
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                    traitPhoto.brapiDelete(newTraits);
+                    traitPhoto.brapiDelete();
                 } else {
                     brapiDelete(getTraitName(), false);
                 }
@@ -665,6 +665,8 @@ public class CollectActivity extends ThemedActivity
 
         geoNavHelper.stopAverageHandler();
 
+        ep.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
+
         super.onPause();
     }
 
@@ -697,6 +699,7 @@ public class CollectActivity extends ThemedActivity
 
         if (!guiThread.isAlive()) {
             try {
+                //TODO test with just .run() to avoid exception
                 guiThread.start();
             } catch (IllegalThreadStateException e) {
                 e.printStackTrace();
@@ -769,6 +772,10 @@ public class CollectActivity extends ThemedActivity
             navigateToLastOpenedTrait();
 
         }
+
+        dataLocked = ep.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
+
+        refreshLock();
     }
 
     /**
@@ -961,8 +968,6 @@ public class CollectActivity extends ThemedActivity
 
         customizeToolbarIcons();
 
-        lockData();
-
         return true;
     }
 
@@ -1068,6 +1073,7 @@ public class CollectActivity extends ThemedActivity
                 if (dataLocked == UNLOCKED) dataLocked = LOCKED;
                 else if (dataLocked == LOCKED) dataLocked = FROZEN;
                 else dataLocked = UNLOCKED;
+                ep.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
                 lockData();
                 break;
             case android.R.id.home:
@@ -1261,10 +1267,13 @@ public class CollectActivity extends ThemedActivity
      * unlocked, locked, or frozen
      */
     void lockData() {
-        if (dataLocked == LOCKED) {
+
+        int state = ep.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
+
+        if (state == LOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
             disableDataEntry();
-        } else if (dataLocked == UNLOCKED) {
+        } else if (state == UNLOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
             enableDataEntry();
         } else {
@@ -1468,6 +1477,11 @@ public class CollectActivity extends ThemedActivity
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
                     moveToSearch("id", rangeID, null, null, inputPlotId, trait);
+                    //select the rep chosen from datagrid
+                    if (collectInputView.isRepeatEnabled()) {
+                        int rep = data.getIntExtra("rep", -1);
+                        collectInputView.navigateToRep(rep);
+                    }
                     mSkipLastUsedTrait = true;
                 }
                 break;
@@ -1867,4 +1881,14 @@ public class CollectActivity extends ThemedActivity
         return geoNavHelper.getMAverageHandler();
     }
 
+    @Override
+    public void inflateTrait(@NonNull BaseTraitLayout layout) {
+        getTraitLayout().onExit();
+        View v = LayoutInflater.from(this).inflate(layout.layoutId(), null);
+        LinearLayout holder = findViewById(R.id.traitHolder);
+        holder.removeAllViews();
+        holder.addView(v);
+        layout.init(this);
+        v.setVisibility(View.VISIBLE);
+    }
 }

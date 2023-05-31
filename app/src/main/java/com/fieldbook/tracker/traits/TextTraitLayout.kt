@@ -1,7 +1,10 @@
 package com.fieldbook.tracker.traits
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -67,10 +70,14 @@ class TextTraitLayout : BaseTraitLayout {
         return "text"
     }
 
-    private var scan = ""
-    override fun init() {
+    override fun layoutId(): Int {
+        return R.layout.trait_text
+    }
 
-        inputEditText = findViewById(R.id.trait_text_edit_text)
+    private var scan = ""
+    override fun init(act: Activity) {
+
+        inputEditText = act.findViewById(R.id.trait_text_edit_text)
 
         inputEditText?.setOnKeyListener { _, _, event ->
 
