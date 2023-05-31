@@ -46,9 +46,7 @@ To add your own field, trait, and resource files to the appropriate subdirectori
 Database
 --------
 
-Field Book uses an internal SQLite database to store imported fields and traits, as well as all data collected with the app.
-
-(#todo add db diagram)
+Field Book uses an internal SQLite database to store imported fields and traits, as well as all data collected with the app. The db schema is modelled on the Breeding API (BrAPI) standard, and is documented in the `Field Book developer wiki <https://github.com/PhenoApps/Field-Book/wiki>`_
 
 The database is automatically backed up to the **database** directory at regular intervals. It can also be manually exported and imported in |database| :doc:`settings-database`. This is useful for transferring Fieldbook data to a new device, or troubleshooting if a problem arises.
 
