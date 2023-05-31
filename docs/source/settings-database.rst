@@ -1,7 +1,7 @@
 Database Settings
 =================
 
-.. figure:: /_static/images/settings/settings_database_framed.png
+.. figure:: /_static/images/settings/database/settings_database_framed.png
    :width: 40%
    :align: center
    :alt: Database settings screen layout

@@ -3,7 +3,7 @@ Behavior Settings
 
 Behavior
 --------
-.. figure:: /_static/images/settings/settings_behavior_framed.png
+.. figure:: /_static/images/settings/behavior/settings_behavior_framed.png
    :width: 40%
    :align: center
    :alt: Behavior settings screen layout
@@ -22,7 +22,7 @@ Allows volume keys to be used to move to next/previous entry. Note that this doe
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 Allows the user to choose the behavior of the return key signal that can be included when scanning barcodes: next plot, next trait, or do nothing.
 
-.. figure:: /_static/images/settings/settings_behavior_return.png
+.. figure:: /_static/images/settings/behavior/settings_behavior_return.png
    :width: 40%
    :align: center
    :alt: Return key layout within behavior settings
@@ -33,7 +33,7 @@ Allows the user to choose the behavior of the return key signal that can be incl
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Disables left or right entry arrow unless data has been collected, to ensure an entry isn't accidentally skipped.
 
-.. figure:: /_static/images/settings/settings_behavior_disable_nav.png
+.. figure:: /_static/images/settings/behavior/settings_behavior_disable_nav.png
    :width: 40%
    :align: center
    :alt: Disable nav layout within behavior settings
@@ -52,7 +52,7 @@ Changes the date trait format to record date values as numbers counting up from 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 When advancing entries, skips either entries that already have data for the active trait, or entries that already have data for all traits.
 
-.. figure:: /_static/images/settings/settings_behavior_skip_entries.png
+.. figure:: /_static/images/settings/behavior/settings_behavior_skip_entries.png
    :width: 40%
    :align: center
    :alt: Skip entries layout within behavior settings

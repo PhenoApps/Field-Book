@@ -1,7 +1,7 @@
 Sound Settings
 ==============
 
-.. figure:: /_static/images/settings/settings_sounds_framed.png
+.. figure:: /_static/images/settings/sounds/settings_sounds_framed.png
    :width: 40%
    :align: center
    :alt: Sounds settings screen layout

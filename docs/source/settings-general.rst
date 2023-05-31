@@ -1,6 +1,13 @@
 General Settings
 ================
 
+.. figure:: /_static/images/settings/general/settings_general_framed.png
+   :width: 40%
+   :align: center
+   :alt: General settings screen layout
+
+   General settings screen layout
+
 System Defaults
 ---------------
 
@@ -8,17 +15,27 @@ System Defaults
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Opens the :doc:`storage` dialog for defining a 'Storage location' on the device.
 
-|import| Default import and |export| default export sources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Set default field import and export sources so the app doesn't ask each time. 
+|import| Default import source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Set the default field and trait import source to one of the provided options so the app doesn't ask each time.
 
-.. figure:: /_static/images/settings/settings_general_framed.png
+.. figure:: /_static/images/settings/general/settings_general_import_sources.png
    :width: 40%
    :align: center
-   :alt: General settings screen layout
+   :alt: Profile verification interval options
 
-   General settings screen layout
+   Default import options
 
+|export| Default export source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sets the default  export location to one of the provided options so the app doesn't ask each time.
+
+.. figure:: /_static/images/settings/general/settings_general_export_sources.png
+   :width: 40%
+   :align: center
+   :alt: Profile verification interval options
+
+  Default export options
 
 Optional Collect Tools
 ----------------------
@@ -27,18 +44,35 @@ Optional Collect Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Adds a button to the Collect top toolbar thats skips to the next entry without data
 
-|barcode| Move to entry via barcode
+|gps| Location collected
+~~~~~~~~~~~~~~~~~~~~~~~~
+Set the method for collecting location while using Field Book. Can be at the level of the field, the plot, or the individual observation
+
+.. figure:: /_static/images/settings/general/settings_general_location_collected.png
+   :width: 40%
+   :align: center
+   :alt: Location collected options
+
+  Location collect options
+
+|barcode-scan| Move to entry via barcode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Adds a button to the Collect toolbar that enables move to entry by scanning a barcode. The barcode must match a unique ID within the active trial.
+Adds a |barcode-scan| icon to the Collect toolbar. When pressed it opens the device camera to move to an entry by scanning a barcode. The barcode must match a unique ID within the active trial.
 
 |grid| Datagrid
 ~~~~~~~~~~~~~~~
-Adds a button to the Collect toolbar to view a grid of all the recorded values for each entry and trait
+Adds a |grid| icon to the Collect toolbar. When pressed it displays a grid of all the recorded values for each entry and trait. See more details about this tool in the |grid| :doc:`datagrid` section. 
 
 |fingerprint| Move to unique identifier
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Adds a button to the Collect toolbar that enables move to entry by typing the unique id (or by scanning it).
+Adds a || icon to the Collect toolbar. When pressed it opens a text entry dialog. Move to a specific entry by typing or scanning its unique id into the text field. 
 
+.. figure:: /_static/images/settings/general/settings_general_moveto_uid.png
+   :width: 40%
+   :align: center
+   :alt: Move to unique identifier tool
+
+  The move to unique identifier dialog
 
 .. |sd| image:: /_static/icons/settings/general/sd.png
   :width: 20
@@ -52,11 +86,17 @@ Adds a button to the Collect toolbar that enables move to entry by typing the un
 .. |next| image:: /_static/icons/settings/general/arrow-right-bold.png
   :width: 20
 
-.. |barcode| image:: /_static/icons/settings/general/barcode-scan.png
+.. |gps| image:: /_static/icons/formats/crosshairs-gps.png
+  :width: 20
+
+.. |barcode-scan| image:: /_static/icons/settings/general/barcode-scan.png
   :width: 20
 
 .. |grid| image:: /_static/icons/settings/general/grid.png
   :width: 20
 
 .. |fingerprint| image:: /_static/icons/settings/general/fingerprint.png
+  :width: 20
+
+.. |barcode| image:: /_static/icons/settings/general/barcode.png
   :width: 20

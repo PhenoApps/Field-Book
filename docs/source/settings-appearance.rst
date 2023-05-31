@@ -1,7 +1,7 @@
 Appearance Settings
 ===================
 
-.. figure:: /_static/images/settings/settings_appearance_framed.png
+.. figure:: /_static/images/settings/appearance/settings_appearance_framed.png
    :width: 40%
    :align: center
    :alt: Appearance settings screen layout
@@ -15,7 +15,7 @@ Application
 
 Opens an additional screen where a user can modify specifc colors or the entire theme of Field Book.
 
-.. figure:: /_static/images/settings/settings_appearance_theme_framed.png
+.. figure:: /_static/images/settings/appearance/settings_appearance_theme_framed.png
    :width: 40%
    :align: center
    :alt: Theme layout within appearance settings
@@ -37,7 +37,7 @@ Collect Screen
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Allows the user to change which default toolbar buttons are displayed on the Collect screen.
 
-.. figure:: /_static/images/settings/settings_appearance_toolbar_framed.png
+.. figure:: /_static/images/settings/appearance/settings_appearance_toolbar_framed.png
    :width: 40%
    :align: center
    :alt: Customize toolbar layout within appearance settings

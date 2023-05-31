@@ -3,7 +3,7 @@ BrAPI Settings
 Configuration
 -------------
 
-.. figure:: /_static/images/settings/settings_brapi_1_framed.png
+.. figure:: /_static/images/settings/brapi/settings_brapi_1_framed.png
    :width: 40%
    :align: center
    :alt: Brapi settings screen layout part 1
@@ -37,7 +37,7 @@ Set the time limit in seconds to wait for a repsonse from the server before timi
 Advanced Auth Settings
 ----------------------
 
-.. figure:: /_static/images/settings/settings_brapi_2_framed.png
+.. figure:: /_static/images/settings/brapi/settings_brapi_2_framed.png
    :width: 40%
    :align: center
    :alt: Brapi settings screen layout part 2
