@@ -3,8 +3,6 @@ package com.fieldbook.tracker.traits
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -79,7 +77,7 @@ class TextTraitLayout : BaseTraitLayout {
 
         inputEditText = act.findViewById(R.id.trait_text_edit_text)
 
-        inputEditText?.setOnKeyListener { _, _, event ->
+        inputEditText?.setOnKeyListener { _, code, event ->
 
             if (event.action == KeyEvent.ACTION_DOWN) {
 
@@ -106,6 +104,10 @@ class TextTraitLayout : BaseTraitLayout {
                     ""
 
                 }
+            } else if (event.action == KeyEvent.ACTION_UP
+                && code == KeyEvent.KEYCODE_ENTER || code == KeyEvent.KEYCODE_TAB) {
+
+                inputEditText?.requestFocus()
             }
 
             true
