@@ -46,7 +46,7 @@ Recommendations
 ---------------
 This section provides the original hardware recommendations from when the Geonav feature was first developed in conjunction with the Breeding Insight OnRamp project. It also includes instructions for deploying the suggested devices to use the GeoNav feature in the field.
 
-While not covered in the original recommendations, Emlid's new `Reach RX <https://emlid.com/reachrx/>_ device is also suitable for Geonav, and comes with a simplified setup process. Devices from other manufacturers should also work with the Geonav feature.
+While not covered in the original recommendations, Emlid's new `Reach RX <https://emlid.com/reachrx/>`_ device is also suitable for Geonav, and comes with a simplified setup process. Devices from other manufacturers should also work with the Geonav feature.
 
 Supplies
 ~~~~~~~~
