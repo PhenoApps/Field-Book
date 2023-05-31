@@ -33,6 +33,7 @@ Any further information for the entries such as variety name, pedigree, or treat
 
    The Fields screen layout with sample fields loaded.
 
+A set of sample field import files are availble for import and inspection on install. field_samples 1-3 represent typical wheat breeding fields, while rtk_sample.csv demonstrates the import format for entry location data (an additional geo_coordinates column). Imported entry coordinates can then be used with the |geonav| :doc:`geonav` feature.   
 
 Importing a new field
 ---------------------
@@ -97,6 +98,8 @@ Managing fields
 
 Fields are selectable from the list of fields. Each row in the fields list displays the Date imported, Date edited, Date exported, and Number of entries. Fields can be deleted or resorted by different identifiers using the sub menu in each row.
 
+.. |geonav| image:: /_static/icons/settings/main/map-search.png
+  :width: 20
 
 .. |add| image:: /_static/icons/fields/plus-circle.png
   :width: 20

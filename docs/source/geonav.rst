@@ -3,7 +3,7 @@ GeoNav
 Overview
 --------
 
-The GeoNav feature is used to automatically navigate between entries in the field based on the location of a high precision GNSS device that provides corrections using the . This feature requires field entries to have high-accuracy location data either collected via the GNSS trait (#todo link to GNSS trait) or included in the imported field file (#todo include details).
+The GeoNav feature is used to automatically navigate between entries in the field based on the location of a high precision GNSS device. This feature requires field entries to have high-accuracy coordinates data already collected via the |gnss| :doc:`trait-gnss` or imported in the field import file. Imported coordinates must be in Lat;Long format in a single `geo_coordinates` column, appended to the end of the import file. Refer to the `rtk_sample.csv` file in the field_import directory as an example.
 
 To use GeoNav, navigate to the :doc:`settings-geonav` (|geonav|) and enable GeoNav. Turn on bluetooth, and pair your external reciever. Navigate to the Collect screen and look for a confirmation message that says 'Rover communications estabished'
 
@@ -80,6 +80,8 @@ Complete kits and matching 3D Cases for M2 hardware are available for purchase o
 https://e38surveysolutions.com/products/reach-m2-with-gnss-antenna
 https://cults3d.com/en/3d-model/tool/emlid-reach-m2-case-estuche-gnss-gps-rtk
 
+.. |gnss| image:: /_static/icons/formats/satellite-variant.png
+  :width: 20
 
 .. |geonav| image:: /_static/icons/settings/main/map-search.png
   :width: 20
