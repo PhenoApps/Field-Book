@@ -16,7 +16,7 @@ Barcoded height sticks can be used to rapidly capture plot height values. Attach
    :align: center
    :alt: Plant height stick
 
-   Example plant height stick
+   Plant height measurement via barcoded height stick
 
 
 Leaf length
@@ -27,10 +27,20 @@ Leaf length
    :align: center
    :alt: Leaf length barcode
 
-   Example leaf length collection
+   Example leaf length collection via length barcodes
 
 Leaf angle
 ~~~~~~~~~~
 
-(#todo link to resources in fieldpheno, give basic steps to set up these tools)
+.. figure:: /_static/images/barcodes/barcodes_leaf_angle.png
+   :width: 60%
+   :align: center
+   :alt: Leaf length barcode
+
+   Example leaf angle barcodes
+
+Resources
+---------
+
+The 3 types of barcodes described above are available for `download on github <https://github.com/FieldPheno/resources/tree/main/barcodes>`_` as printable pdf files.
 
