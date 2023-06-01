@@ -56,7 +56,7 @@ Set the method for collecting location while using Field Book. Can be at the lev
   Location collect options
 
 |barcode-scan| Move to entry via barcode
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Adds a |barcode-scan| icon to the Collect toolbar. When pressed it opens the device camera to move to an entry by scanning a barcode. The barcode must match a unique ID within the active trial.
 
 |grid| Datagrid

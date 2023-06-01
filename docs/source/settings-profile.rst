@@ -16,6 +16,13 @@ Profile
 
 Sets the first and last name of the person operating Field Book. This information is stored with each collected measurement as metadata and is included in the database |export| :doc:`export` format.
 
+.. figure:: /_static/images/settings/profile/settings_profile_set_person.png
+   :width: 40%
+   :align: center
+   :alt: Set person dialog
+
+   Set person dialog
+
 |reset| Reset Profile
 ~~~~~~~~~~~~~~~~~~~~~
 

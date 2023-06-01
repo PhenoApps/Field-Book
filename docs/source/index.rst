@@ -59,9 +59,10 @@ Contents
    :maxdepth: 2
    :caption: Extra
 
-   brapi
-   geonav
    barcodes
+   brapi
+   datagrid
+   geonav
 
 .. toctree::
    :maxdepth: 2
