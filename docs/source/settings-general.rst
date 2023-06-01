@@ -35,7 +35,7 @@ Sets the default  export location to one of the provided options so the app does
    :align: center
    :alt: Export source options
 
-  Default export options
+   Default export options
 
 Optional Collect Tools
 ----------------------
