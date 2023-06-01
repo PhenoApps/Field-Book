@@ -84,6 +84,8 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         gridMultiCat = act.findViewById(R.id.catGrid);
 
         categoryList = new ArrayList<>();
+
+        gridMultiCat.requestFocus();
     }
 
     @Override

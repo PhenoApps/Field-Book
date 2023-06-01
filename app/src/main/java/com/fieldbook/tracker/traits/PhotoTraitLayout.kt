@@ -72,6 +72,8 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
         recyclerView = act.findViewById(R.id.trait_photo_rv)
         recyclerView.adapter = ImageTraitAdapter(context, this)
+
+        recyclerView.requestFocus();
     }
 
     override fun loadLayout() {

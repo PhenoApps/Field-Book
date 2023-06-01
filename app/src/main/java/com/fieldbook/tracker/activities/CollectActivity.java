@@ -1417,8 +1417,10 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+
         int action = event.getAction();
         int keyCode = event.getKeyCode();
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if (ep.getBoolean(GeneralKeys.VOLUME_NAVIGATION, false)) {
@@ -1436,29 +1438,23 @@ public class CollectActivity extends ThemedActivity
                     return true;
                 }
                 return false;
-            case KeyEvent.KEYCODE_ENTER:
-                String return_action = ep.getString(GeneralKeys.RETURN_CHARACTER, "0");
+//                else if (event.action == KeyEvent.ACTION_UP
+//                    && code == KeyEvent.KEYCODE_ENTER || code == KeyEvent.KEYCODE_TAB) {
+//
+//                inputEditText?.requestFocus()
+//            }
+            default:
 
-                if (return_action.equals("0")) {
-                    if (action == KeyEvent.ACTION_UP) {
-                        rangeBox.moveEntryRight();
+                if (action == KeyEvent.ACTION_UP) {
+
+                    if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_TAB) {
+
+                        collectInputView.requestFocus();
+
                         return false;
                     }
                 }
 
-                if (return_action.equals("1")) {
-                    if (action == KeyEvent.ACTION_UP) {
-                        traitBox.moveTrait("right");
-                        return true;
-                    }
-                }
-
-                if (return_action.equals("2")) {
-                    return true;
-                }
-
-                return false;
-            default:
                 return super.dispatchKeyEvent(event);
         }
     }
