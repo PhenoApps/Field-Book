@@ -22,7 +22,7 @@ Set the default field and trait import source to one of the provided options so 
 .. figure:: /_static/images/settings/general/settings_general_import_sources.png
    :width: 40%
    :align: center
-   :alt: Profile verification interval options
+   :alt: Import source options
 
    Default import options
 
@@ -33,7 +33,7 @@ Sets the default  export location to one of the provided options so the app does
 .. figure:: /_static/images/settings/general/settings_general_export_sources.png
    :width: 40%
    :align: center
-   :alt: Profile verification interval options
+   :alt: Export source options
 
   Default export options
 
@@ -65,7 +65,7 @@ Adds a |grid| icon to the Collect toolbar. When pressed it displays a grid of al
 
 |fingerprint| Move to unique identifier
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Adds a || icon to the Collect toolbar. When pressed it opens a text entry dialog. Move to a specific entry by typing or scanning its unique id into the text field. 
+Adds a |barcode| icon to the Collect toolbar. When pressed it opens a text entry dialog. Move to a specific entry by typing or scanning its unique id into the text field. 
 
 .. figure:: /_static/images/settings/general/settings_general_moveto_uid.png
    :width: 40%
