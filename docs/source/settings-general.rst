@@ -1,7 +1,7 @@
 General Settings
 ================
 
-.. figure:: /_static/images/settings/general/settings_general_framed.png
+.. figure:: _static/images/settings/general/settings_general_framed.png
    :width: 40%
    :align: center
    :alt: General settings screen layout
@@ -19,7 +19,7 @@ Opens the :doc:`storage` dialog for defining a 'Storage location' on the device.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Set the default field and trait import source to one of the provided options so the app doesn't ask each time.
 
-.. figure:: /_static/images/settings/general/settings_general_import_sources.png
+.. figure:: _static/images/settings/general/settings_general_import_sources.png
    :width: 40%
    :align: center
    :alt: Import source options
@@ -30,7 +30,7 @@ Set the default field and trait import source to one of the provided options so 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Sets the default  export location to one of the provided options so the app doesn't ask each time.
 
-.. figure:: /_static/images/settings/general/settings_general_export_sources.png
+.. figure:: _static/images/settings/general/settings_general_export_sources.png
    :width: 40%
    :align: center
    :alt: Export source options
@@ -48,7 +48,7 @@ Adds a button to the Collect top toolbar thats skips to the next entry without d
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Set the method for collecting location while using Field Book. Can be at the level of the field, the plot, or the individual observation
 
-.. figure:: /_static/images/settings/general/settings_general_location_collected.png
+.. figure:: _static/images/settings/general/settings_general_location_collected.png
    :width: 40%
    :align: center
    :alt: Location collected options
@@ -67,7 +67,7 @@ Adds a |grid| icon to the Collect toolbar. When pressed it displays a grid of al
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Adds a |barcode| icon to the Collect toolbar. When pressed it opens a text entry dialog. Move to a specific entry by typing or scanning its unique id into the text field. 
 
-.. figure:: /_static/images/settings/general/settings_general_moveto_uid.png
+.. figure:: _static/images/settings/general/settings_general_moveto_uid.png
    :width: 40%
    :align: center
    :alt: Move to unique identifier tool
