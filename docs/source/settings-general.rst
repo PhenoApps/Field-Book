@@ -30,6 +30,12 @@ Set the default field and trait import source to one of the provided options so 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Sets the default  export location to one of the provided options so the app doesn't ask each time.
 
+.. figure:: /_static/images/settings/general/settings_general_export_sources.png
+   :width: 40%
+   :align: center
+   :alt: Export source options
+
+  Default export options
 
 Optional Collect Tools
 ----------------------
