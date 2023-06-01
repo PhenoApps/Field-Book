@@ -55,6 +55,8 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     @Override
     public void setNaTraitsText() {
+        getCollectInputView().setText("NA");
+        setAdapter(getCategories());
     }
 
     @Override
