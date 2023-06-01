@@ -1,72 +1,71 @@
-Appearance Settings
-===================
+General Settings
+================
 
-.. figure:: /_static/images/settings/appearance/settings_appearance_framed.png
-   :width: 40%
-   :align: center
-   :alt: Appearance settings screen layout
-   
-   Appearance settings screen layout
+System Defaults
+---------------
 
-Application
------------
-|theme| Theme
-~~~~~~~~~~~~~
+|sd| Define storage location
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Opens the :doc:`storage` dialog for defining a 'Storage location' on the device.
 
-Opens an additional screen where a user can modify specifc colors or the entire theme of Field Book.
-
-.. figure:: /_static/images/settings/appearance/settings_appearance_theme_framed.png
-   :width: 40%
-   :align: center
-   :alt: Theme layout within appearance settings
-
-   Theme options within appearance settings
-
-|language| Language
-~~~~~~~~~~~~~~~~~~~
-Allows the user to change the Field Book language to one of 14 different options.
-
-|tutorial| Tutorial 
-~~~~~~~~~~~~~~~~~~~
-Adds a button to the toolbar that enables the tutorial. The tutorial provides contextual information throughout the app.
+|import| Default import source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Set the default field and trait import source to one of the provided options so the app doesn't ask each time.
 
 
-Collect Screen
---------------
-|icons| Customize toolbar icons
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Allows the user to change which default toolbar buttons are displayed on the Collect screen.
-
-.. figure:: /_static/images/settings/appearance/settings_appearance_toolbar_framed.png
-   :width: 40%
-   :align: center
-   :alt: Customize toolbar layout within appearance settings
-
-   Turn default toolbar options on/off
-
-|infobars| Number of Infobars
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Allows the user to change the number of Infobars that are displayed on the Collect screen.
-
-|goto| Quick GoTo
-~~~~~~~~~~~~~~~~~
-Changes the read-only primary/secondary order on the Collect screen to edit texts that can search and move to specific entries.
+|export| Default export source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sets the default  export location to one of the provided options so the app doesn't ask each time.
 
 
-.. |theme| image:: /_static/icons/settings/appearance/palette.png
+Optional Collect Tools
+----------------------
+
+|next| Next entry with no data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Adds a button to the Collect top toolbar thats skips to the next entry without data
+
+|gps| Location collected
+~~~~~~~~~~~~~~~~~~~~~~~~
+Set the method for collecting location while using Field Book. Can be at the level of the field, the plot, or the individual observation
+
+
+|barcode-scan| Move to entry via barcode
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Adds a |barcode-scan| icon to the Collect toolbar. When pressed it opens the device camera to move to an entry by scanning a barcode. The barcode must match a unique ID within the active trial.
+
+|grid| Datagrid
+~~~~~~~~~~~~~~~
+Adds a |grid| icon to the Collect toolbar. When pressed it displays a grid of all the recorded values for each entry and trait. See more details about this tool in the |grid| :doc:`datagrid` section. 
+
+|fingerprint| Move to unique identifier
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Adds a |barcode| icon to the Collect toolbar. When pressed it opens a text entry dialog. Move to a specific entry by typing or scanning its unique id into the text field. 
+
+
+.. |sd| image:: /_static/icons/settings/general/sd.png
   :width: 20
 
-.. |language| image:: /_static/icons/settings/appearance/translate.png
+.. |import| image:: /_static/icons/settings/general/application-import.png
   :width: 20
 
-.. |tutorial| image:: /_static/icons/settings/appearance/help-circle.png
+.. |export| image:: /_static/icons/settings/general/application-export.png
   :width: 20
 
-.. |icons| image:: /_static/icons/settings/appearance/server-minus.png
+.. |next| image:: /_static/icons/settings/general/arrow-right-bold.png
   :width: 20
 
-.. |infobars| image:: /_static/icons/settings/appearance/playlist-plus.png
+.. |gps| image:: /_static/icons/formats/crosshairs-gps.png
   :width: 20
 
-.. |goto| image:: /_static/icons/settings/appearance/run-fast.png
+.. |barcode-scan| image:: /_static/icons/settings/general/barcode-scan.png
+  :width: 20
+
+.. |grid| image:: /_static/icons/settings/general/grid.png
+  :width: 20
+
+.. |fingerprint| image:: /_static/icons/settings/general/fingerprint.png
+  :width: 20
+
+.. |barcode| image:: /_static/icons/settings/general/barcode.png
   :width: 20
