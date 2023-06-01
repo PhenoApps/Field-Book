@@ -1,6 +1,13 @@
 General Settings
 ================
 
+.. figure:: /_static/images/settings/general/settings_general_framed.png
+   :width: 40%
+   :align: center
+   :alt: General settings screen layout
+
+   General settings screen layout
+
 System Defaults
 ---------------
 
@@ -12,6 +19,12 @@ Opens the :doc:`storage` dialog for defining a 'Storage location' on the device.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Set the default field and trait import source to one of the provided options so the app doesn't ask each time.
 
+.. figure:: /_static/images/settings/general/settings_general_import_sources.png
+   :width: 40%
+   :align: center
+   :alt: Import source options
+
+   Default import options
 
 |export| Default export source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
