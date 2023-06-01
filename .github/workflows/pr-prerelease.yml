@@ -37,7 +37,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build APK
-        run: ./gradlew app:assembleRelease 
+        run: ./gradlew app:assembleRelease
 
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
@@ -55,9 +55,13 @@ jobs:
           name: Build Artifacts
           path: app/build/outputs/
       
-
       - name: Rename APK file
-        run: mv app/build/outputs/apk/release/app-release-unsigned-signed.apk app/build/outputs/apk/release/${{ env.APK_NUMBER }}-${{ steps.branch-name.outputs.current_branch }}-Field-Book.apk
+        run: |
+          FULL_BRANCH=${{ steps.branch-name.outputs.current_branch }}
+          BRANCH=${FULL_BRANCH##*/}
+          APK_NUMBER=${{ env.APK_NUMBER }}
+          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+          mv app/build/outputs/apk/release/app-release-unsigned-signed.apk "app/build/outputs/apk/release/${APK_NUMBER}-${BRANCH}-Fiel>
 
       - name: Attach APK to PR using artifacts branch
         uses: gavv/pull-request-artifacts@v1.0.0
@@ -66,4 +70,4 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           artifacts-branch: artifacts
           artifacts: |
-            app/build/outputs/apk/release/${{ env.APK_NUMBER }}-${{ steps.branch-name.outputs.current_branch }}-Field-Book.apk
+            app/build/outputs/apk/release/${{ env.APK_NUMBER }}-${{ env.BRANCH }}-Field-Book.apk
