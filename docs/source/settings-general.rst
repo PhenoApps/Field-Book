@@ -48,6 +48,12 @@ Adds a button to the Collect top toolbar thats skips to the next entry without d
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Set the method for collecting location while using Field Book. Can be at the level of the field, the plot, or the individual observation
 
+.. figure:: /_static/images/settings/general/settings_general_location_collected.png
+   :width: 40%
+   :align: center
+   :alt: Location collected options
+
+   Location collect options
 
 |barcode-scan| Move to entry via barcode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,6 +67,12 @@ Adds a |grid| icon to the Collect toolbar. When pressed it displays a grid of al
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Adds a |barcode| icon to the Collect toolbar. When pressed it opens a text entry dialog. Move to a specific entry by typing or scanning its unique id into the text field. 
 
+.. figure:: /_static/images/settings/general/settings_general_moveto_uid.png
+   :width: 40%
+   :align: center
+   :alt: Move to unique identifier tool
+
+   The move to unique identifier dialog
 
 .. |sd| image:: /_static/icons/settings/general/sd.png
   :width: 20
