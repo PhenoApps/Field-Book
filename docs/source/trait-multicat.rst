@@ -1,4 +1,4 @@
-Multicat Trait |multicat|
+|multicat| Multicat Trait
 =========================
 Overview
 --------

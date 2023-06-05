@@ -1,9 +1,9 @@
-GNSS Trait |gnss|
+|gnss| GNSS Trait
 =================
 Overview
 --------
 
-The GNSS trait format is used to acquire high-accuracy GPS coordinates from an external, bluetooth-connected device. While other traits only capture phenotypic or observational data, the GNSS trait is intended to be used to capture metadata about the plot itself. This metadata can be used in conjunction with the :doc:`geonav` (|geonav|) feature to later use the plot metadata to automatically navigate through the field.
+The GNSS trait format is used to acquire high-accuracy GPS coordinates from an external, bluetooth-connected device. While other traits only capture phenotypic or observational data, the GNSS trait is intended to be used to capture metadata about the plot itself. This metadata can be used in conjunction with the |geonav| :doc:`geonav` feature to later use the plot metadata to automatically navigate through the field.
 
 
 Creation

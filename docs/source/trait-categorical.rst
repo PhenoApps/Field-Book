@@ -1,4 +1,4 @@
-Categorical Trait |categorical|
+|categorical| Categorical Trait
 ===============================
 Overview
 --------

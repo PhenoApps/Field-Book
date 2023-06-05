@@ -46,7 +46,7 @@ Crashlytics
 |id| Unique ID
 ~~~~~~~~~~~~~~
 
-Turns on more specific crash logging to help development team improve Field Book
+Creates a unique ID for use in generating more specific crash logs. This helps the development team when troubleshooting and improving Field Book
 
 .. |person| image:: /_static/icons/settings/profile/account.png
   :width: 20

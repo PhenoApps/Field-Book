@@ -5,7 +5,7 @@ Overview
 
 The GeoNav feature is used to automatically navigate between entries in the field based on the location of a high precision GNSS device. This feature requires field entries to have high-accuracy coordinates data already collected via the |gnss| :doc:`trait-gnss` or imported in the field import file. Imported coordinates must be in Lat;Long format in a single `geo_coordinates` column, appended to the end of the import file. Refer to the `rtk_sample.csv` file in the field_import directory as an example.
 
-To use GeoNav, navigate to the :doc:`settings-geonav` (|geonav|) and enable GeoNav. Turn on bluetooth, and pair your external reciever. Navigate to the Collect screen and look for a confirmation message that says 'Rover communications estabished'
+To use GeoNav, navigate to the |geonav| :doc:`settings-geonav` and enable GeoNav. Turn on bluetooth, and pair your external reciever. Navigate to the Collect screen and look for a confirmation message that says 'Rover communications estabished'
 
 .. figure:: /_static/images/geonav/connect_cropped.png
    :width: 60%
@@ -14,7 +14,7 @@ To use GeoNav, navigate to the :doc:`settings-geonav` (|geonav|) and enable GeoN
 
    The collect screen GeoNav confirmation message
 
-Once the rover is connected, Field Book will automatically display the nearest plot in the bottom toolbar. Press the |navigate| symbol on the right to jump to the plot.
+Once the rover is connected, Field Book will automatically display the nearest plot in the bottom toolbar. Press the |navigate| icon on the right to jump to the plot.
 
 .. figure:: /_static/images/geonav/goto_cropped.png
    :width: 60%
@@ -23,7 +23,7 @@ Once the rover is connected, Field Book will automatically display the nearest p
 
    The collect screen bottom toolbar showing the nearest plot for manual geonavigation
 
-To enable automatic geonavigation, press the |compass-off| symbol that appears on the right in the top toolbar. It will change to a |compass| symbol indicating that automatic geonavigation is enabled. Fieldbook will automatically switch to the nearest entry as the device moves around the field, displaying the following message on each switch.
+To enable automatic geonavigation, press the |compass-off| icon that appears on the right in the top toolbar. It will change to a |compass| icon indicating that automatic geonavigation is enabled. Fieldbook will automatically switch to the nearest entry as the device moves around the field, displaying the following message on each switch.
 
 .. figure:: /_static/images/geonav/navigated_cropped.png
    :width: 60%
@@ -78,6 +78,7 @@ Kits and Cases
 Complete kits and matching 3D Cases for M2 hardware are available for purchase online:
 
 https://e38surveysolutions.com/products/reach-m2-with-gnss-antenna
+
 https://cults3d.com/en/3d-model/tool/emlid-reach-m2-case-estuche-gnss-gps-rtk
 
 .. |gnss| image:: /_static/icons/formats/satellite-variant.png

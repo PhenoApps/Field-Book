@@ -1,4 +1,4 @@
-Numeric Trait |numeric|
+|numeric| Numeric Trait
 =======================
 Overview
 --------

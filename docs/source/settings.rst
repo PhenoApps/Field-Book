@@ -12,23 +12,23 @@ Field Book settings are grouped into eight subcategories.
 
 Within the subcategories,
 
-* |general| **General** settings allow modification of system defaults and optional collection tools
+* |general| :doc:`settings-general`allow modification of system defaults and optional collection tools
   
-* |profile| **Profile** settings set the identity of the person collecting data.
+* |profile| :doc:`settings-profile` set the identity of the person collecting data.
 
-* |appearance| **Appearance** settings change language, app colors, icons, or layouts.
+* |appearance| :doc:`settings-appearance` change language, app colors, icons, or layouts.
 
-* |behavior| **Behavior** settings change default collecting and file sharing actions.
+* |behavior| :doc:`settings-behavior` change default collecting and file sharing actions.
 
-* |geonav| **GeoNav** settings allow a positioning device to be paired and used for field navigation.
+* |geonav| :doc:`settings-geonav` allow a positioning device to be paired and used for field navigation.
 
-* |sounds| **Sounds** settings toggle sound notifications for collection activities.
+* |sounds| :doc:`settings-sounds` toggle sound notifications for collection activities.
 
-* |brapi| **BrAPI** settings connect to an external data source using the Breeding API (BrAPI).
+* |brapi| :doc:`settings-brapi` connect to an external data source using the Breeding API (BrAPI).
 
-* |database| **Database** settings allow the database to be imported, exported, or reset.
+* |database| :doc:`settings-database` allow the database to be imported, exported, or reset.
 
-To find a setting without knowing its subcategory, type a string in the |search| **Search** bar at the top of the screen.
+To find a setting without knowing its subcategory, type a string in the |search| bar at the top of the screen.
 
 .. figure:: /_static/images/settings/settings_search_example.png
    :width: 40%

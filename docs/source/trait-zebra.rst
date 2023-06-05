@@ -1,4 +1,4 @@
-Zebra Label Print Trait |print|
+|print| Zebra Label Print Trait
 ===============================
 Overview
 --------

@@ -1,4 +1,4 @@
-Date Trait |date|
+|date| Date Trait
 =================
 Overview
 --------

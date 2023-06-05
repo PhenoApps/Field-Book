@@ -26,10 +26,16 @@ Opens an additional screen where a user can modify specifc colors or the entire 
 ~~~~~~~~~~~~~~~~~~~
 Allows the user to change the Field Book language to one of 14 different options.
 
+.. figure:: /_static/images/settings/appearance/settings_appearance_language_framed.png
+   :width: 40%
+   :align: center
+   :alt: Language options
+
+   Language options
+
 |tutorial| Tutorial 
 ~~~~~~~~~~~~~~~~~~~
-Adds a button to the toolbar that enables the tutorial. The tutorial provides contextual information throughout the app.
-
+Adds a |tutorial| icon to the toolbar that enables the tutorial. The tutorial provides contextual information throughout the app.
 
 Collect Screen
 --------------
@@ -48,9 +54,23 @@ Allows the user to change which default toolbar buttons are displayed on the Col
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Allows the user to change the number of Infobars that are displayed on the Collect screen.
 
+.. figure:: /_static/images/settings/appearance/settings_appearance_number_infobars.png
+   :width: 60%
+   :align: center
+   :alt: Infobar number options
+
+   Choice of number of Infobars
+
 |goto| Quick GoTo
 ~~~~~~~~~~~~~~~~~
 Changes the read-only primary/secondary order on the Collect screen to edit texts that can search and move to specific entries.
+
+.. figure:: /_static/images/settings/appearance/settings_appearance_quick_goto.png
+   :width: 60%
+   :align: center
+   :alt: Quick goto view
+
+   Collect screen editable primary/secondary order when using Quick Goto
 
 
 .. |theme| image:: /_static/icons/settings/appearance/palette.png

@@ -1,9 +1,9 @@
-Disease Trait |disease|
+|disease| Disease Trait
 =======================
 Overview
 --------
 
-The disease trait format is used to for collecting ratings of both disease incidence and severity. It is created with a trait name and optional details. The incidence scale can be adjusted by editing the ``disease_severity.txt`` file in the ``/traits`` directory. By default on the collect page, buttons showing numbers between 0-100 in 5 digit increments are used to record incidence, and R, M, and S are used to record severity. For each measurement, only a single incidence can be recorded while severity types can be combined. The / button allows varying incidence rates to be recorded (e.g., heterogenous response within a plot).
+The disease trait format is used to for collecting ratings of both disease incidence and severity. It is created with a trait name and optional details. The incidence scale can be adjusted by editing the ``disease_severity.txt`` file in the ``/traits`` directory. By default on the collect page, buttons showing numbers between 0-100 in 5 digit increments are used to record incidence, and **R**, **M**, and **S** are used to record severity. For each measurement, only a single incidence can be recorded while severity types can be combined. The **/** button allows varying incidence rates to be recorded (e.g., heterogenous response within a plot).
 
 Creation
 --------

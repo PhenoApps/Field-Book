@@ -1,4 +1,4 @@
-Photo Trait |photo|
+|photo| Photo Trait
 ===================
 Overview
 --------

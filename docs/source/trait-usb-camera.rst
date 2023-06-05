@@ -1,4 +1,4 @@
-USB Camera Trait |camera|
+|camera| USB Camera Trait
 =========================
 Overview
 --------

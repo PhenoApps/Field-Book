@@ -21,7 +21,7 @@ At least one format must be selected to export data. If both formats are selecte
 **Table** format exports each entry as a row and each trait as a column, creating a matrix of observed values. Metadata such as person and timestamp are excluded. If repeated measures have been collected, only the first value will be exported when using the table format.
 
 .. figure:: /_static/images/export/export_file_formats.png
-   :width: 90%
+   :width: 100%
    :align: center
    :alt: Export file formats
 
@@ -50,7 +50,7 @@ Other Customizations
 
 **Overwrite previous export** moves old files to /archive directory.
 
-The default export location can be modified in :doc:`settings-general` (|settings|).
+The default export location can be modified in |settings| :doc:`settings-general`.
 
 .. |settings| image:: /_static/icons/settings/main/cog-outline.png
   :width: 20

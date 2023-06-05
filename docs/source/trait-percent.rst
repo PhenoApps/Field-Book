@@ -1,4 +1,4 @@
-Percent Trait |percent|
+|percent| Percent Trait
 =======================
 Overview
 --------

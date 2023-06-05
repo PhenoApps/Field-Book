@@ -1,4 +1,4 @@
-Text Trait |text|
+|text| Text Trait
 =================
 Overview
 --------

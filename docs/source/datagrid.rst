@@ -13,7 +13,7 @@ The datagrid tool displays a grid of all the recorded values for each entry and 
 
 Settings
 --------
-The value displayed in the row header can be changed by pressing the toolbar |rows| icon in the upper right.
+The value displayed in the row header can be changed by pressing the |rows| icon in the toolbar.
 
 .. figure:: /_static/images/datagrid/datagrid_edit_rows_joined.png
    :width: 80%

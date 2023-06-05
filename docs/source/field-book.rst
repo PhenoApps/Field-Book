@@ -20,13 +20,13 @@ Structure
 
 Field Book utilizes a home screen with links to the major portions of the app. To use Field Book
 
-#. First import your :doc:`fields` (|fields|)
-#. Then create :doc:`traits` (|traits|)
-#. Optionally modify any :doc:`settings` (|settings|)
-#. Then navigate to :doc:`collect` (|collect|)
-#. After data has been collected, :doc:`export` (|export|) will write it to a CSV (comma separated value) file.
+#. First import your |fields| :doc:`fields`
+#. Then create |traits| :doc:`traits`
+#. Optionally modify any |settings| :doc:`settings`
+#. Then navigate to |collect| :doc:`collect`
+#. After data has been collected, |export| :doc:`export` will write it to a CSV (comma separated value) file.
 
-The changelog (|changelog|) can be accessed from the top toolbar.
+The |changelog|changelog can be accessed from the top toolbar.
 
 
 .. |fields| image:: /_static/icons/home/view-module.png

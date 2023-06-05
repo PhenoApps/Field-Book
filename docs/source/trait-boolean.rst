@@ -1,4 +1,4 @@
-Boolean Trait |boolean|
+|boolean| Boolean Trait
 =======================
 Overview
 --------

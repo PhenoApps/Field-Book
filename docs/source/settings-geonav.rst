@@ -16,6 +16,13 @@ Enables the device to move between entires based on GPS data. Requires entries t
 ----------------------
 The method used to match GPS location to entry, defaults to the distance method.
 
+.. figure:: /_static/images/settings/geonav/settings_geonav_search_method.png
+   :width: 40%
+   :align: center
+   :alt: Geonav search method options
+
+   Geonav search method options
+
 |log| GeoNav Log
 ----------------
 Turns on geonav logging to a logfile stored in */storage/geonav/log.txt*
@@ -23,6 +30,13 @@ Turns on geonav logging to a logfile stored in */storage/geonav/log.txt*
 |interval| Update Interval(s)
 -----------------------------
 Changes the time between geonav location updates. Default is 0s, can be set to 1s, 5s, or 10s
+
+.. figure:: /_static/images/settings/geonav/settings_geonav_update_intervals.png
+   :width: 40%
+   :align: center
+   :alt: Geonav interval optionss
+
+   Geonav interval options
 
 |bluetooth| Pair Device
 -----------------------
