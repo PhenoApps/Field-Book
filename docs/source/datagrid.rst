@@ -16,7 +16,7 @@ Settings
 The value displayed in the row header can be changed by pressing the toolbar |rows| icon in the upper right.
 
 .. figure:: /_static/images/datagrid/datagrid_edit_rows_joined.png
-   :width: 40%
+   :width: 80%
    :align: center
    :alt: Datagrid row header editing
 
