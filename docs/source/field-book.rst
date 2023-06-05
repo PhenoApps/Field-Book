@@ -26,7 +26,7 @@ Field Book utilizes a home screen with links to the major portions of the app. T
 #. Then navigate to |collect| :doc:`collect`
 #. After data has been collected, |export| :doc:`export` will write it to a CSV (comma separated value) file.
 
-The |changelog|changelog can be accessed from the top toolbar.
+The |changelog| changelog can be accessed from the top toolbar.
 
 
 .. |fields| image:: /_static/icons/home/view-module.png

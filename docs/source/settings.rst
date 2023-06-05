@@ -12,7 +12,7 @@ Field Book settings are grouped into eight subcategories.
 
 Within the subcategories,
 
-* |general| :doc:`settings-general`allow modification of system defaults and optional collection tools
+* |general| :doc:`settings-general` allow modification of system defaults and optional collection tools
   
 * |profile| :doc:`settings-profile` set the identity of the person collecting data.
 
