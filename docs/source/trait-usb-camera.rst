@@ -17,6 +17,14 @@ Creation
    :align: center
    :alt: USB camera trait creation fields
 
+Collect layout
+--------------
+
+.. figure:: /_static/images/traits/formats/collect_usb_camera_framed.png
+   :width: 40%
+   :align: center
+   :alt: Usb camera trait collection
+
 .. |camera| image:: /_static/icons/formats/webcam.png
   :width: 20
 
