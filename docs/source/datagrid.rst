@@ -9,7 +9,7 @@ The datagrid tool displays a grid of all the recorded values for each entry and 
    :align: center
    :alt: Datagrid view
 
-   The Datagrid tool, showing a grid of entries, traits, and colleced values.
+   The Datagrid tool, showing a grid of entries, traits, and collected values.
 
 Settings
 --------
