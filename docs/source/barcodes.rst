@@ -42,5 +42,5 @@ Leaf angle
 Resources
 ---------
 
-The 3 types of barcodes described above are available for `download on github <https://github.com/FieldPheno/resources/tree/main/barcodes>`_` as printable pdf files.
+The 3 types of barcodes described above are available for `download on github <https://github.com/FieldPheno/resources/tree/main/barcodes>`_ as printable pdf files.
 
