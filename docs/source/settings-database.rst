@@ -11,7 +11,7 @@ Database Settings
 Imports a new database from an export file. This replaces the current data in the app.
 
 .. figure:: /_static/images/settings/database/settings_database_import.png
-   :width: 60%
+   :width: 40%
    :align: center
    :alt: Database import dialog
 
@@ -22,7 +22,7 @@ Imports a new database from an export file. This replaces the current data in th
 Exports the internal database. If you need data recovered or have issues, contact the developer and send the file that is exported.
 
 .. figure:: /_static/images/settings/database/settings_database_export.png
-   :width: 60%
+   :width: 40%
    :align: center
    :alt: Database export dialog
 
@@ -33,12 +33,11 @@ Exports the internal database. If you need data recovered or have issues, contac
 Wipes all data from the app.
 
 .. figure:: /_static/images/settings/database/settings_database_delete.png
-   :width: 60%
+   :width: 40%
    :align: center
    :alt: Database delete confirmation
 
    Database delete confirmation
-
 
 .. |import| image:: /_static/icons/settings/database/database-import.png
   :width: 20

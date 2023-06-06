@@ -55,7 +55,7 @@ Allows the user to change which default toolbar buttons are displayed on the Col
 Allows the user to change the number of Infobars that are displayed on the Collect screen.
 
 .. figure:: /_static/images/settings/appearance/settings_appearance_number_infobars.png
-   :width: 60%
+   :width: 40%
    :align: center
    :alt: Infobar number options
 
@@ -66,7 +66,7 @@ Allows the user to change the number of Infobars that are displayed on the Colle
 Changes the read-only primary/secondary order on the Collect screen to edit texts that can search and move to specific entries.
 
 .. figure:: /_static/images/settings/appearance/settings_appearance_quick_goto.png
-   :width: 60%
+   :width: 40%
    :align: center
    :alt: Quick goto view
 
