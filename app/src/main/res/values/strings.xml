@@ -347,6 +347,7 @@
     <string name="about_help_translate_title">Help translate</string>
     <string name="changelog_title">Changelog</string>
     <string name="libraries_title">Libraries</string>
+    <string name="updates_title">Check for Updates</string>
 
     <!-- Profile dialog -->
     <string name="profile_person">Person</string>

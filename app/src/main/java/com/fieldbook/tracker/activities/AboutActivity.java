@@ -48,6 +48,16 @@ public class AboutActivity extends MaterialAboutActivity {
                 false));
 
         appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
+                .text(getString(R.string.updates_title))
+                .icon(R.drawable.ic_about_get_update)
+                .setOnClickAction(new MaterialAboutItemOnClickAction() {
+                    @Override
+                    public void onClick() {
+                    }
+                })
+                .build());
+
+        appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(getString(R.string.changelog_title))
                 .icon(R.drawable.ic_about_changelog)
                 .setOnClickAction(new MaterialAboutItemOnClickAction() {
