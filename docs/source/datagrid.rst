@@ -2,7 +2,7 @@ Datagrid
 ========
 Overview
 --------
-DataGrid is accessed by pressing the |datagrid| icon in the toolbar. DataGrid displays a matrix of entries and traits in the active field. This view allows rapid identification of missing values. Pressing an individual cell moves the collect screen directly to the corresponding entry and trait.
+DataGrid is accessed by pressing the |grid| icon in the toolbar. DataGrid displays a matrix of entries and traits in the active field. This view allows rapid identification of missing values. Pressing an individual cell moves the collect screen directly to the corresponding entry and trait.
 
 .. figure:: /_static/images/datagrid/datagrid_view_framed.png
    :width: 40%
@@ -25,5 +25,5 @@ The column used for the row header can be changed by pressing the |rows| icon in
 .. |rows| image:: /_static/icons/collect/view-split-vertical.png
   :width: 20
 
-.. |datagrid| image:: /_static/icons/collect/datagrid.png
+.. |grid| image:: /_static/icons/settings/general/grid.png
   :width: 20
