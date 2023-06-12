@@ -31,7 +31,7 @@ By default there are four buttons at the top of the screen (in addtion to the ba
 
    The collect screen search tool
 
-  The search dialog provides a flexible interface for finding a specific entry within the current field. Select which imported data field to search by, what strategy to use to find a match, and enter a search string. Press Add to construct a complex search with an additional field and search string, or press OK to execute the search.
+The search dialog provides a flexible interface for finding a specific entry within the current field. Select which imported data field to search by, what strategy to use to find a match, and enter a search string. Press Add to construct a complex search with an additional field and search string, or press OK to execute the search.
 
 * |resources| Resources opens the ``resources`` directory and can be used to load reference images.
 * |summary| Summary opens a dialog that displays all info for the current entry.
@@ -43,7 +43,7 @@ By default there are four buttons at the top of the screen (in addtion to the ba
 
    The collect screen summary tool
 
-  Summary shows detailed information for the current entry. Arrows at the bottom navigate forwards or backwards to other entries. By default the summary shows all of the imported data fields from the field file, but none of the collected trait values. Pressing the edit icon in the top toolbar opens a dialog to customize which data fields and traits are shown. Selecting a trait from the summary screen navigates to that trait.
+Summary shows detailed information for the current entry. Arrows at the bottom navigate forwards or backwards to other entries. By default the summary shows all of the imported data fields from the field file, but none of the collected trait values. Pressing the edit icon in the top toolbar opens a dialog to customize which data fields and traits are shown. Selecting a trait from the summary screen navigates to that trait.
 
 .. figure:: /_static/images/collect/collect_summary_edit.png
    :width: 40%
