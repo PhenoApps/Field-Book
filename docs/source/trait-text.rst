@@ -3,7 +3,9 @@
 Overview
 --------
 
-The text trait format is used to record open-ended text. It is created with a trait name, optional default value, and trait details. On the collect page you can type or dictate the desired text.
+The text trait format is used to record open-ended text. It is created with a trait name, optional default value, and trait details.
+
+On the collect screen, text can be typed or dictated using the system keyboard.
 
 Creation
 --------

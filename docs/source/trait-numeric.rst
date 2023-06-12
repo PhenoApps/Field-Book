@@ -3,7 +3,7 @@
 Overview
 --------
 
-The numeric trait format is used for quantitative traits like yield and height. In addition the required trait name you can optionally set a default value and min and max values to prevent errors during collection. Text can be optionally added to the details section which will show up under the trait name on the collect page.
+The numeric trait format is used for quantitative traits like yield and height. Value minimum and maximums help reduce erros during collection. Details text is displayed under the trait name on the collect page.
 
 Creation
 --------

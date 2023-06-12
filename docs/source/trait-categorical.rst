@@ -3,7 +3,9 @@
 Overview
 --------
 
-The categorical trait format is used when trait values fall into a set of discrete categories. Categories are invidiually added in the ``Categories`` section of the create scren. Text can be optionally added to the details section which will show up under the trait name on the collect page.Defined categories will be displayed as buttons on the collect screen. A single category can be selected per entry.
+The categorical trait format is used when trait values fall into a set of discrete categories. Categories are invidiually added in the ``Categories`` section of the create screen. Details text is displayed under the trait name on the collect page.
+
+Defined categories are displayed as buttons on the collect screen; a single category can be selected per entry.
 
 Creation
 --------

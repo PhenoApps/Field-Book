@@ -118,11 +118,11 @@ Community Servers
 -----------------
 |barcode| Scan a server barcode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Add a BrAPI server by scanning a barcode of it's URL.
+Add a BrAPI server by scanning a URL barcode.
 
 Advanced
 ~~~~~~~~
-Access whitelisted servers from the BrAPI community.
+Access servers from the BrAPI community.
 
 .. figure:: /_static/images/settings/brapi/settings_brapi_database_whitelist.png
    :width: 40%

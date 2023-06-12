@@ -4,9 +4,9 @@ GeoNav Settings
 .. figure:: /_static/images/settings/geonav/settings_geonav_framed.png
    :width: 40%
    :align: center
-   :alt: Geonav settings screen layout
+   :alt: GeoNav settings screen layout
 
-   Geonav settings screen layout
+   GeoNav settings screen layout
 
 |geonav| Enable Geonav
 ----------------------
@@ -14,22 +14,22 @@ Enables the device to move between entires based on GPS data. Requires entries t
 
 |method| Search Method
 ----------------------
-The method used to match GPS location to entry, defaults to the distance method.
+The method used to match GPS location to entry. Defaults to the distance method.
 
 .. figure:: /_static/images/settings/geonav/settings_geonav_search_method.png
    :width: 40%
    :align: center
-   :alt: Geonav search method options
+   :alt: GeoNav search method options
 
-   Geonav search method options
+   GeoNav search method options
 
 |log| GeoNav Log
 ----------------
-Turns on geonav logging to a logfile stored in */storage/geonav/log.txt*
+Turns on GeoNav logging to a logfile stored in ``/storage/geonav/log.txt``
 
-|interval| Update Interval(s)
+|interval| Update Interval
 -----------------------------
-Changes the time between geonav location updates. Default is 0s, can be set to 1s, 5s, or 10s
+Changes the time between GeoNav location updates. Can be set to 1s (default), 5s, or 10s
 
 .. figure:: /_static/images/settings/geonav/settings_geonav_update_intervals.png
    :width: 40%

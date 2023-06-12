@@ -3,16 +3,16 @@ GeoNav
 Overview
 --------
 
-The GeoNav feature is used to automatically navigate between entries in the field based on the location of a high precision GNSS device. This feature requires field entries to have high-accuracy coordinates data already collected via the |gnss| :doc:`trait-gnss` or imported in the field import file. Imported coordinates must be in Lat;Long format in a single `geo_coordinates` column, appended to the end of the import file. Refer to the `rtk_sample.csv` file in the field_import directory as an example.
+GeoNav is used to automatically navigate between entries in the field based on the location of a high precision GNSS device. This feature requires field entries to have high-precision location data collected via the |gnss| :doc:`trait-gnss` or included in the field import file. Imported coordinates must be in ``Lat;Long`` format in a single `geo_coordinates` column. Refer to the ``rtk_sample.csv`` file in the ``field_import`` directory as an example.
 
-To use GeoNav, navigate to the |geonav| :doc:`settings-geonav` and enable GeoNav. Turn on bluetooth, and pair your external reciever. Navigate to the Collect screen and look for a confirmation message that says 'Rover communications estabished'
+To use GeoNav, navigate to the |geonav| :doc:`settings-geonav` and enable GeoNav. Turn on Bluetooth, and pair your external reciever. Navigate to the Collect screen and look for a confirmation message that says 'Rover communications estabished'
 
 .. figure:: /_static/images/geonav/connect_cropped.png
    :width: 60%
    :align: center
    :alt: GeoNav Connection
 
-   The collect screen GeoNav confirmation message
+   The Collect screen GeoNav confirmation message
 
 Once the rover is connected, Field Book will automatically display the nearest plot in the bottom toolbar. Press the |navigate| icon on the right to jump to the plot.
 
@@ -21,16 +21,16 @@ Once the rover is connected, Field Book will automatically display the nearest p
    :align: center
    :alt: GeoNav manual navigation
 
-   The collect screen bottom toolbar showing the nearest plot for manual geonavigation
+   The Collect screen bottom toolbar showing the nearest plot for manual geonavigation
 
-To enable automatic geonavigation, press the |compass-off| icon that appears on the right in the top toolbar. It will change to a |compass| icon indicating that automatic geonavigation is enabled. Fieldbook will automatically switch to the nearest entry as the device moves around the field, displaying the following message on each switch.
+To enable automatic geonavigation, press the |compass-off| icon that appears on the right in the top toolbar. It will change to a |compass| icon indicating that automatic geonavigation is enabled. Field Book will automatically switch to the nearest entry as the device moves around the field, displaying the following message on each switch.
 
 .. figure:: /_static/images/geonav/navigated_cropped.png
    :width: 60%
    :align: center
    :alt: GeoNav automatic navigation
 
-   The collect screen message when the entry changes during automatic geonavigation
+   The Collect screen message when the entry changes during automatic geonavigation
 
 Example
 -------
@@ -46,7 +46,7 @@ Recommendations
 ---------------
 This section provides the original hardware recommendations from when the Geonav feature was first developed in conjunction with the Breeding Insight OnRamp project. It also includes instructions for deploying the suggested devices to use the GeoNav feature in the field.
 
-While not covered in the original recommendations, Emlid's new `Reach RX <https://emlid.com/reachrx/>`_ device is also suitable for Geonav, and comes with a simplified setup process. Devices from other manufacturers should also work with the Geonav feature.
+While not covered in the original recommendations, Emlid's new `Reach RX <https://emlid.com/reachrx/>`_ device is also suitable for Geonav, and comes with a simplified setup process. Devices from other manufacturers should also work with the Geonav feature, as long as they broadcast using the NMEA protocol.
 
 Supplies
 ~~~~~~~~
@@ -77,9 +77,8 @@ Kits and Cases
 ~~~~~~~~~~~~~~
 Complete kits and matching 3D Cases for M2 hardware are available for purchase online:
 
-https://e38surveysolutions.com/products/reach-m2-with-gnss-antenna
-
-https://cults3d.com/en/3d-model/tool/emlid-reach-m2-case-estuche-gnss-gps-rtk
+* https://e38surveysolutions.com/products/reach-m2-with-gnss-antenna
+* https://cults3d.com/en/3d-model/tool/emlid-reach-m2-case-estuche-gnss-gps-rtk
 
 .. |gnss| image:: /_static/icons/formats/satellite-variant.png
   :width: 20

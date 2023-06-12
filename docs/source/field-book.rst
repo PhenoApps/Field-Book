@@ -7,7 +7,7 @@ Field Book is an open-source Android app that can be used to collect data on fie
 
 Getting Started
 ---------------
-Field Book can be downloaded from the `Google Play Store <https://play.google.com/store/apps/details?id=com.tracker.fieldbook>`_ or can be installed manually using the latest .apk file from the `GitHub releases <https://github.com/PhenoApps/Field-Book/releases>`_ page. After installing the app, all permissions should be accepted so that the app is able to read/write data and access device features. Once permissions are accepted, optional example data can be loaded. The example data consists of three sample fields and a list of sample traits. All of the images in the manual utilize this data.
+Field Book can be downloaded from the `Google Play Store <https://play.google.com/store/apps/details?id=com.tracker.fieldbook>`_ or can be installed manually using the latest release from `GitHub <https://github.com/PhenoApps/Field-Book/releases>`_. After installing the app, all permissions should be accepted and sample data consisting of three fields and traits can be optionally loaded. The images in the documentation utilize the sample data.
 
 Structure
 ---------
@@ -18,15 +18,15 @@ Structure
 
    Primary Field Book screen
 
-Field Book utilizes a home screen with links to the major portions of the app. To use Field Book
+Field Book contains a home screen with links to the major sections of the app. To use Field Book:
 
-#. First import your |fields| :doc:`fields`
-#. Then create |traits| :doc:`traits`
+#. Import your |fields| :doc:`fields`
+#. Create |traits| :doc:`traits`
 #. Optionally modify any |settings| :doc:`settings`
-#. Then navigate to |collect| :doc:`collect`
-#. After data has been collected, |export| :doc:`export` will write it to a CSV (comma separated value) file.
+#. Navigate to |collect| :doc:`collect`
+#. |export| :doc:`export` data to a CSV (comma separated value) file
 
-The |changelog| changelog can be accessed from the top toolbar.
+The |changelog| Changelog can be accessed from the top toolbar to see new features and additions to the app.
 
 
 .. |fields| image:: /_static/icons/home/view-module.png

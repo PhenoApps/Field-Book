@@ -31,7 +31,7 @@ Unsets the first and last name of the person operating Field Book.
 |verify| Require Person
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-If enabled, prevents the use of the app unless Person is set. And adds a |interval| time between verification setting, which can be set to one of three intervals
+If enabled, prevents using Field Book unless Person is set. And adds a |interval| time between verification setting, which can be set to one of three intervals.
 
 .. figure:: /_static/images/settings/profile/settings_profile_verification_times.png
    :width: 40%

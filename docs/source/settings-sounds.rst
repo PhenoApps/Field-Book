@@ -32,7 +32,7 @@ Speech
 
 |speech| Text to Speech
 ~~~~~~~~~~~~~~~~~~~~~~~
-Enables text to speech. When enabled, choose one of the five possible languages. The device will read aloud what data is entered in the Collect screen
+Enables text to speech. When enabled, choose one of the five availalbe languages. The device will read data as it is entered in the Collect screen.
 
 .. figure:: /_static/images/settings/sounds/settings_sounds_choose_language.png
    :width: 40%

@@ -1,8 +1,6 @@
 Settings
 ========
 
-Field Book settings are grouped into eight subcategories.
-
 .. figure:: /_static/images/settings/settings_framed.png
    :width: 40%
    :align: center
@@ -10,7 +8,7 @@ Field Book settings are grouped into eight subcategories.
 
    Settings screen layout
 
-Within the subcategories,
+Field Book settings are grouped into eight subcategories:
 
 * |general| :doc:`settings-general` allow modification of system defaults and optional collection tools
   
@@ -28,7 +26,7 @@ Within the subcategories,
 
 * |database| :doc:`settings-database` allow the database to be imported, exported, or reset.
 
-To find a setting without knowing its subcategory, type a string in the |search| bar at the top of the screen.
+|search| at the top of the screen can be used to quickly find and navigate to a specific setting.
 
 .. figure:: /_static/images/settings/settings_search_example.png
    :width: 40%

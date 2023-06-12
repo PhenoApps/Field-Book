@@ -3,11 +3,11 @@
 Overview
 --------
 
-The usb camera trait format is used to capture images with an external camera. It is created with a trait name and optional details.
+The USB camera trait format is used to capture images with an external camera. It is created with a trait name and optional details.
 
-On the collect page, make sure the external camera is connected by usb. If it is not connected, the collect area will display a |connect| icon. Once connected, press the |camera| icon to access it and capture images. Multiple photos can be captured for each entry.
+On the collect screen, once a camera is connected via USB, it can be opened using |connect|. Once connected, press the |camera| icon to access it and capture images. Multiple photos can be captured for each entry.
 
-Photo files are named with the entry's unique_id, the trait name, the photo number, and a timestamp. They are stored as .jpg files within Field Book's **plot_data** directory and a field-specific subdirectory (plot_data/FIELD_NAME/picture/PHOTO_FILE_NAME.jpg).
+Photo files are named with the entry's unique identifier, the trait name, the photo number, and a timestamp. They are stored as .jpg files in a field-specific subdirectory (``plot_data/FIELD_NAME/usb-camera/PHOTO_FILE_NAME.jpg``).
 
 Creation
 --------

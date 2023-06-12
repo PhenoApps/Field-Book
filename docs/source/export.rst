@@ -48,7 +48,7 @@ Other Customizations
 
 **Bundle media data** produces a zipped file that contains the exported data along with images and audio files that have also been collected.
 
-**Overwrite previous export** moves old files to /archive directory.
+**Overwrite previous export** moves old files to ``archive`` directory.
 
 The default export location can be modified in |settings| :doc:`settings-general`.
 

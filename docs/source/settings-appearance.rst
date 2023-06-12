@@ -13,7 +13,7 @@ Application
 |theme| Theme
 ~~~~~~~~~~~~~
 
-Opens an additional screen where a user can modify specifc colors or the entire theme of Field Book.
+Allows users to modify specific colors or the entire theme of Field Book.
 
 .. figure:: /_static/images/settings/appearance/settings_appearance_theme_framed.png
    :width: 40%

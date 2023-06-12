@@ -3,7 +3,9 @@
 Overview
 --------
 
-The percent trait format is used to percents.  In addition to the required trait name you can optionally set a default value, min, and max values. Text can be optionally added to the details section which will show up under the trait name on the collect page. On the collect page percent values are recorded by adjusting the percent slider.
+The percent trait format is used to collect percentage-based phenotypes. In addition to the required trait name the default value, minimum, and maximum values can be adjusted. Details text is displayed under the trait name on the collect page.
+
+On the collect page, percent values are recorded by adjusting the percent slider.
 
 Creation
 --------

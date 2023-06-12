@@ -12,11 +12,11 @@ Behavior
 
 |repeat| Cycling traits advances entry
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Upon completing a cycle of traits, Field Book advances to the next entry automatically.
+When enabled, once all active traits have been cycled, the app automatically advances to the next entry.
 
 |volume| Map volume keys to entry navigation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Allows volume keys to be used to move to next/previous entry. Note that this does disable the volume buttons being able to change the device volume when Field Book is open.
+Allows volume keys to be used to move to next/previous entry. Note that this disables the volume buttons being able to change the device volume when Collect is open.
 
 |return| Return key signal
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,7 +31,7 @@ Allows the user to choose the behavior of the return key signal that can be incl
 
 |arrow| Disable left/right entry arrow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Disables left or right entry arrow unless data has been collected, to ensure an entry isn't accidentally skipped.
+Disables the left, right, or both entry arrows unless data has been collected to ensure an entry isn't skipped during data collection.
 
 .. figure:: /_static/images/settings/behavior/settings_behavior_disable_nav.png
    :width: 40%
@@ -46,7 +46,7 @@ Turns off the share dialog that opens by default when data is exported.
 
 |day| Use day of year
 ~~~~~~~~~~~~~~~~~~~~~
-Changes the date trait format to record date values as numbers counting up from Jan 1, rather than traditional dates. For example *69* instead of *2023-03-10*.
+Changes the date trait format to record date values as numbers counting up from Jan 1, rather than traditional dates. For example *96* instead of *2023-04-06*.
 
 |skip| Skip entries across active trait
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

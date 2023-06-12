@@ -13,7 +13,7 @@ System Defaults
 
 |sd| Define storage location
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Opens the :doc:`storage` dialog for defining a 'Storage location' on the device.
+Opens the :doc:`storage` dialog to define or update the 'Storage location' on the device.
 
 |import| Default import source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,11 +42,11 @@ Optional Collect Tools
 
 |next| Next entry with no data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Adds a button to the Collect top toolbar thats skips to the next entry without data
+Adds a button to the Collect top toolbar thats skips to the next entry without data.
 
 |gps| Location collected
 ~~~~~~~~~~~~~~~~~~~~~~~~
-Set the method for collecting location while using Field Book. Can be at the level of the field, the plot, or the individual observation
+Set the method for collecting location while using Field Book. Can be at the level of the field, the plot, or the individual observation.
 
 .. figure:: /_static/images/settings/general/settings_general_location_collected.png
    :width: 40%
@@ -57,15 +57,15 @@ Set the method for collecting location while using Field Book. Can be at the lev
 
 |barcode-scan| Move to entry via barcode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Adds a |barcode-scan| icon to the Collect toolbar. When pressed it opens the device camera to move to an entry by scanning a barcode. The barcode must match a unique ID within the active trial.
+Adds a |barcode-scan| icon to the Collect top toolbar. When pressed, it opens the device camera to move to an entry by scanning a barcode. The barcode must match a unique ID within the active trial.
 
 |grid| Datagrid
 ~~~~~~~~~~~~~~~
-Adds a |grid| icon to the Collect toolbar. When pressed it displays a grid of all the recorded values for each entry and trait. See more details about this tool in the |grid| :doc:`datagrid` section. 
+Adds a |grid| icon to the Collect top toolbar. When pressed, it displays a grid of all the recorded values for each entry and trait. See more details in the |grid| :doc:`datagrid` section. 
 
 |fingerprint| Move to unique identifier
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Adds a |barcode| icon to the Collect toolbar. When pressed it opens a text entry dialog. Move to a specific entry by typing or scanning its unique id into the text field. 
+Adds a |barcode| icon to the Collect toolbar. When pressed, it opens a text entry dialog. Move to a specific entry by typing or scanning its unique id into the text field. 
 
 .. figure:: /_static/images/settings/general/settings_general_moveto_uid.png
    :width: 40%

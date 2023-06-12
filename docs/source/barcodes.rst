@@ -9,7 +9,7 @@ Examples
 
 Plant height
 ~~~~~~~~~~~~
-Barcoded height sticks can be used to rapidly capture plot height values. Attaching the Android device to the stick makes it possible to accurately capture height without having to handle the device.
+Barcoded height sticks can be used to rapidly capture plot height values. Attaching the Android device to the stick makes it possible to accurately capture height without having to hold both the height stick and the device.
 
 .. figure:: /_static/images/barcodes/barcodes_plant_height.png
    :width: 40%
@@ -42,5 +42,4 @@ Leaf angle
 Resources
 ---------
 
-The 3 types of barcodes described above are available for `download on github <https://github.com/FieldPheno/resources/tree/main/barcodes>`_ as printable pdf files.
-
+The three types of barcodes described above are available for `download on GitHub <https://github.com/FieldPheno/resources/tree/main/barcodes>`_ as printable files.

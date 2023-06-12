@@ -8,7 +8,7 @@ Database Settings
 
 |import| Import database
 ------------------------
-Imports a new database from an export file. This replaces the current data in the app.
+Imports a database from an exported database file. This replaces the current data in the app.
 
 .. figure:: /_static/images/settings/database/settings_database_import.png
    :width: 40%
@@ -19,7 +19,7 @@ Imports a new database from an export file. This replaces the current data in th
 
 |export| Export database
 ------------------------
-Exports the internal database. If you need data recovered or have issues, contact the developer and send the file that is exported.
+Exports the internal database. Contact the development team if you need data recovered or are having issues and send the file that is exported.
 
 .. figure:: /_static/images/settings/database/settings_database_export.png
    :width: 40%

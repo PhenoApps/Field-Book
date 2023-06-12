@@ -3,7 +3,9 @@
 Overview
 --------
 
-The counter trait format is used to for numeric integer data, where counting up or down to the value from 0 is safer or faster than typing via a number pad. It is created with a trait name and optional details. On the collect page, the counter starts at zero and can be incremented or decremented via the **+1** and **-1** buttons.
+The counter trait format is used to count numeric integer data, starting from zero. It is created with a trait name and optional details.
+
+On the collect screen, the counter starts at zero and can be incremented or decremented via the **+1** and **-1** buttons.
 
 
 Creation
