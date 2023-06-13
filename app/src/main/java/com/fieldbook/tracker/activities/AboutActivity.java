@@ -16,8 +16,10 @@ import com.danielstone.materialaboutlibrary.items.MaterialAboutItemOnClickAction
 import com.danielstone.materialaboutlibrary.items.MaterialAboutTitleItem;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutCard;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutList;
+import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.VersionChecker;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
@@ -50,7 +52,12 @@ public class AboutActivity extends MaterialAboutActivity {
         appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(getString(R.string.updates_title))
                 .icon(R.drawable.ic_about_get_update)
-                .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book/releases")))
+                .setOnClickAction(new MaterialAboutItemOnClickAction() {
+                    @Override
+                    public void onClick() {
+                        checkForUpdate();
+                    }
+                })
                 .build());
 
         appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
@@ -186,6 +193,16 @@ public class AboutActivity extends MaterialAboutActivity {
                 .build());
 
         return new MaterialAboutList(appCardBuilder.build(), authorCardBuilder.build(), contributorsCardBuilder.build(), otherAppsCardBuilder.build(), technicalCardBuilder.build());
+    }
+
+    private String getCurrentAppVersion() {
+        return BuildConfig.VERSION_NAME;
+    }
+
+    private void checkForUpdate() {
+        String currentVersion = getCurrentAppVersion();
+        VersionChecker versionChecker = new VersionChecker(AboutActivity.this, currentVersion, "PhenoApps", "Field-Book");
+        versionChecker.execute();
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {
