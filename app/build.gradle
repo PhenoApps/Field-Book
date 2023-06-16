@@ -146,10 +146,14 @@ dependencies {
     implementation 'com.google.zxing:core:3.3.3'
 
 
-    implementation('com.github.phenoapps:phenolib:v0.9.41')
+    //implementation('com.github.phenoapps:phenolib:v0.9.41')
+
+    implementation 'com.google.android.exoplayer:exoplayer:2.17.0'
+    implementation 'com.arthenica:ffmpeg-kit-min:5.1.LTS'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
 
     //necessary when building phenolib locally
-    //implementation "com.squareup.okhttp:okhttp:2.7.5"
+    implementation "com.squareup.okhttp:okhttp:2.7.5"
 
     //uvc camera java native libs
     implementation("com.serenegiant:common:2.12.4")

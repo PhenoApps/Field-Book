@@ -1015,6 +1015,22 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
         }
     }
 
+    private class TraitGoProFormat extends TraitFormatNotValue {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
+        public String getEnglishString() {
+            return "go pro";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_go_pro_camera;
+        }
+    }
+
     private class TraitFormatPhoto extends TraitFormatNotValue {
 
         @Override
@@ -1164,6 +1180,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
             traitFormatList.add(new TraitFormatZebraLablePrint());
             traitFormatList.add(new TraitFormatGnss());
             traitFormatList.add(new TraitUsbCameraFormat());
+            traitFormatList.add(new TraitGoProFormat());
         }
 
         public int size() {

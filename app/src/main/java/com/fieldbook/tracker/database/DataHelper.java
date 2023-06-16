@@ -1596,19 +1596,6 @@ public class DataHelper {
 //        }
     }
 
-    public void updateTraitByValue(String rid, String parent, String value, String newValue) {
-
-        ContentValues values = new ContentValues();
-        values.put("userValue", newValue);
-
-        try {
-            db.update(USER_TRAITS, values, "rid like ? and parent like ? and userValue = ?",
-                    new String[]{rid, parent, value});
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-    }
-
     /**
      * Returns list of files associated with a specific plot
      */
