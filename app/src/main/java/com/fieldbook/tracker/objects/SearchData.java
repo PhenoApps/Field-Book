@@ -5,6 +5,7 @@ package com.fieldbook.tracker.objects;
  */
 public class SearchData {
     public int id;
+    public String unique;
     public String range;
     public String plot;
 }
