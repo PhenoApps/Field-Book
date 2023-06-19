@@ -7,7 +7,8 @@ public enum ApiErrorCode {
     BAD_REQUEST(400),
     UNAUTHORIZED(401),
     NOT_FOUND(404),
-    FORBIDDEN(403);
+    FORBIDDEN(403),
+    ERROR_READING_RESPONSE(10);
 
     private static final Map<Integer, ApiErrorCode> apiErrorsByCode = new HashMap<>();
 
@@ -18,6 +19,10 @@ public enum ApiErrorCode {
     }
 
     private final int code;
+
+    public int getCode(){
+        return code;
+    }
 
     ApiErrorCode(int code) {
         this.code = code;
