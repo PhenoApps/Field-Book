@@ -46,7 +46,7 @@ public class FieldAdapter extends BaseAdapter {
         mLayoutInflater = LayoutInflater.from(context);
         this.list = list;
     }
-
+ 
     public int getCount() {
         return list.size();
     }
@@ -245,7 +245,7 @@ public class FieldAdapter extends BaseAdapter {
     }
 
     private void fieldClick(FieldObject selectedField) {
-
+        System.out.println("Field clicked: " + selectedField.getExp_name());
         setEditorItem(ep, selectedField);
 
         SharedPreferences.Editor ed = ep.edit();

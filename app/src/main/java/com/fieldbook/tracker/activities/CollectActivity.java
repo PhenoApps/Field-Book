@@ -303,14 +303,14 @@ public class CollectActivity extends ThemedActivity
 
         //lock = new Object();
 
-        infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2), (RecyclerView) findViewById(R.id.selectorList));
+        infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.    INFOBAR_NUMBER, 2), (RecyclerView) findViewById(R.id.selectorList));
 
         traitLayouts = new LayoutCollections(this);
         rangeBox = findViewById(R.id.act_collect_range_box);
         traitBox = findViewById(R.id.act_collect_trait_box);
         traitBox.connectRangeBox(rangeBox);
         rangeBox.connectTraitBox(traitBox);
-
+ 
         initCurrentVals();
 
     }

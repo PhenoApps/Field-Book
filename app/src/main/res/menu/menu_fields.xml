@@ -8,6 +8,11 @@
         android:showAsAction="always"
         android:title="@string/tutorial_dialog_title" />
     <item
+        android:id="@+id/bind_gos_gene_database"
+        android:icon="@drawable/ic_fields_creator"
+        android:showAsAction="always"
+        android:title="" />
+    <item
         android:id="@+id/menu_field_editor_item_creator"
         android:icon="@drawable/ic_fields_creator"
         android:showAsAction="always"

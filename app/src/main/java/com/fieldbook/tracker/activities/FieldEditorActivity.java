@@ -34,10 +34,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiActivity;
 import com.fieldbook.tracker.adapters.FieldAdapter;
+import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
@@ -90,6 +92,7 @@ public class FieldEditorActivity extends ThemedActivity
     public static FieldAdapter mAdapter;
     public static AppCompatActivity thisActivity;
     public static EditText trait;
+    private InfoBarAdapter infoBarAdapter;
     private static final Handler mHandler = new Handler();
     private static FieldFileObject.FieldFileBase fieldFile;
     private static SharedPreferences ep;
@@ -347,7 +350,7 @@ public class FieldEditorActivity extends ThemedActivity
                 }
                 break;
 
-            case R.id.menu_field_editor_item_creator:
+            case R.id. menu_field_editor_item_creator:
 
                 FieldCreatorDialog dialog = new FieldCreatorDialog(this);
 
@@ -364,7 +367,9 @@ public class FieldEditorActivity extends ThemedActivity
                 dialog.show();
 
                 break;
-
+            case R.id.bind_gos_gene_database:
+                infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.    INFOBAR_NUMBER, 2), (RecyclerView) findViewById(R.id.selectorList));
+                break;
             case android.R.id.home:
                 CollectActivity.reloadData = true;
                 finish();
