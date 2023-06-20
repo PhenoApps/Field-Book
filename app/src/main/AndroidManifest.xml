@@ -201,7 +201,7 @@
             android:theme="@style/AppTheme"/>
 
         <provider
-            android:name=".receivers.provider.GenericFileProvider"
+            android:name=".provider.GenericFileProvider"
             android:authorities="com.fieldbook.tracker.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
