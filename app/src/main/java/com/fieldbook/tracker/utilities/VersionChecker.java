@@ -1,25 +1,26 @@
 package com.fieldbook.tracker.utilities;
 
 import android.app.AlertDialog;
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.content.Context;git add -u
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
-import com.fieldbook.tracker.provider.GenericFileProvider;
+
+import androidx.documentfile.provider.DocumentFile;
+
+import com.fieldbook.tracker.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -113,50 +114,66 @@ public class VersionChecker extends AsyncTask<Void, Void, String> {
         }
     }
 
-    private void updateApp(String downloadUrl) {
-        // Create a directory for the APK file
-        File apkDirectory = new File(context.getFilesDir(), "updates");
-        apkDirectory.mkdirs();
-
-        // Create the APK file
-        String apkFilePath = apkDirectory.getAbsolutePath() + "/fieldbook_update.apk";
-        File apkFile = new File(apkFilePath);
-
-        // Download the APK file
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
-        request.setDescription("Downloading update...");
-        request.setTitle("Field Book Update");
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setDestinationUri(Uri.fromFile(apkFile));
-
-        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-        long downloadId = downloadManager.enqueue(request);
-
-        // Create a broadcast receiver
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+    protected void updateApp(String downloadURL) {
+        AsyncTask.execute(new Runnable() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                long receivedDownloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                if (downloadId == receivedDownloadId) {
-                    // Install the downloaded APK
-                    if (apkFile.exists()) {
-                        Intent installIntent = new Intent(Intent.ACTION_VIEW);
-                        installIntent.setDataAndType(GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", apkFile), "application/vnd.android.package-archive");
-                        installIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        installIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(installIntent);
+            public void run() {
+                Log.d("UpdateApp", "Starting updateApp");
+
+                // Specify the download directory
+                DocumentFile downloadDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_updates);
+
+                if (downloadDir != null && downloadDir.exists()) {
+                    // Create the file for the APK download
+                    DocumentFile apkFile = downloadDir.createFile("application/vnd.android.package-archive", "fieldbook_update.apk");
+
+                    if (apkFile != null && apkFile.exists()) {
+                        try {
+                            // Open an OutputStream to write the APK content
+                            OutputStream apkOutputStream = context.getContentResolver().openOutputStream(apkFile.getUri());
+                            Log.d("UpdateApp", "APK OutputStream opened");
+
+                            // Download the APK file and write it to the OutputStream
+                            URL url = new URL(downloadURL);
+                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                            InputStream inputStream = connection.getInputStream();
+
+                            byte[] buffer = new byte[4096];
+                            int bytesRead;
+                            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                apkOutputStream.write(buffer, 0, bytesRead);
+                            }
+
+                            // Close the streams
+                            apkOutputStream.close();
+                            inputStream.close();
+                            Log.d("UpdateApp", "APK downloaded successfully");
+
+                            // Show a notification or perform any other necessary actions
+                            // to inform the user that the APK download is complete.
+
+                            // Install the APK
+                            Uri apkUri = apkFile.getUri();
+                            Intent installIntent = new Intent(Intent.ACTION_VIEW);
+                            installIntent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+                            installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(installIntent);
+                            Log.d("UpdateApp", "APK installation started");
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Log.e("UpdateApp", "IOException occurred: " + e.getMessage());
+                        }
+                    } else {
+                        Log.e("UpdateApp", "APK file creation failed");
                     }
+                } else {
+                    Log.e("UpdateApp", "updates directory does not exist");
                 }
-                // Unregister the broadcast receiver
-                context.unregisterReceiver(this);
             }
-        };
-
-        // Register the broadcast receiver to listen for download completion
-        IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        context.registerReceiver(receiver, filter);
+        });
     }
-
 
     private boolean isNewerVersion(String currentVersion, String latestVersion) {
         // Split the version strings into their components
