@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.utilities;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -115,64 +116,82 @@ public class VersionChecker extends AsyncTask<Void, Void, String> {
     }
 
     protected void updateApp(String downloadURL) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("UpdateApp", "Starting updateApp");
+        new UpdateTask(context).execute(downloadURL);
+    }
 
-                // Specify the download directory
-                DocumentFile downloadDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_updates);
+    private static class UpdateTask extends AsyncTask<String, Void, DocumentFile> {
+        private ProgressDialog progressDialog;
+        private Context context;
 
-                if (downloadDir != null && downloadDir.exists()) {
-                    // Create the file for the APK download
-                    DocumentFile apkFile = downloadDir.createFile("application/vnd.android.package-archive", "fieldbook_update.apk");
+        public UpdateTask(Context context) {
+            this.context = context;
+        }
 
-                    if (apkFile != null && apkFile.exists()) {
-                        try {
-                            // Open an OutputStream to write the APK content
-                            OutputStream apkOutputStream = context.getContentResolver().openOutputStream(apkFile.getUri());
-                            Log.d("UpdateApp", "APK OutputStream opened");
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // Show progress dialog
+            progressDialog = new ProgressDialog(context);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setMessage("Downloading install file...");
+            progressDialog.show();
+        }
 
-                            // Download the APK file and write it to the OutputStream
-                            URL url = new URL(downloadURL);
-                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                            InputStream inputStream = connection.getInputStream();
+        @Override
+        protected DocumentFile doInBackground(String... params) {
+            String downloadURL = params[0];
+            // Specify the download directory
+            DocumentFile downloadDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_updates);
+            if (downloadDir != null && downloadDir.exists()) {
+                // Create the file for the APK download
+                DocumentFile apkFile = downloadDir.createFile("application/vnd.android.package-archive", "fieldbook_update.apk");
 
-                            byte[] buffer = new byte[4096];
-                            int bytesRead;
-                            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                                apkOutputStream.write(buffer, 0, bytesRead);
-                            }
+                if (apkFile != null && apkFile.exists()) {
+                    try {
+                        // Open an OutputStream to write the APK content
+                        OutputStream apkOutputStream = context.getContentResolver().openOutputStream(apkFile.getUri());
 
-                            // Close the streams
-                            apkOutputStream.close();
-                            inputStream.close();
-                            Log.d("UpdateApp", "APK downloaded successfully");
+                        // Download the APK file and write it to the OutputStream
+                        URL url = new URL(downloadURL);
+                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                        InputStream inputStream = connection.getInputStream();
 
-                            // Show a notification or perform any other necessary actions
-                            // to inform the user that the APK download is complete.
-
-                            // Install the APK
-                            Uri apkUri = apkFile.getUri();
-                            Intent installIntent = new Intent(Intent.ACTION_VIEW);
-                            installIntent.setDataAndType(apkUri, "application/vnd.android.package-archive");
-                            installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            context.startActivity(installIntent);
-                            Log.d("UpdateApp", "APK installation started");
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Log.e("UpdateApp", "IOException occurred: " + e.getMessage());
+                        byte[] buffer = new byte[4096];
+                        int bytesRead;
+                        while ((bytesRead = inputStream.read(buffer)) != -1) {
+                            apkOutputStream.write(buffer, 0, bytesRead);
                         }
-                    } else {
-                        Log.e("UpdateApp", "APK file creation failed");
+
+                        // Close the streams
+                        apkOutputStream.close();
+                        inputStream.close();
+
+                        return apkFile;
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } else {
-                    Log.e("UpdateApp", "updates directory does not exist");
                 }
             }
-        });
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(DocumentFile apkFile) {
+            super.onPostExecute(apkFile);
+            // Dismiss the progress dialog
+            progressDialog.dismiss();
+
+            if (apkFile != null) {
+                // Install the APK
+                Uri apkUri = apkFile.getUri();
+                Intent installIntent = new Intent(Intent.ACTION_VIEW);
+                installIntent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+                installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(installIntent);
+            }
+        }
     }
 
     private boolean isNewerVersion(String currentVersion, String latestVersion) {
