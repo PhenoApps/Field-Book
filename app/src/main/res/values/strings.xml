@@ -109,7 +109,7 @@
     <string name="traits_format_barcode">Barcode</string>
     <string name="traits_format_labelprint">Zebra Label Print</string>
     <string name="traits_format_usb_camera">Usb Camera</string>
-    <string name="traits_format_go_pro_camera">go pro</string>
+    <string name="traits_format_go_pro_camera">GoPro</string>
 
     <string name="traits_create_trait">Trait</string>
     <string name="traits_create_format">Format</string>

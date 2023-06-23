@@ -1023,7 +1023,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
         }
 
         public String getEnglishString() {
-            return "go pro";
+            return "GoPro";
         }
 
         public int getResourceId() {

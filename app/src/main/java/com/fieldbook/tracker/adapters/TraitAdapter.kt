@@ -38,7 +38,6 @@ class TraitAdapter(private val sorter: TraitSorter):
 
         init {
 
-
             dragSortImageView.setOnTouchListener { v, event ->
 
                 if (event.action == MotionEvent.ACTION_DOWN) {
@@ -124,6 +123,7 @@ class TraitAdapter(private val sorter: TraitSorter):
                 "zebra label print" -> R.drawable.ic_trait_labelprint
                 "gnss" -> R.drawable.ic_trait_gnss
                 "usb camera" -> R.drawable.ic_trait_usb
+                "gopro" -> R.drawable.ic_trait_camera
                 else -> R.drawable.ic_reorder
             })
 

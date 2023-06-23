@@ -3,10 +3,17 @@ package com.fieldbook.tracker.preferences
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
-import androidx.preference.*
+import androidx.preference.EditTextPreference
+import androidx.preference.ListPreference
+import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import org.phenoapps.security.Security
@@ -16,11 +23,14 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
     private var mPairDevicePref: Preference? = null
 
-    private val mPrefs by lazy {
-        PreferenceManager.getDefaultSharedPreferences(context)
-    }
+    private lateinit var mPrefs: SharedPreferences
 
     private val advisor by Security().secureBluetooth()
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 

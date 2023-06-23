@@ -23,7 +23,9 @@ class GoProWrapper @Inject constructor(
     val gatt: GoProGatt by lazy { GoProGatt(this) }
 
     fun attach() {
-        helper = GoProHelper(activity, this)
+        //activity.advisor().connectWith {
+            helper = GoProHelper(activity, this)
+        //}
     }
 
     fun destroy() {

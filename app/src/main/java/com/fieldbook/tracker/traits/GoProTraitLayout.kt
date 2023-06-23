@@ -77,7 +77,7 @@ class GoProTraitLayout :
 
     companion object {
         const val TAG = "GoProTrait"
-        const val type = "go pro"
+        const val type = "gopro"
         private const val CAMERA_DELAY_MS = 10000L
     }
 
@@ -418,7 +418,7 @@ class GoProTraitLayout :
     private fun connect() {
 
         //ensure bluetooth is enabled
-        collector.advisor().discoverWith { adapter ->
+        collector.advisor().withNearby { adapter ->
 
             if (helper?.isBluetoothEnabled(adapter) != true) {
 
@@ -428,6 +428,8 @@ class GoProTraitLayout :
                 )
 
             } else {
+
+                helper?.registerReceivers()
 
                 activity?.let { act ->
 

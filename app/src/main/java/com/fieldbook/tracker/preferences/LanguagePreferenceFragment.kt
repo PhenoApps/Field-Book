@@ -36,20 +36,23 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
 
         try {
 
-            var id = preference.key
+            context?.let { ctx ->
 
-            with (PreferenceManager.getDefaultSharedPreferences(context)) {
+                var id = preference.key
 
-                if (preference.key == "com.fieldbook.tracker.preference.language.default") {
+                with (PreferenceManager.getDefaultSharedPreferences(ctx)) {
 
-                    id = ConfigurationCompat.getLocales(Resources.getSystem().configuration).get(0)?.language
+                    if (preference.key == "com.fieldbook.tracker.preference.language.default") {
 
+                        id = ConfigurationCompat.getLocales(Resources.getSystem().configuration).get(0)?.language
+
+                    }
+
+                    edit().putString(GeneralKeys.LANGUAGE_LOCALE_ID, id).apply()
+                    edit().putString(GeneralKeys.LANGUAGE_LOCALE_SUMMARY, preference.title.toString()).apply()
+
+                    AppLanguageUtil.refreshAppText(context)
                 }
-
-                edit().putString(GeneralKeys.LANGUAGE_LOCALE_ID, id).apply()
-                edit().putString(GeneralKeys.LANGUAGE_LOCALE_SUMMARY, preference.title.toString()).apply()
-
-                AppLanguageUtil.refreshAppText(context)
             }
 
         } catch (e: Exception) {
