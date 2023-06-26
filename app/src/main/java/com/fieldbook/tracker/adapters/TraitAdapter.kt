@@ -123,7 +123,7 @@ class TraitAdapter(private val sorter: TraitSorter):
                 "zebra label print" -> R.drawable.ic_trait_labelprint
                 "gnss" -> R.drawable.ic_trait_gnss
                 "usb camera" -> R.drawable.ic_trait_usb
-                "gopro" -> R.drawable.ic_trait_camera
+                "gopro" -> R.drawable.ic_trait_gopro
                 else -> R.drawable.ic_reorder
             })
 
