@@ -54,7 +54,7 @@ jobs:
           echo "RELEASE=$RELEASE" >> $GITHUB_ENV
           echo "BUMP_TYPE=$BUMP_TYPE" >> $GITHUB_ENV
 
-      - name: Commit version changes
+      - name: Commit changes
         uses: EndBug/add-and-commit@v7
         with:
           add: 'version.properties'
@@ -94,6 +94,12 @@ jobs:
           name: Signed APK
           path: app/build/outputs/
 
+      - name: Build Changelog
+        id: build_changelog
+        uses: mikepenz/release-changelog-builder-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Get matching release
         uses: cardinalby/git-get-release-action@1.2.4
         id: matching_release
@@ -119,9 +125,7 @@ jobs:
           asset_name: Field-Book-v${{ env.RELEASE }}.apk
           overwrite: ${{ env.BUMP_TYPE == 'patchVersion' }}
           prerelease: ${{ env.BUMP_TYPE != 'patchVersion' }}
-          body: |
-            ${{ steps.matching_release.outputs.body }}
-            ${{ env.COMMIT_MSG }}
+          body: ${{steps.github_release.outputs.changelog}}
     
       # - name: Release APK to Play Store
       #   uses: r0adkll/upload-google-play@v1
