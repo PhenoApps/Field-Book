@@ -1,13 +1,19 @@
-# Field Book <a href="https://play.google.com/store/apps/details?id=com.fieldbook.tracker"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="50"></a>
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+# Field Book
+
+[![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.fieldbook.tracker%26l%3DDownloads%26m%3D%24totalinstalls)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)
+[![Rating](https://img.shields.io/endpoint?color=green&logo=google-play&logoColor=green&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.fieldbook.tracker%26l%3DRating%26m%3D%25E2%25AD%2590%2520%24rating)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)
+[![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+![Build Status](https://img.shields.io/github/actions/workflow/status/PhenoApps/Field-Book/github-release.yml)
+[![Latest](https://img.shields.io/github/v/release/phenoapps/field-book)](https://github.com/PhenoApps/Field-Book/releases/latest)
 [![All Contributors](https://img.shields.io/badge/all_contributors-30-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-Field Book is a simple app for taking phenotypic notes. Collecting data in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity.
 
-Field Book uses custom layouts for different types of data to that allow rapid data collection. Traits being collected are defined by the user and can be exported and transferred between devices. Sample files are provided with the installation.
+Field Book is a simple app for taking phenotypic notes. Collecting data in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity. Field Book uses custom layouts for different types of data to that allow rapid data collection. Traits being collected are defined by the user and can be exported and transferred between devices. Sample files are provided with the installation.
 
-Development of Field Book has been supported by the [Collaborative Crop Research Program][1] of The McKnight Foundation and the National Science Foundation under Grant No. (1543958).
+## Funding
+Development of Field Book has been supported by the [Collaborative Crop Research Program](http://ccrp.org/) of The McKnight Foundation and the National Science Foundation under Grant No. (1543958).
+
+## [Docs](https://docs.fieldbook.phenoapps.org/en/latest/field-book.html)
 
 ## [Translate](https://osij6hx.oneskyapp.com/collaboration/project?id=28259)
 
@@ -64,25 +70,3 @@ Development of Field Book has been supported by the [Collaborative Crop Research
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
-
-## Develop
-To submit code to Field Book:
-
-1. Merge the develop branch with your feature branch and resolve any conflicts.
-2. Create a pull request targeting the develop branch.
-3. Select 1-2 people to review your code.
-
-
-## License
-    Licensed under the GNU General Public License version 2 (GPLv2)
-    You may obtain a copy of the License at
-
-       http://www.gnu.org/licenses/gpl-2.0.html
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
-[1]: http://ccrp.org/
