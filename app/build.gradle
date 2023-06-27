@@ -72,7 +72,8 @@ android {
     buildTypes {
 
         release {
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             // signingConfig signingConfigs.playStoreConfig //Add your own signing config
         }
@@ -151,15 +152,15 @@ dependencies {
     implementation 'com.arthenica:ffmpeg-kit-min:5.1.LTS'
     implementation 'com.squareup.okhttp3:okhttp:4.11.0'
 
-    //necessary when building phenolib locally
-    implementation "com.squareup.okhttp:okhttp:2.7.5"
-
     //uvc camera java native libs
     implementation("com.serenegiant:common:2.12.4")
 
+    //brapi and required dependencies
     implementation 'com.github.breeding-insight:brapi:2.0.3'
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    //necessary when building phenolib locally
+    implementation "com.squareup.okhttp:okhttp:2.7.5"
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation("io.gsonfire:gson-fire:1.8.4") //required v1
 
     implementation 'org.jsoup:jsoup:1.8.1'
     implementation 'net.sourceforge.jexcelapi:jxl:2.6.10'
