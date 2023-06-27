@@ -52,6 +52,15 @@ jobs:
           echo "RELEASE=$RELEASE" >> $GITHUB_ENV
           echo "BUMP_TYPE=$BUMP_TYPE" >> $GITHUB_ENV
 
+      - name: Extract changelog message
+        id: extract_changelog
+        run: |
+          CHANGELOG_LINE=$(grep -oP "(?<=\`release-note\n\n).*" ${{ github.event.pull_request.body }})
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          CHANGELOG_MSG="${CHANGELOG_LINE} (#${PR_NUMBER})"
+          echo "CHANGELOG MSG IS: $CHANGELOG_MSG"
+          echo "CHANGELOG_MSG=$CHANGELOG_MSG" >> $GITHUB_ENV
+
       - name: Commit version changes
         uses: EndBug/add-and-commit@v7
         with:
@@ -119,7 +128,7 @@ jobs:
           prerelease: ${{ env.BUMP_TYPE != 'patchVersion' }}
           body: |
             ${{ steps.matching_release.outputs.body }}
-            ${{ env.COMMIT_MSG }}
+            ${{ env.CHANGELOG_MSG }}
     
       # - name: Release APK to Play Store
       #   uses: r0adkll/upload-google-play@v1
