@@ -12,6 +12,8 @@ props.each { prop ->
     project.ext.set(prop.key, prop.value)
 }
 
+//comment
+
 private Integer makeVersionCode() {
     int major = ext.majorVersion as Integer
     int minor = ext.minorVersion as Integer
