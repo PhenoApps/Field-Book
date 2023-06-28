@@ -1006,6 +1006,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
                     c.setValue(value);
                     c.setLabel(value);
                 }
+                scale.add(c);
             }
             return CategoryJsonUtil.Companion.encode(scale);
         } catch (Exception e) {

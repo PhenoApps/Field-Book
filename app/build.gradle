@@ -157,6 +157,7 @@ dependencies {
     implementation 'com.github.breeding-insight:brapi:2.0.3'
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    implementation("io.gsonfire:gson-fire:1.8.4") //required v1
 
     implementation 'org.jsoup:jsoup:1.8.1'
     implementation 'net.sourceforge.jexcelapi:jxl:2.6.10'
