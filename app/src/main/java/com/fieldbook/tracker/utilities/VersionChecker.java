@@ -110,7 +110,7 @@ public class VersionChecker extends AsyncTask<Void, Void, String> {
                                 dialog.dismiss();
                             }
                         });
-                        builder.setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
+                        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
