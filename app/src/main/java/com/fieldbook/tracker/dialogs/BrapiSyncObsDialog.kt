@@ -133,10 +133,12 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
 //                                    println("Value: " + obs.value)
 //                                }
                             println("Size of ObsList: ${studyObservations.observationList.size}")
-                            println("Done pulling observations. Page: ${paginationManager.page}/${paginationManager.totalPages}")
+                            //Adding 1 to the page number here so it makes more sense when debugging. Otherwise we get 0/10 as the first and 9/10 as the last message.
+                            println("Done pulling observations. Page: ${paginationManager.page + 1}/${paginationManager.totalPages}")
 
                             //Once we have loaded in all the observations, we can make the save button visible
-                            if (paginationManager.page == paginationManager.totalPages) {
+                            // We need to check page == totalPages - 1 otherwise it will loop indefinitely as the 0-based page will never reach totalPages(1based)
+                            if (paginationManager.page == paginationManager.totalPages - 1) {
                                 makeSaveBtnVisible()
                             }
                         }
