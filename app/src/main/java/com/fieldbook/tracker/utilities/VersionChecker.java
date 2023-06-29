@@ -85,18 +85,24 @@ public class VersionChecker extends AsyncTask<Void, Void, String> {
             if (ctx != null) {
 
                 try {
+
+                    String title = ctx.getString(R.string.util_version_checker_update_check);
+                    String updateText = ctx.getString(R.string.util_version_checker_update_text);
                     JSONObject json = new JSONObject(result);
                     String latestVersion = json.getString("tag_name");
                     String downloadUrl = json.getJSONArray("assets").getJSONObject(0).getString("browser_download_url");
 
                     // Show a dialog to the user indicating if an update is available
                     AlertDialog.Builder builder = new AlertDialog.Builder(ctx, R.style.AlertDialogStyle);
-                    builder.setTitle("Update Check");
+                    builder.setTitle(title);
 
                     if (isNewerVersion(currentVersion, latestVersion)) {
+
+                        String message = ctx.getString(R.string.util_version_checker_update_check_message, latestVersion);
+
                         Log.i(TAG, "New version available: " + latestVersion);
-                        builder.setMessage("New version available: " + latestVersion);
-                        builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                        builder.setMessage(message);
+                        builder.setPositiveButton(updateText, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 // Call a method to handle the update process
@@ -111,9 +117,12 @@ public class VersionChecker extends AsyncTask<Void, Void, String> {
                             }
                         });
                     } else {
+
+                        String message = ctx.getString(R.string.util_version_checker_up_to_date);
+
                         Log.i(TAG, "Field Book is up to date.");
-                        builder.setMessage("Field Book is up to date.");
-                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        builder.setMessage(message);
+                        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
