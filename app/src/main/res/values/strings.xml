@@ -347,6 +347,7 @@
     <string name="about_help_translate_title">Help translate</string>
     <string name="changelog_title">Changelog</string>
     <string name="libraries_title">Libraries</string>
+    <string name="updates_title">Check for Updates</string>
 
     <!-- Profile dialog -->
     <string name="profile_person">Person</string>
@@ -789,4 +790,9 @@
     <string name="preferences_sound_delete_obs_description">Notification sound when observation is deleted in Collect activity.</string>
     <string name="file_already_exists">File already exists.</string>
     <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
+    <string name="util_version_checker_progress_message">Downloading install file…</string>
+    <string name="util_version_checker_update_check">Update Check</string>
+    <string name="util_version_checker_update_text">Update</string>
+    <string name="util_version_checker_update_check_message">New version available: %s</string>
+    <string name="util_version_checker_up_to_date">Field Book is up to date.</string>
 </resources>
