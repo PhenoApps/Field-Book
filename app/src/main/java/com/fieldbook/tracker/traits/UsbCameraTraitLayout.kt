@@ -118,6 +118,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
         registerReconnectListener()
 
+        connectBtn?.requestFocus()
     }
 
     private fun registerReconnectListener() {

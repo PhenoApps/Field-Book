@@ -96,6 +96,8 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
         rustM.setOnClickListener(new RustButtonOnClickListener());
         rustS.setOnClickListener(new RustButtonOnClickListener());
         rustDelim.setOnClickListener(new RustButtonOnClickListener());
+
+        rustButtons.get(R.id.rust0).requestFocus();
     }
 
     private List<String> getRustCodes() {

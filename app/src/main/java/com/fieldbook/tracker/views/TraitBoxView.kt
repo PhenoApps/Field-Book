@@ -339,6 +339,7 @@ class TraitBoxView : ConstraintLayout {
         }
         traitType.setSelection(pos)
         controller.refreshLock()
+        controller.getCollectInputView().resetInitialIndex()
     }
 
     fun update(parent: String?, value: String) {

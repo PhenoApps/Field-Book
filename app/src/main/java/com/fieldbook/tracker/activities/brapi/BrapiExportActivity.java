@@ -143,6 +143,7 @@ public class BrapiExportActivity extends ThemedActivity {
     @Override
     public void onResume() {
         super.onResume();
+        brAPIService.authorizeClient();
 
         // Check out brapi auth
 //        BrapiControllerResponse brapiControllerResponse = BrAPIService.checkBrapiAuth(this);

@@ -75,6 +75,8 @@ public class NumericTraitLayout extends BaseTraitLayout {
                 return false;
             }
         });
+
+        numberButtons.get(R.id.k1).requestFocus();
     }
 
     @Override

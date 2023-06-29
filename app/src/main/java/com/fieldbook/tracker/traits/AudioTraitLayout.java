@@ -70,6 +70,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
         buttonState = ButtonState.WAITING_FOR_RECORDING;
         controlButton = act.findViewById(R.id.record);
         controlButton.setOnClickListener(new AudioTraitOnClickListener());
+        controlButton.requestFocus();
     }
 
     @Override

@@ -1488,8 +1488,9 @@ public class DataHelper {
                     SearchData sd = new SearchData();
 
                     sd.id = cursor.getInt(0);
-                    sd.range = cursor.getString(1);
-                    sd.plot = cursor.getString(2);
+                    sd.unique = cursor.getString(1);
+                    sd.range = cursor.getString(2);
+                    sd.plot = cursor.getString(3);
 
                     data[count] = sd;
 

@@ -251,7 +251,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     }
 
     //basic setup for linked list view's adapter
-    fun initialize(values: List<ObservationModel>) {
+    fun initialize(values: List<ObservationModel>, initialRep: Int) {
 
         mValues.clear()
 
@@ -259,7 +259,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         submitList()
 
-        pager.currentItem = values.size - 1
+        pager.currentItem = if (initialRep == -1) values.size - 1 else initialRep - 1
 
         updateButtonVisibility()
     }
