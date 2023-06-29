@@ -43,7 +43,7 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
         super.onCreate(savedInstanceState)
 
         //setup dialog ui
-        window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         setContentView(R.layout.dialog_collect_att_chooser)
 
