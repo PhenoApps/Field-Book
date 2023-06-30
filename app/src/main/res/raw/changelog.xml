@@ -4,6 +4,7 @@
         date="2023-06-01"
         versionCode="550"
         versionName="v5.5">
+        <new>New InfoBar prefix selector</new>
         <info>Improved trait reordering</info>
         <info>Improved external barcode scanning</info>
         <bugfix>Fixed issue with trait cloud imports</bugfix>
