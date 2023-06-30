@@ -2,6 +2,7 @@ package com.fieldbook.tracker.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -45,10 +46,18 @@ class InfoBarAdapter(private val context: Context) :
             setViewHolderText(holder, prefix, value)
         }
 
-        holder.itemView.setOnClickListener {
+        holder.prefixTextView.setOnClickListener {
 
             (context as InfoBarController).onInfoBarClicked(position)
 
+        }
+
+        holder.valueTextView.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> holder.valueTextView.maxLines = 5
+                MotionEvent.ACTION_UP -> holder.valueTextView.maxLines = 1
+            }
+            true
         }
     }
 
