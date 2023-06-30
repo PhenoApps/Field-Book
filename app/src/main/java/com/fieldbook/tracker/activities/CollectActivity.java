@@ -246,6 +246,106 @@ public class CollectActivity extends ThemedActivity
 
         loadScreen();
 
+        checkForInitialBarcodeSearch();
+    }
+
+    private void switchField(int studyId, String fieldName, @Nullable String obsUnitId) {
+
+        try {
+
+            //updates obs. range view in database
+            database.switchField(studyId);
+
+            //rangeBox.setAllRangeID();
+            int[] rangeID = rangeBox.getRangeID();
+
+            //refresh collect activity UI
+            rangeBox.reload();
+            rangeBox.refresh();
+            initWidgets(false);
+
+            if (obsUnitId != null) {
+
+                reloadData = false;
+
+                //navigate to the plot
+                moveToSearch("id", rangeID, null, null, obsUnitId, -1);
+            }
+
+            //update selected item in field adapter using preference
+            ep.edit().putString(GeneralKeys.FIELD_FILE, fieldName).apply();
+            ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId).apply();
+
+            playSound("hero_simple_celebration");
+
+        } catch (Exception e) {
+
+            Log.d(TAG,"Error during switch field");
+
+            e.printStackTrace();
+
+        }
+    }
+
+    /**
+     * Checks if the user has clicked the barcode button on ConfigActivity,
+     * this will search for obs unit and load neccessary field file
+     */
+    private void checkForInitialBarcodeSearch() {
+
+        try {
+
+            Intent i = getIntent();
+            if (i != null) {
+
+                //get barcode to search for which will be an obs. unit id
+                String barcode = i.getStringExtra("barcode");
+
+                if (barcode != null) {
+
+                    Log.d(TAG, "Searching initial barcode: " + barcode);
+
+                    ObservationUnitModel model = database.getObservationUnitById(barcode);
+
+                    if (model != null) {
+
+                        try {
+
+                            //if barcode matches an obs. unit id
+                            if (model.getObservation_unit_db_id().equals(barcode)) {
+
+                                inputPlotId = barcode;
+
+                                FieldObject fo = database.getFieldObject(model.getStudy_id());
+
+                                if (fo != null && fo.getExp_name() != null) {
+
+                                    switchField(model.getStudy_id(), fo.getExp_name(), barcode);
+
+                                }
+                            }
+
+                        } catch (Exception e) {
+
+                            Log.d(TAG, "Failed while searching for: " + barcode);
+
+                            e.printStackTrace();
+                        }
+
+                    } else {
+
+                        Toast.makeText(this, getString(R.string.act_collect_plot_with_code_not_found), Toast.LENGTH_LONG).show();
+
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+
+            Log.d(TAG, "Something failed while searching. ");
+
+            e.printStackTrace();
+        }
     }
 
     public CollectInputView getCollectInputView() {
@@ -605,6 +705,8 @@ public class CollectActivity extends ThemedActivity
 
         // Reload traits based on selected plot
         rangeBox.display();
+
+        String pid = rangeBox.getPlotID();
 
         traitBox.setNewTraits(rangeBox.getPlotID());
 
@@ -1544,25 +1646,7 @@ public class CollectActivity extends ThemedActivity
                             String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
 
                             SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, 8000, null,
-                                (v) -> {
-
-                                    //updates obs. range view in database
-                                    database.switchField(studyId);
-
-                                    //refresh collect activity UI
-                                    rangeBox.reload();
-                                    rangeBox.refresh();
-                                    initWidgets(false);
-
-                                    //navigate to the plot
-                                    moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
-
-                                    //update selected item in field adapter using preference
-                                    ep.edit().putString(GeneralKeys.FIELD_FILE, fieldName).apply();
-                                    ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId).apply();
-
-                                    playSound("hero_simple_celebration");
-                                });
+                                (v) -> switchField(studyId, fieldName, null));
 
                         } else {
 
