@@ -62,7 +62,7 @@ class InfoBarAdapter(private val context: Context) :
     }
 
     private fun setViewHolderText(holder: ViewHolder, label: String?, value: String) {
-        holder.prefixTextView.text = "$label:"
+        holder.prefixTextView.text = "$label: "
         holder.valueTextView.text = value
     }
 
