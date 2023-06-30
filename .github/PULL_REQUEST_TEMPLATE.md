@@ -1,32 +1,40 @@
-# Description
+## Description
 
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
+_Provide a summary of your changes including motivation and context.
+If these changes fix a bug or resolves a feature request, be sure to link to that issue._
 
-Fixes # (issue)
+
 
 ## Type of change
 
-Please delete options that are not relevant.
+_What type of changes does your code introduce? Put an `x` in boxes that apply._
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] This change requires a documentation update
+- [ ] `CHANGE` (fix or feature that would cause existing functionality to not work as expected)
+- [ ] `FEATURE` (non-breaking change which adds functionality)
+- [ ] `BUGFIX` (non-breaking change which fixes an issue)
+- [ ] `ENHANCEMENT` (non-breaking change which improves existing functionality)
+- [ ] `NONE` (if none of the other choices apply. Example, tooling, build system, CI, docs, etc.)
 
-# How Has This Been Tested?
+## Checklist:
 
-Please describe any tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration
-
-- [ ] Test A
-- [ ] Test B
-
-**Test Configuration**:
-* Hardware:
-* SDK:
-
-# Checklist:
-
-- [ ] I have performed a self-review of my own code
+- [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to documentation
-- [ ] My changes generate no new warnings
+- [ ] I have updated relevant documentation
+
+## Changelog entry
+
+_Please add a one-line changelog entry below. This will be copied to the changelog file during the release process._
+
+<!-- 
+Your release note should be written in clear and straightforward sentences. Most often, users aren't familiar with
+the technical details of your PR, so consider what they need to know when you write your release note.
+
+Some brief examples of release notes:
+- Fixed a bug causing Field Book to crash when collecting categorical data.
+- Added a new option to enable a sound when data is deleted.
+- Modified the behavior trait drag and drop behavior.
+-->
+
+```release-note
+
+```

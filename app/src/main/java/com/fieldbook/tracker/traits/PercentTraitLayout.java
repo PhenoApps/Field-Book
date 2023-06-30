@@ -77,6 +77,8 @@ public class PercentTraitLayout extends BaseTraitLayout {
         };
 
         seekBar.setOnSeekBarChangeListener(seekListener);
+
+        seekBar.requestFocus();
     }
 
     @Override

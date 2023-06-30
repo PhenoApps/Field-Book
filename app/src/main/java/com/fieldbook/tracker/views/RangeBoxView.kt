@@ -543,6 +543,7 @@ class RangeBoxView : ConstraintLayout {
             }
         }
         controller.resetGeoNavMessages()
+        controller.getCollectInputView().resetInitialIndex()
     }
 
     fun moveEntryRight() {
@@ -565,6 +566,7 @@ class RangeBoxView : ConstraintLayout {
             }
         }
         controller.resetGeoNavMessages()
+        controller.getCollectInputView().resetInitialIndex()
     }
 
     private fun decrementPaging(pos: Int): Int {

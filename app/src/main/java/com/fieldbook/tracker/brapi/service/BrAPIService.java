@@ -130,7 +130,7 @@ public interface BrAPIService {
 
     public static void handleConnectionError(Context context, int code) {
         ApiErrorCode apiErrorCode = ApiErrorCode.processErrorCode(code);
-        String toastMsg = "";
+        String toastMsg;
 
         switch (apiErrorCode) {
             case UNAUTHORIZED:
@@ -150,7 +150,10 @@ public interface BrAPIService {
             default:
                 toastMsg = "";
         }
-        Toast.makeText(context.getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
+
+        ((Activity)context).runOnUiThread(() -> {
+            Toast.makeText(context.getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
+        });
     }
 
     public void postImageMetaData(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);

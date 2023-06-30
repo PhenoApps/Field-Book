@@ -273,6 +273,24 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "zrm22",
+      "name": "zrm22",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54960003?v=4",
+      "profile": "https://github.com/zrm22",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "joegage",
+      "name": "Joe Gage",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10454330?v=4",
+      "profile": "https://github.com/joegage",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -280,5 +298,7 @@
   "projectOwner": "PhenoApps",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitConvention": "angular",
+  "commitType": "docs"
 }

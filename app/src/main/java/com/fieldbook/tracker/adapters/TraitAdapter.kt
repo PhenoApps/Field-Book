@@ -37,6 +37,8 @@ class TraitAdapter(private val sorter: TraitSorter):
         val menuImageView = view.findViewById<ImageView>(R.id.popupMenu)
 
         init {
+
+
             dragSortImageView.setOnTouchListener { v, event ->
 
                 if (event.action == MotionEvent.ACTION_DOWN) {
@@ -45,6 +47,25 @@ class TraitAdapter(private val sorter: TraitSorter):
                 }
 
                 v.performClick()
+
+            }
+
+            visibleCheckBox.setOnCheckedChangeListener { _, _ ->
+
+                val trait = view.tag as TraitObject
+
+                if (visibleCheckBox.isChecked) {
+                    sorter.getDatabase().updateTraitVisibility(trait.trait, true)
+                } else {
+                    sorter.getDatabase().updateTraitVisibility(trait.trait, false)
+                }
+            }
+
+            menuImageView.setOnClickListener { v ->
+
+                val trait = view.tag as TraitObject
+
+                sorter.onMenuItemClicked(v, trait)
 
             }
         }
@@ -108,21 +129,7 @@ class TraitAdapter(private val sorter: TraitSorter):
 
             // Check or uncheck the list items
             val visible = sorter.getDatabase().traitVisibility[this.trait]
-            viewHolder.visibleCheckBox.isChecked = visible == "true"
-
-            viewHolder.visibleCheckBox.setOnCheckedChangeListener { _, _ ->
-                if (viewHolder.visibleCheckBox.isChecked) {
-                    sorter.getDatabase().updateTraitVisibility(this.trait, true)
-                } else {
-                    sorter.getDatabase().updateTraitVisibility(this.trait, false)
-                }
-            }
-
-            viewHolder.menuImageView.setOnClickListener { v ->
-
-                sorter.onMenuItemClicked(v, this)
-
-            }
+            viewHolder.visibleCheckBox.isChecked = visible == null || visible == "true"
         }
     }
 

@@ -114,7 +114,15 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
         if (observations.length > 0) {
 
+            int repIndex = act.getInputView().getInitialIndex();
+
             String value = observations[observations.length - 1].getValue();
+
+            if (repIndex != -1) {
+
+                value = observations[repIndex - 1].getValue();
+
+            }
 
             if (!value.isEmpty()) {
 

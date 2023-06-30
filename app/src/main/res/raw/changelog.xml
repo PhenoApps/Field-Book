@@ -1,12 +1,16 @@
 <changelog>
 
     <release
-        date="2023-06-101"
+        date="2023-06-01"
         versionCode="550"
         versionName="v5.5">
         <info>Improved trait reordering</info>
+        <info>Improved external barcode scanning</info>
         <bugfix>Fixed issue with trait cloud imports</bugfix>
         <bugfix>Fixed issue with lock state not saving</bugfix>
+        <bugfix>Fixed issue with exporting data via BrAPI</bugfix>
+        <bugfix>Fixed issue with NA in categorical traits</bugfix>
+        <bugfix>Fixed issue with field sorting</bugfix>
     </release>
 
     <release

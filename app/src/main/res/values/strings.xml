@@ -347,6 +347,7 @@
     <string name="about_help_translate_title">Help translate</string>
     <string name="changelog_title">Changelog</string>
     <string name="libraries_title">Libraries</string>
+    <string name="updates_title">Check for Updates</string>
 
     <!-- Profile dialog -->
     <string name="profile_person">Person</string>
@@ -610,6 +611,7 @@
     <string name="preferences_brapi_traits_title">BrAPI Variables</string>
     <string name="menu_action_header_view_data_grid_title">Update Row Headers</string>
     <string name="dialog_data_grid_header_picker_title">Choose Row Headers</string>
+    <string name="dialog_data_grid_repeated_measures_title">Choose Observation</string>
     <string name="act_trait_editor_menu_click_while_dragging">Please finish dragging.</string>
     <string name="act_collect_no_plots">This study has no plots saved.</string>
     <string name="scan_barcode">Scan</string>
@@ -791,4 +793,10 @@
     <string name="dialog_att_chooser_traits">Traits</string>
     <string name="dialog_att_chooser_other">Other</string>
     <string name="dialog_collect_att_chooser_title">Choose an attribute</string>
+    <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
+    <string name="util_version_checker_progress_message">Downloading install file…</string>
+    <string name="util_version_checker_update_check">Update Check</string>
+    <string name="util_version_checker_update_text">Update</string>
+    <string name="util_version_checker_update_check_message">New version available: %s</string>
+    <string name="util_version_checker_up_to_date">Field Book is up to date.</string>
 </resources>

@@ -449,7 +449,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                final Function<Integer, Void> failFunction) {
         try {
             final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
-                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
+                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
@@ -724,7 +724,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
         //search imported obs references for first field book id
         List<BrAPIExternalReference> references = obs.getExternalReferences();
-        if (!references.isEmpty()) {
+        if (references != null && !references.isEmpty()) {
             for (BrAPIExternalReference ref : references) {
                 String source = ref.getReferenceSource();
                 if (source != null && source.equals(fieldBookReferenceSource)) {
@@ -773,18 +773,17 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     try {
 
                         List<Observation> newObservations = new ArrayList<>();
-                        for(BrAPIObservation obs: phenotypesResponse.getResult().getData()){
-                            newObservations.add(mapToObservation(obs));
+                        if(phenotypesResponse.getResult() != null && phenotypesResponse.getResult().getData() != null) {
+                            for (BrAPIObservation obs : phenotypesResponse.getResult().getData()) {
+                                newObservations.add(mapToObservation(obs));
+                            }
                         }
 
                         function.apply(newObservations);
 
                     } catch (Exception e) {
-
                         e.printStackTrace();
-
-                        failFunction.apply(ApiErrorCode.FORBIDDEN.ordinal());
-
+                        failFunction.apply(ApiErrorCode.ERROR_READING_RESPONSE.getCode()); //Cause of the error is unknown, but it is probably not a 4XX error
                     }
                 }
 
@@ -798,20 +797,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             List<BrAPIObservation> request = new ArrayList<>();
 
             for (Observation observation : observations) {
-                BrAPIObservation newObservation = new BrAPIObservation();
-                newObservation.setCollector(observation.getCollector().trim());
-                newObservation.setObservationTimeStamp(TimeAdapter.convertFrom(observation.getTimestamp()));
-                newObservation.setObservationUnitDbId(observation.getUnitDbId());
-                newObservation.setStudyDbId(observation.getStudyId());
-                newObservation.setObservationVariableDbId(observation.getVariableDbId());
-                newObservation.setObservationVariableName(observation.getVariableName());
-                newObservation.setValue(observation.getValue());
-
-                BrAPIExternalReference reference = new BrAPIExternalReference();
-                reference.setReferenceID(observation.getFieldbookDbId());
-                reference.setReferenceSource(fieldBookReferenceSource);
-
-                newObservation.setExternalReferences(Collections.singletonList(reference));
+                BrAPIObservation newObservation = convertToBrAPIObservation(observation);
                 request.add(newObservation);
             }
 
@@ -831,11 +817,19 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
                 public void onSuccess(BrAPIObservationListResponse observationsResponse, int i, Map<String, List<String>> map) {
-                    List<Observation> newObservations = new ArrayList<>();
-                    for(BrAPIObservation obs: observationsResponse.getResult().getData()){
-                        newObservations.add(mapToObservation(obs));
+                    try {
+                        List<Observation> newObservations = new ArrayList<>();
+                        if (observationsResponse.getResult() != null && observationsResponse.getResult().getData() != null) {
+                            for (BrAPIObservation obs : observationsResponse.getResult().getData()) {
+                                newObservations.add(mapToObservation(obs));
+                            }
+                        }
+                        function.apply(newObservations);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        failFunction.apply(ApiErrorCode.ERROR_READING_RESPONSE.getCode()); //Cause of the error is unknown, but it is probably not a 4XX error
                     }
-                    function.apply(newObservations);
                 }
 
                 @Override
@@ -848,14 +842,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             Map<String, BrAPIObservation> request = new HashMap<>();
 
             for (Observation obs : observations) {
-                BrAPIObservation o = new BrAPIObservation();
-                o.setCollector(obs.getCollector().trim());
-                o.setObservationDbId(obs.getDbId());
-                o.setObservationTimeStamp(TimeAdapter.convertFrom(obs.getTimestamp()));
-                o.setObservationUnitDbId(obs.getUnitDbId());
-                o.setObservationVariableDbId(obs.getVariableDbId());
-                o.setValue(obs.getValue());
-
+                BrAPIObservation o = convertToBrAPIObservation(obs);
                 request.put(obs.getDbId(), o);
             }
 
@@ -865,6 +852,26 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             failFunction.apply(error.getCode());
             Log.e("BrAPIServiceV2", "API Exception", error);
         }
+    }
+
+    private BrAPIObservation convertToBrAPIObservation(Observation observation){
+        BrAPIObservation newObservation = new BrAPIObservation();
+        newObservation.setCollector(observation.getCollector().trim());
+        newObservation.setObservationDbId(observation.getDbId());
+        newObservation.setObservationTimeStamp(TimeAdapter.convertFrom(observation.getTimestamp()));
+        newObservation.setObservationUnitDbId(observation.getUnitDbId());
+        newObservation.setStudyDbId(observation.getStudyId());
+        newObservation.setObservationVariableDbId(observation.getVariableDbId());
+        newObservation.setObservationVariableName(observation.getVariableName());
+        newObservation.setValue(observation.getValue());
+
+        BrAPIExternalReference reference = new BrAPIExternalReference();
+        reference.setReferenceID(observation.getFieldbookDbId());
+        reference.setReferenceSource(fieldBookReferenceSource);
+
+        newObservation.setExternalReferences(Collections.singletonList(reference));
+
+        return newObservation;
     }
 
     private String getPrioritizedValue(String... values) {

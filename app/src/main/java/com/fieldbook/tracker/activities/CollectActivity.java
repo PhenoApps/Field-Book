@@ -87,6 +87,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -128,6 +129,7 @@ public class CollectActivity extends ThemedActivity
     public static boolean searchReload;
     public static String searchRange;
     public static String searchPlot;
+    public static String searchUnique;
     public static boolean reloadData;
     public static boolean partialReload;
     public static String TAG = "Field Book";
@@ -574,7 +576,10 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
+                RangeObject ro = rangeBox.getCRange();
+
+                //issue #634 fix for now to check the search query by plot_id which should be the unique id
+                if (Objects.equals(ro.plot_id, searchUnique)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -1469,8 +1474,10 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+
         int action = event.getAction();
         int keyCode = event.getKeyCode();
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if (ep.getBoolean(GeneralKeys.VOLUME_NAVIGATION, false)) {
@@ -1488,29 +1495,23 @@ public class CollectActivity extends ThemedActivity
                     return true;
                 }
                 return false;
-            case KeyEvent.KEYCODE_ENTER:
-                String return_action = ep.getString(GeneralKeys.RETURN_CHARACTER, "0");
+//                else if (event.action == KeyEvent.ACTION_UP
+//                    && code == KeyEvent.KEYCODE_ENTER || code == KeyEvent.KEYCODE_TAB) {
+//
+//                inputEditText?.requestFocus()
+//            }
+            default:
 
-                if (return_action.equals("0")) {
-                    if (action == KeyEvent.ACTION_UP) {
-                        rangeBox.moveEntryRight();
+                if (action == KeyEvent.ACTION_UP) {
+
+                    if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_TAB) {
+
+                        collectInputView.requestFocus();
+
                         return false;
                     }
                 }
 
-                if (return_action.equals("1")) {
-                    if (action == KeyEvent.ACTION_UP) {
-                        traitBox.moveTrait("right");
-                        return true;
-                    }
-                }
-
-                if (return_action.equals("2")) {
-                    return true;
-                }
-
-                return false;
-            default:
                 return super.dispatchKeyEvent(event);
         }
     }
@@ -1549,6 +1550,11 @@ public class CollectActivity extends ThemedActivity
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
                     moveToSearch("id", rangeID, null, null, inputPlotId, trait);
+                    //select the rep chosen from datagrid
+                    if (collectInputView.isRepeatEnabled()) {
+                        int rep = data.getIntExtra("rep", -1);
+                        collectInputView.navigateToRep(rep);
+                    }
                     mSkipLastUsedTrait = true;
                 }
                 break;
