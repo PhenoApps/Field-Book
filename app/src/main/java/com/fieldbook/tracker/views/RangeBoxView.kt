@@ -7,6 +7,7 @@ import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -197,7 +198,6 @@ class RangeBoxView : ConstraintLayout {
 
         controller.getTraitBox().setNewTraits(getPlotID())
 
-        controller.initWidgets(true)
     }
 
     private fun truncate(s: String, maxLen: Int): String? {
@@ -390,6 +390,8 @@ class RangeBoxView : ConstraintLayout {
             display()
             controller.getTraitBox().setNewTraits(getPlotID())
             controller.initWidgets(true)
+
+            Log.d("Field Book", "refresh widgets range box repeate key press")
         }
     }
 
