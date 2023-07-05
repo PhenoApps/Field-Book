@@ -206,6 +206,7 @@
     <string name="preferences_brapi_version_v1">V1</string>
     <string name="preferences_brapi_version_v2">V2</string>
     <string name="preferences_brapi_oidc_flow">OIDC Flow</string>
+    <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
     <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
     <string name="preferences_brapi_oidc_flow_old_custom">Original Field Book Custom</string>
 
