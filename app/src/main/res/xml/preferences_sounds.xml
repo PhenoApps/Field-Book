@@ -23,6 +23,13 @@
         android:title="@string/preferences_sound_cycle_traits_title"
         android:summary="@string/preferences_sound_cycle_traits_description" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_tb_delete"
+        android:key="DELETE_OBSERVATION_SOUND"
+        android:title="@string/preferences_sound_delete_obs_title"
+        android:summary="@string/preferences_sound_delete_obs_description" />
+
     <PreferenceCategory android:title="@string/preferences_category_audio_tts_title"
         app:iconSpaceReserved="false">
 

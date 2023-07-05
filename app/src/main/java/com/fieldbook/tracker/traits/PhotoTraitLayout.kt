@@ -3,40 +3,34 @@ package com.fieldbook.tracker.traits
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.widget.AdapterView
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.Gallery
 import android.widget.ImageButton
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.documentfile.provider.DocumentFile
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.adapters.GalleryImageAdapter
+import com.fieldbook.tracker.adapters.ImageTraitAdapter
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getPlotMedia
 import com.fieldbook.tracker.utilities.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getStem
-import java.io.IOException
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PhotoTraitLayout : BaseTraitLayout {
+class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
     companion object {
         const val TAG = "PhotoTrait"
@@ -44,15 +38,15 @@ class PhotoTraitLayout : BaseTraitLayout {
         const val PICTURE_REQUEST_CODE = 252
     }
 
-    private var scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(Dispatchers.IO)
 
-    private var drawables: ArrayList<Bitmap>? = null
     private var uris = arrayListOf<Uri>()
 
-    private var photo: Gallery? = null
-    private var photoAdapter: GalleryImageAdapter? = null
     private var currentPhotoPath: Uri? = null
     private var activity: Activity? = null
+
+    private lateinit var recyclerView: RecyclerView
+
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -65,187 +59,69 @@ class PhotoTraitLayout : BaseTraitLayout {
     override fun setNaTraitsText() {}
     override fun type() = type
 
-    override fun init() {
-
+    override fun layoutId(): Int {
+        return R.layout.trait_photo
     }
 
-    override fun init(act: Activity?) {
-        super.init(act)
-        val capture = findViewById<ImageButton>(R.id.capture)
+    override fun init(act: Activity) {
+
+        val capture = act.findViewById<ImageButton>(R.id.capture)
         capture.setOnClickListener(PhotoTraitOnClickListener())
-        photo = findViewById(R.id.photo)
+
         activity = act
+
+        recyclerView = act.findViewById(R.id.trait_photo_rv)
+        recyclerView.adapter = ImageTraitAdapter(context, this)
+
+        recyclerView.requestFocus();
     }
 
     override fun loadLayout() {
 
         loadLayoutWork()
 
-        super.loadLayout()
     }
 
     private fun loadLayoutWork() {
 
-        scope.cancel()
-        scope = CoroutineScope(Dispatchers.IO)
-        scope.launch {
+        val studyId = (context as CollectActivity).studyId
 
-            // Always set to null as default, then fill in with trait value
-            drawables = ArrayList()
-            uris = arrayListOf()
-
-            currentTrait.trait?.let { traitName ->
-
-                val photosDir = getFieldMediaDirectory(context, traitName)
-
-                try {
-
-                    val thumbDir = photosDir?.findFile(".thumbnails")
-                    //back down to the photos directory if thumbnails don't exist
-                    if (thumbDir == null || thumbDir.listFiles().isEmpty()) {
-                        generateThumbnails()
-                    }
-                    if (thumbDir != null) {
-                        val plot = currentRange.plot_id
-                        val locations = getPlotMedia(thumbDir, plot, ".jpg")
-
-                        if (locations.isNotEmpty()) {
-                            locations.forEach { image ->
-                                if (image.exists()) {
-
-                                    val name = image.name
-
-                                    if (name != null) {
-
-                                        if (plot in name) {
-
-                                            val bmp = decodeBitmap(image.uri)
-
-                                            if (bmp != null) {
-
-                                                if (image.uri !in uris) {
-                                                    uris.add(image.uri)
-                                                    drawables?.add(bmp)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        loadGallery()
-
-                    }
-
-                    scope.cancel()
-
-                } catch (e: Exception) {
-
-                    e.printStackTrace()
-
-                }
-            }
-        }
-    }
-
-    private fun loadGallery() {
+        uris = arrayListOf()
 
         currentTrait.trait?.let { traitName ->
 
-            val photosDir = getFieldMediaDirectory(context, traitName)
-            if (photosDir != null) {
-                val photos = getPlotMedia(photosDir, currentRange.plot_id, ".jpg")
+            try {
 
-                activity?.runOnUiThread {
+                scope.launch {
 
-                    photoAdapter = GalleryImageAdapter(context as Activity, drawables)
-                    photo?.adapter = photoAdapter
+                    val plot = currentRange.plot_id
+                    val toc = System.currentTimeMillis()
+                    val uris = database.getAllObservations(studyId, plot, traitName)
+                    val tic = System.currentTimeMillis()
+                    Log.d(TAG, "Photo trait query time ${uris.size} photos: ${(tic-toc)*1e-3}")
 
-                    if (photos.isNotEmpty()) {
+                    val models = uris.mapIndexed { index, model -> ImageTraitAdapter.Model(model.value, index) }
 
-                        photo?.setSelection((photo?.count ?: 1) - 1)
-                        photo?.onItemClickListener =
-                            OnItemClickListener { _: AdapterView<*>?, _: View?, pos: Int, _: Long ->
-                                if (pos < photos.size) {
-                                    displayPlotImage(
-                                        photos[pos].uri
-                                    )
-                                }
-                            }
-                    }
-
-                    photoAdapter?.notifyDataSetChanged()
-                }
-            }
-        }
-    }
-
-    private fun decodeBitmap(uri: Uri): Bitmap? {
-        return try {
-            context.contentResolver.openInputStream(uri).use { input ->
-                var bmp = BitmapFactory.decodeStream(input)
-                val mat = Matrix().apply {
-                    postRotate(90f)
-                }
-                bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, mat, false)
-                input?.close()
-                bmp
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-            null
-        }
-    }
-
-    private fun generateThumbnails() {
-        currentTrait.trait?.let { traitName ->
-            val photosDir = getFieldMediaDirectory(context, traitName)
-            if (photosDir != null) {
-                val files = photosDir.listFiles()
-                for (doc in files) {
-                    createThumbnail(photosDir, doc.uri)
-                }
-            }
-        }
-    }
-
-    private fun createThumbnail(photosDir: DocumentFile, uri: Uri) {
-
-        //create thumbnail
-        try {
-            var thumbsDir = photosDir.findFile(".thumbnails")
-            val name: String = uri.getStem(context)
-
-            if (thumbsDir == null) {
-                thumbsDir = photosDir.createDirectory(".thumbnails")
-            }
-
-            if (thumbsDir != null) {
-                val nomedia = thumbsDir.findFile(".nomedia")
-                if (nomedia == null || !nomedia.exists()) {
-                    thumbsDir.createFile("*/*", ".nomedia")
-                }
-                var bmp = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-                bmp = Bitmap.createScaledBitmap(bmp, 256, 256, true)
-                val thumbnail = thumbsDir.createFile("image/*", "$name.jpg")
-                if (thumbnail != null) {
-                    context.contentResolver.openOutputStream(thumbnail.uri).use { output ->
-                        bmp.compress(Bitmap.CompressFormat.JPEG, 80, output)
+                    activity?.runOnUiThread {
+                        (recyclerView.adapter as ImageTraitAdapter).submitList(models)
+                        recyclerView.adapter?.notifyItemRangeChanged(0, models.size)
                     }
                 }
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
     override fun deleteTraitListener() {
-        deletePhotoWarning(false, null)
+        deletePhoto(isBrapi = false)
     }
 
-    fun brapiDelete(newTraits: MutableMap<String, String>?) {
-        deletePhotoWarning(true, newTraits)
+    fun brapiDelete() {
+        deletePhoto(isBrapi = true)
     }
 
     private fun displayPlotImage(path: Uri) {
@@ -263,64 +139,104 @@ class PhotoTraitLayout : BaseTraitLayout {
 
     fun makeImage(currentTrait: TraitObject, newTraits: MutableMap<String, String>?, success: Boolean) {
 
-        currentTrait.trait?.let { traitName ->
+        val timeStamp = SimpleDateFormat(
+            "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
+        )
 
-            val photosDir = getFieldMediaDirectory(context, traitName)
+        scope.launch {
 
-            try {
+            currentTrait.trait?.let { traitName ->
 
-                if (photosDir != null) {
+                val studyId = (context as CollectActivity).studyId
+                val photosDir = getFieldMediaDirectory(context, traitName)
+                val unit = currentRange.plot_id
+                val dir = getFieldMediaDirectory(context, traitName)
 
-                    currentPhotoPath?.let { path ->
+                if (dir != null) {
 
-                        DocumentFile.fromSingleUri(context, path)?.let { file ->
+                    try {
 
-                            if (success) {
+                        if (photosDir != null) {
 
-                                try {
+                            val cache = File(context.cacheDir, "temp.jpg")
 
-                                    Utils.scanFile(context, file.uri.toString(), "image/*")
-                                    createThumbnail(photosDir, file.uri)
-                                    updateTraitAllowDuplicates(
-                                        traitName,
-                                        type,
-                                        path.toString(),
-                                        null,
-                                        newTraits
-                                    )
-                                    loadLayoutWork()
+                            val uri = GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", cache)
 
-                                } catch (e: Exception) {
+                            val rep = database.getNextRep(studyId, unit, traitName)
 
-                                    e.printStackTrace()
+                            val generatedName =
+                                currentRange.plot_id + "_" + traitName + "_" + rep + "_" + timeStamp.format(
+                                    Calendar.getInstance().time
+                                ) + ".jpg"
 
+                            Log.w(TAG, dir.uri.toString() + generatedName)
+
+                            val file = dir.createFile("image/jpg", generatedName)
+
+                            if (file != null) {
+
+                                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                                    context.contentResolver.openOutputStream(file.uri)?.use { outputStream ->
+                                        inputStream.copyTo(outputStream)
+                                    }
                                 }
 
-                            } else {
+                                if (success) {
 
-                                file.delete()
+                                    try {
 
+                                        Utils.scanFile(context, file.uri.toString(), "image/*")
+
+                                        updateTraitAllowDuplicates(
+                                            plotId = unit,
+                                            traitName,
+                                            type,
+                                            file.uri.toString(),
+                                            null,
+                                            newTraits,
+                                            rep
+                                        )
+
+                                    } catch (e: Exception) {
+
+                                        e.printStackTrace()
+
+                                    }
+
+                                } else {
+
+                                    file.delete()
+
+                                }
                             }
                         }
+
+                    } catch (e: Exception) {
+
+                        e.printStackTrace()
+
                     }
                 }
 
-            } catch (e: Exception) {
+                activity?.runOnUiThread {
 
-                e.printStackTrace()
+                    loadLayoutWork()
 
+                    (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+
+                }
             }
-
-            (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
         }
     }
 
     private fun updateTraitAllowDuplicates(
+        plotId: String,
         traitName: String,
         format: String,
         value: String?,
         newValue: String?,
-        newTraits: MutableMap<String, String>?
+        newTraits: MutableMap<String, String>?,
+        rep: String,
     ) {
         if (value != newValue) {
             if (currentRange == null || currentRange.plot_id.isEmpty()) {
@@ -332,12 +248,12 @@ class PhotoTraitLayout : BaseTraitLayout {
                 Log.d(TAG, "$format $v")
                 newTraits?.remove(traitName)
                 newTraits?.set(traitName, v)
-                val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+                val studyId = (context as CollectActivity).studyId
                 val observation =
-                    database.getObservationByValue(expId, currentRange.plot_id, traitName, v)
-                database.deleteTraitByValue(expId, currentRange.plot_id, traitName, v)
+                    database.getObservationByValue(studyId, plotId, traitName, v)
+                database.deleteTraitByValue(studyId, plotId, traitName, v)
                 database.insertObservation(
-                    currentRange.plot_id,
+                    plotId,
                     traitName,
                     format,
                     newValue ?: v,
@@ -347,78 +263,64 @@ class PhotoTraitLayout : BaseTraitLayout {
                     ) + " " + prefs.getString(GeneralKeys.LAST_NAME, ""),
                     (activity as? CollectActivity)?.locationByPreferences,
                     "",
-                    expId,
+                    studyId,
                     observation.dbId,
                     observation.lastSyncedTime,
-                    null
+                    rep
                 )
             }
         }
     }
 
-    private fun deletePhotoWarning(brapiDelete: Boolean, newTraits: MutableMap<String, String>?) {
+    private fun deletePhoto(isBrapi: Boolean, modelToDelete: ImageTraitAdapter.Model? = null) {
+
+        var model = modelToDelete
         if (!isLocked) {
-            val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-            val builder = AlertDialog.Builder(context)
-            builder.setTitle(context.getString(R.string.dialog_warning))
-            builder.setMessage(context.getString(R.string.trait_delete_warning_photo))
-            builder.setPositiveButton(context.getString(R.string.dialog_yes)) { dialog, _ ->
-                dialog.dismiss()
-                if (brapiDelete) {
-                    Toast.makeText(
-                        context.applicationContext,
-                        context.getString(R.string.brapi_delete_message),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    //updateTrait(parent, currentTrait.getFormat(), getString(R.string.brapi_na));
-                }
-                if ((photo?.count ?: 0) > 0) {
 
-                    currentTrait.trait?.let { traitName ->
+            //if pressing the delete button bottom button, find the first visible photo to delete
+            if (model == null) {
+                val position = (recyclerView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+                model = (recyclerView.adapter as ImageTraitAdapter).currentList[position]
+            }
 
-                        val photosDir = getFieldMediaDirectory(context, traitName)
+            model?.let { m ->
+
+                val studyId = (context as CollectActivity).studyId
+
+                val builder = AlertDialog.Builder(context)
+
+                builder.setTitle(context.getString(R.string.dialog_warning))
+                builder.setMessage(context.getString(R.string.trait_delete_warning_photo))
+                builder.setPositiveButton(context.getString(R.string.dialog_yes)) { dialog, _ ->
+                    dialog.dismiss()
+
+                    if ((recyclerView.adapter?.itemCount ?: 0) > 0) {
 
                         try {
 
-                            val thumbsDir = photosDir?.findFile(".thumbnails")
-                            val photosList = getPlotMedia(photosDir, currentRange.plot_id, ".jpg").toMutableList()
-                            val thumbsList = getPlotMedia(thumbsDir, currentRange.plot_id, ".jpg")
-                            val index = photo?.selectedItemPosition ?: 0
-                            val selected = photosList[index]
-                            val thumbSelected = thumbsList[index]
-                            val item = selected.uri
-                            if (!brapiDelete) {
-                                selected.delete()
-                                thumbSelected.delete()
-                                photosList.removeAt(index)
-                            }
-                            val file = DocumentFile.fromSingleUri(context, item)
+                            val file = DocumentFile.fromSingleUri(context, Uri.parse(m.uri))
                             if (file != null && file.exists()) {
                                 file.delete()
                             }
 
                             // Remove individual images
-                            if (brapiDelete) {
+                            if (isBrapi) {
                                 updateTraitAllowDuplicates(
-                                    currentTrait.trait,
-                                    "photo",
-                                    item.toString(),
-                                    "NA",
-                                    newTraits
-                                )
-                                loadLayout()
-                            } else {
-                                database.deleteTraitByValue(
-                                    expId,
                                     currentRange.plot_id,
                                     currentTrait.trait,
-                                    item.toString()
+                                    "photo",
+                                    m.uri,
+                                    "NA",
+                                    newTraits,
+                                    (context as CollectActivity).rep
                                 )
-                            }
-
-                            // Only do a purge by trait when there are no more images left
-                            if (!brapiDelete) {
-                                if (photosList.size == 0) removeTrait(currentTrait.trait)
+                            } else {
+                                database.deleteTraitByValue(
+                                    studyId,
+                                    currentRange.plot_id,
+                                    currentTrait.trait,
+                                    m.uri
+                                )
                             }
 
                         } catch (e: Exception) {
@@ -426,61 +328,54 @@ class PhotoTraitLayout : BaseTraitLayout {
                             e.printStackTrace()
 
                         }
+
+                    } else {
+
+                        // If an NA exists, delete it
+                        database.deleteTraitByValue(
+                            studyId,
+                            currentRange.plot_id,
+                            currentTrait.trait,
+                            "NA"
+                        )
                     }
 
-                } else {
+                    loadLayoutWork()
 
-                    // If an NA exists, delete it
-                    database.deleteTraitByValue(
-                        expId,
-                        currentRange.plot_id,
-                        currentTrait.trait,
-                        "NA"
-                    )
+                    (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
                 }
-                loadLayoutWork()
-                (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+
+                builder.setNegativeButton(context.getString(R.string.dialog_no)) { dialog, _ -> dialog.dismiss() }
+
+                activity?.runOnUiThread {
+                    val alert = builder.create()
+                    alert.show()
+                    DialogUtils.styleDialogs(alert)
+                }
             }
-            builder.setNegativeButton(context.getString(R.string.dialog_no)) { dialog, _ -> dialog.dismiss() }
-            val alert = builder.create()
-            alert.show()
-            DialogUtils.styleDialogs(alert)
         }
     }
 
+    /**
+     * When button is pressed, create a cached image and switch to the camera intent.
+     * CollectActivity will receive REQUEST_IMAGE_CAPTURE and call this layout's makeImage() method.
+     */
     private fun takePicture() {
 
-        val timeStamp = SimpleDateFormat(
-            "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
-        )
+        val file = File(context.cacheDir, "temp.jpg")
 
-        currentTrait.trait?.let { traitName ->
+        file.createNewFile()
 
-            val rep = (context as CollectActivity).rep
+        val uri = GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", file)
 
-            val dir = getFieldMediaDirectory(context, traitName)
-            if (dir != null) {
-                val generatedName =
-                    currentRange.plot_id + "_" + traitName + "_" + rep + "_" + timeStamp.format(
-                        Calendar.getInstance().time
-                    ) + ".jpg"
-                Log.w(TAG, dir.uri.toString() + generatedName)
-                val file = dir.createFile("image/jpg", generatedName)
-                if (file != null) {
-
-                    currentPhotoPath = file.uri
-
-                    val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    // Ensure that there's a camera activity to handle the intent
-                    if (takePictureIntent.resolveActivity(context.packageManager) != null) {
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, file.uri)
-                        (context as Activity).startActivityForResult(
-                            takePictureIntent,
-                            PICTURE_REQUEST_CODE
-                        )
-                    }
-                }
-            }
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(context.packageManager) != null) {
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+            (context as Activity).startActivityForResult(
+                takePictureIntent,
+                PICTURE_REQUEST_CODE
+            )
         }
     }
 
@@ -521,5 +416,21 @@ class PhotoTraitLayout : BaseTraitLayout {
                 }
             }
         }
+    }
+
+    override fun onItemClicked(model: ImageTraitAdapter.Model) {
+
+        displayPlotImage(Uri.parse(model.uri))
+
+    }
+
+    override fun onItemDeleted(model: ImageTraitAdapter.Model) {
+
+        val studyId = (context as CollectActivity).studyId
+        val rep = (context as CollectActivity).rep
+        val status = database.isBrapiSynced(studyId, currentRange.plot_id, currentTrait.trait, rep)
+
+        deletePhoto(status, model)
+
     }
 }

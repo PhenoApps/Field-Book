@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.Button;
@@ -35,9 +36,14 @@ public class CounterTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
-        Button addCounterBtn = findViewById(R.id.addBtn);
-        Button minusCounterBtn = findViewById(R.id.minusBtn);
+    public int layoutId() {
+        return R.layout.trait_counter;
+    }
+
+    @Override
+    public void init(Activity act) {
+        Button addCounterBtn = act.findViewById(R.id.addBtn);
+        Button minusCounterBtn = act.findViewById(R.id.minusBtn);
 
         // Add counter
         addCounterBtn.setOnClickListener(view -> {
@@ -78,6 +84,7 @@ public class CounterTraitLayout extends BaseTraitLayout {
             triggerTts(value);
         });
 
+        addCounterBtn.requestFocus();
     }
 
     @Override

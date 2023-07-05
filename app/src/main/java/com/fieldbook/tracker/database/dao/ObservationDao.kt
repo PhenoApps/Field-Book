@@ -68,6 +68,8 @@ class ObservationDao {
          */
         fun getDefaultRepeatedValue(studyId: String, obsUnit: String, traitName: String) = getAllRepeatedValues(studyId, obsUnit, traitName).minByOrNull { it.rep.toInt() }?.rep ?: "1"
 
+        fun getNextRepeatedValue(studyId: String, obsUnit: String, traitName: String) = (getAllRepeatedValues(studyId, obsUnit, traitName).maxByOrNull { it.rep.toInt() }?.rep?.toInt() ?: 0) + 1
+
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
         fun getHostImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
@@ -102,17 +104,19 @@ class ObservationDao {
                 AND vars.trait_data_source IS NOT NULL
                 AND vars.observation_variable_field_book_format = 'photo'
                 
-        """.trimIndent(), arrayOf(hostUrl)).toTable()
-                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "observation_variable_name"), missingPhoto).apply {
-                        rep = getStringVal(row, "rep")
-                        unitDbId = getStringVal(row, "uniqueName")
-                        setDescriptiveOntologyTerms(listOf(getStringVal(row, "external_db_id")))
-                        setDescription(getStringVal(row, "observation_variable_details"))
-                        setTimestamp(getStringVal(row, "observation_time_stamp"))
-                        fieldBookDbId = getStringVal(row, "id")
-                        dbId = getStringVal(row, "observation_db_id")
-                        setLastSyncedTime(getStringVal(row, "last_synced_time"))
-                    } }
+        """.trimIndent(), arrayOf(hostUrl)).toTable().mapNotNull { row ->
+                if (getStringVal(row, "observation_variable_name") != null)
+                    FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "observation_variable_name"), missingPhoto).apply {
+                    rep = getStringVal(row, "rep")
+                    unitDbId = getStringVal(row, "uniqueName")
+                    setDescriptiveOntologyTerms(listOf(getStringVal(row, "external_db_id")))
+                    setDescription(getStringVal(row, "observation_variable_details"))
+                    setTimestamp(getStringVal(row, "observation_time_stamp"))
+                    fieldBookDbId = getStringVal(row, "id")
+                    dbId = getStringVal(row, "observation_db_id")
+                    setLastSyncedTime(getStringVal(row, "last_synced_time"))
+                } else null
+            }
 
         } ?: emptyList()
 
@@ -180,9 +184,11 @@ class ObservationDao {
         fun getWrongSourceImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sRemoteImageObservationsViewName, where = "trait_data_source <> ?", whereArgs = arrayOf(hostUrl)).toTable()
-                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "observation_variable_name"), missingPhoto).apply {
+                    .mapNotNull { row -> if (getStringVal(row, "observation_variable_name") != null)
+                        FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "observation_variable_name"), missingPhoto).apply {
                         this.fieldBookDbId = getStringVal(row, "id")
-                    } }
+                        } else null
+                    }
 
         } ?: emptyList()
 
@@ -204,9 +210,15 @@ class ObservationDao {
         fun getUserTraitImageObservations(ctx: Context, expId: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sLocalImageObservationsViewName, where = "${Study.FK} = ?", whereArgs = arrayOf(expId)).toTable()
-                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "observation_variable_name"), missingPhoto).apply {
-                        this.fieldBookDbId = getStringVal(row, "id")
-                    } }
+                    .mapNotNull { row ->
+                        if (getStringVal(row, "observation_variable_name") != null)
+                            FieldBookImage(ctx,
+                                getStringVal(row, "value"),
+                                getStringVal(row, "observation_variable_name"),
+                                missingPhoto).apply {
+                            this.fieldBookDbId = getStringVal(row, "id")
+                        } else null
+                    }
 
         } ?: emptyList()
 

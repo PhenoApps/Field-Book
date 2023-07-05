@@ -26,6 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -35,6 +36,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
@@ -47,6 +49,7 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.GeoNavHelper;
+import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.objects.VerifyPersonHelper;
@@ -56,6 +59,7 @@ import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -83,6 +87,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -101,7 +106,8 @@ public class CollectActivity extends ThemedActivity
         implements UsbCameraInterface, SummaryFragment.SummaryOpenListener,
         com.fieldbook.tracker.interfaces.CollectController,
         com.fieldbook.tracker.interfaces.CollectRangeController,
-        com.fieldbook.tracker.interfaces.CollectTraitController {
+        com.fieldbook.tracker.interfaces.CollectTraitController,
+        InfoBarAdapter.InfoBarController {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -115,10 +121,15 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     VerifyPersonHelper verifyPersonHelper;
-    
+
+    //used to query for infobar prefix/value pairs and building InfoBarModels
+    @Inject
+    InfoBarHelper infoBarHelper;
+
     public static boolean searchReload;
     public static String searchRange;
     public static String searchPlot;
+    public static String searchUnique;
     public static boolean reloadData;
     public static boolean partialReload;
     public static String TAG = "Field Book";
@@ -136,6 +147,7 @@ public class CollectActivity extends ThemedActivity
     private String inputPlotId = "";
     private AlertDialog goToId;
     private final Object lock = new Object();
+
     /**
      * Main screen elements
      */
@@ -143,6 +155,8 @@ public class CollectActivity extends ThemedActivity
     private InfoBarAdapter infoBarAdapter;
     private TraitBoxView traitBox;
     private RangeBoxView rangeBox;
+    private RecyclerView infoBarRv;
+
     /**
      * Trait-related elements
      */
@@ -302,16 +316,46 @@ public class CollectActivity extends ThemedActivity
 
         //lock = new Object();
 
-        infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2), (RecyclerView) findViewById(R.id.selectorList));
-
         traitLayouts = new LayoutCollections(this);
         rangeBox = findViewById(R.id.act_collect_range_box);
         traitBox = findViewById(R.id.act_collect_trait_box);
         traitBox.connectRangeBox(rangeBox);
         rangeBox.connectTraitBox(traitBox);
 
+        //setup infobar recycler view ui
+        infoBarRv = findViewById(R.id.act_collect_infobar_rv);
+        infoBarRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+
         initCurrentVals();
 
+        Log.d(TAG, "Load screen.");
+
+        refreshInfoBarAdapter();
+    }
+
+    /**
+     * Updates the infobar adapter with the new plot information.
+     */
+    public void refreshInfoBarAdapter() {
+
+        Log.d(TAG, "Refreshing info bar adapter.");
+
+        try {
+
+            infoBarAdapter = new InfoBarAdapter(this);
+
+            infoBarRv.setAdapter(infoBarAdapter);
+
+            List<InfoBarModel> models = infoBarHelper.getInfoBarData();
+
+            infoBarAdapter.submitList(models);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Log.d(TAG, "Error: info bar adapter loading.");
+        }
     }
 
     @Override
@@ -319,6 +363,8 @@ public class CollectActivity extends ThemedActivity
         rangeBox.saveLastPlot();
         rangeBox.refresh();
         traitBox.setNewTraits(rangeBox.getPlotID());
+
+        Log.d(TAG, "Refresh main.");
 
         initWidgets(true);
 
@@ -432,9 +478,8 @@ public class CollectActivity extends ThemedActivity
             if (status) {
                 if (getTraitFormat().equals("photo")) {
                     // I want to use abstract method
-                    Map<String, String> newTraits = traitBox.getNewTraits();
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                    traitPhoto.brapiDelete(newTraits);
+                    traitPhoto.brapiDelete();
                 } else {
                     brapiDelete(getTraitName(), false);
                 }
@@ -483,8 +528,10 @@ public class CollectActivity extends ThemedActivity
         // Reset dropdowns
 
         if (!database.isRangeTableEmpty()) {
-            String plotID = rangeBox.getPlotID();
-            infoBarAdapter.configureDropdownArray(plotID);
+
+            Log.d(TAG, "init widgets refreshing info bar");
+
+            refreshInfoBarAdapter();
         }
 
         traitBox.initTraitDetails();
@@ -529,7 +576,10 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
+                RangeObject ro = rangeBox.getCRange();
+
+                //issue #634 fix for now to check the search query by plot_id which should be the unique id
+                if (Objects.equals(ro.plot_id, searchUnique)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -603,6 +653,8 @@ public class CollectActivity extends ThemedActivity
 
         traitBox.setNewTraits(rangeBox.getPlotID());
 
+        Log.d(TAG, "Move to result core: " + j);
+
         initWidgets(false);
     }
 
@@ -622,6 +674,8 @@ public class CollectActivity extends ThemedActivity
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         traitBox.setSelection(traitIndex);
+
+        Log.d(TAG, "Move to result core: " + j);
 
         initWidgets(false);
     }
@@ -665,6 +719,8 @@ public class CollectActivity extends ThemedActivity
 
         geoNavHelper.stopAverageHandler();
 
+        ep.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
+
         super.onPause();
     }
 
@@ -697,6 +753,7 @@ public class CollectActivity extends ThemedActivity
 
         if (!guiThread.isAlive()) {
             try {
+                //TODO test with just .run() to avoid exception
                 guiThread.start();
             } catch (IllegalThreadStateException e) {
                 e.printStackTrace();
@@ -723,6 +780,8 @@ public class CollectActivity extends ThemedActivity
             rangeBox.reload();
             traitBox.setPrefixTraits();
 
+            Log.d(TAG, "On resume load data.");
+
             initWidgets(false);
             traitBox.setSelection(0);
 
@@ -737,6 +796,9 @@ public class CollectActivity extends ThemedActivity
             partialReload = false;
             rangeBox.display();
             traitBox.setPrefixTraits();
+
+            Log.d(TAG, "On resume partial reload data.");
+
             initWidgets(false);
 
         } else if (searchReload) {
@@ -769,6 +831,10 @@ public class CollectActivity extends ThemedActivity
             navigateToLastOpenedTrait();
 
         }
+
+        dataLocked = ep.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
+
+        refreshLock();
     }
 
     /**
@@ -861,9 +927,9 @@ public class CollectActivity extends ThemedActivity
         }
 
         //update the info bar in case a variable is used
-        infoBarAdapter.notifyItemRangeChanged(0, infoBarAdapter.getItemCount());
-
+        refreshInfoBarAdapter();
         refreshRepeatedValuesToolbarIndicator();
+
     }
 
     public void insertRep(String parent, String trait, String value, String rep) {
@@ -961,8 +1027,6 @@ public class CollectActivity extends ThemedActivity
 
         customizeToolbarIcons();
 
-        lockData();
-
         return true;
     }
 
@@ -998,7 +1062,7 @@ public class CollectActivity extends ThemedActivity
         switch (item.getItemId()) {
             case helpId:
                 TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(collectDataTapTargetView(R.id.selectorList, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), R.color.main_primary_dark,200),
+                        .targets(collectDataTapTargetView(R.id.act_collect_infobar_rv, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), R.color.main_primary_dark,200),
                                 collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), R.color.main_primary_dark,60),
                                 collectDataTapTargetView(R.id.traitType, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), R.color.main_primary_dark,80),
                                 collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), R.color.main_primary_dark,60),
@@ -1068,6 +1132,7 @@ public class CollectActivity extends ThemedActivity
                 if (dataLocked == UNLOCKED) dataLocked = LOCKED;
                 else if (dataLocked == LOCKED) dataLocked = FROZEN;
                 else dataLocked = UNLOCKED;
+                ep.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
                 lockData();
                 break;
             case android.R.id.home:
@@ -1078,8 +1143,6 @@ public class CollectActivity extends ThemedActivity
              * If geonav is enabled, collect activity will auto move to the plot in user's vicinity
              */
             case geonavId:
-
-                Log.d(GEOTAG, "Menu item clicked.");
 
                 geoNavHelper.setMGeoNavActivated(!geoNavHelper.getMGeoNavActivated());
                 MenuItem navItem = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
@@ -1261,10 +1324,13 @@ public class CollectActivity extends ThemedActivity
      * unlocked, locked, or frozen
      */
     void lockData() {
-        if (dataLocked == LOCKED) {
+
+        int state = ep.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
+
+        if (state == LOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
             disableDataEntry();
-        } else if (dataLocked == UNLOCKED) {
+        } else if (state == UNLOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
             enableDataEntry();
         } else {
@@ -1408,8 +1474,10 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+
         int action = event.getAction();
         int keyCode = event.getKeyCode();
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if (ep.getBoolean(GeneralKeys.VOLUME_NAVIGATION, false)) {
@@ -1427,29 +1495,23 @@ public class CollectActivity extends ThemedActivity
                     return true;
                 }
                 return false;
-            case KeyEvent.KEYCODE_ENTER:
-                String return_action = ep.getString(GeneralKeys.RETURN_CHARACTER, "0");
+//                else if (event.action == KeyEvent.ACTION_UP
+//                    && code == KeyEvent.KEYCODE_ENTER || code == KeyEvent.KEYCODE_TAB) {
+//
+//                inputEditText?.requestFocus()
+//            }
+            default:
 
-                if (return_action.equals("0")) {
-                    if (action == KeyEvent.ACTION_UP) {
-                        rangeBox.moveEntryRight();
+                if (action == KeyEvent.ACTION_UP) {
+
+                    if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_TAB) {
+
+                        collectInputView.requestFocus();
+
                         return false;
                     }
                 }
 
-                if (return_action.equals("1")) {
-                    if (action == KeyEvent.ACTION_UP) {
-                        traitBox.moveTrait("right");
-                        return true;
-                    }
-                }
-
-                if (return_action.equals("2")) {
-                    return true;
-                }
-
-                return false;
-            default:
                 return super.dispatchKeyEvent(event);
         }
     }
@@ -1488,6 +1550,11 @@ public class CollectActivity extends ThemedActivity
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
                     moveToSearch("id", rangeID, null, null, inputPlotId, trait);
+                    //select the rep chosen from datagrid
+                    if (collectInputView.isRepeatEnabled()) {
+                        int rep = data.getIntExtra("rep", -1);
+                        collectInputView.navigateToRep(rep);
+                    }
                     mSkipLastUsedTrait = true;
                 }
                 break;
@@ -1537,6 +1604,9 @@ public class CollectActivity extends ThemedActivity
                                     //refresh collect activity UI
                                     rangeBox.reload();
                                     rangeBox.refresh();
+
+                                    Log.d(TAG, "Snackbar navigate to field: " + fieldName + " (" + studyId + ")");
+
                                     initWidgets(false);
 
                                     //navigate to the plot
@@ -1887,4 +1957,21 @@ public class CollectActivity extends ThemedActivity
         return geoNavHelper.getMAverageHandler();
     }
 
+    @Override
+    public void inflateTrait(@NonNull BaseTraitLayout layout) {
+        getTraitLayout().onExit();
+        View v = LayoutInflater.from(this).inflate(layout.layoutId(), null);
+        LinearLayout holder = findViewById(R.id.traitHolder);
+        holder.removeAllViews();
+        holder.addView(v);
+        layout.init(this);
+        v.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onInfoBarClicked(int position) {
+
+        infoBarHelper.showInfoBarChoiceDialog(position);
+
+    }
 }

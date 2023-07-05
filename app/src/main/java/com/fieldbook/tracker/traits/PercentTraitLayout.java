@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
@@ -39,9 +40,14 @@ public class PercentTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
+    public int layoutId() {
+        return R.layout.trait_percent;
+    }
+
+    @Override
+    public void init(Activity act) {
         // Progress bar
-        seekBar = findViewById(R.id.seekbar);
+        seekBar = act.findViewById(R.id.seekbar);
         seekBar.setMax(100);
 
         seekListener = new SeekBar.OnSeekBarChangeListener() {
@@ -71,6 +77,8 @@ public class PercentTraitLayout extends BaseTraitLayout {
         };
 
         seekBar.setOnSeekBarChangeListener(seekListener);
+
+        seekBar.requestFocus();
     }
 
     @Override

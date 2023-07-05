@@ -7,6 +7,7 @@ import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -197,7 +198,6 @@ class RangeBoxView : ConstraintLayout {
 
         controller.getTraitBox().setNewTraits(getPlotID())
 
-        controller.initWidgets(true)
     }
 
     private fun truncate(s: String, maxLen: Int): String? {
@@ -390,6 +390,8 @@ class RangeBoxView : ConstraintLayout {
             display()
             controller.getTraitBox().setNewTraits(getPlotID())
             controller.initWidgets(true)
+
+            Log.d("Field Book", "refresh widgets range box repeate key press")
         }
     }
 
@@ -526,7 +528,6 @@ class RangeBoxView : ConstraintLayout {
             return
         }
         if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
-            && !controller.getTraitBox().existsTrait()
         ) {
             controller.playSound("advance")
         }
@@ -542,6 +543,7 @@ class RangeBoxView : ConstraintLayout {
             }
         }
         controller.resetGeoNavMessages()
+        controller.getCollectInputView().resetInitialIndex()
     }
 
     fun moveEntryRight() {
@@ -549,7 +551,6 @@ class RangeBoxView : ConstraintLayout {
             return
         }
         if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
-            && !controller.getTraitBox().existsTrait()
         ) {
             controller.playSound("advance")
         }
@@ -565,6 +566,7 @@ class RangeBoxView : ConstraintLayout {
             }
         }
         controller.resetGeoNavMessages()
+        controller.getCollectInputView().resetInitialIndex()
     }
 
     private fun decrementPaging(pos: Int): Int {

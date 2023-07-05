@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -59,11 +60,17 @@ public class AudioTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
-        audioRecordingText = findViewById(R.id.audioRecordingText);
+    public int layoutId() {
+        return R.layout.trait_audio;
+    }
+
+    @Override
+    public void init(Activity act) {
+        audioRecordingText = act.findViewById(R.id.audioRecordingText);
         buttonState = ButtonState.WAITING_FOR_RECORDING;
-        controlButton = findViewById(R.id.record);
+        controlButton = act.findViewById(R.id.record);
         controlButton.setOnClickListener(new AudioTraitOnClickListener());
+        controlButton.requestFocus();
     }
 
     @Override

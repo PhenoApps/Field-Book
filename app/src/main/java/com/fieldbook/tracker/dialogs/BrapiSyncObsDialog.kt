@@ -15,7 +15,6 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.brapi.BrapiControllerResponse
 import com.fieldbook.tracker.brapi.model.Observation
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
@@ -57,7 +56,7 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
         setContentView(R.layout.dialog_brapi_sync_observations)
         brAPIService = BrAPIServiceFactory.getBrAPIService(this.context)
         val pageSize = context.getSharedPreferences("Settings", 0)
-            .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000")!!.toInt()
+            .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50")!!.toInt()
         paginationManager = BrapiPaginationManager(0, pageSize)
         saveBtn = findViewById(R.id.brapi_save_btn)
         saveBtn!!.setOnClickListener(this)
@@ -134,10 +133,12 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
 //                                    println("Value: " + obs.value)
 //                                }
                             println("Size of ObsList: ${studyObservations.observationList.size}")
-                            println("Done pulling observations. Page: ${paginationManager.page}/${paginationManager.totalPages}")
+                            //Adding 1 to the page number here so it makes more sense when debugging. Otherwise we get 0/10 as the first and 9/10 as the last message.
+                            println("Done pulling observations. Page: ${paginationManager.page + 1}/${paginationManager.totalPages}")
 
                             //Once we have loaded in all the observations, we can make the save button visible
-                            if (paginationManager.page == paginationManager.totalPages) {
+                            // We need to check page == totalPages - 1 otherwise it will loop indefinitely as the 0-based page will never reach totalPages(1based)
+                            if (paginationManager.page == paginationManager.totalPages - 1) {
                                 makeSaveBtnVisible()
                             }
                         }

@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
@@ -59,6 +60,11 @@ public class DateTraitLayout extends BaseTraitLayout {
     }
 
     @Override
+    public int layoutId() {
+        return R.layout.trait_date;
+    }
+
+    @Override
     public boolean block() {
         return isBlocked;
     }
@@ -69,15 +75,15 @@ public class DateTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
+    public void init(Activity act) {
         date = getPrefs().getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, "2000-01-01");
         log();
 
-        addDayBtn = findViewById(R.id.addDateBtn);
-        minusDayBtn = findViewById(R.id.minusDateBtn);
-        saveDayBtn = findViewById(R.id.enterBtn);
+        addDayBtn = act.findViewById(R.id.addDateBtn);
+        minusDayBtn = act.findViewById(R.id.minusDateBtn);
+        saveDayBtn = act.findViewById(R.id.enterBtn);
 
-        ImageButton calendarVisibilityBtn = findViewById(R.id.trait_date_calendar_visibility_btn);
+        ImageButton calendarVisibilityBtn = act.findViewById(R.id.trait_date_calendar_visibility_btn);
 
         String minusDayTts = getContext().getString(R.string.trait_date_minus_day_tts);
         String openCalendarTts = getContext().getString(R.string.trait_date_open_calendar_tts);
@@ -191,6 +197,8 @@ public class DateTraitLayout extends BaseTraitLayout {
 
             isBlocked = false;
         });
+
+        saveDayBtn.requestFocus();
     }
 
     private String getTtsFromCalendar(Calendar calendar) {

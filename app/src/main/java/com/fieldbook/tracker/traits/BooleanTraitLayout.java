@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -43,16 +44,21 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     }
 
     @Override
-    public void init() {
+    public int layoutId() {
+        return R.layout.trait_boolean;
+    }
+
+    @Override
+    public void init(Activity act) {
 
         String on = getContext().getString(R.string.trait_boolean_on);
         String off = getContext().getString(R.string.trait_boolean_off);
 
-        threeStateSeekBar = findViewById(R.id.traitBooleanSeekBar);
+        threeStateSeekBar = act.findViewById(R.id.traitBooleanSeekBar);
         threeStateSeekBar.setOnSeekBarChangeListener(this);
 
-        ImageView onImageView = findViewById(R.id.onImage);
-        ImageView offImageView = findViewById(R.id.offImage);
+        ImageView onImageView = act.findViewById(R.id.onImage);
+        ImageView offImageView = act.findViewById(R.id.offImage);
 
         onImageView.setOnClickListener((View v) -> {
             triggerTts(on);
@@ -64,6 +70,7 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
             threeStateSeekBar.setProgress(ThreeState.OFF);
         });
 
+        threeStateSeekBar.requestFocus();
     }
 
     @Override

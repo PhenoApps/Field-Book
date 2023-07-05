@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -54,6 +55,8 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     @Override
     public void setNaTraitsText() {
+        getCollectInputView().setText("NA");
+        setAdapter(getCategories());
     }
 
     @Override
@@ -61,13 +64,21 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         return "categorical";
     }
 
+    @Override
+    public int layoutId() {
+        return R.layout.trait_categorical;
+    }
+
     public boolean isTraitType(String trait) {
         return trait.equals("categorical") || trait.equals("qualitative");
     }
 
     @Override
-    public void init() {
-        gridMultiCat = findViewById(R.id.catGrid);
+    public void init(Activity act) {
+
+        gridMultiCat = act.findViewById(R.id.catGrid);
+
+        gridMultiCat.requestFocus();
     }
 
     @Override

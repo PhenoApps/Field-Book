@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -40,6 +41,8 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     //private StaggeredGridView gridMultiCat;
     private RecyclerView gridMultiCat;
 
+    private BrAPIScaleValidValuesCategories defaultNaCategory = new BrAPIScaleValidValuesCategories().label("NA").value("NA");
+
     public MultiCatTraitLayout(Context context) {
         super(context);
     }
@@ -54,6 +57,10 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
     @Override
     public void setNaTraitsText() {
+        getCollectInputView().setText("NA");
+        categoryList = new ArrayList<>();
+        categoryList.add(defaultNaCategory);
+        setAdapter();
     }
 
     @Override
@@ -67,11 +74,18 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
+    public int layoutId() {
+        return R.layout.trait_multicat;
+    }
 
-        gridMultiCat = findViewById(R.id.catGrid);
+    @Override
+    public void init(Activity act) {
+
+        gridMultiCat = act.findViewById(R.id.catGrid);
 
         categoryList = new ArrayList<>();
+
+        gridMultiCat.requestFocus();
     }
 
     @Override
@@ -96,6 +110,8 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         categoryList = new ArrayList<>();
 
         loadScale();
+
+        if (value != null && value.equals("NA")) controller.getInputView().setText("NA");
 
         if (!((CollectActivity) getContext()).isDataLocked()) {
 
@@ -184,7 +200,12 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
             }
         }
 
-        scale = CategoryJsonUtil.Companion.filterExists(getCategories(), scale);
+        //only filter if it's not NA
+        if (!value.equals("NA")) {
+
+            scale = CategoryJsonUtil.Companion.filterExists(getCategories(), scale);
+
+        }
 
         categoryList.addAll(scale);
     }
@@ -201,6 +222,9 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         return v -> {
 
             if (!isFrozen) {
+
+                removeCategory(new BrAPIScaleValidValuesCategories().label("NA").value("NA"));
+
                 BrAPIScaleValidValuesCategories cat = (BrAPIScaleValidValuesCategories) button.getTag();
 
                 if (hasCategory(cat)) {

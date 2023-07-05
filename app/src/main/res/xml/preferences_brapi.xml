@@ -19,11 +19,6 @@
             android:title="@string/brapi_base_url" />
 
         <Preference
-            android:icon="@drawable/ic_launch"
-            android:key="authorizeBrapi"
-            android:title="@string/brapi_authorize" />
-
-        <Preference
             android:icon="@drawable/ic_pref_brapi_logout"
             android:key="revokeBrapiAuth"
             android:title="@string/brapi_revoke_auth" />
@@ -38,7 +33,7 @@
             android:title="@string/preferences_brapi_version" />
 
         <com.fieldbook.tracker.preferences.BetterEditTextPreference
-            android:defaultValue="1000"
+            android:defaultValue="50"
             android:icon="@drawable/ic_pref_brapi_pagination"
             android:inputType="number"
             android:key="BRAPI_PAGE_SIZE"

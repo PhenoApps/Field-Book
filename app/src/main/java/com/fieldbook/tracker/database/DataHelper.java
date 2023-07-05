@@ -285,6 +285,15 @@ public class DataHelper {
     }
 
     @NonNull
+    public String getNextRep(String studyId, String unit, String trait) {
+
+        open();
+
+        return String.valueOf(ObservationDao.Companion.getNextRepeatedValue(studyId, unit, trait));
+
+    }
+
+    @NonNull
     public String getDefaultRep(String studyId, String unit, String trait) {
 
         open();
@@ -1479,8 +1488,9 @@ public class DataHelper {
                     SearchData sd = new SearchData();
 
                     sd.id = cursor.getInt(0);
-                    sd.range = cursor.getString(1);
-                    sd.plot = cursor.getString(2);
+                    sd.unique = cursor.getString(1);
+                    sd.range = cursor.getString(2);
+                    sd.plot = cursor.getString(3);
 
                     data[count] = sd;
 

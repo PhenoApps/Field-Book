@@ -45,6 +45,7 @@ public class GeneralKeys {
     public static final String USE_DAY_OF_YEAR                      = "UseDay";
     public static final String DISABLE_SHARE                        = "DisableShare";
     public static final String GENERAL_LOCATION_COLLECTION          = "com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION";
+    public static final String ATTR_CHOOSER_DIALOG_TAB              = "ATTR_CHOOSER_DIALOG_TAB";
 
     // Files and Naming
     public static final String DEFAULT_STORAGE_LOCATION_PREFERENCE  = "DEFAULT_STORAGE_LOCATION_PREFERENCE";
@@ -58,6 +59,8 @@ public class GeneralKeys {
     public static final String PRIMARY_SOUND                        = "RangeSound";
     public static final String CYCLE_TRAITS_SOUND                   = "CYCLE_TRAITS_SOUND";
     public static final String ENTRY_NAVIGATION_SOUND               = "ENTRY_NAVIGATION_SOUND";
+
+    public static final String DELETE_OBSERVATION_SOUND             = "DELETE_OBSERVATION_SOUND";
 
     //BrAPI
     public static final String BRAPI_BASE_URL                       = "BRAPI_BASE_URL";
@@ -140,6 +143,8 @@ public class GeneralKeys {
 
     //preference key to save the last plot during collect activity
     public static final String LAST_PLOT = "lastplot";
+
+    public static final String DATA_LOCK_STATE = "DataLockState";
 
     //export flags
     public static final String EXPORT_COLUMNS_UNIQUE = "EXPORT_COLUMNS_UNIQUE";

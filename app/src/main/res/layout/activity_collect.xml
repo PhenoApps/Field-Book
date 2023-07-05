@@ -82,7 +82,7 @@
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/selectorList"
+        android:id="@+id/act_collect_infobar_rv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
@@ -97,7 +97,7 @@
         android:layout_marginTop="4dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/selectorList"
+        app:layout_constraintTop_toBottomOf="@id/act_collect_infobar_rv"
         app:layout_constraintBottom_toTopOf="@id/act_collect_range_box"/>
 
     <com.fieldbook.tracker.views.RangeBoxView
@@ -135,93 +135,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"/>
 
-            <include
-                layout="@layout/trait_audio"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_boolean"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent" />
-
-            <include
-                layout="@layout/trait_categorical"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_date"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_numeric"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_percent"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_text"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_photo"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_counter"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_disease_rating"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_multicat"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_location"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_gnss"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>
-
-            <include
-                layout="@layout/trait_angle"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_barcode"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_labelprint"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_usb_camera"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
