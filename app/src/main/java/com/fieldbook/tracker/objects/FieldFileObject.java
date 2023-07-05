@@ -1,5 +1,9 @@
 package com.fieldbook.tracker.objects;
 
+import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BOOLEAN;
+import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
+import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -11,8 +15,10 @@ import com.fieldbook.tracker.utilities.CSVReader;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -443,6 +449,8 @@ public class FieldFileObject {
             ArrayList<XSSFRow> rows = new ArrayList<>();
             XSSFSheet sheet = wb.getSheetAt(0);
 
+            XSSFFormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
+
             for (Iterator<Row> it = sheet.rowIterator(); it.hasNext();) {
                 rows.add((XSSFRow) it.next());
             }
@@ -454,7 +462,22 @@ public class FieldFileObject {
             ArrayList<String> data = new ArrayList<>();
             for (Iterator<Cell> it = rows.get(currentRow).cellIterator(); it.hasNext();) {
                 XSSFCell cell = (XSSFCell) it.next();
-                data.add(fmt.formatCellValue(cell));
+                if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {//formula
+                    int type = evaluator.evaluateFormulaCell(cell);
+                    switch (type) {
+                        case CELL_TYPE_BOOLEAN:
+                            data.add(String.valueOf(cell.getBooleanCellValue()));
+                            break;
+                        case CELL_TYPE_NUMERIC:
+                            data.add(String.valueOf(cell.getNumericCellValue()));
+                            break;
+                        default:
+                            data.add(cell.getStringCellValue());
+                            break;
+                    }
+                } else {
+                    data.add(fmt.formatCellValue(cell));
+                }
             }
 
             currentRow += 1;
@@ -472,12 +495,25 @@ public class FieldFileObject {
      * @return attempt to parse the string value of the cell
      */
     private static String getCellStringValue(XSSFCell cell) {
+
+        FormulaEvaluator evaluator = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
+
         switch (cell.getCellType()) {
             case 0: { //numeric
                 return String.valueOf(cell.getNumericCellValue());
             }
             case 1: { //text
                 return cell.getStringCellValue();
+            }
+            case Cell.CELL_TYPE_FORMULA: { //formula
+                switch (evaluator.evaluateFormulaCell(cell)) {
+                    case CELL_TYPE_BOOLEAN:
+                        return String.valueOf(cell.getBooleanCellValue());
+                    case CELL_TYPE_NUMERIC:
+                        return String.valueOf(cell.getNumericCellValue());
+                    case CELL_TYPE_STRING:
+                        return cell.getStringCellValue();
+                }
             }
             case 3: { //boolean
                 return String.valueOf(cell.getBooleanCellValue());
