@@ -64,6 +64,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         super.onAttach(context);
         // Occurs before onCreate function. We get the context this way.
         BrapiPreferencesFragment.this.context = context;
+
     }
 
     @Override
@@ -79,6 +80,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
+
+        //remove old custom fb auth if it is being used
+        if (prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
+                .equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
+
+            prefMgr.getSharedPreferences().edit().putString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)).apply();
+
+        }
 
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
 

@@ -108,7 +108,6 @@
     <string-array name="pref_brapi_oidc_flow">
         <item>@string/preferences_brapi_oidc_flow_oauth_code</item>
         <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_old_custom</item>
     </string-array>
 
     <string-array name="pref_collect_customize_labelval">

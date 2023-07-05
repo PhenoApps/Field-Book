@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -181,20 +180,9 @@ public class BrapiAuthActivity extends ThemedActivity {
                             Intent responseIntent = new Intent(context, BrapiAuthActivity.class);
                             responseIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                int flag = PendingIntent.FLAG_IMMUTABLE;
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    flag = PendingIntent.FLAG_MUTABLE;
-                                }
-                                authService.performAuthorizationRequest(
-                                        authRequest,
-                                        PendingIntent.getActivity(context, 0, responseIntent, flag));
-                            } else {
-                                authService.performAuthorizationRequest(
-                                        authRequest,
-                                        PendingIntent.getActivity(context, 0, responseIntent, 0));
-                            }
-
+                            authService.performAuthorizationRequest(
+                                    authRequest,
+                                    PendingIntent.getActivity(context, 0, responseIntent, PendingIntent.FLAG_MUTABLE));
                         }
 
                     }, builder);
