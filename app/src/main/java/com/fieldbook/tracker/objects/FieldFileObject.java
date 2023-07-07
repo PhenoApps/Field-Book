@@ -356,7 +356,16 @@ public class FieldFileObject {
         }
 
         public void close() {
-            //TODO check for memory leak
+            try {
+                if (wb != null) {
+                    wb.close();
+                }
+                if (super.getInputStream() != null) {
+                    super.getInputStream().close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -387,23 +396,26 @@ public class FieldFileObject {
         public String[] getColumns() {
 
             try {
-                
-                wb = new XSSFWorkbook(super.getInputStream());
 
-                XSSFSheet sheet = wb.getSheetAt(0);
+                if (super.getInputStream() != null) {
 
-                XSSFRow headerRow = sheet.getRow(0);
+                    wb = new XSSFWorkbook(super.getInputStream());
 
-                ArrayList<String> columns = new ArrayList<>();
+                    XSSFSheet sheet = wb.getSheetAt(0);
 
-                for (Iterator<Cell> it = headerRow.cellIterator(); it.hasNext();) {
-                    XSSFCell cell = (XSSFCell) it.next();
+                    XSSFRow headerRow = sheet.getRow(0);
 
-                    columns.add(cell.getStringCellValue());
+                    ArrayList<String> columns = new ArrayList<>();
 
+                    for (Iterator<Cell> it = headerRow.cellIterator(); it.hasNext();) {
+                        XSSFCell cell = (XSSFCell) it.next();
+
+                        columns.add(cell.getStringCellValue());
+
+                    }
+
+                    return columns.toArray(new String[] {});
                 }
-
-                return columns.toArray(new String[] {});
 
             } catch (IOException format) {
 
@@ -485,7 +497,16 @@ public class FieldFileObject {
         }
 
         public void close() {
-            //todo check for memory leak
+            try {
+                if (wb != null) {
+                    wb.close();
+                }
+                if (super.getInputStream() != null) {
+                    super.getInputStream().close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
