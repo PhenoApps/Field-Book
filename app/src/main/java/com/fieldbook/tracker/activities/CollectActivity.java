@@ -267,7 +267,13 @@ public class CollectActivity extends ThemedActivity
             //updates obs. range view in database
             database.switchField(studyId);
 
-            //rangeBox.setAllRangeID();
+            FieldObject fo = database.getFieldObject(studyId);
+
+            ep.edit().putString(GeneralKeys.UNIQUE_NAME, fo.getUnique_id()).apply();
+            ep.edit().putString(GeneralKeys.PRIMARY_NAME, fo.getPrimary_id()).apply();
+            ep.edit().putString(GeneralKeys.SECONDARY_NAME, fo.getSecondary_id()).apply();
+
+            rangeBox.setAllRangeID();
             int[] rangeID = rangeBox.getRangeID();
 
             //refresh collect activity UI

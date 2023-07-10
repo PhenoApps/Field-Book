@@ -414,6 +414,11 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun reload() {
+
+        firstName = controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
+        secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
+        uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+
         switchVisibility(controller.getPreferences().getBoolean(GeneralKeys.QUICK_GOTO, false))
         setName(8)
         paging = 1
