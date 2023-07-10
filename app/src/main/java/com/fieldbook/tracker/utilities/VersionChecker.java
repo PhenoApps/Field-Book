@@ -222,17 +222,58 @@ public class VersionChecker extends AsyncTask<Void, Void, String> {
                 progressDialog.dismiss();
 
                 if (apkFile != null) {
-                    // Install the APK
-                    Uri apkUri = apkFile.getUri();
-                    Intent installIntent = new Intent(Intent.ACTION_VIEW);
-                    installIntent.setDataAndType(apkUri, "application/vnd.android.package-archive");
-                    installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(installIntent);
+                    // // Install the APK
+                    // Uri apkUri = apkFile.getUri();
+                    // Intent installIntent = new Intent(Intent.ACTION_VIEW);
+                    // installIntent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+                    // installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    // installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    // context.startActivity(installIntent);
+
+                    // Display a message instructing the user to install the APK and open the directory
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AlertDialogStyle);
+                    builder.setTitle("Download Completed");
+                    builder.setMessage("The update file has been successfully downloaded to the updates directory.\n\nOpen the directory and double click the APK file to install it.");
+
+                    builder.setPositiveButton("Open Directory", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Open the directory where the APK was saved
+                            openDownloadDirectory(apkFile);
+                            dialog.dismiss();
+                        }
+                    });
+
+                    builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                    builder.show();
                 }
             }
         }
     }
+
+    private void openDownloadDirectory(DocumentFile apkFile) {
+    Context context = getContext();
+    if (context != null) {
+        DocumentFile parentDirectory = apkFile.getParentFile();
+        if (parentDirectory != null) {
+            Uri uri = parentDirectory.getUri();
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setDataAndType(uri, "*/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (intent.resolveActivity(context.getPackageManager()) != null) {
+                context.startActivity(intent);
+            }
+        }
+    }
+}
 
     private boolean isNewerVersion(String currentVersion, String latestVersion) {
         // Split the version strings into their components
