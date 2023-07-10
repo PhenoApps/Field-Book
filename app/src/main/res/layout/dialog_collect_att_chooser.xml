@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/dialog_collect_att_chooser_tl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_att_chooser_attributes"/>
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_att_chooser_traits"/>
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_att_chooser_other"/>
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/dialog_collect_att_chooser_lv"
+        android:layout_margin="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/list_item_infobar" />
+
+    <Button style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_margin="8dp"
+        android:id="@+id/dialog_collect_att_chooser_cancel_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:maxHeight="48dp"
+        android:text="@android:string/cancel" />
+
+</LinearLayout>
+

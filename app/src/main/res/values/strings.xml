@@ -206,6 +206,7 @@
     <string name="preferences_brapi_version_v1">V1</string>
     <string name="preferences_brapi_version_v2">V2</string>
     <string name="preferences_brapi_oidc_flow">OIDC Flow</string>
+    <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
     <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
     <string name="preferences_brapi_oidc_flow_old_custom">Original Field Book Custom</string>
 
@@ -789,6 +790,10 @@
     <string name="preferences_sound_delete_obs_title">Delete Observation Sound</string>
     <string name="preferences_sound_delete_obs_description">Notification sound when observation is deleted in Collect activity.</string>
     <string name="file_already_exists">File already exists.</string>
+    <string name="dialog_att_chooser_attributes">Attributes</string>
+    <string name="dialog_att_chooser_traits">Traits</string>
+    <string name="dialog_att_chooser_other">Other</string>
+    <string name="dialog_collect_att_chooser_title">Choose an attribute</string>
     <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
     <string name="util_version_checker_progress_message">Downloading install file…</string>
     <string name="util_version_checker_update_check">Update Check</string>

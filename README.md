@@ -62,7 +62,8 @@ Development of Field Book has been supported by the [Collaborative Crop Research
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/HMS17"><img src="https://avatars.githubusercontent.com/u/84345306?v=4?s=100" width="100px;" alt="HMS17"/><br /><sub><b>HMS17</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=HMS17" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/zrm22"><img src="https://avatars.githubusercontent.com/u/54960003?v=4?s=100" width="100px;" alt="zrm22"/><br /><sub><b>zrm22</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=zrm22" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/joegage"><img src="https://avatars.githubusercontent.com/u/10454330?v=4?s=100" width="100px;" alt="Joe Gage"/><br /><sub><b>Joe Gage</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Ajoegage" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/joegage"><img src="https://avatars.githubusercontent.com/u/10454330?v=4?s=100" width="100px;" alt="Joe Gage"/><br /><sub><b>Joe Gage</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Ajoegage" title="Bug reports">🐛</a> <a href="https://github.com/PhenoApps/Field-Book/commits?author=joegage" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mobreza"><img src="https://avatars.githubusercontent.com/u/712974?v=4?s=100" width="100px;" alt="mobreza"/><br /><sub><b>mobreza</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=mobreza" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

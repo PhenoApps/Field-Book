@@ -147,16 +147,25 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <!-- Handles BrAPI server authentication, shows a progress circle -->
         <activity
             android:name=".activities.brapi.BrapiAuthActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:exported="true">
+            android:exported="true"
+            tools:node="replace">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
+                <data
+                    android:host=""
+                    android:scheme="fieldbook"
+                    tools:ignore="AppLinkUrlError" /> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -165,16 +174,25 @@
                     android:scheme="https"
                     tools:ignore="AppLinkUrlError" /> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
             </intent-filter>
+        </activity>
+
+        <!-- Handles BrAPI server authentication, shows a progress circle -->
+        <activity
+            android:name="net.openid.appauth.RedirectUriReceiverActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:exported="true"
+            tools:node="replace">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host=""
+                    android:host="app"
                     android:scheme="fieldbook"
-                    tools:ignore="AppLinkUrlError" /> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
+                    android:path="/auth" />
             </intent-filter>
         </activity>
 

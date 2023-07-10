@@ -157,6 +157,7 @@ dependencies {
     implementation 'com.github.breeding-insight:brapi:2.0.3'
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    implementation("io.gsonfire:gson-fire:1.8.4") //required v1
 
     implementation 'org.jsoup:jsoup:1.8.1'
     implementation 'net.sourceforge.jexcelapi:jxl:2.6.10'
@@ -173,7 +174,7 @@ dependencies {
     implementation "com.github.skydoves:colorpickerpreference:2.0.4"
     implementation 'com.github.evrencoskun:TableView:v0.8.9.4'
 
-    implementation 'net.openid:appauth:0.9.0'
+    implementation 'net.openid:appauth:0.11.1'
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava' //google messed up some packages, this package is temporary until the issue is fixed (Feb 2021)
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
@@ -246,4 +247,3 @@ repositories {
 
 task prepareKotlinBuildScriptModel {}
 
-android.defaultConfig.manifestPlaceholders = ['appAuthRedirectScheme': 'fieldbook' ]
