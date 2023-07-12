@@ -312,20 +312,6 @@
         "ideas",
         "eventOrganizing"
       ]
-    },
-    {
-      "login": "jessepoland",
-      "name": "jessepoland",
-      "avatar_url": "https://avatars.githubusercontent.com/u/8932524?v=4",
-      "profile": "https://github.com/jessepoland",
-      "contributions": [
-        "bug",
-        "design",
-        "financial",
-        "fundingFinding",
-        "ideas",
-        "userTesting"
-      ]
     }
   ],
   "contributorsPerLine": 7,
