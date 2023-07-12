@@ -22,6 +22,9 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
     }
 
     override fun switchField(studyId: Int) {
+        if (!::database.isInitialized) {
+            database = DataHelper(context)
+        }
         val f = database.getFieldObject(studyId)
         switchField(f)
     }

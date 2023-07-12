@@ -115,9 +115,8 @@ public class ConfigActivity extends ThemedActivity {
     @Inject
     public DataHelper database;
     @Inject
-    public FieldSwitchImpl fieldSwitcher;
-    @Inject
     public SoundHelperImpl soundHelper;
+    public FieldSwitchImpl fieldSwitcher = null;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     ListView settingsList;
@@ -340,6 +339,9 @@ public class ConfigActivity extends ThemedActivity {
                     .setRequestCode(REQUEST_BARCODE)
                     .initiateScan();
         });
+
+        //this must happen after migrations and can't be injected in config
+        fieldSwitcher = new FieldSwitchImpl(this);
 
     }
 
@@ -990,6 +992,10 @@ public class ConfigActivity extends ThemedActivity {
      * @param studyId the study id to switch to
      */
     private void switchField(int studyId) {
+
+        if (fieldSwitcher == null) {
+            fieldSwitcher = new FieldSwitchImpl(this);
+        }
 
         fieldSwitcher.switchField(studyId);
 
