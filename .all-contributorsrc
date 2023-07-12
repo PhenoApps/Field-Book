@@ -348,6 +348,17 @@
         "bug",
         "ideas"
       ]
+    },
+    {
+      "login": "keocorak",
+      "name": "Keo Corak",
+      "avatar_url": "https://avatars.githubusercontent.com/u/27022199?v=4",
+      "profile": "https://github.com/keocorak",
+      "contributions": [
+        "bug",
+        "userTesting",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
