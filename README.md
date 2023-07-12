@@ -68,6 +68,9 @@ Development of Field Book has been supported by the [Collaborative Crop Research
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jessepoland"><img src="https://avatars.githubusercontent.com/u/8932524?v=4?s=100" width="100px;" alt="jessepoland"/><br /><sub><b>jessepoland</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Ajessepoland" title="Bug reports">🐛</a> <a href="#design-jessepoland" title="Design">🎨</a> <a href="#financial-jessepoland" title="Financial">💵</a> <a href="#fundingFinding-jessepoland" title="Funding Finding">🔍</a> <a href="#ideas-jessepoland" title="Ideas, Planning, & Feedback">🤔</a> <a href="#userTesting-jessepoland" title="User Testing">📓</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/hkmanching"><img src="https://avatars.githubusercontent.com/u/8751385?v=4?s=100" width="100px;" alt="Heather Manching"/><br /><sub><b>Heather Manching</b></sub></a><br /><a href="#userTesting-hkmanching" title="User Testing">📓</a> <a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Ahkmanching" title="Bug reports">🐛</a> <a href="#ideas-hkmanching" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ahulsekemp"><img src="https://avatars.githubusercontent.com/u/28273398?v=4?s=100" width="100px;" alt="Amanda Hulse-Kemp"/><br /><sub><b>Amanda Hulse-Kemp</b></sub></a><br /><a href="#userTesting-ahulsekemp" title="User Testing">📓</a> <a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Aahulsekemp" title="Bug reports">🐛</a> <a href="#ideas-ahulsekemp" title="Ideas, Planning, & Feedback">🤔</a></td>
+    </tr>
   </tbody>
 </table>
 
