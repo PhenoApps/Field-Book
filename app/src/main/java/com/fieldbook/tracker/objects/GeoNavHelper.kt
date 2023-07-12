@@ -7,7 +7,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
-import android.hardware.*
+import android.hardware.GeomagneticField
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.os.Handler
 import android.os.HandlerThread
@@ -66,7 +70,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
             if (time > mLastGeoNavTime) {
                 if (!mFirstLocationFound) {
                     mFirstLocationFound = true
-                    (context as CollectActivity).playSound("cycle")
+                    (context as CollectActivity).getSoundHelper().playCycle()
                     Utils.makeToast(context,
                         context.getString(R.string.act_collect_geonav_first_location_found)
                     )
@@ -136,9 +140,16 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     private var mGeoNavLogWriter: OutputStreamWriter? = null
 
     init {
+        init()
+    }
+
+    private fun init() {
         mMessageHandlerThread.start()
+        mMessageHandlerThread.looper
         mSchedulerHandler.start()
+        mSchedulerHandler.looper
         mAverageHandler.start()
+        mAverageHandler.looper
     }
 
     /**

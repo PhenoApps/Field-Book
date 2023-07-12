@@ -124,6 +124,9 @@ public class GeneralKeys {
     //example: field_sample how to get: sharedPreferences.getString(Constants.FIELD_FILE, "")
     public static final String FIELD_FILE = "FieldFile";
 
+    //field alias is currently used from imported brapi studies, it is the study db id
+    public static final String FIELD_ALIAS = "FieldAlias";
+
     //key that saves where the field source is from local, brapi, etc.
     public static final String FIELD_SOURCE = "ImportExpSource";
 
