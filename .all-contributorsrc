@@ -311,6 +311,7 @@
         "bug",
         "ideas",
         "eventOrganizing"
+      ]
     },
     {
       "login": "jessepoland",
@@ -324,6 +325,7 @@
         "fundingFinding",
         "ideas",
         "userTesting"
+      ]
     }
   ],
   "contributorsPerLine": 7,
