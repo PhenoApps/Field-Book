@@ -802,4 +802,6 @@
     <string name="util_version_checker_up_to_date">Field Book is up to date.</string>
     <string name="act_config_search_fab_content_description">Search all plots and fields to load/navigate to the barcoded item.</string>
     <string name="act_collect_plot_with_code_not_found">Barcode not found.\n</string>
+    <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
+    <string name="act_config_fuzzy_search_error">Something went wrong when searching for %s</string>
 </resources>

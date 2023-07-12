@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,10 +42,9 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.ObservationUnitDao;
-import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.GeoNavHelper;
 import com.fieldbook.tracker.objects.InfoBarModel;
@@ -59,9 +57,11 @@ import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
+import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.views.CollectInputView;
@@ -126,6 +126,11 @@ public class CollectActivity extends ThemedActivity
     @Inject
     InfoBarHelper infoBarHelper;
 
+    @Inject
+    FieldSwitchImpl fieldSwitcher;
+
+    @Inject
+    SoundHelperImpl soundHelper;
     public static boolean searchReload;
     public static String searchRange;
     public static String searchPlot;
@@ -260,18 +265,11 @@ public class CollectActivity extends ThemedActivity
         checkForInitialBarcodeSearch();
     }
 
-    private void switchField(int studyId, String fieldName, @Nullable String obsUnitId) {
+    private void switchField(int studyId, @Nullable String obsUnitId) {
 
         try {
 
-            //updates obs. range view in database
-            database.switchField(studyId);
-
-            FieldObject fo = database.getFieldObject(studyId);
-
-            ep.edit().putString(GeneralKeys.UNIQUE_NAME, fo.getUnique_id()).apply();
-            ep.edit().putString(GeneralKeys.PRIMARY_NAME, fo.getPrimary_id()).apply();
-            ep.edit().putString(GeneralKeys.SECONDARY_NAME, fo.getSecondary_id()).apply();
+            fieldSwitcher.switchField(studyId);
 
             rangeBox.setAllRangeID();
             int[] rangeID = rangeBox.getRangeID();
@@ -289,11 +287,7 @@ public class CollectActivity extends ThemedActivity
                 moveToSearch("id", rangeID, null, null, obsUnitId, -1);
             }
 
-            //update selected item in field adapter using preference
-            ep.edit().putString(GeneralKeys.FIELD_FILE, fieldName).apply();
-            ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId).apply();
-
-            playSound("hero_simple_celebration");
+            soundHelper.playCelebrate();
 
         } catch (Exception e) {
 
@@ -337,7 +331,7 @@ public class CollectActivity extends ThemedActivity
 
                                 if (fo != null && fo.getExp_name() != null) {
 
-                                    switchField(model.getStudy_id(), fo.getExp_name(), barcode);
+                                    switchField(model.getStudy_id(), barcode);
 
                                 }
                             }
@@ -477,22 +471,6 @@ public class CollectActivity extends ThemedActivity
         refreshLock();
     }
 
-    @Override
-    public void playSound(String sound) {
-        try {
-            int resID = getResources().getIdentifier(sound, "raw", getPackageName());
-            MediaPlayer chimePlayer = MediaPlayer.create(CollectActivity.this, resID);
-            chimePlayer.start();
-
-            chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                public void onCompletion(MediaPlayer mp) {
-                    mp.release();
-                }
-            });
-        } catch (Exception ignore) {
-        }
-    }
-
     /**
      * Is used to ensure the UI entered data is within the bounds of the trait's min/max
      *
@@ -528,7 +506,7 @@ public class CollectActivity extends ThemedActivity
             removeTrait(trait);
             collectInputView.clear();
 
-            playSound("error");
+            soundHelper.playError();
 
             return false;
         }
@@ -1678,15 +1656,15 @@ public class CollectActivity extends ThemedActivity
 
                     //play success or error sound if the plotId was not found
                     if (success) {
-                        playSound("hero_simple_celebration");
+                        soundHelper.playCelebrate();
                     } else {
                         boolean found = false;
                         FieldObject studyObj = null;
-                        ObservationUnitModel[] models = ObservationUnitDao.Companion.getAll();
+                        ObservationUnitModel[] models = database.getAllObservationUnits();
                         for (ObservationUnitModel m : models) {
                             if (m.getObservation_unit_db_id().equals(inputPlotId)) {
 
-                                FieldObject study = StudyDao.Companion.getFieldObject(m.getStudy_id());
+                                FieldObject study = database.getFieldObject(m.getStudy_id());
                                 if (study != null && study.getExp_name() != null) {
                                     studyObj = study;
                                     found = true;
@@ -1703,11 +1681,11 @@ public class CollectActivity extends ThemedActivity
                             String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
 
                             SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, 8000, null,
-                                (v) -> switchField(studyId, fieldName, null));
+                                (v) -> switchField(studyId, null));
 
                         } else {
 
-                            playSound("alert_error");
+                            soundHelper.playError();
 
                             Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
 
@@ -2059,5 +2037,17 @@ public class CollectActivity extends ThemedActivity
 
         infoBarHelper.showInfoBarChoiceDialog(position);
 
+    }
+
+    @NonNull
+    @Override
+    public FieldSwitcher getFieldSwitcher() {
+        return fieldSwitcher;
+    }
+
+    @NonNull
+    @Override
+    public SoundHelperImpl getSoundHelper() {
+        return soundHelper;
     }
 }

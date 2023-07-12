@@ -44,13 +44,16 @@ import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.StudyDao;
+import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
+import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
@@ -111,6 +114,10 @@ public class ConfigActivity extends ThemedActivity {
     private final Runnable exportData = () -> new ExportDataTask().execute(0);
     @Inject
     public DataHelper database;
+    @Inject
+    public FieldSwitchImpl fieldSwitcher;
+    @Inject
+    public SoundHelperImpl soundHelper;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     ListView settingsList;
@@ -711,6 +718,107 @@ public class ConfigActivity extends ThemedActivity {
         });
     }
 
+    private void resolveFuzzySearchResult(FieldObject f, @Nullable String plotId) {
+
+        soundHelper.playCelebrate();
+
+        int studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        int newStudyId = f.getExp_id();
+
+        if (studyId != newStudyId) {
+
+            switchField(newStudyId);
+
+        }
+
+        Intent intent = new Intent(this, CollectActivity.class);
+        CollectActivity.reloadData = true;
+
+        if (plotId != null) {
+
+            ep.edit().putString(GeneralKeys.LAST_PLOT, plotId).apply();
+
+        }
+
+        startActivity(intent);
+
+    }
+    @Nullable
+    private FieldObject searchStudiesForBarcode(String barcode) {
+
+        // first, search to try and match study alias (brapi stores study_db_id here)
+        ArrayList<FieldObject> fields = database.getAllFieldObjects();
+
+        // start by searching for alias
+        for (FieldObject f : fields) {
+
+            if (f != null && f.getExp_alias() != null && f.getExp_alias().equals(barcode)) {
+
+                return f;
+
+            }
+        }
+
+        // second, if field is not found search for study name
+        for (FieldObject f : fields) {
+
+            if (f != null && f.getExp_name() != null && f.getExp_name().equals(barcode)) {
+
+                return f;
+
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    private ObservationUnitModel searchPlotsForBarcode(String barcode) {
+
+        // search for barcode in database
+        ObservationUnitModel[] models = database.getAllObservationUnits();
+        for (ObservationUnitModel m : models) {
+            if (m.getObservation_unit_db_id().equals(barcode)) {
+
+                return m;
+            }
+        }
+
+        return null;
+    }
+
+    //1) study alias, 2) study names, 3) plotdbids
+    private void fuzzyBarcodeSearch(String barcode) {
+
+        // search for studies
+        FieldObject f = searchStudiesForBarcode(barcode);
+
+        if (f == null) {
+
+            // search for plots
+            ObservationUnitModel m = searchPlotsForBarcode(barcode);
+
+            if (m != null && m.getStudy_id() != -1) {
+
+                FieldObject study = database.getFieldObject(m.getStudy_id());
+
+                resolveFuzzySearchResult(study, barcode);
+
+            } else {
+
+                soundHelper.playError();
+
+                Utils.makeToast(this, getString(R.string.act_config_fuzzy_search_failed, barcode));
+            }
+
+        } else {
+
+            resolveFuzzySearchResult(f, null);
+
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -718,11 +826,23 @@ public class ConfigActivity extends ThemedActivity {
             if (resultCode != Activity.RESULT_OK) finish();
         } else if (requestCode == REQUEST_BARCODE) {
             if (resultCode == RESULT_OK) {
-                // store barcode value as data
+
+                // get barcode from scan result
                 IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
                 String scannedBarcode = plotDataResult.getContents();
-                startActivity(new Intent(this, CollectActivity.class)
-                        .putExtra("barcode", scannedBarcode));
+
+                try {
+
+                    fuzzyBarcodeSearch(scannedBarcode);
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+
+                    Utils.makeToast(this, getString(R.string.act_config_fuzzy_search_error, scannedBarcode));
+
+                    soundHelper.playError();
+                }
             }
         }
     }
@@ -871,22 +991,8 @@ public class ConfigActivity extends ThemedActivity {
      */
     private void switchField(int studyId) {
 
-        FieldObject f = StudyDao.Companion.getFieldObject(studyId);
+        fieldSwitcher.switchField(studyId);
 
-        if (f != null) {
-
-            database.switchField(studyId);
-
-            //clear field selection after updates
-            ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId)
-                    .putString(GeneralKeys.FIELD_FILE, f.getExp_name())
-                    .putString(GeneralKeys.FIELD_OBS_LEVEL, f.getObservation_level())
-                    .putString(GeneralKeys.UNIQUE_NAME, f.getUnique_id())
-                    .putString(GeneralKeys.PRIMARY_NAME, f.getPrimary_id())
-                    .putString(GeneralKeys.SECONDARY_NAME, f.getSecondary_id())
-                    .putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true)
-                    .putString(GeneralKeys.LAST_PLOT, null).apply();
-        }
     }
 
     private class ExportDataTask extends AsyncTask<Integer, Integer, Integer> {
