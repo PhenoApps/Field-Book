@@ -301,6 +301,17 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "jmh579",
+      "name": "Jenna Hershberger",
+      "avatar_url": "https://avatars.githubusercontent.com/u/33294076?v=4",
+      "profile": "http://jmh579.github.io",
+      "contributions": [
+        "bug",
+        "ideas",
+        "eventOrganizing"
+      ]
     }
   ],
   "contributorsPerLine": 7,
