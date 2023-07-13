@@ -5,17 +5,18 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/PhenoApps/Field-Book/github-release.yml)
 [![Latest](https://img.shields.io/github/v/release/phenoapps/field-book)](https://github.com/PhenoApps/Field-Book/releases/latest)
-[![All Contributors](https://img.shields.io/badge/all_contributors-30-orange.svg?style=flat-square)](#contributors-)
+[![Crowdin](https://badges.crowdin.net/field-book/localized.svg)](https://crowdin.com/project/field-book)
+[![All Contributors](https://img.shields.io/badge/all_contributors-30-orange.svg)](#contributors-)
 
 
 Field Book is a simple app for taking phenotypic notes. Collecting data in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity. Field Book uses custom layouts for different types of data to that allow rapid data collection. Traits being collected are defined by the user and can be exported and transferred between devices. Sample files are provided with the installation.
 
 ## Funding
-Development of Field Book has been supported by the [Collaborative Crop Research Program](http://ccrp.org/) of The McKnight Foundation and the National Science Foundation under Grant No. (1543958).
+Development of Field Book has been supported by the McKnight Foundation [Collaborative Crop Research Program](http://ccrp.org/), the National Science Foundation [No. 1543958](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1543958), USAID [No. 7200AA‐19LE‐00005](https://ilci.cornell.edu/), USDA NIFA SCRI No. 2022-51181-38449, and USDA NIFA AG2PI [No. 2022-70412-38454](https://www.ag2pi.org/).
 
 ## [Docs](https://docs.fieldbook.phenoapps.org/en/latest/field-book.html)
 
-## [Translate](https://osij6hx.oneskyapp.com/collaboration/project?id=28259)
+## [Translate](https://crowdin.com/project/field-book)
 
 ## Contributors
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
