@@ -27,7 +27,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.database.dao.ObservationUnitDao.Companion.getAll
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.location.gnss.ConnectThread
@@ -130,14 +129,18 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     private var mLastGeoNavTime = 0.0
     private var mFirstLocationFound = false
     private var mLastDevice: BluetoothDevice? = null
-    private var mSchedulerHandler = HandlerThread("scheduler")
+    private var mSchedulerHandlerThread = HandlerThread("scheduler")
     private var mMessageHandlerThread = HandlerThread("messages")
-    var mAverageHandler = HandlerThread("averaging")
+    private var mAverageHandlerThread = HandlerThread("averaging")
+    private var schedulerHandler: Handler? = null
+    private var averageHandler: Handler? = null
     private var lastPlotIdNav: String? = null
     private var mGeoNavSnackbar: Snackbar? = null
     private val mPrefs = PreferenceManager.getDefaultSharedPreferences(context)
     private val ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
     private var mGeoNavLogWriter: OutputStreamWriter? = null
+
+    var initialized: Boolean = false
 
     init {
         init()
@@ -146,10 +149,13 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     private fun init() {
         mMessageHandlerThread.start()
         mMessageHandlerThread.looper
-        mSchedulerHandler.start()
-        mSchedulerHandler.looper
-        mAverageHandler.start()
-        mAverageHandler.looper
+        mSchedulerHandlerThread.start()
+        mSchedulerHandlerThread.looper
+        schedulerHandler = Handler(mSchedulerHandlerThread.looper)
+        mAverageHandlerThread.start()
+        mAverageHandlerThread.looper
+        averageHandler = Handler(mAverageHandlerThread.looper)
+        initialized = true
     }
 
     /**
@@ -210,7 +216,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
 
     private fun runScheduler(internal: Boolean, period: Long) {
 
-        Handler(mSchedulerHandler.looper).postDelayed({
+        schedulerHandler?.postDelayed({
             runImpactZoneAlgorithm(internal)
             runScheduler(internal, period)
         }, period)
@@ -230,7 +236,18 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     /**
      * This handler is used within the connect thread to broadcast messages.
      */
-    private val mHandler = Handler(mMessageHandlerThread.looper) { msg: Message ->
+    private var mHandler = createLocalHandler()
+
+    private fun recreateThreads() {
+
+        mSchedulerHandlerThread = HandlerThread("scheduler")
+        mMessageHandlerThread = HandlerThread("messages")
+        mAverageHandlerThread = HandlerThread("averaging")
+
+        init()
+    }
+
+    private fun createLocalHandler(): Handler = Handler(mMessageHandlerThread.looper) { msg: Message ->
         val nmea = msg.obj as String
         if (msg.what == GNSSResponseReceiver.MESSAGE_OUTPUT_CODE) {
             val broadcastNmea =
@@ -273,6 +290,12 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         (context as CollectActivity).getSecurityChecker().withNearby { adapter: BluetoothAdapter ->
             adapter.cancelDiscovery()
             mLastDevice = device
+
+            if (!mHandler.looper.thread.isAlive) {
+                recreateThreads()
+                mHandler = createLocalHandler()
+            }
+
             mConnectThread = ConnectThread(device, mHandler)
             mConnectThread?.start()
         }
@@ -321,7 +344,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         val studyId: Int = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
 
         //find all observation units within the field
-        val units = getAll(studyId)
+        val units = (context as CollectActivity).getDatabase().getAllObservationUnits(studyId)
         val coordinates: MutableList<ObservationUnitModel> = ArrayList()
 
         //add all units that have non null coordinates.
@@ -410,8 +433,8 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     fun stopGeoNav() {
         (context.getSystemService(Context.SENSOR_SERVICE) as SensorManager).unregisterListener(this)
         mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply() //turn off auto nav
-        mSchedulerHandler.quit()
-        mAverageHandler.quit()
+        mSchedulerHandlerThread.quit()
+        mAverageHandlerThread.quit()
         mMessageHandlerThread.quit()
         //flush and close geo nav log writer
         try {
@@ -436,7 +459,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     }
 
     fun stopAverageHandler() {
-        mAverageHandler.quit()
+        mAverageHandlerThread.quit()
     }
 
     /**
@@ -579,5 +602,9 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         
         """.trimIndent()
         )
+    }
+
+    public fun getAverageHandler(): Handler? {
+        return averageHandler
     }
 }

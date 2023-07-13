@@ -91,6 +91,9 @@ public class GeneralKeys {
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
     // @formatter:on
 
+    // GNSS
+    public static final String GNSS_LAST_PAIRED_DEVICE_NAME      = "GNSS_LAST_PAIRED_DEVICE_NAME";
+
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
 
