@@ -228,6 +228,13 @@ public class DataHelper {
         return ObservationUnitDao.Companion.getAll();
     }
 
+    public ObservationUnitModel[] getAllObservationUnits(int studyId) {
+
+        open();
+
+        return ObservationUnitDao.Companion.getAll(studyId);
+    }
+
     @Nullable
     public ObservationUnitModel getObservationUnitById(String id) {
 

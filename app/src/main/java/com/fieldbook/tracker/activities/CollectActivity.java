@@ -58,6 +58,7 @@ import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
+import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
@@ -113,11 +114,13 @@ public class CollectActivity extends ThemedActivity
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
 
-    @Inject
-    DataHelper database;
+    private GeoNavHelper geoNavHelper;
 
     @Inject
-    GeoNavHelper geoNavHelper;
+    GnssThreadHelper gnssThreadHelper;
+
+    @Inject
+    DataHelper database;
 
     @Inject
     VerifyPersonHelper verifyPersonHelper;
@@ -829,6 +832,8 @@ public class CollectActivity extends ThemedActivity
         mUsbCameraHelper.destroy();
 
         traitLayoutRefresh();
+
+        gnssThreadHelper.stop();
 
         super.onDestroy();
     }
@@ -2015,10 +2020,10 @@ public class CollectActivity extends ThemedActivity
         return secureBluetooth;
     }
 
-    @NonNull
+    @Nullable
     @Override
-    public HandlerThread getAverageHandler() {
-        return geoNavHelper.getMAverageHandler();
+    public Handler getAverageHandler() {
+        return geoNavHelper.getAverageHandler();
     }
 
     @Override
@@ -2049,5 +2054,17 @@ public class CollectActivity extends ThemedActivity
     @Override
     public SoundHelperImpl getSoundHelper() {
         return soundHelper;
+    }
+
+    @NonNull
+    @Override
+    public GeoNavHelper getGeoNavHelper() {
+        return geoNavHelper;
+    }
+
+    @NonNull
+    @Override
+    public GnssThreadHelper getGnssThreadHelper() {
+        return gnssThreadHelper;
     }
 }
