@@ -54,6 +54,7 @@ Contents
    settings-sounds
    settings-brapi
    settings-database
+   settings-beta
 
 .. toctree::
    :maxdepth: 2
