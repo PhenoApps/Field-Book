@@ -99,7 +99,15 @@ Managing fields
 
    Managing existing fields
 
-To activate a field for data collection, select it from the list of fields. Each row in the fields list displays the Date imported, Date edited, Date exported, and Number of entries. Fields can be deleted or sorted by different identifiers using the sub menu in each row.
+To activate a field for data collection, select it from the list of fields. Each row in the fields list displays the Date imported, Date edited, Date exported, and Number of entries.
+
+Pressing the 'More options' icon to the right of the trial info opens a sub menu.
+
+   * Delete removes the trial and all associated data. A confirmation message will be shown first, to confirm that deletion is not triggered accidentally.
+   
+   * Sync connects to the BrAPI sever that is configured in settings, updating the trial with any data that has been added since its last sync or import.
+   
+   * Sort provides dialog to update the plot ordering by selecting different identifiers from a list of imported columns   
 
 .. |geonav| image:: /_static/icons/settings/main/map-search.png
   :width: 20
