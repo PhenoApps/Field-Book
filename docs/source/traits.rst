@@ -76,3 +76,6 @@ Trait imports and exports are similar to field imports/exports, in that they rel
 
 .. |reorder| image:: /_static/icons/traits/reorder-horizontal.png
   :width: 20
+
+.. |brapi| image:: /_static/icons/settings/main/server-network.png
+  :width: 20
