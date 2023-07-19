@@ -105,7 +105,7 @@ Each row in the fields list displays the Date imported, Date edited, Date export
 
 Pressing the |menu| icon to the right of the trial info opens a list of options:
 
-   * **Sort** provides a dialog to update the plot ordering. Populate the sort menu by pressing the |add| icon, and selecting from the list of imported columns. Once columns have been added, change their relative priority by using the |reorder| icon to drag and reorder them. Press the |sort| icon to toggle the sort between ascending and descending. Press the |delete| icon to remove a column. 
+   * **Sort** provides a dialog to update the plot ordering. Populate the sort menu by pressing the |plus| icon, and selecting from the list of imported columns. Once columns have been added, change their relative priority by using the |reorder| icon to drag and reorder them. Press the |sort| icon to toggle the sort between ascending and descending. Press the |delete| icon to remove a column. 
 
    * **Sync** connects to the server specified in |brapi| :doc:`settings-brapi`, updating the trial with new data that has been added from other sources since the last sync or import. This option will not work for trials imported from a file.
 
@@ -121,6 +121,9 @@ Pressing the |menu| icon to the right of the trial info opens a list of options:
   :width: 20
 
 .. |brapi| image:: /_static/icons/settings/main/server-network.png
+  :width: 20
+
+.. |plus| image:: /_static/icons/fields/plus.png
   :width: 20
 
 .. |create| image:: /_static/icons/fields/table-large-plus.png
