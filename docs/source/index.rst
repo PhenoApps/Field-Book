@@ -69,4 +69,5 @@ Contents
    :maxdepth: 2
    :caption: About
 
+   about
    funding
