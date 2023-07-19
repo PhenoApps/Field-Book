@@ -96,7 +96,7 @@ To activate a field for data collection, select it from the list of fields.
 
 Each row in the fields list displays the Date imported, Date edited, Date exported, and Number of entries.
 
-Pressing the |menu| icon to the right of the trial info opens a list of options.
+Pressing the |menu| icon to the right of the trial info opens a list of options:
 
 .. figure:: /_static/images/fields/fields_list_menu_framed.png
    :width: 40%
@@ -107,16 +107,16 @@ Pressing the |menu| icon to the right of the trial info opens a list of options.
    
    * `Sort` provides a dialog to update the plot ordering. Populate the sort menu by pressing the |add| icon, and selecting from the list of imported columns. Once columns have been added, change their relative priority by using the |reorder| icon to drag and reorder them. Press the |sort| icon to toggle the sort between ascending and descending. Press the |delete| icon to remove a column. 
 
+   * `Sync` connects to the server configured in |brapi| :doc:`settings-brapi`, updating the trial with any data that has been added since its last sync or import. Ignore this option for trials imported from a file.
+
+   * `Delete`` removes the trial and all associated data. A confirmation message will be shown first, to confirm that deletion is not triggered accidentally.
+
 .. figure:: /_static/images/fields/fields_sorting_joined.png
    :width: 80%
    :align: center
    :alt: Field sorting steps
 
    Field sorting steps
-   
-   * `Sync` connects to the server that is configured in |brapi| :doc:`settings-brapi`, updating the trial with any data that has been added since its last sync or import. Ignore this option for trials imported from a file.
-
-   * `Delete`` removes the trial and all associated data. A confirmation message will be shown first, to confirm that deletion is not triggered accidentally.
 
 .. |geonav| image:: /_static/icons/settings/main/map-search.png
   :width: 20

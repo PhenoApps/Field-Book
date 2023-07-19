@@ -13,12 +13,12 @@ Beta Settings
 
 Turns on repeated measures. When turned on, a green plus symbol appears next to the trait value entry box on the collect screen.
 
-.. figure:: /_static/images/settings/beta/settings_beta_repeated_example.png
-   :width: 40%
+.. figure:: /_static/images/settings/beta/settings_beta_repeated_icon.png
+   :width: 60%
    :align: center
    :alt: Repeated measurement example collect screen
 
-   Collect screen with repeated measurements enabled
+   Collect screen value entry with repeated measurements enabled
 
 When pressed it creates a new entry field for collecting an additional observation on the same plot for the same trait.
 
