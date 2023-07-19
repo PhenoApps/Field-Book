@@ -114,7 +114,7 @@ Pressing the |menu| icon to the right of the trial info opens a list of options.
 
    Field sorting steps
    
-   * `Sync` connects to the server that is configured in |brapi-settings| :doc:`settings-brapi`, updating the trial with any data that has been added since its last sync or import. Ignore this option for trials imported from a file.
+   * `Sync` connects to the server that is configured in |brapi| :doc:`settings-brapi`, updating the trial with any data that has been added since its last sync or import. Ignore this option for trials imported from a file.
 
    * `Delete`` removes the trial and all associated data. A confirmation message will be shown first, to confirm that deletion is not triggered accidentally.
 
@@ -131,6 +131,9 @@ Pressing the |menu| icon to the right of the trial info opens a list of options.
   :width: 20
 
 .. |create| image:: /_static/icons/fields/table-large-plus.png
+  :width: 20
+
+.. |menu| image:: /_static/icons/traits/dots-vertical.png
   :width: 20
 
 .. |reorder| image:: /_static/icons/traits/reorder-horizontal.png
