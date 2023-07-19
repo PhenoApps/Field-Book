@@ -55,9 +55,9 @@ Other changes affecting the whole trait list can be made by accessing the trait 
 
    All traits mangement menu.
 
-* Reorder all traits by selecting `Sort`, then chosing your sort criterion (options include trait `Name`, `Format`, or `Checked` status)
-* Remove all traits by selecting `Delete all traits`, then confirming the operation.
-* Transfer traits in and out by selecting the `Import/Export`` option.
+* Reorder all traits by selecting **Sort**, then chosing your sort criterion (options include trait `Name`, `Format`, or `Checked` status)
+* Remove all traits by selecting **Delete all traits**, then confirming the operation.
+* Transfer traits in and out by selecting the **Import/Export** option.
 
 Trait imports and exports are similar to field imports/exports in that they rely on files stored in a dedicated folder, or on communication with a designated server using a |brapi| :doc:`brapi` connection.
 

@@ -96,27 +96,20 @@ To activate a field for data collection, select it from the list of fields.
 
 Each row in the fields list displays the Date imported, Date edited, Date exported, and Number of entries.
 
+.. figure:: /_static/images/fields/fields_sorting_example_joined.png
+   :width: 100%
+   :align: center
+   :alt: Field management sorting example
+
+   Field management sorting steps
+
 Pressing the |menu| icon to the right of the trial info opens a list of options:
 
-.. figure:: /_static/images/fields/fields_list_menu_framed.png
-   :width: 40%
-   :align: center
-   :alt: Field management menu options
+   * **Sort** provides a dialog to update the plot ordering. Populate the sort menu by pressing the |add| icon, and selecting from the list of imported columns. Once columns have been added, change their relative priority by using the |reorder| icon to drag and reorder them. Press the |sort| icon to toggle the sort between ascending and descending. Press the |delete| icon to remove a column. 
 
-   Field management menu options
-   
-   * `Sort` provides a dialog to update the plot ordering. Populate the sort menu by pressing the |add| icon, and selecting from the list of imported columns. Once columns have been added, change their relative priority by using the |reorder| icon to drag and reorder them. Press the |sort| icon to toggle the sort between ascending and descending. Press the |delete| icon to remove a column. 
+   * **Sync** connects to the server specified in |brapi| :doc:`settings-brapi`, updating the trial with new data that has been added from other sources since the last sync or import. This option will not work for trials imported from a file.
 
-   * `Sync` connects to the server configured in |brapi| :doc:`settings-brapi`, updating the trial with any data that has been added since its last sync or import. Ignore this option for trials imported from a file.
-
-   * `Delete`` removes the trial and all associated data. A confirmation message will be shown first, to confirm that deletion is not triggered accidentally.
-
-.. figure:: /_static/images/fields/fields_sorting_joined.png
-   :width: 80%
-   :align: center
-   :alt: Field sorting steps
-
-   Field sorting steps
+   * **Delete** removes the trial and all associated data. A confirmation message will be shown first, to confirm that deletion is not triggered accidentally.
 
 .. |geonav| image:: /_static/icons/settings/main/map-search.png
   :width: 20
