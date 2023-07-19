@@ -92,22 +92,31 @@ To create a new field directly within Field Book press the |create| icon on the 
 Managing fields
 ---------------
 
-.. figure:: /_static/images/fields/fields_list_joined.png
+To activate a field for data collection, select it from the list of fields.
+
+Each row in the fields list displays the Date imported, Date edited, Date exported, and Number of entries.
+
+Pressing the |menu| icon to the right of the trial info opens a list of options.
+
+.. figure:: /_static/images/fields/fields_list_menu_framed.png
+   :width: 40%
+   :align: center
+   :alt: Field management menu options
+
+   Field management menu options
+   
+   * `Sort` provides a dialog to update the plot ordering. Populate the sort menu by pressing the |add| icon, and selecting from the list of imported columns. Once columns have been added, change their relative priority by using the |reorder| icon to drag and reorder them. Press the |sort| icon to toggle the sort between ascending and descending. Press the |delete| icon to remove a column. 
+
+.. figure:: /_static/images/fields/fields_sorting_joined.png
    :width: 80%
    :align: center
-   :alt: Field management screens
+   :alt: Field sorting steps
 
-   Managing existing fields
-
-To activate a field for data collection, select it from the list of fields. Each row in the fields list displays the Date imported, Date edited, Date exported, and Number of entries.
-
-Pressing the 'More options' icon to the right of the trial info opens a sub menu.
-
-   * Delete removes the trial and all associated data. A confirmation message will be shown first, to confirm that deletion is not triggered accidentally.
+   Field sorting steps
    
-   * Sync connects to the BrAPI sever that is configured in settings, updating the trial with any data that has been added since its last sync or import.
-   
-   * Sort provides dialog to update the plot ordering by selecting different identifiers from a list of imported columns   
+   * `Sync` connects to the server that is configured in |brapi-settings| :doc:`settings-brapi`, updating the trial with any data that has been added since its last sync or import. Ignore this option for trials imported from a file.
+
+   * `Delete`` removes the trial and all associated data. A confirmation message will be shown first, to confirm that deletion is not triggered accidentally.
 
 .. |geonav| image:: /_static/icons/settings/main/map-search.png
   :width: 20
@@ -122,4 +131,13 @@ Pressing the 'More options' icon to the right of the trial info opens a sub menu
   :width: 20
 
 .. |create| image:: /_static/icons/fields/table-large-plus.png
+  :width: 20
+
+.. |reorder| image:: /_static/icons/traits/reorder-horizontal.png
+  :width: 20
+
+.. |sort| image:: /_static/icons/fields/sort-ascending.png
+  :width: 20
+
+.. |delete| image:: /_static/icons/settings/sounds/delete.png
   :width: 20
