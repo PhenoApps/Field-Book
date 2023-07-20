@@ -35,6 +35,7 @@ data class StudyObservations(var fieldBookStudyDbId:Int=0, val traitList: Mutabl
 
 class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.OnClickListener {
     private var saveBtn: Button? = null
+    private var noObsLabel : TextView? = null
     private var brAPIService: BrAPIService? = null
 
     private var studyObservations = StudyObservations()
@@ -60,6 +61,7 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
         paginationManager = BrapiPaginationManager(0, pageSize)
         saveBtn = findViewById(R.id.brapi_save_btn)
         saveBtn!!.setOnClickListener(this)
+        noObsLabel = findViewById(R.id.noObservationLbl)
         fieldNameLbl = findViewById(R.id.studyNameValue)
         val cancelBtn = findViewById<Button>(R.id.brapi_cancel_btn)
         cancelBtn.setOnClickListener(this)
@@ -72,6 +74,8 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
     override fun onStart() {
         // Set our OK button to be disabled until we are finished loading
         saveBtn!!.visibility = View.GONE
+        //Hide the error message in case no observations are downloaded.
+        noObsLabel!!.visibility = View.GONE
 
         fieldNameLbl.text = selectedField.exp_name
 
@@ -138,8 +142,17 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
 
                             //Once we have loaded in all the observations, we can make the save button visible
                             // We need to check page == totalPages - 1 otherwise it will loop indefinitely as the 0-based page will never reach totalPages(1based)
-                            if (paginationManager.page == paginationManager.totalPages - 1) {
-                                makeSaveBtnVisible()
+                            if (paginationManager.page >= paginationManager.totalPages - 1) {
+                                //If we hit the last page but we have no observations we should not post the save button.
+                                if(studyObservations.observationList.size <= 0) {
+                                    makeNoObsWarningVisible()
+                                }
+                                else {
+                                    makeSaveBtnVisible()
+                                }
+                            }
+                            else if(paginationManager.totalPages == 0) {
+                                makeNoObsWarningVisible()
                             }
                         }
 
@@ -155,9 +168,28 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
     }
 
     /**
-     * Function to unhide the save button
+     * Function that first populates the trait and observation counts, hides the loading spinner and
+     * then will pop up the Save button.
      */
     fun makeSaveBtnVisible() {
+        populateCountsAndHideLoadingPanel()
+
+        saveBtn!!.visibility = View.VISIBLE
+    }
+
+    /**
+     * Function that first populates the trait and observation counts, hides the loading spinner and
+     * then will pop up the Warning message if no observations are downloaded.
+     */
+    fun makeNoObsWarningVisible() {
+        populateCountsAndHideLoadingPanel()
+        noObsLabel!!.visibility = View.VISIBLE
+    }
+
+    /**
+     * Function used to update the numTraits and numObs counts on the Dialog and then hid the loading spinner.
+     */
+    private fun populateCountsAndHideLoadingPanel() {
         //populate the description fields
         (findViewById<View>(R.id.numberTraitsValue) as TextView).text =
             "${studyObservations.traitList.size}"
@@ -165,7 +197,6 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
             "${studyObservations.observationList.size}"
 
         findViewById<View>(R.id.loadingPanel).visibility = View.GONE
-        saveBtn!!.visibility = View.VISIBLE
     }
 
     fun saveObservations() {
