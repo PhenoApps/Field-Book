@@ -45,11 +45,13 @@ import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
 import com.fieldbook.tracker.dialogs.FieldSortDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
+import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -105,6 +107,9 @@ public class FieldEditorActivity extends ThemedActivity
     @Inject
     DataHelper database;
 
+    @Inject
+    FieldSwitchImpl fieldSwitcher;
+
     // Creates a new thread to do importing
     private final Runnable importRunnable = new Runnable() {
         public void run() {
@@ -120,7 +125,7 @@ public class FieldEditorActivity extends ThemedActivity
     // Helper function to load data
     public void loadData(ArrayList<FieldObject> fields) {
         try {
-            mAdapter = new FieldAdapter(thisActivity, fields);
+            mAdapter = new FieldAdapter(thisActivity, fields, fieldSwitcher);
             fieldList.setAdapter(mAdapter);
         } catch (Exception e) {
             e.printStackTrace();
@@ -170,7 +175,7 @@ public class FieldEditorActivity extends ThemedActivity
         thisActivity = this;
         database.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         fieldList = findViewById(R.id.myList);
-        mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects());
+        mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
         fieldList.setAdapter(mAdapter);
 
     }
@@ -356,7 +361,7 @@ public class FieldEditorActivity extends ThemedActivity
 
                     //update list of fields
                     fieldList = findViewById(R.id.myList);
-                    mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects());
+                    mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
                     fieldList.setAdapter(mAdapter);
 
                 }));
@@ -799,7 +804,8 @@ public class FieldEditorActivity extends ThemedActivity
             database.updateStudySort(joiner.toString(), field.getExp_id());
 
             if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.getExp_id()) {
-                database.switchField(field.getExp_id());
+
+                fieldSwitcher.switchField(field);
                 CollectActivity.reloadData = true;
             }
 
@@ -837,5 +843,11 @@ public class FieldEditorActivity extends ThemedActivity
     @Override
     public SharedPreferences getPreferences() {
         return PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    }
+
+    @NonNull
+    @Override
+    public FieldSwitcher getFieldSwitcher() {
+        return fieldSwitcher;
     }
 }

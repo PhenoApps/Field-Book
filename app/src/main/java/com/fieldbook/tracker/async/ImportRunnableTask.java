@@ -232,21 +232,13 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         } else {
             SharedPreferences.Editor ed = mPrefs.edit();
 
-            ed.putString(GeneralKeys.UNIQUE_NAME, unique);
-            ed.putString(GeneralKeys.PRIMARY_NAME, primary);
-            ed.putString(GeneralKeys.SECONDARY_NAME, secondary);
-            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true);
-            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, result);
-
-            ed.apply();
-
             CollectActivity.reloadData = true;
 
             controller.queryAndLoadFields();
 
             try {
 
-                controller.getDatabase().switchField(result);
+                controller.getFieldSwitcher().switchField(result);
 
             } catch (Exception e) {
 

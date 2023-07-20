@@ -384,7 +384,7 @@ class RangeBoxView : ConstraintLayout {
             if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
                 if (cRange.range != lastRange && lastRange != "") {
                     lastRange = cRange.range
-                    controller.playSound("plonk")
+                    controller.getSoundHelper().playPlonk()
                 }
             }
             display()
@@ -414,6 +414,11 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun reload() {
+
+        firstName = controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
+        secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
+        uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+
         switchVisibility(controller.getPreferences().getBoolean(GeneralKeys.QUICK_GOTO, false))
         setName(8)
         paging = 1
@@ -436,7 +441,7 @@ class RangeBoxView : ConstraintLayout {
         if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
             if (cRange.range != lastRange && lastRange != "") {
                 lastRange = cRange.range
-                controller.playSound("plonk")
+                controller.getSoundHelper().playPlonk()
             }
         }
     }
@@ -529,12 +534,12 @@ class RangeBoxView : ConstraintLayout {
         }
         if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
         ) {
-            controller.playSound("advance")
+            controller.getSoundHelper().playAdvance()
         }
         val entryArrow =
             controller.getPreferences().getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
         if ((entryArrow == "1" || entryArrow == "3") && !controller.getTraitBox().existsTrait()) {
-            controller.playSound("error")
+            controller.getSoundHelper().playError()
         } else {
             if (rangeID.isNotEmpty()) {
                 //index.setEnabled(true);
@@ -552,12 +557,12 @@ class RangeBoxView : ConstraintLayout {
         }
         if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
         ) {
-            controller.playSound("advance")
+            controller.getSoundHelper().playAdvance()
         }
         val entryArrow =
             controller.getPreferences().getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
         if ((entryArrow == "2" || entryArrow == "3") && !controller.getTraitBox().existsTrait()) {
-            controller.playSound("error")
+            controller.getSoundHelper().playError()
         } else {
             if (rangeID.isNotEmpty()) {
                 //index.setEnabled(true);

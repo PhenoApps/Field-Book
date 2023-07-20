@@ -6,9 +6,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.location.Location
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -20,8 +18,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.Group
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
@@ -29,14 +25,13 @@ import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.database.dao.ObservationUnitDao
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.location.GPSTracker
-import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.Companion.ACTION_BROADCAST_GNSS_TRAIT
 import com.fieldbook.tracker.location.gnss.NmeaParser
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.utilities.Constants
 import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
+import com.fieldbook.tracker.utilities.GnssThreadHelper
 import com.google.android.material.chip.ChipGroup
 import org.json.JSONObject
 import kotlin.math.atan2
@@ -57,9 +52,6 @@ import kotlin.math.sqrt
 class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private var mActivity: Activity? = null
-
-    //thread used to establish a connection with
-    private lateinit var mConnectThread: ConnectThread
 
     //used for communication between threads and ui thread
     private lateinit var mLocalBroadcastManager: LocalBroadcastManager
@@ -103,6 +95,10 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     data class AverageInfo(var unit: ObservationUnitModel, var location: Location?,
                            var points: List<Pair<Double, Double>>, val latLength: Int, val lngLength: Int)
 
+    private fun getThreadHelper(): GnssThreadHelper {
+        return controller.getGnssThreadHelper()
+    }
+
     private fun startAverageTimer(info: AverageInfo, period: Long) {
 
         val runnable = Runnable {
@@ -125,8 +121,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             })
         }
 
-        if (controller.getAverageHandler().looper != null)
-            Handler(controller.getAverageHandler().looper).post(runnable)
+        if (controller.getAverageHandler() != null)
+            controller.getAverageHandler()?.post(runnable)
         else mProgressDialog?.dismiss()
 
     }
@@ -215,47 +211,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         }
     }
 
-    private fun checkPermissions(act: Activity?): Boolean {
-
-        var granted = false
-
-        if (act != null) {
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val scan = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
-                    android.Manifest.permission.BLUETOOTH_SCAN)
-                val connect = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
-                    android.Manifest.permission.BLUETOOTH_CONNECT)
-                if (scan && connect) {
-                    granted = true
-                } else {
-                    ActivityCompat.requestPermissions(act, arrayOf(android.Manifest.permission.BLUETOOTH_CONNECT,
-                        android.Manifest.permission.BLUETOOTH_SCAN), Constants.PERM_REQ)
-                }
-            } else {
-                val admin = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
-                    android.Manifest.permission.BLUETOOTH_ADMIN)
-                val bluetooth = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
-                    android.Manifest.permission.BLUETOOTH)
-                val fine = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION)
-                val coarse = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                if (admin && bluetooth && fine && coarse) {
-                    granted = true
-                } else {
-                    ActivityCompat.requestPermissions(act, arrayOf(
-                        android.Manifest.permission.BLUETOOTH_ADMIN,
-                        android.Manifest.permission.BLUETOOTH,
-                        android.Manifest.permission.ACCESS_FINE_LOCATION,
-                        android.Manifest.permission.ACCESS_COARSE_LOCATION), Constants.PERM_REQ)
-                }
-            }
-        }
-
-        return granted
-    }
-
     /**
      * This function is called to initialize the UI. All trait layouts are set to "gone" by default.
      */
@@ -291,13 +246,24 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         // Get Location
         connectButton.setOnClickListener {
             if (mActivity != null) {
-                if (checkPermissions(mActivity)) {
+                controller.getSecurityChecker().connectWith {
                     findPairedDevice()
-                } else {
-                    Toast.makeText(context, R.string.permission_ask_bluetooth, Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Toast.makeText(context, R.string.permission_ask_bluetooth, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        val deviceName = prefs.getString(GeneralKeys.GNSS_LAST_PAIRED_DEVICE_NAME, null)
+
+        if (deviceName != null) {
+
+            controller.getSecurityChecker().connectWith { devices ->
+
+                val names = devices.map { it.name } + context.getString(R.string.pref_behavior_geonav_internal_gps_choice)
+                names.find { it == deviceName }?.let {
+                    connectDevice(deviceName)
+                }
             }
         }
     }
@@ -365,7 +331,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val newLat = latitude.toDouble()
             val newLng = longitude.toDouble()
 
-            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == currentRange.plot_id }
+            val units = database.getAllObservationUnits(studyDbId.toInt()).filter { it.observation_unit_db_id == currentRange.plot_id }
 
             if (units.isNotEmpty()) {
 
@@ -540,60 +506,77 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         clearUi()
 
         //check if the device has bluetooth enabled, if not, request it to be enabled via system action
-        val adapter = BluetoothAdapter.getDefaultAdapter()
-        if (adapter.isEnabled) {
+        controller.getSecurityChecker().withAdapter { adapter ->
 
-            //create a dialog with the paired devices
-            val pairedDevices = adapter.bondedDevices
+            if (adapter.isEnabled) {
 
-            //create table of names -> bluetooth devices, when the item is selected we can retrieve the device
-            val bluetoothMap = HashMap<String, BluetoothDevice>()
-            for (bd in pairedDevices) {
-                bluetoothMap[bd.name] = bd
-            }
+                //create a dialog with the paired devices
+                val pairedDevices = adapter.bondedDevices
 
-            val builder = AlertDialog.Builder(context)
-            builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
-
-            val internalGpsString = context.getString(R.string.pref_behavior_geonav_internal_gps_choice)
-
-            //add internal gps to device choice
-            val devices = pairedDevices.map { it.name }.toTypedArray() +
-                    arrayOf(internalGpsString)
-
-            //when a device is chosen, start a connect thread
-            builder.setSingleChoiceItems(devices, -1) { dialog, which ->
-
-                val value = devices[which]
-
-                if (value != null) {
-
-                    val internal = context.getString(R.string.trait_gnss_internal_tts)
-
-                    val chosenDevice = pairedDevices.find { it.name == value }
-
-                    if (chosenDevice == null) {
-                        //register the location listener
-                        //update no matter the distance change and every 10s
-                        mGpsTracker = GPSTracker(context, this, 0, 10000)
-
-                        triggerTts(internal)
-                    } else {
-
-                        val deviceTts = context.getString(R.string.trait_gnss_external_device_tts, chosenDevice.name)
-
-                        triggerTts(deviceTts)
-                    }
-
-                    setupCommunicationsUi(chosenDevice)
-
-                    dialog.dismiss()
+                //create table of names -> bluetooth devices, when the item is selected we can retrieve the device
+                val bluetoothMap = HashMap<String, BluetoothDevice>()
+                for (bd in pairedDevices) {
+                    bluetoothMap[bd.name] = bd
                 }
+
+                val builder = AlertDialog.Builder(context)
+                builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
+
+                val internalGpsString = context.getString(R.string.pref_behavior_geonav_internal_gps_choice)
+
+                //add internal gps to device choice
+                val devices = pairedDevices.map { it.name }.toTypedArray() +
+                        arrayOf(internalGpsString)
+
+                //when a device is chosen, start a connect thread
+                builder.setSingleChoiceItems(devices, -1) { dialog, which ->
+
+                    val value = devices[which]
+
+                    if (value != null) {
+
+                        connectDevice(value)
+
+                        dialog.dismiss()
+                    }
+                }
+
+                builder.show()
+
+            } else context.startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+        }
+    }
+
+    private fun connectDevice(value: String) {
+
+        controller.getSecurityChecker().connectWith { pairedDevices ->
+
+            val internal = context.getString(R.string.trait_gnss_internal_tts)
+
+            val chosenDevice = pairedDevices.find { it.name == value }
+
+            if (chosenDevice == null) {
+                //register the location listener
+                //update no matter the distance change and every 10s
+                mGpsTracker = GPSTracker(context, this, 0, 10000)
+
+                triggerTts(internal)
+            } else {
+
+                val deviceTts = context.getString(R.string.trait_gnss_external_device_tts, chosenDevice.name)
+
+                triggerTts(deviceTts)
             }
 
-            builder.show()
+            prefs.edit().putString(GeneralKeys.GNSS_LAST_PAIRED_DEVICE_NAME, value).apply()
 
-        } else context.startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+            setupCommunicationsUi(chosenDevice)
+        }
+    }
+
+    override fun onExit() {
+        super.onExit()
+        //if (::mConnectThread.isInitialized) mConnectThread.cancel()
     }
 
     /**
@@ -601,13 +584,11 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
      */
     private fun setupCommunicationsUi(value: BluetoothDevice? = null) {
 
-        BluetoothAdapter.getDefaultAdapter().cancelDiscovery()
+        //BluetoothAdapter.getDefaultAdapter().cancelDiscovery()
 
         if (value != null) {
-            if (::mConnectThread.isInitialized) mConnectThread.cancel()
             mLastDevice = value
-            mConnectThread = ConnectThread(value, mHandler)
-            mConnectThread.start()
+            if (!getThreadHelper().isAlive) getThreadHelper().start(value, mHandler)
         }
 
         //make connected UI visible
@@ -633,7 +614,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             connectGroup.visibility = View.GONE
 
             if (value != null) {
-                mConnectThread.cancel()
+                getThreadHelper().stop()
                 mHandler.removeMessages(GNSSResponseReceiver.MESSAGE_OUTPUT_FAIL)
             }
 
@@ -644,6 +625,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             chipGroup.visibility = View.GONE
 
             setupChooseBluetoothDevice()
+
+            prefs.edit().remove(GeneralKeys.GNSS_LAST_PAIRED_DEVICE_NAME).apply()
         }
 
         setupAveragingUi()
@@ -680,7 +663,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
             ObservationDao.deleteTrait(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
 
-            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == currentRange.plot_id }
+            val units = controller.getDatabase().getAllObservationUnits(studyDbId.toInt())
+                .filter { it.observation_unit_db_id == currentRange.plot_id }
             if (units.isNotEmpty()) {
                 units.first().let { unit ->
                     ObservationUnitDao.updateObservationUnit(unit, "")
@@ -708,7 +692,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             } else if (it.what == GNSSResponseReceiver.MESSAGE_OUTPUT_FAIL) {
                 if (mLastDevice != null) {
 
-                    if (::mConnectThread.isInitialized) mConnectThread.cancel()
+                    getThreadHelper().stop()
 
                     setupCommunicationsUi(mLastDevice)
 
@@ -751,10 +735,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     }
 
     //close the thread when the linear layout is removed
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-
-        if (::mConnectThread.isInitialized)
-            mConnectThread.cancel()
-    }
+//    override fun onDetachedFromWindow() {
+//        super.onDetachedFromWindow()
+//
+//        getThreadHelper().stop()
+//    }
 }

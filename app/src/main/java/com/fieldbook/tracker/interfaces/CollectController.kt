@@ -1,6 +1,9 @@
 package com.fieldbook.tracker.interfaces
 
-import android.os.HandlerThread
+import android.os.Handler
+import com.fieldbook.tracker.objects.GeoNavHelper
+import com.fieldbook.tracker.utilities.GnssThreadHelper
+import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.views.CollectInputView
 import com.fieldbook.tracker.views.RangeBoxView
 import com.fieldbook.tracker.views.TraitBoxView
@@ -10,10 +13,12 @@ interface CollectController: FieldController {
     fun getRangeBox(): RangeBoxView
     fun getTraitBox(): TraitBoxView
     fun getInputView(): CollectInputView
-    fun playSound(sound: String)
+    fun getSoundHelper(): SoundHelperImpl
     fun resetGeoNavMessages()
+    fun getGeoNavHelper(): GeoNavHelper
     fun getSecurityChecker(): SecureBluetoothActivityImpl
-    fun getAverageHandler(): HandlerThread
+    fun getGnssThreadHelper(): GnssThreadHelper
+    fun getAverageHandler(): Handler?
     fun moveToSearch(command: String,
                      plotIndices: IntArray?,
                      rangeId: String?,

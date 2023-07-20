@@ -7,7 +7,11 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.ImageView
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.interfaces.CollectTraitController
@@ -322,7 +326,7 @@ class TraitBoxView : ConstraintLayout {
                     rangeBox.clickLeft()
                 }
                 if (controller.getPreferences().getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND, false)) {
-                    controller.playSound("cycle")
+                    controller.getSoundHelper().playCycle()
                 }
             }
         } else if (direction == "right") {
@@ -333,7 +337,7 @@ class TraitBoxView : ConstraintLayout {
                     rangeBox.clickRight()
                 }
                 if (controller.getPreferences().getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND, false)) {
-                    controller.playSound("cycle")
+                    controller.getSoundHelper().playCycle()
                 }
             }
         }

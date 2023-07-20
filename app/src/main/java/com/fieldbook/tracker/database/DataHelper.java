@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
@@ -225,6 +226,21 @@ public class DataHelper {
         open();
 
         return ObservationUnitDao.Companion.getAll();
+    }
+
+    public ObservationUnitModel[] getAllObservationUnits(int studyId) {
+
+        open();
+
+        return ObservationUnitDao.Companion.getAll(studyId);
+    }
+
+    @Nullable
+    public ObservationUnitModel getObservationUnitById(String id) {
+
+        open();
+
+        return ObservationUnitDao.Companion.getById(id);
     }
 
     /**

@@ -91,6 +91,9 @@ public class GeneralKeys {
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
     // @formatter:on
 
+    // GNSS
+    public static final String GNSS_LAST_PAIRED_DEVICE_NAME      = "GNSS_LAST_PAIRED_DEVICE_NAME";
+
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
 
@@ -123,6 +126,9 @@ public class GeneralKeys {
     //used to get the name of the currently selected field that is saved in preferences
     //example: field_sample how to get: sharedPreferences.getString(Constants.FIELD_FILE, "")
     public static final String FIELD_FILE = "FieldFile";
+
+    //field alias is currently used from imported brapi studies, it is the study db id
+    public static final String FIELD_ALIAS = "FieldAlias";
 
     //key that saves where the field source is from local, brapi, etc.
     public static final String FIELD_SOURCE = "ImportExpSource";

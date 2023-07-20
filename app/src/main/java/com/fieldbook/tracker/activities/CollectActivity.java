@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,10 +42,9 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.ObservationUnitDao;
-import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.GeoNavHelper;
 import com.fieldbook.tracker.objects.InfoBarModel;
@@ -59,9 +57,12 @@ import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.FieldSwitchImpl;
+import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
+import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.views.CollectInputView;
@@ -113,11 +114,13 @@ public class CollectActivity extends ThemedActivity
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
 
-    @Inject
-    DataHelper database;
+    private GeoNavHelper geoNavHelper;
 
     @Inject
-    GeoNavHelper geoNavHelper;
+    GnssThreadHelper gnssThreadHelper;
+
+    @Inject
+    DataHelper database;
 
     @Inject
     VerifyPersonHelper verifyPersonHelper;
@@ -126,6 +129,11 @@ public class CollectActivity extends ThemedActivity
     @Inject
     InfoBarHelper infoBarHelper;
 
+    @Inject
+    FieldSwitchImpl fieldSwitcher;
+
+    @Inject
+    SoundHelperImpl soundHelper;
     public static boolean searchReload;
     public static String searchRange;
     public static String searchPlot;
@@ -257,6 +265,101 @@ public class CollectActivity extends ThemedActivity
 
         loadScreen();
 
+        checkForInitialBarcodeSearch();
+    }
+
+    private void switchField(int studyId, @Nullable String obsUnitId) {
+
+        try {
+
+            fieldSwitcher.switchField(studyId);
+
+            rangeBox.setAllRangeID();
+            int[] rangeID = rangeBox.getRangeID();
+
+            //refresh collect activity UI
+            rangeBox.reload();
+            rangeBox.refresh();
+            initWidgets(false);
+
+            if (obsUnitId != null) {
+
+                reloadData = false;
+
+                //navigate to the plot
+                moveToSearch("id", rangeID, null, null, obsUnitId, -1);
+            }
+
+            soundHelper.playCelebrate();
+
+        } catch (Exception e) {
+
+            Log.d(TAG,"Error during switch field");
+
+            e.printStackTrace();
+
+        }
+    }
+
+    /**
+     * Checks if the user has clicked the barcode button on ConfigActivity,
+     * this will search for obs unit and load neccessary field file
+     */
+    private void checkForInitialBarcodeSearch() {
+
+        try {
+
+            Intent i = getIntent();
+            if (i != null) {
+
+                //get barcode to search for which will be an obs. unit id
+                String barcode = i.getStringExtra("barcode");
+
+                if (barcode != null) {
+
+                    Log.d(TAG, "Searching initial barcode: " + barcode);
+
+                    ObservationUnitModel model = database.getObservationUnitById(barcode);
+
+                    if (model != null) {
+
+                        try {
+
+                            //if barcode matches an obs. unit id
+                            if (model.getObservation_unit_db_id().equals(barcode)) {
+
+                                inputPlotId = barcode;
+
+                                FieldObject fo = database.getFieldObject(model.getStudy_id());
+
+                                if (fo != null && fo.getExp_name() != null) {
+
+                                    switchField(model.getStudy_id(), barcode);
+
+                                }
+                            }
+
+                        } catch (Exception e) {
+
+                            Log.d(TAG, "Failed while searching for: " + barcode);
+
+                            e.printStackTrace();
+                        }
+
+                    } else {
+
+                        Toast.makeText(this, getString(R.string.act_collect_plot_with_code_not_found), Toast.LENGTH_LONG).show();
+
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+
+            Log.d(TAG, "Something failed while searching. ");
+
+            e.printStackTrace();
+        }
     }
 
     public CollectInputView getCollectInputView() {
@@ -371,22 +474,6 @@ public class CollectActivity extends ThemedActivity
         refreshLock();
     }
 
-    @Override
-    public void playSound(String sound) {
-        try {
-            int resID = getResources().getIdentifier(sound, "raw", getPackageName());
-            MediaPlayer chimePlayer = MediaPlayer.create(CollectActivity.this, resID);
-            chimePlayer.start();
-
-            chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                public void onCompletion(MediaPlayer mp) {
-                    mp.release();
-                }
-            });
-        } catch (Exception ignore) {
-        }
-    }
-
     /**
      * Is used to ensure the UI entered data is within the bounds of the trait's min/max
      *
@@ -422,7 +509,7 @@ public class CollectActivity extends ThemedActivity
             removeTrait(trait);
             collectInputView.clear();
 
-            playSound("error");
+            soundHelper.playError();
 
             return false;
         }
@@ -651,7 +738,9 @@ public class CollectActivity extends ThemedActivity
         // Reload traits based on selected plot
         rangeBox.display();
 
-        traitBox.setNewTraits(rangeBox.getPlotID());
+        String pid = rangeBox.getPlotID();
+
+        traitBox.setNewTraits(pid);
 
         Log.d(TAG, "Move to result core: " + j);
 
@@ -743,6 +832,8 @@ public class CollectActivity extends ThemedActivity
         mUsbCameraHelper.destroy();
 
         traitLayoutRefresh();
+
+        gnssThreadHelper.stop();
 
         super.onDestroy();
     }
@@ -929,7 +1020,6 @@ public class CollectActivity extends ThemedActivity
         //update the info bar in case a variable is used
         refreshInfoBarAdapter();
         refreshRepeatedValuesToolbarIndicator();
-
     }
 
     public void insertRep(String parent, String trait, String value, String rep) {
@@ -1571,15 +1661,15 @@ public class CollectActivity extends ThemedActivity
 
                     //play success or error sound if the plotId was not found
                     if (success) {
-                        playSound("hero_simple_celebration");
+                        soundHelper.playCelebrate();
                     } else {
                         boolean found = false;
                         FieldObject studyObj = null;
-                        ObservationUnitModel[] models = ObservationUnitDao.Companion.getAll();
+                        ObservationUnitModel[] models = database.getAllObservationUnits();
                         for (ObservationUnitModel m : models) {
                             if (m.getObservation_unit_db_id().equals(inputPlotId)) {
 
-                                FieldObject study = StudyDao.Companion.getFieldObject(m.getStudy_id());
+                                FieldObject study = database.getFieldObject(m.getStudy_id());
                                 if (study != null && study.getExp_name() != null) {
                                     studyObj = study;
                                     found = true;
@@ -1596,32 +1686,11 @@ public class CollectActivity extends ThemedActivity
                             String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
 
                             SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, 8000, null,
-                                (v) -> {
-
-                                    //updates obs. range view in database
-                                    database.switchField(studyId);
-
-                                    //refresh collect activity UI
-                                    rangeBox.reload();
-                                    rangeBox.refresh();
-
-                                    Log.d(TAG, "Snackbar navigate to field: " + fieldName + " (" + studyId + ")");
-
-                                    initWidgets(false);
-
-                                    //navigate to the plot
-                                    moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
-
-                                    //update selected item in field adapter using preference
-                                    ep.edit().putString(GeneralKeys.FIELD_FILE, fieldName).apply();
-                                    ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId).apply();
-
-                                    playSound("hero_simple_celebration");
-                                });
+                                (v) -> switchField(studyId, null));
 
                         } else {
 
-                            playSound("alert_error");
+                            soundHelper.playError();
 
                             Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
 
@@ -1951,10 +2020,10 @@ public class CollectActivity extends ThemedActivity
         return secureBluetooth;
     }
 
-    @NonNull
+    @Nullable
     @Override
-    public HandlerThread getAverageHandler() {
-        return geoNavHelper.getMAverageHandler();
+    public Handler getAverageHandler() {
+        return geoNavHelper.getAverageHandler();
     }
 
     @Override
@@ -1973,5 +2042,29 @@ public class CollectActivity extends ThemedActivity
 
         infoBarHelper.showInfoBarChoiceDialog(position);
 
+    }
+
+    @NonNull
+    @Override
+    public FieldSwitcher getFieldSwitcher() {
+        return fieldSwitcher;
+    }
+
+    @NonNull
+    @Override
+    public SoundHelperImpl getSoundHelper() {
+        return soundHelper;
+    }
+
+    @NonNull
+    @Override
+    public GeoNavHelper getGeoNavHelper() {
+        return geoNavHelper;
+    }
+
+    @NonNull
+    @Override
+    public GnssThreadHelper getGnssThreadHelper() {
+        return gnssThreadHelper;
     }
 }
