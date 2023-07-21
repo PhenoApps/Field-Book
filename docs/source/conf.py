@@ -3,11 +3,11 @@
 # -- Project information
 
 project = 'Field Book'
-copyright = '2022, PhenoApps'
+copyright = '2023, PhenoApps'
 author = 'Trevor Rife'
 
-release = '5.2'
-version = '5.2.0'
+release = '5.4'
+version = '5.4'
 
 # -- General configuration
 
