@@ -449,6 +449,7 @@
     <string name="brapi_obs_header_name">Downloading Observations for Study:</string>
     <string name="number_traits_label">Number of Traits:</string>
     <string name="number_observation_label">Number of Observations:</string>
+    <string name="no_observations_warning">No Observations Found For Study.  Please Tap Cancel.</string>
     <string name="device_offline_warning">设备离线：请连接网络再试</string>
     <string name="next">下一个</string>
     <string name="prev">前一个</string>
