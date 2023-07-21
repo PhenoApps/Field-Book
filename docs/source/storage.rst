@@ -31,6 +31,10 @@ Fieldbook will create the following subdirectories within the selected 'Storage 
 
 * ``archive``: contains backups when exported fields are overwritten
 
+* ``geonav``: stores files created when using the geonav feature
+
+* ``updates``: stores .apk files downloaded for app updates
+
 File transfer
 -------------
 

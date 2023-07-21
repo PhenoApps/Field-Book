@@ -92,14 +92,24 @@ To create a new field directly within Field Book press the |create| icon on the 
 Managing fields
 ---------------
 
-.. figure:: /_static/images/fields/fields_list_joined.png
-   :width: 80%
+To activate a field for data collection, select it from the list of fields.
+
+Each row in the fields list displays the Date imported, Date edited, Date exported, and Number of entries.
+
+.. figure:: /_static/images/fields/fields_sorting_example_joined.png
+   :width: 100%
    :align: center
-   :alt: Field management screens
+   :alt: Field management sorting example
 
-   Managing existing fields
+   Field management sorting steps
 
-To activate a field for data collection, select it from the list of fields. Each row in the fields list displays the Date imported, Date edited, Date exported, and Number of entries. Fields can be deleted or sorted by different identifiers using the sub menu in each row.
+Pressing the |menu| icon to the right of the trial info opens a list of options:
+
+   * **Sort** provides a dialog to update the plot ordering. Populate the sort menu by pressing the |plus| icon, and selecting from the list of imported columns. Once columns have been added, change their relative priority by using the |reorder| icon to drag and reorder them. Press the |sort| icon to toggle the sort between ascending and descending. Press the |delete| icon to remove a column. 
+
+   * **Sync** connects to the server specified in |brapi| :doc:`settings-brapi`, updating the trial with new data that has been added from other sources since the last sync or import. This option will not work for trials imported from a file.
+
+   * **Delete** removes the trial and all associated data. A confirmation message will be shown first, to confirm that deletion is not triggered accidentally.
 
 .. |geonav| image:: /_static/icons/settings/main/map-search.png
   :width: 20
@@ -113,5 +123,20 @@ To activate a field for data collection, select it from the list of fields. Each
 .. |brapi| image:: /_static/icons/settings/main/server-network.png
   :width: 20
 
+.. |plus| image:: /_static/icons/fields/plus.png
+  :width: 20
+
 .. |create| image:: /_static/icons/fields/table-large-plus.png
+  :width: 20
+
+.. |menu| image:: /_static/icons/traits/dots-vertical.png
+  :width: 20
+
+.. |reorder| image:: /_static/icons/traits/reorder-horizontal.png
+  :width: 20
+
+.. |sort| image:: /_static/icons/fields/sort-ascending.png
+  :width: 20
+
+.. |delete| image:: /_static/icons/settings/sounds/delete.png
   :width: 20

@@ -54,6 +54,7 @@ Contents
    settings-sounds
    settings-brapi
    settings-database
+   settings-beta
 
 .. toctree::
    :maxdepth: 2
@@ -68,4 +69,5 @@ Contents
    :maxdepth: 2
    :caption: About
 
+   about
    funding
