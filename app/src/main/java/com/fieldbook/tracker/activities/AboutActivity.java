@@ -1,12 +1,16 @@
 package com.fieldbook.tracker.activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import com.danielstone.materialaboutlibrary.ConvenienceBuilder;
@@ -19,14 +23,21 @@ import com.danielstone.materialaboutlibrary.model.MaterialAboutList;
 import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.provider.GenericFileProvider;
 import com.fieldbook.tracker.utilities.VersionChecker;
+import com.fieldbook.tracker.utilities.VersionCheckerListener;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
-public class AboutActivity extends MaterialAboutActivity {
+import java.io.File;
+import javax.annotation.Nullable;
+
+public class AboutActivity extends MaterialAboutActivity implements VersionCheckerListener {
     //todo move to fragments so aboutactivity can extend base activity
+
+    private static final int REQUEST_CODE_OPEN_DIRECTORY = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -202,6 +213,7 @@ public class AboutActivity extends MaterialAboutActivity {
     private void checkForUpdate() {
         String currentVersion = getCurrentAppVersion();
         VersionChecker versionChecker = new VersionChecker(AboutActivity.this, currentVersion, "PhenoApps", "Field-Book");
+        versionChecker.setListener(this); // Register the listener
         versionChecker.execute();
     }
 
@@ -222,6 +234,62 @@ public class AboutActivity extends MaterialAboutActivity {
         return getString(R.string.mal_title_about);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_OPEN_DIRECTORY && resultCode == RESULT_OK && data != null) {
+            Uri treeUri = data.getData();
+            // Handle the selected directory URI (treeUri) here
+        }
+    }
+
+    @Override
+    public void onApkDownloaded(File apkFile) {
+        Log.d("onApkDownload", "callback triggered, handling apk in AboutActivity");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogStyle);
+        builder.setTitle("Download Completed");
+        builder.setMessage("The update file has been successfully downloaded to the updates directory.\n\nOpen the directory and double-click the APK file to install it.");
+
+        builder.setPositiveButton("Open Directory", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Open the directory where the APK was saved
+                openDownloadDirectory(apkFile);
+                dialog.dismiss();
+            }
+        });
+
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.show();
+    }
+
+    private void openDownloadDirectory(File apkFile) {
+        Context context = this;
+        if (context != null) {
+            File parentDirectory = apkFile.getParentFile();
+            if (parentDirectory != null) {
+                Uri contentUri = GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", parentDirectory);
+                Log.d("URI_DEBUG", "URI: " + contentUri.toString());
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setDataAndType(contentUri, "*/*");
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                if (intent.resolveActivity(context.getPackageManager()) != null) {
+                    context.startActivity(intent);
+                }
+            } else {
+                Log.e("URI_DEBUG", "Parent directory is null");
+            }
+        }
+    }
 
     private MaterialAboutItemOnClickAction openAppOrStore(String packageName, Context c) {
         PackageManager packageManager = getBaseContext().getPackageManager();
