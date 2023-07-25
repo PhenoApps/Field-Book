@@ -1,22 +1,15 @@
 <changelog>
 
     <release
-        date="2023-06-01"
+        date="2023-08-01"
         versionCode="550"
         versionName="v5.5">
-        <new>New InfoBar prefix selector</new>
         <new>New GoPro Trait (Hero 11)</new>
-        <info>Improved trait reordering</info>
-        <info>Improved external barcode scanning</info>
-        <bugfix>Fixed issue with trait cloud imports</bugfix>
-        <bugfix>Fixed issue with lock state not saving</bugfix>
-        <bugfix>Fixed issue with exporting data via BrAPI</bugfix>
-        <bugfix>Fixed issue with NA in categorical traits</bugfix>
-        <bugfix>Fixed issue with field sorting</bugfix>
+        <new>New InfoBar prefix selector</new>
     </release>
 
     <release
-        date="2022-12-01"
+        date="2023-6-01"
         versionCode="540"
         versionName="v5.4">
         <new>Experimental settings section</new>
@@ -26,6 +19,13 @@
         <new>Improved field sorting workflow</new>
         <new>Import brapi studies at multiple observation levels</new>
         <info>Optimized trait import workflow</info>
+        <info>Improved trait reordering</info>
+        <info>Improved external barcode scanning</info>
+        <bugfix>Fixed issue with trait cloud imports</bugfix>
+        <bugfix>Fixed issue with lock state not saving</bugfix>
+        <bugfix>Fixed issue with exporting data via BrAPI</bugfix>
+        <bugfix>Fixed issue with NA in categorical traits</bugfix>
+        <bugfix>Fixed issue with field sorting</bugfix>
     </release>
 
     <release
