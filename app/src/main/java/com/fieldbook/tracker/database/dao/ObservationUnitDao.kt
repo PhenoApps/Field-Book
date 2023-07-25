@@ -1,11 +1,13 @@
 package com.fieldbook.tracker.database.dao
 
 import android.content.ContentValues
-import com.fieldbook.tracker.database.*
-import com.fieldbook.tracker.database.models.ObservationUnitModel
-import java.util.HashMap
-import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.Migrator.ObservationUnit
+import com.fieldbook.tracker.database.Migrator.Study
+import com.fieldbook.tracker.database.models.ObservationUnitModel
+import com.fieldbook.tracker.database.query
+import com.fieldbook.tracker.database.toFirst
+import com.fieldbook.tracker.database.toTable
+import com.fieldbook.tracker.database.withDatabase
 
 class ObservationUnitDao {
 
@@ -34,6 +36,19 @@ class ObservationUnitDao {
                 .toTypedArray())
 
         } ?: emptyArray()
+
+        fun getById(id: String): ObservationUnitModel? = withDatabase { db ->
+
+            val map = db.query(ObservationUnit.tableName,
+                where = "observation_unit_db_id = ?",
+                whereArgs = arrayOf(id)).toFirst()
+
+            if ("observation_unit_db_id" in map.keys) {
+                ObservationUnitModel(map)
+            } else {
+                null
+            }
+        }
 
         fun getAll(eid: Int): Array<ObservationUnitModel> = withDatabase { db ->
 

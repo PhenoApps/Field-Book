@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
@@ -225,6 +226,21 @@ public class DataHelper {
         open();
 
         return ObservationUnitDao.Companion.getAll();
+    }
+
+    public ObservationUnitModel[] getAllObservationUnits(int studyId) {
+
+        open();
+
+        return ObservationUnitDao.Companion.getAll(studyId);
+    }
+
+    @Nullable
+    public ObservationUnitModel getObservationUnitById(String id) {
+
+        open();
+
+        return ObservationUnitDao.Companion.getById(id);
     }
 
     /**
@@ -1488,8 +1504,9 @@ public class DataHelper {
                     SearchData sd = new SearchData();
 
                     sd.id = cursor.getInt(0);
-                    sd.range = cursor.getString(1);
-                    sd.plot = cursor.getString(2);
+                    sd.unique = cursor.getString(1);
+                    sd.range = cursor.getString(2);
+                    sd.plot = cursor.getString(3);
 
                     data[count] = sd;
 

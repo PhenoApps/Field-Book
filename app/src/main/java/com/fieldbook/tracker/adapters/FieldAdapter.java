@@ -21,8 +21,8 @@ import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
-import com.fieldbook.tracker.interfaces.FieldController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
+import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
@@ -40,11 +40,12 @@ public class FieldAdapter extends BaseAdapter {
     private final ArrayList<FieldObject> list;
     private final Context context;
     private SharedPreferences ep;
-
-    public FieldAdapter(Context context, ArrayList<FieldObject> list) {
+    private final FieldSwitcher fieldSwitcher;
+    public FieldAdapter(Context context, ArrayList<FieldObject> list, FieldSwitcher switcher) {
         this.context = context;
         mLayoutInflater = LayoutInflater.from(context);
         this.list = list;
+        this.fieldSwitcher = switcher;
     }
 
     public int getCount() {
@@ -151,10 +152,20 @@ public class FieldAdapter extends BaseAdapter {
 
         //Check both file name and observation level
         if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) != -1) {
-            holder.active.setChecked((ep.getString(GeneralKeys.FIELD_FILE, "")
-                    .contentEquals(holder.fieldName.getText())) &&
-                    (ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "")
-                    .contentEquals(holder.observationLevel.getText())));
+            FieldObject field = getItem(position);
+
+            if (field.getExp_source() == null) {
+                holder.active.setChecked((ep.getString(GeneralKeys.FIELD_FILE, "")
+                        .contentEquals(holder.fieldName.getText())) &&
+                        (ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "")
+                                .contentEquals(holder.observationLevel.getText())));
+            } else if (field.getExp_alias() != null) {
+                String alias = ep.getString(GeneralKeys.FIELD_ALIAS, "");
+                String level = ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "");
+                holder.active.setChecked(alias.contentEquals(field.getExp_alias())
+                        && level.contentEquals(holder.observationLevel.getText()));
+            }
+
         } else holder.active.setChecked(false);
 
         holder.menuPopup.setOnClickListener(makeMenuPopListener(position));
@@ -248,11 +259,7 @@ public class FieldAdapter extends BaseAdapter {
 
         setEditorItem(ep, selectedField);
 
-        SharedPreferences.Editor ed = ep.edit();
-        ed.putInt(GeneralKeys.SELECTED_FIELD_ID, selectedField.getExp_id());
-        ed.apply();
-
-        ((FieldController) context).getDatabase().switchField(selectedField.getExp_id());
+        fieldSwitcher.switchField(selectedField);
 
         CollectActivity.reloadData = true;
         notifyDataSetChanged();

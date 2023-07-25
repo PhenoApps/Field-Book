@@ -16,8 +16,10 @@ import com.danielstone.materialaboutlibrary.items.MaterialAboutItemOnClickAction
 import com.danielstone.materialaboutlibrary.items.MaterialAboutTitleItem;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutCard;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutList;
+import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.VersionChecker;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
@@ -46,6 +48,17 @@ public class AboutActivity extends MaterialAboutActivity {
                 getResources().getDrawable(R.drawable.ic_about_info),
                 getString(R.string.about_version_title),
                 false));
+
+        appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
+                .text(getString(R.string.updates_title))
+                .icon(R.drawable.ic_about_get_update)
+                .setOnClickAction(new MaterialAboutItemOnClickAction() {
+                    @Override
+                    public void onClick() {
+                        checkForUpdate();
+                    }
+                })
+                .build());
 
         appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(getString(R.string.changelog_title))
@@ -180,6 +193,16 @@ public class AboutActivity extends MaterialAboutActivity {
                 .build());
 
         return new MaterialAboutList(appCardBuilder.build(), authorCardBuilder.build(), contributorsCardBuilder.build(), otherAppsCardBuilder.build(), technicalCardBuilder.build());
+    }
+
+    private String getCurrentAppVersion() {
+        return BuildConfig.VERSION_NAME;
+    }
+
+    private void checkForUpdate() {
+        String currentVersion = getCurrentAppVersion();
+        VersionChecker versionChecker = new VersionChecker(AboutActivity.this, currentVersion, "PhenoApps", "Field-Book");
+        versionChecker.execute();
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {

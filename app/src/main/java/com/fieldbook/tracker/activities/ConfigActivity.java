@@ -45,20 +45,26 @@ import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.StudyDao;
+import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
+import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
@@ -84,32 +90,37 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * The main page of FieldBook.
- *
+ * <p>
  * This contains a list of features that the app provides containing:
- *      Fields -> the FieldEditorActivity, allows the user to import, delete and select a field
- *      Traits -> the TraitEditorActivity, allows the user to edit, import, delete and select visible traits
- *      Collect -> the main phenotyping component allowing user to navigate across plots and make
- *                  observations using the visible traits
- *      Export -> creates a dialog that lets the user export data
- *      Settings -> the app preferences activity
- *      About -> a third party library that handles showing dependencies and other app data
- *
+ * Fields -> the FieldEditorActivity, allows the user to import, delete and select a field
+ * Traits -> the TraitEditorActivity, allows the user to edit, import, delete and select visible traits
+ * Collect -> the main phenotyping component allowing user to navigate across plots and make
+ * observations using the visible traits
+ * Export -> creates a dialog that lets the user export data
+ * Settings -> the app preferences activity
+ * About -> a third party library that handles showing dependencies and other app data
+ * <p>
  * Also this activity has a static member variable for the DataHelper (database) class that many other classes use
  * to make queries.
  */
 @AndroidEntryPoint
 public class ConfigActivity extends ThemedActivity {
 
-    @Inject
-    public DataHelper database;
-
+    private static final int REQUEST_BARCODE = 100;
     private final static String TAG = ConfigActivity.class.getSimpleName();
     private final int PERMISSIONS_REQUEST_EXPORT_DATA = 9990;
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
     private final int PERMISSIONS_REQUEST_MAKE_DIRS = 9930;
     private final int REQUEST_STORAGE_DEFINER = 104;
+    private final Runnable exportData = () -> new ExportDataTask().execute(0);
+    @Inject
+    public DataHelper database;
+    @Inject
+    public SoundHelperImpl soundHelper;
+    public FieldSwitchImpl fieldSwitcher = null;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
+    ListView settingsList;
     private SharedPreferences ep;
     private AlertDialog saveDialog;
     private EditText exportFile;
@@ -126,9 +137,8 @@ public class ConfigActivity extends ThemedActivity {
     private ArrayList<String> newRange;
     private ArrayList<String> exportTrait;
     private Menu systemMenu;
-    ListView settingsList;
-
-    private final Runnable exportData = () -> new ExportDataTask().execute(0);
+    //barcode search fab
+    private FloatingActionButton barcodeSearchFab;
 
     private void invokeDatabaseImport(DocumentFile doc) {
 
@@ -207,8 +217,8 @@ public class ConfigActivity extends ThemedActivity {
             entries.add("summary");
             entries.add("lockData");
 
-            ed.putStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE,entries);
-            ed.putBoolean(GeneralKeys.FIRST_RUN,false);
+            ed.putStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, entries);
+            ed.putBoolean(GeneralKeys.FIRST_RUN, false);
             ed.apply();
         }
 
@@ -250,7 +260,7 @@ public class ConfigActivity extends ThemedActivity {
         settingsList = findViewById(R.id.myList);
 
         String[] configList = new String[]{getString(R.string.settings_fields),
-                getString(R.string.settings_traits), getString(R.string.settings_collect),  getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)};
+                getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)};
 
         Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
 
@@ -321,11 +331,25 @@ public class ConfigActivity extends ThemedActivity {
             showTipsDialog();
             loadSampleDataDialog();
         }
+
+        barcodeSearchFab = findViewById(R.id.act_config_search_fab);
+        barcodeSearchFab.setOnClickListener(v -> {
+            new IntentIntegrator(this)
+                    .setPrompt(getString(R.string.main_barcode_text))
+                    .setBeepEnabled(false)
+                    .setRequestCode(REQUEST_BARCODE)
+                    .initiateScan();
+        });
+
+        //this must happen after migrations and can't be injected in config
+        fieldSwitcher = new FieldSwitchImpl(this);
+
     }
 
     /**
      * Checks if there are any visible traits in trait editor.
      * Also checks if a field is selected.
+     *
      * @return -1 when the conditions fail, otherwise it returns 1
      */
     private int checkTraitsExist() {
@@ -334,10 +358,10 @@ public class ConfigActivity extends ThemedActivity {
 
         if (!ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
                 || ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
-            Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
+            Utils.makeToast(getApplicationContext(), getString(R.string.warning_field_missing));
             return -1;
         } else if (traits.length == 0) {
-            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing));
+            Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing));
             return -1;
         }
 
@@ -594,10 +618,10 @@ public class ConfigActivity extends ThemedActivity {
         checkOverwrite.setChecked(ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false));
         checkDB.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABSE, false));
         checkExcel.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, false));
-        onlyUnique.setChecked(ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE,false));
-        allColumns.setChecked(ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_ALL,false));
-        allTraits.setChecked(ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ALL,false));
-        activeTraits.setChecked(ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE,false));
+        onlyUnique.setChecked(ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, false));
+        allColumns.setChecked(ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, false));
+        allTraits.setChecked(ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ALL, false));
+        activeTraits.setChecked(ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, false));
 
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
@@ -633,17 +657,17 @@ public class ConfigActivity extends ThemedActivity {
         Button positiveButton = saveDialog.getButton(AlertDialog.BUTTON_POSITIVE);
         positiveButton.setOnClickListener(arg0 -> {
             if (!checkDB.isChecked() & !checkExcel.isChecked()) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_format));
+                Utils.makeToast(getApplicationContext(), getString(R.string.export_error_missing_format));
                 return;
             }
 
             if (!onlyUnique.isChecked() & !allColumns.isChecked()) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_column));
+                Utils.makeToast(getApplicationContext(), getString(R.string.export_error_missing_column));
                 return;
             }
 
             if (!activeTraits.isChecked() & !allTraits.isChecked()) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_trait));
+                Utils.makeToast(getApplicationContext(), getString(R.string.export_error_missing_trait));
                 return;
             }
 
@@ -697,11 +721,132 @@ public class ConfigActivity extends ThemedActivity {
         });
     }
 
+    private void resolveFuzzySearchResult(FieldObject f, @Nullable String plotId) {
+
+        soundHelper.playCelebrate();
+
+        int studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        int newStudyId = f.getExp_id();
+
+        if (studyId != newStudyId) {
+
+            switchField(newStudyId);
+
+        }
+
+        Intent intent = new Intent(this, CollectActivity.class);
+        CollectActivity.reloadData = true;
+
+        if (plotId != null) {
+
+            ep.edit().putString(GeneralKeys.LAST_PLOT, plotId).apply();
+
+        }
+
+        startActivity(intent);
+
+    }
+    @Nullable
+    private FieldObject searchStudiesForBarcode(String barcode) {
+
+        // first, search to try and match study alias (brapi stores study_db_id here)
+        ArrayList<FieldObject> fields = database.getAllFieldObjects();
+
+        // start by searching for alias
+        for (FieldObject f : fields) {
+
+            if (f != null && f.getExp_alias() != null && f.getExp_alias().equals(barcode)) {
+
+                return f;
+
+            }
+        }
+
+        // second, if field is not found search for study name
+        for (FieldObject f : fields) {
+
+            if (f != null && f.getExp_name() != null && f.getExp_name().equals(barcode)) {
+
+                return f;
+
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    private ObservationUnitModel searchPlotsForBarcode(String barcode) {
+
+        // search for barcode in database
+        ObservationUnitModel[] models = database.getAllObservationUnits();
+        for (ObservationUnitModel m : models) {
+            if (m.getObservation_unit_db_id().equals(barcode)) {
+
+                return m;
+            }
+        }
+
+        return null;
+    }
+
+    //1) study alias, 2) study names, 3) plotdbids
+    private void fuzzyBarcodeSearch(String barcode) {
+
+        // search for studies
+        FieldObject f = searchStudiesForBarcode(barcode);
+
+        if (f == null) {
+
+            // search for plots
+            ObservationUnitModel m = searchPlotsForBarcode(barcode);
+
+            if (m != null && m.getStudy_id() != -1) {
+
+                FieldObject study = database.getFieldObject(m.getStudy_id());
+
+                resolveFuzzySearchResult(study, barcode);
+
+            } else {
+
+                soundHelper.playError();
+
+                Utils.makeToast(this, getString(R.string.act_config_fuzzy_search_failed, barcode));
+            }
+
+        } else {
+
+            resolveFuzzySearchResult(f, null);
+
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_STORAGE_DEFINER) {
             if (resultCode != Activity.RESULT_OK) finish();
+        } else if (requestCode == REQUEST_BARCODE) {
+            if (resultCode == RESULT_OK) {
+
+                // get barcode from scan result
+                IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                String scannedBarcode = plotDataResult.getContents();
+
+                try {
+
+                    fuzzyBarcodeSearch(scannedBarcode);
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+
+                    Utils.makeToast(this, getString(R.string.act_config_fuzzy_search_error, scannedBarcode));
+
+                    soundHelper.playError();
+                }
+            }
         }
     }
 
@@ -824,6 +969,42 @@ public class ConfigActivity extends ThemedActivity {
         Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
 
         new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
+    }
+
+    /**
+     * Queries the database for saved studies and calls switch field for the first one.
+     */
+    public void selectFirstField() {
+
+        try {
+
+            FieldObject[] fs = StudyDao.Companion.getAllFieldObjects().toArray(new FieldObject[0]);
+
+            if (fs.length > 0) {
+
+                switchField(fs[0].getExp_id());
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+    }
+
+    /**
+     * Calls database switch field on the given studyId.
+     *
+     * @param studyId the study id to switch to
+     */
+    private void switchField(int studyId) {
+
+        if (fieldSwitcher == null) {
+            fieldSwitcher = new FieldSwitchImpl(this);
+        }
+
+        fieldSwitcher.switchField(studyId);
+
     }
 
     private class ExportDataTask extends AsyncTask<Integer, Integer, Integer> {
@@ -1054,7 +1235,7 @@ public class ConfigActivity extends ThemedActivity {
 
             try {
 
-                ZipUtil.Companion.zip(ctx, paths.toArray(new DocumentFile[] {}), outputStream);
+                ZipUtil.Companion.zip(ctx, paths.toArray(new DocumentFile[]{}), outputStream);
 
                 outputStream.close();
 
@@ -1078,11 +1259,11 @@ public class ConfigActivity extends ThemedActivity {
             }
 
             if (fail) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_general));
+                Utils.makeToast(getApplicationContext(), getString(R.string.export_error_general));
             }
 
             if (noData) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_data_missing));
+                Utils.makeToast(getApplicationContext(), getString(R.string.export_error_data_missing));
             }
         }
     }
@@ -1129,7 +1310,7 @@ public class ConfigActivity extends ThemedActivity {
                 dialog.dismiss();
 
             if (fail) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_general));
+                Utils.makeToast(getApplicationContext(), getString(R.string.import_error_general));
             }
 
             SharedPreferences prefs = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
@@ -1148,51 +1329,6 @@ public class ConfigActivity extends ThemedActivity {
             }
 
             CollectActivity.reloadData = true;
-        }
-    }
-
-    /**
-     * Queries the database for saved studies and calls switch field for the first one.
-     */
-    public void selectFirstField() {
-
-        try {
-
-            FieldObject[] fs = StudyDao.Companion.getAllFieldObjects().toArray(new FieldObject[0]);
-
-            if (fs.length > 0) {
-
-                switchField(fs[0].getExp_id());
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
-    }
-
-    /**
-     * Calls database switch field on the given studyId.
-     * @param studyId the study id to switch to
-     */
-    private void switchField(int studyId) {
-
-        FieldObject f = StudyDao.Companion.getFieldObject(studyId);
-
-        if (f != null) {
-
-            database.switchField(studyId);
-
-            //clear field selection after updates
-            ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId)
-                .putString(GeneralKeys.FIELD_FILE, f.getExp_name())
-                .putString(GeneralKeys.FIELD_OBS_LEVEL, f.getObservation_level())
-                .putString(GeneralKeys.UNIQUE_NAME, f.getUnique_id())
-                .putString(GeneralKeys.PRIMARY_NAME, f.getPrimary_id())
-                .putString(GeneralKeys.SECONDARY_NAME, f.getSecondary_id())
-                .putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true)
-                .putString(GeneralKeys.LAST_PLOT, null).apply();
         }
     }
 }

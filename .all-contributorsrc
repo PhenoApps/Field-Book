@@ -282,6 +282,83 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "joegage",
+      "name": "Joe Gage",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10454330?v=4",
+      "profile": "https://github.com/joegage",
+      "contributions": [
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "mobreza",
+      "name": "mobreza",
+      "avatar_url": "https://avatars.githubusercontent.com/u/712974?v=4",
+      "profile": "https://github.com/mobreza",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "jmh579",
+      "name": "Jenna Hershberger",
+      "avatar_url": "https://avatars.githubusercontent.com/u/33294076?v=4",
+      "profile": "http://jmh579.github.io",
+      "contributions": [
+        "bug",
+        "ideas",
+        "eventOrganizing"
+      ]
+    },
+    {
+      "login": "jessepoland",
+      "name": "jessepoland",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8932524?v=4",
+      "profile": "https://github.com/jessepoland",
+      "contributions": [
+        "bug",
+        "design",
+        "financial",
+        "fundingFinding",
+        "ideas",
+        "userTesting"
+      ]
+    },
+    {
+      "login": "hkmanching",
+      "name": "Heather Manching",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8751385?v=4",
+      "profile": "https://github.com/hkmanching",
+      "contributions": [
+        "userTesting",
+        "bug",
+        "ideas"
+      ]
+    },
+    {
+      "login": "ahulsekemp",
+      "name": "Amanda Hulse-Kemp",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28273398?v=4",
+      "profile": "https://github.com/ahulsekemp",
+      "contributions": [
+        "userTesting",
+        "bug",
+        "ideas"
+      ]
+    },
+    {
+      "login": "keocorak",
+      "name": "Keo Corak",
+      "avatar_url": "https://avatars.githubusercontent.com/u/27022199?v=4",
+      "profile": "https://github.com/keocorak",
+      "contributions": [
+        "bug",
+        "userTesting",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -290,5 +367,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": true,
-  "commitConvention": "angular"
+  "commitConvention": "angular",
+  "commitType": "docs"
 }

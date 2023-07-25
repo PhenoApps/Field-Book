@@ -1,15 +1,22 @@
-# Field Book <a href="https://play.google.com/store/apps/details?id=com.fieldbook.tracker"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="50"></a>
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-30-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+# Field Book
 
-Field Book is a simple app for taking phenotypic notes. Collecting data in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity.
+[![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.fieldbook.tracker%26l%3DDownloads%26m%3D%24totalinstalls)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)
+[![Rating](https://img.shields.io/endpoint?color=green&logo=google-play&logoColor=green&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.fieldbook.tracker%26l%3DRating%26m%3D%25E2%25AD%2590%2520%24rating)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)
+[![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+![Build Status](https://img.shields.io/github/actions/workflow/status/PhenoApps/Field-Book/github-release.yml)
+[![Latest](https://img.shields.io/github/v/release/phenoapps/field-book)](https://github.com/PhenoApps/Field-Book/releases/latest)
+[![Crowdin](https://badges.crowdin.net/field-book/localized.svg)](https://crowdin.com/project/field-book)
+[![All Contributors](https://img.shields.io/badge/all_contributors-30-orange.svg)](#contributors-)
 
-Field Book uses custom layouts for different types of data to that allow rapid data collection. Traits being collected are defined by the user and can be exported and transferred between devices. Sample files are provided with the installation.
 
-Development of Field Book has been supported by the [Collaborative Crop Research Program][1] of The McKnight Foundation and the National Science Foundation under Grant No. (1543958).
+Field Book is a simple app for taking phenotypic notes. Collecting data in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity. Field Book uses custom layouts for different types of data to that allow rapid data collection. Traits being collected are defined by the user and can be exported and transferred between devices. Sample files are provided with the installation.
 
-## [Translate](https://osij6hx.oneskyapp.com/collaboration/project?id=28259)
+## Funding
+Development of Field Book has been supported by the McKnight Foundation [Collaborative Crop Research Program](http://ccrp.org/), the National Science Foundation [No. 1543958](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1543958), USAID [No. 7200AA‐19LE‐00005](https://ilci.cornell.edu/), USDA NIFA SCRI No. 2022-51181-38449, and USDA NIFA AG2PI [No. 2022-70412-38454](https://www.ag2pi.org/).
+
+## [Docs](https://docs.fieldbook.phenoapps.org/en/latest/field-book.html)
+
+## [Translate](https://crowdin.com/project/field-book)
 
 ## Contributors
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
@@ -56,6 +63,15 @@ Development of Field Book has been supported by the [Collaborative Crop Research
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/HMS17"><img src="https://avatars.githubusercontent.com/u/84345306?v=4?s=100" width="100px;" alt="HMS17"/><br /><sub><b>HMS17</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=HMS17" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/zrm22"><img src="https://avatars.githubusercontent.com/u/54960003?v=4?s=100" width="100px;" alt="zrm22"/><br /><sub><b>zrm22</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=zrm22" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/joegage"><img src="https://avatars.githubusercontent.com/u/10454330?v=4?s=100" width="100px;" alt="Joe Gage"/><br /><sub><b>Joe Gage</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Ajoegage" title="Bug reports">🐛</a> <a href="https://github.com/PhenoApps/Field-Book/commits?author=joegage" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mobreza"><img src="https://avatars.githubusercontent.com/u/712974?v=4?s=100" width="100px;" alt="mobreza"/><br /><sub><b>mobreza</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=mobreza" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://jmh579.github.io"><img src="https://avatars.githubusercontent.com/u/33294076?v=4?s=100" width="100px;" alt="Jenna Hershberger"/><br /><sub><b>Jenna Hershberger</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Ajmh579" title="Bug reports">🐛</a> <a href="#ideas-jmh579" title="Ideas, Planning, & Feedback">🤔</a> <a href="#eventOrganizing-jmh579" title="Event Organizing">📋</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jessepoland"><img src="https://avatars.githubusercontent.com/u/8932524?v=4?s=100" width="100px;" alt="jessepoland"/><br /><sub><b>jessepoland</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Ajessepoland" title="Bug reports">🐛</a> <a href="#design-jessepoland" title="Design">🎨</a> <a href="#financial-jessepoland" title="Financial">💵</a> <a href="#fundingFinding-jessepoland" title="Funding Finding">🔍</a> <a href="#ideas-jessepoland" title="Ideas, Planning, & Feedback">🤔</a> <a href="#userTesting-jessepoland" title="User Testing">📓</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hkmanching"><img src="https://avatars.githubusercontent.com/u/8751385?v=4?s=100" width="100px;" alt="Heather Manching"/><br /><sub><b>Heather Manching</b></sub></a><br /><a href="#userTesting-hkmanching" title="User Testing">📓</a> <a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Ahkmanching" title="Bug reports">🐛</a> <a href="#ideas-hkmanching" title="Ideas, Planning, & Feedback">🤔</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ahulsekemp"><img src="https://avatars.githubusercontent.com/u/28273398?v=4?s=100" width="100px;" alt="Amanda Hulse-Kemp"/><br /><sub><b>Amanda Hulse-Kemp</b></sub></a><br /><a href="#userTesting-ahulsekemp" title="User Testing">📓</a> <a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Aahulsekemp" title="Bug reports">🐛</a> <a href="#ideas-ahulsekemp" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/keocorak"><img src="https://avatars.githubusercontent.com/u/27022199?v=4?s=100" width="100px;" alt="Keo Corak"/><br /><sub><b>Keo Corak</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Akeocorak" title="Bug reports">🐛</a> <a href="#userTesting-keocorak" title="User Testing">📓</a> <a href="#ideas-keocorak" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
   </tbody>
 </table>
@@ -64,25 +80,3 @@ Development of Field Book has been supported by the [Collaborative Crop Research
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
-
-## Develop
-To submit code to Field Book:
-
-1. Merge the develop branch with your feature branch and resolve any conflicts.
-2. Create a pull request targeting the develop branch.
-3. Select 1-2 people to review your code.
-
-
-## License
-    Licensed under the GNU General Public License version 2 (GPLv2)
-    You may obtain a copy of the License at
-
-       http://www.gnu.org/licenses/gpl-2.0.html
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
-[1]: http://ccrp.org/

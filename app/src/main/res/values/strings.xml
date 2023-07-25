@@ -207,6 +207,7 @@
     <string name="preferences_brapi_version_v1">V1</string>
     <string name="preferences_brapi_version_v2">V2</string>
     <string name="preferences_brapi_oidc_flow">OIDC Flow</string>
+    <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
     <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
     <string name="preferences_brapi_oidc_flow_old_custom">Original Field Book Custom</string>
 
@@ -348,6 +349,7 @@
     <string name="about_help_translate_title">Help translate</string>
     <string name="changelog_title">Changelog</string>
     <string name="libraries_title">Libraries</string>
+    <string name="updates_title">Check for Updates</string>
 
     <!-- Profile dialog -->
     <string name="profile_person">Person</string>
@@ -506,6 +508,7 @@
     <string name="brapi_obs_header_name">Downloading Observations for Study:</string>
     <string name="number_traits_label">Number of Traits:</string>
     <string name="number_observation_label">Number of Observations:</string>
+    <string name="no_observations_warning">No Observations Found For Study.  Please Tap Cancel.</string>
     <string name="device_offline_warning">Device Offline: Please connect to a network and try again</string>
     <string name="next">Next</string>
     <string name="prev">Prev</string>
@@ -789,6 +792,10 @@
     <string name="preferences_sound_delete_obs_title">Delete Observation Sound</string>
     <string name="preferences_sound_delete_obs_description">Notification sound when observation is deleted in Collect activity.</string>
     <string name="file_already_exists">File already exists.</string>
+    <string name="dialog_att_chooser_attributes">Attributes</string>
+    <string name="dialog_att_chooser_traits">Traits</string>
+    <string name="dialog_att_chooser_other">Other</string>
+    <string name="dialog_collect_att_chooser_title">Choose an attribute</string>
     <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
     <string name="go_pro_frag_connect_btn_content_description">Connect to a GoPro camera.\n</string>
     <string name="trait_go_pro_capture_content_description">Capture a picture from a connected GoPro device.\n</string>
@@ -801,4 +808,13 @@
     <string name="trait_go_pro_await_ap_neutral">Manual Connect</string>
     <string name="trait_go_pro_camera_delete_photo_title">Delete Photo</string>
     <string name="go_pro_layout_black_11_not_detected">This trait was made for a GoPro Black 11, please contact developers to implement your GoPro model.\n</string>
+    <string name="util_version_checker_progress_message">Downloading install file…</string>
+    <string name="util_version_checker_update_check">Update Check</string>
+    <string name="util_version_checker_update_text">Update</string>
+    <string name="util_version_checker_update_check_message">New version available: %s</string>
+    <string name="util_version_checker_up_to_date">Field Book is up to date.</string>
+    <string name="act_config_search_fab_content_description">Search all plots and fields to load/navigate to the barcoded item.</string>
+    <string name="act_collect_plot_with_code_not_found">Barcode not found.\n</string>
+    <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
+    <string name="act_config_fuzzy_search_error">Something went wrong when searching for %s</string>
 </resources>

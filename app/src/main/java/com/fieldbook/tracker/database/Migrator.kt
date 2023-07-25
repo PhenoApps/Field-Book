@@ -42,9 +42,9 @@ class Migrator {
                 obs.value AS value, 
                 s.${Study.PK} AS study_db_id,
                 vars.trait_data_source
-            FROM ${Observation.tableName} AS obs, ${Study.tableName} AS s
+            FROM ${Observation.tableName} AS obs
             JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK}
-            JOIN ${Study.tableName} ON obs.${Study.FK} = ${Study.tableName}.${Study.PK}
+            JOIN ${Study.tableName} AS s ON obs.${Study.FK} = s.${Study.PK}
             WHERE vars.observation_variable_field_book_format <> 'photo'
         """
 

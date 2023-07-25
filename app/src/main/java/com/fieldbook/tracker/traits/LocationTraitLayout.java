@@ -66,6 +66,8 @@ public class LocationTraitLayout extends BaseTraitLayout {
             updateObservation(getCurrentTrait().getTrait(), "location", fullLocation);
             triggerTts(locationSavedTts);
         });
+
+        getLocation.requestFocus();
     }
 
     @Override

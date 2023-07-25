@@ -82,7 +82,7 @@
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/selectorList"
+        android:id="@+id/act_collect_infobar_rv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
@@ -97,7 +97,7 @@
         android:layout_marginTop="4dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/selectorList"
+        app:layout_constraintTop_toBottomOf="@id/act_collect_infobar_rv"
         app:layout_constraintBottom_toTopOf="@id/act_collect_range_box"/>
 
     <com.fieldbook.tracker.views.RangeBoxView

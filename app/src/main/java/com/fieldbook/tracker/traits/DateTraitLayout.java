@@ -197,6 +197,8 @@ public class DateTraitLayout extends BaseTraitLayout {
 
             isBlocked = false;
         });
+
+        saveDayBtn.requestFocus();
     }
 
     private String getTtsFromCalendar(Calendar calendar) {
