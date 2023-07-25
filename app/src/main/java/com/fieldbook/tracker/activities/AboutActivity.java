@@ -25,15 +25,23 @@ import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
+import javax.annotation.Nullable;
+
 public class AboutActivity extends MaterialAboutActivity {
     //todo move to fragments so aboutactivity can extend base activity
+
+    // Declaration of the "Updates" action item
+    private MaterialAboutActionItem updateCheckItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ThemedActivity.Companion.applyTheme(this);
         super.onCreate(savedInstanceState);
+        // Automatically check for updates when the activity starts
+        checkForUpdate();
     }
 
+    private MaterialAboutActionItem.Builder updatesButtonBuilder;
     @Override
     @NonNull
     public MaterialAboutList getMaterialAboutList(@NonNull Context c) {
@@ -49,16 +57,14 @@ public class AboutActivity extends MaterialAboutActivity {
                 getString(R.string.about_version_title),
                 false));
 
-        appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
+        // Save a reference to the "Updates" action item
+        updateCheckItem = new MaterialAboutActionItem.Builder()
                 .text(getString(R.string.updates_title))
                 .icon(R.drawable.ic_about_get_update)
-                .setOnClickAction(new MaterialAboutItemOnClickAction() {
-                    @Override
-                    public void onClick() {
-                        checkForUpdate();
-                    }
-                })
-                .build());
+                .setOnClickAction(null) // Set initially to null, will be updated later
+                .build();
+
+        appCardBuilder.addItem(updateCheckItem);
 
         appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(getString(R.string.changelog_title))
@@ -201,8 +207,45 @@ public class AboutActivity extends MaterialAboutActivity {
 
     private void checkForUpdate() {
         String currentVersion = getCurrentAppVersion();
-        VersionChecker versionChecker = new VersionChecker(AboutActivity.this, currentVersion, "PhenoApps", "Field-Book");
+        VersionChecker versionChecker = new VersionChecker(AboutActivity.this, currentVersion, "PhenoApps", "Field-Book") {
+            protected void onVersionCheckCompleted(boolean isNewVersionAvailable, @Nullable String latestVersion, @Nullable String downloadUrl) {
+                showVersionStatus(isNewVersionAvailable, latestVersion, downloadUrl);
+            }
+        };
         versionChecker.execute();
+    }
+
+    private void showVersionStatus(boolean isNewVersionAvailable, @Nullable String latestVersion, @Nullable String downloadUrl) {
+        if (updateCheckItem == null) {
+            // The "Updates" action item was not added to the card, something went wrong
+            return;
+        }
+
+        if (isNewVersionAvailable) {
+            // Update the action item text and subtext to indicate that an update is available
+            updateCheckItem.setText("Update Available");
+            updateCheckItem.setSubText(latestVersion);
+
+            // Set the onClickAction to open the browser with the release URL
+            updateCheckItem.setOnClickAction(new MaterialAboutItemOnClickAction() {
+                @Override
+                public void onClick() {
+                    if (downloadUrl != null) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl));
+                        startActivity(browserIntent);
+                    }
+                }
+            });
+        } else {
+            // Update the action item text and subtext to indicate that the app is up to date
+            updateCheckItem.setText("Running the latest version");
+
+            // Set the onClickAction to null (no action needed when the app is up to date)
+            updateCheckItem.setOnClickAction(null);
+        }
+
+        // Refresh the MaterialAboutList to update the UI
+        refreshMaterialAboutList();
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {
