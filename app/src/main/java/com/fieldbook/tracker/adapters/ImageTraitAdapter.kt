@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.ProgressBar
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +21,10 @@ import com.fieldbook.tracker.R
  * Reference:
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
-class ImageTraitAdapter(private val context: Context, private val listener: ImageItemHandler) :
+class ImageTraitAdapter(
+    private val context: Context,
+    private val listener: ImageItemHandler,
+    private val hasProgressBar: Boolean = false) :
         ListAdapter<ImageTraitAdapter.Model, ImageTraitAdapter.ViewHolder>(DiffCallback()) {
 
     data class Model(var uri: String, var index: Int)
@@ -35,6 +39,7 @@ class ImageTraitAdapter(private val context: Context, private val listener: Imag
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.list_item_image_iv)
+        val progressBar: ProgressBar = view.findViewById(R.id.list_item_image_pb)
         private val closeButton: ImageButton = view.findViewById(R.id.list_item_image_close_btn)
         init {
             // Define click listener for the ViewHolder's View.
@@ -44,6 +49,10 @@ class ImageTraitAdapter(private val context: Context, private val listener: Imag
 
             closeButton.setOnClickListener {
                 listener.onItemDeleted(view.tag as Model)
+            }
+
+            if (hasProgressBar) {
+                progressBar.visibility = View.VISIBLE
             }
         }
     }
@@ -63,7 +72,9 @@ class ImageTraitAdapter(private val context: Context, private val listener: Imag
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         with(currentList[position]) {
-            viewHolder.imageView.setImageBitmap(decodeBitmap(Uri.parse(this.uri)))
+            val bmp = decodeBitmap(Uri.parse(this.uri))
+            if (bmp != null) viewHolder.progressBar.visibility = View.GONE
+            viewHolder.imageView.setImageBitmap(bmp)
             viewHolder.itemView.tag = this
         }
     }

@@ -31,14 +31,18 @@ class TtsLanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnP
 
         try {
 
-            val id = preference.key
+            context?.let { ctx ->
 
-            with (PreferenceManager.getDefaultSharedPreferences(context)) {
+                val id = preference.key
 
-                edit().putString(GeneralKeys.TTS_LANGUAGE, id).apply()
-                edit().putString(GeneralKeys.TTS_LANGUAGE_SUMMARY, preference.title.toString()).apply()
+                with (PreferenceManager.getDefaultSharedPreferences(ctx)) {
 
+                    edit().putString(GeneralKeys.TTS_LANGUAGE, id).apply()
+                    edit().putString(GeneralKeys.TTS_LANGUAGE_SUMMARY, preference.title.toString()).apply()
+
+                }
             }
+
 
         } catch (e: Exception) {
 
