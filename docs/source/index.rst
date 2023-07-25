@@ -40,6 +40,7 @@ Contents
    trait-zebra
    trait-gnss
    trait-usb-camera
+   trait-gopro
 
 .. toctree::
    :maxdepth: 2
