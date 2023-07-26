@@ -21,10 +21,6 @@ private Integer makeVersionCode() {
 }
 
 private String makeVersionName() {
-    if (ext.buildNumber) {
-        return "${ext.majorVersion}.${ext.minorVersion}.${ext.patchVersion}.${ext.buildNumber}"
-    }
-
     return "${ext.majorVersion}.${ext.minorVersion}.${ext.patchVersion}"
 }
 
