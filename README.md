@@ -1,4 +1,4 @@
-# Field Book
+# <img width="25" src="https://github.com/PhenoApps/Field-Book/blob/main/docs/source/img/icon.png"> Field Book
 
 [![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.fieldbook.tracker%26l%3DDownloads%26m%3D%24totalinstalls)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)
 [![Rating](https://img.shields.io/endpoint?color=green&logo=google-play&logoColor=green&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.fieldbook.tracker%26l%3DRating%26m%3D%25E2%25AD%2590%2520%24rating)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)
@@ -8,17 +8,28 @@
 [![Crowdin](https://badges.crowdin.net/field-book/localized.svg)](https://crowdin.com/project/field-book)
 [![All Contributors](https://img.shields.io/badge/all_contributors-30-orange.svg)](#contributors-)
 
+Field Book is a simple app for collecting phenotypic notes. Data capture in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity. Field Book uses custom layouts for different types of data to facilitate rapid data collection. Traits being collected are defined by the user and can be exported and transferred between devices. Sample files are provided in the app. Field Book is compatible with [BrAPI](https://brapi.org/) which can be used to transfer data to compatible databases.
 
-Field Book is a simple app for taking phenotypic notes. Collecting data in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity. Field Book uses custom layouts for different types of data to that allow rapid data collection. Traits being collected are defined by the user and can be exported and transferred between devices. Sample files are provided with the installation.
+## 📖 Help
+Check the [user manual](https://docs.fieldbook.phenoapps.org/en/latest/field-book.html) and the [wiki](https://github.com/PhenoApps/Field-Book/wiki) for usage instructions. If you run into a problem while using Field Book, search [existing issues](https://github.com/PhenoApps/Field-Book/issues) and [discussions](https://github.com/PhenoApps/Field-Book/discussions) to see if it is currently being addressed. If you have a new feature idea or want to report a new bug, [create a new issue](https://github.com/PhenoApps/Field-Book/issues/new/choose).
 
-## Funding
-Development of Field Book has been supported by the McKnight Foundation [Collaborative Crop Research Program](http://ccrp.org/), the National Science Foundation [No. 1543958](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1543958), USAID [No. 7200AA‐19LE‐00005](https://ilci.cornell.edu/), USDA NIFA SCRI No. 2022-51181-38449, and USDA NIFA AG2PI [No. 2022-70412-38454](https://www.ag2pi.org/).
+## 🌎 Contribute
+Visit our [translation page](https://crowdin.com/project/field-book) to help translate Field Book to your language. To submit code or new features, please review our [contribution guidelines](https://github.com/PhenoApps/Field-Book/wiki/Contributing) before opening a [pull request](https://github.com/PhenoApps/Field-Book/pulls).
 
-## [Docs](https://docs.fieldbook.phenoapps.org/en/latest/field-book.html)
+## ⬇️ Updates
+Field Book regularly receives new updates to improve performance or add new features. To ensure these changes don't interfere with most field seasons, we do not update the [Google Play version](https://play.google.com/store/apps/details?id=com.fieldbook.tracker) of the app between May 1 and September 1. An up-to-date version can be downloaded from the `About` section within the app or through our [GitHub releases](https://github.com/PhenoApps/Field-Book/releases/latest).
 
-## [Translate](https://crowdin.com/project/field-book)
+## 💰 Funding 
+Development of Field Book is possible because of the support received from the following organizations:
+- McKnight Foundation [Collaborative Crop Research Program](https://www.ccrp.org/grants/one-handheld-per-breeder/)
+- National Science Foundation [No. 1543958](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1543958)
+- USDA NIFA FACT [No. 2019-67021-29931](https://portal.nifa.usda.gov/web/crisprojectpages/1019820-fact-geospatial-plant-breeding.html)
+- USAID [No. 7200AA‐19LE‐00005](https://ilci.cornell.edu/)
+- USDA NIFA SCRI [No. 2022-51181-38449](https://portal.nifa.usda.gov/lmd4/recent_awards)
+- USDA NIFA AG2PI [No. 2022-70412-38454](https://www.ag2pi.org/resources/ag2pi-funded-seed-grants/)
 
-## Contributors
+## ✨ Contributors
+This project follows the [all-contributors](https://allcontributors.org/) specification. Contributions of any kind are welcome!
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
