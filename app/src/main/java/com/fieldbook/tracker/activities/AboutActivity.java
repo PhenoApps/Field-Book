@@ -176,17 +176,6 @@ public class AboutActivity extends MaterialAboutActivity {
                 .build());
 
         otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
-                .text("Inventory")
-                .icon(R.drawable.other_ic_inventory)
-                .setOnClickAction(openAppOrStore("org.wheatgenetics.inventory", c))
-                .build());
-
-        otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
-                .text("Verify")
-                .icon(R.drawable.other_ic_verify)
-                .build());
-
-        otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text("Intercross")
                 .icon(R.drawable.other_ic_intercross)
                 .setOnClickAction(openAppOrStore("org.phenoapps.intercross", c))
