@@ -48,12 +48,14 @@ import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.GeoNavHelper;
 import com.fieldbook.tracker.objects.InfoBarModel;
+import com.fieldbook.tracker.objects.GoProWrapper;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.objects.VerifyPersonHelper;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
+import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
@@ -74,6 +76,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
+import org.phenoapps.interfaces.security.SecureBluetooth;
 import org.phenoapps.interfaces.usb.camera.UsbCameraInterface;
 import org.phenoapps.security.SecureBluetoothActivityImpl;
 import org.phenoapps.usb.camera.UsbCameraHelper;
@@ -108,7 +111,8 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.interfaces.CollectController,
         com.fieldbook.tracker.interfaces.CollectRangeController,
         com.fieldbook.tracker.interfaces.CollectTraitController,
-        InfoBarAdapter.InfoBarController {
+        InfoBarAdapter.InfoBarController,
+        GoProTraitLayout.GoProCollector {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -134,6 +138,10 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     SoundHelperImpl soundHelper;
+
+    @Inject
+    GoProWrapper goProWrapper;
+
     public static boolean searchReload;
     public static String searchRange;
     public static String searchPlot;
@@ -263,6 +271,8 @@ public class CollectActivity extends ThemedActivity
 
         mUsbCameraHelper = new UsbCameraHelper(this);
 
+        goProWrapper.attach();
+
         loadScreen();
 
         checkForInitialBarcodeSearch();
@@ -362,6 +372,7 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
+    @NonNull
     public CollectInputView getCollectInputView() {
         return collectInputView;
     }
@@ -829,7 +840,11 @@ public class CollectActivity extends ThemedActivity
             e.printStackTrace();
         }
 
+        getTraitLayout().onExit();
+
         mUsbCameraHelper.destroy();
+
+        goProWrapper.destroy();
 
         traitLayoutRefresh();
 
@@ -1234,6 +1249,8 @@ public class CollectActivity extends ThemedActivity
              */
             case geonavId:
 
+                Log.d(GEOTAG, "Menu item clicked.");
+
                 geoNavHelper.setMGeoNavActivated(!geoNavHelper.getMGeoNavActivated());
                 MenuItem navItem = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
                 if (geoNavHelper.getMGeoNavActivated()) {
@@ -1564,10 +1581,8 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-
         int action = event.getAction();
         int keyCode = event.getKeyCode();
-
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if (ep.getBoolean(GeneralKeys.VOLUME_NAVIGATION, false)) {
@@ -2067,4 +2082,17 @@ public class CollectActivity extends ThemedActivity
     public GnssThreadHelper getGnssThreadHelper() {
         return gnssThreadHelper;
     }
+
+    @NonNull
+    @Override
+    public GoProWrapper wrapper() {
+        return goProWrapper;
+    }
+
+    @NonNull
+    @Override
+    public SecureBluetooth advisor() {
+        return secureBluetooth;
+    }
+
 }

@@ -57,12 +57,12 @@ android {
         }
     }
 
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.fieldbook.tracker"
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode = makeVersionCode()
         versionName = makeVersionName()
         multiDexEnabled true
@@ -72,7 +72,8 @@ android {
     buildTypes {
 
         release {
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             // signingConfig signingConfigs.playStoreConfig //Add your own signing config
         }
@@ -127,7 +128,7 @@ dependencies {
     //zebra dependency
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
 
-    implementation 'androidx.appcompat:appcompat:1.6.0-alpha04'
+    implementation 'androidx.appcompat:appcompat:1.7.0-alpha02'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
@@ -135,7 +136,7 @@ dependencies {
     implementation "androidx.legacy:legacy-preference-v14:1.0.0"
     implementation "androidx.preference:preference:1.1.1"
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation "androidx.core:core-ktx:1.6.0"
+    implementation "androidx.core:core-ktx:1.10.1"
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'com.google.android.material:material:1.4.0'
@@ -145,18 +146,20 @@ dependencies {
 
     implementation 'com.google.zxing:core:3.3.3'
 
+    implementation('com.github.phenoapps:phenolib:v0.9.48')
 
-    implementation('com.github.phenoapps:phenolib:v0.9.41')
-
-    //necessary when building phenolib locally
-    //implementation "com.squareup.okhttp:okhttp:2.7.5"
+    implementation 'com.google.android.exoplayer:exoplayer:2.17.0'
+    implementation 'com.arthenica:ffmpeg-kit-min:5.1.LTS'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
 
     //uvc camera java native libs
     implementation("com.serenegiant:common:2.12.4")
 
+    //brapi and required dependencies
     implementation 'com.github.breeding-insight:brapi:2.0.3'
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    //necessary when building phenolib locally
+    implementation "com.squareup.okhttp:okhttp:2.7.5"
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation("io.gsonfire:gson-fire:1.8.4") //required v1
 
     implementation 'org.jsoup:jsoup:1.8.1'
@@ -247,3 +250,4 @@ repositories {
 
 task prepareKotlinBuildScriptModel {}
 
+android.defaultConfig.manifestPlaceholders = ['appAuthRedirectScheme': 'fieldbook' ]

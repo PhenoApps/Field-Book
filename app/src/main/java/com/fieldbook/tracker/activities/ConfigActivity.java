@@ -11,6 +11,7 @@ import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
@@ -863,6 +864,11 @@ public class ConfigActivity extends ThemedActivity {
     @AfterPermissionGranted(PERMISSIONS_REQUEST_TRAIT_DATA)
     public void collectDataFilePermission() {
         String[] perms = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            perms = new String[] {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
+        }
+
         if (EasyPermissions.hasPermissions(this, perms)) {
             Intent intent = new Intent();
 

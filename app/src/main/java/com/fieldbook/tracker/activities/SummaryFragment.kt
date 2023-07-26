@@ -173,18 +173,21 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                             try {
 
-                                value?.let { v ->
+                                activity?.let { act ->
 
-                                    //read the preferences, default to displaying values instead of labels
-                                    val labelValPref: String =
-                                        PreferenceManager.getDefaultSharedPreferences(activity)
-                                            .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value")
-                                            ?: "value"
+                                    value?.let { v ->
 
-                                    value = CategoryJsonUtil.flattenMultiCategoryValue(
-                                        CategoryJsonUtil.decode(v), labelValPref == "value"
-                                    )
+                                        //read the preferences, default to displaying values instead of labels
+                                        val labelValPref: String =
+                                            PreferenceManager.getDefaultSharedPreferences(act)
+                                                .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value")
+                                                ?: "value"
 
+                                        value = CategoryJsonUtil.flattenMultiCategoryValue(
+                                            CategoryJsonUtil.decode(v), labelValPref == "value"
+                                        )
+
+                                    }
                                 }
 
                             } catch (ignore: JsonParseException) {

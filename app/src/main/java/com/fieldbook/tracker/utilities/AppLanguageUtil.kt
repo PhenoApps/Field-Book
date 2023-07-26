@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.preferences.GeneralKeys
-import java.util.*
+import java.util.Locale
 
 class AppLanguageUtil {
 
@@ -16,9 +16,12 @@ class AppLanguageUtil {
 
         fun setDefaultLanguage(context: Context?) {
 
-            PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putString(GeneralKeys.LANGUAGE_LOCALE_DEFAULT_ID, Locale.getDefault().language)
-                .apply()
+            context?.let { ctx ->
+
+                PreferenceManager.getDefaultSharedPreferences(ctx).edit()
+                    .putString(GeneralKeys.LANGUAGE_LOCALE_DEFAULT_ID, Locale.getDefault().language)
+                    .apply()
+            }
         }
 
         /**
@@ -29,18 +32,22 @@ class AppLanguageUtil {
 
             try {
 
-                val id = PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(GeneralKeys.LANGUAGE_LOCALE_ID, "") ?: ""
+                context?.let { ctx ->
 
-                if (id.isNotEmpty()) {
+                    val id = PreferenceManager.getDefaultSharedPreferences(ctx)
+                        .getString(GeneralKeys.LANGUAGE_LOCALE_ID, "") ?: ""
 
-                    Log.d(TAG, "Language set from preferences: $id")
+                    if (id.isNotEmpty()) {
 
-                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(id))
+                        Log.d(TAG, "Language set from preferences: $id")
 
-                } else {
+                        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(id))
 
-                    Log.d(TAG, "No language stored in preferences.")
+                    } else {
+
+                        Log.d(TAG, "No language stored in preferences.")
+
+                    }
 
                 }
 
