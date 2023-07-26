@@ -331,7 +331,7 @@
     <!-- About dialog -->
     <string name="about_title">About</string>
     <string name="about_version_title">Version</string>
-    <string name="about_title_other_apps">Other PhenoApps</string>
+    <string name="about_title_other_apps">PhenoApps</string>
     <string name="about_project_lead_title">Project Lead</string>
     <string name="about_developer_trife" translatable="false">Trevor Rife</string>
     <string name="about_developer_trife_location" translatable="false">Clemson University</string>
@@ -344,12 +344,14 @@
     <string name="about_contributors_funding_title">Funding</string>
     <string name="about_contributors_funding_text" translatable="false">Development of Field Book has been supported by the Collaborative Crop Research Program of The McKnight Foundation, the National Science Foundation (#1543958), and the National Institute of Food and Agriculture (#2019-67021-29931).</string>
     <string name="about_rate">Rate this app</string>
-    <string name="about_technical_title">Technical Details</string>
+    <string name="about_technical_title">Technical</string>
     <string name="about_github_title">GitHub</string>
     <string name="about_help_translate_title">Help translate</string>
     <string name="changelog_title">Changelog</string>
     <string name="libraries_title">Libraries</string>
-    <string name="updates_title">Check for Updates</string>
+    <string name="updates_title">Check for updates</string>
+    <string name="about_manual_title">Manual</string>
+    <string name="about_support_title">Support</string>
 
     <!-- Profile dialog -->
     <string name="profile_person">Person</string>
