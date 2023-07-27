@@ -108,5 +108,4 @@
     <string name="preferences_general_feature_barcode_text">Aktiviert die Option zu einem bestimmten einzigartigen Zuordnungsmerkmal zu navigieren</string>
     <string name="main_toolbar_moveto">Gehe zu ID</string>
     <string name="about_version_title">Version</string>
-    <string name="about_translators_title">Übersetzer</string>
 </resources>

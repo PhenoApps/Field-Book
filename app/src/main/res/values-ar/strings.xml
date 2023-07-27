@@ -108,5 +108,4 @@
     <string name="preferences_general_feature_barcode_text">تفعيل الخيار للمتقدم لتحديد المعرف الفريد</string>
     <string name="main_toolbar_moveto">إنتقل إلى ID</string>
     <string name="about_version_title">الإصدار</string>
-    <string name="about_translators_title">المترجمين</string>
 </resources>

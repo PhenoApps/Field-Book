@@ -20,9 +20,6 @@ import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.VersionChecker;
-import com.michaelflisar.changelog.ChangelogBuilder;
-import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
-import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
 public class AboutActivity extends MaterialAboutActivity {
@@ -56,7 +53,7 @@ public class AboutActivity extends MaterialAboutActivity {
                 Uri.parse("https://docs.fieldbook.phenoapps.org/en/latest/field-book.html")));
 
         appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
-                .text(getString(R.string.updates_title))
+                .text(getString(R.string.about_updates_title))
                 .icon(R.drawable.ic_about_get_update)
                 .setOnClickAction(new MaterialAboutItemOnClickAction() {
                     @Override
@@ -134,7 +131,7 @@ public class AboutActivity extends MaterialAboutActivity {
         final int libStyleId = styleId;
 
         technicalCardBuilder.addItem(new MaterialAboutActionItem.Builder()
-                .text(R.string.libraries_title)
+                .text(R.string.about_libraries_title)
                 .icon(R.drawable.ic_about_libraries)
                 .setOnClickAction(new MaterialAboutItemOnClickAction() {
                     @Override
@@ -142,7 +139,7 @@ public class AboutActivity extends MaterialAboutActivity {
                         new LibsBuilder()
                                 .withActivityTheme(libStyleId)
                                 .withAutoDetect(true)
-                                .withActivityTitle(getString(R.string.libraries_title))
+                                .withActivityTitle(getString(R.string.about_libraries_title))
                                 .withLicenseShown(true)
                                 .withVersionShown(true)
                                 .start(getApplicationContext());

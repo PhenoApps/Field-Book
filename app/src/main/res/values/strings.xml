@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Common -->
+    <!-- App -->
     <string name="field_book">Field Book</string>
+
+    <!-- Dialog -->
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
@@ -22,8 +24,6 @@
     <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
     <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
     <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
-
-    <!-- Miscellaneous  -->
 
     <!-- Main Activity  -->
     <string name="main_toolbar_search">Search</string>
@@ -197,16 +197,16 @@
     <string name="preferences_brapi_advanced_title">Advanced Auth Settings</string>
     <string name="preferences_brapi_servers_title">Community Servers</string>
     <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
-    <string name="preferences_brapi_server_cassavabase">CassavaBase</string>
-    <string name="preferences_brapi_server_t3_wheat">T3 Wheat Sandbox</string>
-    <string name="preferences_brapi_server_t3_oat">T3 Oat Sandbox</string>
-    <string name="preferences_brapi_server_t3_barley">T3 Barley Sandbox</string>
+    <string name="preferences_brapi_server_cassavabase" translatable="false">CassavaBase</string>
+    <string name="preferences_brapi_server_t3_wheat" translatable="false">T3 Wheat Sandbox</string>
+    <string name="preferences_brapi_server_t3_oat" translatable="false">T3 Oat Sandbox</string>
+    <string name="preferences_brapi_server_t3_barley" translatable="false">T3 Barley Sandbox</string>
     <string name="preferences_brapi_server_test">Default Test Server</string>
     <string name="preferences_brapi_server_add">Submit a server</string>
     <string name="preferences_brapi_version">BrAPI Version</string>
-    <string name="preferences_brapi_version_v1">V1</string>
-    <string name="preferences_brapi_version_v2">V2</string>
-    <string name="preferences_brapi_oidc_flow">OIDC Flow</string>
+    <string name="preferences_brapi_version_v1" translatable="false">V1</string>
+    <string name="preferences_brapi_version_v2" translatable="false">V2</string>
+    <string name="preferences_brapi_oidc_flow" translatable="false">OIDC Flow</string>
     <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
     <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
     <string name="preferences_brapi_oidc_flow_old_custom">Original Field Book Custom</string>
@@ -331,33 +331,29 @@
     <!-- About dialog -->
     <string name="about_title">About</string>
     <string name="about_version_title">Version</string>
-    <string name="about_title_other_apps">PhenoApps</string>
+    <string name="about_title_other_apps" translatable="false">PhenoApps</string>
     <string name="about_project_lead_title">Project Lead</string>
     <string name="about_developer_trife" translatable="false">Trevor Rife</string>
     <string name="about_developer_trife_location" translatable="false">Clemson University</string>
     <string name="about_developer_trife_email" translatable="false">twrife@clemson.edu</string>
     <string name="about_email_title">Email</string>
     <string name="about_contributors_title">Contributors</string>
-    <string name="about_contributors_developers_title">Developers</string>
-    <string name="about_translators_title">Translators</string>
-    <string name="about_translators_text" translatable="false">Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa, Mokhlesur Rahman, Alice Brunazzi</string>
     <string name="about_contributors_funding_title">Funding</string>
-    <string name="about_contributors_funding_text" translatable="false">Development of Field Book has been supported by the Collaborative Crop Research Program of The McKnight Foundation, the National Science Foundation (#1543958), and the National Institute of Food and Agriculture (#2019-67021-29931).</string>
     <string name="about_rate">Rate this app</string>
     <string name="about_technical_title">Technical</string>
-    <string name="about_github_title">GitHub</string>
+    <string name="about_github_title" translatable="false">GitHub</string>
     <string name="about_help_translate_title">Help translate</string>
-    <string name="changelog_title">Changelog</string>
-    <string name="libraries_title">Libraries</string>
-    <string name="updates_title">Check for updates</string>
+    <string name="about_libraries_title">Libraries</string>
+    <string name="about_updates_title">Check for updates</string>
     <string name="about_manual_title">Manual</string>
     <string name="about_support_title">Support</string>
+
+    <string name="changelog_title">Changelog</string>
 
     <!-- Profile dialog -->
     <string name="profile_person">Person</string>
     <string name="profile_reset">Reset Profile</string>
     <string name="preferences_profile_settings">Profile Settings</string>
-
 
     <string name="profile_person_title">Set person</string>
     <string name="profile_name_first">First name</string>
@@ -375,7 +371,7 @@
     <!-- Import dialog -->
     <string name="import_source_local">Local storage</string>
     <string name="import_source_cloud">Cloud storage</string>
-    <string name="import_source_brapi">BrAPI</string>
+    <string name="import_source_brapi" translatable="false">BrAPI</string>
     <string name="import_source_ask">Always ask</string>
 
     <string name="import_dialog_title_fields">Import field</string>
@@ -449,10 +445,10 @@
     <string name="preferences_brapi" translatable="false">BrAPI</string>
     <string name="brapi_base_url">Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
-    <string name="brapi_base_url_default">https://test-server.brapi.org</string>
+    <string name="brapi_base_url_default" translatable="false">https://test-server.brapi.org</string>
     <string name="brapi_oidc_url">OIDC Discovery URL</string>
     <string name="brapi_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
-    <string name="brapi_oidc_url_default">https://test-server.brapi.org/.well-known/openid-configuration</string>
+    <string name="brapi_oidc_url_default" translatable="false">https://test-server.brapi.org/.well-known/openid-configuration</string>
     <string name="brapi_save_authorize">Authorize</string>
     <string name="brapi_authorize">Authorize</string>
     <string name="brapi_reauthorize">Reauthorize</string>
@@ -682,7 +678,7 @@
     <string name="trait_date_next_day_tts">Next day</string>
     <string name="trait_date_open_calendar_tts">Opening calendar.</string>
     <string name="trait_location_saved_tts">Location saved.</string>
-    <string name="preferences_profile_crashlytics">Crashlytics</string>
+    <string name="preferences_profile_crashlytics" translatable="false">Crashlytics</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>

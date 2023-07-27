@@ -108,5 +108,4 @@
     <string name="preferences_general_feature_barcode_text">Habilitar opção para avançar para um identificador único</string>
     <string name="main_toolbar_moveto">Ir para ID</string>
     <string name="about_version_title">Versão</string>
-    <string name="about_translators_title">Tradutores</string>
 </resources>
