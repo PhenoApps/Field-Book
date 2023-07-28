@@ -11,13 +11,13 @@ class TapTargetUtil {
 
     companion object {
 
-        fun getTapTargetSettingsView(context: Context, view: View, color: Int, targetRadius: Int, title: String, desc: String): TapTarget {
-            val attrs = intArrayOf(color)
+        fun getTapTargetSettingsView(context: Context, view: View, title: String, desc: String, targetRadius: Int): TapTarget {
+            val attrs = intArrayOf(R.attr.fb_color_primary_dark)
             val ta = context.obtainStyledAttributes(attrs)
-            val outerColor = ta.getColor(0,0)
+            val colorPrimaryDark = ta.getColor(0,0)
             ta.recycle()
             return TapTarget.forView(view, title, desc)
-                .outerCircleColorInt(outerColor)
+                .outerCircleColorInt(colorPrimaryDark)
                 .outerCircleAlpha(0.95f)
                 .titleTextSize(30)
                 .descriptionTextSize(20)
@@ -45,23 +45,6 @@ class TapTargetUtil {
                 .tintTarget(true) // Whether to tint the target view's color
                 .transparentTarget(true) // Specify whether the target is transparent (displays the content underneath)
                 .targetRadius(60)
-        }
-
-        fun getTapTargetSettingsView(context: Context, view: View, title: String, desc: String): TapTarget {
-            val attrs = intArrayOf(R.attr.fb_color_primary_dark)
-            val ta = context.obtainStyledAttributes(attrs)
-            val colorPrimaryDark = ta.getColor(0,0)
-            ta.recycle()
-            return TapTarget.forView(view, title, desc)
-                .outerCircleColorInt(colorPrimaryDark)
-                .outerCircleAlpha(0.95f)
-                .titleTextSize(30)
-                .descriptionTextSize(20)
-                .descriptionTypeface(Typeface.DEFAULT_BOLD)
-                .drawShadow(true)
-                .cancelable(false)
-                .tintTarget(true)
-                .transparentTarget(true)
         }
     }
 }
