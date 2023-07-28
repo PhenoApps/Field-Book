@@ -62,6 +62,9 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     private var recyclerView: RecyclerView? = null
     private var previewGroup: Group? = null
     private var constraintLayout: ConstraintLayout? = null
+    //zoom buttons
+    private var zoomInButton: ImageButton? = null
+    private var zoomOutButton: ImageButton? = null
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -88,6 +91,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         captureBtn = act.findViewById(R.id.usb_camera_fragment_capture_btn)
         recyclerView = act.findViewById(R.id.usb_camera_fragment_rv)
         previewGroup = act.findViewById(R.id.usb_camera_fragment_preview_group)
+        zoomInButton = act.findViewById(R.id.usb_camera_fragment_plus_btn)
+        zoomOutButton = act.findViewById(R.id.usb_camera_fragment_minus_btn)
 
         activity = act
 
@@ -113,6 +118,54 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 devices.forEach {
                     manager.requestPermission(it, permissionIntent)
                 }
+            }
+        }
+
+        textureView?.setOnClickListener {
+
+            mUsbCameraHelper?.setFocus()
+
+        }
+
+        zoomOutButton?.setOnClickListener {
+
+            try {
+
+                val current = mUsbCameraHelper?.getZoom() ?: 1
+
+                if (current < Int.MAX_VALUE) {
+
+                    mUsbCameraHelper?.setZoom(current)
+
+                }
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+                Log.d(TAG, "Something went wrong with zooming USB Camera.")
+
+            }
+        }
+
+        zoomInButton?.setOnClickListener {
+
+            try {
+
+                val current = mUsbCameraHelper?.getZoom() ?: 1
+
+                if (current > 1) {
+
+                    mUsbCameraHelper?.setZoom(current - 1)
+
+                }
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+                Log.d(TAG, "Something went wrong with zooming USB Camera.")
+
             }
         }
 
