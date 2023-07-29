@@ -307,7 +307,9 @@
     <string name="about_help_translate_title">Help translate</string>
     <string name="changelog_title">ከመጨረሸ እድሳት ቀይረዉ</string>
     <string name="libraries_title">Libraries</string>
-    <string name="updates_title">Check for Updates</string>
+    <string name="check_updates_title">Checking for Updates...</string>
+    <string name="found_updates_title">Download Latest Version</string>
+    <string name="no_updates_title">Running Latest Version</string>
     <!-- Profile dialog -->
     <string name="profile_person">ሰዉ፤</string>
     <string name="profile_reset">የተዘጋጀዉን አጥፋዉ፤</string>
