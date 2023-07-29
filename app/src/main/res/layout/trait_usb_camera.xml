@@ -29,7 +29,7 @@
         <androidx.constraintlayout.widget.Group
             android:visibility="invisible"
             android:id="@+id/usb_camera_fragment_preview_group"
-            app:constraint_referenced_ids="usb_camera_fragment_tv, usb_camera_fragment_capture_btn"
+            app:constraint_referenced_ids="usb_camera_fragment_tv, usb_camera_fragment_capture_btn, usb_camera_fragment_plus_btn, usb_camera_fragment_minus_btn"
             android:layout_width="0dp"
             android:layout_height="0dp"/>
 
@@ -57,6 +57,34 @@
             app:layout_constraintBottom_toBottomOf="@id/usb_camera_fragment_tv"
             app:layout_constraintEnd_toEndOf="@id/usb_camera_fragment_tv"
             app:layout_constraintStart_toStartOf="@id/usb_camera_fragment_tv" />
+
+        <ImageButton
+            android:contentDescription="@string/trait_usb_camera_zoom_in_content_description"
+            android:src="@drawable/ic_plus"
+            android:background="@drawable/circle_background"
+            android:id="@+id/usb_camera_fragment_plus_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="8dp"
+            android:padding="8dp"
+            android:text="@string/trait_usb_camera_zoom_in_button_text"
+            app:layout_constraintTop_toTopOf="@id/usb_camera_fragment_capture_btn"
+            app:layout_constraintBottom_toBottomOf="@id/usb_camera_fragment_tv"
+            app:layout_constraintStart_toEndOf="@id/usb_camera_fragment_capture_btn" />
+
+        <ImageButton
+            android:contentDescription="@string/trait_usb_camera_zoom_out_content_description"
+            android:src="@drawable/minus"
+            android:background="@drawable/circle_background"
+            android:id="@+id/usb_camera_fragment_minus_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="8dp"
+            android:padding="8dp"
+            android:text="@string/trait_usb_camera_zoom_out_button_text"
+            app:layout_constraintTop_toTopOf="@id/usb_camera_fragment_capture_btn"
+            app:layout_constraintBottom_toBottomOf="@id/usb_camera_fragment_tv"
+            app:layout_constraintEnd_toStartOf="@id/usb_camera_fragment_capture_btn" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="0dp"
