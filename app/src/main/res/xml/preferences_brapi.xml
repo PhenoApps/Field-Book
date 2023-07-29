@@ -24,7 +24,7 @@
             android:title="@string/brapi_revoke_auth" />
 
         <ListPreference
-            android:defaultValue="@string/preferences_brapi_version_v1"
+            android:defaultValue="@string/preferences_brapi_version_v2"
             android:entries="@array/pref_brapi_version"
             android:entryValues="@array/pref_brapi_version"
             android:icon="@drawable/ic_pref_brapi_version"
