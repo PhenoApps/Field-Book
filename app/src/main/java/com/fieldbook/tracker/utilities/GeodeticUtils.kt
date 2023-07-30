@@ -103,6 +103,7 @@ class GeodeticUtils {
          * @return a object representing the returned location and it's distance
          **/
         fun impactZoneSearch(log: OutputStreamWriter?,
+                             shorterLog: OutputStreamWriter?,
                              start: Location,
                              coordinates: Array<ObservationUnitModel>,
                              azimuth: Double,
@@ -167,6 +168,8 @@ class GeodeticUtils {
 
             //print the entire array to log
             izLogArray.forEach { writeGeoNavLog(log, it.toString()) }
+            //print only the closest plant to the log
+            izLogArray.forEach { if (it.closest == 1) writeGeoNavLog(shorterLog, it.toString()) }
 
             return closestPoint to closestDistance
         }
