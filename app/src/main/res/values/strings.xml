@@ -111,7 +111,7 @@
     <string name="traits_format_usb_camera">Usb Camera</string>
     <string name="traits_format_go_pro_camera">GoPro</string>
 
-    <string name="traits_create_trait">Trait</string>
+    <string name="traits_create_trait">Trait Name</string>
     <string name="traits_create_format">Format</string>
     <string name="traits_create_value_default">Default</string>
     <string name="traits_create_value_minimum">Minimum</string>
