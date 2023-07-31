@@ -84,12 +84,14 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                 //always log external gps updates
                 writeGeoNavLog(
                     mGeoNavLogWriter,
-                    "$lat,$lng,$time,null,null,null,null,null,null,null,null,null,null\n"
+                    "$lat,$lng,$time,null,null,null,null,null,null,null,null,null,null,null\n"
                 )
-                writeGeoNavLog(
-                    mGeoNavShorterLogWriter,
-                    "$lat,$lng,$time,null,null,null,null,null,null,null,null,null,null\n"
-                )
+                //don't log the location update for geonav_shorter
+                // because closest would always be written as null in this case
+//                writeGeoNavLog(
+//                    mGeoNavShorterLogWriter,
+//                    "$lat,$lng,$time,null,null,null,null,null,null,null,null,null,null\n"
+//                )
                 mExternalLocation = Location("GeoNav Rover")
 
                 //initialize the double values, attempt to parse the strings, if impossible then don't update the coordinate.
@@ -234,11 +236,11 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
 
         writeGeoNavLog(
             mGeoNavLogWriter,
-            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, closest, unique id, primary id, secondary id\n"
+            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, closest, accuracy correction status, unique id, primary id, secondary id\n"
         )
         writeGeoNavLog(
             mGeoNavShorterLogWriter,
-            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, closest, unique id, primary id, secondary id\n"
+            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, closest, accuracy correction status, unique id, primary id, secondary id\n"
         )
     }
 
@@ -493,7 +495,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                     val fileName =
                         "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv"
                     val geoNavLogFile = geoNavFolder.createFile("*/csv", fileName)
-                    val geoNavShorterLogFile = geoNavShorterFolder.createFile("*/csv", fileName)
+                    val geoNavShorterLogFile = geoNavShorterFolder.createFile("*/csv", "short_$fileName")
                     if (geoNavLogFile != null && geoNavLogFile.exists() && geoNavShorterLogFile != null && geoNavShorterLogFile.exists()) {
                         val outputStream = resolver.openOutputStream(geoNavLogFile.uri)
                         val outputStreamShortLog = resolver.openOutputStream(geoNavShorterLogFile.uri);
@@ -614,7 +616,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         writeGeoNavLog(
             mGeoNavLogWriter,
             """
-        ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,null,null,null,null
+        ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,null,null,null,null,null
         
         """.trimIndent()
         )
