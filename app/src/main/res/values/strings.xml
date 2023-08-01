@@ -193,6 +193,7 @@
     <string name="preferences_behavior_disable_entry_arrow_both">Both</string>
     <string name="preferences_behavior_disable_entry_arrow_neither">Neither</string>
 
+    <string name="preferences_brapi_enable_title">Enable BrAPI</string>
     <string name="preferences_brapi_core_title">Configuration</string>
     <string name="preferences_brapi_advanced_title">Advanced Auth Settings</string>
     <string name="preferences_brapi_servers_title">Community Servers</string>
