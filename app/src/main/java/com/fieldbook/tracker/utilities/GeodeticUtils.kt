@@ -8,7 +8,11 @@ import math.geom2d.Point2D
 import math.geom2d.line.Line2D
 import java.io.IOException
 import java.io.OutputStreamWriter
-import kotlin.math.*
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class GeodeticUtils {
 
@@ -55,6 +59,9 @@ class GeodeticUtils {
          *      note: the bearing can be null if the compass setting is disabled
          *
          *  (1) and (2) are a bit outdated in terms of column order (look at the headers above for most up to date)
+         *
+         *
+         *  Update (8/2/23): "fix" has been added as a header to the log file, it is the tenth item. This can be any value GPS, RTK, or RTK Float
          */
         fun writeGeoNavLog(log: OutputStreamWriter?, line: String) {
 
@@ -73,9 +80,9 @@ class GeodeticUtils {
         //Represents what we print to the log
         data class IzString(val startTime: Long, val uniqueId: String, val primaryId: String, val secondaryId: String,
             val startLat: Double, val startLng: Double, val endLat: Double, val endLng: Double, val azimuth: Double,
-            val teslas: Double, var bearing: Double?, val distance: Double, var closest: Int) {
+            val teslas: Double, var bearing: Double?, val distance: Double, var closest: Int, var fix: String) {
             override fun toString(): String {
-                return "$startLat,$startLng,$startTime,$endLat,$endLng,$azimuth,$teslas,$bearing,$distance,$closest,\"${uniqueId.escape()}\",\"${primaryId.escape()}\",\"${secondaryId.escape()}\"\n"
+                return "$startLat,$startLng,$startTime,$endLat,$endLng,$azimuth,$teslas,$bearing,$distance,$fix,$closest,\"${uniqueId.escape()}\",\"${primaryId.escape()}\",\"${secondaryId.escape()}\"\n"
             }
         }
 
@@ -128,9 +135,11 @@ class GeodeticUtils {
 
                     val bearing: Double = angleFromCoordinate(start.latitude, start.longitude, location.latitude, location.longitude)
 
+                    val fix = start.extras?.getString("fix") ?: "invalid"
+
                     val loggedString = IzString(startTime = start.time, uniqueId = coordinate.observation_unit_db_id, primaryId = coordinate.primary_id, secondaryId = coordinate.secondary_id,
                         startLat = start.latitude, startLng = start.longitude, endLat = location.latitude, endLng = location.longitude, azimuth = azimuth, teslas = teslas, bearing = bearing,
-                        distance = distance, closest = NOT_CLOSEST)
+                        distance = distance, closest = NOT_CLOSEST, fix = fix)
 
                     if (geoNavMethod == "0") { //default distance based method
 

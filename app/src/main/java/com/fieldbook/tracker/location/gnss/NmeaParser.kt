@@ -3,7 +3,6 @@ package com.fieldbook.tracker.location.gnss
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.ParseException
-import java.util.*
 
 /**
  * NMEA 0183 parser.
@@ -224,5 +223,15 @@ class NmeaParser {
             "8" -> "simulation"
             else -> "invalid"
         }
+    }
+
+    /**
+     * For now just display GPS, RTK, Float RTK, or invalid
+     */
+    fun getSimpleFix() = when (fix) {
+        "GPS", "DGPS", "PPS" -> "GPS"
+        "RTK" -> "RTK"
+        "invalid" -> "invalid"
+        else -> "Float RTK"
     }
 }

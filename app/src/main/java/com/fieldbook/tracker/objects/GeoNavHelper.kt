@@ -75,8 +75,9 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                     )
                 }
                 mLastGeoNavTime = time
-                val lat = truncateFixQuality(parser.latitude, parser.fix)
-                val lng = truncateFixQuality(parser.longitude, parser.fix)
+                val fix = parser.getSimpleFix()
+                val lat = truncateFixQuality(parser.latitude, fix)
+                val lng = truncateFixQuality(parser.longitude, fix)
                 var alt = parser.altitude
                 val altLength = alt.length
                 alt = alt.substring(0, altLength - 1) //drop the "M"
@@ -84,7 +85,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                 //always log external gps updates
                 writeGeoNavLog(
                     mGeoNavLogWriter,
-                    "$lat,$lng,$time,null,null,null,null,null,null,null,null,null,null\n"
+                    "$lat,$lng,$time,null,null,null,null,null,null,$fix,null,null,null,null\n"
                 )
                 mExternalLocation = Location("GeoNav Rover")
 
@@ -104,6 +105,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                     mExternalLocation?.latitude = latValue
                     mExternalLocation?.longitude = lngValue
                     mExternalLocation?.altitude = altValue
+                    mExternalLocation?.extras?.putString("fix", fix)
                 }
             }
         }
@@ -229,7 +231,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
 
         writeGeoNavLog(
             mGeoNavLogWriter,
-            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, closest, unique id, primary id, secondary id\n"
+            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, fix, closest, unique id, primary id, secondary id\n"
         )
     }
 
@@ -335,7 +337,9 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         //user must have a valid pointing direction before attempting the IZ
         //initialize the start position and fill with external or internal GPS coordinates
         val start: Location? = if (internal) {
-            mInternalLocation
+            mInternalLocation.also {
+                it?.extras?.putString("fix", "GPS")
+            }
         } else {
             mExternalLocation
         }
@@ -598,7 +602,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         writeGeoNavLog(
             mGeoNavLogWriter,
             """
-        ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,null,null,null,null
+        ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,GPS,null,null,null,null
         
         """.trimIndent()
         )
