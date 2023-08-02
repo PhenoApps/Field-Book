@@ -16,11 +16,13 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.DialogFragment;
+import androidx.preference.CheckBoxPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
+import androidx.preference.PreferenceScreen;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
@@ -93,6 +95,20 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
 
+        // Show/hide preferences and category titles based on the BRAPI_ENABLED value
+        CheckBoxPreference brapiEnabledPref = findPreference("BRAPI_ENABLED");
+        if (brapiEnabledPref != null) {
+            brapiEnabledPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    boolean isChecked = (Boolean) newValue;
+                    updatePreferencesVisibility(isChecked);
+                    return true;
+                }
+            });
+            updatePreferencesVisibility(brapiEnabledPref.isChecked());
+        }
+
         setupToolbar();
         setHasOptionsMenu(true);
 
@@ -150,6 +166,18 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
 
         setOidcFlowUi();
+    }
+
+    private void updatePreferencesVisibility(boolean isChecked) {
+        PreferenceScreen preferenceScreen = getPreferenceScreen();
+        for (int i = 0; i < preferenceScreen.getPreferenceCount(); i++) {
+            Preference preferenceItem = preferenceScreen.getPreference(i);
+            // Skip the checkbox preference itself
+            if (preferenceItem.getKey().equals("BRAPI_ENABLED")) {
+                continue;
+            }
+            preferenceItem.setVisible(isChecked);
+        }
     }
 
     @Override
