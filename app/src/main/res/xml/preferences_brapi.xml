@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <CheckBoxPreference
         android:defaultValue="false"
         android:icon="@drawable/ic_adv_brapi"
         android:key="BRAPI_ENABLED"
         android:title="@string/preferences_brapi_enable_title" />
-
     <PreferenceCategory
         android:key="brapi_category"
         android:title="@string/preferences_brapi_core_title"
@@ -97,7 +95,8 @@
 
     <PreferenceCategory
         android:title="@string/preferences_brapi_traits_title"
-        app:iconSpaceReserved="false">
+        app:iconSpaceReserved="false"
+        android:key="brapi_variables">
         <ListPreference
             android:defaultValue="value"
             android:dialogTitle="@string/preferences_appearance_collect_labelval_customize"
