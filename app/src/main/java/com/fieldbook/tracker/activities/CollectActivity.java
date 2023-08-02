@@ -48,6 +48,9 @@ import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.GeoNavHelper;
+import com.fieldbook.tracker.objects.GoProWrapper;
+import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
@@ -824,6 +827,8 @@ public class CollectActivity extends ThemedActivity
         verifyPersonHelper.updateLastOpenedTime();
 
         geoNavHelper.stopGeoNav();
+
+        gnssThreadHelper.stop();
 
         //save the last used trait
         if (traitBox.getCurrentTrait() != null)

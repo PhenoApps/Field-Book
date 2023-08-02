@@ -51,6 +51,10 @@ import kotlin.math.sqrt
  */
 class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
+    companion object {
+        const val CONNECTION_STATUS_INTERVAL = 3000L
+    }
+
     private var mActivity: Activity? = null
 
     //used for communication between threads and ui thread
@@ -75,6 +79,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     private lateinit var connectButton: ImageButton
     private lateinit var collectButton: ImageButton
     private lateinit var disconnectButton: ImageButton
+
+    private var lastUtc = String()
+    private var currentUtc = String()
 
     private val mAverageResponseHandler = Handler(Looper.getMainLooper()) {
 
@@ -160,6 +167,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         mLocalBroadcastManager.registerReceiver(
             object : GNSSResponseReceiver() {
                 override fun onGNSSParsed(parser: NmeaParser) {
+
+                    currentUtc = parser.utc
 
                     //populate ui
                     accTextView.text = parser.fix
@@ -574,11 +583,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         }
     }
 
-    override fun onExit() {
-        super.onExit()
-        //if (::mConnectThread.isInitialized) mConnectThread.cancel()
-    }
-
     /**
      * Starts connect thread and sets up the UI.
      */
@@ -624,13 +628,32 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
             chipGroup.visibility = View.GONE
 
+            prefs.edit().remove(GeneralKeys.GNSS_LAST_PAIRED_DEVICE_NAME).apply()
+
             setupChooseBluetoothDevice()
 
-            prefs.edit().remove(GeneralKeys.GNSS_LAST_PAIRED_DEVICE_NAME).apply()
+            clearUi()
+
         }
 
         setupAveragingUi()
 
+        if (mGpsTracker == null) {
+            connectionCheckHandler()
+        }
+    }
+
+    private fun connectionCheckHandler() {
+
+        if (currentUtc == lastUtc) {
+            clearUi()
+        }
+
+        lastUtc = currentUtc
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            connectionCheckHandler()
+        }, CONNECTION_STATUS_INTERVAL)
     }
 
     private fun clearUi() {
@@ -667,7 +690,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                 .filter { it.observation_unit_db_id == currentRange.plot_id }
             if (units.isNotEmpty()) {
                 units.first().let { unit ->
-                    ObservationUnitDao.updateObservationUnit(unit, "")
+                    controller.getDatabase().updateObservationUnit(unit, "")
                 }
             }
         }
