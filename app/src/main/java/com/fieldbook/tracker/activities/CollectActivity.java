@@ -44,11 +44,12 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.GeoNavHelper;
-import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.GoProWrapper;
+import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.objects.VerifyPersonHelper;
@@ -214,6 +215,11 @@ public class CollectActivity extends ThemedActivity
      */
     private AlertDialog dialogMultiMeasureDelete;
     private AlertDialog dialogMultiMeasureConfirmDelete;
+
+    /**
+     * GeoNav dialog
+     */
+    private androidx.appcompat.app.AlertDialog dialogGeoNav;
 
     public void triggerTts(String text) {
         if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
@@ -922,10 +928,7 @@ public class CollectActivity extends ThemedActivity
             //setup logger whenever activity resumes
             geoNavHelper.setupGeoNavLogger();
 
-            secureBluetooth.withNearby((adapter) -> {
-                geoNavHelper.startGeoNav();
-                return null;
-            });
+            startGeoNav();
         }
 
         verifyPersonHelper.checkLastOpened();
@@ -941,6 +944,17 @@ public class CollectActivity extends ThemedActivity
         dataLocked = ep.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
 
         refreshLock();
+    }
+
+    private void startGeoNav() {
+        try {
+            secureBluetooth.withNearby((adapter) -> {
+                geoNavHelper.startGeoNav();
+                return null;
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -1251,21 +1265,18 @@ public class CollectActivity extends ThemedActivity
 
                 Log.d(GEOTAG, "Menu item clicked.");
 
-                geoNavHelper.setMGeoNavActivated(!geoNavHelper.getMGeoNavActivated());
-                MenuItem navItem = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
-                if (geoNavHelper.getMGeoNavActivated()) {
+                dialogGeoNav = new GeoNavCollectDialog(this).create();
 
-                    navItem.setIcon(R.drawable.ic_explore_black_24dp);
+                if (!dialogGeoNav.isShowing()) {
 
-                    mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, true).apply();
+                    if (getWindow().isActive()) {
 
-                }
-                else {
-
-                    navItem.setIcon(R.drawable.ic_explore_off_black_24dp);
-
-                    mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply();
-
+                        try {
+                            dialogGeoNav.show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
 
                 return true;

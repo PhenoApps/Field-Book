@@ -166,6 +166,11 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
      * Starts a timer (with interval defined in the preferences) that runs the IZ algorithm.
      */
     fun startGeoNav() {
+
+        if (!initialized) {
+            recreateThreads()
+        }
+
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager?
         if (sensorManager != null) {
             sensorManager.registerListener(
@@ -452,6 +457,8 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         mLocalBroadcastManager.unregisterReceiver(mGnssResponseReceiver)
 
         mConnectThread?.cancel()
+
+        initialized = false
     }
 
     fun resetGeoNavMessages() {

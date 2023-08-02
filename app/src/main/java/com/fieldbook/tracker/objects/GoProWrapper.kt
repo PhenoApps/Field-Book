@@ -29,8 +29,12 @@ class GoProWrapper @Inject constructor(
     }
 
     fun destroy() {
-        helper?.onDestroy()
-        gatt.clear()
+        try {
+            helper?.onDestroy()
+            gatt.clear()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onApRequested() {
