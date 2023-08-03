@@ -246,7 +246,7 @@
     <string name="tutorial_main_infobars_title">インフォバー</string>
     <string name="tutorial_main_infobars_description">インフォバーは各エントリーの追加情報を表示し、ドロップダウンメニューで変更できます。</string>
     <string name="tutorial_main_traits_title">形質</string>
-    <string name="tutorial_main_traits_description">小さい緑の矢印で形質間を移動します。</string>
+    <string name="tutorial_main_traits_description">The small, colored arrows move between traits.</string>
     <string name="tutorial_main_traitlist_title">形質</string>
     <string name="tutorial_main_traitlist_description">現在収集している形質です。現在の形質を押すと調査可能な形質のリストを表示します。</string>
     <string name="tutorial_main_entries_title">エントリー</string>
