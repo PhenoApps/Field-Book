@@ -111,7 +111,7 @@
     <string name="traits_format_usb_camera">Usb Camera</string>
     <string name="traits_format_go_pro_camera">GoPro</string>
 
-    <string name="traits_create_trait">Trait</string>
+    <string name="traits_create_trait">Name</string>
     <string name="traits_create_format">Format</string>
     <string name="traits_create_value_default">Default</string>
     <string name="traits_create_value_minimum">Minimum</string>
@@ -345,10 +345,13 @@
     <string name="about_help_translate_title">Help translate</string>
     <string name="about_libraries_title">Libraries</string>
     <string name="about_updates_title">Check for updates</string>
+    <string name="changelog_title">Changelog</string>
+    <string name="libraries_title">Libraries</string>
     <string name="about_manual_title">Manual</string>
     <string name="about_support_title">Support</string>
-
-    <string name="changelog_title">Changelog</string>
+    <string name="check_updates_title">Checking for Updates...</string>
+    <string name="found_updates_title">Download Latest Version</string>
+    <string name="no_updates_title">Running Latest Version</string>
 
     <!-- Profile dialog -->
     <string name="profile_person">Person</string>
