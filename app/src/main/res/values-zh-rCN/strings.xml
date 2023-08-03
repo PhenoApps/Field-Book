@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Common -->
+    <!-- App -->
     <string name="field_book">田间记录本</string>
+    <!-- Dialog -->
     <string name="dialog_cancel">取消</string>
     <string name="dialog_ok">同意</string>
     <string name="dialog_yes">是</string>
@@ -11,6 +12,11 @@
     <string name="dialog_import">导入</string>
     <string name="dialog_warning">警告</string>
     <string name="dialog_save">保存</string>
+    <string name="dialog_go">Go</string>
+    <string name="dialog_save_error_title">Save Error</string>
+    <string name="dialog_back">Back</string>
+    <string name="dialog_scan">Scan</string>
+    <string name="barcode_scanner_text">扫描条形码</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">示例数据</string>
     <string name="startup_sample_data_message">加载示例数据？</string>
@@ -18,345 +24,28 @@
     <string name="permission_rationale_storage_import">导入文件需要访问设备上的文件</string>
     <string name="permission_rationale_storage_export">导出数据需要访问设备上的文件。</string>
     <string name="permission_rationale_trait_features">采集数据需要访问设备上的文件，麦克风和相机。</string>
-    <!-- Miscellaneous  -->
-    <!-- Main Activity  -->
-    <string name="main_toolbar_search">搜索</string>
-    <string name="main_toolbar_resources">资源</string>
-    <string name="main_trait_details">性状说明</string>
-    <string name="main_infobar_data_missing">无数据</string>
-    <string name="main_toolbar_moveto_no_match">无匹配的数值</string>
-    <string name="main_toolbar_next_entry_no_data">下一个空记录</string>
-    <string name="main_toolbar_moveto">转到 ID</string>
-    <string name="main_toolbar_barcode_scan">扫描条码</string>
-    <string name="main_toolbar_moveto_scan">扫描</string>
-    <string name="barcode_scanner_text">扫描条形码</string>
-    <!-- Fields Activity  -->
-    <string name="fields_delete_study">删除地块</string>
-    <string name="fields_delete_study_confirmation">你确信要删除这个地块吗？它将删除这个地块的全部数据！</string>
-    <string name="fields_study_exists_message">地块已经存在。</string>
-    <string name="fields_delete">删除</string>
-    <!-- Settings Activity  -->
+    <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
+    <!-- Config Activity  -->
     <string name="settings_fields">地块</string>
     <string name="settings_traits">性状</string>
     <string name="settings_collect">收集</string>
     <string name="settings_export">导出</string>
     <string name="settings_advanced">设置</string>
     <string name="settings_profile">说明</string>
-    <!-- Traits Activity  -->
-    <string name="traits_sort_title">排序</string>
-    <string name="traits_sort_name">名称</string>
-    <string name="traits_sort_visibility">可见性</string>
-    <string name="traits_sort_format">格式</string>
-    <string name="traits_toolbar_add_trait">添加性状</string>
-    <string name="traits_toolbar_delete_all">删除全部性状</string>
-    <string name="traits_toolbar_sort">排序</string>
-    <string name="traits_toolbar_import_export">导入/导出</string>
-    <string name="traits_dialog_import">导入</string>
-    <string name="traits_dialog_export">导出</string>
-    <string name="traits_options_copy">复制</string>
-    <string name="traits_options_edit">编辑</string>
-    <string name="traits_options_delete">删除</string>
-    <string name="traits_options_delete_title">删除性状</string>
-    <string name="traits_format_numeric">数值型</string>
-    <string name="traits_format_categorical">类别型</string>
-    <string name="traits_format_date">日期型</string>
-    <string name="traits_format_percent">百分数</string>
-    <string name="traits_format_counter">计数型</string>
-    <string name="traits_format_disease_rating">病害评级</string>
-    <string name="traits_format_boolean">逻辑型</string>
-    <string name="traits_format_text">文本型</string>
-    <string name="traits_format_photo">图片</string>
-    <string name="traits_format_audio">音频</string>
-    <string name="traits_format_multicategorical">多重分类</string>
-    <string name="traits_format_location">位置</string>
-    <string name="traits_format_barcode">条形码</string>
-    <string name="traits_format_labelprint">斑马标签打印</string>
-    <string name="traits_create_trait">性状</string>
-    <string name="traits_create_format">格式</string>
-    <string name="traits_create_value_default">默认值</string>
-    <string name="traits_create_value_minimum">最小值</string>
-    <string name="traits_create_value_maximum">最大值</string>
-    <string name="traits_create_details">详细信息</string>
-    <string name="traits_create_optional">可选的</string>
-    <string name="traits_create_categories_title">类别</string>
-    <string name="traits_create_photo_maximum">照片的最大数目</string>
-    <string name="traits_create_true">正确</string>
-    <string name="traits_create_false">错误</string>
-    <string name="traits_create_categories_text">用“/\"分割类别</string>
-    <string name="traits_create_warning_name_blank">性状名称不能为空</string>
-    <string name="traits_create_warning_duplicate">性状已经存在</string>
-    <string name="traits_create_warning_numeric_required">默认值、最小值和最大值必须设定为数字</string>
-    <string name="traits_export_check">导出当前性状列表？</string>
-    <string name="traits_warning_delete">删除性状也会删掉上采集的性状数据。确定要删除这个性状吗？</string>
-    <!-- Export  -->
-    <string name="export_format_database">数据库</string>
-    <string name="export_format_table">表格</string>
-    <string name="export_file_name">文件名</string>
-    <string name="export_content_columns_title">地块列</string>
-    <string name="export_content_columns_all">所有导入的列</string>
-    <string name="export_content_columns_unique">只要独特的标识</string>
-    <string name="export_content_traits_all">所有性状</string>
-    <string name="export_content_traits_active">只要活动的性状</string>
-    <string name="export_error_general">导出错误</string>
-    <string name="export_error_data_missing">没有数据可导出</string>
-    <string name="export_complete">导出完成</string>
-    <string name="export_progress">导出中...</string>
-    <string name="export_error_missing_format">必须选择导出类型</string>
-    <string name="export_error_missing_column">地块列必选</string>
-    <string name="export_error_missing_trait">性状类型必选</string>
-    <string name="export_overwrite">覆盖此前的导出</string>
-    <!-- Preferences Activity  -->
-    <string name="preferences_appearance_title">外观</string>
-    <string name="preferences_appearance_tutorial_description">在采集、设置、地块和性状页面上添加”教程“按钮</string>
-    <string name="preferences_appearance_infobar_number">信息条数量</string>
-    <string name="preferences_appearance_infobar_number_description">调整主屏幕上显示的信息条数量</string>
-    <string name="preferences_appearance_quickgoto">快速转移</string>
-    <string name="preferences_appearance_quickgoto_description">主屏幕中间部分改为”快速转移“</string>
-    <string name="preferences_appearance_language">语言</string>
-    <string name="preferences_appearance_language_description">语言随系统设置</string>
-    <string name="preferences_appearance_theme_title">主题</string>
-    <string name="preferences_appearance_toolbar_customize">调整工具栏图标</string>
-    <string name="preferences_appearance_toolbar_customize_description">调整采集页上的默认图标</string>
-    <string name="preferences_appearance_toolbar_customize_search">搜索</string>
-    <string name="preferences_appearance_toolbar_customize_resources">资源</string>
-    <string name="preferences_appearance_toolbar_customize_summary">汇总</string>
-    <string name="preferences_appearance_toolbar_customize_lock">锁定</string>
-    <string name="preferences_behavior_title">动作</string>
-    <string name="preferences_behavior_volume_buttons_navigate">用音量键翻动记录</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">按音量键上翻或下翻记录</string>
-    <string name="preferences_behavior_return_character">返回键信号</string>
-    <string name="preferences_behavior_return_character_next_plot">下一个小区</string>
-    <string name="preferences_behavior_return_character_next_trait">下一个性状</string>
-    <string name="preferences_behavior_return_character_do_nothing">无动作</string>
-    <string name="preferences_behavior_cycle_traits">遍历性状然后前进</string>
-    <string name="preferences_behavior_cycle_traits_description">采集完所有性状，田间记载本进入下一条记录</string>
-    <string name="preferences_behavior_disable_entry_arrow">不显示记录箭头</string>
-    <string name="preferences_behavior_disable_entry_arrow_left">向左</string>
-    <string name="preferences_behavior_disable_entry_arrow_right">向右</string>
-    <string name="preferences_behavior_disable_entry_arrow_both">都是</string>
-    <string name="preferences_sounds">声音</string>
-    <string name="preferences_sound_primary_order_sound">主顺序通知音</string>
-    <string name="preferences_sound_primary_order_sound_description">主顺序变化时的通知声音</string>
-    <string name="preferences_general_title">通用</string>
-    <string name="preferences_general_use_day_number">使用累计日代替日期</string>
-    <string name="preferences_general_use_day_number_description">采集数据时用当年日数代替日期</string>
-    <string name="preferences_general_skip_entries_with_data">跳过有数据的记录</string>
-    <string name="preferences_general_skip_entries_with_data_description">跳过当前性状已有数据的记录</string>
-    <string name="preferences_general_share_disable">禁用文件分享</string>
-    <string name="preferences_general_share_disable_description">导出文件时，不显示分享对话框</string>
-    <string name="preferences_general_barcode_camera">转到条码指定的记录</string>
-    <string name="preferences_general_barcode_camera_description">扫描条码，然后转到特定记录</string>
-    <string name="preferences_general_feature_next_missing">下个无数据记录</string>
-    <string name="preferences_general_feature_next_missing_description">在工具栏增加一个按钮，跳到下一个当前性状无数据的记录。</string>
-    <string name="preferences_general_feature_barcode_text">转到唯一的标识符</string>
-    <string name="preferences_general_feature_barcode_text_description">打开对话框输入唯一的ID，跳转过去</string>
-    <string name="preferences_general_feature_datagrid">数据表格</string>
-    <string name="preferences_general_feature_datagrid_description">显示包含小区和性状的电子表来展示收集到的数据</string>
-    <string name="preferences_general_system_title">默认数据</string>
-    <string name="preferences_source_default_import">默认导入源</string>
-    <string name="preferences_source_default_export">默认导出源</string>
-    <string name="preferences_appearance_system_category_title">应用</string>
-    <string name="preferences_appearance_collection_category_title">采集页</string>
-    <!-- Trait text and errors -->
-    <string name="trait_layout_data_stored">已保存</string>
-    <string name="trait_layout_print_label_size_title">大小：</string>
-    <string name="trait_layout_print_text_field_title">文本：</string>
-    <string name="trait_layout_print_text_field_title_2">文本2：</string>
-    <string name="trait_layout_print_text_field_title_3">文本3：</string>
-    <string name="trait_layout_print_text_field_title_4">文本4：</string>
-    <string name="trait_layout_print_barcode_field_title">条形码：</string>
-    <string name="trait_layout_print_label_copies_title">拷贝：</string>
-    <string name="trait_error_hardware_missing">您的设备不包含此功能所必需的硬件</string>
-    <string name="trait_error_minimum_value">数值低于最小值</string>
-    <string name="trait_error_maximum_value">数值超过最大值</string>
-    <string name="trait_error_disease_severity">严重度数据已存储</string>
-    <string name="trait_delete_warning_photo">确定要删除这张照片吗？</string>
-    <!-- Tutorial -->
-    <string name="tutorial_dialog_title">教程</string>
-    <string name="tutorial_dialog_description">您希望启用教程吗？此设定可以在设置中更改。</string>
-    <string name="tutorial_main_infobars_title">信息栏</string>
-    <string name="tutorial_main_infobars_description">信息栏显示每条记录的额外信息，可用下拉菜单修改。</string>
-    <string name="tutorial_main_traits_title">性状</string>
-    <string name="tutorial_main_traits_description">小绿箭头可切换性状</string>
-    <string name="tutorial_main_traitlist_title">性状</string>
-    <string name="tutorial_main_traitlist_description">正采集当前性状数据。点击当前性状，将显示活动的性状列表。</string>
-    <string name="tutorial_main_entries_title">记录</string>
-    <string name="tutorial_main_entries_description">大黑箭头可切换记录</string>
-    <string name="tutorial_main_navinfo_title">排序列</string>
-    <string name="tutorial_main_navinfo_description">主要和次要顺序显示于此</string>
-    <string name="tutorial_main_datacollect_title">数据录入</string>
-    <string name="tutorial_main_datacollect_description">数据在屏幕底部区域录入。性状会有不同的显示方式。</string>
-    <string name="tutorial_main_na_title">缺失数据</string>
-    <string name="tutorial_main_na_description">NA按钮用来标识数值缺失。</string>
-    <string name="tutorial_main_delete_title">删除数据</string>
-    <string name="tutorial_main_delete_description">点此按钮删除数据。</string>
-    <string name="tutorial_main_search_title">搜索</string>
-    <string name="tutorial_main_search_description">\"搜索\"图标启动数据库查询。</string>
-    <string name="tutorial_main_resources_title">资源</string>
-    <string name="tutorial_main_resources_description">显示资源目录中的文件列表</string>
-    <string name="tutorial_main_summary_title">汇总</string>
-    <string name="tutorial_main_summary_description">显示当前记录的所有数据汇总。</string>
-    <string name="tutorial_main_lockdata_title">锁定数据</string>
-    <string name="tutorial_main_lockdata_description">锁定当前的数据录入。</string>
-    <string name="tutorial_settings_fields_title">地块</string>
-    <string name="tutorial_settings_fields_description">允许导入和管理地块。</string>
-    <string name="tutorial_settings_fields_import">使用田间记本前，先要导入一个地块文件。</string>
-    <string name="tutorial_settings_traits_title">性状</string>
-    <string name="tutorial_settings_traits_description">允许添加、导入和管理性状。</string>
-    <string name="tutorial_settings_collect_title">采集数据</string>
-    <string name="tutorial_settings_collect_description">允许采集表型数据。</string>
-    <string name="tutorial_settings_settings_title">设置</string>
-    <string name="tutorial_settings_settings_description">对数据采集进行其它配置</string>
-    <string name="tutorial_settings_export_title">导出</string>
-    <string name="tutorial_settings_export_description">数据可导出两种格式：数据库或者表格。</string>
-    <string name="tutorial_fields_add_title">添加地块</string>
-    <string name="tutorial_fields_add_description">导入一个地块文件。</string>
-    <string name="tutorial_fields_file_description">文件必须包含3列：唯一标识、主顺序和次要顺序。主/次顺序用来在地块中导航。</string>
-    <string name="tutorial_fields_select_title">活动地块</string>
-    <string name="tutorial_fields_select_description">被选中进行数据采集的导入地块。</string>
-    <string name="tutorial_fields_delete_title">删除地块</string>
-    <string name="tutorial_fields_delete_description">要删除地块，打开地块名称左侧的菜单然后选择删除。</string>
-    <string name="tutorial_traits_add_title">添加性状</string>
-    <string name="tutorial_traits_add_description">添加性状会创建一个新性状。不同性状的采集布局不同。</string>
-    <string name="tutorial_traits_format_title">性状格式</string>
-    <string name="tutorial_traits_format_description">不同的性状格式通过图标来标识。</string>
-    <string name="tutorial_traits_visibility_title">性状可见性</string>
-    <string name="tutorial_traits_visibility_description">通过点击检查框来禁止性状采集数据。</string>
-    <!-- About dialog -->
-    <string name="about_title">关于</string>
-    <string name="about_version_title">版本</string>
-    <string name="about_title_other_apps">其它表型软件</string>
-    <string name="about_project_lead_title">项目指挥</string>
-    <string name="about_contributors_title">贡献者</string>
-    <string name="about_contributors_funding_title">经费支持</string>
-    <string name="about_rate">评价这个软件</string>
-    <string name="changelog_title">更改记录</string>
-    <string name="about_libraries_title">函数库</string>
-    <!-- Profile dialog -->
-    <string name="profile_person">采集者</string>
-    <string name="profile_reset">清除设置</string>
-    <string name="profile_person_title">设定采集者</string>
-    <string name="profile_name_first">名</string>
-    <string name="profile_name_last">姓</string>
-    <!-- Database dialog -->
-    <string name="database_dialog_title">数据库</string>
-    <string name="database_import">导入数据库</string>
-    <string name="database_export">导出数据库</string>
-    <string name="database_reset">删除数据库</string>
-    <string name="database_reset_warning1">重置数据库将删除所有数据。你确定吗？</string>
-    <string name="database_reset_warning2">数据库重置无法逆转。该应用将在清除数据库后退出。你确定要继续吗?</string>
-    <string name="database_reset_message">数据库已被删除</string>
-    <!-- Import dialog -->
+    <!-- Config Activity Fuzzy Search  -->
+    <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
+    <string name="act_config_fuzzy_search_error">Something went wrong when searching for %s</string>
+    <string name="act_config_search_fab_content_description">Search all plots and fields to load/navigate to the barcoded item.</string>
+    <!-- File manager  -->
     <string name="import_source_local">本地存储</string>
     <string name="import_source_cloud">云端存储</string>
     <string name="import_source_ask">总是询问</string>
-    <string name="import_dialog_title_fields">导入地块</string>
-    <string name="import_dialog_title_traits">导入性状</string>
-    <string name="import_dialog_unique">唯一标识符</string>
-    <string name="import_dialog_primary">主要顺序</string>
-    <string name="import_dialog_secondary">次要顺序</string>
     <string name="import_dialog_importing">请稍等...</string>
     <string name="import_error_general">导入错误</string>
-    <string name="import_error_unique">唯一标识包含重复项或被另一个文件使用了</string>
-    <string name="import_error_unsupported">尚不支持此文件格式</string>
-    <string name="import_error_column_name">导入文件的列名称不能是：</string>
-    <string name="import_error_unique_characters_illegal">所选列含有不能用作唯一标识的字符</string>
-    <string name="import_error_column_choice">这些列不能用于同一个事项</string>
-    <string name="import_error_format_field">只有CSV或XLS文件可作为地块导入</string>
-    <string name="import_error_format_trait">只有TRT文件可作为性状列表导入</string>
-    <!-- Export dialog -->
-    <string name="export_source_local">本地</string>
-    <string name="export_source_brapi">BrAPI</string>
-    <string name="export_dialog_title">导出数据</string>
-    <!-- BrAPI export dialog -->
-    <string name="brapi_export_button">导出</string>
-    <string name="brapi_export_title">BrAPI导出统计量</string>
-    <string name="brapi_export_observations">观测值</string>
-    <string name="brapi_export_num_new_obs">新观测值</string>
-    <string name="brapi_export_num_synced_obs">同步观测值</string>
-    <string name="brapi_export_num_ed_obs">编辑的观测值</string>
-    <string name="brapi_export_skipped_observations">跳过的观测值</string>
-    <string name="brapi_export_skipped_user_created">用户创建性状的观测值</string>
-    <string name="brapi_export_skipped_wrong_source">不同的数据来源</string>
-    <string name="brapi_export_num_new_imgs">新图像</string>
-    <string name="brapi_export_num_synced_imgs">同步的图像</string>
-    <string name="brapi_export_num_ed_imgs">编辑的图像</string>
-    <string name="brapi_export_num_incomplete_imgs">未完整同步的图像</string>
-    <string name="brapi_export_skipped_images">跳过的图像</string>
-    <string name="brapi_export_skipped_user_created_images">用户创建性状的图像</string>
-    <string name="brapi_export_images">图像</string>
-    <string name="brapi_na">缺失</string>
-    <string name="brapi_delete_message">不能删除同步的BrAPI观测值，以缺失代替</string>
+    <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">地块没有载入。请载入地块再采集数据。</string>
     <string name="warning_traits_missing">无性状存在。请先创建性状，再采集数据。</string>
-    <string name="warning_traits_missing_modify">先创建性状，才能修改。</string>
-    <!-- Search Activity -->
-    <string name="search_dialog_add">添加</string>
-    <string name="search_dialog_clear">清除</string>
-    <string name="search_dialog_query_is_equal_to">等于</string>
-    <string name="search_dialog_query_is_not_equal_to">不等于</string>
-    <string name="search_dialog_query_contains">包含</string>
-    <string name="search_dialog_query_does_not_contain">不包含</string>
-    <string name="search_dialog_query_is_more_than">大于</string>
-    <string name="search_dialog_query_is_less_than">小于</string>
-    <string name="search_results_dialog_title">搜索结果</string>
-    <string name="search_results_dialog_range">排</string>
-    <string name="search_results_dialog_plot">小区</string>
-    <string name="search_results_missing">无结果</string>
-    <!-- Citation strings -->
-    <string name="citation_title">引用</string>
-    <string name="citation_string">如果利用田间记载本进行科研，请引用如下的杂志文章：</string>
-    <!-- Brapi strings -->
-    <string name="brapi_base_url">基础网址</string>
-    <string name="brapi_base_url_desc">连接到BrAPI服务器的基础网址</string>
-    <string name="brapi_save_authorize">保存和授权</string>
-    <string name="brapi_revoke_auth">退出</string>
-    <string name="brapi_auth_success">BrAPI授权成功</string>
-    <string name="brapi_auth_deny">BrAPI授权被拒绝</string>
-    <string name="brapi_auth_error_starting">启动BrAPI授权出错</string>
-    <string name="brapi_load_data_button">载入地块</string>
-    <string name="brapi_load_traits_button">载入性状</string>
-    <string name="brapi_save_data_button">保存地块</string>
-    <string name="brapi_study_name">名称</string>
-    <string name="brapi_study_description">描述</string>
-    <string name="brapi_study_location">位置</string>
-    <string name="brapi_study_num_traits">性状</string>
-    <string name="brapi_study_detail_error">载入课题细节出错。课题未保存。</string>
-    <string name="brapi_plot_detail_error">载入课题小区出错。课题未保存。</string>
-    <string name="brapi_study_traits_error">载入课题性状出错。课题未保存。</string>
-    <string name="brapi_ontology_error">从BrAPI载入性状出错。</string>
-    <string name="brapi_save_field_error">保存地块出错。</string>
-    <string name="brapi_field_not_selected">选中的地块必须是从BrAPI载入的。</string>
-    <string name="brapi_save_trait">保存性状</string>
-    <string name="brapi_must_configure_url">操作前必须设置有效的BrAPI网址</string>
-    <string name="brapi_export_failed">BrAPI导出失败</string>
-    <string name="brapi_export_permission_deny">错误：你不具有向专用系统发送数据的许可。</string>
-    <string name="brapi_export_not_supported">错误：目标系统不支持通过BrAPI发送观测值。</string>
-    <string name="brapi_export_wrong_num_obs">错误：观测值返回数目与申请不一致。</string>
-    <string name="brapi_export_missing_obs">错误：返回缺失观测值。</string>
-    <string name="brapi_export_multiple_obs">错误：每个变量多个观测值。</string>
-    <string name="brapi_export_unknown_error">错误：未知错误。</string>
-    <string name="brapi_export_successful">BrAPI导出成功</string>
-    <string name="brapi_saving_indicator">在保存观测值...</string>
-    <string name="brapi_field_non_matching_sources">无法同步数据。地块数据来自%1$s，BrAPI当前设为%2$s。来源地址必须一致。</string>
-    <string name="brapi_trait_already_exists">性状已经存在。 %1$s未保存。</string>
-    <string name="brapi_error_saving_all_traits">保存性状出错。未保存性状。</string>
-    <string name="brapi_error_saving_some_traits">部分性状保证出错。部分性状未保存。</string>
-    <string name="brapi_traits_saved_success">选中的性状保存成功。</string>
-    <string name="device_offline_warning">设备离线：请连接网络再试</string>
-    <string name="next">下一个</string>
-    <string name="prev">前一个</string>
-    <string name="page_one_of_one">第一页，共一页。</string>
-    <string name="brapi_auth_needed_title">需要登录</string>
-    <string name="brapi_auth_needed">需要登录系统。
-你试图通过同步数据来保存你的数据。
-
-现在需要授权吗？</string>
-    <string name="brapi_info_message">通过BrAPI导入的性状和地块可以通过“BrAPI导出”来导出观测值。
-
-通过手工创建或通过CSV导入的性状和地块需要用CSV格式导出。</string>
-    <string name="brapi_info_title">BrAPI同步信息中</string>
-    <string name="brapi_auth_btn">登录进入站点</string>
-    <string name="about_technical_title">技术细节</string>
+    <!-- Changelog -->
+    <string name="changelog_title">更改记录</string>
 </resources>
