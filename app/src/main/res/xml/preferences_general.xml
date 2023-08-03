@@ -55,12 +55,14 @@
         android:entryValues="@array/pref_general_location_acquisition_level_values"
         android:defaultValue="-1"/>
 
-    <CheckBoxPreference
-        android:defaultValue="false"
+    <ListPreference
         android:icon="@drawable/ic_tb_barcode_scan"
-        android:key="BarcodeScan"
-        android:summary="@string/preferences_general_barcode_camera_description"
-        android:title="@string/preferences_general_barcode_camera" />
+        android:key="com.fieldbook.tracker.MOVE_TO_UNIQUE_ID"
+        android:summary="@string/preferences_general_feature_barcode_text_description"
+        android:title="@string/preferences_general_feature_barcode_text"
+        android:entries="@array/pref_general_move_to_unique_id_entries"
+        android:entryValues="@array/pref_general_move_to_unique_id_values"
+        android:defaultValue="1"/>
 
     <CheckBoxPreference
         android:defaultValue="false"
@@ -68,12 +70,5 @@
         android:key="DataGrid"
         android:summary="@string/preferences_general_feature_datagrid_description"
         android:title="@string/preferences_general_feature_datagrid" />
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_adv_unique"
-        android:key="JumpToPlot"
-        android:summary="@string/preferences_general_feature_barcode_text_description"
-        android:title="@string/preferences_general_feature_barcode_text" />
 
 </PreferenceScreen>
