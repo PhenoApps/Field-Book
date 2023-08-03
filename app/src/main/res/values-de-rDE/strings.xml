@@ -246,7 +246,7 @@
     <string name="tutorial_main_infobars_title">InfoBars</string>
     <string name="tutorial_main_infobars_description">InfoBars show extra data for each entry and can be changed using the dropdown menus.</string>
     <string name="tutorial_main_traits_title">Merkmale</string>
-    <string name="tutorial_main_traits_description">The small, green arrows move between traits.</string>
+    <string name="tutorial_main_traits_description">The small, colored arrows move between traits.</string>
     <string name="tutorial_main_traitlist_title">Merkmale</string>
     <string name="tutorial_main_traitlist_description">The current trait being collected. A list of active traits is displayed when the current trait is pressed.</string>
     <string name="tutorial_main_entries_title">Entries</string>
