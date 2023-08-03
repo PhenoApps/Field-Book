@@ -12,7 +12,10 @@ import android.os.Looper
 import android.os.Message
 import android.util.AttributeSet
 import android.view.View
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ImageButton
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -34,6 +37,7 @@ import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQualit
 import com.fieldbook.tracker.utilities.GnssThreadHelper
 import com.google.android.material.chip.ChipGroup
 import org.json.JSONObject
+import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -66,6 +70,10 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private var mProgressDialog: AlertDialog? = null
 
+    private var precision: String? = null
+
+    private var currentFixQuality = false
+
     private lateinit var chipGroup: ChipGroup
     private lateinit var averageSwitch: SwitchCompat
     private lateinit var utcTextView: TextView
@@ -75,6 +83,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     private lateinit var latTextView: TextView
     private lateinit var lngTextView: TextView
     private lateinit var hdopTextView: TextView
+    private lateinit var precisionSp: Spinner
     private lateinit var connectGroup: Group
     private lateinit var connectButton: ImageButton
     private lateinit var collectButton: ImageButton
@@ -170,28 +179,31 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
                     currentUtc = parser.utc
 
-                    //populate ui
-                    accTextView.text = parser.fix
-                    latTextView.text = truncateFixQuality(parser.latitude)
-                    lngTextView.text = truncateFixQuality(parser.longitude)
-                    utcTextView.text = parser.utc
-                    hdopTextView.text = parser.hdop
+                    checkBeforeUpdate(parser.getSimpleFix()) {
 
-                    if (parser.satellites.isEmpty()) {
-                        satTextView.text = "${parser.gsv.size}"
-                    } else {
-                        val maxSats = maxOf(parser.satellites.toInt(), parser.gsv.size)
-                        satTextView.text = "${parser.gsv.size}/$maxSats"
+                        //populate ui
+                        accTextView.text = parser.fix
+                        latTextView.text = truncateFixQuality(parser.latitude)
+                        lngTextView.text = truncateFixQuality(parser.longitude)
+                        utcTextView.text = parser.utc
+                        hdopTextView.text = parser.hdop
+
+                        if (parser.satellites.isEmpty()) {
+                            satTextView.text = "${parser.gsv.size}"
+                        } else {
+                            val maxSats = maxOf(parser.satellites.toInt(), parser.gsv.size)
+                            satTextView.text = "${parser.gsv.size}/$maxSats"
+                        }
+                        altTextView.text = truncateFixQuality(parser.altitude)
                     }
-                    altTextView.text = truncateFixQuality(parser.altitude)
                 }
-
             },
             filter
         )
 
         setupChooseBluetoothDevice()
 
+        precision = controller.getPreferences().getString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, "Any") ?: "Any"
     }
 
     /**
@@ -240,6 +252,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         connectGroup = act.findViewById(R.id.gnss_group)
         collectButton = act.findViewById(R.id.gnss_collect_button)
         disconnectButton = act.findViewById(R.id.disconnect_button)
+        precisionSp = act.findViewById(R.id.precisionSpinner)
 
         connectButton.requestFocus()
 
@@ -636,6 +649,34 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         }
 
+        precisionSp.setSelection(
+            when (precision) {
+                "GPS" -> 1
+                "RTK" -> 2
+                "Float RTK" -> 3
+                else -> 0
+            }
+        )
+
+        precisionSp.onItemSelectedListener = object : OnItemSelectedListener {
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+
+                precision = precisionSp.selectedItem.toString()
+
+                controller.getPreferences().edit().putString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, precision).apply()
+
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+
+        }
+
         setupAveragingUi()
 
         if (mGpsTracker == null) {
@@ -734,33 +775,51 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
      */
     override fun onLocationChanged(location: Location) {
 
-        //LocationManager accuracy is horizontal accuracy in meters
-        //>=100 use three decimal places
-        val fixQuality = when (location.accuracy) {
-           in 0.0..11.0 -> {
-               "DGPS"         //<11 use five
-           }
-           in 12.0..50.0 -> {
-               "internal"     //>11 <=50 use four
-           }
-           else -> {
-               "bad"
-           }
+        checkBeforeUpdate("GPS") {
+
+            currentUtc = UUID.randomUUID().toString()
+
+            latTextView.text = truncateFixQuality(location.latitude.toString())
+            lngTextView.text = truncateFixQuality(location.longitude.toString())
+            altTextView.text = truncateFixQuality(location.altitude.toString())
+
+            accTextView.text = location.accuracy.toString()
+            utcTextView.text = location.time.toString()
         }
-
-        latTextView.text = truncateFixQuality(location.latitude.toString())
-        lngTextView.text = truncateFixQuality(location.longitude.toString())
-        altTextView.text = truncateFixQuality(location.altitude.toString())
-
-        accTextView.text = location.accuracy.toString()
-        utcTextView.text = location.time.toString()
-
     }
 
-    //close the thread when the linear layout is removed
-//    override fun onDetachedFromWindow() {
-//        super.onDetachedFromWindow()
-//
-//        getThreadHelper().stop()
-//    }
+    private fun checkBeforeUpdate(fix: String, update: () -> Unit) {
+
+        val precisionThresh = controller.getPreferences().getString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, "Any") ?: "Any"
+
+        if (precisionThresh != "Any") {
+
+            val isQuality = NmeaParser().compareFix(fix, precisionThresh)
+            if (isQuality && !currentFixQuality) {
+                //quality fix is found, play something good
+                update()
+                collectButton.isEnabled = true
+                controller.getSoundHelper().playCelebrate()
+                controller.getVibrator().vibrate(1000L)
+                currentFixQuality = true
+            } else if (isQuality && currentFixQuality) {
+                //quality is still good
+                update()
+                collectButton.isEnabled = true
+            } else if (!isQuality && currentFixQuality) {
+                //quality is bad, play something bad
+                //reset last plotId if quality drops
+                currentFixQuality = false
+                (controller.getContext() as? CollectActivity)?.showLocationPrecisionLossDialog()
+                controller.getSoundHelper().playError()
+                controller.getVibrator().vibrate(1000L)
+                collectButton.isEnabled = false
+            }
+
+        } else {
+            update()
+            currentFixQuality = true
+            collectButton.isEnabled = true
+        }
+    }
 }

@@ -71,6 +71,7 @@ import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.utilities.VibrateUtil;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
 import com.fieldbook.tracker.utilities.VibrateUtil;
 import com.fieldbook.tracker.views.CollectInputView;
@@ -2129,7 +2130,7 @@ public class CollectActivity extends ThemedActivity
         return this;
     }
 
-    public void showGeoNavPrecisionLossDialog() {
+    public void showLocationPrecisionLossDialog() {
 
         if (getWindow().isActive()) {
 

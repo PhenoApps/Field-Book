@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="dialog_geonav_precision_loss_title">GeoNav Precision Loss</string>
+    <string name="dialog_geonav_precision_loss_title">Location Precision Loss</string>
     <string name="dialog_geonav_precision_loss_msg">Your preferred precision has been lost.</string>
 </resources>
