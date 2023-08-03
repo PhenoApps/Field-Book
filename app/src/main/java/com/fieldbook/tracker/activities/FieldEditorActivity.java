@@ -50,14 +50,15 @@ import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.GeoNavHelper;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
+import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
-import com.google.android.material.snackbar.Snackbar;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -104,6 +105,8 @@ public class FieldEditorActivity extends ThemedActivity
     private Menu systemMenu;
 
     private GPSTracker mGpsTracker;
+
+    private GeoNavHelper geoNavHelper;
 
     @Inject
     DataHelper database;
@@ -179,6 +182,7 @@ public class FieldEditorActivity extends ThemedActivity
         mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
         fieldList.setAdapter(mAdapter);
 
+        geoNavHelper = new GeoNavHelper(this);
     }
 
     private void showFileDialog() {
@@ -438,32 +442,37 @@ public class FieldEditorActivity extends ThemedActivity
 
                     int studyId = model.getStudy_id();
 
+                    FieldObject study = database.getFieldObject(studyId);
+
+                    String studyName = study.getExp_name();
+
                     if (studyId == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
 
-                        Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
+                        SnackbarUtils.showNavigateSnack(getLayoutInflater(),
+                                findViewById(R.id.main_content),
                                 getString(R.string.activity_field_editor_switch_field_same),
-                                Snackbar.LENGTH_LONG).show();
+                                8000, null, null
+                                );
+//                        Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
+//                                Snackbar.LENGTH_LONG).show();
 
                     } else {
 
-                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
-                                getString(R.string.activity_field_editor_switch_field, String.valueOf(studyId)),
-                                Snackbar.LENGTH_LONG);
+                        SnackbarUtils.showNavigateSnack(
+                                getLayoutInflater(),
+                                findViewById(R.id.main_content),
+                                getString(R.string.activity_field_editor_switch_field, studyName),
+                                8000,
+                                null, (v) -> {
+                                    int count = mAdapter.getCount();
 
-                        mySnackbar.setAction(R.string.activity_field_editor_switch_field_action, (view) -> {
-
-                            int count = mAdapter.getCount();
-
-                            for (int i = 0; i < count; i++) {
-                                FieldObject field = mAdapter.getItem(i);
-                                if (field.getExp_id() == studyId) {
-                                    mAdapter.getView(i, null, null).performClick();
-                                }
-                            }
-
-                        });
-
-                        mySnackbar.show();
+                                    for (int i = 0; i < count; i++) {
+                                        FieldObject field = mAdapter.getItem(i);
+                                        if (field.getExp_id() == studyId) {
+                                            mAdapter.getView(i, null, null).performClick();
+                                        }
+                                    }
+                                });
                     }
                 }
 

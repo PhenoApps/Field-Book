@@ -69,7 +69,10 @@ public final class SnackbarUtils {
         }
 
         ImageButton btn = snackView.findViewById(R.id.geonav_snackbar_btn);
-        if (btn != null) {
+
+        if (onClickListener == null) {
+            btn.setVisibility(View.GONE);
+        } else if (btn != null) {
             btn.setOnClickListener((v) -> {
 
                 snackbar.dismiss();
