@@ -150,6 +150,10 @@ public class GeneralKeys {
     //preference key to save the last plot during collect activity
     public static final String LAST_PLOT = "lastplot";
 
+    // collect search activity defaults
+    public static final String SEARCH_COLUMN_DEFAULT = "SEARCH_COLUMN_DEFAULT";
+    public static final String SEARCH_LIKE_DEFAULT = "SEARCH_LIKE_DEFAULT";
+
     public static final String DATA_LOCK_STATE = "DataLockState";
 
     //export flags

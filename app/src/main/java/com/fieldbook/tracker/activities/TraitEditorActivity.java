@@ -355,8 +355,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         return TapTargetUtil.Companion.getTapTargetSettingsRect(this, item, title, desc);
     }
 
-    private TapTarget traitsTapTargetMenu(int id, String title, String desc) {
-        return TapTargetUtil.Companion.getTapTargetSettingsView(this, findViewById(id), title, desc);
+    private TapTarget traitsTapTargetMenu(int id, String title, String desc, int targetRadius) {
+        return TapTargetUtil.Companion.getTapTargetSettingsView(this, findViewById(id), title, desc, targetRadius);
     }
 
     @Override
@@ -365,7 +365,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         switch (item.getItemId()) {
             case R.id.help:
                 TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(traitsTapTargetMenu(R.id.addTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description))
+                        .targets(traitsTapTargetMenu(R.id.addTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description), 60)
                                 //Todo add overflow menu action
                         );
 

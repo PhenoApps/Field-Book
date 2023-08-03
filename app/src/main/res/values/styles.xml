@@ -144,9 +144,9 @@
         <item name="fb_button_color_pressed">@color/high_contrast_button_color_pressed</item>
         <item name="fb_icon_fill_tint">@color/high_contrast_primary_dark</item>
 
-        <item name="colorPrimary">?attr/fb_color_primary</item>
+        <item name="colorPrimary">?attr/fb_color_primary_dark</item>
         <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
-        <item name="colorPrimaryVariant">?attr/fb_color_primary_dark</item>
+        <item name="colorPrimaryVariant">?attr/fb_color_primary</item>
         <item name="colorAccent">?attr/fb_color_accent</item>
         <item name="android:colorAccent">?attr/fb_color_accent</item>
 

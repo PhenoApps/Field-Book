@@ -84,7 +84,7 @@
     <color name="high_contrast_trait_categorical_button_press_color">@color/WHITE</color>
     <color name="high_contrast_button_text_color">@color/BLACK</color>
     <color name="high_contrast_button_color_normal">@color/BLACK</color>
-    <color name="high_contrast_button_color_pressed">@color/BLACK</color>
+    <color name="high_contrast_button_color_pressed">@color/WHITE</color>
     <color name="high_contrast_subheading_color">@color/BLACK</color>
     <color name="high_contrast_color_text_secondary">@color/BLACK</color>
 
