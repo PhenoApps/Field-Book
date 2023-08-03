@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sort -->
+    <string name="traits_toolbar_sort">Sort</string>
+    <string name="traits_sort_title">Sort</string>
+    <string name="traits_sort_name">Name</string>
+    <string name="traits_sort_visibility">Visibility</string>
+    <string name="traits_sort_format">Format</string>
+    <string name="warning_traits_missing_modify">Create traits before modifying them.</string>
+    <!-- Trait import/export -->
+    <string name="traits_toolbar_import_export">Import/Export</string>
+    <string name="traits_dialog_import">Import</string>
+    <string name="traits_export_check">Export current trait list?</string>
+    <string name="traits_dialog_export">Export</string>
+    <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
+    <string name="import_error_format_trait">Only TRT files can be imported as a trait list</string>
+    <string name="import_dialog_title_traits">Import traits</string>
+    <string name="traits_toolbar_delete_all">Delete all traits</string>
+    <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
+    <!-- Trait item menu -->
+    <string name="list_item_trait_popup_content_description">Open a menu specific to this trait.</string>
+    <string name="traits_options_copy">Copy</string>
+    <string name="traits_options_edit">Edit</string>
+    <string name="traits_options_delete">Delete</string>
+    <string name="traits_options_delete_title">Delete trait</string>
+    <string name="traits_warning_delete">Deleting a trait also deletes data that has been collected for that trait. Are you sure you want to delete this trait?</string>
+    <!-- Trait formats -->
+    <string name="traits_format_numeric">Numeric</string>
+    <string name="traits_format_categorical">Categorical</string>
+    <string name="traits_format_date">Date</string>
+    <string name="traits_format_percent">Percent</string>
+    <string name="traits_format_counter">Counter</string>
+    <string name="traits_format_disease_rating">Disease Rating</string>
+    <string name="traits_format_boolean">Boolean</string>
+    <string name="traits_format_text">Text</string>
+    <string name="traits_format_photo">Photo</string>
+    <string name="traits_format_audio">Audio</string>
+    <string name="traits_format_multicategorical">Multicat</string>
+    <string name="traits_format_location">Location</string>
+    <string name="traits_format_gnss">GNSS</string>
+    <string name="traits_format_barcode">Barcode</string>
+    <string name="traits_format_labelprint">Zebra Label Print</string>
+    <string name="traits_format_usb_camera">Usb Camera</string>
+    <string name="traits_format_go_pro_camera">GoPro</string>
+    <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">Add trait</string>
+    <string name="activity_traits_new_button_content_description">Create a new trait.</string>
+    <string name="traits_create_trait">Name</string>
+    <string name="traits_create_format">Format</string>
+    <string name="traits_create_value_default">Default</string>
+    <string name="traits_create_value_minimum">Minimum</string>
+    <string name="traits_create_value_maximum">Maximum</string>
+    <string name="traits_create_details">Details</string>
+    <string name="traits_create_optional">Optional</string>
+    <string name="traits_create_categories_title">Categories</string>
+    <string name="traits_create_photo_maximum">Maximum number of photos</string>
+    <string name="traits_create_true">True</string>
+    <string name="traits_create_false">False</string>
+    <string name="traits_create_categories_text">Use / to separate categories</string>
+    <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
+    <string name="traits_create_warning_duplicate">Trait already exists</string>
+    <string name="traits_create_warning_numeric_required">Default, minimum, and maximum are required and must be numeric</string>
+    <string name="dialog_new_trait_add_cat_button_text">Add</string>
+    <string name="traits_create_categories_value_text">Enter category value here</string>
+    <string name="list_item_category_delete_content_description">Delete the category.</string>
+    <string name="dialog_new_trait_add_category_content_description">Add new category.</string>
+</resources>
