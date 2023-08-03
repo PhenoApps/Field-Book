@@ -246,7 +246,7 @@
     <string name="tutorial_main_infobars_title">信息栏</string>
     <string name="tutorial_main_infobars_description">信息栏显示每条记录的额外信息，可用下拉菜单修改。</string>
     <string name="tutorial_main_traits_title">性状</string>
-    <string name="tutorial_main_traits_description">小绿箭头可切换性状</string>
+    <string name="tutorial_main_traits_description">The small, colored arrows move between traits.</string>
     <string name="tutorial_main_traitlist_title">性状</string>
     <string name="tutorial_main_traitlist_description">正采集当前性状数据。点击当前性状，将显示活动的性状列表。</string>
     <string name="tutorial_main_entries_title">记录</string>
