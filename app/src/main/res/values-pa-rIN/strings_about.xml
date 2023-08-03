@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App  -->
+    <string name="about_title">About</string>
+    <string name="about_version_title">Version</string>
+    <string name="about_manual_title">Manual</string>
+    <string name="about_rate">Rate this app</string>
+    <!-- Lead  -->
+    <string name="about_project_lead_title">Project Lead</string>
+    <string name="about_email_title">Email</string>
+    <!-- Support  -->
+    <string name="about_support_title">Support</string>
+    <string name="about_contributors_title">Contributors</string>
+    <string name="about_contributors_funding_title">Funding</string>
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <string name="about_technical_title">Technical</string>
+    <string name="about_libraries_title">Libraries</string>
+    <!-- Update -->
+    <string name="check_updates_title">Checking for Updates…</string>
+    <string name="found_updates_title">Download Latest Version</string>
+    <string name="no_updates_title">Running Latest Version</string>
+</resources>
