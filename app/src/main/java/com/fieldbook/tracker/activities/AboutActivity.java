@@ -24,10 +24,6 @@ import com.danielstone.materialaboutlibrary.model.MaterialAboutList;
 import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.VersionChecker;
-import com.michaelflisar.changelog.ChangelogBuilder;
-import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
-import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
 import java.io.BufferedReader;
@@ -80,13 +76,11 @@ public class AboutActivity extends MaterialAboutActivity {
                 Uri.parse("https://docs.fieldbook.phenoapps.org/en/latest/field-book.html")));
 
         // Save a reference to the "Updates" action item
-        updateCheckItem = new MaterialAboutActionItem.Builder()
+        appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(getString(R.string.check_updates_title))
                 .icon(circularProgressDrawable)
                 .setOnClickAction(null) // Set initially to null, will be updated later
-                .build();
-
-        appCardBuilder.addItem(updateCheckItem);
+                .build());
 
         MaterialAboutCard.Builder authorCardBuilder = new MaterialAboutCard.Builder();
         authorCardBuilder.title(getString(R.string.about_project_lead_title));
