@@ -246,7 +246,7 @@
     <string name="tutorial_main_infobars_title">InfoBars</string>
     <string name="tutorial_main_infobars_description">Le InfoBars mostrano dati aggiuntivi per ciascuna voce e possono essere modificate utilizzando i menu a discesa.</string>
     <string name="tutorial_main_traits_title">Caratteri</string>
-    <string name="tutorial_main_traits_description">Le piccole frecce verdi si spostano tra i caratteri.</string>
+    <string name="tutorial_main_traits_description">The small, colored arrows move between traits.</string>
     <string name="tutorial_main_traitlist_title">Caratteri</string>
     <string name="tutorial_main_traitlist_description">Il tratto corrente viene raccolto. Un elenco di caratteri attivi viene visualizzato quando viene premuto il carattere corrente.</string>
     <string name="tutorial_main_entries_title">Voci</string>
