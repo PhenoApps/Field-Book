@@ -15,7 +15,7 @@
         android:layout_height="50dp"
         android:paddingLeft="20dp"
         android:src="@drawable/other_ic_field_book"
-        android:contentDescription="@string/act_config_list_item_icon" />
+        tools:ignore="ContentDescription" />
 
     <TextView style="@style/TextViewStyle.Bold.Title"
         android:id="@+id/config_title"

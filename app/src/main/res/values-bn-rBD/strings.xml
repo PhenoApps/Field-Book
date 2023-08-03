@@ -105,7 +105,6 @@
 
     <string name="about_title">সম্বন্ধে</string>
     <string name="about_version_title">ভার্সন</string>
-    <string name="about_translators_title">অনুবাদক</string>
 
     <!-- Other Apps -->
     <string name="about_title_other_apps">অন্যান্য অ্যাপ্স।</string>

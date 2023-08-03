@@ -563,7 +563,7 @@ public class CollectActivity extends ThemedActivity
         barcodeInput.setOnClickListener(v -> {
             triggerTts(barcodeTts);
             new IntentIntegrator(CollectActivity.this)
-                    .setPrompt(getString(R.string.main_barcode_text))
+                    .setPrompt(getString(R.string.barcode_scanner_text))
                     .setBeepEnabled(false)
                     .setRequestCode(BARCODE_COLLECT_CODE)
                     .initiateScan();
@@ -1217,7 +1217,7 @@ public class CollectActivity extends ThemedActivity
                 break;
             case barcodeScanId:
                 new IntentIntegrator(this)
-                        .setPrompt(getString(R.string.main_barcode_text))
+                        .setPrompt(getString(R.string.barcode_scanner_text))
                         .setBeepEnabled(false)
                         .setRequestCode(BARCODE_SEARCH_CODE)
                         .initiateScan();
@@ -1512,7 +1512,7 @@ public class CollectActivity extends ThemedActivity
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 new IntentIntegrator(CollectActivity.this)
-                        .setPrompt(getString(R.string.main_barcode_text))
+                        .setPrompt(getString(R.string.barcode_scanner_text))
                         .setBeepEnabled(false)
                         .setRequestCode(BARCODE_SEARCH_CODE)
                         .initiateScan();

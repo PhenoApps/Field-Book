@@ -335,7 +335,7 @@ public class ConfigActivity extends ThemedActivity {
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
             new IntentIntegrator(this)
-                    .setPrompt(getString(R.string.main_barcode_text))
+                    .setPrompt(getString(R.string.barcode_scanner_text))
                     .setBeepEnabled(false)
                     .setRequestCode(REQUEST_BARCODE)
                     .initiateScan();
@@ -853,12 +853,14 @@ public class ConfigActivity extends ThemedActivity {
     @AfterPermissionGranted(PERMISSIONS_REQUEST_EXPORT_DATA)
     private void exportPermission() {
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(this, perms)) {
-            showSaveDialog();
-        } else {
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
-                    PERMISSIONS_REQUEST_EXPORT_DATA, perms);
-        }
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            if (EasyPermissions.hasPermissions(this, perms)) {
+                showSaveDialog();
+            } else {
+                EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
+                        PERMISSIONS_REQUEST_EXPORT_DATA, perms);
+            }
+        } else showSaveDialog();
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_TRAIT_DATA)

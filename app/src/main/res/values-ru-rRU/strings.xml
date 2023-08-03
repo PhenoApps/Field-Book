@@ -108,5 +108,4 @@
     <string name="preferences_general_feature_barcode_text">Дополнительные опции для уникального идентификаторас</string>
     <string name="main_toolbar_moveto">Переход к ID</string>
     <string name="about_version_title">Версия приложения</string>
-    <string name="about_translators_title">Переводчики</string>
 </resources>

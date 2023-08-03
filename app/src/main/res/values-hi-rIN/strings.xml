@@ -108,5 +108,4 @@
     <string name="preferences_general_feature_barcode_text">विशिष्ट अद्वितीय पहचानकर्ता पे जाने के लिए विकल्प को सक्षम करता है</string>
     <string name="main_toolbar_moveto">पहचानकर्ता पे जाएँ</string>
     <string name="about_version_title">संस्करण</string>
-    <string name="about_translators_title">अनुवादक</string>
 </resources>

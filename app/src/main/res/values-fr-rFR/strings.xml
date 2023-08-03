@@ -108,5 +108,4 @@
     <string name="preferences_general_feature_barcode_text">"activer l'option pour passer à un identifiant unique spécifique"</string>
     <string name="main_toolbar_moveto">aller à ID</string>
     <string name="about_version_title">version</string>
-    <string name="about_translators_title">traducteurs</string>
 </resources>

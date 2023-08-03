@@ -29,8 +29,7 @@
     <string name="main_toolbar_moveto">Ir a ID</string>
     <string name="main_toolbar_barcode_scan">Escanear codigo de barras</string>
     <string name="main_toolbar_moveto_scan">Escanear</string>
-    <string name="main_infobar_title">InfoBar</string>
-    <string name="main_barcode_text">Escanear código de barras</string>
+    <string name="barcode_scanner_text">Escanear código de barras</string>
     <!-- Fields Activity  -->
     <string name="fields_delete_study">Eliminar campo</string>
     <string name="fields_delete_study_confirmation">¿Estás seguro(a) de que quieres eliminar este campo? Esto eliminará todos los datos de este campo.</string>
@@ -229,13 +228,11 @@
     <string name="about_title_other_apps">Otras PhenoApps</string>
     <string name="about_project_lead_title">Líder del Projecto</string>
     <string name="about_contributors_title">Colaboradores</string>
-    <string name="about_contributors_developers_title">Desarrolladores</string>
-    <string name="about_translators_title">Traductores</string>
     <string name="about_contributors_funding_title">Fuente de financiamiento</string>
     <string name="about_rate">Califica esta app</string>
     <string name="about_technical_title">Detalles Tecnicos</string>
     <string name="changelog_title">Registro de Cambios</string>
-    <string name="libraries_title">Bibliotecas</string>
+    <string name="about_libraries_title">Bibliotecas</string>
     <!-- Profile dialog -->
     <string name="profile_person">Usuario</string>
     <string name="profile_reset">Borrar ajustes</string>
@@ -253,7 +250,6 @@
     <!-- Import dialog -->
     <string name="import_source_local">Almacenamiento local</string>
     <string name="import_source_cloud">Almacenamiento en la nube</string>
-    <string name="import_source_brapi">BrAPI</string>
     <string name="import_source_ask">Preguntar siempre</string>
     <string name="import_dialog_title_fields">Importar campo</string>
     <string name="import_dialog_title_traits">Importar variables</string>
@@ -316,15 +312,11 @@
     <string name="brapi_base_url">URL base</string>
     <string name="brapi_base_url_desc">La URL base para el servidor conectado por BrAPI</string>
     <string name="brapi_save_authorize">Salvar y Autorizar</string>
-    <string name="brapi_authorize">Autorizar BrAPI</string>
-    <string name="brapi_reauthorize">Reautorizar</string>
     <string name="brapi_revoke_auth">Cerrar sesión</string>
     <string name="brapi_auth_success">Autorización por BrAPI exitosa</string>
     <string name="brapi_auth_deny">Autorización BrAPI denegada</string>
     <string name="brapi_auth_error_starting">Error al iniciar la autenticación BrAPI</string>
     <string name="brapi_auth_permission_deny">ERROR: no tiene los permisos necesarios para el sistema especificado.</string>
-    <string name="brapi_btn_auth_summary">Brapi está actualmente autorizado con %1$s</string>
-    <string name="brapi_base_url_default">https://test-server.brapi.org</string>
     <string name="brapi_load_data_button">Cargar Campos</string>
     <string name="brapi_load_traits_button">Cargar Variables</string>
     <string name="brapi_save_data_button">Salvar Campo</string>
