@@ -16,6 +16,6 @@
     <string name="dir_media_audio" translatable="false">audio</string>
 
     <!-- special files -->
-    <string name="hidden_file_thumbnails">.thumbnails</string>
+    <string name="hidden_file_thumbnails" translatable="false">.thumbnails</string>
 
 </resources>

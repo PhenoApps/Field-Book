@@ -69,18 +69,26 @@ public class AboutActivity extends MaterialAboutActivity {
                 getString(R.string.about_version_title),
                 false));
 
+        // Save a reference to the "Updates" action item
+        updateCheckItem = new MaterialAboutActionItem.Builder()
+                .text(getString(R.string.check_updates_title))
+                .icon(circularProgressDrawable)
+                .setOnClickAction(null) // Set initially to null, will be updated later
+                .build();
+
+        appCardBuilder.addItem(updateCheckItem);
+
         appCardBuilder.addItem(ConvenienceBuilder.createWebsiteActionItem(c,
                 getResources().getDrawable(R.drawable.book_open_variant),
                 getString(R.string.about_manual_title),
                 false,
                 Uri.parse("https://docs.fieldbook.phenoapps.org/en/latest/field-book.html")));
 
-        // Save a reference to the "Updates" action item
-        appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
-                .text(getString(R.string.check_updates_title))
-                .icon(circularProgressDrawable)
-                .setOnClickAction(null) // Set initially to null, will be updated later
-                .build());
+        appCardBuilder.addItem(ConvenienceBuilder.createRateActionItem(c,
+                getResources().getDrawable(R.drawable.ic_about_rate),
+                getString(R.string.about_rate),
+                null
+        ));
 
         MaterialAboutCard.Builder authorCardBuilder = new MaterialAboutCard.Builder();
         authorCardBuilder.title(getString(R.string.about_project_lead_title));
@@ -98,20 +106,9 @@ public class AboutActivity extends MaterialAboutActivity {
                 getString(R.string.about_developer_trife_email),
                 "Field Book Question"));
 
-        authorCardBuilder.addItem(ConvenienceBuilder.createWebsiteActionItem(c,
-                getResources().getDrawable(R.drawable.ic_about_website),
-                "PhenoApps.org",
-                false,
-                Uri.parse("http://phenoapps.org/")));
-
         MaterialAboutCard.Builder contributorsCardBuilder = new MaterialAboutCard.Builder();
         contributorsCardBuilder.title(getString(R.string.about_support_title));
 
-        contributorsCardBuilder.addItem(ConvenienceBuilder.createRateActionItem(c,
-                getResources().getDrawable(R.drawable.ic_about_rate),
-                getString(R.string.about_rate),
-                null
-        ));
 
         contributorsCardBuilder.addItem(ConvenienceBuilder.createWebsiteActionItem(c,
                 getResources().getDrawable(R.drawable.ic_about_contributors),
@@ -168,6 +165,12 @@ public class AboutActivity extends MaterialAboutActivity {
 
         MaterialAboutCard.Builder otherAppsCardBuilder = new MaterialAboutCard.Builder();
         otherAppsCardBuilder.title(getString(R.string.about_title_other_apps));
+
+        otherAppsCardBuilder.addItem(ConvenienceBuilder.createWebsiteActionItem(c,
+                getResources().getDrawable(R.drawable.ic_about_website),
+                "PhenoApps.org",
+                false,
+                Uri.parse("http://phenoapps.org/")));
 
         otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text("Coordinate")

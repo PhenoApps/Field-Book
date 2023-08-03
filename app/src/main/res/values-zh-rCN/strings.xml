@@ -29,8 +29,7 @@
     <string name="main_toolbar_moveto">转到 ID</string>
     <string name="main_toolbar_barcode_scan">扫描条码</string>
     <string name="main_toolbar_moveto_scan">扫描</string>
-    <string name="main_infobar_title">信息栏</string>
-    <string name="main_barcode_text">扫描条形码</string>
+    <string name="barcode_scanner_text">扫描条形码</string>
     <!-- Fields Activity  -->
     <string name="fields_delete_study">删除地块</string>
     <string name="fields_delete_study_confirmation">你确信要删除这个地块吗？它将删除这个地块的全部数据！</string>
@@ -312,13 +311,10 @@
     <string name="brapi_base_url">基础网址</string>
     <string name="brapi_base_url_desc">连接到BrAPI服务器的基础网址</string>
     <string name="brapi_save_authorize">保存和授权</string>
-    <string name="brapi_authorize">授权BrAPI</string>
-    <string name="brapi_reauthorize">再授权</string>
     <string name="brapi_revoke_auth">退出</string>
     <string name="brapi_auth_success">BrAPI授权成功</string>
     <string name="brapi_auth_deny">BrAPI授权被拒绝</string>
     <string name="brapi_auth_error_starting">启动BrAPI授权出错</string>
-    <string name="brapi_btn_auth_summary">BrAPI当前的授权价格是 %1$s</string>
     <string name="brapi_load_data_button">载入地块</string>
     <string name="brapi_load_traits_button">载入性状</string>
     <string name="brapi_save_data_button">保存地块</string>
