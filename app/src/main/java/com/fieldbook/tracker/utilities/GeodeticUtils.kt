@@ -394,7 +394,7 @@ class GeodeticUtils {
         /**
          * As of issue #477 v5.3, standardize truncation to 7 digits
          */
-        fun truncateFixQuality(x: String, fix: String): String = try {
+        fun truncateFixQuality(x: String): String = try {
 
             val tokens = x.split(".")
             val head = tokens[0]

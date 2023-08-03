@@ -1,19 +1,23 @@
 package com.fieldbook.tracker.interfaces
 
+import android.content.Context
 import android.os.Handler
-import com.fieldbook.tracker.objects.GeoNavHelper
+import com.fieldbook.tracker.utilities.GeoNavHelper
 import com.fieldbook.tracker.utilities.GnssThreadHelper
 import com.fieldbook.tracker.utilities.SoundHelperImpl
+import com.fieldbook.tracker.utilities.VibrateUtil
 import com.fieldbook.tracker.views.CollectInputView
 import com.fieldbook.tracker.views.RangeBoxView
 import com.fieldbook.tracker.views.TraitBoxView
 import org.phenoapps.security.SecureBluetoothActivityImpl
 
 interface CollectController: FieldController {
+    fun getContext(): Context
     fun getRangeBox(): RangeBoxView
     fun getTraitBox(): TraitBoxView
     fun getInputView(): CollectInputView
     fun getSoundHelper(): SoundHelperImpl
+    fun getVibrator(): VibrateUtil
     fun resetGeoNavMessages()
     fun getGeoNavHelper(): GeoNavHelper
     fun getSecurityChecker(): SecureBluetoothActivityImpl

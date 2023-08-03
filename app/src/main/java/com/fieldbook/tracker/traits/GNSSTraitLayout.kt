@@ -163,8 +163,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
                     //populate ui
                     accTextView.text = parser.fix
-                    latTextView.text = truncateFixQuality(parser.latitude, parser.fix)
-                    lngTextView.text = truncateFixQuality(parser.longitude, parser.fix)
+                    latTextView.text = truncateFixQuality(parser.latitude)
+                    lngTextView.text = truncateFixQuality(parser.longitude)
                     utcTextView.text = parser.utc
                     hdopTextView.text = parser.hdop
 
@@ -174,7 +174,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                         val maxSats = maxOf(parser.satellites.toInt(), parser.gsv.size)
                         satTextView.text = "${parser.gsv.size}/$maxSats"
                     }
-                    altTextView.text = truncateFixQuality(parser.altitude, parser.fix)
+                    altTextView.text = truncateFixQuality(parser.altitude)
                 }
 
             },
@@ -725,9 +725,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
            }
         }
 
-        latTextView.text = truncateFixQuality(location.latitude.toString(), fixQuality)
-        lngTextView.text = truncateFixQuality(location.longitude.toString(), fixQuality)
-        altTextView.text = truncateFixQuality(location.altitude.toString(), fixQuality)
+        latTextView.text = truncateFixQuality(location.latitude.toString())
+        lngTextView.text = truncateFixQuality(location.longitude.toString())
+        altTextView.text = truncateFixQuality(location.altitude.toString())
 
         accTextView.text = location.accuracy.toString()
         utcTextView.text = location.time.toString()

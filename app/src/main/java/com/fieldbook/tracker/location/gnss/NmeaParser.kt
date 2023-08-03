@@ -234,4 +234,17 @@ class NmeaParser {
         "invalid" -> "invalid"
         else -> "Float RTK"
     }
+
+    fun compareFix(fix: String, precisionThresh: String): Boolean {
+
+        if (precisionThresh == "Any") return true
+
+        if (precisionThresh == "Float RTK" && fix == "Float RTK") return true
+
+        if (precisionThresh == "RTK" && (fix == "RTK" || fix == "Float RTK")) return true
+
+        if (precisionThresh == "GPS" && (fix == "GPS" || fix == "RTK" || fix == "Float RTK")) return true
+
+        return false
+    }
 }

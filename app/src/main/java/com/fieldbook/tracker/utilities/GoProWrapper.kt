@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.objects
+package com.fieldbook.tracker.utilities
 
 import android.content.Context
 import android.graphics.Bitmap

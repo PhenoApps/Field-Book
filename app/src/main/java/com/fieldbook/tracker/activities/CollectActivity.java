@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -47,12 +48,9 @@ import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
-import com.fieldbook.tracker.objects.GeoNavHelper;
-import com.fieldbook.tracker.objects.GoProWrapper;
 import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.objects.VerifyPersonHelper;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
@@ -61,13 +59,17 @@ import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
+import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
+import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.utilities.VerifyPersonHelper;
+import com.fieldbook.tracker.utilities.VibrateUtil;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
@@ -120,6 +122,9 @@ public class CollectActivity extends ThemedActivity
     public static final int BARCODE_SEARCH_CODE = 98;
 
     private GeoNavHelper geoNavHelper;
+
+    @Inject
+    VibrateUtil vibrator;
 
     @Inject
     GnssThreadHelper gnssThreadHelper;
@@ -220,6 +225,7 @@ public class CollectActivity extends ThemedActivity
      * GeoNav dialog
      */
     private androidx.appcompat.app.AlertDialog dialogGeoNav;
+    private androidx.appcompat.app.AlertDialog dialogPrecisionLoss;
 
     public void triggerTts(String text) {
         if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
@@ -2106,4 +2112,39 @@ public class CollectActivity extends ThemedActivity
         return secureBluetooth;
     }
 
+    @NonNull
+    @Override
+    public VibrateUtil getVibrator() {
+        return vibrator;
+    }
+
+    @NonNull
+    @Override
+    public Context getContext() {
+        return this;
+    }
+
+    public void showGeoNavPrecisionLossDialog() {
+
+        if (getWindow().isActive()) {
+
+            try {
+
+                if (dialogPrecisionLoss != null) {
+                    dialogPrecisionLoss.dismiss();
+                }
+
+                dialogPrecisionLoss = new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle(getString(R.string.dialog_geonav_precision_loss_title))
+                        .setMessage(getString(R.string.dialog_geonav_precision_loss_msg))
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            dialog.dismiss();
+                        })
+                        .show();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
