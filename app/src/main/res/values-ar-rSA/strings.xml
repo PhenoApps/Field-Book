@@ -1,111 +1,419 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-
+<resources>
+    <!-- GENERAL -->
+    <!-- App -->
     <string name="field_book">سجل الحقل</string>
-    <string name="main_toolbar_search">بحث</string>
-    <string name="main_toolbar_resources">مصادر</string>
-    <string name="traits_format_audio">الصوت</string>
-    <string name="preferences_appearance_language">اللغة</string>
-    <string name="main_trait_details">تفاصيل السمة</string>
-    <string name="search_results_dialog_range">مجال</string>
-    <string name="search_results_dialog_plot">قطعة تجريبية</string>
-    <string name="search_dialog_add">إضافة</string>
-    <string name="search_dialog_clear">إزالة</string>
-    <string name="dialog_close">إغلاق</string>
+    <!-- Dialog -->
+    <string name="dialog_cancel">إلغاء</string>
     <string name="dialog_ok">موافق</string>
-    <string name="dialog_confirm">هل أنت متأكد؟</string>
     <string name="dialog_yes">نعم</string>
     <string name="dialog_no">لا</string>
-    <string name="trait_error_minimum_value">القيمة أقل من الحد الأدنى</string>
-    <string name="trait_error_maximum_value">القيمة أكبر من الحد الأقصى</string>
-    <string name="changelog_title">سجل التغييرات</string>
-    <string name="main_toolbar_moveto_no_match">لايوجد قيمة مطابقة</string>
-    <string name="dialog_warning">تحذير</string>
-    <string name="export_error_general">خطأ أثناء التصدير</string>
-    <string name="export_complete">تم التصدير</string>
-    <string name="profile_person_title">تحديد الشخص</string>
-    <string name="about_title">حول</string>
-    <string name="profile_reset">إزالة الإعدادات</string>
+    <string name="dialog_close">إغلاق</string>
+    <string name="dialog_confirm">هل أنت متأكد؟</string>
     <string name="dialog_import">إستيراد</string>
-    <string name="settings_export">تصدير</string>
-    <string name="profile_name_first">الإسم</string>
-    <string name="profile_name_last">الكنية</string>
-    <string name="profile_person">شخص</string>
+    <string name="dialog_warning">تحذير</string>
+    <string name="dialog_save">حفظ</string>
+    <!-- Startup  -->
+    <string name="startup_sample_data_title">بيانات نموذجية</string>
+    <string name="startup_sample_data_message">تحميل البيانات النموذجية</string>
+    <!-- Permissions  -->
+    <string name="permission_rationale_storage_import">استيراد الملفات يتطلب الوصول إلى ملفات الجهاز.</string>
+    <string name="permission_rationale_storage_export">تصدير الملفات يتطلب الوصول إلى ملفات الجهاز.</string>
+    <string name="permission_rationale_trait_features">جمع البيانات يتطلب الوصول إلى ملفات الجهاز والميكروفون والكاميرا.</string>
+    <!-- Config Activity  -->
     <string name="settings_fields">حقول</string>
     <string name="settings_traits">السمات</string>
-    <string name="preferences_general_skip_entries_with_data">إخفاء المدخلات التي سبق جمعها</string>
-    <string name="export_format_database">قاعدة بيانات</string>
-    <string name="export_format_table">جدول</string>
-    <string name="export_file_name">اسم الملف</string>
+    <string name="settings_collect">جمع</string>
+    <string name="settings_export">تصدير</string>
+    <string name="settings_advanced">إعدادات متقدمة</string>
+    <string name="settings_profile">الملف الشخصي</string>
+    <!-- Config Activity Fuzzy Search  -->
+    <!-- File manager  -->
+    <string name="import_source_local">التخزين المحلي</string>
+    <string name="import_source_cloud">التخزين في Cloud</string>
+    <string name="import_source_ask">اسال دائما</string>
+    <string name="import_dialog_importing">الرجاء الانتظار...</string>
+    <string name="import_error_general">خطأ بالاستيراد</string>
+    <!-- Warnings/Catches -->
+    <string name="warning_field_missing">لم يتم تحميل أي حقل حاليا، الرجاء تحميل حقل قبل جمع البيانات</string>
+    <string name="warning_traits_missing">لا توجد سمات، الرجاء أنشئ سمات قبل جمع البيانات.</string>
+    <!-- Changelog -->
+    <string name="changelog_title">سجل التغييرات</string>
+    <!-- FIELDS -->
+    <!-- General -->
+    <!-- Sort -->
+    <!-- Delete -->
+    <string name="fields_delete">حذف</string>
+    <string name="fields_delete_study">حذف الحقل</string>
+    <string name="fields_delete_study_confirmation">هل أنت متأكد أنك تريد حذف هذا الحقل؟ سيؤدي هذا إلى حذف جميع البيانات من هذا الحقل.</string>
+    <!-- Import -->
+    <string name="import_dialog_title_fields">استيراد حقل</string>
+    <string name="import_dialog_unique">معرف فريد</string>
+    <string name="import_dialog_primary">ترتيب رئيسي</string>
+    <string name="import_dialog_secondary">ترتيب ثانوي</string>
+    <string name="import_error_unsupported">نوع الملف غير مدعوم حاليا</string>
+    <string name="import_error_column_name">لا يمكن أن يكون اسم العمود في الملف المستورد:</string>
+    <string name="import_error_unique_characters_illegal">يحتوي العمود المحدد على رموز لا يمكن استخدامها في المعرف الفريد</string>
+    <string name="import_error_column_choice">لا يمكن استخدام الأعمدة لنفس المهمة</string>
+    <string name="import_error_unique">المعرف الفريد يتضمن تكرارات</string>
+    <string name="import_error_format_field">يمكن استيراد ملفات CSV و XLS فقط كحقل</string>
+    <string name="fields_study_exists_message">هذا الحقل موجود مسبقا.</string>
+    <!-- Field Creator  -->
+    <!-- Geo-Navigate to Field -->
+    <!-- Unimplemented -->
+    <string name="fields_study_statistics">إحصائيات</string>
+    <string name="fields_date_imported">تم استيراد التاريخ</string>
+    <string name="fields_date_edited">تعديل التاريخ</string>
+    <string name="fields_date_exported">تصدير التاريخ</string>
+    <string name="fields_summary">ملخص الحقل</string>
+    <string name="fields_options">خيارات</string>
+    <!-- TRAITS -->
+    <!-- Sort -->
+    <string name="traits_toolbar_sort">ترتيب</string>
+    <string name="traits_sort_title">ترتيب</string>
+    <string name="traits_sort_name">اسم</string>
+    <string name="traits_sort_visibility">رؤية</string>
+    <string name="traits_sort_format">تنسيق</string>
+    <string name="warning_traits_missing_modify">أنشئ الصفات قبل أن تقوم بتعديلهم.</string>
+    <!-- Trait import/export -->
+    <string name="traits_toolbar_import_export">استيراد/تصدير</string>
+    <string name="traits_dialog_import">استيراد</string>
+    <string name="traits_export_check">هل تريد تصدير قائمة السمات الحالية؟</string>
+    <string name="traits_dialog_export">تصدير</string>
+    <string name="import_error_format_trait">يمكن استيراد ملفات TRT فقط كقائمة سمات</string>
+    <string name="import_dialog_title_traits">استيراد السمات</string>
+    <string name="traits_toolbar_delete_all">حذف كل السمات</string>
+    <!-- Trait item menu -->
+    <string name="traits_options_copy">نسخ</string>
+    <string name="traits_options_edit">تعديل</string>
+    <string name="traits_options_delete">حذف</string>
+    <string name="traits_options_delete_title">حذف السمة</string>
+    <string name="traits_warning_delete">يؤدي حذف سمة ما إلى حذف البيانات التي تم جمعها لهذه السمة. هل أنت متأكد أنك تريد حذف هذه السمة؟</string>
+    <!-- Trait formats -->
+    <string name="traits_format_numeric">عددي</string>
+    <string name="traits_format_categorical">فئوية</string>
+    <string name="traits_format_date">تاريخ</string>
+    <string name="traits_format_percent">نسبة مؤية</string>
+    <string name="traits_format_counter">عداد</string>
+    <string name="traits_format_disease_rating">تقييم المرض</string>
+    <string name="traits_format_boolean">منطقي</string>
+    <string name="traits_format_text">نص</string>
+    <string name="traits_format_photo">صورة</string>
+    <string name="traits_format_audio">الصوت</string>
+    <string name="traits_format_multicategorical">متعدد الفئات</string>
+    <string name="traits_format_location">موقع</string>
+    <string name="traits_format_barcode">رمز شريطي (باركود)</string>
+    <string name="traits_format_labelprint">طباعة الملصقات زيبرا Zebra</string>
+    <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">أضف سمة</string>
     <string name="traits_create_trait">سمة</string>
+    <string name="traits_create_format">التنسيق</string>
+    <string name="traits_create_value_default">افتراضي</string>
+    <string name="traits_create_value_minimum">أدنى</string>
+    <string name="traits_create_value_maximum">أقصى</string>
+    <string name="traits_create_details">تفاصيل</string>
+    <string name="traits_create_optional">اختياري</string>
+    <string name="traits_create_categories_title">فئات</string>
+    <string name="traits_create_photo_maximum">العدد الأقصى للصور الملتقطة</string>
+    <string name="traits_create_true">صح</string>
+    <string name="traits_create_false">خطأ</string>
+    <string name="traits_create_categories_text">افصل العناصر باستخدام /</string>
+    <string name="traits_create_warning_name_blank">لا يمكن أن يكون اسم السمة فارغ</string>
+    <string name="traits_create_warning_duplicate">السمة موجودة مسبقا</string>
+    <string name="traits_create_warning_numeric_required">القيمة الافتراضية والدنيا والقصوى يجب أن تكون عددية</string>
+    <!-- COLLECT -->
+    <!-- Validation -->
+    <string name="trait_error_minimum_value">القيمة أقل من الحد الأدنى</string>
+    <string name="trait_error_maximum_value">القيمة أكبر من الحد الأقصى</string>
+    <string name="trait_error_disease_severity">الحدة مخزنة مسبقا</string>
+    <!-- Toolbar -->
+    <string name="main_toolbar_resources">مصادر</string>
+    <string name="main_trait_details">تفاصيل السمة</string>
+    <string name="main_infobar_data_missing">لايوجد بيانات</string>
+    <string name="main_toolbar_next_entry_no_data">المدخل الفارغ التالي</string>
+    <!-- InfoBars -->
+    <string name="dialog_att_chooser_traits">السمات</string>
+    <!-- ID/Barcode Search -->
+    <string name="main_toolbar_moveto_no_match">لايوجد قيمة مطابقة</string>
+    <string name="main_toolbar_moveto">إنتقل إلى ID</string>
+    <string name="main_toolbar_barcode_scan">مسح الرمز الشريطى (باركود)</string>
+    <string name="main_toolbar_moveto_scan">مسح</string>
+    <!-- Search  -->
+    <string name="main_toolbar_search">بحث</string>
+    <string name="search_dialog_add">إضافة</string>
+    <string name="search_dialog_clear">إزالة</string>
     <string name="search_dialog_query_is_equal_to">يساوي</string>
     <string name="search_dialog_query_is_not_equal_to">لا يساوي</string>
     <string name="search_dialog_query_contains">يتضمن</string>
     <string name="search_dialog_query_does_not_contain">لا يتضمن</string>
     <string name="search_dialog_query_is_more_than">أكبر من</string>
     <string name="search_dialog_query_is_less_than">أصغر من</string>
-    <string name="search_results_missing">لم يعد البحث أي نتائج</string>
-    <string name="import_dialog_unique">معرف فريد</string>
-    <string name="import_dialog_primary">ترتيب رئيسي</string>
-    <string name="import_dialog_secondary">ترتيب ثانوي</string>
-    <string name="import_dialog_importing">الرجاء الانتظار...</string>
-    <string name="import_error_general">خطأ بالاستيراد</string>
-    <string name="import_error_unique">المعرف الفريد يتضمن تكرارات</string>
-    <string name="traits_toolbar_add_trait">أضف سمة</string>
-    <string name="traits_create_format">التنسيق</string>
-    <string name="traits_create_value_default">افتراضي</string>
-    <string name="traits_create_value_minimum">أدنى</string>
-    <string name="traits_create_value_maximum">أقصى</string>
-    <string name="traits_create_details">تفاصيل</string>
-    <string name="traits_create_categories_title">فئات</string>
-    <string name="dialog_save">حفظ</string>
-    <string name="traits_format_numeric">عددي</string>
-    <string name="traits_format_categorical">فئوية</string>
-    <string name="traits_format_date">تاريخ</string>
-    <string name="traits_format_percent">نسبة مؤية</string>
-    <string name="traits_format_boolean">منطقي</string>
-    <string name="traits_format_text">نص</string>
-    <string name="traits_options_copy">نسخ</string>
-    <string name="traits_create_warning_name_blank">لا يمكن أن يكون اسم السمة فارغ</string>
-    <string name="traits_create_warning_duplicate">السمة موجودة مسبقا</string>
-    <string name="traits_options_delete_title">حذف السمة</string>
-    <string name="traits_toolbar_delete_all">حذف كل السمات</string>
-    <string name="traits_create_warning_numeric_required">القيمة الافتراضية والدنيا والقصوى يجب أن تكون عددية</string>
-    <string name="traits_create_true">صح</string>
-    <string name="traits_create_false">خطأ</string>
-    <string name="settings_advanced">إعدادات متقدمة</string>
-    <string name="traits_create_categories_text">افصل العناصر باستخدام /</string>
-    <string name="main_infobar_data_missing">لايوجد بيانات</string>
-    <string name="export_error_missing_format">يجب تحديد نوع الاستيراد</string>
     <string name="search_results_dialog_title">نتائج البحث</string>
-    <string name="preferences_behavior_cycle_traits">تحرك متقدما من آخر سمة للمدخل السابق إلى السمة الأولى في المدخل التالي</string>
-    <string name="preferences_general_use_day_number">استخدم رقم اليوم بالسنة عوض التاريخ</string>
+    <string name="search_results_dialog_range">مجال</string>
+    <string name="search_results_dialog_plot">قطعة تجريبية</string>
+    <string name="search_results_missing">لم يعد البحث أي نتائج</string>
+    <!--- Profile -->
+    <string name="activity_collect_dialog_verify_no_button">لا</string>
+    <string name="activity_collect_dialog_verify_yes_button">نعم</string>
+    <!--- Datagrid -->
+    <!-- Trait Layout: Photo -->
+    <string name="trait_error_hardware_missing">لا يتضمن جهازك العتاد الضروري لهذه الميزة</string>
+    <string name="trait_delete_warning_photo">هل أنت متأكد من رغبتك بحذف هذه الصورة؟</string>
+    <!-- Trait Layout: GNSS -->
+    <!-- Trait Layout: Date -->
+    <!-- Trait Layout: Boolean -->
+    <!-- Trait Layout: GoPro -->
+    <!-- Trait Layout: USB Camera -->
+    <!--- Trait Layout: Zebra label print -->
     <string name="trait_layout_data_stored">تم حفظ البيانات</string>
-    <string name="traits_create_optional">اختياري</string>
+    <string name="trait_layout_print_label_size_title">حجم:</string>
+    <string name="trait_layout_print_text_field_title">نص:</string>
+    <string name="trait_layout_print_text_field_title_2">نص2:</string>
+    <string name="trait_layout_print_text_field_title_3">نص3:</string>
+    <string name="trait_layout_print_text_field_title_4">نص4:</string>
+    <string name="trait_layout_print_barcode_field_title">الرمز الشريطي (باركود):</string>
+    <string name="trait_layout_print_label_copies_title">نسخ:</string>
+    <!--- Trait Layout: Counter -->
+    <!--- Trait Layout: Location -->
+    <!--- Text to Speech Strings -->
+    <!--- Summary -->
+    <!--- Repeated measures -->
+    <string name="dialog_multi_measure_delete">حذف</string>
+    <!--- GeoNav -->
+    <!--- Content Descriptions -->
+    <!-- EXPORT -->
+    <!-- Export dialog -->
+    <string name="export_source_local">محلي</string>
+    <string name="export_dialog_title">تصدير البيانات</string>
+    <string name="export_format_database">قاعدة بيانات</string>
+    <string name="export_format_table">جدول</string>
+    <string name="export_file_name">اسم الملف</string>
+    <string name="export_content_columns_title">أعمدة الحقل</string>
+    <string name="export_content_columns_all">كل أعمدة الحقل</string>
+    <string name="export_content_columns_unique">المعرف الوحيد فقط</string>
+    <string name="export_content_traits_all">كل السمات</string>
+    <string name="export_content_traits_active">فقط الصفات النشطة</string>
+    <string name="export_error_general">خطأ أثناء التصدير</string>
+    <string name="export_error_data_missing">لا يوجد بيانات ليتم تصديرها</string>
+    <string name="export_complete">تم التصدير</string>
     <string name="export_progress">تصدير...</string>
-    <string name="tutorial_dialog_title">دليل تعليمي</string>
-    <string name="warning_field_missing">لم يتم تحميل أي حقل حاليا، الرجاء تحميل حقل قبل جمع البيانات</string>
-    <string name="warning_traits_missing">لا توجد سمات، الرجاء أنشئ سمات قبل جمع البيانات.</string>
+    <string name="export_error_missing_format">يجب تحديد نوع الاستيراد</string>
+    <string name="export_error_missing_column">يجب اختيار نوع عمود الحقل</string>
+    <string name="export_error_missing_trait">يجب اختيار نوع السمة</string>
+    <string name="export_overwrite">الكتابة فوق التصدير السابق</string>
+    <!-- Citation -->
+    <string name="citation_title">الاقتباس</string>
+    <string name="citation_string">إذا كنت تستخدم Field Book للبحث ، فيرجى الاستشهاد بمقالة المجلة التالية:</string>
+    <!-- SETTINGS -->
+    <!-- General -->
+    <string name="preferences_general_title">عام</string>
+    <string name="preferences_source_default_import">مصدر الإستيراد الأساسي</string>
+    <string name="preferences_source_default_export">مصدر التصدير الأساسي</string>
+    <string name="preferences_general_feature_next_missing">تفعيل زر الانتقال إلى المدخل التالي الذي لا يتضمن بيانات للمستخدم المتقدم</string>
+    <string name="preferences_general_feature_next_missing_description">إضافة زر إلى شريط الأدوات ينتقل إلى المدخل التالي بدون بيانات للسمة الحالية</string>
+    <string name="preferences_general_skip_entries_default">افتراضي</string>
+    <string name="preferences_general_barcode_camera">الانتقال المدخل عبر الباركود</string>
+    <string name="preferences_general_barcode_camera_description">إمسح الباركود للانتقال إلى المدخل المحدد</string>
+    <string name="preferences_general_feature_barcode_text">تفعيل الخيار للمتقدم لتحديد المعرف الفريد</string>
+    <string name="preferences_general_feature_barcode_text_description">لفتح مربع حوار لإدخال ID فريد والانتقال إلى مدخل محدد</string>
+    <string name="preferences_general_feature_datagrid">جدول البيانات</string>
+    <string name="preferences_general_feature_datagrid_description">عرض جدول للقطع التجريبية والسمات يظهر البيانات المجموعة</string>
+    <!-- Profile -->
+    <string name="profile_person">شخص</string>
+    <string name="profile_person_title">تحديد الشخص</string>
+    <string name="profile_name_first">الإسم</string>
+    <string name="profile_name_last">الكنية</string>
+    <string name="profile_reset">إزالة الإعدادات</string>
+    <!-- Appearance -->
+    <string name="preferences_appearance_title">مظهر خارجي</string>
+    <string name="preferences_appearance_system_category_title">تطبيق</string>
+    <string name="preferences_appearance_theme_title">الموضوع</string>
+    <string name="theme_default">افتراضي</string>
+    <string name="preferences_appearance_language">اللغة</string>
+    <string name="preferences_appearance_language_description">اللغة التي يحددها النظام</string>
+    <string name="preferences_appearance_tutorial_description">إضافة أيقونة الدليل التعليمي إلى كل من النوافذ الرئيسية والإعدادات والحقول والصفات</string>
+    <string name="preferences_appearance_collection_category_title">شاشة جمع البيانات</string>
+    <string name="preferences_appearance_toolbar_customize">شريط الأدوات</string>
+    <string name="preferences_appearance_toolbar_customize_description">تعديل الرموز الافتراضية على شاشة التجميع</string>
+    <string name="preferences_appearance_toolbar_customize_search">بحث</string>
+    <string name="preferences_appearance_toolbar_customize_resources">مصادر</string>
+    <string name="preferences_appearance_toolbar_customize_summary">ملخص</string>
+    <string name="preferences_appearance_toolbar_customize_lock">قفل</string>
+    <string name="preferences_appearance_infobar_number">عدد أشرطة المعلومات</string>
+    <string name="preferences_appearance_infobar_number_description">اضبط عدد أشرطة المعلومات المعروضة على الشاشة الرئيسية</string>
+    <string name="preferences_appearance_quickgoto">إنتقل مباشرة إلى</string>
+    <string name="preferences_appearance_quickgoto_description">تغيير القسم الأوسط من الشاشة الرئيسية إلى \"السريع GoTo\" القديم</string>
+    <!-- Behavior -->
+    <string name="preferences_behavior_title">سلوك</string>
+    <string name="preferences_behavior_cycle_traits">تحرك متقدما من آخر سمة للمدخل السابق إلى السمة الأولى في المدخل التالي</string>
+    <string name="preferences_behavior_cycle_traits_description">بعد المرور بجميع السمات ، ينتقل Field Book إلى المدخل التالي</string>
+    <string name="preferences_behavior_volume_buttons_navigate">مفاتيح مستوى الصوت للتحرك بين المدخلات</string>
+    <string name="preferences_behavior_volume_buttons_navigate_description">مفاتيح مستوى الصوت للإنتقال إلى المدخل التالي أو السابق</string>
+    <string name="preferences_behavior_return_character">إشارة مفتاح العودة</string>
+    <string name="preferences_behavior_return_character_next_plot">القطعة تجريبية الموالية</string>
+    <string name="preferences_behavior_return_character_next_trait">السمة الموالية</string>
+    <string name="preferences_behavior_return_character_do_nothing">لا تفعل شيئا</string>
+    <string name="preferences_behavior_disable_entry_arrow">تعطيل سهم الإدخال</string>
+    <string name="preferences_behavior_disable_entry_arrow_left">يسار</string>
+    <string name="preferences_behavior_disable_entry_arrow_right">يمين</string>
+    <string name="preferences_behavior_disable_entry_arrow_both">كلاهما</string>
+    <string name="preferences_general_share_disable">تعطيل مشاركة الملفات</string>
+    <string name="preferences_general_share_disable_description">عند تصدير الملفات لن يتم عرض الصندوق الخاص بالمشاركة</string>
+    <string name="preferences_general_use_day_number">استخدم رقم اليوم بالسنة عوض التاريخ</string>
+    <string name="preferences_general_use_day_number_description">استخدم رقم اليوم بالسنة عند جمع البيانات عوضا عن التاريخ</string>
+    <string name="preferences_general_skip_entries_with_data">إخفاء المدخلات التي سبق جمعها</string>
+    <string name="preferences_general_skip_entries_with_data_description">تجاوز المدخلات التي لديها بيانات للسمة الحالية</string>
+    <!-- GeoNav -->
+    <!-- Sounds -->
+    <string name="preferences_sounds">اصوات</string>
+    <string name="preferences_sound_primary_order_sound">صوت التنبيه عند تغيير الترتيب الأساسي</string>
+    <string name="preferences_sound_primary_order_sound_description">صوت التنبيه عند تغيير الترتيب الأساسي</string>
+    <!-- BrAPI preferences are in the BrAPI section below -->
+    <!-- Database -->
+    <string name="database_dialog_title">قاعدة بيانات</string>
+    <string name="database_import">استيراد قاعدة البيانات</string>
+    <string name="database_export">تصدير قاعدة البيانات</string>
     <string name="database_reset">إعادة تعيين قاعدة البيانات</string>
     <string name="database_reset_warning1">سيتم حذف كل البيانات عند إعادة التعيين، هل أنت متأكد؟</string>
     <string name="database_reset_warning2">لا يمكن التراجع عن هذه العملية، سيتم الخروج من التطبيق بعد محي قاعدة البيانات. هل لازلت ترغب في المتابعة؟</string>
-    <string name="database_dialog_title">قاعدة بيانات</string>
     <string name="database_reset_message">تم حذف قاعدة البيانات</string>
-    <string name="database_import">استيراد قاعدة البيانات</string>
-    <string name="database_export">تصدير قاعدة البيانات</string>
-    <string name="export_content_columns_all">كل أعمدة الحقل</string>
-    <string name="export_content_traits_all">كل السمات</string>
-    <string name="traits_format_photo">صورة</string>
-    <string name="trait_error_hardware_missing">لا يتضمن جهازك العتاد الضروري لهذه الميزة</string>
-    <string name="traits_options_delete">حذف</string>
-    <string name="export_error_data_missing">لا يوجد بيانات ليتم تصديرها</string>
-    <string name="tutorial_dialog_description">هل ترغب في تفعيل الدليل التعليمي؟ هذا الإعداد يمكن تغييره ضمن الإعدادات المتقدمة.</string>
-    <string name="dialog_cancel">إلغاء</string>
-    <string name="preferences_sound_primary_order_sound">صوت التنبيه عند تغيير الترتيب الأساسي</string>
-    <string name="traits_create_photo_maximum">العدد الأقصى للصور الملتقطة</string>
-    <string name="preferences_general_feature_next_missing">تفعيل زر الانتقال إلى المدخل التالي الذي لا يتضمن بيانات للمستخدم المتقدم</string>
-    <string name="main_toolbar_next_entry_no_data">المدخل الفارغ التالي</string>
-    <string name="preferences_general_feature_barcode_text">تفعيل الخيار للمتقدم لتحديد المعرف الفريد</string>
-    <string name="main_toolbar_moveto">إنتقل إلى ID</string>
+    <!-- Beta -->
+    <!-- ABOUT -->
+    <!-- App  -->
+    <string name="about_title">حول</string>
     <string name="about_version_title">الإصدار</string>
+    <string name="about_rate">قيم هذا التطبيق</string>
+    <!-- Lead  -->
+    <string name="about_project_lead_title">مدير المشروع</string>
+    <!-- Support  -->
+    <string name="about_contributors_title">المساهمون</string>
+    <string name="about_contributors_funding_title">التمويل</string>
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <string name="about_technical_title">التفاصيل الفنية 1</string>
+    <!-- Update -->
+    <!-- BRAPI -->
+    <!-- BrAPI preferences -->
+    <string name="brapi_info_title">معلومات مزامنة BrAPI</string>
+    <string name="brapi_base_url">الموقع الأساسي لـ BrAPI</string>
+    <string name="brapi_base_url_desc">عنوان URL الأساسي لخادم BrAPI المتصل</string>
+    <!-- Authorization -->
+    <string name="brapi_save_authorize">حفظ وسماح</string>
+    <string name="brapi_revoke_auth">الخروج</string>
+    <string name="brapi_auth_btn">تسجيل الدخول إلى الموقع</string>
+    <string name="brapi_auth_success">تم ترخيص BrAPI بنجاح</string>
+    <string name="brapi_auth_deny">تم رفض ترخيص BrAPI</string>
+    <string name="brapi_auth_error_starting">خطأ في بدء مصادقة BrAPI</string>
+    <string name="brapi_auth_needed_title">مطلوب تسجيل الدخول</string>
+    <string name="brapi_auth_needed">تحتاج إلى تسجيل الدخول إلى النظام الذي تحاول مزامنة البيانات معه بالترتيب
+لمزامنة بياناتك.
+
+هل تريد المصادقة الآن؟</string>
+    <!-- BrAPI Import -->
+    <string name="brapi_load_data_button">تحميل الحقول</string>
+    <string name="brapi_load_traits_button">تحميل السمات</string>
+    <string name="brapi_save_data_button">حفظ الملف</string>
+    <string name="brapi_study_name">اسم</string>
+    <string name="brapi_study_description">وصف</string>
+    <string name="brapi_study_location">موقع</string>
+    <string name="brapi_study_num_traits">السمات</string>
+    <string name="brapi_study_detail_error">خطأ عند تحميل تفاصيل الدراسة. لم يتم حفظ الدراسة.</string>
+    <string name="brapi_plot_detail_error">خطأ عند تحميل اللقطع التجريبية للدراسة. لم يتم حفظ الدراسة.</string>
+    <string name="brapi_study_traits_error">خطأ عند تحميل السمات للدراسة. لم يتم حفظ الدراسة.</string>
+    <string name="brapi_ontology_error">حدث خطأ أثناء تحميل السمات من BrAPI.</string>
+    <string name="brapi_save_field_error">خطأ في تحميل الحقل</string>
+    <string name="brapi_field_not_selected">الحقل المحدد يجب استيرادها من BrAPI.</string>
+    <string name="brapi_save_trait">حفظ السمات</string>
+    <string name="brapi_must_configure_url">يجب تهيئة عنوان URL صالح لـ BrAPI في الإعدادات قبل المتابعة</string>
+    <string name="brapi_export_failed">تصدير BrAPI فاشل</string>
+    <string name="brapi_export_permission_deny">خطأ: ليس لديك الإذن لإرسال البيانات إلى النظام المحدد.</string>
+    <string name="brapi_export_not_supported">خطأ: لا يدعم نظام الهدف إرسال الملاحظات عبر BrAPI.</string>
+    <string name="brapi_export_wrong_num_obs">خطأ: عدد ردود الملاحظات يختلف عن المطلوب</string>
+    <string name="brapi_export_missing_obs">خطأ: ملاحظة مفقودة في الاستجابة</string>
+    <string name="brapi_export_multiple_obs">خطأ: ملاحظات متعددة لكل متغي</string>
+    <string name="brapi_export_unknown_error">خطأ غير معروف</string>
+    <string name="brapi_export_successful">تصدير BrAPI ناجح</string>
+    <string name="brapi_saving_indicator">حفظ الملاحظات</string>
+    <string name="brapi_field_non_matching_sources">غير قادر على مزامنة البيانات. بيانات الحقل المنشأة من %1$s، تم تعيين عنوان url لـ BrAPI حاليًا إلى%2$s . يجب أن تتطابق المصادر.</string>
+    <string name="brapi_trait_already_exists">السمة موجودة بالفعل: %1$s. عدم الحفظ.</string>
+    <string name="brapi_error_saving_all_traits">خطأ في حفظ السمات. لم يتم حفظ السمات.</string>
+    <string name="brapi_error_saving_some_traits">خطأ في حفظ بعض السمات. لم يتم حفظ بعض السمات</string>
+    <string name="brapi_traits_saved_success">تم حفظ السمات المحددة بنجاح.</string>
+    <!-- BrAPI Export -->
+    <string name="brapi_export_button">تصدير</string>
+    <string name="brapi_export_title">تصدير إحصائيات BrAPI</string>
+    <string name="brapi_export_observations">ملاحظات</string>
+    <string name="brapi_export_num_new_obs">ملاحظات جديدة</string>
+    <string name="brapi_export_num_synced_obs">الملاحظات المتزامنة</string>
+    <string name="brapi_export_num_ed_obs">ملاحظات معدلة</string>
+    <string name="brapi_export_skipped_observations">تخطي الملاحظات</string>
+    <string name="brapi_export_skipped_user_created">المستخدم أنشأ ملاحظات للسمات</string>
+    <string name="brapi_export_skipped_wrong_source">مصدر بيانات مختلف</string>
+    <string name="brapi_export_num_new_imgs">صور جديدة</string>
+    <string name="brapi_export_num_synced_imgs">الصور المتزامنة</string>
+    <string name="brapi_export_num_ed_imgs">الصور المعدلة</string>
+    <string name="brapi_export_num_incomplete_imgs">صور متزامنة غير مكتملة</string>
+    <string name="brapi_export_skipped_images">تخطي الصور</string>
+    <string name="brapi_export_skipped_user_created_images">المستخدم أنشأ صور للسمات</string>
+    <string name="brapi_export_images">صور</string>
+    <string name="brapi_delete_message">لا يمكن حذف ملاحظة BrAPI المتزامنة ، وذلك باستخدام NA بدلاً من ذلك</string>
+    <!-- Pagination -->
+    <string name="next">التالي</string>
+    <string name="prev">السابق</string>
+    <string name="page_one_of_one">صفحة 1 من 1</string>
+    <!-- General -->
+    <string name="device_offline_warning">الجهاز غير متصل: الرجاء الاتصال بشبكة وإعادة المحاولة</string>
+    <string name="brapi_info_message">الصفات والحقول المستوردة عبر BrAPI ستكون قادرة على تصدير هذه الملاحظات عبر تصدير BrAPI.
+السمات والحقول التي تم إنشاؤها يدويًا أو استيرادها عبر CSV يجب تصديرها عبرCSV.</string>
+    <!-- TUTORIAL -->
+    <string name="tutorial_dialog_title">دليل تعليمي</string>
+    <string name="tutorial_dialog_description">هل ترغب في تفعيل الدليل التعليمي؟ هذا الإعداد يمكن تغييره ضمن الإعدادات المتقدمة.</string>
+    <string name="tutorial_main_infobars_title">أشرطة المعلومات</string>
+    <string name="tutorial_main_infobars_description">أعمدة المعلومات في أعلى الشاشة تظهر بيانات إضافية لكل مدخل. يمكن تغييرها من قائمة الإعداد.</string>
+    <string name="tutorial_main_traits_title">السمات</string>
+    <string name="tutorial_main_traits_description">الأسهم الصغيرة الخضراء فتتنقل ما بين السمات</string>
+    <string name="tutorial_main_traitlist_title">السمات</string>
+    <string name="tutorial_main_traitlist_description">هده السمة تجمع, لائحة من السمات المفعلة تظهر حين يتم النقر على السمة الحالية.</string>
+    <string name="tutorial_main_entries_title">المدخلات</string>
+    <string name="tutorial_main_entries_description">الأسهم الكبيرة السوداء تتنقل ما بين المدخلات</string>
+    <string name="tutorial_main_navinfo_title">ترتيب األأعمدة</string>
+    <string name="tutorial_main_navinfo_description">هذا هو المكان الذي يتم فيه عرض الترتيب الأساسي والثانوي.</string>
+    <string name="tutorial_main_datacollect_title">إدخال بيانات</string>
+    <string name="tutorial_main_datacollect_description">يتم إدخال البيانات في الجزء السفلي من الشاشة. أنواع السمات المختلفة لها مخططات مختلفة.</string>
+    <string name="tutorial_main_na_title">بيانات مفقودة</string>
+    <string name="tutorial_main_na_description">يتم استخدام الزر NA لتمييز القيم على أنها مفقودة.</string>
+    <string name="tutorial_main_delete_title">حذف البيانات</string>
+    <string name="tutorial_main_delete_description">يتم حذف البيانات باستخدام هذا الزر.</string>
+    <string name="tutorial_main_search_title">بحث</string>
+    <string name="tutorial_main_search_description">أيقونة البحث تسمح باستعلام قاعدة البيانات</string>
+    <string name="tutorial_main_resources_title">مصادر</string>
+    <string name="tutorial_main_resources_description">هذا يعرض قائمة بالملفات في مجلد الموارد.</string>
+    <string name="tutorial_main_summary_title">ملخص</string>
+    <string name="tutorial_main_summary_description">يعرض هذا ملخصًا لجميع البيانات الخاصة بالمدخل الحالي.</string>
+    <string name="tutorial_main_lockdata_title">قفل البيانات</string>
+    <string name="tutorial_main_lockdata_description">إقفال إدخال البيانات الحالية</string>
+    <string name="tutorial_settings_fields_title">حقول</string>
+    <string name="tutorial_settings_fields_description">يسمح باستيراد وإدارة الحقول.</string>
+    <string name="tutorial_settings_fields_import">لبدء استخدام Field Book ، قم أولاً باستيراد ملف حقل.</string>
+    <string name="tutorial_settings_traits_title">السمات</string>
+    <string name="tutorial_settings_traits_description">يسمح بإضافة واستيراد وإدارة الحقول.</string>
+    <string name="tutorial_settings_collect_title">جمع البيانات</string>
+    <string name="tutorial_settings_collect_description">يسمح لك بجمع بيانات النمط الظاهري.</string>
+    <string name="tutorial_settings_settings_title">إعدادات</string>
+    <string name="tutorial_settings_settings_description">يسمح بتكوين إضافي لجمع البيانات.</string>
+    <string name="tutorial_settings_export_title">تصدير</string>
+    <string name="tutorial_settings_export_description">يمكن تصدير البيانات بطريقتين: قاعدة بيانات أو جدول.</string>
+    <string name="tutorial_fields_add_title">إضافة حقل</string>
+    <string name="tutorial_fields_add_description">استيراد ملف الحقل</string>
+    <string name="tutorial_fields_file_description">يجب أن تحتوي الملفات على ثلاثة أعمدة: معرّف فريد وترتيب أساسي وترتيب ثانوي. يتم استخدام الترتيب الأساسي / الثانوي للتنقل في هذا الحقل.</string>
+    <string name="tutorial_fields_select_title">حقل نشط</string>
+    <string name="tutorial_fields_select_description">يتم تحديد حقل لجمع البيانات بعد استيراده.</string>
+    <string name="tutorial_fields_delete_title">حقل نشط</string>
+    <string name="tutorial_fields_delete_description">لحذف حقل، افتح القائمة التي على الجهة اليسرى من اسم الحقل واختر حذف.</string>
+    <string name="tutorial_traits_add_title">أضف سمة</string>
+    <string name="tutorial_traits_add_description">خيار أضف سمة ضمن القائمة ينشيء سمة جديدة. أنواع السمات المختلفة لها مخططات جمع مختلفة.</string>
+    <string name="tutorial_traits_format_title">أنواع السمة</string>
+    <string name="tutorial_traits_format_description">تتم الإشارة إلى أنواع السمات المختلفة برموز مختلفة.</string>
+    <string name="tutorial_traits_visibility_title">رؤية السمة</string>
+    <string name="tutorial_traits_visibility_description">يمكن تعطيل السمات من الجمع من خلال تبديل مربع الاختيار.</string>
 </resources>

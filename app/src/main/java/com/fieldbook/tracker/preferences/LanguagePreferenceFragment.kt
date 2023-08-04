@@ -23,7 +23,7 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
         for (key in setOf("com.fieldbook.tracker.preference.language.default",
             "am-ET", "ar-SA", "bn-BD", "de-DE", "en-US", "es-MX",
             "fr-FR", "hi-IN", "it-IT", "ja-JP", "om-ET", "pt-BR",
-            "ru-RU", "zh-CN")) {
+            "ru-RU", "sv-SE", "vi-VN", "zh-CN")) {
             findPreference<Preference>(key)?.onPreferenceClickListener = this
         }
     }

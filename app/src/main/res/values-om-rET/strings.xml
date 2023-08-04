@@ -1,107 +1,198 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-
+<resources>
+    <!-- GENERAL -->
+    <!-- App -->
     <string name="field_book">Baruule Dirree</string>
-    <string name="main_toolbar_search">Barbaacha</string>
-    <string name="main_toolbar_resources">Qabiyeee</string>
-    <string name="traits_format_audio">Sagalee</string>
-    <string name="preferences_appearance_language">Qooqa</string>
-    <string name="main_trait_details">Ibsaa gadfageenyaan</string>
-    <string name="search_results_dialog_range">Sarara</string>
-    <string name="search_results_dialog_plot">Madabii</string>
-    <string name="search_dialog_add">"Ida'i"</string>
-    <string name="search_dialog_clear">Balleessi</string>
-    <string name="dialog_close">Cufi</string>
+    <!-- Dialog -->
+    <string name="dialog_cancel">Ballessi</string>
     <string name="dialog_ok">Eeyyeee</string>
-    <string name="dialog_confirm">Dhuguma keetii?</string>
     <string name="dialog_yes">Eeyee</string>
     <string name="dialog_no">Lakki</string>
-    <string name="trait_error_minimum_value">Gattin isaa kan eegamuu irra xiqqaata.</string>
-    <string name="trait_error_maximum_value">Gatiin isaa waan eegamu irra caala</string>
-    <string name="main_toolbar_moveto_no_match">Kan kanaan wal fakaatu hin jiru.</string>
-    <string name="dialog_warning">Ofeegannoo</string>
-    <string name="export_error_general">Baasuf dogoggora qaba</string>
-    <string name="export_complete">Baasun raawwatame</string>
-    <string name="profile_person_title">Maqaa qopeessi</string>
-    <string name="about_title">"Waa'ee"</string>
-    <string name="profile_reset">Kessa jijjiraa ballessuu</string>
+    <string name="dialog_close">Cufi</string>
+    <string name="dialog_confirm">Dhuguma keetii?</string>
     <string name="dialog_import">kara biraatii galchuu</string>
-    <string name="settings_export">kara biraatti baasuu</string>
-    <string name="profile_name_first">Maqaa duraa</string>
-    <string name="profile_name_last">Maqaa dhumaa</string>
-    <string name="profile_person">Nama</string>
+    <string name="dialog_warning">Ofeegannoo</string>
+    <string name="dialog_save">Olkaa\'i</string>
+    <!-- Startup  -->
+    <!-- Permissions  -->
+    <!-- Config Activity  -->
     <string name="settings_fields">Dirree</string>
     <string name="settings_traits">Wanta ideefanonn guuramuuf</string>
-    <string name="preferences_general_skip_entries_with_data">Ideeffanoo guurame dhoksi</string>
-    <string name="export_format_database">Kusaa odeeffanoo</string>
-    <string name="export_format_table">Gabatee</string>
-    <string name="export_file_name">Maqaa faayilii</string>
-    <string name="traits_create_trait">Amala</string>
-    <string name="search_dialog_query_is_equal_to">walqixa</string>
-    <string name="search_dialog_query_is_not_equal_to">walqixa miti</string>
-    <string name="search_dialog_query_contains">ni qabata</string>
-    <string name="search_dialog_query_does_not_contain">hin qabatu</string>
-    <string name="search_dialog_query_is_more_than">ni caala</string>
-    <string name="search_dialog_query_is_less_than">"ni hir'ata"</string>
-    <string name="search_results_missing">barbaaduun deebi hin finne</string>
-    <string name="import_dialog_unique">adda baasaa dhuunfaa</string>
+    <string name="settings_export">kara biraatti baasuu</string>
+    <string name="settings_advanced">Haala ittin jijiiramu ol\'aanaa</string>
+    <!-- Config Activity Fuzzy Search  -->
+    <!-- File manager  -->
     <string name="import_dialog_importing">Eegi</string>
     <string name="import_error_general">Galchuurratti dogogora qaba</string>
-    <string name="import_error_unique">"Maqaan dhuunfa deddeebi'e"</string>
-    <string name="traits_toolbar_add_trait">Amala dabali</string>
-    <string name="traits_create_format">Haala itti baasuu barbaaddu</string>
-    <string name="traits_create_value_default">Akkuma jirutti</string>
-    <string name="traits_create_value_minimum">Hundarra xiqqaa</string>
-    <string name="traits_create_value_maximum">Hundarra guddaa</string>
-    <string name="traits_create_details">Gad fageenyaan</string>
-    <string name="traits_create_categories_title">Kutaa isaa</string>
-    <string name="dialog_save">"Olkaa'i"</string>
+    <!-- Warnings/Catches -->
+    <string name="warning_field_missing">Yeroo kana direen hingalle. Odoo ragaa hin funaanin dura, dirree galchi</string>
+    <string name="warning_traits_missing">Amaloonni hinjiran. Odoo ragaa funaanuu hinjalqabni, amaloota uumi</string>
+    <!-- Changelog -->
+    <!-- FIELDS -->
+    <!-- General -->
+    <!-- Sort -->
+    <!-- Delete -->
+    <!-- Import -->
+    <string name="import_dialog_unique">adda baasaa dhuunfaa</string>
+    <string name="import_error_unique">Maqaan dhuunfa deddeebi\'e</string>
+    <!-- Field Creator  -->
+    <!-- Geo-Navigate to Field -->
+    <!-- Unimplemented -->
+    <!-- TRAITS -->
+    <!-- Sort -->
+    <!-- Trait import/export -->
+    <string name="traits_dialog_import">kara biraatii galchuu</string>
+    <string name="traits_dialog_export">kara biraatti baasuu</string>
+    <string name="traits_toolbar_delete_all">Amala hundaa balleessi</string>
+    <!-- Trait item menu -->
+    <string name="traits_options_copy">Waraabuu</string>
+    <string name="traits_options_delete">Balleessi</string>
+    <string name="traits_options_delete_title">Amala balleessi</string>
+    <!-- Trait formats -->
     <string name="traits_format_numeric">Lakkoofsa</string>
     <string name="traits_format_categorical">Kutaan kan qoodame</string>
     <string name="traits_format_date">Guyyaa</string>
     <string name="traits_format_percent">Parasantii</string>
     <string name="traits_format_boolean">Gosa dhugaa ykn Soba</string>
     <string name="traits_format_text">Barreefama</string>
-    <string name="traits_options_copy">Waraabuu</string>
-    <string name="traits_create_warning_name_blank">"Maqaan amalaa duwaa hin ta'u"</string>
-    <string name="traits_create_warning_duplicate">Amalichi jira</string>
-    <string name="traits_options_delete_title">Amala balleessi</string>
-    <string name="traits_toolbar_delete_all">Amala hundaa balleessi</string>
-    <string name="traits_create_warning_numeric_required">"Xiqaani fi guddaan lakkoofsa ta'uu qaba"</string>
+    <string name="traits_format_photo">Footoo</string>
+    <string name="traits_format_audio">Sagalee</string>
+    <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">Amala dabali</string>
+    <string name="traits_create_trait">Amala</string>
+    <string name="traits_create_format">Haala itti baasuu barbaaddu</string>
+    <string name="traits_create_value_default">Akkuma jirutti</string>
+    <string name="traits_create_value_minimum">Hundarra xiqqaa</string>
+    <string name="traits_create_value_maximum">Hundarra guddaa</string>
+    <string name="traits_create_details">Gad fageenyaan</string>
+    <string name="traits_create_optional">Filannoo keeti</string>
+    <string name="traits_create_categories_title">Kutaa isaa</string>
+    <string name="traits_create_photo_maximum">Baay\'ina footo qabuu danda\'u</string>
     <string name="traits_create_true">Dhugaa</string>
     <string name="traits_create_false">Soba</string>
-    <string name="settings_advanced">"Haala ittin jijiiramu ol'aanaa"</string>
     <string name="traits_create_categories_text">Wantooota kanaan adda baasi a /</string>
+    <string name="traits_create_warning_name_blank">Maqaan amalaa duwaa hin ta\'u</string>
+    <string name="traits_create_warning_duplicate">Amalichi jira</string>
+    <string name="traits_create_warning_numeric_required">Xiqaani fi guddaan lakkoofsa ta\'uu qaba</string>
+    <!-- COLLECT -->
+    <!-- Validation -->
+    <string name="trait_error_minimum_value">Gattin isaa kan eegamuu irra xiqqaata.</string>
+    <string name="trait_error_maximum_value">Gatiin isaa waan eegamu irra caala</string>
+    <!-- Toolbar -->
+    <string name="main_toolbar_resources">Qabiyeee</string>
+    <string name="main_trait_details">Ibsaa gadfageenyaan</string>
     <string name="main_infobar_data_missing">Daatan hin jiru</string>
-    <string name="export_error_missing_format">"Wanti ba'u filatamuu qaba"</string>
+    <string name="main_toolbar_next_entry_no_data">Kan itti aanu bakka duwwaa jiru</string>
+    <!-- InfoBars -->
+    <string name="dialog_att_chooser_traits">Wanta ideefanonn guuramuuf</string>
+    <!-- ID/Barcode Search -->
+    <string name="main_toolbar_moveto_no_match">Kan kanaan wal fakaatu hin jiru.</string>
+    <string name="main_toolbar_moveto">Maqaa dhuunfaa biraa deemi</string>
+    <!-- Search  -->
+    <string name="main_toolbar_search">Barbaacha</string>
+    <string name="search_dialog_add">Ida\'i</string>
+    <string name="search_dialog_clear">Balleessi</string>
+    <string name="search_dialog_query_is_equal_to">walqixa</string>
+    <string name="search_dialog_query_is_not_equal_to">walqixa miti</string>
+    <string name="search_dialog_query_contains">ni qabata</string>
+    <string name="search_dialog_query_does_not_contain">hin qabatu</string>
+    <string name="search_dialog_query_is_more_than">ni caala</string>
+    <string name="search_dialog_query_is_less_than">ni hir\'ata</string>
     <string name="search_results_dialog_title">Debee barabaacha godhamee</string>
-    <string name="preferences_behavior_cycle_traits">Dhumarratti bakka jirturra gara jalqaba itti aanutti darbi</string>
-    <string name="preferences_general_use_day_number">"Guyyaa odoo hin ta'in guyya waggaa fayyadami"</string>
-    <string name="trait_layout_data_stored">"Daatan olka'amee jira"</string>
-    <string name="traits_create_optional">Filannoo keeti</string>
-    <string name="export_progress">Baasaa jira</string>
-    <string name="tutorial_dialog_title">Ibsa</string>
-    <string name="warning_field_missing">Yeroo kana direen hingalle. Odoo ragaa hin funaanin dura, dirree galchi</string>
-    <string name="warning_traits_missing">Amaloonni hinjiran. Odoo ragaa funaanuu hinjalqabni, amaloota uumi</string>
-    <string name="database_reset">"Kuusa irra deeebi'ii qopheessi"</string>
-    <string name="database_reset_warning1">Ragaan hindinuu ni bada. Dhugaa keetii?</string>
-    <string name="database_reset_warning2">"Wanti dalagame duubatti hin deeb'u. Meeshan erga kuusaa qul'qullessen booda hojii ni dhaaba. Akkanumatti itti fufuu ni barbaaddaa?"</string>
-    <string name="database_dialog_title">Kuusaa ragaa</string>
-    <string name="database_reset_message">Kuusan badee jira</string>
-    <string name="database_import">Kuusaa ragaa galchi</string>
-    <string name="database_export">Kuusaa ragaa baasi.</string>
+    <string name="search_results_dialog_range">Sarara</string>
+    <string name="search_results_dialog_plot">Madabii</string>
+    <string name="search_results_missing">barbaaduun deebi hin finne</string>
+    <!--- Profile -->
+    <string name="activity_collect_dialog_verify_no_button">Lakki</string>
+    <string name="activity_collect_dialog_verify_yes_button">Eeyee</string>
+    <!--- Datagrid -->
+    <!-- Trait Layout: Photo -->
+    <!-- Trait Layout: GNSS -->
+    <!-- Trait Layout: Date -->
+    <!-- Trait Layout: Boolean -->
+    <!-- Trait Layout: GoPro -->
+    <!-- Trait Layout: USB Camera -->
+    <!--- Trait Layout: Zebra label print -->
+    <string name="trait_layout_data_stored">Daatan olka\'amee jira</string>
+    <!--- Trait Layout: Counter -->
+    <!--- Trait Layout: Location -->
+    <!--- Text to Speech Strings -->
+    <!--- Summary -->
+    <!--- Repeated measures -->
+    <!--- GeoNav -->
+    <!--- Content Descriptions -->
+    <!-- EXPORT -->
+    <!-- Export dialog -->
+    <string name="export_format_database">Kusaa odeeffanoo</string>
+    <string name="export_format_table">Gabatee</string>
+    <string name="export_file_name">Maqaa faayilii</string>
     <string name="export_content_columns_all">Sarara gad qajeela hundaa</string>
     <string name="export_content_traits_all">amaloota hundaa</string>
-    <string name="traits_format_photo">Footoo</string>
-    <string name="traits_options_delete">Balleessi</string>
+    <string name="export_error_general">Baasuf dogoggora qaba</string>
     <string name="export_error_data_missing">Ragaan bahu hinjiru</string>
-    <string name="tutorial_dialog_description">"Ibsaa akka qophaa'uu ni barbaaddaa? Kun qopheessa ol'aanaa kessatti jijjiramuu ni danda'a"</string>
-    <string name="dialog_cancel">Ballessi</string>
+    <string name="export_complete">Baasun raawwatame</string>
+    <string name="export_progress">Baasaa jira</string>
+    <string name="export_error_missing_format">Wanti ba\'u filatamuu qaba</string>
+    <!-- Citation -->
+    <!-- SETTINGS -->
+    <!-- General -->
+    <string name="preferences_general_feature_next_missing">Iddoo ragaan hin jirreetti akka darbuu danda\'amu taasisuu</string>
+    <string name="preferences_general_skip_entries_default">Akkuma jirutti</string>
+    <string name="preferences_general_feature_barcode_text">Maqaa dhuunfatti akka darbuun danda\'amu taasisuu</string>
+    <!-- Profile -->
+    <string name="profile_person">Nama</string>
+    <string name="profile_person_title">Maqaa qopeessi</string>
+    <string name="profile_name_first">Maqaa duraa</string>
+    <string name="profile_name_last">Maqaa dhumaa</string>
+    <string name="profile_reset">Kessa jijjiraa ballessuu</string>
+    <!-- Appearance -->
+    <string name="theme_default">Akkuma jirutti</string>
+    <string name="preferences_appearance_language">Qooqa</string>
+    <string name="preferences_appearance_toolbar_customize_search">Barbaacha</string>
+    <string name="preferences_appearance_toolbar_customize_resources">Qabiyeee</string>
+    <!-- Behavior -->
+    <string name="preferences_behavior_cycle_traits">Dhumarratti bakka jirturra gara jalqaba itti aanutti darbi</string>
+    <string name="preferences_general_use_day_number">Guyyaa odoo hin ta\'in guyya waggaa fayyadami</string>
+    <string name="preferences_general_skip_entries_with_data">Ideeffanoo guurame dhoksi</string>
+    <!-- GeoNav -->
+    <!-- Sounds -->
     <string name="preferences_sound_primary_order_sound">Tartiibni jalqabaa yoo jijirame sagalee beeksisaa</string>
-    <string name="traits_create_photo_maximum">"Baay'ina footo qabuu danda'u"</string>
-    <string name="preferences_general_feature_next_missing">"Iddoo ragaan hin jirreetti akka darbuu danda'amu taasisuu"</string>
-    <string name="main_toolbar_next_entry_no_data">Kan itti aanu bakka duwwaa jiru</string>
-    <string name="preferences_general_feature_barcode_text">"Maqaa dhuunfatti akka darbuun danda'amu taasisuu"</string>
-    <string name="main_toolbar_moveto">Maqaa dhuunfaa biraa deemi</string>
+    <!-- BrAPI preferences are in the BrAPI section below -->
+    <!-- Database -->
+    <string name="database_dialog_title">Kuusaa ragaa</string>
+    <string name="database_import">Kuusaa ragaa galchi</string>
+    <string name="database_export">Kuusaa ragaa baasi.</string>
+    <string name="database_reset">Kuusa irra deeebi\'ii qopheessi</string>
+    <string name="database_reset_warning1">Ragaan hindinuu ni bada. Dhugaa keetii?</string>
+    <string name="database_reset_warning2">Wanti dalagame duubatti hin deeb\'u. Meeshan erga kuusaa qul\'qullessen booda hojii ni dhaaba. Akkanumatti itti fufuu ni barbaaddaa?</string>
+    <string name="database_reset_message">Kuusan badee jira</string>
+    <!-- Beta -->
+    <!-- ABOUT -->
+    <!-- App  -->
+    <string name="about_title">Waa\'ee</string>
     <string name="about_version_title">Fooyyee meeshaa</string>
+    <!-- Lead  -->
+    <!-- Support  -->
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <!-- Update -->
+    <!-- BRAPI -->
+    <!-- BrAPI preferences -->
+    <!-- Authorization -->
+    <!-- BrAPI Import -->
+    <!-- BrAPI Export -->
+    <string name="brapi_export_button">kara biraatti baasuu</string>
+    <!-- Pagination -->
+    <!-- General -->
+    <!-- TUTORIAL -->
+    <string name="tutorial_dialog_title">Ibsa</string>
+    <string name="tutorial_dialog_description">Ibsaa akka qophaa\'uu ni barbaaddaa? Kun qopheessa ol\'aanaa kessatti jijjiramuu ni danda\'a</string>
+    <string name="tutorial_main_traits_title">Wanta ideefanonn guuramuuf</string>
+    <string name="tutorial_main_traitlist_title">Wanta ideefanonn guuramuuf</string>
+    <string name="tutorial_main_search_title">Barbaacha</string>
+    <string name="tutorial_main_resources_title">Qabiyeee</string>
+    <string name="tutorial_settings_fields_title">Dirree</string>
+    <string name="tutorial_settings_traits_title">Wanta ideefanonn guuramuuf</string>
+    <string name="tutorial_settings_settings_title">Haala ittin jijiiramu ol\'aanaa</string>
+    <string name="tutorial_settings_export_title">kara biraatti baasuu</string>
 </resources>

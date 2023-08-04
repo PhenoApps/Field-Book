@@ -546,6 +546,8 @@
     <string name="language_om_rET" translatable="false">Afaan Oromoo</string>
     <string name="language_pt_rBR" translatable="false">Português</string>
     <string name="language_ru" translatable="false">Русский</string>
+    <string name="language_sv_rSE" translatable="false">Svenska</string>
+    <string name="language_vi_vRN" translatable="false">Tiếng Việt</string>
     <string name="language_zh_rCN" translatable="false">简体字</string>
 
     <string name="preferences_appearance_tutorial_description">Adds a tutorial icon to the collect, settings, fields, and traits screens</string>
