@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- GENERAL -->
     <!-- App -->
     <string name="field_book">መረጃ መመዝገቢያ፤</string>
     <!-- Dialog -->
@@ -12,40 +13,190 @@
     <string name="dialog_import">ማስገባት፤</string>
     <string name="dialog_warning">ማስጠንቀቂያ፤</string>
     <string name="dialog_save">አስቀምጥ</string>
-    <string name="dialog_go">Go</string>
-    <string name="dialog_save_error_title">Save Error</string>
-    <string name="dialog_back">Back</string>
-    <string name="dialog_scan">Scan</string>
-    <string name="barcode_scanner_text">Scan a barcode</string>
     <!-- Startup  -->
-    <string name="startup_sample_data_title">Sample data</string>
-    <string name="startup_sample_data_message">Load sample data?</string>
     <!-- Permissions  -->
-    <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
-    <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
-    <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
-    <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
     <!-- Config Activity  -->
     <string name="settings_fields">ቦታዎች</string>
     <string name="settings_traits">ጸባዮች</string>
-    <string name="settings_collect">Collect</string>
     <string name="settings_export">ማውጣት፤</string>
     <string name="settings_advanced">የረቀቃ አዘጋጃጀት</string>
-    <string name="settings_profile">Profile</string>
     <!-- Config Activity Fuzzy Search  -->
-    <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
-    <string name="act_config_fuzzy_search_error">Something went wrong when searching for %s</string>
-    <string name="act_config_search_fab_content_description">Search all plots and fields to load/navigate to the barcoded item.</string>
     <!-- File manager  -->
-    <string name="import_source_local">Local storage</string>
-    <string name="import_source_cloud">Cloud storage</string>
-    <string name="import_source_ask">Always ask</string>
     <string name="import_dialog_importing">እባክህ ጠብቅ</string>
     <string name="import_error_general">ማስገባት ላይ ስህተት አላ</string>
-    <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">የሙከራ ቦታ አልቀረበም፤ እባክዎን መረጃ ከመሰብሰብዎ በፊት ቦታዉ እንዲቀርብ ያድርጉ፤</string>
     <string name="warning_traits_missing">ጣባዮች የሉም፤</string>
     <!-- Changelog -->
     <string name="changelog_title">ከመጨረሸ እድሳት ቀይረዉ</string>
+    <!-- FIELDS -->
+    <!-- General -->
+    <!-- Sort -->
+    <!-- Delete -->
+    <!-- Import -->
+    <string name="import_dialog_unique">መለያ</string>
+    <string name="import_dialog_primary">ዋና አደራደር</string>
+    <string name="import_dialog_secondary">ሁለተኛ አደራደር</string>
+    <string name="import_error_unique">መለያዉ ተመላልስዋል</string>
+    <!-- Field Creator  -->
+    <!-- Geo-Navigate to Field -->
+    <!-- Unimplemented -->
+    <!-- TRAITS -->
+    <!-- Sort -->
+    <!-- Trait import/export -->
+    <string name="traits_dialog_import">ማስገባት፤</string>
+    <string name="traits_dialog_export">ማውጣት፤</string>
+    <string name="traits_toolbar_delete_all">ሁሉንም ጸባዮች አጥፋቸው</string>
+    <!-- Trait item menu -->
+    <string name="traits_options_copy">ገልብጥ</string>
+    <string name="traits_options_delete">አጥፋው</string>
+    <string name="traits_options_delete_title">ጸባዩን አጥፋው</string>
+    <!-- Trait formats -->
+    <string name="traits_format_numeric">ቁጥር</string>
+    <string name="traits_format_categorical">በክፍል ልመደብ የሚችል</string>
+    <string name="traits_format_date">ቀን</string>
+    <string name="traits_format_percent">ከመቶኛ</string>
+    <string name="traits_format_boolean">እዉነት ውይም ውሸት ብቻ ልሆን የሚችል</string>
+    <string name="traits_format_text">ፍደል</string>
+    <string name="traits_format_photo">ፎቶ፤</string>
+    <string name="traits_format_audio">ድምጽ፤</string>
+    <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">ጸባይ ጨምር</string>
+    <string name="traits_create_trait">ጸባይ</string>
+    <string name="traits_create_format">ፎርማት</string>
+    <string name="traits_create_value_default">እንደነበረ</string>
+    <string name="traits_create_value_minimum">ትንሹ</string>
+    <string name="traits_create_value_maximum">ትልቁ</string>
+    <string name="traits_create_details">ዝርዝር</string>
+    <string name="traits_create_optional">አማራጭ</string>
+    <string name="traits_create_categories_title">ክፍል</string>
+    <string name="traits_create_photo_maximum">የፍቶዎች ብዛት ትልቁ፤</string>
+    <string name="traits_create_true">እዉነት</string>
+    <string name="traits_create_false">ዉሸት</string>
+    <string name="traits_create_categories_text">ሁኔታዎችን በ አ ለይ</string>
+    <string name="traits_create_warning_name_blank">ያጸባይ ስም ባዶ ልሆን አይችልም</string>
+    <string name="traits_create_warning_duplicate">በፊት የነበራ ጸባይ</string>
+    <string name="traits_create_warning_numeric_required">የነበረው ትንሹና ትልቁ ቁጥር ብቻ መሆን አለባቸው</string>
+    <!-- COLLECT -->
+    <!-- Validation -->
+    <string name="trait_error_minimum_value">ዋጋው ከታሰበው በታች ነዉ፤</string>
+    <string name="trait_error_maximum_value">ዋጋዉ ከታሰበዉ በላይ ነው</string>
+    <!-- Toolbar -->
+    <string name="main_toolbar_resources">የመረጀ ምንጮች፤</string>
+    <string name="main_trait_details">የጸባይ ዝርዝር፤</string>
+    <string name="main_infobar_data_missing">መረጃ የለም</string>
+    <string name="main_toolbar_next_entry_no_data">የሚቀጥለው ባዶ ናሙና፤</string>
+    <!-- InfoBars -->
+    <string name="dialog_att_chooser_traits">ጸባዮች</string>
+    <!-- ID/Barcode Search -->
+    <string name="main_toolbar_moveto_no_match">ከዝህ ጋር የሚመሳሰል የለም፤</string>
+    <string name="main_toolbar_moveto">ወደ ማለያ ቁጥር ህድ፤</string>
+    <!-- Search  -->
+    <string name="main_toolbar_search">መፈለግ፤</string>
+    <string name="search_dialog_add">መደመር፤</string>
+    <string name="search_dialog_clear">ንጹህ አርገዉ enter የምለዉን ንካዉ፤</string>
+    <string name="search_dialog_query_is_equal_to">እኩል ይሆናል</string>
+    <string name="search_dialog_query_is_not_equal_to">እኩል አይሆንም</string>
+    <string name="search_dialog_query_contains">ያጠቃልላል</string>
+    <string name="search_dialog_query_does_not_contain">አያጠቃልልም</string>
+    <string name="search_dialog_query_is_more_than">ይበልጣል</string>
+    <string name="search_dialog_query_is_less_than">ያንሳል</string>
+    <string name="search_results_dialog_title">የፍለጋ ዉጤት</string>
+    <string name="search_results_dialog_range">ከግራ ወደ ቀኝ የምሀድ መስመር፤</string>
+    <string name="search_results_dialog_plot">መደብ፤</string>
+    <string name="search_results_missing">መፈለግ ውጤት አላስግኘም</string>
+    <!--- Profile -->
+    <string name="activity_collect_dialog_verify_no_button">አይደለም፤</string>
+    <string name="activity_collect_dialog_verify_yes_button">አዎ፤</string>
+    <!--- Datagrid -->
+    <!-- Trait Layout: Photo -->
+    <string name="trait_error_hardware_missing">መሳሪያህ ለዚህ የሚያስፈልገውን ዕቃ የለውም፤</string>
+    <!-- Trait Layout: GNSS -->
+    <!-- Trait Layout: Date -->
+    <!-- Trait Layout: Boolean -->
+    <!-- Trait Layout: GoPro -->
+    <!-- Trait Layout: USB Camera -->
+    <!--- Trait Layout: Zebra label print -->
+    <string name="trait_layout_data_stored">መረጃው ተቀምጥዋል</string>
+    <!--- Trait Layout: Counter -->
+    <!--- Trait Layout: Location -->
+    <!--- Text to Speech Strings -->
+    <!--- Summary -->
+    <!--- Repeated measures -->
+    <!--- GeoNav -->
+    <!--- Content Descriptions -->
+    <!-- EXPORT -->
+    <!-- Export dialog -->
+    <string name="export_format_database">የመረጃ ማህደር</string>
+    <string name="export_format_table">ሰንጠረዥ</string>
+    <string name="export_file_name">የፋይል ስም</string>
+    <string name="export_content_columns_all">ሁሉም ቦታዎች የሰንጠረዥ ወደ ታች መሄጃ መስመር፤</string>
+    <string name="export_content_traits_all">ሁሉም ጠባዮች፤</string>
+    <string name="export_error_general">ስውጣ ስህተት አለበት፤</string>
+    <string name="export_error_data_missing">የሚወጣ መረጃ የለም፤</string>
+    <string name="export_complete">ማውጣቱ አልቀዋል፤</string>
+    <string name="export_progress">አዉጣው</string>
+    <string name="export_error_missing_format">የምወጣ የመረጃ ዓይነት የለም</string>
+    <!-- Citation -->
+    <!-- SETTINGS -->
+    <!-- General -->
+    <string name="preferences_general_feature_next_missing">ተጥቃሚው መረጃ ወደሌለው ናሙና እንዲሄድ ቅልፉ ኢንዲሰራ ያደርጋል።</string>
+    <string name="preferences_general_skip_entries_default">እንደነበረ</string>
+    <string name="preferences_general_feature_barcode_text">ወደ መለያ ለማለፍ የሚያስችለውን አማራጭ እንዲሰራ ማድረግ፤</string>
+    <!-- Profile -->
+    <string name="profile_person">ሰዉ፤</string>
+    <string name="profile_person_title">ስም ማስተካከል፤</string>
+    <string name="profile_name_first">የመጀመሪያ ስም፤</string>
+    <string name="profile_name_last">የመጨረሻ ስም፤</string>
+    <string name="profile_reset">የተዘጋጀዉን አጥፋዉ፤</string>
+    <!-- Appearance -->
+    <string name="theme_default">እንደነበረ</string>
+    <string name="preferences_appearance_language">ቀወንቀ፤</string>
+    <string name="preferences_appearance_toolbar_customize_search">መፈለግ፤</string>
+    <string name="preferences_appearance_toolbar_customize_resources">የመረጀ ምንጮች፤</string>
+    <!-- Behavior -->
+    <string name="preferences_behavior_cycle_traits">ከመጨረሻ መስመር ወደ ፊት መሄድ ወደሚቀጥለው መጀመሪያ መስመር ይወስዳል</string>
+    <string name="preferences_general_use_day_number">ከተለመደው ቀን አቆጣጠር ይልቅ ዓመትን መሰረት ያደረጋ ቀን አቆጣጠር ተጠቀም</string>
+    <string name="preferences_general_skip_entries_with_data">መረጃ የተሰበሰበለት መስመር ደብቅ</string>
+    <!-- GeoNav -->
+    <!-- Sounds -->
+    <string name="preferences_sound_primary_order_sound">የመጀመሪያ ቅደምተከተል ስለወጥ ያማሳወቂያ ድምጽ፤</string>
+    <!-- BrAPI preferences are in the BrAPI section below -->
+    <!-- Database -->
+    <string name="database_dialog_title">የመረጃ ማህደር፤</string>
+    <string name="database_import">የመረጃ ማህደሩን አስገባው፤</string>
+    <string name="database_export">የመረጃ ማህደሩን አውጣው</string>
+    <string name="database_reset">የመረጃ ማህደር እንደገና ማስተካከል፤</string>
+    <string name="database_reset_warning1">በመለሶ ማስተካከል ጊዜ መረጃ ልጠፋ ይችላል፤ ይሁን?</string>
+    <string name="database_reset_warning2">ይህ ዉሳኔ አይቀየርም፤ መሳሪያው የመራጃ ማህደሩን ካጸዳ ብሃላ መስራት ይትዋል፤ ቢሆንም ለመቀጠል ትፈልጋለህ?</string>
+    <string name="database_reset_message">የመረጃ ማህደሩ ጠፍትዋል</string>
+    <!-- Beta -->
+    <!-- ABOUT -->
+    <!-- App  -->
+    <string name="about_title">ስለ፤</string>
+    <string name="about_version_title">ዕድሳት፤</string>
+    <!-- Lead  -->
+    <!-- Support  -->
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <!-- Update -->
+    <!-- BRAPI -->
+    <!-- BrAPI preferences -->
+    <!-- Authorization -->
+    <!-- BrAPI Import -->
+    <!-- BrAPI Export -->
+    <string name="brapi_export_button">ማውጣት፤</string>
+    <!-- Pagination -->
+    <!-- General -->
+    <!-- TUTORIAL -->
+    <string name="tutorial_dialog_title">መግለጫ</string>
+    <string name="tutorial_dialog_description">መግለጫ እንዲሰራ ትፈልጋለህ? ይህ በረቀቃ አዘገጃጀት ሊለወጥ ይችላል፤</string>
+    <string name="tutorial_main_traits_title">ጸባዮች</string>
+    <string name="tutorial_main_traitlist_title">ጸባዮች</string>
+    <string name="tutorial_main_search_title">መፈለግ፤</string>
+    <string name="tutorial_main_resources_title">የመረጀ ምንጮች፤</string>
+    <string name="tutorial_settings_fields_title">ቦታዎች</string>
+    <string name="tutorial_settings_traits_title">ጸባዮች</string>
+    <string name="tutorial_settings_settings_title">የረቀቃ አዘጋጃጀት</string>
+    <string name="tutorial_settings_export_title">ማውጣት፤</string>
 </resources>

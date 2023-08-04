@@ -1,51 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- GENERAL -->
     <!-- App -->
-    <string name="field_book">Field Book</string>
     <!-- Dialog -->
-    <string name="dialog_cancel">Cancel</string>
-    <string name="dialog_ok">OK</string>
-    <string name="dialog_yes">Yes</string>
-    <string name="dialog_no">No</string>
-    <string name="dialog_close">Close</string>
-    <string name="dialog_confirm">Are you sure?</string>
-    <string name="dialog_import">Import</string>
-    <string name="dialog_warning">Warning</string>
-    <string name="dialog_save">Save</string>
-    <string name="dialog_go">Go</string>
-    <string name="dialog_save_error_title">Save Error</string>
-    <string name="dialog_back">Back</string>
-    <string name="dialog_scan">Scan</string>
-    <string name="barcode_scanner_text">Scan a barcode</string>
     <!-- Startup  -->
-    <string name="startup_sample_data_title">Sample data</string>
-    <string name="startup_sample_data_message">Load sample data?</string>
     <!-- Permissions  -->
-    <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
-    <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
-    <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
-    <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
     <!-- Config Activity  -->
-    <string name="settings_fields">Fields</string>
-    <string name="settings_traits">Traits</string>
-    <string name="settings_collect">Collect</string>
-    <string name="settings_export">Export</string>
-    <string name="settings_advanced">Settings</string>
-    <string name="settings_profile">Profile</string>
     <!-- Config Activity Fuzzy Search  -->
-    <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
-    <string name="act_config_fuzzy_search_error">Something went wrong when searching for %s</string>
-    <string name="act_config_search_fab_content_description">Search all plots and fields to load/navigate to the barcoded item.</string>
     <!-- File manager  -->
-    <string name="import_source_local">Local storage</string>
-    <string name="import_source_cloud">Cloud storage</string>
-    <string name="import_source_ask">Always ask</string>
-    <string name="import_dialog_importing">Please wait…</string>
-    <string name="import_error_general">Error importing</string>
-    <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
     <!-- Warnings/Catches -->
-    <string name="warning_field_missing">No field is currently loaded. Please load a field before collecting data.</string>
-    <string name="warning_traits_missing">No traits exist. Please create traits before collecting data.</string>
     <!-- Changelog -->
-    <string name="changelog_title">Changelog</string>
+    <!-- FIELDS -->
+    <!-- General -->
+    <!-- Sort -->
+    <!-- Delete -->
+    <!-- Import -->
+    <!-- Field Creator  -->
+    <!-- Geo-Navigate to Field -->
+    <!-- Unimplemented -->
+    <!-- TRAITS -->
+    <!-- Sort -->
+    <!-- Trait import/export -->
+    <!-- Trait item menu -->
+    <!-- Trait formats -->
+    <!-- Trait Creation Dialog -->
+    <!-- COLLECT -->
+    <!-- Validation -->
+    <!-- Toolbar -->
+    <!-- InfoBars -->
+    <!-- ID/Barcode Search -->
+    <!-- Search  -->
+    <!--- Profile -->
+    <!--- Datagrid -->
+    <!-- Trait Layout: Photo -->
+    <!-- Trait Layout: GNSS -->
+    <!-- Trait Layout: Date -->
+    <!-- Trait Layout: Boolean -->
+    <!-- Trait Layout: GoPro -->
+    <!-- Trait Layout: USB Camera -->
+    <!--- Trait Layout: Zebra label print -->
+    <!--- Trait Layout: Counter -->
+    <!--- Trait Layout: Location -->
+    <!--- Text to Speech Strings -->
+    <!--- Summary -->
+    <!--- Repeated measures -->
+    <!--- GeoNav -->
+    <!--- Content Descriptions -->
+    <!-- EXPORT -->
+    <!-- Export dialog -->
+    <!-- Citation -->
+    <!-- SETTINGS -->
+    <!-- General -->
+    <!-- Profile -->
+    <!-- Appearance -->
+    <!-- Behavior -->
+    <!-- GeoNav -->
+    <!-- Sounds -->
+    <!-- BrAPI preferences are in the BrAPI section below -->
+    <!-- Database -->
+    <!-- Beta -->
+    <!-- ABOUT -->
+    <!-- App  -->
+    <!-- Lead  -->
+    <!-- Support  -->
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <!-- Update -->
+    <!-- BRAPI -->
+    <!-- BrAPI preferences -->
+    <!-- Authorization -->
+    <!-- BrAPI Import -->
+    <!-- BrAPI Export -->
+    <!-- Pagination -->
+    <!-- General -->
+    <!-- TUTORIAL -->
 </resources>

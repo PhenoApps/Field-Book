@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- GENERAL -->
+    <!-- App -->
+    <string name="field_book">Sổ tay đồng ruộng</string>
+    <!-- Dialog -->
+    <string name="dialog_cancel">Bỏ qua</string>
+    <string name="dialog_ok">Đồng ý</string>
+    <string name="dialog_yes">Có</string>
+    <string name="dialog_no">Không</string>
+    <string name="dialog_close">Đóng</string>
+    <string name="dialog_confirm">Bạn có chắc chắn không?</string>
+    <string name="dialog_import">Nhập</string>
+    <string name="dialog_warning">Cảnh báo</string>
+    <string name="dialog_save">Lưu</string>
+    <!-- Startup  -->
+    <string name="startup_sample_data_title">Dữ liệu mẫu</string>
+    <string name="startup_sample_data_message">Nạp dữ liệu mẫu</string>
+    <!-- Permissions  -->
+    <string name="permission_rationale_storage_import">Chức năng nhập liệu từ tập tin yêu cầu quyền truy cập các tập tin của thiết bị.</string>
+    <string name="permission_rationale_storage_export">Chức năng xuất dữ liệu yêu cầu quyền truy cập các tập tin của thiết bị.</string>
+    <string name="permission_rationale_trait_features">Việc thu thập số liệu yêu cầu quyền truy cập các tập tin, micro và máy ảnh của thiết bị.</string>
+    <!-- Config Activity  -->
+    <string name="settings_fields">Ruộng</string>
+    <string name="settings_traits">(Các) Tính trạng</string>
+    <string name="settings_collect">Thu thập</string>
+    <string name="settings_export">Xuất</string>
+    <string name="settings_advanced">Tùy chỉnh</string>
+    <string name="settings_profile">Hồ sơ</string>
+    <!-- Config Activity Fuzzy Search  -->
+    <!-- File manager  -->
+    <string name="import_source_local">Bộ nhớ máy</string>
+    <string name="import_source_cloud">Lưu trữ đám mây</string>
+    <string name="import_source_ask">Luôn luôn hỏi</string>
+    <string name="import_dialog_importing">Xin vui lòng đợi...</string>
+    <string name="import_error_general">Lỗi trong quá trình nhập</string>
+    <!-- Warnings/Catches -->
+    <string name="warning_field_missing">Không có ruộng nào đang được nạp. Xin vui lòng nạp một ruộng trước khi thu thập số liệu.</string>
+    <string name="warning_traits_missing">Không có tính trạng nào tồn tại. Xin vui lòng tạo tính trạng trước khi thu thập số liệu.</string>
+    <!-- Changelog -->
+    <string name="changelog_title">Nhật ký thay đổi</string>
+    <!-- FIELDS -->
+    <!-- General -->
+    <!-- Sort -->
+    <!-- Delete -->
+    <string name="fields_delete">Xóa</string>
+    <string name="fields_delete_study">Xóa ruộng</string>
+    <string name="fields_delete_study_confirmation">Bạn có chắc chắn là muốn xóa ruộng này không? Việc này sẽ xóa toàn bộ dữ liệu khỏi ruộng này.</string>
+    <!-- Import -->
+    <string name="import_dialog_title_fields">Nhập ruộng</string>
+    <string name="import_dialog_unique">Định danh độc nhất</string>
+    <string name="import_dialog_primary">Trật tự chủ yếu</string>
+    <string name="import_dialog_secondary">Trật tự thứ yếu</string>
+    <string name="import_error_unsupported">Loại tập tin này hiện không được hỗ trợ</string>
+    <string name="import_error_column_name">Tên cột trong tập tin nhập không thể là:</string>
+    <string name="import_error_unique_characters_illegal">Cột được chọn có chưa các ký tự không thể được sử dụng trong định danh độc nhất</string>
+    <string name="import_error_column_choice">Các cột không thể được sử dụng cho cùng một việc</string>
+    <string name="import_error_unique">Cột định danh độc nhất bị lặp hoặc đã được sử dụng ở tập tin khác</string>
+    <string name="import_error_format_field">Chỉ các tập tin CSV và XLS mới có thể được nhập dưới dạng một ruộng</string>
+    <string name="fields_study_exists_message">Ruộng này đã tồn tại.</string>
+    <!-- Field Creator  -->
+    <!-- Geo-Navigate to Field -->
+    <!-- Unimplemented -->
+    <string name="fields_study_statistics">Thống kê</string>
+    <string name="fields_date_imported">Ngày nhập</string>
+    <string name="fields_date_edited">Chỉnh sửa ngày</string>
+    <string name="fields_date_exported">Ngày xuất</string>
+    <string name="fields_summary">Tóm tắt ruộng</string>
+    <string name="fields_options">Các lựa chọn</string>
+    <!-- TRAITS -->
+    <!-- Sort -->
+    <string name="traits_toolbar_sort">Sắp xếp</string>
+    <string name="traits_sort_title">Sắp xếp</string>
+    <string name="traits_sort_name">Tên</string>
+    <string name="traits_sort_visibility">Sự hiển thị</string>
+    <string name="traits_sort_format">Định dạng</string>
+    <string name="warning_traits_missing_modify">Tạo tính trạng trước khi chỉnh sửa chúng.</string>
+    <!-- Trait import/export -->
+    <string name="traits_toolbar_import_export">Nhập/Xuất</string>
+    <string name="traits_dialog_import">Nhập</string>
+    <string name="traits_export_check">Xuất danh sách tính trạng hiện tại?</string>
+    <string name="traits_dialog_export">Xuất</string>
+    <string name="import_error_format_trait">Chỉ tập tin TRT mới có thể được nhập dưới dạng một danh sách tính trạng</string>
+    <string name="import_dialog_title_traits">Nhập tính trạng</string>
+    <string name="traits_toolbar_delete_all">Xóa tất cả tính trạng</string>
+    <!-- Trait item menu -->
+    <string name="traits_options_copy">Sao chép</string>
+    <string name="traits_options_edit">Chỉnh sửa</string>
+    <string name="traits_options_delete">Xóa</string>
+    <string name="traits_options_delete_title">Xóa tính trạng</string>
+    <string name="traits_warning_delete">Xóa một tính trạng đồng thời sẽ xóa dữ liệu đã được thu thập của tính trạng đó. Bạn có chắc bạn muốn xóa tính trạng này?</string>
+    <!-- Trait formats -->
+    <string name="traits_format_numeric">Số</string>
+    <string name="traits_format_categorical">Danh mục</string>
+    <string name="traits_format_date">Ngày tháng</string>
+    <string name="traits_format_percent">Phần trăm</string>
+    <string name="traits_format_counter">Bộ đếm</string>
+    <string name="traits_format_disease_rating">Điểm bệnh</string>
+    <string name="traits_format_boolean">Đúng sai</string>
+    <string name="traits_format_text">Chữ</string>
+    <string name="traits_format_photo">Ảnh</string>
+    <string name="traits_format_audio">Tiếng</string>
+    <string name="traits_format_multicategorical">Đa danh mục</string>
+    <string name="traits_format_location">Địa điểm</string>
+    <string name="traits_format_barcode">Mã vạch</string>
+    <string name="traits_format_labelprint">Máy in nhãn Zebra</string>
+    <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">Thêm tính trạng</string>
+    <string name="traits_create_trait">Tính trạng</string>
+    <string name="traits_create_format">Định dạng</string>
+    <string name="traits_create_value_default">Mặc định</string>
+    <string name="traits_create_value_minimum">Nhỏ nhất</string>
+    <string name="traits_create_value_maximum">Lớn nhất</string>
+    <string name="traits_create_details">Chi tiết</string>
+    <string name="traits_create_optional">Tùy chọn</string>
+    <string name="traits_create_categories_title">Danh mục</string>
+    <string name="traits_create_photo_maximum">Số lượng ảnh tối đa</string>
+    <string name="traits_create_true">Đúng</string>
+    <string name="traits_create_false">Sai</string>
+    <string name="traits_create_categories_text">Sử dụng / để phân chia các mục</string>
+    <string name="traits_create_warning_name_blank">Tên tính trạng không được để trống</string>
+    <string name="traits_create_warning_duplicate">Tính trạng đã tồn tại</string>
+    <string name="traits_create_warning_numeric_required">Giá trị mặc định, nhỏ nhất, lớn nhất là bắt buộc và phải là định dạng số</string>
+    <!-- COLLECT -->
+    <!-- Validation -->
+    <string name="trait_error_minimum_value">Giá trị nhỏ hơn mức nhỏ nhất</string>
+    <string name="trait_error_maximum_value">Giá trị lớn hơn mức lớn nhất</string>
+    <string name="trait_error_disease_severity">Mức độ thiệt hại từ bệnh đã được ghi nhận</string>
+    <!-- Toolbar -->
+    <string name="main_toolbar_resources">Tài nguyên</string>
+    <string name="main_trait_details">Chi tiết tính trạng</string>
+    <string name="main_infobar_data_missing">Không có dữ liệu</string>
+    <string name="main_toolbar_next_entry_no_data">Đi đến mã tiếp theo khi không có số liệu</string>
+    <!-- InfoBars -->
+    <string name="dialog_att_chooser_traits">(Các) Tính trạng</string>
+    <!-- ID/Barcode Search -->
+    <string name="main_toolbar_moveto_no_match">Không có giá trị phù hợp</string>
+    <string name="main_toolbar_moveto">Đi đến số thứ tự</string>
+    <string name="main_toolbar_barcode_scan">Quét mã vạch</string>
+    <string name="main_toolbar_moveto_scan">Quét</string>
+    <!-- Search  -->
+    <string name="main_toolbar_search">Tìm kiếm</string>
+    <string name="search_dialog_add">Thêm</string>
+    <string name="search_dialog_clear">Xóa</string>
+    <string name="search_dialog_query_is_equal_to">giá trị bằng</string>
+    <string name="search_dialog_query_is_not_equal_to">giá trị không bằng</string>
+    <string name="search_dialog_query_contains">giá trị có chứa</string>
+    <string name="search_dialog_query_does_not_contain">giá trị không chứa</string>
+    <string name="search_dialog_query_is_more_than">giá trị lớn hơn</string>
+    <string name="search_dialog_query_is_less_than">giá trị nhỏ hơn</string>
+    <string name="search_results_dialog_title">Kết quả tìm kiếm</string>
+    <string name="search_results_dialog_range">Khoảng</string>
+    <string name="search_results_dialog_plot">Nghiệm thức</string>
+    <string name="search_results_missing">Không có kết quả</string>
+    <!--- Profile -->
+    <string name="activity_collect_dialog_verify_no_button">Không</string>
+    <string name="activity_collect_dialog_verify_yes_button">Có</string>
+    <!--- Datagrid -->
+    <!-- Trait Layout: Photo -->
+    <string name="trait_error_hardware_missing">Thiết bị của bạn không chứa phần cứng cần thiết cho tính năng này</string>
+    <string name="trait_delete_warning_photo">Bạn có chắc chắn muốn xóa ảnh này?</string>
+    <!-- Trait Layout: GNSS -->
+    <!-- Trait Layout: Date -->
+    <!-- Trait Layout: Boolean -->
+    <!-- Trait Layout: GoPro -->
+    <!-- Trait Layout: USB Camera -->
+    <!--- Trait Layout: Zebra label print -->
+    <string name="trait_layout_data_stored">Đã lưu</string>
+    <string name="trait_layout_print_label_size_title">Kích cỡ:</string>
+    <string name="trait_layout_print_text_field_title">Nội dung Chữ:</string>
+    <string name="trait_layout_print_text_field_title_2">Nội dung Chữ 2:</string>
+    <string name="trait_layout_print_text_field_title_3">Nội dung Chữ 3:</string>
+    <string name="trait_layout_print_text_field_title_4">Nội dung Chữ 4:</string>
+    <string name="trait_layout_print_barcode_field_title">Mã vạch:</string>
+    <string name="trait_layout_print_label_copies_title">Các bản sao:</string>
+    <!--- Trait Layout: Counter -->
+    <!--- Trait Layout: Location -->
+    <!--- Text to Speech Strings -->
+    <!--- Summary -->
+    <!--- Repeated measures -->
+    <string name="dialog_multi_measure_delete">Xóa</string>
+    <!--- GeoNav -->
+    <!--- Content Descriptions -->
+    <!-- EXPORT -->
+    <!-- Export dialog -->
+    <string name="export_source_local">Bộ nhớ máy</string>
+    <string name="export_dialog_title">Xuất dữ liệu</string>
+    <string name="export_format_database">Cơ sở dữ liệu</string>
+    <string name="export_format_table">Bảng</string>
+    <string name="export_file_name">Tên tập tin</string>
+    <string name="export_content_columns_title">Cột trên ruộng</string>
+    <string name="export_content_columns_all">Tất cả những cột được nhập</string>
+    <string name="export_content_columns_unique">Chỉ định danh độc nhất</string>
+    <string name="export_content_traits_all">Tất cả tính trạng</string>
+    <string name="export_content_traits_active">Chỉ những tính trạng hiện hành</string>
+    <string name="export_error_general">Lỗi trong quá trình xuất</string>
+    <string name="export_error_data_missing">Không có dữ liệu tồn tại để xuất</string>
+    <string name="export_complete">Xuất thành công</string>
+    <string name="export_progress">Đang xuất...</string>
+    <string name="export_error_missing_format">Cần lựa chọn kiểu xuất</string>
+    <string name="export_error_missing_column">Loại cột trên ruộng phải được lựa chọn</string>
+    <string name="export_error_missing_trait">Loại tính trạng phải được lựa chọn</string>
+    <string name="export_overwrite">Ghi đè dữ liệu xuất trước đây</string>
+    <!-- Citation -->
+    <string name="citation_title">Trích dẫn</string>
+    <string name="citation_string">Nếu bạn sử dụng Nhật ký Đồng ruộng cho mục đích nghiên cứu, xin vui lòng trích dẫn bài báo sau:</string>
+    <!-- SETTINGS -->
+    <!-- General -->
+    <string name="preferences_general_title">Chung</string>
+    <string name="preferences_source_default_import">Nguồn nhập chính</string>
+    <string name="preferences_source_default_export">Nguồn xuất chính</string>
+    <string name="preferences_general_feature_next_missing">Nghiệm thức tiếp theo chưa có dữ liệu</string>
+    <string name="preferences_general_feature_next_missing_description">Thêm một nút trên thanh công cụ có tác dụng chuyển đến nghiệm thức chưa có dữ liệu tiếp theo đối với tính trạng hiện tại</string>
+    <string name="preferences_general_skip_entries_default">Mặc định</string>
+    <string name="preferences_general_barcode_camera">Chuyển đến nghiệm thức bằng mã vạch</string>
+    <string name="preferences_general_barcode_camera_description">Quét mã vạch và chuyển đến nghiệm thức tương ứng</string>
+    <string name="preferences_general_feature_barcode_text">Chuyển đến định danh độc nhất</string>
+    <string name="preferences_general_feature_barcode_text_description">Mở một khung tương tác để nhập số định danh độc nhất và chuyển đến nghiệm thức tương ứng</string>
+    <string name="preferences_general_feature_datagrid">Lưới dữ liệu</string>
+    <string name="preferences_general_feature_datagrid_description">Hiển thị một bảng tính gồm các nghiệm thức và các tính trạng để trình bày dữ liệu đã thu thập</string>
+    <!-- Profile -->
+    <string name="profile_person">Người sử dụng</string>
+    <string name="profile_person_title">Nhập người sử dụng</string>
+    <string name="profile_name_first">Tên</string>
+    <string name="profile_name_last">Họ</string>
+    <string name="profile_reset">Xóa các tùy chỉnh</string>
+    <!-- Appearance -->
+    <string name="preferences_appearance_title">Diện mạo</string>
+    <string name="preferences_appearance_system_category_title">Chương trình</string>
+    <string name="preferences_appearance_theme_title">Nền</string>
+    <string name="theme_default">Mặc định</string>
+    <string name="preferences_appearance_language">Ngôn ngữ</string>
+    <string name="preferences_appearance_language_description">Ngôn ngữ được thiết lập bởi hệ thống</string>
+    <string name="preferences_appearance_tutorial_description">Thêm một biểu tượng hướng dẫn vào các màn hình thu thập dữ liệu, tùy chỉnh, đồng ruộng và tính trạng</string>
+    <string name="preferences_appearance_collection_category_title">Màn hình Thu thập</string>
+    <string name="preferences_appearance_toolbar_customize">Tùy chọn biểu tượng thanh công cụ</string>
+    <string name="preferences_appearance_toolbar_customize_description">Điều chỉnh biểu tượng mặc định trên màn hình thu thập</string>
+    <string name="preferences_appearance_toolbar_customize_search">Tìm kiếm</string>
+    <string name="preferences_appearance_toolbar_customize_resources">Tài nguyên</string>
+    <string name="preferences_appearance_toolbar_customize_summary">Tóm tắt</string>
+    <string name="preferences_appearance_toolbar_customize_lock">Khóa</string>
+    <string name="preferences_appearance_infobar_number">Số lượng thanh thông tin</string>
+    <string name="preferences_appearance_infobar_number_description">Điều chỉnh số lượng thanh thông tin được hiển thị trên màn hình chính</string>
+    <string name="preferences_appearance_quickgoto">Đi đến (nghiệm thức) nhanh</string>
+    <string name="preferences_appearance_quickgoto_description">Thay đổi phần giữa màn hình chính sang kiểu cũ Đi đến (nghiệm thức) nhanh</string>
+    <!-- Behavior -->
+    <string name="preferences_behavior_title">Hành vi</string>
+    <string name="preferences_behavior_cycle_traits">Xoay vòng tính trạng tăng lên nghiệm nghiệm thức</string>
+    <string name="preferences_behavior_cycle_traits_description">Sau khi đi qua tất cả các tính trạng, Sổ tay đồng ruộng đi đến nghiệm thức tiếp theo</string>
+    <string name="preferences_behavior_volume_buttons_navigate">Đặt các nút âm lượng để điều hướng nghiệm thức</string>
+    <string name="preferences_behavior_volume_buttons_navigate_description">Các nút âm lượng đi đến nghiệm thức tiếp theo hoặc nghiệm thức trước</string>
+    <string name="preferences_behavior_return_character">Nút Return (Enter)</string>
+    <string name="preferences_behavior_return_character_next_plot">Nghiệm thức tiếp theo</string>
+    <string name="preferences_behavior_return_character_next_trait">Tính trạng tiếp theo</string>
+    <string name="preferences_behavior_return_character_do_nothing">Không làm gì</string>
+    <string name="preferences_behavior_disable_entry_arrow">Vô hiệu hóa mũi tên nghiệm thức</string>
+    <string name="preferences_behavior_disable_entry_arrow_left">Trái</string>
+    <string name="preferences_behavior_disable_entry_arrow_right">Phải</string>
+    <string name="preferences_behavior_disable_entry_arrow_both">Cả hai</string>
+    <string name="preferences_general_share_disable">Vô hiệu hóa chia sẻ tập tin</string>
+    <string name="preferences_general_share_disable_description">Khi các tập tin được xuất, khung tương tác chia sẽ sẽ không được hiển thị</string>
+    <string name="preferences_general_use_day_number">Sử dụng ngày trong năm</string>
+    <string name="preferences_general_use_day_number_description">Sử dụng số thứ tự ngày trong năm khi thu thập dữ liệu thay vì ngày tháng</string>
+    <string name="preferences_general_skip_entries_with_data">Bỏ qua nghiệm thức có dữ liệu</string>
+    <string name="preferences_general_skip_entries_with_data_description">Bỏ qua những nghiệm thức có dữ liệu đối với tính trạng hiện tại</string>
+    <!-- GeoNav -->
+    <!-- Sounds -->
+    <string name="preferences_sounds">Tiếng</string>
+    <string name="preferences_sound_primary_order_sound">Tiếng trật tự chính</string>
+    <string name="preferences_sound_primary_order_sound_description">Tiếng thông báo khi trật tự chính thay đổi</string>
+    <!-- BrAPI preferences are in the BrAPI section below -->
+    <!-- Database -->
+    <string name="database_dialog_title">Cơ sở dữ liệu</string>
+    <string name="database_import">Nhập cơ sở dữ liệu</string>
+    <string name="database_export">Xuất cơ sở dữ liệu</string>
+    <string name="database_reset">Xóa cơ sở dữ liệu</string>
+    <string name="database_reset_warning1">Tất cả dữ liệu sẽ bị xóa. Bạn có chắc bạn muốn thiết lập lại cơ sở dữ liệu?</string>
+    <string name="database_reset_warning2">Việc thiết lập lại cơ sở dữ liệu không thể đảo ngược lại. Phần mềm sẽ tắt sau khi xóa cơ sở dữ liệu. Bạn có thực sự chắc chắn bạn muốn tiếp tục?</string>
+    <string name="database_reset_message">Cơ sở dữ liệu đã được xóa</string>
+    <!-- Beta -->
+    <!-- ABOUT -->
+    <!-- App  -->
+    <string name="about_title">Thông tin phần mềm</string>
+    <string name="about_version_title">Phiên bản</string>
+    <string name="about_rate">Đánh giá phần mềm</string>
+    <!-- Lead  -->
+    <string name="about_project_lead_title">Người đứng đầu dự án</string>
+    <!-- Support  -->
+    <string name="about_contributors_title">Những người đóng góp</string>
+    <string name="about_contributors_funding_title">Nguồn tài chính</string>
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <string name="about_technical_title">Thông tin kỹ thuật chi tiết 1</string>
+    <!-- Update -->
+    <!-- BRAPI -->
+    <!-- BrAPI preferences -->
+    <string name="brapi_info_title">Thông tin đồng bộ BrAPI</string>
+    <string name="brapi_base_url">Đường dẫn gốc BrAPI</string>
+    <string name="brapi_base_url_desc">Dường dẫn gốc đến máy chủ BrAPI</string>
+    <!-- Authorization -->
+    <string name="brapi_save_authorize">Lưu và đăng nhập</string>
+    <string name="brapi_revoke_auth">Đăng xuất</string>
+    <string name="brapi_auth_btn">Đăng nhập vào trang web</string>
+    <string name="brapi_auth_success">Thành công phê duyệt BrAPI</string>
+    <string name="brapi_auth_deny">Từ chối phê duyệt BrAPI</string>
+    <string name="brapi_auth_error_starting">Lỗi khởi động phê duyệt BrAPI</string>
+    <string name="brapi_auth_needed_title">Yêu cầu đăng nhập</string>
+    <string name="brapi_auth_needed">Bạn phải đăng nhập hệ thống mà bạn đang muốn đồng bộ dữ liệu để có thể đồng bộ dữ liệu của bạn. 
+
+Bạn có muốn thực hiện bây giờ không?</string>
+    <!-- BrAPI Import -->
+    <string name="brapi_load_data_button">Nạp ruộng</string>
+    <string name="brapi_load_traits_button">Nạp tính trạng</string>
+    <string name="brapi_save_data_button">Lưu ruộng</string>
+    <string name="brapi_study_name">Tên</string>
+    <string name="brapi_study_description">Miêu tả</string>
+    <string name="brapi_study_location">Địa điểm</string>
+    <string name="brapi_study_num_traits">(Các) Tính trạng</string>
+    <string name="brapi_study_detail_error">Lỗi khi nạp chi tiết nghiên cứu cho nghiên cứu. Nghiên cứu không được lưu.</string>
+    <string name="brapi_plot_detail_error">Lỗi khi nạp các mã (nghiệm thức) cho nghiên cứu. Nghiên cứu không được lưu.</string>
+    <string name="brapi_study_traits_error">Lỗi khi nạp các tính trạng cho nghiên cứu. Nghiên cứu không được lưu.</string>
+    <string name="brapi_ontology_error">Lỗi khi nạp các tính trạng từ BrAPI.</string>
+    <string name="brapi_save_field_error">Lỗi lưu ruộng</string>
+    <string name="brapi_field_not_selected">Ruộng đang được lựa chọn phải được nhập từ BrAPI.</string>
+    <string name="brapi_save_trait">Lưu (các) tính trạng</string>
+    <string name="brapi_must_configure_url">Phải thiết lập một đường dẫn BrAPI hợp lệ trong tùy chỉnh trước khi thực hiện</string>
+    <string name="brapi_export_failed">BrAPI xuất không thành công</string>
+    <string name="brapi_export_permission_deny">LỖI: Bạn không có quyền gửi dữ liệu đến hệ thống được nêu.</string>
+    <string name="brapi_export_not_supported">LỖI: Hệ thống dích không hỗ trợ việc gửi đánh giá qua BrAPI.</string>
+    <string name="brapi_export_wrong_num_obs">LỖI: Số lượng đánh giá được phản hồi khác với yêu cầu</string>
+    <string name="brapi_export_missing_obs">LỖI: Thiếu đánh giá trong sự phản hồi</string>
+    <string name="brapi_export_multiple_obs">LỖI: Có nhiều đánh giá trong một biến số</string>
+    <string name="brapi_export_unknown_error">LỖI: Lỗi không rõ</string>
+    <string name="brapi_export_successful">BrAPI xuất thành công</string>
+    <string name="brapi_saving_indicator">Đang lưu các đánh giá...</string>
+    <string name="brapi_field_non_matching_sources">Không thể đồng bộ dữ liệu. Dữ liệu ruộng từ  %1$s, đường dẫn BrAPI hiện tại đang được đặt là %2$s. Các nguồn phải khớp với nhau.</string>
+    <string name="brapi_trait_already_exists">Tính trạng đã tồn tại: %1$s. Không lưu được.</string>
+    <string name="brapi_error_saving_all_traits">Lỗi lưu (các) tính trạng. Không tính trạng nào được lưu.</string>
+    <string name="brapi_error_saving_some_traits">Lỗi lưu một vài tính trạng. Một vài tính trạng không được lưu.</string>
+    <string name="brapi_traits_saved_success">Các tính trạng được chọn đã được lưu thành công.</string>
+    <!-- BrAPI Export -->
+    <string name="brapi_export_button">Xuất</string>
+    <string name="brapi_export_title">Thống kê việc xuất lên BrAPI</string>
+    <string name="brapi_export_observations">Đánh giá</string>
+    <string name="brapi_export_num_new_obs">Đánh giá mới</string>
+    <string name="brapi_export_num_synced_obs">Đánh giá đã được đồng bộ</string>
+    <string name="brapi_export_num_ed_obs">Đánh giá đã được chỉnh sửa</string>
+    <string name="brapi_export_skipped_observations">Đánh giá bị bỏ qua</string>
+    <string name="brapi_export_skipped_user_created">Đánh giá được tạo bởi người dùng</string>
+    <string name="brapi_export_skipped_wrong_source">Nguồn dữ liệu khác</string>
+    <string name="brapi_export_num_new_imgs">Ảnh mới</string>
+    <string name="brapi_export_num_synced_imgs">Ảnh được đồng bộ</string>
+    <string name="brapi_export_num_ed_imgs">Ảnh đã được chỉnh sửa</string>
+    <string name="brapi_export_num_incomplete_imgs">Ảnh được đồng bộ chưa hoàn chỉnh</string>
+    <string name="brapi_export_skipped_images">Ảnh bị bỏ qua</string>
+    <string name="brapi_export_skipped_user_created_images">Ảnh được tạo bởi người dùng</string>
+    <string name="brapi_export_images">Ảnh</string>
+    <string name="brapi_delete_message">Không thể xóa đánh giá đã được đồng bộ ở BrAPI, hãy sử dụng NA</string>
+    <!-- Pagination -->
+    <string name="next">Tiếp theo</string>
+    <string name="prev">Trước</string>
+    <string name="page_one_of_one">Trang 1 trên 1</string>
+    <!-- General -->
+    <string name="device_offline_warning">Thiết bị ngoại tuyến: Xin vui lòng kết nối mạng và thử lại</string>
+    <string name="brapi_info_message">Các tính trạng và ruộng được nhập từ BrAPI sẽ có thể được xuất các đánh giá của chúng qua hệ thống xuất của BrAPI.
+Các tính trạng và ruộng được tạo thủ công hoặc được nhập từ CSV sẽ cần phải được xuất dưới định dạng CSV.</string>
+    <!-- TUTORIAL -->
+    <string name="tutorial_dialog_title">Hướng dẫn</string>
+    <string name="tutorial_dialog_description">Bạn có muốn kích kích hoạt hướng dẫn? Tùy chỉnh này có thể được thay đổi trong phần Tùy chỉnh</string>
+    <string name="tutorial_main_infobars_title">Thanh thông tin</string>
+    <string name="tutorial_main_infobars_description">Thanh thông tin hiển thị dữ liệu thêm đối với mỗi nghiệm thức và có thể được thay đổi trên Menu cuộn xuống.</string>
+    <string name="tutorial_main_traits_title">(Các) tính trạng</string>
+    <string name="tutorial_main_traits_description">Mũi tên nhỏ, màu xanh chuyển tiếp giữa các tính trạng.</string>
+    <string name="tutorial_main_traitlist_title">(Các) tính trạng</string>
+    <string name="tutorial_main_traitlist_description">Tính trạng hiện tại đang được thu thập. Một danh sách các tính trạng hiện hành sẽ được hiển thị khi tính trạng hiện tại được ấn.</string>
+    <string name="tutorial_main_entries_title">(Các) nghiệm thức</string>
+    <string name="tutorial_main_entries_description">Mũi tên lớn, màu đen chuyển tiếp giữa các nghiệm thức.</string>
+    <string name="tutorial_main_navinfo_title">Sắp xếp các cột</string>
+    <string name="tutorial_main_navinfo_description">Đây là nơi trật tự chủ yếu và trật tự thứ yếu được hiển thị.</string>
+    <string name="tutorial_main_datacollect_title">Nhập dữ liệu</string>
+    <string name="tutorial_main_datacollect_description">Dữ liệu được nhập ở khu vực dưới của màn hình. Các loại tính trạng khác nhau có các kiểu bố trí khác nhau.</string>
+    <string name="tutorial_main_na_title">Dữ liệu còn thiếu</string>
+    <string name="tutorial_main_na_description">Phím NA được sử dụng để ghi nhận dữ liệu bị thiếu.</string>
+    <string name="tutorial_main_delete_title">Xóa dữ liệu</string>
+    <string name="tutorial_main_delete_description">Dữ liệu được xóa bằng phím này</string>
+    <string name="tutorial_main_search_title">Tìm kiếm</string>
+    <string name="tutorial_main_search_description">Biểu tượng tìm kiếm cho phép truy vấn cơ sở dữ liệu.</string>
+    <string name="tutorial_main_resources_title">Tài nguyên</string>
+    <string name="tutorial_main_resources_description">Hiển thị danh sách các tập tin ở trong thư mục Tài nguyên.</string>
+    <string name="tutorial_main_summary_title">Tóm tắt</string>
+    <string name="tutorial_main_summary_description">Hiển thị tóm tắt tất cả dữ liệu của nghiệm thức hiện tại.</string>
+    <string name="tutorial_main_lockdata_title">Khóa dữ liệu</string>
+    <string name="tutorial_main_lockdata_description">Khóa việc nhập liệu hiện tại</string>
+    <string name="tutorial_settings_fields_title">Ruộng</string>
+    <string name="tutorial_settings_fields_description">cho phép bạn nhập và quản lý các ruộng.</string>
+    <string name="tutorial_settings_fields_import">Để bắt đầu sử dụng Sổ tay Đồng ruộng, trước hết hãy nhập một tập tin về ruộng.</string>
+    <string name="tutorial_settings_traits_title">(Các) Tính trạng</string>
+    <string name="tutorial_settings_traits_description">cho phép bạn thêm, nhập và quản lý các tính trạng.</string>
+    <string name="tutorial_settings_collect_title">Thu thập số liệu</string>
+    <string name="tutorial_settings_collect_description">cho phép bạn thu thập số liệu kiểu hình.</string>
+    <string name="tutorial_settings_settings_title">Tùy chỉnh</string>
+    <string name="tutorial_settings_settings_description">cho phép bổ sung các tùy chỉnh cho việc thu thập dữ liệu</string>
+    <string name="tutorial_settings_export_title">Xuất</string>
+    <string name="tutorial_settings_export_description">Dữ liệu có thể được xuất dưới 2 định dạng: cơ sở dữ liệu hoặc bảng.</string>
+    <string name="tutorial_fields_add_title">Thêm Ruộng</string>
+    <string name="tutorial_fields_add_description">Nhập một tập tin Ruộng</string>
+    <string name="tutorial_fields_file_description">Các tập tin phải bao gồm 3 cột: một định danh độc nhất, một thứ tự chủ yếu, và một thứ tự thứ yếu. Thứ tự chủ yếu / thứ yếu được sử dụng để định hướng trên ruộng.</string>
+    <string name="tutorial_fields_select_title">Ruộng đang làm việc</string>
+    <string name="tutorial_fields_select_description">Một ruộng đang được chọn để thu thập số liệu sau khi được nhập.</string>
+    <string name="tutorial_fields_delete_title">Xóa ruộng</string>
+    <string name="tutorial_fields_delete_description">Để xóa một ruộng, mở menu phía bên trái tên ruộng và lựa chọn Xóa.</string>
+    <string name="tutorial_traits_add_title">Thêm tính trạng</string>
+    <string name="tutorial_traits_add_description">Thêm tính trạng tạo ra một tính trạng mới. Các định dạng tính trạng khác nhau có bố cục thu số liệu khác nhau.</string>
+    <string name="tutorial_traits_format_title">Định dạng tính trạng</string>
+    <string name="tutorial_traits_format_description">Các định dạng tính trạng khác nhau được đánh dấu bằng các biểu tượng khác nhau.</string>
+    <string name="tutorial_traits_visibility_title">Hiển thị tính trạng</string>
+    <string name="tutorial_traits_visibility_description">Các tính trạng có thể được vô hiệu hóa khỏi danh sách bằng cách bỏ đánh dấu trong ô.</string>
+</resources>
