@@ -1,127 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- BrAPI preferences -->
-    <string name="brapi_info_title">Breeding API</string>
-    <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
-    <string name="act_brapi_auth_http_warning_title">HTTP Warning</string>
-    <string name="act_brapi_auth_http_warning_message">You have entered an http url. There is no guarantee that this connection is secure.</string>
-    <string name="preferences_brapi_core_title">Configuration</string>
-    <string name="brapi_base_url">Base URL</string>
-    <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
-    <string name="preferences_brapi_version">BrAPI Version</string>
-    <string name="brapi_pagination">Page Size</string>
-    <string name="brapi_timeout">Server Timeout</string>
-    <string name="brapi_chunk_size">Chunk Size</string>
-    <string name="preferences_brapi_advanced_title">Advanced Auth Settings</string>
-    <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
-    <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
-    <string name="preferences_brapi_oidc_flow_old_custom">Original Field Book Custom</string>
-    <string name="brapi_oidc_url">OIDC Discovery URL</string>
-    <string name="brapi_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
-    <string name="preferences_brapi_traits_title">BrAPI Variables</string>
-    <string name="preferences_appearance_collect_labelval_customize">Value vs Label Display</string>
-    <string name="preferences_appearance_collect_labelval_customize_description">Display values or labels on the collect screen</string>
-    <string name="preferences_appearance_collect_labelval_customize_value">Value</string>
-    <string name="preferences_appearance_collect_labelval_customize_label">Label</string>
-    <string name="preferences_brapi_servers_title">Community Servers</string>
-    <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
-    <string name="preferences_brapi_server_test">Default Test Server</string>
-    <string name="preferences_brapi_server_add">Submit a server</string>
-    <!-- Authorization -->
-    <string name="brapi_save_authorize">Authorize</string>
-    <string name="brapi_revoke_auth">Log Out</string>
-    <string name="brapi_auth_btn">Log In to Site</string>
-    <string name="brapi_auth_success">BrAPI Authorization Successful</string>
-    <string name="brapi_auth_deny">BrAPI Authorization Denied</string>
-    <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
-    <string name="brapi_auth_permission_deny">ERROR: You do not have the permissions necessary to perform this action</string>
-    <string name="brapi_auth_needed_title">Login Needed</string>
-    <string name="brapi_auth_needed">    You need to be logged into the system you are attempting to sync data with in order
-        to sync your data.
-
-    Would you like to authenticate now?
-    </string>
-    <!-- BrAPI Import -->
-    <string name="import_dialog_title_brapi_fields">BrAPI Field Import</string>
-    <string name="brapi_load_data_button">Load Fields</string>
-    <string name="brapi_load_traits_button">Load Traits</string>
-    <string name="brapi_save_data_button">Preview Field</string>
-    <string name="brapi_study_name">Name</string>
-    <string name="brapi_study_description">Description</string>
-    <string name="brapi_study_location">Location</string>
-    <string name="brapi_observation_level">Observation Level</string>
-    <string name="brapi_study_num_traits"> Traits</string>
-    <string name="brapi_not_found">ERROR: Target system does not support this operation via BrAPI.</string>
-    <string name="brapi_studies_error">Error when loading studies.</string>
-    <string name="brapi_study_detail_error">Error when loading study details for study. Study not saved.</string>
-    <string name="brapi_plot_detail_error">Error when loading plots for study. Study not saved.</string>
-    <string name="brapi_study_traits_error">Error when loading traits for study. Study not saved.</string>
-    <string name="brapi_ontology_error">Error loadings traits from BrAPI.</string>
-    <string name="brapi_save_field_error">Error Saving Field</string>
-    <string name="brapi_field_not_selected">Selected Field Must Be Imported From BrAPI.</string>
-    <string name="brapi_fields_filter_by_program">Filter by program</string>
-    <string name="brapi_fields_filter_by_trial">Filter by trial</string>
-    <string name="brapi_programs_load">Load programs</string>
-    <string name="brapi_programs_select">Select program</string>
-    <string name="brapi_programs_error">Error when loading programs.</string>
-    <string name="brapi_trials_load">Load trials</string>
-    <string name="brapi_trials_select">Select trial</string>
-    <string name="brapi_trials_error">Error when loading trials.</string>
-    <string name="brapi_save_trait">Save Traits</string>
-    <string name="brapi_must_configure_url">Must configure a valid BrAPI URL in settings before proceeding</string>
-    <string name="brapi_warning_select_program">Please select a program</string>
-    <string name="brapi_warning_select_trial">Please select a trial</string>
-    <string name="brapi_warning_select_study">Please select a field</string>
-    <string name="brapi_export_failed">BrAPI Export Failed</string>
-    <string name="brapi_export_permission_deny">ERROR: You do not have the permissions to send data to the specified system.</string>
-    <string name="brapi_export_not_supported">ERROR: Target system does not support sending observations via BrAPI.</string>
-    <string name="brapi_export_wrong_num_obs">ERROR: Response number of observations different from request</string>
-    <string name="brapi_export_missing_obs">ERROR: Missing observation in response</string>
-    <string name="brapi_export_multiple_obs">ERROR: Multiple observations per variable</string>
-    <string name="brapi_export_unknown_error">ERROR: Unknown Error</string>
-    <string name="brapi_export_successful">BrAPI Export Successful</string>
-    <string name="brapi_saving_indicator">Saving Observations…</string>
-    <string name="brapi_field_non_matching_sources">Unable to sync data. Field data originates from, %1$s, BrAPI url currently set to %2$s. Sources must match.</string>
-    <string name="brapi_trait_already_exists">Trait already exists: %1$s. Not saving.</string>
-    <string name="brapi_error_saving_all_traits">Error saving traits. No traits were saved.</string>
-    <string name="brapi_error_saving_some_traits">Error saving some traits. Some traits were not saved</string>
-    <string name="brapi_traits_saved_success">Selected traits saved successfully.</string>
-    <string name="brapi_obs_sync_menu_name">Sync</string>
-    <string name="brapi_obs_header_name">Downloading Observations for Study:</string>
-    <string name="number_traits_label">Number of Traits:</string>
-    <string name="number_observation_label">Number of Observations:</string>
-    <string name="no_observations_warning">No Observations Found For Study.  Please Tap Cancel.</string>
-    <string name="brapi_skipped_traits">Successfully fetched traits. %1$d traits ignored because of missing brapi \'trait\' field</string>
-    <string name="brapi_study_incompatible">This BrAPI study is currently incompatible with Field Book. Studies must include row and column in the header.</string>
-    <string name="act_collect_no_plots">This study has no plots saved.</string>
-    <!-- BrAPI Export -->
-    <string name="act_brapi_export_title">BrAPI Export</string>
-    <string name="brapi_export_button">Exportar</string>
-    <string name="brapi_export_title">BrAPI Export Statistics</string>
-    <string name="brapi_export_observations">Observations</string>
-    <string name="brapi_export_num_new_obs"> New Observations</string>
-    <string name="brapi_export_num_synced_obs"> Synced Observations</string>
-    <string name="brapi_export_num_ed_obs"> Edited Observations</string>
-    <string name="brapi_export_skipped_observations"> Skipped Observations</string>
-    <string name="brapi_export_skipped_user_created"> User Created Trait Observations</string>
-    <string name="brapi_export_skipped_wrong_source"> Different Data Source</string>
-    <string name="brapi_export_num_new_imgs">New Images</string>
-    <string name="brapi_export_num_synced_imgs">Synced Images</string>
-    <string name="brapi_export_num_ed_imgs">Edited Images</string>
-    <string name="brapi_export_num_incomplete_imgs">Incomplete Synced Images</string>
-    <string name="brapi_export_skipped_images">Skipped Images</string>
-    <string name="brapi_export_skipped_user_created_images">User Created Trait Images</string>
-    <string name="brapi_export_images">Images</string>
-    <string name="brapi_delete_message">Cannot delete synced BrAPI observation, using NA instead</string>
-    <string name="act_brapi_export_image_load_failed">Image load failed.</string>
-    <!-- Pagination -->
-    <string name="next">Next</string>
-    <string name="prev">Prev</string>
-    <string name="page_one_of_one">Page 1 of 1</string>
-    <!-- General -->
-    <string name="device_offline_warning">Device Offline: Please connect to a network and try again</string>
-    <string name="brapi_info_message">        Traits and fields imported via BrAPI will be able to export their observations via the BrAPI export.
-        Traits and fields created manually or imported via CSV will need to be exported via CSV format.
-    </string>
-    <string name="brapi_na">NA</string>
+    <!-- Validation -->
+    <string name="trait_error_minimum_value">Value is less than allowed minimum</string>
+    <string name="trait_error_maximum_value">Value is larger than allowed maximum</string>
+    <string name="trait_error_disease_severity">Severity already stored</string>
+    <string name="act_collect_study_names_empty">The selected study has empty unique, primary, or secondary names.</string>
+    <!-- Toolbar -->
+    <string name="main_toolbar_resources">Resources</string>
+    <string name="main_trait_details">Trait details</string>
+    <string name="main_infobar_data_missing">No data</string>
+    <string name="main_toolbar_next_entry_no_data">Next entry with no data</string>
+    <!-- InfoBars -->
+    <string name="dialog_att_chooser_attributes">Attributes</string>
+    <string name="dialog_att_chooser_traits">Caracteres</string>
+    <string name="dialog_att_chooser_other">Other</string>
+    <string name="dialog_collect_att_chooser_title">Choose an attribute</string>
+    <!-- ID/Barcode Search -->
+    <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
+    <string name="main_toolbar_moveto_no_match">No matching value</string>
+    <string name="main_toolbar_moveto">Go to ID</string>
+    <string name="main_toolbar_barcode_scan">Scan barcode</string>
+    <string name="main_toolbar_moveto_scan">Scan</string>
+    <string name="act_collect_plot_with_code_not_found">Barcode not found.\n</string>
+    <!-- Search  -->
+    <string name="main_toolbar_search">Search</string>
+    <string name="search_dialog_add">Add</string>
+    <string name="search_dialog_clear">Clear</string>
+    <string name="search_dialog_query_is_equal_to">is equal to</string>
+    <string name="search_dialog_query_is_not_equal_to">is not equal to</string>
+    <string name="search_dialog_query_contains">contains</string>
+    <string name="search_dialog_query_does_not_contain">does not contain</string>
+    <string name="search_dialog_query_is_more_than">is more than</string>
+    <string name="search_dialog_query_is_less_than">is less than</string>
+    <string name="search_results_dialog_title">Search results</string>
+    <string name="search_results_dialog_range">Range</string>
+    <string name="search_results_dialog_plot">Plot</string>
+    <string name="search_results_missing">No results</string>
+    <!--- Profile -->
+    <string name="activity_collect_dialog_verify_collector">Is this still</string>
+    <string name="activity_collect_dialog_verify_no_button">Não</string>
+    <string name="activity_collect_dialog_verify_yes_button">Sim</string>
+    <string name="activity_collect_dialog_neutral_button">Don\'t ask again</string>
+    <string name="activity_collect_dialog_new_collector">Do you want to save the name of the person collecting data?</string>
+    <!--- Datagrid -->
+    <string name="act_data_grid_cursor_failed">Data grid failed to load your data.</string>
+    <string name="dialog_data_grid_header_picker_title">Choose Row Headers</string>
+    <string name="dialog_data_grid_repeated_measures_title">Choose Observation</string>
+    <string name="menu_action_header_view_data_grid_title">Update Row Headers</string>
+    <!-- Trait Layout: Photo -->
+    <string name="trait_error_hardware_missing">Your device does not have a camera that can be used to take a photo.</string>
+    <string name="trait_delete_warning_photo">Are you sure you want to delete this photo?</string>
+    <string name="trait_photo_capture_button_content_description">Press to open a camera view for capturing.</string>
+    <!-- Trait Layout: GNSS -->
+    <string name="trait_gnss_geo_coord_update_dialog_title">Coordinate Update Warning</string>
+    <string name="trait_gnss_geo_coord_update_dialog_message">You have a saved coordinate for this unit, are you sure you want to update it?</string>
+    <string name="trait_gnss_chip_manual_text">Manual</string>
+    <string name="trait_gnss_chip_10s_text">10s</string>
+    <string name="trait_gnss_chip_5s_text">5s</string>
+    <string name="gnss_trait_averaging_dialog_title">Collecting coordinates</string>
+    <string name="gnss_trait_averaging_dialog_message">Please wait while the incoming locations are being averaged…</string>
+    <string name="trait_gnss_collect_button_content_description">Collects the current location.</string>
+    <string name="trait_gnss_disconnect_button_content_description">Disconnects from the current GPS device.</string>
+    <string name="trait_gnss_connect_button_content_description">Opens a dialog with possible GPS devices to connect to.</string>
+    <string name="gnss_trait_averaging_switch_text">Average</string>
+    <!-- Trait Layout: Date -->
+    <string name="trait_date_calendar_picker_content_description">Button that opens a calendar picker.</string>
+    <string name="trait_date_save_button_content_description">This will save the current selected date.</string>
+    <string name="dialog_date_picker_neutral_button">Today</string>
+    <!-- Trait Layout: Boolean -->
+    <string name="trait_boolean_on">On</string>
+    <string name="trait_boolean_off">Off</string>
+    <!-- Trait Layout: GoPro -->
+    <string name="trait_go_pro_capture_button_text">Capture\n</string>
+    <string name="trait_go_pro_await_device_title">Scanning for GoPros</string>
+    <string name="trait_go_pro_await_ble_title">Awaiting GoPro BLE Connection</string>
+    <string name="trait_go_pro_await_ble_message">Communicating with GoPro BLE, this may take a minute.</string>
+    <string name="trait_go_pro_await_ap_title">Awaiting GoPro AP</string>
+    <string name="trait_go_pro_await_ap_message">Connecting to network, this may take a minute. \n SSID: %s \n Pass: %s</string>
+    <string name="trait_go_pro_await_ap_neutral">Manual Connect</string>
+    <string name="trait_go_pro_camera_delete_photo_title">Delete Photo</string>
+    <string name="go_pro_layout_black_11_not_detected">This trait was made for a GoPro Black 11, please contact developers to implement your GoPro model.\n</string>
+    <string name="go_pro_frag_connect_btn_content_description">Connect to a GoPro camera.\n</string>
+    <string name="trait_go_pro_capture_content_description">Capture a picture from a connected GoPro device.\n</string>
+    <!-- Trait Layout: USB Camera -->
+    <string name="trait_usb_camera_zoom_in_button_text">Zoom in</string>
+    <string name="trait_usb_camera_zoom_out_button_text">Zoom out</string>
+    <string name="trait_usb_camera_zoom_out_content_description">Zoom out</string>
+    <string name="trait_usb_camera_zoom_in_content_description">Zoom in</string>
+    <string name="trait_usb_camera_delete_photo">Delete USB Photo</string>
+    <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>
+    <string name="trait_usb_camera_capture_button_text">Capture</string>
+    <!--- Trait Layout: Zebra label print -->
+    <string name="trait_layout_data_stored">Saved</string>
+    <string name="trait_layout_print_label_size_title">Size:</string>
+    <string name="trait_layout_print_text_field_title">Text:</string>
+    <string name="trait_layout_print_text_field_title_2">Text2:</string>
+    <string name="trait_layout_print_text_field_title_3">Text3:</string>
+    <string name="trait_layout_print_text_field_title_4">Text4:</string>
+    <string name="trait_layout_print_barcode_field_title">Barcode:</string>
+    <string name="trait_layout_print_label_copies_title">Copies:</string>
+    <string name="printer_open">Printer is open</string>
+    <string name="printer_paused">Printer is paused</string>
+    <string name="printer_empty">Printer is empty</string>
+    <string name="printer_not_connected">Printer not connected</string>
+    <string name="no_device_paired">No device paired</string>
+    <string name="trait_labelprint_preview_description">Label preview.</string>
+    <string name="trait_labelprint_print_button_description">Button which prints labels configured in this dialog.</string>
+    <string name="printer_success">Print success</string>
+    <string name="bluetooth_printer_choose_device_title">Choose bluetooth device to print from.</string>
+    <!--- Trait Layout: Counter -->
+    <string name="trait_counter_layout_failed">Counter failed to save, please recreate this trait.</string>
+    <!--- Trait Layout: Location -->
+    <string name="trait_location_save_content_description">Save the current location.</string>
+    <!--- Text to Speech Strings -->
+    <string name="trait_photo_tts_success">Picture taken successfully.</string>
+    <string name="trait_photo_tts_fail">Picture trait failed.</string>
+    <string name="trait_print_label_success">Printing label.</string>
+    <string name="trait_gnss_internal_tts">Internal GPS</string>
+    <string name="trait_gnss_external_device_tts">External device %s chosen.</string>
+    <string name="act_collect_na_btn_tts">Not applicable</string>
+    <string name="act_collect_barcode_btn_tts">Opening barcode scanner</string>
+    <string name="act_collect_delete_btn_tts">Value has been deleted.</string>
+    <string name="trait_numeric_backspace_tts">Backspace</string>
+    <string name="trait_date_minus_day_tts">Back one day</string>
+    <string name="trait_date_next_day_tts">Next day</string>
+    <string name="trait_date_open_calendar_tts">Opening calendar.</string>
+    <string name="trait_location_saved_tts">Location saved.</string>
+    <!--- Summary -->
+    <string name="fragment_summary_toolbar_title">Summary</string>
+    <string name="menu_fragment_summary_filter_title">Filter</string>
+    <string name="fragment_summary_filter_title">Select summary labels</string>
+    <string name="dialog_fragment_summary_neutral_button">Toggle All</string>
+    <string name="fragment_summary_prev_button_text">Previous</string>
+    <string name="fragment_summary_next_button_text">Next</string>
+    <string name="fragment_summary_prev_button_content_description">Navigates to previous entry.</string>
+    <string name="fragment_summary_next_button_content_description">Navigates to next entry.</string>
+    <string name="list_item_summary_nav_button_content_description">Navigates to the selected entry.</string>
+    <!--- Repeated measures -->
+    <string name="view_repeated_values_add_button_content_description">Adds a new observation.</string>
+    <string name="view_repeated_values_add_button_fail">You must enter a value before creating a new observation.</string>
+    <string name="menu_collect_repeated_values_indicator">Displays the number of repeated values.</string>
+    <string name="dialog_multi_measure_delete_no_observations">No observations exist.</string>
+    <string name="dialog_multi_measure_delete_title">Observations</string>
+    <string name="dialog_multi_measure_confirm_delete_title">These observations will be permanently deleted.</string>
+    <string name="dialog_multi_measure_delete">Delete</string>
+    <string name="dialog_multi_measure_select_all">Select all</string>
+    <!--- GeoNav -->
+    <string name="menu_collect_start_geo_nav_title">Start GeoNav</string>
+    <string name="activity_collect_found_plot">Navigated to plot in vicinity</string>
+    <string name="act_collect_geonav_first_location_found">Rover communications established.</string>
+    <string name="act_collect_geonav_snack_nav_button_content_description">This will navigate you to the closest plot.</string>
+    <string name="activity_collect_sensor_manager_failed">Failed to start sensor manager</string>
+    <string name="activity_collect_geomagnetic_noise_detected">Interference detected, the compass might not be accurate</string>
+    <!--- Content Descriptions -->
+    <string name="view_trait_box_right_content_description">Go to next trait.</string>
+    <string name="view_trait_box_left_content_description">Go to previous trait.</string>
+    <string name="view_range_box_left_button_content_description">Navigates to previous entry.</string>
+    <string name="view_range_box_right_button_content_description">Navigates to the next entry.</string>
+    <string name="act_collect_delete_value_button_content_description">Deletes the current value.</string>
+    <string name="act_collect_barcode_button_content_description">Start a barcode scanner.</string>
+    <string name="act_collect_na_value_button_content_description">Fill value with not available.</string>
 </resources>
