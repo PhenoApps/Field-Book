@@ -1,54 +1,186 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Tutorial -->
-    <string name="tutorial_dialog_title">Tutorial</string>
+    <!-- GENERAL -->
+    <!-- App -->
+    <string name="field_book">Fieldbuch</string>
+    <!-- Dialog -->
+    <string name="dialog_cancel">Abbrechen</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_yes">Ja</string>
+    <string name="dialog_no">Nein</string>
+    <string name="dialog_close">Schliessen</string>
+    <string name="dialog_confirm">Sind Sie sicher?</string>
+    <string name="dialog_import">Import</string>
+    <string name="dialog_warning">Warnung</string>
+    <string name="dialog_save">Speichern</string>
+    <!-- Startup  -->
+    <!-- Permissions  -->
+    <!-- Config Activity  -->
+    <string name="settings_fields">Felder</string>
+    <string name="settings_traits">Merkmale</string>
+    <string name="settings_export">Export</string>
+    <string name="settings_advanced">Weitere Einstellungen</string>
+    <!-- Config Activity Fuzzy Search  -->
+    <!-- File manager  -->
+    <string name="import_dialog_importing">Bitte warten...</string>
+    <string name="import_error_general">Fehler beim Importieren</string>
+    <!-- Warnings/Catches -->
+    <string name="warning_field_missing">Es wurde keine Felddatei importiert. Bitte importieren Sie zuerst die Datei mit allen Informationen bezüglich des Feldes bevor Sie mit der Datenerfassung beginnen.</string>
+    <string name="warning_traits_missing">Es existieren keine Merkmale. Bitte erstellen Sie Merkmale bevor Sie mit der Datenerfassung beginnen.</string>
+    <!-- Changelog -->
+    <string name="changelog_title">Änderungsprotokoll</string>
+    <!-- FIELDS -->
+    <!-- General -->
+    <!-- Sort -->
+    <!-- Delete -->
+    <!-- Import -->
+    <string name="import_dialog_unique">eindeutiges Zuordnungsmerkmal</string>
+    <string name="import_dialog_primary">Erste Ordung</string>
+    <string name="import_dialog_secondary">Zweite Ordnung</string>
+    <string name="import_error_unique">Eindeutiges Zuordnungsmerkmal kommt mehr als nur einmal vor</string>
+    <!-- Field Creator  -->
+    <!-- Geo-Navigate to Field -->
+    <!-- Unimplemented -->
+    <!-- TRAITS -->
+    <!-- Sort -->
+    <!-- Trait import/export -->
+    <string name="traits_dialog_import">Import</string>
+    <string name="traits_dialog_export">Export</string>
+    <string name="traits_toolbar_delete_all">Alle Merkmale löschen</string>
+    <!-- Trait item menu -->
+    <string name="traits_options_copy">Kopieren</string>
+    <string name="traits_options_delete">Löschen</string>
+    <string name="traits_options_delete_title">Merkmal löschen</string>
+    <!-- Trait formats -->
+    <string name="traits_format_numeric">Numerisch</string>
+    <string name="traits_format_categorical">Kategorisch</string>
+    <string name="traits_format_date">Datum</string>
+    <string name="traits_format_percent">Prozent</string>
+    <string name="traits_format_boolean">Boolesch</string>
+    <string name="traits_format_photo">Foto</string>
+    <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">Merkmal hinzufügen</string>
+    <string name="traits_create_trait">Merkmal</string>
+    <string name="traits_create_value_default">Vorgegeben</string>
+    <string name="traits_create_categories_title">Kategorien</string>
+    <string name="traits_create_photo_maximum">Maximale Anzahl an Fotos</string>
+    <string name="traits_create_true">Wahr</string>
+    <string name="traits_create_false">Falsch</string>
+    <string name="traits_create_categories_text">Separieren Sie Begriffe mit /</string>
+    <string name="traits_create_warning_name_blank">Merkmalsname muss definiert sein</string>
+    <string name="traits_create_warning_duplicate">Merkmal ist bereits vorhanden</string>
+    <string name="traits_create_warning_numeric_required">Vorgegeben, Minimum und Maximum muessen numerisch sein</string>
+    <!-- COLLECT -->
+    <!-- Validation -->
+    <string name="trait_error_minimum_value">Der Wert ist kleiner als das vorgegebene Minimum</string>
+    <string name="trait_error_maximum_value">Der Wert ist grösser als das vorgegebene Maximum</string>
+    <!-- Toolbar -->
+    <string name="main_toolbar_resources">Resourcen</string>
+    <string name="main_trait_details">Details eines Merkmales</string>
+    <string name="main_infobar_data_missing">Keine Daten vorhanden</string>
+    <string name="main_toolbar_next_entry_no_data">Nächste Versuchsparzelle ohne Daten</string>
+    <!-- InfoBars -->
+    <string name="dialog_att_chooser_traits">Merkmale</string>
+    <!-- ID/Barcode Search -->
+    <string name="main_toolbar_moveto_no_match">Kein uebereinstimmender Wert gefunden</string>
+    <string name="main_toolbar_moveto">Gehe zu ID</string>
+    <!-- Search  -->
+    <string name="main_toolbar_search">Suchen</string>
+    <string name="search_dialog_add">Hinzufuegen</string>
+    <string name="search_dialog_clear">Löschen</string>
+    <string name="search_dialog_query_is_equal_to">ist gleich wie</string>
+    <string name="search_dialog_query_is_not_equal_to">ist nicht gleich wie</string>
+    <string name="search_dialog_query_contains">beinhaltet</string>
+    <string name="search_dialog_query_does_not_contain">beinhaltet nicht</string>
+    <string name="search_dialog_query_is_more_than">ist mehr als</string>
+    <string name="search_dialog_query_is_less_than">ist weniger als</string>
+    <string name="search_results_dialog_title">Suchresultat</string>
+    <string name="search_results_dialog_range">Reihe</string>
+    <string name="search_results_dialog_plot">Parzelle</string>
+    <string name="search_results_missing">Die Suche hat kein Resultat ergeben</string>
+    <!--- Profile -->
+    <string name="activity_collect_dialog_verify_no_button">Nein</string>
+    <string name="activity_collect_dialog_verify_yes_button">Ja</string>
+    <!--- Datagrid -->
+    <!-- Trait Layout: Photo -->
+    <string name="trait_error_hardware_missing">Ihr Gerät verfüget nicht über die notwendige Hardware um diese Funktion auszuführen</string>
+    <!-- Trait Layout: GNSS -->
+    <!-- Trait Layout: Date -->
+    <!-- Trait Layout: Boolean -->
+    <!-- Trait Layout: GoPro -->
+    <!-- Trait Layout: USB Camera -->
+    <!--- Trait Layout: Zebra label print -->
+    <string name="trait_layout_data_stored">Daten wurden gespeichert</string>
+    <!--- Trait Layout: Counter -->
+    <!--- Trait Layout: Location -->
+    <!--- Text to Speech Strings -->
+    <!--- Summary -->
+    <!--- Repeated measures -->
+    <!--- GeoNav -->
+    <!--- Content Descriptions -->
+    <!-- EXPORT -->
+    <!-- Export dialog -->
+    <string name="export_format_database">Datenbank</string>
+    <string name="export_format_table">Tabelle</string>
+    <string name="export_file_name">Dateiname</string>
+    <string name="export_content_columns_all">Alle Spalten der Datei</string>
+    <string name="export_content_traits_all">Alle Merkmale</string>
+    <string name="export_error_general">Fehler während dem Export</string>
+    <string name="export_error_data_missing">Keine Daten vorhanden zum Exportieren</string>
+    <string name="export_complete">Export komplett</string>
+    <string name="export_progress">Exportieren...</string>
+    <string name="export_error_missing_format">Exportformat muss ausgewählt werden</string>
+    <!-- Citation -->
+    <!-- SETTINGS -->
+    <!-- General -->
+    <string name="preferences_general_feature_next_missing">Ermöglicht beim Drücken des Vorwärtspfeiles zur nächsten Versuchsparzelle ohne Daten für ein bestimmtes Merkmal zu gelangen. Versuchsparzellen mit Daten werden übersprungen und nur diejenigen Versuchsparzellen angezeigt, die noch keine Daten erhalten.</string>
+    <string name="preferences_general_feature_barcode_text">Aktiviert die Option zu einem bestimmten einzigartigen Zuordnungsmerkmal zu navigieren</string>
+    <!-- Profile -->
+    <string name="profile_person_title">Person bestimmen</string>
+    <string name="profile_name_first">Name</string>
+    <string name="profile_name_last">Nachname</string>
+    <string name="profile_reset">Alle Einstellungen löschen</string>
+    <!-- Appearance -->
+    <string name="preferences_appearance_language">Sprache</string>
+    <!-- Behavior -->
+    <string name="preferences_behavior_cycle_traits">Durch drücken des Pfeils vorwärts, gelangt man vom letzten Merkmal zum ersten Merkmal der nächsten Einheit (z.B. nächsten Versuchsparzelle)</string>
+    <string name="preferences_general_use_day_number">Verwende den aktuellen Tag im Jahr anstelle des Datums (z.B. 40 anstelle von 9. Februar)</string>
+    <string name="preferences_general_skip_entries_with_data">Ignoriere Einträge die bereits Daten enthalten</string>
+    <!-- GeoNav -->
+    <!-- Sounds -->
+    <string name="preferences_sound_primary_order_sound">Notifikationsgeräusch ein beim Wechsel der ersten Ordnung (ein Geräusch macht den Nutzer darauf aufmerksam, dass die letzte Versuchsparzelle in einer Reihe (erste Ordnung) erreicht wurde und die nächste Parzelle in der nächsten Reihe liegt.)</string>
+    <!-- BrAPI preferences are in the BrAPI section below -->
+    <!-- Database -->
+    <string name="database_dialog_title">Datenbank</string>
+    <string name="database_import">Datenbank importieren</string>
+    <string name="database_export">Datenbank exportieren</string>
+    <string name="database_reset">Datenbank zurücksetzen</string>
+    <string name="database_reset_warning1">Alle Daten werden gelöscht beim Zurücksetzen der Datenbank. Sind Sie sicher?</string>
+    <string name="database_reset_warning2">Dieser Vorgang kann nicht rückgängig gemacht werden. Die Applikation wird gestoppt nach dem die Datenbank gelöscht wurde. Wollen Sie den Vorgang trotzdem fortsetzen?</string>
+    <string name="database_reset_message">Datenbank wurde gelöscht</string>
+    <!-- Beta -->
+    <!-- ABOUT -->
+    <!-- App  -->
+    <string name="about_title">Information</string>
+    <!-- Lead  -->
+    <!-- Support  -->
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <!-- Update -->
+    <!-- BRAPI -->
+    <!-- BrAPI preferences -->
+    <!-- Authorization -->
+    <!-- BrAPI Import -->
+    <!-- BrAPI Export -->
+    <string name="brapi_export_button">Export</string>
+    <!-- Pagination -->
+    <!-- General -->
+    <!-- TUTORIAL -->
     <string name="tutorial_dialog_description">Wollen sie das Tutorial aktivieren? Diese Einstellung kann unter Weiteren Einstellungen geändert werden.</string>
-    <string name="tutorial_main_infobars_title">InfoBars</string>
-    <string name="tutorial_main_infobars_description">InfoBars show extra data for each entry and can be changed using the dropdown menus.</string>
     <string name="tutorial_main_traits_title">Merkmale</string>
-    <string name="tutorial_main_traits_description">The small, green arrows move between traits.</string>
     <string name="tutorial_main_traitlist_title">Merkmale</string>
-    <string name="tutorial_main_traitlist_description">The current trait being collected. A list of active traits is displayed when the current trait is pressed.</string>
-    <string name="tutorial_main_entries_title">Entries</string>
-    <string name="tutorial_main_entries_description">The large, black arrows move between entries.</string>
-    <string name="tutorial_main_navinfo_title">Order columns</string>
-    <string name="tutorial_main_navinfo_description">This is where the primary and secondary order are displayed.</string>
-    <string name="tutorial_main_datacollect_title">Data input</string>
-    <string name="tutorial_main_datacollect_description">Data is entered in the bottom area of the screen. Different trait types have different layouts.</string>
-    <string name="tutorial_main_na_title">Missing data</string>
-    <string name="tutorial_main_na_description">The NA button is used to mark values as missing.</string>
-    <string name="tutorial_main_delete_title">Delete data</string>
-    <string name="tutorial_main_delete_description">Data is deleted using this button.</string>
-    <string name="tutorial_main_search_title">Search</string>
-    <string name="tutorial_main_search_description">The search icon allows database queries.</string>
-    <string name="tutorial_main_resources_title">Resources</string>
-    <string name="tutorial_main_resources_description">This displays a list of files in the Resources folder.</string>
-    <string name="tutorial_main_summary_title">Summary</string>
-    <string name="tutorial_main_summary_description">This displays a summary of all data for the current entry.</string>
-    <string name="tutorial_main_lockdata_title">Lock data</string>
-    <string name="tutorial_main_lockdata_description">This locks current data input</string>
     <string name="tutorial_settings_fields_title">Felder</string>
-    <string name="tutorial_settings_fields_description">allows you to import and manage fields.</string>
-    <string name="tutorial_settings_fields_import">To start using Field Book, first import a field file.</string>
     <string name="tutorial_settings_traits_title">Merkmale</string>
-    <string name="tutorial_settings_traits_description">allows you to add, import, and manage traits.</string>
-    <string name="tutorial_settings_collect_title">Collect data</string>
-    <string name="tutorial_settings_collect_description">allows you to collect phenotypic data.</string>
     <string name="tutorial_settings_settings_title">Weitere Einstellungen</string>
-    <string name="tutorial_settings_settings_description">allows additional configuration for data collection.</string>
     <string name="tutorial_settings_export_title">Export</string>
-    <string name="tutorial_settings_export_description">Data can be exported in two formats: database or table.</string>
-    <string name="tutorial_fields_add_title">Add Field</string>
-    <string name="tutorial_fields_add_description">Import a field file.</string>
-    <string name="tutorial_fields_file_description">Files must contain three columns: a unique identifier, a primary order, and a secondary order. The primary/secondary order are used for navigation in the field.</string>
-    <string name="tutorial_fields_select_title">Active Field</string>
-    <string name="tutorial_fields_select_description">A field is selected for data collection after being imported.</string>
-    <string name="tutorial_fields_delete_title">Delete Field</string>
-    <string name="tutorial_fields_delete_description">To delete a field, open the menu on the left side of a field name and select Delete.</string>
-    <string name="tutorial_traits_add_title">Add Trait</string>
-    <string name="tutorial_traits_add_description">Add Trait creates a new trait. Different trait formats have different collection layouts.</string>
-    <string name="tutorial_traits_format_title">Trait Formats</string>
-    <string name="tutorial_traits_format_description">Different trait formats are indicated with different icons.</string>
-    <string name="tutorial_traits_visibility_title">Trait Visibility</string>
-    <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
 </resources>
