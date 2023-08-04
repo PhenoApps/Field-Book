@@ -334,7 +334,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
      * First the selected studyDbId is found in the preferences, and the static ObservationUnitDao
      * is used to find the relevant Obs. Unit. and update the row with the NMEA data.
      */
-    private fun submitGnss(latitude: String, longitude: String, elevation: String) {
+    private fun submitGnss(latitude: String, longitude: String, elevation: String, precision: String) {
 
         if (latitude.isNotBlank() && longitude.isNotBlank()) {
 
@@ -343,7 +343,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             //geo json object : elevation (stored in obs. units, used in navigation)
             //geo json has properties map for additional info
             val geoJson = GeoJSON(geometry = Geometry(coordinates = arrayOf(latitude, longitude)),
-                    properties = mapOf("altitude" to elevation))
+                    properties = mapOf("altitude" to elevation, "fix" to precision))
 
             //save fix length to truncate the average later if needed
             val latLength = latitude.length
@@ -618,8 +618,16 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val latitude = latTextView.text.toString()
             val longitude = lngTextView.text.toString()
             val elevation = altTextView.text.toString()
+            val precision = accTextView.text.toString()
 
-            submitGnss(latitude, longitude, elevation)
+            val isFloat = try {
+                precision.toDouble()
+                true
+            } catch (e: NumberFormatException) {
+                false
+            }
+
+            submitGnss(latitude, longitude, elevation, if (isFloat) "GPS" else precision)
 
             triggerTts(context.getString(R.string.trait_location_saved_tts))
 

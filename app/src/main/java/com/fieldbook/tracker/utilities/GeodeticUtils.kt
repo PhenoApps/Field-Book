@@ -252,6 +252,12 @@ class GeodeticUtils {
 
                 location.longitude = geoJson.geometry.coordinates[1].toDouble()
 
+                geoJson.properties?.get("fix")?.let { fix ->
+
+                    location.extras?.putString("fix", fix)
+
+                }
+
             } catch (e: Exception) {  //could be a NPE, number format exception, index out of bounds or json syntax exception,
 
                 failed = true
