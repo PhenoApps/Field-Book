@@ -1,51 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App -->
-    <string name="field_book">田间记录本</string>
-    <!-- Dialog -->
-    <string name="dialog_cancel">取消</string>
-    <string name="dialog_ok">同意</string>
-    <string name="dialog_yes">是</string>
-    <string name="dialog_no">否</string>
-    <string name="dialog_close">关闭</string>
-    <string name="dialog_confirm">确定?</string>
-    <string name="dialog_import">导入</string>
-    <string name="dialog_warning">警告</string>
-    <string name="dialog_save">保存</string>
-    <string name="dialog_go">Go</string>
-    <string name="dialog_save_error_title">Save Error</string>
-    <string name="dialog_back">Back</string>
-    <string name="dialog_scan">Scan</string>
-    <string name="barcode_scanner_text">扫描条形码</string>
-    <!-- Startup  -->
-    <string name="startup_sample_data_title">示例数据</string>
-    <string name="startup_sample_data_message">加载示例数据？</string>
-    <!-- Permissions  -->
-    <string name="permission_rationale_storage_import">导入文件需要访问设备上的文件</string>
-    <string name="permission_rationale_storage_export">导出数据需要访问设备上的文件。</string>
-    <string name="permission_rationale_trait_features">采集数据需要访问设备上的文件，麦克风和相机。</string>
-    <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
-    <!-- Config Activity  -->
-    <string name="settings_fields">地块</string>
-    <string name="settings_traits">性状</string>
-    <string name="settings_collect">收集</string>
-    <string name="settings_export">导出</string>
-    <string name="settings_advanced">设置</string>
-    <string name="settings_profile">说明</string>
-    <!-- Config Activity Fuzzy Search  -->
-    <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
-    <string name="act_config_fuzzy_search_error">Something went wrong when searching for %s</string>
-    <string name="act_config_search_fab_content_description">Search all plots and fields to load/navigate to the barcoded item.</string>
-    <!-- File manager  -->
-    <string name="import_source_local">本地存储</string>
-    <string name="import_source_cloud">云端存储</string>
-    <string name="import_source_ask">总是询问</string>
-    <string name="import_dialog_importing">请稍等...</string>
-    <string name="import_error_general">导入错误</string>
-    <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
-    <!-- Warnings/Catches -->
-    <string name="warning_field_missing">地块没有载入。请载入地块再采集数据。</string>
-    <string name="warning_traits_missing">无性状存在。请先创建性状，再采集数据。</string>
-    <!-- Changelog -->
-    <string name="changelog_title">更改记录</string>
+    <!-- App  -->
+    <string name="about_title">About</string>
+    <string name="about_version_title">Version</string>
+    <string name="about_manual_title">Manual</string>
+    <string name="about_rate">Rate this app</string>
+    <!-- Lead  -->
+    <string name="about_project_lead_title">Project Lead</string>
+    <string name="about_email_title">Email</string>
+    <!-- Support  -->
+    <string name="about_support_title">Support</string>
+    <string name="about_contributors_title">Contributors</string>
+    <string name="about_contributors_funding_title">Funding</string>
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <string name="about_technical_title">Technical</string>
+    <string name="about_libraries_title">Libraries</string>
+    <!-- Update -->
+    <string name="check_updates_title">Checking for Updates…</string>
+    <string name="found_updates_title">Download Latest Version</string>
+    <string name="no_updates_title">Running Latest Version</string>
 </resources>
