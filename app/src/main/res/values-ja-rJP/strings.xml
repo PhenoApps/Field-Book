@@ -1,51 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App -->
-    <string name="field_book">Field Book</string>
-    <!-- Dialog -->
-    <string name="dialog_cancel">キャンセル</string>
-    <string name="dialog_ok">決定</string>
-    <string name="dialog_yes">はい</string>
-    <string name="dialog_no">いいえ</string>
-    <string name="dialog_close">閉じる</string>
-    <string name="dialog_confirm">よろしいですか？</string>
-    <string name="dialog_import">インポート</string>
-    <string name="dialog_warning">警告</string>
-    <string name="dialog_save">保存</string>
-    <string name="dialog_go">Go</string>
-    <string name="dialog_save_error_title">Save Error</string>
-    <string name="dialog_back">Back</string>
-    <string name="dialog_scan">Scan</string>
-    <string name="barcode_scanner_text">バーコードを読み取る</string>
-    <!-- Startup  -->
-    <string name="startup_sample_data_title">サンプルデータ</string>
-    <string name="startup_sample_data_message">サンプルデータをロードしますか？</string>
-    <!-- Permissions  -->
-    <string name="permission_rationale_storage_import">ファイルのインポートにはデバイスのファイルへのアクセスが必要です。</string>
-    <string name="permission_rationale_storage_export">データのエクスポートにはデバイスのファイルへのアクセスが必要です。</string>
-    <string name="permission_rationale_trait_features">データ収集にはデバイスのファイル、マイク及びカメラへのアクセスが必要です。</string>
-    <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
-    <!-- Config Activity  -->
-    <string name="settings_fields">圃場</string>
-    <string name="settings_traits">形質</string>
-    <string name="settings_collect">収集</string>
-    <string name="settings_export">エクスポート</string>
-    <string name="settings_advanced">設定</string>
-    <string name="settings_profile">プロフィール</string>
-    <!-- Config Activity Fuzzy Search  -->
-    <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
-    <string name="act_config_fuzzy_search_error">Something went wrong when searching for %s</string>
-    <string name="act_config_search_fab_content_description">Search all plots and fields to load/navigate to the barcoded item.</string>
-    <!-- File manager  -->
-    <string name="import_source_local">ローカル領域</string>
-    <string name="import_source_cloud">クラウド領域</string>
-    <string name="import_source_ask">常に尋ねる</string>
-    <string name="import_dialog_importing">しばらくお待ちください・・・</string>
-    <string name="import_error_general">インポート中にエラー</string>
-    <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
-    <!-- Warnings/Catches -->
-    <string name="warning_field_missing">圃場データがありません。調査を開始する前に圃場ファイルを読み込んでください。</string>
-    <string name="warning_traits_missing">調査形質のデータがありません。調査を開始する前に形質データを作成してください。</string>
-    <!-- Changelog -->
-    <string name="changelog_title">変更履歴</string>
+    <!-- App  -->
+    <string name="about_title">About</string>
+    <string name="about_version_title">Version</string>
+    <string name="about_manual_title">Manual</string>
+    <string name="about_rate">Rate this app</string>
+    <!-- Lead  -->
+    <string name="about_project_lead_title">Project Lead</string>
+    <string name="about_email_title">Email</string>
+    <!-- Support  -->
+    <string name="about_support_title">Support</string>
+    <string name="about_contributors_title">Contributors</string>
+    <string name="about_contributors_funding_title">Funding</string>
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <string name="about_technical_title">Technical</string>
+    <string name="about_libraries_title">Libraries</string>
+    <!-- Update -->
+    <string name="check_updates_title">Checking for Updates…</string>
+    <string name="found_updates_title">Download Latest Version</string>
+    <string name="no_updates_title">Running Latest Version</string>
 </resources>
