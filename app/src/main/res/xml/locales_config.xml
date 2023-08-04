@@ -14,5 +14,7 @@
     <locale android:name="om-rET"/>
     <locale android:name="pt-rBR"/>
     <locale android:name="ru-rRU"/>
+    <locale android:name="sv-rSE"/>
+    <locale android:name="vi-vRN"/>
     <locale android:name="zh-rCN"/>
 </locale-config>

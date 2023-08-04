@@ -72,6 +72,16 @@
             android:title="@string/language_ru" />
 
         <Preference
+            android:icon="@drawable/ic_sv"
+            android:key="sv-SE"
+            android:title="@string/language_sv_rSE" />
+
+        <Preference
+            android:icon="@drawable/ic_vi"
+            android:key="vi-VN"
+            android:title="@string/language_vi_vRN" />
+
+        <Preference
             android:icon="@drawable/ic_cn"
             android:key="zh-CN"
             android:title="@string/language_zh_rCN" />
