@@ -77,8 +77,9 @@ android {
         debug {
             clean
             debuggable true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             manifestPlaceholders = [crashlyticsCollectionEnabled: "false"]
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
