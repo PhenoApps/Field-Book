@@ -1,51 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App -->
-    <string name="field_book">መረጃ መመዝገቢያ፤</string>
-    <!-- Dialog -->
-    <string name="dialog_cancel">ታወው</string>
-    <string name="dialog_ok">ይሁን</string>
-    <string name="dialog_yes">አዎ፤</string>
-    <string name="dialog_no">አይደለም፤</string>
-    <string name="dialog_close">ዝጋዉ</string>
-    <string name="dialog_confirm">እርግጠኛ ነህ፤</string>
-    <string name="dialog_import">ማስገባት፤</string>
-    <string name="dialog_warning">ማስጠንቀቂያ፤</string>
-    <string name="dialog_save">አስቀምጥ</string>
-    <string name="dialog_go">Go</string>
-    <string name="dialog_save_error_title">Save Error</string>
-    <string name="dialog_back">Back</string>
-    <string name="dialog_scan">Scan</string>
-    <string name="barcode_scanner_text">Scan a barcode</string>
-    <!-- Startup  -->
-    <string name="startup_sample_data_title">Sample data</string>
-    <string name="startup_sample_data_message">Load sample data?</string>
-    <!-- Permissions  -->
-    <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
-    <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
-    <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
-    <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
-    <!-- Config Activity  -->
-    <string name="settings_fields">ቦታዎች</string>
-    <string name="settings_traits">ጸባዮች</string>
-    <string name="settings_collect">Collect</string>
-    <string name="settings_export">ማውጣት፤</string>
-    <string name="settings_advanced">የረቀቃ አዘጋጃጀት</string>
-    <string name="settings_profile">Profile</string>
-    <!-- Config Activity Fuzzy Search  -->
-    <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
-    <string name="act_config_fuzzy_search_error">Something went wrong when searching for %s</string>
-    <string name="act_config_search_fab_content_description">Search all plots and fields to load/navigate to the barcoded item.</string>
-    <!-- File manager  -->
-    <string name="import_source_local">Local storage</string>
-    <string name="import_source_cloud">Cloud storage</string>
-    <string name="import_source_ask">Always ask</string>
-    <string name="import_dialog_importing">እባክህ ጠብቅ</string>
-    <string name="import_error_general">ማስገባት ላይ ስህተት አላ</string>
-    <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
-    <!-- Warnings/Catches -->
-    <string name="warning_field_missing">የሙከራ ቦታ አልቀረበም፤ እባክዎን መረጃ ከመሰብሰብዎ በፊት ቦታዉ እንዲቀርብ ያድርጉ፤</string>
-    <string name="warning_traits_missing">ጣባዮች የሉም፤</string>
-    <!-- Changelog -->
-    <string name="changelog_title">ከመጨረሸ እድሳት ቀይረዉ</string>
+    <!-- App  -->
+    <string name="about_title">About</string>
+    <string name="about_version_title">Version</string>
+    <string name="about_manual_title">Manual</string>
+    <string name="about_rate">Rate this app</string>
+    <!-- Lead  -->
+    <string name="about_project_lead_title">Project Lead</string>
+    <string name="about_email_title">Email</string>
+    <!-- Support  -->
+    <string name="about_support_title">Support</string>
+    <string name="about_contributors_title">Contributors</string>
+    <string name="about_contributors_funding_title">Funding</string>
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <string name="about_technical_title">Technical</string>
+    <string name="about_libraries_title">Libraries</string>
+    <!-- Update -->
+    <string name="check_updates_title">Checking for Updates…</string>
+    <string name="found_updates_title">Download Latest Version</string>
+    <string name="no_updates_title">Running Latest Version</string>
 </resources>
