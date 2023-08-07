@@ -117,6 +117,7 @@ public class CollectActivity extends ThemedActivity
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
+
     private GeoNavHelper geoNavHelper;
 
     @Inject
@@ -1156,7 +1157,6 @@ public class CollectActivity extends ThemedActivity
         final int resourcesId = R.id.resources;
         final int nextEmptyPlotId = R.id.nextEmptyPlot;
         final int jumpToPlotId = R.id.jumpToPlot;
-//        final int barcodeScanId = R.id.barcodeScan;
         final int dataGridId = R.id.datagrid;
         final int lockDataId = R.id.lockData;
         final int summaryId = R.id.summary;
@@ -1209,16 +1209,6 @@ public class CollectActivity extends ThemedActivity
                 refreshMain();
 
                 break;
-//            case jumpToPlotId:
-//                moveToPlotID();
-//                break;
-//            case barcodeScanId:
-//                new IntentIntegrator(this)
-//                        .setPrompt(getString(R.string.main_barcode_text))
-//                        .setBeepEnabled(false)
-//                        .setRequestCode(BARCODE_SEARCH_CODE)
-//                        .initiateScan();
-//                break;
             case jumpToPlotId:
                 String moveToUniqueIdValue = ep.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "");
                 if (moveToUniqueIdValue.equals("2")) {

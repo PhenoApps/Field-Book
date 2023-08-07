@@ -20,11 +20,6 @@
         android:icon="@drawable/ic_tb_barcode_scan"
         android:showAsAction="always"
         android:title="@string/main_toolbar_moveto" />
-<!--    <item-->
-<!--        android:id="@+id/barcodeScan"-->
-<!--        android:icon="@drawable/ic_tb_barcode_scan"-->
-<!--        android:showAsAction="always"-->
-<!--        android:title="@string/main_toolbar_barcode_scan" />-->
     <item
         android:id="@+id/datagrid"
         android:icon="@drawable/ic_tb_datagrid"
