@@ -220,6 +220,7 @@
     <string name="preferences_sound_entry_description">Notification sound when moving between entries</string>
 
     <string name="preferences_general_title">General</string>
+    <string name="preferences_general_collect_tools">Collect Tools</string>
     <string name="preferences_general_use_day_number">Use day of year</string>
     <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
     <string name="preferences_general_skip_entries_with_data">Skip entries across active trait</string>
@@ -233,14 +234,17 @@
     <string name="preferences_general_feature_next_missing">Next entry with no data</string>
     <string name="preferences_general_feature_next_missing_description">Adds a button to the toolbar that jumps to the next entry with no data depending on settings.</string>
     <string name="preferences_general_feature_barcode_text">Move to unique identifier</string>
-    <string name="preferences_general_feature_barcode_text_description">Adds a button to the toolbar to move to a specific entry by its unique id. Uses text entry and/or camera barcode scan depending on settings.</string>
+    <string name="preferences_general_feature_barcode_text_description">Adds a button to the toolbar to move to a specific entry by its unique id. Input method depends on settings.</string>
     <string name="preferences_general_feature_datagrid">Datagrid</string>
     <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
 
     <!-- move to unique id preference -->
-    <string name="move_to_unique_id_disabled">Off</string>
-    <string name="move_to_unique_id_text_or_scan">Text Entry or Scan</string>
+    <string name="move_to_unique_id_disabled">Disabled</string>
+    <string name="move_to_unique_id_disabled_description">Disabled and hidden from the collect toolbar</string>
+    <string name="move_to_unique_id_text_or_scan">Text Entry or Camera Scan</string>
+    <string name="move_to_unique_id_text_or_scan_description">Opens a text input for a unique id, includes a Scan option to open the camera barcode scanner</string>
     <string name="move_to_unique_id_direct_camera_scan">Direct Camera Scan</string>
+    <string name="move_to_unique_id_direct_camera_scan_description">Directly opens the device camera to scan a unique id barcode</string>
 
     <string name="preferences_general_system_title">System Defaults</string>
     <string name="preferences_general_files_base_directory_title">Define storage location</string>
