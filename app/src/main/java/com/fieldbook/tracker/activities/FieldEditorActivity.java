@@ -50,7 +50,6 @@ import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
-import com.fieldbook.tracker.objects.GeoNavHelper;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
@@ -105,8 +104,6 @@ public class FieldEditorActivity extends ThemedActivity
     private Menu systemMenu;
 
     private GPSTracker mGpsTracker;
-
-    private GeoNavHelper geoNavHelper;
 
     @Inject
     DataHelper database;
@@ -181,8 +178,6 @@ public class FieldEditorActivity extends ThemedActivity
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
         fieldList.setAdapter(mAdapter);
-
-        geoNavHelper = new GeoNavHelper(this);
     }
 
     private void showFileDialog() {

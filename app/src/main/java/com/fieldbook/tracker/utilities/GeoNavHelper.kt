@@ -145,7 +145,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                 lastPlotIdNav = null
                 currentFixQuality = false
                 if (audioOnDrop) {
-                    (controller.getContext() as? CollectActivity)?.showGeoNavPrecisionLossDialog()
+                    (controller.getContext() as? CollectActivity)?.showLocationPrecisionLossDialog()
                     controller.getSoundHelper().playError()
                     controller.getVibrator().vibrate(1000L)
                 }
