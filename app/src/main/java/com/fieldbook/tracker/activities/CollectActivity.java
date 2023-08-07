@@ -118,6 +118,7 @@ public class CollectActivity extends ThemedActivity
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
 
+    private String moveToUniqueIdValue;
     private GeoNavHelper geoNavHelper;
 
     @Inject
@@ -869,9 +870,12 @@ public class CollectActivity extends ThemedActivity
         // Update menu item visibility
         if (systemMenu != null) {
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
-            systemMenu.findItem(R.id.jumpToPlot).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_TEXT, false));
+//            systemMenu.findItem(R.id.jumpToPlot).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_TEXT, false));
             systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1").equals("1"));
-            systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
+//            systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
+            moveToUniqueIdValue = ep.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "1");
+            Log.d("MoveToUniqueIdValue", "Value: " + moveToUniqueIdValue); // Log the value
+            systemMenu.findItem(R.id.jumpToPlot).setVisible(!moveToUniqueIdValue.equals("1"));
             systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
         }
 
@@ -1116,9 +1120,13 @@ public class CollectActivity extends ThemedActivity
         systemMenu = menu;
 
         systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
-        systemMenu.findItem(R.id.jumpToPlot).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_TEXT, false));
         systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1").equals("1"));
-        systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
+
+        moveToUniqueIdValue = ep.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "1");
+        Log.d("MoveToUniqueIdValue", "Value: " + moveToUniqueIdValue); // Log the value
+        systemMenu.findItem(R.id.jumpToPlot).setVisible(!moveToUniqueIdValue.equals("1"));
+//        systemMenu.findItem(R.id.barcodeScan).setVisible(!moveToUniqueIdValue.equals(getString(R.string.pref_general_move_to_unique_id_camera_scan)));
+
         systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
 
         //toggle repeated values indicator
@@ -1159,7 +1167,7 @@ public class CollectActivity extends ThemedActivity
         final int resourcesId = R.id.resources;
         final int nextEmptyPlotId = R.id.nextEmptyPlot;
         final int jumpToPlotId = R.id.jumpToPlot;
-        final int barcodeScanId = R.id.barcodeScan;
+//        final int barcodeScanId = R.id.barcodeScan;
         final int dataGridId = R.id.datagrid;
         final int lockDataId = R.id.lockData;
         final int summaryId = R.id.summary;
@@ -1212,15 +1220,26 @@ public class CollectActivity extends ThemedActivity
                 refreshMain();
 
                 break;
+//            case jumpToPlotId:
+//                moveToPlotID();
+//                break;
+//            case barcodeScanId:
+//                new IntentIntegrator(this)
+//                        .setPrompt(getString(R.string.main_barcode_text))
+//                        .setBeepEnabled(false)
+//                        .setRequestCode(BARCODE_SEARCH_CODE)
+//                        .initiateScan();
+//                break;
             case jumpToPlotId:
-                moveToPlotID();
-                break;
-            case barcodeScanId:
-                new IntentIntegrator(this)
-                        .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(false)
-                        .setRequestCode(BARCODE_SEARCH_CODE)
-                        .initiateScan();
+                if (moveToUniqueIdValue.equals("2")) {
+                    moveToPlotID();
+                } else if (moveToUniqueIdValue.equals("3")) {
+                    new IntentIntegrator(this)
+                            .setPrompt(getString(R.string.main_barcode_text))
+                            .setBeepEnabled(false)
+                            .setRequestCode(BARCODE_SEARCH_CODE)
+                            .initiateScan();
+                }
                 break;
             case summaryId:
                 showSummary();
