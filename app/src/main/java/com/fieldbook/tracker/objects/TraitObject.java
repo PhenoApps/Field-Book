@@ -4,6 +4,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import java.util.List;
+
 /**
  * Simple wrapper class for trait data
  */
@@ -21,6 +23,12 @@ public class TraitObject {
     private String externalDbId;
     private String traitDataSource;
     private String additionalInfo;
+
+    /**
+     * This is a BMS specific field. This will be populated when traits are imported from
+     * the BMS implementation of Brapi 2.0 GET /variables.
+     */
+    private List<String> observationLevelNames;
 
     public String getTrait() {
         return trait;
@@ -124,6 +132,14 @@ public class TraitObject {
 
     public void setAdditionalInfo(String additionalInfo) {
         this.additionalInfo = additionalInfo;
+    }
+
+    public List<String> getObservationLevelNames() {
+        return observationLevelNames;
+    }
+
+    public void setObservationLevelNames(List<String> observationLevelNames) {
+        this.observationLevelNames = observationLevelNames;
     }
 
     public boolean isValidValue(final String s) {
