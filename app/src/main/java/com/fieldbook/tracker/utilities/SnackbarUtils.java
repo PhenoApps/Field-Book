@@ -88,7 +88,7 @@ public final class SnackbarUtils {
         }
 
         snackbar.setBackgroundTint(Color.TRANSPARENT);
-
+        snackbar.setAnchorView(R.id.toolbarBottom);
         snackbar.show();
     }
 }

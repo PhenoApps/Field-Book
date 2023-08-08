@@ -439,7 +439,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                     ).show()
                                 } else {
                                     mGeoNavSnackbar = Snackbar.make(
-                                        findViewById(R.id.traitHolder),
+                                        findViewById(R.id.toolbarBottom),
                                         id, Snackbar.LENGTH_INDEFINITE
                                     )
                                     val snackLayout = mGeoNavSnackbar?.view as SnackbarLayout
@@ -453,6 +453,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                             LinearLayout.LayoutParams.MATCH_PARENT,
                                             LinearLayout.LayoutParams.WRAP_CONTENT
                                         )
+                                    params.bottomToTop = R.id.toolbarBottom
                                     snackView.layoutParams = params
                                     snackLayout.addView(snackView)
                                     snackLayout.setPadding(0, 0, 0, 0)
@@ -470,6 +471,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                         //when navigate button is pressed use rangeBox to go to the plot id
                                         moveToSearch("id", getRangeBox().getRangeID(), null, null, id, -1)
                                     }
+                                    mGeoNavSnackbar?.setAnchorView(R.id.toolbarBottom)
                                     mGeoNavSnackbar?.setBackgroundTint(Color.TRANSPARENT)
                                     mGeoNavSnackbar?.show()
                                 }
