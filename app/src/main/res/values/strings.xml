@@ -608,6 +608,9 @@
     <string name="bluetooth_printer_choose_device_title">Choose bluetooth device to print from.</string>
     <string name="pref_geonav_log_summary">Write GeoNav steps to a log file in \n storage/geonav/log.txt</string>
     <string name="pref_geonav_log_title">GeoNav Log</string>
+    <string name="pref_geonav_logging_mode">Current Logging Mode</string>
+    <string name="pref_geonav_shorter">Shorter Log</string>
+    <string name="pref_geonav_verbose">Verbose Log</string>
     <string name="act_collect_geonav_first_location_found">Rover communications established.</string>
     <string name="gnss_trait_averaging_switch_text">Average</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book could not load the file.</string>

@@ -133,4 +133,9 @@
         <item>@string/location_level_observation</item>
         <item>@string/location_level_study</item>
     </string-array>
+
+    <string-array name="pref_geonav_logging_mode">
+        <item>@string/pref_geonav_shorter</item>
+        <item>@string/pref_geonav_verbose</item>
+    </string-array>
 </resources>

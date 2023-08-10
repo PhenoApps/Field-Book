@@ -145,7 +145,6 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     private val mPrefs = PreferenceManager.getDefaultSharedPreferences(context)
     private val ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
     private var mGeoNavLogWriter: OutputStreamWriter? = null
-    private var mGeoNavShorterLogWriter: OutputStreamWriter? = null
 
     var initialized: Boolean = false
 
@@ -236,10 +235,6 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
 
         writeGeoNavLog(
             mGeoNavLogWriter,
-            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, closest, accuracy correction status, unique id, primary id, secondary id\n"
-        )
-        writeGeoNavLog(
-            mGeoNavShorterLogWriter,
             "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, closest, accuracy correction status, unique id, primary id, secondary id\n"
         )
     }
@@ -342,7 +337,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         val geoNavMethod: String = mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
         val d1: Double = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble() ?: 0.001
         val d2: Double = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble() ?: 0.01
-
+        val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, context.getString(R.string.pref_geonav_logging_mode)) ?: context.getString(R.string.pref_geonav_logging_mode)
         //user must have a valid pointing direction before attempting the IZ
         //initialize the start position and fill with external or internal GPS coordinates
         val start: Location? = if (internal) {
@@ -372,7 +367,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
 
                 //long toc = System.currentTimeMillis();
                 val (first) = impactZoneSearch(
-                    mGeoNavLogWriter, mGeoNavShorterLogWriter,
+                    mGeoNavLogWriter, currentLoggingMode,
                     start, coordinates.toTypedArray(),
                     azimuth, theta, mTeslas, geoNavMethod, d1, d2
                 )
@@ -452,10 +447,6 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                 mGeoNavLogWriter?.flush()
                 mGeoNavLogWriter?.close()
             }
-            if (mGeoNavShorterLogWriter != null) {
-                mGeoNavShorterLogWriter?.flush()
-                mGeoNavShorterLogWriter?.close()
-            }
         } catch (io: IOException) {
             io.printStackTrace()
         }
@@ -485,23 +476,25 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
             try {
                 val resolver: ContentResolver = context.contentResolver
                 val geoNavFolder = getDirectory(context, R.string.dir_geonav)
-                val geoNavShorterFolder = getDirectory(context, R.string.dir_geonav_shorter)
-                if (geoNavFolder != null && geoNavFolder.exists() && geoNavShorterFolder != null && geoNavShorterFolder.exists()) {
+                if (geoNavFolder != null && geoNavFolder.exists()) {
                     val interval = mPrefs.getString(GeneralKeys.UPDATE_INTERVAL, "1")
                     val address = (mPrefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "") ?: "")
                         .replace(":".toRegex(), "-")
                         .replace("\\s".toRegex(), "_")
                     val thetaPref = mPrefs.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
-                    val fileName =
-                        "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv"
+                    val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, R.string.pref_geonav_shorter.toString())
+                    // if the currentLoggingMode is for shorter log, use "shorter_" as the prefix for filename
+                    val prefixOfFile = if (currentLoggingMode == "Shorter Log") {
+                        "shorter_"
+                    } else{
+                        ""
+                    }
+                    val fileName = prefixOfFile + "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv"
                     val geoNavLogFile = geoNavFolder.createFile("*/csv", fileName)
-                    val geoNavShorterLogFile = geoNavShorterFolder.createFile("*/csv", "short_$fileName")
-                    if (geoNavLogFile != null && geoNavLogFile.exists() && geoNavShorterLogFile != null && geoNavShorterLogFile.exists()) {
+                    if (geoNavLogFile != null && geoNavLogFile.exists()) {
                         val outputStream = resolver.openOutputStream(geoNavLogFile.uri)
-                        val outputStreamShortLog = resolver.openOutputStream(geoNavShorterLogFile.uri);
                         Log.d(CollectActivity.TAG, "GeoNav Logger started successfully.")
                         mGeoNavLogWriter = OutputStreamWriter(outputStream)
-                        mGeoNavShorterLogWriter = OutputStreamWriter(outputStreamShortLog)
                     } else {
                         Log.d(CollectActivity.TAG, "GeoNav Logger start failed.")
                     }
@@ -612,14 +605,18 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     override fun onLocationChanged(location: Location) {
         mInternalLocation = location
 
-        //always log location updates
-        writeGeoNavLog(
-            mGeoNavLogWriter,
-            """
-        ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,null,null,null,null,null
-        
-        """.trimIndent()
-        )
+        val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, context.getString(R.string.pref_geonav_logging_mode)) ?: context.getString(R.string.pref_geonav_logging_mode)
+
+        //always log location updates for verbose log
+        if (currentLoggingMode != "Shorter Log") {
+            writeGeoNavLog(
+                mGeoNavLogWriter,
+                """
+                ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,null,null,null,null,null
+                
+                """.trimIndent()
+            )
+        }
 
         //don't log the location update for geonav_shorter
         // because closest would always be written as null in this case

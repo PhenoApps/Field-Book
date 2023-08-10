@@ -8,6 +8,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import androidx.preference.CheckBoxPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -61,6 +62,23 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
             updateMethodSummaryText()
             updateParametersVisibility()
+
+            true
+        }
+
+        val geoNavLog = findPreference<CheckBoxPreference>(GeneralKeys.GEONAV_LOG)
+        val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
+
+        // if the geonav is checked, only then display the logging mode selection tile
+        geoNavLog?.setOnPreferenceChangeListener { preference, newValue ->
+            geoNavLoggingMode?.isVisible = newValue as Boolean
+            true
+        }
+
+        // select geonav logging mode
+        geoNavLoggingMode?.setOnPreferenceChangeListener { preference, newValue ->
+            mPrefs.edit()
+                .putString(GeneralKeys.GEONAV_LOGGING_MODE, newValue as? String ?: "Shorter Log").apply()
 
             true
         }

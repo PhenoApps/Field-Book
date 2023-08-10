@@ -89,6 +89,9 @@ public class GeneralKeys {
     public static final String GEONAV_PARAMETER_D1                  = GEONAV_PREFIX + "parameters.trapezoid.D1";
     public static final String GEONAV_PARAMETER_D2                  = GEONAV_PREFIX + "parameters.trapezoid.D2";
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
+
+    public static final String GEONAV_LOGGING_MODE                 = GEONAV_PREFIX + "GEONAV_LOGGING_MODE";
+
     // @formatter:on
 
     // GNSS

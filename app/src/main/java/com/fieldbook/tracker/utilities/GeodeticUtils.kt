@@ -1,6 +1,9 @@
 package com.fieldbook.tracker.utilities
 
 import android.location.Location
+import android.util.Log
+import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.traits.GNSSTraitLayout
 import com.google.gson.Gson
@@ -103,7 +106,7 @@ class GeodeticUtils {
          * @return a object representing the returned location and it's distance
          **/
         fun impactZoneSearch(log: OutputStreamWriter?,
-                             shorterLog: OutputStreamWriter?,
+                             currentLoggingMode: String,
                              start: Location,
                              coordinates: Array<ObservationUnitModel>,
                              azimuth: Double,
@@ -167,10 +170,13 @@ class GeodeticUtils {
             //after a full run of IZ, update the last CLOSEST_UPDATE to CLOSEST_FINAL
             izLogArray.findLast { it.closest == CLOSEST_UPDATE }?.closest = CLOSEST_FINAL
 
-            //print the entire array to log
-            izLogArray.forEach { writeGeoNavLog(log, it.toString()) }
-            //print only the closest plant to the log
-            izLogArray.forEach { if (it.closest == 1) writeGeoNavLog(shorterLog, it.toString()) }
+            if(currentLoggingMode == "Shorter Log"){
+                //print only the closest plant to the log
+                izLogArray.forEach { if (it.closest == 1) writeGeoNavLog(log, it.toString()) }
+            }else{
+                //print the entire array to log
+                izLogArray.forEach { writeGeoNavLog(log, it.toString()) }
+            }
 
             return closestPoint to closestDistance
         }

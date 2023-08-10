@@ -7,7 +7,6 @@
     <string name="dir_field_import">field_import</string>
     <string name="dir_field_export">field_export</string>
     <string name="dir_geonav">geonav</string>
-    <string name="dir_geonav_shorter">geonav_shorter</string>
     <string name="dir_database">database</string>
     <string name="dir_updates">updates</string>
     <string name="dir_archive">archive</string>
