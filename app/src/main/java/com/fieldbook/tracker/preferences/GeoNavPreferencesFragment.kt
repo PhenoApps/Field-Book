@@ -69,6 +69,10 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         val geoNavLog = findPreference<CheckBoxPreference>(GeneralKeys.GEONAV_LOG)
         val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
 
+        // when GeoNav screen loads, check if GeoNav Log is checked
+        // if checked, only then display the logging mode
+        geoNavLoggingMode?.isVisible = geoNavLog!!.isChecked
+
         // if the geonav is checked, only then display the logging mode selection tile
         geoNavLog?.setOnPreferenceChangeListener { preference, newValue ->
             geoNavLoggingMode?.isVisible = newValue as Boolean
