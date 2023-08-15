@@ -9,6 +9,7 @@ name: do-pr-prerelease
 
 jobs:
   build-and-upload:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
 

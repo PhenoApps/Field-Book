@@ -24,10 +24,9 @@
     <TextView
         android:id="@+id/list_item_summary_value_tv"
         style="@style/TextAppearance.AppCompat.Subhead"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ellipsize="end"
-        android:maxLines="1"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/list_item_summary_ib"
