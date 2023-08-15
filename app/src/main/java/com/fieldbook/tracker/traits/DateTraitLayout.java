@@ -240,6 +240,7 @@ public class DateTraitLayout extends BaseTraitLayout {
             ObservationModel model = getCurrentObservation();
             date = model.getValue();
             log();
+            //afterLoadExists((CollectActivity) getContext(), date);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -272,15 +273,19 @@ public class DateTraitLayout extends BaseTraitLayout {
         if (!block() || isFirstLoad) {
             isFirstLoad = false;
             super.refreshLayout(onNew);
-            loadSelectedDate();
+            if (!onNew) {
+                ObservationModel model = getCurrentObservation();
+                if (model != null) {
+                    date = getCurrentObservation().getValue();
+                }
+                refreshDateText(date);
+            }
         } else {
             Utils.makeToast(getContext(), getContext().getString(R.string.view_repeated_values_add_button_fail));
         }
     }
 
-    @Override
-    public void afterLoadExists(CollectActivity act, @Nullable String value) {
-        super.afterLoadExists(act, value);
+    private void refreshDateText(String value) {
 
         //first check if observation values is observed for this plot and the value is not NA
         if (value != null && !value.equals("NA")) {
@@ -333,6 +338,13 @@ public class DateTraitLayout extends BaseTraitLayout {
 
             forceDataSavedColor();
         }
+    }
+
+    @Override
+    public void afterLoadExists(CollectActivity act, @Nullable String value) {
+        super.afterLoadExists(act, value);
+
+        refreshDateText(value);
 
         isBlocked = false;
     }

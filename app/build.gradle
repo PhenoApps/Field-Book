@@ -68,18 +68,16 @@ android {
     buildTypes {
 
         release {
-            shrinkResources true
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-            // signingConfig signingConfigs.playStoreConfig //Add your own signing config
+            minifyEnabled false
+            debuggable false
+            //signingConfig signingConfigs.playStoreConfig //Add your own signing config
         }
 
         debug {
             clean
             debuggable true
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             manifestPlaceholders = [crashlyticsCollectionEnabled: "false"]
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
