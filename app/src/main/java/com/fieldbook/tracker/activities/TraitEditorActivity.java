@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -489,31 +490,40 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE_IMPORT)
     public void loadTraitFilePermission() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(this, perms)) {
-            if (ep.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)) {
-                showFileDialog();
-            } else {
-                checkTraitExportDialog();
-            }
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
-                    PERMISSIONS_REQUEST_STORAGE_IMPORT, perms);
-        }
 
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
+            if (EasyPermissions.hasPermissions(this, perms)) {
+                if (ep.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)) {
+                    showFileDialog();
+                } else {
+                    checkTraitExportDialog();
+                }
+            } else {
+                // Do not have permissions, request them now
+                EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
+                        PERMISSIONS_REQUEST_STORAGE_IMPORT, perms);
+            }
+        } else if (ep.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)) {
+            showFileDialog();
+        } else {
+            checkTraitExportDialog();
+        }
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE_EXPORT)
     public void exportTraitFilePermission() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(this, perms)) {
-            showExportDialog();
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
-                    PERMISSIONS_REQUEST_STORAGE_EXPORT, perms);
-        }
+
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
+            if (EasyPermissions.hasPermissions(this, perms)) {
+                showExportDialog();
+            } else {
+                // Do not have permissions, request them now
+                EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
+                        PERMISSIONS_REQUEST_STORAGE_EXPORT, perms);
+            }
+        } else showExportDialog();
     }
 
     private void showImportDialog() {

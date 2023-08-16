@@ -43,7 +43,7 @@
         <Preference
             app:fragment="com.fieldbook.tracker.preferences.TtsLanguagePreferenceFragment"
             app:isPreferenceVisible="false"
-            android:icon="@drawable/ic_pref_general_root_directory"
+            android:icon="@drawable/ic_nav_drawer_translate"
             android:key="TTS_LANGUAGE"
             android:summary="@string/preferences_general_tts_language_description"
             android:title="@string/preferences_general_tts_language_title" />

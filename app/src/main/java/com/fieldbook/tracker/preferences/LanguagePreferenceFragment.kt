@@ -21,9 +21,9 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
             getString(R.string.preferences_appearance_language)
 
         for (key in setOf("com.fieldbook.tracker.preference.language.default",
-            "am", "ar", "bn", "de", "en", "es",
-            "fr", "hi", "it", "ja", "om-ET", "pt-BR",
-            "ru", "zh-CN")) {
+            "am-ET", "ar-SA", "bn-BD", "de-DE", "en-US", "es-MX",
+            "fr-FR", "hi-IN", "it-IT", "ja-JP", "om-ET", "pt-BR",
+            "ru-RU", "sv-SE", "vi-VN", "zh-CN")) {
             findPreference<Preference>(key)?.onPreferenceClickListener = this
         }
     }

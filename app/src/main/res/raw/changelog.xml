@@ -7,10 +7,11 @@
         <new>New GoPro Trait (Hero 11)</new>
         <new>New InfoBar prefix selector</new>
         <new>Search selections persist</new>
+        <new>Added Vietnamese and Swedish translations</new>
     </release>
 
     <release
-        date="2023-6-01"
+        date="2023-06-01"
         versionCode="540"
         versionName="v5.4">
         <new>Experimental settings section</new>

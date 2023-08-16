@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.OpenableColumns;
@@ -270,15 +271,16 @@ public class FieldEditorActivity extends ThemedActivity
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE)
     public void loadLocalPermission() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(this, perms)) {
-            loadLocal();
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
-                    PERMISSIONS_REQUEST_STORAGE, perms);
-        }
-
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
+            if (EasyPermissions.hasPermissions(this, perms)) {
+                loadLocal();
+            } else {
+                // Do not have permissions, request them now
+                EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
+                        PERMISSIONS_REQUEST_STORAGE, perms);
+            }
+        } else loadLocal();
     }
 
     @Override
