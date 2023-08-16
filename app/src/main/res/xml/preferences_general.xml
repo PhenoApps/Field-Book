@@ -48,6 +48,7 @@
         android:key="collect_tools"
         android:title="@string/preferences_general_collect_tools"
         app:iconSpaceReserved="false">
+
         <ListPreference
             android:icon="@drawable/ic_tb_forward"
             android:key="com.fieldbook.tracker.HIDE_ENTRIES_WITH_DATA_TOOLBAR"

@@ -1215,7 +1215,7 @@ public class CollectActivity extends ThemedActivity
                     moveToPlotID();
                 } else if (moveToUniqueIdValue.equals("3")) {
                     new IntentIntegrator(this)
-                            .setPrompt(getString(R.string.main_barcode_text))
+                            .setPrompt(getString(R.string.barcode_scanner_text))
                             .setBeepEnabled(false)
                             .setRequestCode(BARCODE_SEARCH_CODE)
                             .initiateScan();
