@@ -139,7 +139,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
             default: {
 
-                preference.setSummary(R.string.move_to_unique_id_disabled_description);
+                preference.setSummary(R.string.preferences_general_feature_barcode_text_description);
 
                 break;
 
