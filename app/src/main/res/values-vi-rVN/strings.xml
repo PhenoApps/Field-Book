@@ -212,10 +212,7 @@
     <string name="preferences_general_feature_next_missing">Nghiệm thức tiếp theo chưa có dữ liệu</string>
     <string name="preferences_general_feature_next_missing_description">Thêm một nút trên thanh công cụ có tác dụng chuyển đến nghiệm thức chưa có dữ liệu tiếp theo đối với tính trạng hiện tại</string>
     <string name="preferences_general_skip_entries_default">Mặc định</string>
-    <string name="preferences_general_barcode_camera">Chuyển đến nghiệm thức bằng mã vạch</string>
-    <string name="preferences_general_barcode_camera_description">Quét mã vạch và chuyển đến nghiệm thức tương ứng</string>
     <string name="preferences_general_feature_barcode_text">Chuyển đến định danh độc nhất</string>
-    <string name="preferences_general_feature_barcode_text_description">Mở một khung tương tác để nhập số định danh độc nhất và chuyển đến nghiệm thức tương ứng</string>
     <string name="preferences_general_feature_datagrid">Lưới dữ liệu</string>
     <string name="preferences_general_feature_datagrid_description">Hiển thị một bảng tính gồm các nghiệm thức và các tính trạng để trình bày dữ liệu đã thu thập</string>
     <!-- Profile -->
