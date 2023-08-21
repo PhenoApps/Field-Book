@@ -171,10 +171,7 @@
     <string name="preferences_general_feature_next_missing">Nästa post utan data</string>
     <string name="preferences_general_feature_next_missing_description">Lägger till en knapp i verktygsfältet som hoppar till nästa post som saknar data för aktuell karaktär </string>
     <string name="preferences_general_skip_entries_default">Standard</string>
-    <string name="preferences_general_barcode_camera">Gå till post med streckkod</string>
-    <string name="preferences_general_barcode_camera_description">Scanna streckkod för att gå till en viss post</string>
     <string name="preferences_general_feature_barcode_text">Gå till unikt ID</string>
-    <string name="preferences_general_feature_barcode_text_description">Öppnar en dialogruta där unikt ID kan anges för att gå till en viss post </string>
     <string name="preferences_general_feature_datagrid">Tabell</string>
     <string name="preferences_general_feature_datagrid_description">Visar ett datablad över parceller och karaktärer med registrerad data</string>
     <!-- Profile -->
