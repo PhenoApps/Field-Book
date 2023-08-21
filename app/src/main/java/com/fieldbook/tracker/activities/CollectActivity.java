@@ -1719,7 +1719,7 @@ public class CollectActivity extends ThemedActivity
 
                             String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
 
-                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, 8000, null,
+                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, R.id.toolbarBottom,8000, null,
                                 (v) -> switchField(studyId, null));
 
                         } else {

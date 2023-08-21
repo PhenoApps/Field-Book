@@ -50,6 +50,7 @@ public final class SnackbarUtils {
 
     public static void showNavigateSnack(LayoutInflater inflater, View view,
                                          String msg,
+                                         @Nullable Integer anchorViewId,
                                          int duration,
                                          @Nullable Boolean showGeoNavIcon,
                                          View.OnClickListener onClickListener) {
@@ -88,7 +89,11 @@ public final class SnackbarUtils {
         }
 
         snackbar.setBackgroundTint(Color.TRANSPARENT);
-        snackbar.setAnchorView(R.id.toolbarBottom);
+
+        if (anchorViewId != null) {
+            snackbar.setAnchorView(anchorViewId);
+        }
+
         snackbar.show();
     }
 }

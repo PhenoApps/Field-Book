@@ -446,6 +446,7 @@ public class FieldEditorActivity extends ThemedActivity
                         SnackbarUtils.showNavigateSnack(getLayoutInflater(),
                                 findViewById(R.id.main_content),
                                 getString(R.string.activity_field_editor_switch_field_same),
+                                null,
                                 8000, null, null
                                 );
 //                        Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
@@ -457,6 +458,7 @@ public class FieldEditorActivity extends ThemedActivity
                                 getLayoutInflater(),
                                 findViewById(R.id.main_content),
                                 getString(R.string.activity_field_editor_switch_field, studyName),
+                                null,
                                 8000,
                                 null, (v) -> {
                                     int count = mAdapter.getCount();
