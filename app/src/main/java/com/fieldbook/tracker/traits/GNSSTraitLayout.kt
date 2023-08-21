@@ -705,8 +705,13 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private fun connectionCheckHandler() {
 
-        if (currentUtc == lastUtc) {
-            clearUi()
+        val deviceName = prefs.getString(GeneralKeys.GNSS_LAST_PAIRED_DEVICE_NAME, null)
+
+        if (deviceName != context.getString(R.string.pref_behavior_geonav_internal_gps_choice)) {
+
+            if (currentUtc == lastUtc) {
+                clearUi()
+            }
         }
 
         lastUtc = currentUtc
