@@ -205,10 +205,7 @@
     <string name="preferences_general_feature_next_missing">Siguiente entrada sin datos</string>
     <string name="preferences_general_feature_next_missing_description">Agrega un botón a la barra de herramientas que salta a la siguiente entrada sin datos para el la variable actual</string>
     <string name="preferences_general_skip_entries_default">Predeterminado</string>
-    <string name="preferences_general_barcode_camera">Pasar a la entrada vía código de barras</string>
-    <string name="preferences_general_barcode_camera_description">Escanear el código de barras y pasar a la entrada específica</string>
     <string name="preferences_general_feature_barcode_text">Pasar al identificador único</string>
-    <string name="preferences_general_feature_barcode_text_description">Abre el diálogo para ingresar un identificador único y pasar a una entrada específica</string>
     <string name="preferences_general_feature_datagrid">Cuadrícula de datos</string>
     <string name="preferences_general_feature_datagrid_description">Muestra datos capturados en una tabla con parcelas y variables</string>
     <!-- Profile -->
