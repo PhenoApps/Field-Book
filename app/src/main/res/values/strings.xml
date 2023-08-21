@@ -461,13 +461,6 @@
     <string name="preferences_source_default_import">Default import source</string>
     <string name="preferences_source_default_export">Default export source</string>
 
-    <string name="preferences_general_feature_next_missing">Next entry with no data</string>
-    <string name="preferences_general_feature_next_missing_description">Adds a button to the toolbar that jumps to the next entry with no data depending on settings.</string>
-    <string name="preferences_general_skip_entries_disabled">Disabled</string>
-    <string name="preferences_general_skip_entries_across_all_traits_description">Skip entries that have data for all traits</string>
-    <string name="preferences_general_skip_entries_default_description">Go to next plot.</string>
-    <string name="preferences_general_skip_entries_default">Default</string>
-
     <string name="pref_general_location_collection_title">Location collected</string>
     <string name="pref_general_location_collection_summary">Select a method for collecting location while using Field Book.</string>
     <string name="location_level_off">Off</string>
@@ -480,11 +473,22 @@
     <string name="pref_general_location_collection_summary_obs">A location will be collected for every phenotype that is collected.</string>
     <string name="pref_general_location_collection_obs_dialog_title">This setting may substantially increase battery consumption.</string>
 
-    <string name="preferences_general_barcode_camera">Move to entry via barcode</string>
-    <string name="preferences_general_barcode_camera_description">Scan barcode and move to the specific entry</string>
+    <string name="preferences_general_collect_tools">Collect Toolbar</string>
+
+    <string name="preferences_general_feature_next_missing">Next entry with no data</string>
+    <string name="preferences_general_feature_next_missing_description">Adds a button to the toolbar that jumps to the next entry with no data depending on settings.</string>
+    <string name="preferences_general_skip_entries_disabled">Disabled</string>
+    <string name="preferences_general_skip_entries_across_all_traits_description">Skip entries that have data for all traits</string>
+    <string name="preferences_general_skip_entries_default_description">Go to next plot.</string>
+    <string name="preferences_general_skip_entries_default">Default</string>
 
     <string name="preferences_general_feature_barcode_text">Move to unique identifier</string>
-    <string name="preferences_general_feature_barcode_text_description">Opens dialog to input unique id and move to specific entry</string>
+    <string name="preferences_general_feature_barcode_text_description">Adds a button to the toolbar to move to a specific entry by its unique id. Input method depends on settings.</string>
+    <string name="move_to_unique_id_disabled">Disabled</string>
+    <string name="move_to_unique_id_text_or_scan">Text Entry with Camera Scan Optional</string>
+    <string name="move_to_unique_id_text_or_scan_description">Toolbar button opens a dialog with a text input for a unique id and an optional Scan button</string>
+    <string name="move_to_unique_id_direct_camera_scan">Direct Camera Scan</string>
+    <string name="move_to_unique_id_direct_camera_scan_description">Toolbar button directly opens the device camera to scan a unique id barcode</string>
 
     <string name="preferences_general_feature_datagrid">Datagrid</string>
     <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
