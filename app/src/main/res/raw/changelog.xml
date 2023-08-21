@@ -8,6 +8,7 @@
         <new>New InfoBar prefix selector</new>
         <new>Search selections persist</new>
         <new>Added Vietnamese and Swedish translations</new>
+        <info>Merged barcode and text unique ID search setting</info>
     </release>
 
     <release
