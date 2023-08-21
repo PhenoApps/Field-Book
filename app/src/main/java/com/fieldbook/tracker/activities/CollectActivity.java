@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,6 +48,7 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
+import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
@@ -54,6 +56,7 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
+import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
@@ -115,7 +118,8 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.interfaces.CollectRangeController,
         com.fieldbook.tracker.interfaces.CollectTraitController,
         InfoBarAdapter.InfoBarController,
-        GoProTraitLayout.GoProCollector {
+        GoProTraitLayout.GoProCollector,
+        GPSTracker.GPSTrackerListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -147,6 +151,8 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     GoProWrapper goProWrapper;
+
+    private GPSTracker gps;
 
     public static boolean searchReload;
     public static String searchRange;
@@ -235,6 +241,8 @@ public class CollectActivity extends ThemedActivity
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        gps = new GPSTracker(this, this, 0, 10000);
 
         guiThread.start();
         myGuiHandler = new Handler(guiThread.getLooper()) {
@@ -2148,5 +2156,30 @@ public class CollectActivity extends ThemedActivity
                 e.printStackTrace();
             }
         }
+    }
+
+    @NonNull
+    @Override
+    public GPSTracker getGps() {
+        return gps;
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+
+        if (getCurrentTrait().getFormat().equals("gnss")) {
+
+            ((GNSSTraitLayout) traitLayouts.getTraitLayout("gnss"))
+                    .onLocationChanged(location);
+
+        }
+    }
+
+    @Override
+    public Location getLocation() {
+
+        if (gps == null) return null;
+
+        return gps.getLastLocation();
     }
 }

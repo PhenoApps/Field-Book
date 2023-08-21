@@ -1,7 +1,9 @@
 package com.fieldbook.tracker.interfaces
 
 import android.content.Context
+import android.location.Location
 import android.os.Handler
+import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.utilities.GeoNavHelper
 import com.fieldbook.tracker.utilities.GnssThreadHelper
 import com.fieldbook.tracker.utilities.SoundHelperImpl
@@ -13,6 +15,8 @@ import org.phenoapps.security.SecureBluetoothActivityImpl
 
 interface CollectController: FieldController {
     fun getContext(): Context
+    fun getGps(): GPSTracker
+    fun getLocation(): Location?
     fun getRangeBox(): RangeBoxView
     fun getTraitBox(): TraitBoxView
     fun getInputView(): CollectInputView
