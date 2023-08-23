@@ -57,7 +57,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     private  ImageView label;
     private ImageButton printLabel;
 
-    private BluetoothUtil mBluetoothUtil = new BluetoothUtil();
+    private BluetoothUtil mBluetoothUtil;
 
     private Activity mActivity = null;
 
@@ -162,8 +162,8 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mPrinterMessageReceiver,
                 new IntentFilter("printer_message"));
-        Log.d("LabelPrintTraitLayout", "initializing bluetooth util");
-//        mBluetoothUtil = new BluetoothUtil();
+
+        mBluetoothUtil = new BluetoothUtil();
 
         String[] prefixTraits = getDatabase().getRangeColumnNames();
         optionsList = new ArrayList<>(Arrays.asList(prefixTraits));
@@ -413,7 +413,9 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                          * This bluetooth utility class is used to connect with a paired printer and send print commands.
                          * A local broadcast receiver is used to communicate with the print thread within this utility class.
                          */
-                        mBluetoothUtil.print(getContext(), size, labels);
+                        String printerName = getPrefs().getString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, null);
+                        Log.d("LabelPrintTraitLayout", "printerName is $printerName");
+                        mBluetoothUtil.print(getContext(), printerName, size, labels);
                     }
                 }
             } else {
