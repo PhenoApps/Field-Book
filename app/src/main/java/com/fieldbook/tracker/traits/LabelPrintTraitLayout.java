@@ -57,7 +57,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     private  ImageView label;
     private ImageButton printLabel;
 
-    private BluetoothUtil mBluetoothUtil;
+    private BluetoothUtil mBluetoothUtil = new BluetoothUtil();
 
     private Activity mActivity = null;
 
@@ -162,8 +162,8 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mPrinterMessageReceiver,
                 new IntentFilter("printer_message"));
-
-        mBluetoothUtil = new BluetoothUtil();
+        Log.d("LabelPrintTraitLayout", "initializing bluetooth util");
+//        mBluetoothUtil = new BluetoothUtil();
 
         String[] prefixTraits = getDatabase().getRangeColumnNames();
         optionsList = new ArrayList<>(Arrays.asList(prefixTraits));

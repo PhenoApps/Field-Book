@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 
@@ -21,7 +22,11 @@ class BluetoothUtil {
     //operation that uses the provided context to prompt the user for a paired bluetooth device
     private fun choose(ctx: Context, f: () -> Unit) {
 
+        Log.d("BluetoothUtil", "Selected Bluetooth Device: $mBtName")
+
         if (mBtName.isBlank()) {
+
+            Log.d("BluetoothUtil", "Selected Bluetooth Device was blank")
 
             mBluetoothAdapter?.let {
 
