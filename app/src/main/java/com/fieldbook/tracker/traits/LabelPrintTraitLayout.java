@@ -25,6 +25,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.BluetoothChooseCallback;
 import com.fieldbook.tracker.utilities.BluetoothUtil;
 import com.fieldbook.tracker.utilities.Constants;
 
@@ -414,8 +415,19 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                          * A local broadcast receiver is used to communicate with the print thread within this utility class.
                          */
                         String printerName = getPrefs().getString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, null);
-                        Log.d("LabelPrintTraitLayout", "printerName is $printerName");
-                        mBluetoothUtil.print(getContext(), printerName, size, labels);
+                        Log.d("LabelPrintTraitLayout", "retrieved printerName is " + printerName);
+                        if (printerName == null) {
+                            mBluetoothUtil.choose(getContext(), new BluetoothChooseCallback() {
+                                @Override
+                                public void onDeviceChosen(String newDeviceName) {
+                                    Log.d("LabelPrintTraitLayout", "Chosen printerName is " + newDeviceName);
+                                    saveDeviceNamePreference(newDeviceName);
+                                    mBluetoothUtil.print(getContext(), newDeviceName, size, labels);
+                                }
+                            });
+                        } else {
+                            mBluetoothUtil.print(getContext(), printerName, size, labels);
+                        }
                     }
                 }
             } else {
@@ -424,6 +436,12 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
             }
         });
+    }
+
+    private void saveDeviceNamePreference(String newDeviceName) {
+        SharedPreferences.Editor editor = getPrefs().edit();
+        editor.putString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, newDeviceName);
+        editor.apply();
     }
 
     @Override
