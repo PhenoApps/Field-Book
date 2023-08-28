@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.interfaces
 
+import android.content.Context
 import android.os.Handler
 import com.fieldbook.tracker.objects.GeoNavHelper
 import com.fieldbook.tracker.utilities.GnssThreadHelper
@@ -25,4 +26,7 @@ interface CollectController: FieldController {
                      plotId: String?,
                      data: String?,
                      traitIndex: Int): Boolean
+    fun queryForLabelValue(
+        plotId: String, label: String, isAttribute: Boolean?
+    ) : String
 }

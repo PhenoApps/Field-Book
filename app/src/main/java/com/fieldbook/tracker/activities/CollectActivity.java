@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -93,6 +94,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -2093,6 +2095,56 @@ public class CollectActivity extends ThemedActivity
     @Override
     public SecureBluetooth advisor() {
         return secureBluetooth;
+    }
+
+    @Override
+    public String queryForLabelValue(
+            String plotId, String label, Boolean isAttribute
+    ) {
+        Context context = this;
+
+        String dataMissingString = context.getString(R.string.main_infobar_data_missing);
+
+        if (isAttribute) {
+
+            String[] values = database.getDropDownRange(label, plotId);
+            if (values == null || values.length == 0) {
+                return dataMissingString;
+            } else {
+                return values[0];
+            }
+
+        } else {
+
+            String value = database.getUserDetail(plotId).get(label);
+            if (value == null) {
+                value = dataMissingString;
+            }
+
+            try {
+
+                String labelValPref = ((CollectActivity) context).getPreferences()
+                        .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value");
+                if (labelValPref == null) {
+                    labelValPref = "value";
+                }
+
+                StringJoiner joiner = new StringJoiner(":");
+                ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
+                for (BrAPIScaleValidValuesCategories s : scale) {
+                    if ("label".equals(labelValPref)) {
+                        joiner.add(s.getLabel());
+                    } else {
+                        joiner.add(s.getValue());
+                    }
+                }
+
+                return joiner.toString();
+
+            } catch (Exception ignore) {
+                return value;
+            }
+        }
     }
 
 }

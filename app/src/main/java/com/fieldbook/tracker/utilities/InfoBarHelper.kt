@@ -2,8 +2,10 @@ package com.fieldbook.tracker.utilities
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.provider.ContactsContract.Data
 import android.util.Log
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.CollectAttributeChooserDialog
 import com.fieldbook.tracker.objects.InfoBarModel
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -15,7 +17,7 @@ import javax.inject.Inject
  * Helper class for handling all infobar data and logic.
  * Used in collect activity.
  */
-class InfoBarHelper @Inject constructor(@ActivityContext private val context: Context) : LabelValue() {
+class InfoBarHelper @Inject constructor(@ActivityContext private val context: Context)  {
 
     companion object {
         const val TAG = "InfoBarHelper"
@@ -44,13 +46,15 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
         //iterate and build teh arraylist
         for (i in 0 until numInfoBars) {
 
+            var database : DataHelper = (context as CollectActivity).getDatabase();
+
             //ensure that the initialLabel is actually a plot attribute
 
             //get all plot attribute names for the study
-            val attributes: List<String> = ArrayList(Arrays.asList(*super.database.rangeColumnNames))
+            val attributes: List<String> = ArrayList(Arrays.asList(*database.rangeColumnNames))
 
             //get all traits for this study
-            val traits = super.database.allTraitObjects
+            val traits = database.allTraitObjects
 
             //create a new array with just trait names
             val traitNames = ArrayList<String>()
@@ -87,7 +91,7 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
             //query the database for the label's value
             (context as? CollectActivity)?.getRangeBox()?.getPlotID()?.let { plot ->
 
-                val value = super.queryForLabelValue(context, plot, initialLabel, isAttribute, "InfoBarActiv")
+                val value = (context as CollectActivity).queryForLabelValue(plot, initialLabel, isAttribute)
 
                 infoBarModels.add(InfoBarModel(initialLabel, value))
             }

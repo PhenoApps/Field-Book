@@ -16,6 +16,7 @@ import android.location.Location
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
+import android.provider.ContactsContract.Data
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
@@ -34,13 +35,11 @@ import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.NmeaParser
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.impactZoneSearch
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.lowPassFilter
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.writeGeoNavLog
 import com.fieldbook.tracker.utilities.InfoBarHelper
-import com.fieldbook.tracker.utilities.LabelValue
 import com.fieldbook.tracker.utilities.Utils
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.SnackbarLayout
@@ -49,13 +48,12 @@ import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getDirectory
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.util.Arrays
-import java.util.StringJoiner
 import javax.inject.Inject
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 class GeoNavHelper @Inject constructor(@ActivityContext private val context: Context, private val infoBarHelper: InfoBarHelper):
-    SensorEventListener, GPSTracker.GPSTrackerListener, LabelValue() {
+SensorEventListener, GPSTracker.GPSTrackerListener{
 
     /**
      * GeoNav sensors and variables
@@ -410,12 +408,14 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                                     val tv =
                                         snackView.findViewById<TextView>(R.id.geonav_snackbar_tv)
 
+                                    // get the first info-bar field displayed on the screen
                                     val models: List<InfoBarModel>? =
-                                        infoBarHelper!!.getInfoBarData()
-                                    Log.d(CollectActivity.TAG, "runImpactZoneAlgorithm: ${models!![0].prefix}")
-                                    val firstInfoBar = models!![0].prefix
+                                        infoBarHelper?.getInfoBarData()
 
-                                    tv.text = getInfoBarData(id, firstInfoBar)
+                                    val firstInfoBar = models?.get(0)?.prefix
+
+                                    // fallback for firstInfoBar will be plot_id
+                                    tv.text = firstInfoBar + ": " + getInfoBarData(id, "${firstInfoBar?: "plot_id"}")
 
 //                                    if (tv != null) {
 //                                        tv.text = id
@@ -440,18 +440,19 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         }
     }
 
-    fun getInfoBarData(id: String, firstInfoBar: String): String {
+    private fun getInfoBarData(id: String, firstInfoBar: String): String {
+
+        var database : DataHelper = (context as CollectActivity).getDatabase()
+
         //ensure that the initialLabel is actually a plot attribute
 
         //get all plot attribute names for the study
-        val attributes: List<String> = ArrayList(Arrays.asList(*super.database?.rangeColumnNames))
+        val attributes: List<String> = ArrayList(Arrays.asList(*database.rangeColumnNames))
 
         //check if the label is an attribute or a trait
         val isAttribute = attributes.contains(firstInfoBar)
 
-        Log.d(CollectActivity.TAG, "getInfoBarData: $firstInfoBar $isAttribute")
-
-        return super.queryForLabelValue(context, id, firstInfoBar, isAttribute, "Geonav")
+        return (context as CollectActivity).queryForLabelValue(id, firstInfoBar, isAttribute)
     }
 
     /**
