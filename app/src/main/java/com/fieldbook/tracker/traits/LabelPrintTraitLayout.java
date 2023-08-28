@@ -133,12 +133,14 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     private final BroadcastReceiver mPrinterMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
         if (intent != null && intent.getExtras() != null) {
 
             String message = intent.getExtras().getString("message");
             String size = intent.getExtras().getString("size");
 
             if (message != null) {
+
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
             }
@@ -441,7 +443,6 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
         editor.putString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, newDeviceName);
         editor.apply();
     }
-
 
     @Override
     public void deleteTraitListener() {
