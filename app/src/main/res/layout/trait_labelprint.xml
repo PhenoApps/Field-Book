@@ -25,18 +25,47 @@
             android:scaleType="centerInside"
             android:contentDescription="@string/trait_labelprint_preview_description" />
 
-        <ImageButton
-            android:id="@+id/printLabelButton"
-            android:layout_width="65dp"
-            android:layout_height="65dp"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:background="@drawable/custom_round_button"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:gravity="center"
-            android:padding="10dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_trait_labelprint"
-            android:contentDescription="@string/trait_labelprint_print_button_description" />
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/printLabelButton"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/custom_round_button"
+                android:gravity="center"
+                android:padding="10dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_trait_labelprint"
+                android:contentDescription="@string/trait_labelprint_print_button_description" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/printerNameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Printer Name" />
+
+                <ImageButton
+                    android:id="@+id/editPrinterButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/pencil"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="Edit Printer"
+                    android:maxHeight="?android:attr/textSize"
+                    android:maxWidth="?android:attr/textSize" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
