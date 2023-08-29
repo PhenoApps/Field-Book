@@ -257,7 +257,8 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
             if (root != null && root.exists()) {
 
-                String path = BaseDocumentTreeUtil.Companion.getStem(root.getUri(), context);
+                // Get the full path from the URI
+                String path = root.getUri().getPath();
 
                 defaultStorageLocation.setSummary(path);
 
