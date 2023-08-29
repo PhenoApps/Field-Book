@@ -14,7 +14,7 @@
         android:entries="@array/pref_remap_volume_buttons"
         android:entryValues="@array/pref_remap_volume_buttons_values"
         android:icon="@drawable/ic_remap_volume_buttons"
-        android:key="VOLUME_NAVIGATION"
+        android:key="com.fieldbook.tracker.VOLUME_NAVIGATION"
         android:summary="@string/preferences_behavior_volume_buttons_navigate_description"
         android:title="@string/preferences_behavior_volume_buttons_navigate" />
 
