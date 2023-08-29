@@ -1582,9 +1582,15 @@ public class CollectActivity extends ThemedActivity
     public boolean dispatchKeyEvent(KeyEvent event) {
         int action = event.getAction();
         int keyCode = event.getKeyCode();
+        String volumeNavigation = ep.getString(GeneralKeys.VOLUME_NAVIGATION, "0");
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
-                if (ep.getBoolean(GeneralKeys.VOLUME_NAVIGATION, false)) {
+                if (volumeNavigation.equals("1")) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        traitBox.moveTrait("right");
+                    }
+                    return true;
+                } else if (volumeNavigation.equals("2")) {
                     if (action == KeyEvent.ACTION_UP) {
                         rangeBox.moveEntryRight();
                     }
@@ -1592,7 +1598,12 @@ public class CollectActivity extends ThemedActivity
                 }
                 return false;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-                if (ep.getBoolean(GeneralKeys.VOLUME_NAVIGATION, false)) {
+                if (volumeNavigation.equals("1")) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        traitBox.moveTrait("left");
+                    }
+                    return true;
+                } else if (volumeNavigation.equals("2")) {
                     if (action == KeyEvent.ACTION_UP) {
                         rangeBox.moveEntryLeft();
                     }
