@@ -676,14 +676,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                 id: Long
             ) {
 
-                val newPrecision = precisionSp.selectedItem.toString()
-
-                if (newPrecision != precision) {
-
-                    clearUi()
-
-                }
-
                 precision = precisionSp.selectedItem.toString()
 
                 controller.getPreferences().edit().putString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, precision).apply()
@@ -843,6 +835,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                 controller.getSoundHelper().playError()
                 controller.getVibrator().vibrate(1000L)
                 collectButton.isEnabled = false
+                update()
             }
 
         } else {

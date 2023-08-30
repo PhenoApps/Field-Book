@@ -823,4 +823,5 @@
     <string name="trait_usb_camera_zoom_in_content_description">Zoom in</string>
     <string name="trait_usb_camera_zoom_in_button_text">Zoom in</string>
     <string name="trait_usb_camera_zoom_out_button_text">Zoom out</string>
+    <string name="dialog_geonav_collect_neutral_reconnect">Reconnect</string>
 </resources>

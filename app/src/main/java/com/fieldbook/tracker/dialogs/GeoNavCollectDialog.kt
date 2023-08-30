@@ -1,10 +1,7 @@
 package com.fieldbook.tracker.dialogs
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
-import android.widget.Button
 import android.widget.CheckBox
 import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
@@ -41,7 +38,6 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
     private var autoNavigateCb: CheckBox? = null
     private var audioOnDropCb: CheckBox? = null
     private var degreeOfPrecisionSp: Spinner? = null
-    private var reconnectButton: Button? = null
 
     private val view by lazy {
         LayoutInflater.from(context).inflate(R.layout.dialog_geonav_collect, null, false)
@@ -58,9 +54,16 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
         autoNavigateCb = view.findViewById(R.id.dialog_geonav_collect_auto_navigate)
         audioOnDropCb = view.findViewById(R.id.dialog_geonav_collect_notify_on_precision_loss)
         degreeOfPrecisionSp = view.findViewById(R.id.dialog_geonav_collect_precision_threshold)
-        reconnectButton = view.findViewById(R.id.dialog_geonav_collect_reconnect)
 
         loadPreferencesIntoUi()
+
+        setNeutralButton(context.getString(R.string.dialog_geonav_collect_neutral_reconnect)) { dialog, which ->
+            Utils.makeToast(context, context.getString(R.string.dialog_geonav_collect_reset_start_toast_message))
+            activity.getGeoNavHelper().stopGeoNav()
+            activity.getGeoNavHelper().startGeoNav()
+            Utils.makeToast(context, context.getString(R.string.dialog_geonav_collect_reset_end_toast_message))
+            dialog.dismiss()
+        }
 
         setNegativeButton(android.R.string.cancel) { dialog, which ->
             dialog.dismiss()
@@ -69,18 +72,6 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
         setPositiveButton(android.R.string.ok) { dialog, which ->
             saveUiToPreferences()
             dialog.dismiss()
-        }
-
-        reconnectButton?.setOnClickListener {
-            reconnectButton?.isEnabled = false
-            Utils.makeToast(context, context.getString(R.string.dialog_geonav_collect_reset_start_toast_message))
-            activity.getGeoNavHelper().stopGeoNav()
-            activity.getGeoNavHelper().startGeoNav()
-            Utils.makeToast(context, context.getString(R.string.dialog_geonav_collect_reset_end_toast_message))
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                reconnectButton?.isEnabled = true
-            }, 5000)
         }
 
         return super.setView(view)

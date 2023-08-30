@@ -57,10 +57,4 @@
             android:entries="@array/dialog_geonav_collect_degrees_of_precision"/>
     </LinearLayout>
 
-    <Button android:id="@+id/dialog_geonav_collect_reconnect"
-        android:layout_margin="8dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_geonav_collect_reconnect"/>
-
 </LinearLayout>
