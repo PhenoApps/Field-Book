@@ -41,6 +41,17 @@
                 precisionHeader, precisionSpinner"
             tools:visibility="visible" />
 
+        <ProgressBar
+            android:visibility="invisible"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/trait_gnss_pb"
+            android:indeterminate="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/gnss_collect_button"/>
+
         <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/utcHeader"
             android:layout_width="0dp"

@@ -2167,11 +2167,16 @@ public class CollectActivity extends ThemedActivity
     @Override
     public void onLocationChanged(@NonNull Location location) {
 
-        if (getCurrentTrait().getFormat().equals("gnss")) {
+        TraitObject trait = getCurrentTrait();
 
-            ((GNSSTraitLayout) traitLayouts.getTraitLayout("gnss"))
-                    .onLocationChanged(location);
+        if (trait != null) {
 
+            if (trait.getFormat().equals("gnss")) {
+
+                ((GNSSTraitLayout) traitLayouts.getTraitLayout("gnss"))
+                        .onLocationChanged(location);
+
+            }
         }
     }
 
@@ -2180,6 +2185,6 @@ public class CollectActivity extends ThemedActivity
 
         if (gps == null) return null;
 
-        return gps.getLastLocation();
+        return gps.getLocation(0, 0);
     }
 }

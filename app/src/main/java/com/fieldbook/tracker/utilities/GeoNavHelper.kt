@@ -427,10 +427,11 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                 if (first != null) {
                     val id = first.observation_unit_db_id
                     with ((controller.getContext() as CollectActivity)) {
-                        if (id != getRangeBox().cRange.plot_id) { // remove this for now && id != lastPlotIdNav) {
+                        if (id != getRangeBox().cRange.plot_id && id != lastPlotIdNav) {
                             lastPlotIdNav = id
                             runOnUiThread {
                                 if (ep.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
+                                    lastPlotIdNav = null
                                     moveToSearch("id", getRangeBox().getRangeID(), null, null, id, -1)
                                     Toast.makeText(
                                         this,

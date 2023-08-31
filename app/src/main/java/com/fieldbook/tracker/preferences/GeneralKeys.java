@@ -101,6 +101,10 @@ public class GeneralKeys {
 
     public static final String GNSS_LAST_CHOSEN_PRECISION        = "GNSS_LAST_CHOSEN_PRECISION";
 
+    public static final String GNSS_WARNED_PRECISION             = "GNSS_WARNED_PRECISION";
+
+    public static final String GNSS_PRECISION_OK_SOUND           = "GNSS_PRECISION_OK_SOUND";
+
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
 

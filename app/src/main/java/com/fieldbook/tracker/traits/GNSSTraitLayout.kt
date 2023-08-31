@@ -15,12 +15,14 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.Group
+import androidx.core.view.isVisible
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
@@ -56,7 +58,7 @@ import kotlin.math.sqrt
 class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     companion object {
-        const val CONNECTION_STATUS_INTERVAL = 3000L
+        const val CONNECTION_STATUS_INTERVAL = 5000L
     }
 
     private var mActivity: Activity? = null
@@ -72,6 +74,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private var currentFixQuality = false
 
+    //flag to track when collect button is disabled
+    private var isCollectEnabled = false
+
     private lateinit var chipGroup: ChipGroup
     private lateinit var averageSwitch: SwitchCompat
     private lateinit var utcTextView: TextView
@@ -86,6 +91,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     private lateinit var connectButton: ImageButton
     private lateinit var collectButton: ImageButton
     private lateinit var disconnectButton: ImageButton
+    private lateinit var progressBar: ProgressBar
 
     private var lastUtc = String()
     private var currentUtc = String()
@@ -155,6 +161,33 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         return R.layout.trait_gnss
     }
 
+    private val receiver = object : GNSSResponseReceiver() {
+        override fun onGNSSParsed(parser: NmeaParser) {
+
+            currentUtc = parser.utc
+
+            checkBeforeUpdate(parser.getSimpleFix()) {
+
+                //populate ui
+                accTextView.text = parser.fix
+                latTextView.text = truncateFixQuality(parser.latitude)
+                lngTextView.text = truncateFixQuality(parser.longitude)
+                utcTextView.text = parser.utc
+                hdopTextView.text = parser.hdop
+
+                if (parser.satellites.isEmpty()) {
+                    satTextView.text = "${parser.gsv.size}"
+                } else {
+                    val maxSats = maxOf(parser.satellites.toInt(), parser.gsv.size)
+                    satTextView.text = "${parser.gsv.size}/$maxSats"
+                }
+                altTextView.text = truncateFixQuality(parser.altitude)
+
+                resolveUiStatus()
+            }
+        }
+    }
+
     private fun initialize() {
 
         mProgressDialog = AlertDialog.Builder(context)
@@ -174,37 +207,12 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
          * The parser parameter is a model for the parsed message, and is used to populate the
          * trait layout UI.
          */
-        mLocalBroadcastManager.registerReceiver(
-            object : GNSSResponseReceiver() {
-                override fun onGNSSParsed(parser: NmeaParser) {
+        mLocalBroadcastManager.registerReceiver(receiver, filter)
 
-                    currentUtc = parser.utc
-
-                    checkBeforeUpdate(parser.getSimpleFix()) {
-
-                        //populate ui
-                        accTextView.text = parser.fix
-                        latTextView.text = truncateFixQuality(parser.latitude)
-                        lngTextView.text = truncateFixQuality(parser.longitude)
-                        utcTextView.text = parser.utc
-                        hdopTextView.text = parser.hdop
-
-                        if (parser.satellites.isEmpty()) {
-                            satTextView.text = "${parser.gsv.size}"
-                        } else {
-                            val maxSats = maxOf(parser.satellites.toInt(), parser.gsv.size)
-                            satTextView.text = "${parser.gsv.size}/$maxSats"
-                        }
-                        altTextView.text = truncateFixQuality(parser.altitude)
-                    }
-                }
-            },
-            filter
-        )
+        precision = prefs.getString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, "Any") ?: "Any"
 
         setupChooseBluetoothDevice()
 
-        precision = controller.getPreferences().getString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, "Any") ?: "Any"
     }
 
     /**
@@ -254,6 +262,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         collectButton = act.findViewById(R.id.gnss_collect_button)
         disconnectButton = act.findViewById(R.id.disconnect_button)
         precisionSp = act.findViewById(R.id.precisionSpinner)
+        progressBar = act.findViewById(R.id.trait_gnss_pb)
 
         connectButton.requestFocus()
 
@@ -528,8 +537,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
      **/
     private fun findPairedDevice() {
 
-        clearUi()
-
         //check if the device has bluetooth enabled, if not, request it to be enabled via system action
         controller.getSecurityChecker().withAdapter { adapter ->
 
@@ -583,7 +590,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             if (chosenDevice == null) {
 
                 controller.getLocation()?.let { loc ->
+
                     onLocationChanged(loc)
+
                 }
 
                 triggerTts(internal)
@@ -606,8 +615,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
      */
     private fun setupCommunicationsUi(value: BluetoothDevice? = null) {
 
-        //BluetoothAdapter.getDefaultAdapter().cancelDiscovery()
-
         if (value != null) {
             mLastDevice = value
             if (!getThreadHelper().isAlive) getThreadHelper().start(value, mHandler)
@@ -620,26 +627,38 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         collectButton.setOnClickListener {
 
-            val latitude = latTextView.text.toString()
-            val longitude = lngTextView.text.toString()
-            val elevation = altTextView.text.toString()
-            val precision = accTextView.text.toString()
+            if (!isCollectEnabled) {
 
-            val isFloat = try {
-                precision.toDouble()
-                true
-            } catch (e: NumberFormatException) {
-                false
+                soundWarning()
+
+            } else {
+
+                val latitude = latTextView.text.toString()
+                val longitude = lngTextView.text.toString()
+                val elevation = altTextView.text.toString()
+                val precision = accTextView.text.toString()
+
+                val isFloat = try {
+                    precision.toDouble()
+                    true
+                } catch (e: NumberFormatException) {
+                    false
+                }
+
+                submitGnss(latitude, longitude, elevation, if (isFloat) "GPS" else precision)
+
+                triggerTts(context.getString(R.string.trait_location_saved_tts))
+
             }
-
-            submitGnss(latitude, longitude, elevation, if (isFloat) "GPS" else precision)
-
-            triggerTts(context.getString(R.string.trait_location_saved_tts))
-
         }
 
         //cancel the thread when the disconnect button is pressed
         disconnectButton.setOnClickListener {
+
+            clearUi()
+
+            collectButton.visibility = View.INVISIBLE
+            progressBar.visibility = View.INVISIBLE
             connectButton.visibility = View.VISIBLE
             connectGroup.visibility = View.GONE
 
@@ -654,8 +673,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
             setupChooseBluetoothDevice()
 
-            clearUi()
-
         }
 
         precisionSp.setSelection(
@@ -667,31 +684,77 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             }
         )
 
-        precisionSp.onItemSelectedListener = object : OnItemSelectedListener {
+        Handler(Looper.getMainLooper()).postDelayed({
 
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
+            precisionSp.onItemSelectedListener = object : OnItemSelectedListener {
 
-                precision = precisionSp.selectedItem.toString()
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
 
-                controller.getPreferences().edit().putString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, precision).apply()
+                    val newPrecision = precisionSp.selectedItem.toString()
+
+                    if (!NmeaParser().compareFix(precision ?: "Any", newPrecision)) {
+
+                        if (newPrecision in setOf("GPS", "Any")) {
+
+                            soundOk()
+
+                            isCollectEnabled = true
+
+                            prefs.edit().remove(GeneralKeys.GNSS_WARNED_PRECISION).apply()
+
+                        } else {
+
+                            showWarning()
+
+                            isCollectEnabled = false
+
+                            prefs.edit().remove(GeneralKeys.GNSS_PRECISION_OK_SOUND).apply()
+
+                        }
+
+                    } else {
+
+                        soundOk()
+
+                        isCollectEnabled = true
+
+                        prefs.edit().remove(GeneralKeys.GNSS_WARNED_PRECISION).apply()
+
+                    }
+
+                    precision = newPrecision
+
+                    prefs.edit().putString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, precision).apply()
+
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
 
             }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-
-        }
+        }, 1000)
 
         setupAveragingUi()
 
-        if (value != null) {
+        connectionCheckHandler()
 
-            connectionCheckHandler()
+    }
 
+    private fun resolveUiStatus() {
+        if (!connectButton.isVisible) {
+            if (utcTextView.text.toString().isBlank()) {
+                connectGroup.visibility = View.INVISIBLE
+                progressBar.visibility = View.VISIBLE
+                disconnectButton.visibility = View.VISIBLE
+                collectButton.visibility = View.VISIBLE
+            } else {
+                connectGroup.visibility = View.VISIBLE
+                progressBar.visibility = View.INVISIBLE
+            }
         }
     }
 
@@ -701,12 +764,16 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         if (deviceName != context.getString(R.string.pref_behavior_geonav_internal_gps_choice)) {
 
-            if (currentUtc == lastUtc) {
+            if (currentUtc.isNotBlank() && (currentUtc == lastUtc)) {
+
                 clearUi()
+
             }
         }
 
         lastUtc = currentUtc
+
+        resolveUiStatus()
 
         Handler(Looper.getMainLooper()).postDelayed({
             connectionCheckHandler()
@@ -795,6 +862,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         if (deviceName == context.getString(R.string.pref_behavior_geonav_internal_gps_choice)) {
 
+            //this will force collect navigation to keep GPS data on screen,
+            //otherwise the data is only updated when the fix quality is good
             checkBeforeUpdate("GPS") {
 
                 currentUtc = UUID.randomUUID().toString()
@@ -805,43 +874,67 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
                 accTextView.text = location.accuracy.toString()
                 utcTextView.text = location.time.toString()
+
+                resolveUiStatus()
             }
+        }
+    }
+
+    private fun soundOk() {
+
+        val soundOkFlag = prefs.getBoolean(GeneralKeys.GNSS_PRECISION_OK_SOUND, false)
+
+        if (!soundOkFlag) {
+
+            controller.getSoundHelper().playCelebrate()
+            controller.getVibrator().vibrate(1000L)
+
+            prefs.edit().putBoolean(GeneralKeys.GNSS_PRECISION_OK_SOUND, true).apply()
+        }
+
+    }
+
+    private fun soundWarning() {
+        controller.getSoundHelper().playError()
+        controller.getVibrator().vibrate(1000L)
+    }
+
+    private fun showWarning() {
+
+        val soundWarningFlag = prefs.getBoolean(GeneralKeys.GNSS_WARNED_PRECISION, false)
+
+        if (!soundWarningFlag) {
+
+            (controller.getContext() as? CollectActivity)?.showLocationPrecisionLossDialog()
+
+            soundWarning()
+
+            prefs.edit().putBoolean(GeneralKeys.GNSS_WARNED_PRECISION, true).apply()
         }
     }
 
     private fun checkBeforeUpdate(fix: String, update: () -> Unit) {
 
-        val precisionThresh = controller.getPreferences().getString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, "Any") ?: "Any"
+        val precisionThresh = prefs.getString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, "Any") ?: "Any"
 
-        if (precisionThresh != "Any") {
-
-            val isQuality = NmeaParser().compareFix(fix, precisionThresh)
-            if (isQuality && !currentFixQuality) {
-                //quality fix is found, play something good
-                update()
-                collectButton.isEnabled = true
-                controller.getSoundHelper().playCelebrate()
-                controller.getVibrator().vibrate(1000L)
-                currentFixQuality = true
-            } else if (isQuality && currentFixQuality) {
-                //quality is still good
-                update()
-                collectButton.isEnabled = true
-            } else if (!isQuality && currentFixQuality) {
-                //quality is bad, play something bad
-                //reset last plotId if quality drops
-                currentFixQuality = false
-                (controller.getContext() as? CollectActivity)?.showLocationPrecisionLossDialog()
-                controller.getSoundHelper().playError()
-                controller.getVibrator().vibrate(1000L)
-                collectButton.isEnabled = false
-                update()
-            }
-
-        } else {
-            update()
+        val isQuality = NmeaParser().compareFix(fix, precisionThresh)
+        if (isQuality && !currentFixQuality) {
+            //quality fix is found, play something good
+            isCollectEnabled = true
+            soundOk()
             currentFixQuality = true
-            collectButton.isEnabled = true
+        } else if (isQuality) {
+            //quality is still good
+            isCollectEnabled = true
+        } else  {
+            //quality is bad, play something bad
+            //reset last plotId if quality drops
+            currentFixQuality = false
+            showWarning()
+            isCollectEnabled = false
+
         }
+
+        update()
     }
 }
