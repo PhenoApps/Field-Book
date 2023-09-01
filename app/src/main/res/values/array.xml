@@ -145,4 +145,13 @@
         <item>2</item>
         <item>3</item>
     </string-array>
+
+
+    <!-- degrees of precision to be used in spinner -->
+    <string-array name="dialog_geonav_collect_degrees_of_precision">
+        <item>Any</item>
+        <item>GPS</item>
+        <item>RTK</item>
+        <item>Float RTK</item>
+    </string-array>
 </resources>
