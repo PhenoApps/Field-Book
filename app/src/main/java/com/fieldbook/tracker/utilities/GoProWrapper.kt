@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.objects
+package com.fieldbook.tracker.utilities
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -29,8 +29,12 @@ class GoProWrapper @Inject constructor(
     }
 
     fun destroy() {
-        helper?.onDestroy()
-        gatt.clear()
+        try {
+            helper?.onDestroy()
+            gatt.clear()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onApRequested() {

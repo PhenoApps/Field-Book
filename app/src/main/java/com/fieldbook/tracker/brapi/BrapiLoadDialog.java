@@ -203,6 +203,12 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                     @Override
                     public void run() {
                         BrapiStudyDetails.merge(studyDetails, study);
+
+                        // This is BMS specific. Remove the traits that are not part of the selected Observation Level.
+                        // To ensure that only relevant traits are included in the imported study/field.
+                        studyDetails.getTraits().removeIf(t -> t.getObservationLevelNames() != null &&
+                                t.getObservationLevelNames().stream().noneMatch(s -> s.equalsIgnoreCase(selectedObservationLevel.getObservationLevelName())));
+
                         loadStudy();
                         // Check if user should save yet
                         traitLoadStatus = true;
