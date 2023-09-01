@@ -865,10 +865,10 @@ public class ConfigActivity extends ThemedActivity {
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_TRAIT_DATA)
     public void collectDataFilePermission() {
-        String[] perms = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+        String[] perms = {Manifest.permission.VIBRATE, Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            perms = new String[] {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
+            perms = new String[] {Manifest.permission.VIBRATE, Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
         }
 
         if (EasyPermissions.hasPermissions(this, perms)) {

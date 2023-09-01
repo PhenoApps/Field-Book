@@ -221,6 +221,14 @@ public class DataHelper {
 //                String.valueOf(val), trait});
     }
 
+    public void updateObservationUnit(ObservationUnitModel model, String geoCoordinates) {
+
+        open();
+
+        ObservationUnitDao.Companion.updateObservationUnit(model, geoCoordinates);
+
+    }
+
     public ObservationUnitModel[] getAllObservationUnits() {
 
         open();
