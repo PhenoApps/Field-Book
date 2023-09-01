@@ -6,6 +6,9 @@
         versionName="v5.5">
         <new>New GoPro Trait (Hero 11)</new>
         <new>New InfoBar prefix selector</new>
+        <new>Search selections persist</new>
+        <new>Added Vietnamese and Swedish translations</new>
+        <info>Merged barcode and text unique ID search setting</info>
     </release>
 
     <release

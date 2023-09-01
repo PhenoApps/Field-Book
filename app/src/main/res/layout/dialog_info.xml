@@ -24,7 +24,7 @@
         android:gravity="center"
         android:paddingHorizontal="20dp"
         android:paddingVertical="10dp"
-        android:text="@string/brapi_dialog_info_example_text"/>
+        android:text=""/>
 
     <Button
         android:id="@+id/closeBtn"

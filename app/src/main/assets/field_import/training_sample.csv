@@ -1,4 +1,4 @@
-plot_id,row,column,plot,replicate,germplasm_name,pedigree
+plot_id,row,column,plot,replicate,germplasm,pedigree
 23TRN010_0101,1,1,0101,1,Barrie,"BW429, CPSR1//CNR17/3/NI98133/SALWIN"
 23TRN010_0102,1,2,0102,1,Oahe,Ransom/SD96240-3-1
 23TRN010_0103,1,3,0103,1,Jet,MS Chancellor/SD004072

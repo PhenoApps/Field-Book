@@ -304,8 +304,8 @@ public class FieldEditorActivity extends ThemedActivity
         return TapTargetUtil.Companion.getTapTargetSettingsRect(this, item, title, desc);
     }
 
-    private TapTarget fieldsTapTargetMenu(int id, String title, String desc) {
-        return TapTargetUtil.Companion.getTapTargetSettingsView(this, findViewById(id), title, desc);
+    private TapTarget fieldsTapTargetMenu(int id, String title, String desc, int targetRadius) {
+        return TapTargetUtil.Companion.getTapTargetSettingsView(this, findViewById(id), title, desc, targetRadius);
     }
 
     //TODO
@@ -319,8 +319,8 @@ public class FieldEditorActivity extends ThemedActivity
         switch (item.getItemId()) {
             case R.id.help:
                 TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description)),
-                                fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description))
+                        .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
+                                fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
                         );
 
                 if (fieldExists()) {

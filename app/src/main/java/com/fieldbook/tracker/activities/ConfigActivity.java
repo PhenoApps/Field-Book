@@ -335,7 +335,7 @@ public class ConfigActivity extends ThemedActivity {
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
             new IntentIntegrator(this)
-                    .setPrompt(getString(R.string.main_barcode_text))
+                    .setPrompt(getString(R.string.barcode_scanner_text))
                     .setBeepEnabled(false)
                     .setRequestCode(REQUEST_BARCODE)
                     .initiateScan();
