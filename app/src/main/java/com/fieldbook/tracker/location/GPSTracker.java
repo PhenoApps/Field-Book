@@ -112,6 +112,10 @@ public class GPSTracker extends Service implements LocationListener {
         return location;
     }
 
+    public Location getLastLocation() {
+        return location;
+    }
+
     public Location getLocation() {
         return getLastLocation(MIN_DISTANCE_CHANGE_FOR_UPDATES, MIN_TIME_BW_UPDATES);
     }

@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothSocket
 import android.os.Handler
 import android.util.Log
 import java.io.IOException
-import java.util.*
+import java.util.UUID
 
 class ConnectThread(device: BluetoothDevice, private val handler: Handler) : Thread() {
 
@@ -70,8 +70,6 @@ class ConnectThread(device: BluetoothDevice, private val handler: Handler) : Thr
         mConnectedThread?.cancel()
 
         mmSocket?.close()
-
-        this.handler.removeCallbacksAndMessages(null)
 
     } catch (e: IOException) {
 
