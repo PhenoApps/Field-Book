@@ -45,6 +45,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
+import com.fieldbook.tracker.objects.FieldAudioObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.GeoNavHelper;
 import com.fieldbook.tracker.objects.InfoBarModel;
@@ -119,6 +120,9 @@ public class CollectActivity extends ThemedActivity
     public static final int BARCODE_SEARCH_CODE = 98;
 
     private GeoNavHelper geoNavHelper;
+
+
+    private FieldAudioObject fieldAudioObject;
 
     @Inject
     GnssThreadHelper gnssThreadHelper;
@@ -1128,6 +1132,10 @@ public class CollectActivity extends ThemedActivity
 //        View actionView = MenuItemCompat.getActionView(geoNavEnable);
 //        actionView.setOnClickListener((View) -> onOptionsItemSelected(geoNavEnable));
 
+        MenuItem fieldAudioMic = systemMenu.findItem(R.id.field_audio_mic);
+        fieldAudioMic.setVisible(mPrefs.getBoolean(GeneralKeys.ENABLE_FIELD_AUDIO, false));
+        fieldAudioObject = new FieldAudioObject(this);
+
         customizeToolbarIcons();
 
         return true;
@@ -1161,6 +1169,7 @@ public class CollectActivity extends ThemedActivity
         final int lockDataId = R.id.lockData;
         final int summaryId = R.id.summary;
         final int geonavId = R.id.action_act_collect_geonav_sw;
+        final int fieldAudioMicId = R.id.field_audio_mic;
         switch (item.getItemId()) {
             case helpId:
                 TapTargetSequence sequence = new TapTargetSequence(this)
@@ -1265,6 +1274,27 @@ public class CollectActivity extends ThemedActivity
 
                     mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply();
 
+                }
+
+                return true;
+
+            case R.id.field_audio_mic:
+                MenuItem micItem = systemMenu.findItem(R.id.field_audio_mic);
+
+                if(fieldAudioObject.getButtonState() == "mic_off"){
+                    fieldAudioObject.startRecording();
+                    Toast.makeText(
+                        this, R.string.field_audio_recording_start,
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    micItem.setIcon(R.drawable.ic_tb_field_mic_on);
+                }else{
+                    fieldAudioObject.stopRecording();
+                    Toast.makeText(
+                        this, R.string.field_audio_recording_stop,
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    micItem.setIcon(R.drawable.ic_tb_field_mic_off);
                 }
 
                 return true;

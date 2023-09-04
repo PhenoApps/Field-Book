@@ -55,5 +55,10 @@
         android:icon="@drawable/numeric_1_box"
         android:showAsAction="always"
         android:title="@string/menu_collect_repeated_values_indicator"/>
+    <item
+        android:id="@+id/field_audio_mic"
+        android:icon="@drawable/ic_tb_field_mic_off"
+        android:showAsAction="always"
+        android:title="@string/menu_collect_field_audio_start" />
 </menu>
 

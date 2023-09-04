@@ -96,6 +96,8 @@ public class GeneralKeys {
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
 
+    public static final String ENABLE_FIELD_AUDIO = "com.tracker.fieldbook.preferences.keys.enable_field_audio";
+
     public static final String LAST_TIME_OPENED = "LastTimeAppOpened";
     public static final String VERIFY_USER = "VerifyUserEvery24Hours";
 
