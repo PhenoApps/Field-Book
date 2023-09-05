@@ -8,52 +8,52 @@
 
         <Preference
             android:icon="@drawable/ic_am"
-            android:key="am"
+            android:key="am-ET"
             android:title="@string/language_am" />
 
         <Preference
             android:icon="@drawable/ic_ar"
-            android:key="ar"
+            android:key="ar-SA"
             android:title="@string/language_ar" />
 
         <Preference
             android:icon="@drawable/ic_bn"
-            android:key="bn"
+            android:key="bn-BD"
             android:title="@string/language_bn" />
 
         <Preference
             android:icon="@drawable/ic_de"
-            android:key="de"
+            android:key="de-DE"
             android:title="@string/language_de" />
 
         <Preference
             android:icon="@drawable/ic_us"
-            android:key="en"
+            android:key="en-US"
             android:title="@string/language_en" />
 
         <Preference
             android:icon="@drawable/ic_mx"
-            android:key="es"
+            android:key="es-MX"
             android:title="@string/language_es" />
 
         <Preference
             android:icon="@drawable/ic_fr"
-            android:key="fr"
+            android:key="fr-FR"
             android:title="@string/language_fr" />
 
         <Preference
             android:icon="@drawable/ic_in"
-            android:key="hi"
+            android:key="hi-IN"
             android:title="@string/language_hi" />
 
         <Preference
             android:icon="@drawable/ic_it"
-            android:key="it"
+            android:key="it-IT"
             android:title="@string/language_it" />
 
         <Preference
             android:icon="@drawable/ic_jp"
-            android:key="ja"
+            android:key="ja-JP"
             android:title="@string/language_ja" />
 
         <Preference
@@ -68,8 +68,18 @@
 
         <Preference
             android:icon="@drawable/ic_ru"
-            android:key="ru"
+            android:key="ru-RU"
             android:title="@string/language_ru" />
+
+        <Preference
+            android:icon="@drawable/ic_sv"
+            android:key="sv-SE"
+            android:title="@string/language_sv_rSE" />
+
+        <Preference
+            android:icon="@drawable/ic_vi"
+            android:key="vi-VN"
+            android:title="@string/language_vi_vRN" />
 
         <Preference
             android:icon="@drawable/ic_cn"

@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.objects
+package com.fieldbook.tracker.utilities
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -28,6 +28,7 @@ import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.models.ObservationUnitModel
+import com.fieldbook.tracker.interfaces.CollectController
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
@@ -37,10 +38,8 @@ import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.impactZoneSearch
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.lowPassFilter
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.writeGeoNavLog
-import com.fieldbook.tracker.utilities.Utils
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.SnackbarLayout
-import dagger.hilt.android.qualifiers.ActivityContext
 import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getDirectory
 import java.io.IOException
 import java.io.OutputStreamWriter
@@ -48,7 +47,7 @@ import javax.inject.Inject
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class GeoNavHelper @Inject constructor(@ActivityContext private val context: Context):
+class GeoNavHelper @Inject constructor(private val controller: CollectController):
     SensorEventListener, GPSTracker.GPSTrackerListener {
 
     /**
@@ -61,57 +60,100 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     private var mAzimuth: Double? = null
     private var mNotWarnedInterference = true
 
+    private var currentFixQuality = false
+
     private val mGnssResponseReceiver: GNSSResponseReceiver = object : GNSSResponseReceiver() {
         override fun onGNSSParsed(parser: NmeaParser) {
-            val time = parser.utc.toDouble()
 
-            //only update the gps if it is a newly parsed coordinate
-            if (time > mLastGeoNavTime) {
-                if (!mFirstLocationFound) {
-                    mFirstLocationFound = true
-                    (context as CollectActivity).getSoundHelper().playCycle()
-                    Utils.makeToast(context,
-                        context.getString(R.string.act_collect_geonav_first_location_found)
-                    )
-                }
-                mLastGeoNavTime = time
-                val lat = truncateFixQuality(parser.latitude, parser.fix)
-                val lng = truncateFixQuality(parser.longitude, parser.fix)
-                var alt = parser.altitude
-                val altLength = alt.length
-                alt = alt.substring(0, altLength - 1) //drop the "M"
+            checkBeforeUpdate(parser.getSimpleFix()) {
 
-                //always log external gps updates
-                writeGeoNavLog(
-                    mGeoNavLogWriter,
-                    "$lat,$lng,$time,null,null,null,null,null,null,null,null,null,null,null\n"
+                updateLocationWithGnss(parser)
+            }
+        }
+    }
+
+    private fun updateLocationWithGnss(parser: NmeaParser) {
+        val time = parser.utc.toDouble()
+
+        //only update the gps if it is a newly parsed coordinate
+        if (time > mLastGeoNavTime) {
+            if (!mFirstLocationFound) {
+                mFirstLocationFound = true
+                controller.getSoundHelper().playCycle()
+                Utils.makeToast(controller.getContext(),
+                    controller.getContext().getString(R.string.act_collect_geonav_first_location_found)
                 )
-                //don't log the location update for geonav_shorter
-                // because closest would always be written as null in this case
-//                writeGeoNavLog(
-//                    mGeoNavShorterLogWriter,
-//                    "$lat,$lng,$time,null,null,null,null,null,null,null,null,null,null\n"
-//                )
-                mExternalLocation = Location("GeoNav Rover")
+            }
+            mLastGeoNavTime = time
+            val fix = parser.getSimpleFix()
+            val lat = truncateFixQuality(parser.latitude)
+            val lng = truncateFixQuality(parser.longitude)
+            var alt = parser.altitude
+            val altLength = alt.length
+            alt = alt.substring(0, altLength - 1) //drop the "M"
 
-                //initialize the double values, attempt to parse the strings, if impossible then don't update the coordinate.
-                var latValue = Double.NaN
-                var lngValue = Double.NaN
-                var altValue = Double.NaN
-                try {
-                    latValue = lat.toDouble()
-                    lngValue = lng.toDouble()
-                    altValue = alt.toDouble()
-                } catch (nfe: NumberFormatException) {
-                    nfe.printStackTrace()
+            //always log external gps updates
+            writeGeoNavLog(
+                mGeoNavLogWriter,
+                "$lat,$lng,$time,null,null,null,null,null,null,$fix,null,null,null,null,null\n"
+            )
+            mExternalLocation = Location("GeoNav Rover")
+
+            //initialize the double values, attempt to parse the strings, if impossible then don't update the coordinate.
+            var latValue = Double.NaN
+            var lngValue = Double.NaN
+            var altValue = Double.NaN
+            try {
+                latValue = lat.toDouble()
+                lngValue = lng.toDouble()
+                altValue = alt.toDouble()
+            } catch (nfe: NumberFormatException) {
+                nfe.printStackTrace()
+            }
+            if (!java.lang.Double.isNaN(latValue) && !java.lang.Double.isNaN(lngValue)) {
+                mExternalLocation?.time = time.toLong()
+                mExternalLocation?.latitude = latValue
+                mExternalLocation?.longitude = lngValue
+                mExternalLocation?.altitude = altValue
+                mExternalLocation?.extras?.putString("fix", fix)
+            }
+        }
+    }
+
+    private fun checkBeforeUpdate(fix: String, update: () -> Unit) {
+
+        val precisionThresh = controller.getPreferences().getString(GeneralKeys.GEONAV_CONFIG_DEGREE_PRECISION, "Any") ?: "Any"
+        val audioOnDrop = controller.getPreferences().getBoolean(GeneralKeys.GEONAV_CONFIG_AUDIO_ON_DROP, false)
+
+        if (precisionThresh != "Any" || audioOnDrop) {
+
+            val isQuality = NmeaParser().compareFix(fix, precisionThresh)
+            if (isQuality && !currentFixQuality) {
+                //quality fix is found, play something good
+                update()
+                if (audioOnDrop) {
+                    controller.getSoundHelper().playCelebrate()
+                    controller.getVibrator().vibrate(1000L)
                 }
-                if (!java.lang.Double.isNaN(latValue) && !java.lang.Double.isNaN(lngValue)) {
-                    mExternalLocation?.time = time.toLong()
-                    mExternalLocation?.latitude = latValue
-                    mExternalLocation?.longitude = lngValue
-                    mExternalLocation?.altitude = altValue
+                currentFixQuality = true
+            } else if (isQuality && currentFixQuality) {
+                //quality is still good
+                update()
+            } else if (!isQuality && currentFixQuality) {
+                //quality is bad, play something bad
+                //reset last plotId if quality drops
+                lastPlotIdNav = null
+                currentFixQuality = false
+                if (audioOnDrop) {
+                    (controller.getContext() as? CollectActivity)?.showLocationPrecisionLossDialog()
+                    controller.getSoundHelper().playError()
+                    controller.getVibrator().vibrate(1000L)
                 }
             }
+
+        } else {
+            update()
+            currentFixQuality = true
         }
     }
 
@@ -120,7 +162,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
      * The parser parameter is a model for the parsed message, and is used to populate the
      * trait layout UI.
      */
-    private var mLocalBroadcastManager = LocalBroadcastManager.getInstance(context).also {
+    private var mLocalBroadcastManager = LocalBroadcastManager.getInstance(controller.getContext()).also {
         val filter = IntentFilter()
         filter.addAction(GNSSResponseReceiver.ACTION_BROADCAST_GNSS_ROVER)
         it.registerReceiver(mGnssResponseReceiver, filter)
@@ -142,8 +184,8 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     private var averageHandler: Handler? = null
     private var lastPlotIdNav: String? = null
     private var mGeoNavSnackbar: Snackbar? = null
-    private val mPrefs = PreferenceManager.getDefaultSharedPreferences(context)
-    private val ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+    private val mPrefs = PreferenceManager.getDefaultSharedPreferences(controller.getContext())
+    private val ep = controller.getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
     private var mGeoNavLogWriter: OutputStreamWriter? = null
 
     var initialized: Boolean = false
@@ -170,7 +212,12 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
      * Starts a timer (with interval defined in the preferences) that runs the IZ algorithm.
      */
     fun startGeoNav() {
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager?
+
+        if (!initialized) {
+            recreateThreads()
+        }
+
+        val sensorManager = controller.getContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager?
         if (sensorManager != null) {
             sensorManager.registerListener(
                 this,
@@ -198,11 +245,11 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
 
             //find the mac address of the device, if not found then start the internal GPS
             val address: String = mPrefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "") ?: ""
-            val internalGps: String = context.getString(R.string.pref_behavior_geonav_internal_gps_choice)
+            val internalGps: String = controller.getContext().getString(R.string.pref_behavior_geonav_internal_gps_choice)
             var internal = true
             if (address.isEmpty() || address == internalGps) {
                 //update no matter the distance change and every 10s
-                val mGpsTracker = GPSTracker(context, this, 0, 10000)
+                val mGpsTracker = GPSTracker(controller.getContext(), this, 0, 10000)
             } else {
                 getDeviceByAddress(address)?.let { device ->
                     setupCommunicationsUi(device)
@@ -214,7 +261,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
 
         } else {
             Toast.makeText(
-                context, R.string.activity_collect_sensor_manager_failed,
+                controller.getContext(), R.string.activity_collect_sensor_manager_failed,
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -235,7 +282,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
 
         writeGeoNavLog(
             mGeoNavLogWriter,
-            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, closest, accuracy correction status, unique id, primary id, secondary id\n"
+            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, fix, closest, accuracy correction status, unique id, primary id, secondary id\n"
         )
     }
 
@@ -293,7 +340,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
      * @param device the paired device that has been chosen in the preferences.
      */
     private fun setupCommunicationsUi(device: BluetoothDevice) {
-        (context as CollectActivity).getSecurityChecker().withNearby { adapter: BluetoothAdapter ->
+        controller.getSecurityChecker().withNearby { adapter: BluetoothAdapter ->
             adapter.cancelDiscovery()
             mLastDevice = device
 
@@ -337,11 +384,13 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         val geoNavMethod: String = mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
         val d1: Double = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble() ?: 0.001
         val d2: Double = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble() ?: 0.01
-        val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, context.getString(R.string.pref_geonav_logging_mode)) ?: context.getString(R.string.pref_geonav_logging_mode)
+        val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, controller.getContext().getString(R.string.pref_geonav_logging_mode)) ?: controller.getContext().getString(R.string.pref_geonav_logging_mode)
         //user must have a valid pointing direction before attempting the IZ
         //initialize the start position and fill with external or internal GPS coordinates
         val start: Location? = if (internal) {
-            mInternalLocation
+            mInternalLocation.also {
+                it?.extras?.putString("fix", "GPS")
+            }
         } else {
             mExternalLocation
         }
@@ -350,7 +399,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         val studyId: Int = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
 
         //find all observation units within the field
-        val units = (context as CollectActivity).getDatabase().getAllObservationUnits(studyId)
+        val units = controller.getDatabase().getAllObservationUnits(studyId)
         val coordinates: MutableList<ObservationUnitModel> = ArrayList()
 
         //add all units that have non null coordinates.
@@ -361,7 +410,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         }
 
         //run the algorithm and time how long it takes
-        if (start != null) {
+        if (start != null && currentFixQuality) {
 
             mAzimuth?.let { azimuth ->
 
@@ -376,11 +425,12 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                 //if we received a result then show it to the user, create a button to navigate to the plot
                 if (first != null) {
                     val id = first.observation_unit_db_id
-                    with (context as CollectActivity) {
+                    with ((controller.getContext() as CollectActivity)) {
                         if (id != getRangeBox().cRange.plot_id && id != lastPlotIdNav) {
                             lastPlotIdNav = id
                             runOnUiThread {
-                                if (mPrefs.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
+                                if (ep.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
+                                    lastPlotIdNav = null
                                     moveToSearch("id", getRangeBox().getRangeID(), null, null, id, -1)
                                     Toast.makeText(
                                         this,
@@ -389,7 +439,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                                     ).show()
                                 } else {
                                     mGeoNavSnackbar = Snackbar.make(
-                                        findViewById(R.id.traitHolder),
+                                        findViewById(R.id.toolbarBottom),
                                         id, Snackbar.LENGTH_INDEFINITE
                                     )
                                     val snackLayout = mGeoNavSnackbar?.view as SnackbarLayout
@@ -403,6 +453,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                                             LinearLayout.LayoutParams.MATCH_PARENT,
                                             LinearLayout.LayoutParams.WRAP_CONTENT
                                         )
+                                    params.bottomToTop = R.id.toolbarBottom
                                     snackView.layoutParams = params
                                     snackLayout.addView(snackView)
                                     snackLayout.setPadding(0, 0, 0, 0)
@@ -420,6 +471,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                                         //when navigate button is pressed use rangeBox to go to the plot id
                                         moveToSearch("id", getRangeBox().getRangeID(), null, null, id, -1)
                                     }
+                                    mGeoNavSnackbar?.setAnchorView(R.id.toolbarBottom)
                                     mGeoNavSnackbar?.setBackgroundTint(Color.TRANSPARENT)
                                     mGeoNavSnackbar?.show()
                                 }
@@ -436,8 +488,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
      * Simply stops listening to the sensor manager and stops the geonav timer.
      */
     fun stopGeoNav() {
-        (context.getSystemService(Context.SENSOR_SERVICE) as SensorManager).unregisterListener(this)
-        mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply() //turn off auto nav
+        (controller.getContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager).unregisterListener(this)
         mSchedulerHandlerThread.quit()
         mAverageHandlerThread.quit()
         mMessageHandlerThread.quit()
@@ -453,6 +504,8 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         mLocalBroadcastManager.unregisterReceiver(mGnssResponseReceiver)
 
         mConnectThread?.cancel()
+
+        initialized = false
     }
 
     fun resetGeoNavMessages() {
@@ -474,8 +527,8 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     fun setupGeoNavLogger() {
         if (mPrefs.getBoolean(GeneralKeys.GEONAV_LOG, false)) {
             try {
-                val resolver: ContentResolver = context.contentResolver
-                val geoNavFolder = getDirectory(context, R.string.dir_geonav)
+                val resolver: ContentResolver = controller.getContext().contentResolver
+                val geoNavFolder = getDirectory(controller.getContext(), R.string.dir_geonav)
                 if (geoNavFolder != null && geoNavFolder.exists()) {
                     val interval = mPrefs.getString(GeneralKeys.UPDATE_INTERVAL, "1")
                     val address = (mPrefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "") ?: "")
@@ -529,7 +582,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
             if ((mTeslas < 25 || mTeslas > 65) && mNotWarnedInterference) {
                 mNotWarnedInterference = false
                 Toast.makeText(
-                    context, R.string.activity_collect_geomagnetic_noise_detected,
+                    controller.getContext(), R.string.activity_collect_geomagnetic_noise_detected,
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -603,16 +656,25 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     }
 
     override fun onLocationChanged(location: Location) {
+
+        checkBeforeUpdate("GPS") {
+
+            updateLocationWithInternal(location)
+        }
+    }
+
+    private fun updateLocationWithInternal(location: Location) {
+
         mInternalLocation = location
 
-        val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, context.getString(R.string.pref_geonav_logging_mode)) ?: context.getString(R.string.pref_geonav_logging_mode)
+        val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, controller.getContext().getString(R.string.pref_geonav_logging_mode)) ?: controller.getContext().getString(R.string.pref_geonav_logging_mode)
 
         //always log location updates for verbose log
         if (currentLoggingMode != "Shorter Log") {
             writeGeoNavLog(
                 mGeoNavLogWriter,
                 """
-                ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,null,null,null,null,null
+                ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,GPS,null,null,null,null,null
                 
                 """.trimIndent()
             )

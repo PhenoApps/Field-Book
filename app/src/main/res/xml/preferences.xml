@@ -32,7 +32,7 @@
     <Preference
         android:icon="@drawable/ic_map_search"
         android:key="pref_key_geonav_settings"
-        android:title="@string/preference_geonav_title"
+        android:title="@string/preferences_geonav_title"
         app:fragment="com.fieldbook.tracker.preferences.GeoNavPreferencesFragment" />
 
     <Preference

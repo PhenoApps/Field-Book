@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- GENERAL -->
+    <!-- App -->
+    <!-- Dialog -->
+    <!-- Startup  -->
+    <!-- Permissions  -->
+    <!-- Config Activity  -->
+    <!-- Config Activity Fuzzy Search  -->
+    <!-- File manager  -->
+    <!-- Warnings/Catches -->
+    <!-- Changelog -->
+    <!-- FIELDS -->
+    <!-- General -->
+    <!-- Sort -->
+    <!-- Delete -->
+    <!-- Import -->
+    <!-- Field Creator  -->
+    <!-- Geo-Navigate to Field -->
+    <!-- Unimplemented -->
+    <!-- TRAITS -->
+    <!-- Sort -->
+    <!-- Trait import/export -->
+    <!-- Trait item menu -->
+    <!-- Trait formats -->
+    <!-- Trait Creation Dialog -->
+    <!-- COLLECT -->
+    <!-- Validation -->
+    <!-- Toolbar -->
+    <!-- InfoBars -->
+    <!-- ID/Barcode Search -->
+    <!-- Search  -->
+    <!--- Profile -->
+    <!--- Datagrid -->
+    <!-- Trait Layout: Photo -->
+    <!-- Trait Layout: GNSS -->
+    <!-- Trait Layout: Date -->
+    <!-- Trait Layout: Boolean -->
+    <!-- Trait Layout: GoPro -->
+    <!-- Trait Layout: USB Camera -->
+    <!--- Trait Layout: Zebra label print -->
+    <!--- Trait Layout: Counter -->
+    <!--- Trait Layout: Location -->
+    <!--- Text to Speech Strings -->
+    <!--- Summary -->
+    <!--- Repeated measures -->
+    <!--- GeoNav -->
+    <!--- Content Descriptions -->
+    <!-- EXPORT -->
+    <!-- Export dialog -->
+    <!-- Citation -->
+    <!-- SETTINGS -->
+    <!-- General -->
+    <!-- Profile -->
+    <!-- Appearance -->
+    <!-- Behavior -->
+    <!-- GeoNav -->
+    <!-- Sounds -->
+    <!-- BrAPI preferences are in the BrAPI section below -->
+    <!-- Database -->
+    <!-- Beta -->
+    <!-- ABOUT -->
+    <!-- App  -->
+    <!-- Lead  -->
+    <!-- Support  -->
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <!-- Update -->
+    <!-- BRAPI -->
+    <!-- BrAPI preferences -->
+    <!-- Authorization -->
+    <!-- BrAPI Import -->
+    <!-- BrAPI Export -->
+    <!-- Pagination -->
+    <!-- General -->
+    <!-- TUTORIAL -->
+</resources>

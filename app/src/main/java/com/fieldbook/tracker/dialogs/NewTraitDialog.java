@@ -152,23 +152,26 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
 
         addCategoryButton.setOnClickListener((v) -> {
             String value = categoryValueEt.getText().toString();
-            if (!value.isEmpty()) {
-
-                ArrayList<String> values = new ArrayList<>();
-                for (BrAPIScaleValidValuesCategories s : catList) {
-                    values.add(s.getValue());
-                }
-
-                if (!values.contains(value)) {
-                    BrAPIScaleValidValuesCategories scale = new BrAPIScaleValidValuesCategories();
-                    scale.setLabel(value);
-                    scale.setValue(value);
-                    catList.add(scale);
-                    categoryValueEt.setText("");
-                    updateCatAdapter();
-                }
-            }
+            addCategory(value);
+            categoryValueEt.setText("");
         });
+    }
+
+    private void addCategory(String value) {
+        if (!value.isEmpty()) {
+            ArrayList<String> values = new ArrayList<>();
+            for (BrAPIScaleValidValuesCategories s : catList) {
+                values.add(s.getValue());
+            }
+
+            if (!values.contains(value)) {
+                BrAPIScaleValidValuesCategories scale = new BrAPIScaleValidValuesCategories();
+                scale.setLabel(value);
+                scale.setValue(value);
+                catList.add(scale);
+                updateCatAdapter();
+            }
+        }
     }
 
     private void updateCatAdapter() {
@@ -368,7 +371,11 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
         t.setMinimum(minimum.getText().toString());
         t.setMaximum(maximum.getText().toString());
         t.setDetails(details.getText().toString());
-        //t.setCategories(categoryLabelEt.getText().toString());
+        String finalCat = categoryValueEt.getText().toString();
+        if (!finalCat.isEmpty()) {
+            addCategory(finalCat);
+            categoryValueEt.setText("");
+        }
 
         try {
 

@@ -17,14 +17,9 @@
         android:title="@string/main_toolbar_next_entry_no_data" />
     <item
         android:id="@+id/jumpToPlot"
-        android:icon="@drawable/ic_tb_barcode"
-        android:showAsAction="always"
-        android:title="@string/main_toolbar_moveto" />
-    <item
-        android:id="@+id/barcodeScan"
         android:icon="@drawable/ic_tb_barcode_scan"
         android:showAsAction="always"
-        android:title="@string/main_toolbar_barcode_scan" />
+        android:title="@string/main_toolbar_moveto" />
     <item
         android:id="@+id/datagrid"
         android:icon="@drawable/ic_tb_datagrid"
@@ -52,7 +47,7 @@
         android:title="" />
     <item
         android:id="@+id/action_act_collect_geonav_sw"
-        android:icon="@drawable/ic_explore_off_black_24dp"
+        android:icon="@drawable/ic_explore_black_24dp"
         android:showAsAction="always"
         android:title="@string/menu_collect_start_geo_nav_title"/>
     <item

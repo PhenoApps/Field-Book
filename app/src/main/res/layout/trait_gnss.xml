@@ -37,8 +37,20 @@
                 altHeader,altTextView,
                 hdopHeader,hdopTextView,
                 gnss_collect_button, disconnect_button,
-                gnss_trait_averaging_switch"
+                gnss_trait_averaging_switch,
+                precisionHeader, precisionSpinner"
             tools:visibility="visible" />
+
+        <ProgressBar
+            android:visibility="invisible"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/trait_gnss_pb"
+            android:indeterminate="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/gnss_collect_button"/>
 
         <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/utcHeader"
@@ -48,7 +60,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
             android:layout_weight="1"
-            android:text="UTC"
+            android:text="@string/trait_gnss_time_header"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -92,7 +104,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
-            android:text="Lat.:"
+            android:text="@string/trait_gnss_latitude_header"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/utcHeader" />
 
@@ -117,7 +129,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
-            android:text="Long.:"
+            android:text="@string/trait_gnss_longitude_header"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/latHeader" />
 
@@ -142,7 +154,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:text="Alt.:"
+            android:text="@string/trait_gnss_altitude_header"
             app:layout_constraintStart_toEndOf="@id/latTextView"
             app:layout_constraintTop_toBottomOf="@+id/utcHeader" />
 
@@ -164,9 +176,31 @@
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
-            android:text="HDOP:"
+            android:text="@string/trait_gnss_hdop_header"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/lngHeader" />
+
+        <TextView style="@style/TextViewStyle.Bold"
+            android:id="@+id/precisionHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/trait_gnss_precision_header"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/hdopHeader" />
+
+        <Spinner
+            android:id="@+id/precisionSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:entries="@array/dialog_geonav_collect_degrees_of_precision"
+            app:layout_constraintStart_toEndOf="@+id/precisionHeader"
+            app:layout_constraintTop_toBottomOf="@+id/hdopHeader" />
 
         <TextView
             android:id="@+id/hdopTextView"
@@ -185,7 +219,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:text="Acc.:"
+            android:text="@string/trait_gnss_accuracy_header"
             app:layout_constraintEnd_toStartOf="@+id/accTextView"
             app:layout_constraintTop_toBottomOf="@+id/latHeader" />
 
@@ -207,7 +241,7 @@
             android:src="@drawable/ic_trait_location"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/disconnect_button"
-            app:layout_constraintTop_toBottomOf="@id/hdopHeader"
+            app:layout_constraintTop_toBottomOf="@id/precisionHeader"
             app:layout_constraintHorizontal_weight="4"
             android:contentDescription="@string/trait_gnss_collect_button_content_description" />
 
@@ -219,7 +253,7 @@
             android:src="@drawable/trait_gnss_disconnect"
             app:layout_constraintEnd_toStartOf="@id/gnss_collect_button"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/hdopHeader"
+            app:layout_constraintTop_toBottomOf="@id/precisionHeader"
             app:layout_constraintHorizontal_weight="1"
             android:contentDescription="@string/trait_gnss_disconnect_button_content_description" />
 

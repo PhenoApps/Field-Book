@@ -649,10 +649,6 @@ class RangeBoxView : ConstraintLayout {
             //if we wrap around the entire range then observations are completed
             //notify the user and just go to the first range id.
             if (!firstLoop && prevPos == localPrev) {
-                Toast.makeText(
-                    context,
-                    R.string.activity_collect_all_obs_made, Toast.LENGTH_SHORT
-                ).show()
                 return 1
             }
             firstLoop = false
