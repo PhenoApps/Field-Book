@@ -3,8 +3,13 @@ package com.fieldbook.tracker.preferences;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -14,6 +19,9 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.DefineStorageActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
+
+import java.util.List;
+import java.util.Objects;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -246,6 +254,31 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
         }
     }
 
+    @RequiresApi(24)
+    public static @NonNull String getDisplayPath(@NonNull Context context, @NonNull Uri uri) {
+        String lastPathSegment = Objects.requireNonNull(uri.getLastPathSegment());
+        String backupVolume    = lastPathSegment.replaceFirst(":.*", "");
+        String backupName      = lastPathSegment.replaceFirst(".*:", "");
+
+        StorageManager      storageManager = ContextCompat.getSystemService(context, StorageManager.class);
+        List<StorageVolume> storageVolumes = storageManager.getStorageVolumes();
+        StorageVolume       storageVolume  = null;
+
+        for (StorageVolume volume : storageVolumes) {
+            if (Objects.equals(volume.getUuid(), backupVolume)) {
+                storageVolume = volume;
+                break;
+            }
+        }
+
+        if (storageVolume == null) {
+            return backupName;
+        } else {
+            return context.getString(R.string.StorageUtil__s_s, storageVolume.getDescription(context), backupName);
+        }
+    }
+
+
     @Override
     public void onResume() {
         super.onResume();
@@ -257,8 +290,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
             if (root != null && root.exists()) {
 
-                // Get the full path from the URI
-                String path = root.getUri().getPath();
+                String path = getDisplayPath(context, root.getUri());
 
                 defaultStorageLocation.setSummary(path);
 

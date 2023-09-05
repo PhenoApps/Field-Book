@@ -57,7 +57,7 @@ android {
 
     defaultConfig {
         applicationId "com.fieldbook.tracker"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 33
         versionCode = makeVersionCode()
         versionName = makeVersionName()

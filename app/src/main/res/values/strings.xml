@@ -472,6 +472,7 @@
     <string name="preferences_general_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
     <string name="preferences_source_default_import">Default import source</string>
     <string name="preferences_source_default_export">Default export source</string>
+    <string name="StorageUtil__s_s">%1$s/%2$s</string>
 
     <string name="pref_general_location_collection_title">Location collected</string>
     <string name="pref_general_location_collection_summary">Select a method for collecting location while using Field Book.</string>
