@@ -92,11 +92,15 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             val altLength = alt.length
             alt = alt.substring(0, altLength - 1) //drop the "M"
 
-            //always log external gps updates
-            writeGeoNavLog(
-                mGeoNavLogWriter,
-                "$lat,$lng,$time,null,null,null,null,null,null,$fix,null,null,null,null,null\n"
-            )
+            val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, controller.getContext().getString(R.string.pref_geonav_logging_mode)) ?: controller.getContext().getString(R.string.pref_geonav_logging_mode)
+
+            //always log location updates for verbose log
+            if (currentLoggingMode != "Shorter Log") {
+                writeGeoNavLog(
+                    mGeoNavLogWriter,
+                    "$lat,$lng,$time,null,null,null,null,null,null,$fix,null,null,null,null,null\n"
+                )
+            }
             mExternalLocation = Location("GeoNav Rover")
 
             //initialize the double values, attempt to parse the strings, if impossible then don't update the coordinate.
