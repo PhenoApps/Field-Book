@@ -346,6 +346,18 @@ class TraitBoxView : ConstraintLayout {
         controller.getCollectInputView().resetInitialIndex()
     }
 
+    fun returnFirst() {
+        if (!controller.validateData()) {
+            return
+        }
+        if (controller.getPreferences().getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND, false)) {
+            controller.getSoundHelper().playCycle()
+        }
+        traitType.setSelection(0)
+        controller.refreshLock()
+        controller.getCollectInputView().resetInitialIndex()
+    }
+
     fun update(parent: String?, value: String) {
         if (newTraits.containsKey(parent!!)) {
             newTraits.remove(parent)

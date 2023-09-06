@@ -552,6 +552,7 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun moveEntryRight() {
+        val traitBox = controller.getTraitBox()
         if (!controller.validateData()) {
             return
         }
@@ -561,11 +562,14 @@ class RangeBoxView : ConstraintLayout {
         }
         val entryArrow =
             controller.getPreferences().getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
-        if ((entryArrow == "2" || entryArrow == "3") && !controller.getTraitBox().existsTrait()) {
+        if ((entryArrow == "2" || entryArrow == "3") && !traitBox.existsTrait()) {
             controller.getSoundHelper().playError()
         } else {
             if (rangeID.isNotEmpty()) {
                 //index.setEnabled(true);
+                if (controller.isReturnFirstTrait()) {
+                    traitBox.returnFirst()
+                }
                 paging = incrementPaging(paging)
                 controller.refreshMain()
             }
