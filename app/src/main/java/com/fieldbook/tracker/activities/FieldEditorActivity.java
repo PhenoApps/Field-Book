@@ -188,7 +188,7 @@ public class FieldEditorActivity extends ThemedActivity
         String[] importArray = new String[3];
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_cloud);
-        importArray[2] = getString(R.string.import_source_brapi);
+        importArray[2] = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, "BrAPI");
 
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, importArray);

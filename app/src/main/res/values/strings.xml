@@ -737,6 +737,8 @@
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
     <string name="brapi_base_url_default" translatable="false">https://test-server.brapi.org</string>
 
+    <string name="brapi_edit_display_name">Edit Display Name</string>
+
     <string name="preferences_brapi_version">BrAPI Version</string>
     <string name="preferences_brapi_version_v1" translatable="false">V1</string>
     <string name="preferences_brapi_version_v2" translatable="false">V2</string>
@@ -773,6 +775,7 @@
 
     <!-- Authorization -->
     <string name="brapi_save_authorize">Authorize</string>
+    <string name="brapi_display_name">Display Name</string>
     <string name="brapi_revoke_auth">Log Out</string>
     <string name="brapi_auth_btn">Log In to Site</string>
     <string name="brapi_auth_success">BrAPI Authorization Successful</string>

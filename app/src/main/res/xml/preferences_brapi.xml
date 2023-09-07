@@ -23,6 +23,16 @@
             android:summary="%s"
             android:title="@string/brapi_base_url" />
 
+        <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
+            android:defaultValue="@string/preferences_brapi_server_test"
+            android:dialogTitle="@string/brapi_edit_display_name"
+            android:icon="@drawable/ic_pref_brapi_name"
+            android:key="BRAPI_DISPLAY_NAME"
+            app:positiveButtonText="@android:string/ok"
+            app:negativeButtonText="@android:string/cancel"
+            android:summary="%s"
+            android:title="@string/brapi_display_name" />
+
         <Preference
             android:icon="@drawable/ic_pref_brapi_logout"
             android:key="revokeBrapiAuth"

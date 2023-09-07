@@ -54,6 +54,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private PreferenceCategory brapiPrefCategory;
     private Preference brapiLogoutButton;
     private NeutralButtonEditTextDialog brapiURLPreference;
+    private NeutralButtonEditTextDialog brapiDisplayName;
     private NeutralButtonEditTextDialog brapiOIDCURLPreference;
     private ListPreference brapiOIDCFlow;
 
@@ -116,8 +117,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiLogoutButton = findPreference("revokeBrapiAuth");
 
         brapiURLPreference = findPreference(GeneralKeys.BRAPI_BASE_URL);
+        brapiDisplayName = findPreference(GeneralKeys.BRAPI_DISPLAY_NAME);
         if (brapiURLPreference != null) {
             brapiURLPreference.setOnPreferenceChangeListener(this);
+        }
+        if (brapiDisplayName != null) {
+            brapiDisplayName.setOnPreferenceChangeListener(this);
         }
 
         brapiOIDCURLPreference = findPreference(GeneralKeys.BRAPI_OIDC_URL);
@@ -128,9 +133,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         //set saved urls, default to the test server
         String url = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
+        String displayName = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
         String oidcUrl = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
         oldBaseUrl = url;
         brapiURLPreference.setText(url);
+        brapiDisplayName.setText(displayName);
         brapiOIDCURLPreference.setText(oidcUrl);
 
         //set logout button
@@ -230,33 +237,39 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     @Override
     public boolean onPreferenceTreeClick(Preference preference) {
+        SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
         switch (preference.getKey()){
             case "brapi_server_cassavabase":
-                prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_cassavabase)).apply();
                 setServer("https://www.cassavabase.org",
                         "https://www.cassavabase.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_wheat":
-                prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_t3_wheat)).apply();
                 setServer("https://wheat-sandbox.triticeaetoolbox.org",
                         "https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_oat":
-                prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_t3_oat)).apply();
                 setServer("https://oat-sandbox.triticeaetoolbox.org",
                         "https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_barley":
-                prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_t3_barley)).apply();
                 setServer("https://barley-sandbox.triticeaetoolbox.org",
                         "https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_default":
-                prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test)).apply();
                 setServer(getString(R.string.brapi_base_url_default),
                         getString(R.string.brapi_oidc_url_default),
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
