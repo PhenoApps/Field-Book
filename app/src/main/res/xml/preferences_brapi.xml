@@ -19,7 +19,7 @@
             android:key="BRAPI_BASE_URL"
             app:positiveButtonText="@string/brapi_save_authorize"
             app:negativeButtonText="@android:string/cancel"
-            app:neutralButtonText="@string/scan_barcode"
+            app:neutralButtonText="@string/dialog_scan"
             android:summary="%s"
             android:title="@string/brapi_base_url" />
 
@@ -29,7 +29,7 @@
             android:title="@string/brapi_revoke_auth" />
 
         <ListPreference
-            android:defaultValue="@string/preferences_brapi_version_v1"
+            android:defaultValue="@string/preferences_brapi_version_v2"
             android:entries="@array/pref_brapi_version"
             android:entryValues="@array/pref_brapi_version"
             android:icon="@drawable/ic_pref_brapi_version"
@@ -89,7 +89,7 @@
             android:title="@string/brapi_oidc_url"
             app:positiveButtonText="@android:string/ok"
             app:negativeButtonText="@android:string/cancel"
-            app:neutralButtonText="@string/scan_barcode"/>
+            app:neutralButtonText="@string/dialog_scan"/>
 
     </PreferenceCategory>
 

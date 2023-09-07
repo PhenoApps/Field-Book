@@ -27,9 +27,9 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.ImageTraitAdapter
 import com.fieldbook.tracker.database.dao.ObservationDao
-import com.fieldbook.tracker.objects.GoProWrapper
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
+import com.fieldbook.tracker.utilities.GoProWrapper
 import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem

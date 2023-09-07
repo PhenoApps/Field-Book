@@ -23,6 +23,9 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 
 import org.brapi.client.v2.BrAPIClient;
 import org.brapi.client.v2.model.exceptions.ApiException;
@@ -68,6 +71,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,6 +82,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
+
+    private static final String ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES = "observationLevelNames";
 
     //used to identify field book db id in external references
     private final String fieldBookReferenceSource = "Field Book Upload";
@@ -1015,6 +1021,16 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 //                    }
                 }
 
+            }
+
+            // The BMS implementation of BrAPI 2.x Variables includes an Observation Variable with observationLevelNames metadata in the additionalInfo field.
+            // This metadata helps identify the level(s) at which a variable is utilized within a study/field. The information will be utilized to filter the variables
+            // based on the selected Observation Level during BrAPI Field Import, ensuring that only relevant variables will be processed.
+            if (var.getAdditionalInfo() != null && var.getAdditionalInfo().has(ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES)) {
+                JsonArray observationVariableNames = var.getAdditionalInfo().getAsJsonArray(ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES);
+                // Convert the JsonArray to a List<String>
+                Type listType = new TypeToken<List<String>>() {}.getType();
+                trait.setObservationLevelNames(new Gson().fromJson(observationVariableNames, listType));
             }
 
             // Set some config variables in fieldbook

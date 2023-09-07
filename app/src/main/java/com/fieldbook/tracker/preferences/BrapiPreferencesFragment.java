@@ -157,7 +157,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             brapiServerBarcode.setOnPreferenceClickListener(preference -> {
 
                 new IntentIntegrator(getActivity())
-                        .setPrompt(getString(R.string.main_barcode_text))
+                        .setPrompt(getString(R.string.barcode_scanner_text))
                         .setBeepEnabled(true)
                         .setRequestCode(IntentIntegrator.REQUEST_CODE)
                         .initiateScan();
@@ -291,14 +291,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 //change request code for brapi url vs oidc url
                 if (preference.getKey().equals(brapiURLPreference.getKey())) {
                     new IntentIntegrator(getActivity())
-                            .setPrompt(getString(R.string.main_barcode_text))
+                            .setPrompt(getString(R.string.barcode_scanner_text))
                             .setBeepEnabled(false)
                             .setRequestCode(REQUEST_BARCODE_SCAN_BASE_URL)
                             .initiateScan();
                 } else {
                     prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
                     new IntentIntegrator(getActivity())
-                            .setPrompt(getString(R.string.main_barcode_text))
+                            .setPrompt(getString(R.string.barcode_scanner_text))
                             .setBeepEnabled(false)
                             .setRequestCode(REQUEST_BARCODE_SCAN_OIDC_URL)
                             .initiateScan();

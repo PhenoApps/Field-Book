@@ -94,6 +94,12 @@ public class SearchActivity extends ThemedActivity {
         start.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
+                Spinner c = parent.getChildAt(0).findViewById(R.id.columns);
+                Spinner s = parent.getChildAt(0).findViewById(R.id.like);
+                SharedPreferences.Editor ed = ep.edit();
+                ed.putInt(GeneralKeys.SEARCH_COLUMN_DEFAULT, c.getSelectedItemPosition());
+                ed.putInt(GeneralKeys.SEARCH_LIKE_DEFAULT, s.getSelectedItemPosition());
+                ed.apply();
 
                 try {
                     // Create the sql query based on user selection
@@ -109,8 +115,8 @@ public class SearchActivity extends ThemedActivity {
 
                         EditText t = child.findViewById(R.id.searchText);
 
-                        Spinner c = child.findViewById(R.id.columns);
-                        Spinner s = child.findViewById(R.id.like);
+                        c = child.findViewById(R.id.columns);
+                        s = child.findViewById(R.id.like);
 
                         String value = "";
                         String prefix;
@@ -341,6 +347,15 @@ public class SearchActivity extends ThemedActivity {
 
             parent.addView(v);
         }
+        int columnDefault = ep.getInt(GeneralKeys.SEARCH_COLUMN_DEFAULT, 0);
+        int likeDefault = ep.getInt(GeneralKeys.SEARCH_LIKE_DEFAULT, 0);
+        if (columnDefault < c.getCount()) {
+            c.setSelection(columnDefault);
+        } else {
+            // Set to first column if the default is not present.
+            c.setSelection(0);
+        }
+        s.setSelection(likeDefault);
     }
 
     @Override

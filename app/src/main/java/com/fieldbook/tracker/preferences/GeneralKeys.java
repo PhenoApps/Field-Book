@@ -37,8 +37,7 @@ public class GeneralKeys {
     public static final String TUTORIAL_MODE                        = "Tips";
     public static final String NEXT_ENTRY_NO_DATA                   = "NextEmptyPlot";
     public static final String QUICK_GOTO                           = "QuickGoTo";
-    public static final String UNIQUE_CAMERA                        = "BarcodeScan";
-    public static final String UNIQUE_TEXT                          = "JumpToPlot";
+    public static final String MOVE_TO_UNIQUE_ID                    = "com.fieldbook.tracker.MOVE_TO_UNIQUE_ID";
     public static final String DATAGRID_SETTING                     = "DataGrid";
     public static final String HIDE_ENTRIES_WITH_DATA               = "com.fieldbook.tracker.HIDE_ENTRIES";
     public static final String HIDE_ENTRIES_WITH_DATA_TOOLBAR       = "com.fieldbook.tracker.HIDE_ENTRIES_WITH_DATA_TOOLBAR";
@@ -90,10 +89,21 @@ public class GeneralKeys {
     public static final String GEONAV_PARAMETER_D1                  = GEONAV_PREFIX + "parameters.trapezoid.D1";
     public static final String GEONAV_PARAMETER_D2                  = GEONAV_PREFIX + "parameters.trapezoid.D2";
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
+
+    // GeoNav Configuration Preferences
+    public static final String GEONAV_CONFIG_AUDIO_ON_DROP          = GEONAV_PREFIX + "AUDIO_ON_DROP";
+
+    public static final String GEONAV_CONFIG_DEGREE_PRECISION       = GEONAV_PREFIX + "DEGREE_PRECISION";
     // @formatter:on
 
     // GNSS
     public static final String GNSS_LAST_PAIRED_DEVICE_NAME      = "GNSS_LAST_PAIRED_DEVICE_NAME";
+
+    public static final String GNSS_LAST_CHOSEN_PRECISION        = "GNSS_LAST_CHOSEN_PRECISION";
+
+    public static final String GNSS_WARNED_PRECISION             = "GNSS_WARNED_PRECISION";
+
+    public static final String GNSS_PRECISION_OK_SOUND           = "GNSS_PRECISION_OK_SOUND";
 
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
@@ -150,6 +160,10 @@ public class GeneralKeys {
 
     //preference key to save the last plot during collect activity
     public static final String LAST_PLOT = "lastplot";
+
+    // collect search activity defaults
+    public static final String SEARCH_COLUMN_DEFAULT = "SEARCH_COLUMN_DEFAULT";
+    public static final String SEARCH_LIKE_DEFAULT = "SEARCH_LIKE_DEFAULT";
 
     public static final String DATA_LOCK_STATE = "DataLockState";
 

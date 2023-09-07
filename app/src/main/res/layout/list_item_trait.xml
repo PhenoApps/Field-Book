@@ -19,11 +19,11 @@
         android:layout_height="30dp"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:contentDescription="@string/list_item_trait_drag_content_description"
         android:padding="3dp"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
-        android:src="@drawable/ic_reorder" />
+        android:src="@drawable/ic_reorder"
+        tools:ignore="ContentDescription" />
 
     <View
         android:id="@+id/spacer4"
@@ -70,9 +70,9 @@
         android:layout_height="20dp"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/spacer2"
-        android:contentDescription="@string/list_item_trait_type_content_description"
         android:padding="3dp"
-        tools:src="@drawable/ic_trait_boolean"/>
+        tools:src="@drawable/ic_trait_boolean"
+        tools:ignore="ContentDescription" />
 
     <View
         android:id="@+id/spacer3"
