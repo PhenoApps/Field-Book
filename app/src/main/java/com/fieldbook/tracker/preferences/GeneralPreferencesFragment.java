@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.ListPreference;
@@ -15,8 +14,6 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.DefineStorageActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
-
-import java.util.Objects;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -260,8 +257,12 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
             if (root != null && root.exists()) {
 
-                String path = Objects.requireNonNull(root.getUri().getLastPathSegment());
-                Log.d("GeneralPreferencesFragment", "path: " + path);
+                String path = root.getUri().getLastPathSegment();
+                if (path == null) {
+                    // default to directory name if path is null
+                    path = BaseDocumentTreeUtil.Companion.getStem(root.getUri(), context)
+                }
+
                 defaultStorageLocation.setSummary(path);
 
             }
