@@ -347,14 +347,10 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun returnFirst() {
-        if (!controller.validateData()) {
-            return
-        }
         if (controller.getPreferences().getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND, false)) {
             controller.getSoundHelper().playCycle()
         }
         traitType.setSelection(0)
-        controller.refreshLock()
         controller.getCollectInputView().resetInitialIndex()
     }
 

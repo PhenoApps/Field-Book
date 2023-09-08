@@ -567,6 +567,7 @@ class RangeBoxView : ConstraintLayout {
         } else {
             if (rangeID.isNotEmpty()) {
                 //index.setEnabled(true);
+                // In addtion to advancing the entry, return to the first trait in the trait order if the preference is enabled
                 if (controller.isReturnFirstTrait()) {
                     traitBox.returnFirst()
                 }
