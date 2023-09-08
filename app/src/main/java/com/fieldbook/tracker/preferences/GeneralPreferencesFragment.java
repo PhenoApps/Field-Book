@@ -261,6 +261,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
             if (root != null && root.exists()) {
 
                 String path = Objects.requireNonNull(root.getUri().getLastPathSegment());
+                Log.d("GeneralPreferencesFragment", "path: " + path);
                 defaultStorageLocation.setSummary(path);
 
             }
