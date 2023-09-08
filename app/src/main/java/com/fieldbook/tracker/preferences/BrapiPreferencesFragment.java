@@ -225,6 +225,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         }
 
+        if (preference.equals(brapiDisplayName)) {
+
+            brapiDisplayName.setSummary(newValue.toString());
+
+        }
+
         if (preference.equals(brapiOIDCFlow)) {
 
             prefMgr.getSharedPreferences().edit().putString(GeneralKeys.BRAPI_OIDC_FLOW, (String) newValue).apply();
@@ -241,36 +247,36 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         switch (preference.getKey()){
             case "brapi_server_cassavabase":
                 editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
-                editor.putString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_cassavabase)).apply();
                 setServer("https://www.cassavabase.org",
+                        getString(R.string.preferences_brapi_server_cassavabase),
                         "https://www.cassavabase.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_wheat":
                 editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
-                editor.putString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_t3_wheat)).apply();
                 setServer("https://wheat-sandbox.triticeaetoolbox.org",
+                        getString(R.string.preferences_brapi_server_t3_wheat),
                         "https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_oat":
                 editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
-                editor.putString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_t3_oat)).apply();
                 setServer("https://oat-sandbox.triticeaetoolbox.org",
+                        getString(R.string.preferences_brapi_server_t3_oat),
                         "https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_barley":
                 editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
-                editor.putString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_t3_barley)).apply();
                 setServer("https://barley-sandbox.triticeaetoolbox.org",
+                        getString(R.string.preferences_brapi_server_t3_barley),
                         "https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_default":
                 editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
-                editor.putString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test)).apply();
                 setServer(getString(R.string.brapi_base_url_default),
+                        getString(R.string.preferences_brapi_server_test),
                         getString(R.string.brapi_oidc_url_default),
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
@@ -328,6 +334,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     brapiURLPreference.setText(text);
                     onPreferenceChange(brapiURLPreference, text);
                     brapiAuth();
+                } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
+                    brapiDisplayName.setText(text);
+                    onPreferenceChange(brapiDisplayName, text);
                 } else {
                     prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
                     brapiOIDCURLPreference.setText(text);
@@ -370,7 +379,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     private void setBaseURLSummary() {
         String url = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_BASE_URL, "https://test-server.brapi.org");
+        String displayName = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
         brapiURLPreference.setSummary(url);
+        brapiDisplayName.setSummary(displayName);
     }
 
     //should only be called from brapi auth or the warning dialog
@@ -403,9 +414,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
     }
 
-    private void setServer(String url, String oidcUrl, String oidcFlow) {
+    private void setServer(String url, String displayName, String oidcUrl, String oidcFlow) {
         oldBaseUrl = url;
         brapiURLPreference.setText(url);
+        brapiDisplayName.setText(displayName);
         brapiOIDCURLPreference.setText(oidcUrl);
         prefMgr.getSharedPreferences().edit().putString(GeneralKeys.BRAPI_OIDC_URL, oidcUrl).apply();
         if(oidcFlow != null)
@@ -423,6 +435,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private void updateUrls(String newValue) {
         SharedPreferences sp = prefMgr.getSharedPreferences();
         String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
+        String displayName = sp.getString(GeneralKeys.BRAPI_DISPLAY_NAME, "");
 
         Log.d(TAG, oldBaseUrl + " to " + oldOidcUrl);
 
@@ -435,7 +448,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
             Log.d(TAG, newOidcUrl);
 
-            setServer(newValue, newOidcUrl, null);
+            setServer(newValue, displayName, newOidcUrl, null);
         }
 
         oldBaseUrl = newValue;
