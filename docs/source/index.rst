@@ -65,6 +65,7 @@ Contents
    brapi
    datagrid
    geonav
+   training-resources
 
 .. toctree::
    :maxdepth: 2

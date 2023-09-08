@@ -50,6 +50,7 @@ public final class SnackbarUtils {
 
     public static void showNavigateSnack(LayoutInflater inflater, View view,
                                          String msg,
+                                         @Nullable Integer anchorViewId,
                                          int duration,
                                          @Nullable Boolean showGeoNavIcon,
                                          View.OnClickListener onClickListener) {
@@ -69,7 +70,10 @@ public final class SnackbarUtils {
         }
 
         ImageButton btn = snackView.findViewById(R.id.geonav_snackbar_btn);
-        if (btn != null) {
+
+        if (onClickListener == null) {
+            btn.setVisibility(View.GONE);
+        } else if (btn != null) {
             btn.setOnClickListener((v) -> {
 
                 snackbar.dismiss();
@@ -85,6 +89,10 @@ public final class SnackbarUtils {
         }
 
         snackbar.setBackgroundTint(Color.TRANSPARENT);
+
+        if (anchorViewId != null) {
+            snackbar.setAnchorView(anchorViewId);
+        }
 
         snackbar.show();
     }

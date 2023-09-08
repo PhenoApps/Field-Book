@@ -98,7 +98,11 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
                 updateButtonVisibility()
 
-                act.traitLayoutRefresh()
+                Handler(Looper.getMainLooper()).postDelayed({
+
+                    act.traitLayoutRefresh()
+
+                }, 100)
             }
         }
 
@@ -116,7 +120,11 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
                 updateButtonVisibility()
 
-                act.traitLayoutRefresh()
+                Handler(Looper.getMainLooper()).postDelayed({
+
+                    act.traitLayoutRefresh()
+
+                }, 100)
             }
         }
 

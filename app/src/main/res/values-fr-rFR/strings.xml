@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- GENERAL -->
+    <!-- App -->
+    <string name="field_book">Carnet d\'essai</string>
+    <!-- Dialog -->
+    <string name="dialog_cancel">Annuler</string>
+    <string name="dialog_ok">ok</string>
+    <string name="dialog_yes">oui</string>
+    <string name="dialog_no">non</string>
+    <string name="dialog_close">fermer</string>
+    <string name="dialog_confirm">êtes-vous sûr?</string>
+    <string name="dialog_import">importer</string>
+    <string name="dialog_warning">avertissement</string>
+    <string name="dialog_save">enregistrer</string>
+    <!-- Startup  -->
+    <string name="startup_sample_data_title">Données tests</string>
+    <string name="startup_sample_data_message">Charger les données tests ?</string>
+    <!-- Permissions  -->
+    <string name="permission_rationale_storage_import">L\'importation de nouveaux fichiers requiert le droit d\'accès aux fichiers de votre appareil.</string>
+    <string name="permission_rationale_storage_export">L\'exportation des données requiert le droit d\'accès aux fichiers de votre appareil.</string>
+    <string name="permission_rationale_trait_features">La collecte de données requiert le droit d\'accès aux fichiers, au microphone et à la caméra de votre appareil.</string>
+    <!-- Config Activity  -->
+    <string name="settings_fields">essais</string>
+    <string name="settings_traits">caractères</string>
+    <string name="settings_collect">Collecter</string>
+    <string name="settings_export">exporter</string>
+    <string name="settings_advanced">paramètres avancés</string>
+    <!-- Config Activity Fuzzy Search  -->
+    <!-- File manager  -->
+    <string name="import_source_local">Sauvegarde locale</string>
+    <string name="import_source_cloud">Sauvegarde cloud</string>
+    <string name="import_source_ask">Toujours demander</string>
+    <string name="import_dialog_importing">veuillez patienter</string>
+    <string name="import_error_general">erreur d\'importation</string>
+    <!-- Warnings/Catches -->
+    <string name="warning_field_missing">Aucun essai n\'a été chargé. Veuillez charger un essai avant de collecter les données.</string>
+    <string name="warning_traits_missing">Aucun caractère n\'a été défini. Veuillez définir les caractères avant de collecter les données.</string>
+    <!-- Changelog -->
+    <string name="changelog_title">journal des modifications</string>
+    <!-- FIELDS -->
+    <!-- General -->
+    <!-- Sort -->
+    <!-- Delete -->
+    <string name="fields_delete">Effacer</string>
+    <string name="fields_delete_study">Effacer cet essai</string>
+    <string name="fields_delete_study_confirmation">Êtes-vous certain de vouloir supprimer cet essai ? Cette action entraînera  la perte de toutes les données de cet essai.</string>
+    <!-- Import -->
+    <string name="import_dialog_title_fields">Importer essai</string>
+    <string name="import_dialog_unique">identifiant unique</string>
+    <string name="import_dialog_primary">premier ordre</string>
+    <string name="import_dialog_secondary">deuxième ordre</string>
+    <string name="import_error_unsupported">Ce type de fichier n\'est actuellement pas reconnu</string>
+    <string name="import_error_column_name">Le nom de colonne dans le fichier importé ne peut pas être: </string>
+    <string name="import_error_unique_characters_illegal">La colonne selectionnée contiens des caractères ne pouvant pas être utilisés comme identifiant unique.</string>
+    <string name="import_error_column_choice">Les colonnes ne peuvent être utilisées pour le meme attribut. </string>
+    <string name="import_error_unique">l\'identifiant unique contient des doublons</string>
+    <string name="import_error_format_field">Seuls les fichiers de types CSV ou XLS peuvent être importés comme essai</string>
+    <string name="fields_study_exists_message">Cet essai existe déjà.</string>
+    <!-- Field Creator  -->
+    <!-- Geo-Navigate to Field -->
+    <!-- Unimplemented -->
+    <string name="fields_study_statistics">Statistiques</string>
+    <string name="fields_date_imported">Importer la date</string>
+    <string name="fields_date_edited">Modifier la date</string>
+    <string name="fields_date_exported">Exporter la date</string>
+    <string name="fields_summary">Résumé sur l\'essai</string>
+    <!-- TRAITS -->
+    <!-- Sort -->
+    <string name="traits_toolbar_sort">Trier</string>
+    <string name="traits_sort_title">Trier</string>
+    <string name="traits_sort_name">Nom</string>
+    <string name="traits_sort_visibility">Visibilité</string>
+    <string name="warning_traits_missing_modify">Créé les caractères avant de les modifier.</string>
+    <!-- Trait import/export -->
+    <string name="traits_toolbar_import_export">Importer/Exporter</string>
+    <string name="traits_dialog_import">Importer</string>
+    <string name="traits_export_check">Exporter la liste actuelle de caractères ?</string>
+    <string name="traits_dialog_export">Exporter</string>
+    <string name="import_error_format_trait">Seulement les fichiers de type TRT peuvent être importés comme liste de caractères</string>
+    <string name="import_dialog_title_traits">Importer caractères</string>
+    <string name="traits_toolbar_delete_all">supprimer tous les caractères</string>
+    <!-- Trait item menu -->
+    <string name="traits_options_copy">copier</string>
+    <string name="traits_options_edit">Modifier</string>
+    <string name="traits_options_delete">supprimer</string>
+    <string name="traits_options_delete_title">supprimer le caractère</string>
+    <string name="traits_warning_delete">Supprimer un caractère efface également les données qui ont été collectées pour celui-ci. Êtes-vous certain de vouloir effacer ce caractère?</string>
+    <!-- Trait formats -->
+    <string name="traits_format_numeric">numérique</string>
+    <string name="traits_format_categorical">qualitatif</string>
+    <string name="traits_format_date">date</string>
+    <string name="traits_format_percent">pourcentage</string>
+    <string name="traits_format_counter">Compteur</string>
+    <string name="traits_format_disease_rating">Score de maladie</string>
+    <string name="traits_format_boolean">booléen</string>
+    <string name="traits_format_text">texte</string>
+    <string name="traits_format_photo">photo</string>
+    <string name="traits_format_multicategorical">Multicategorie</string>
+    <string name="traits_format_location">Lieu</string>
+    <string name="traits_format_barcode">Code-barres</string>
+    <string name="traits_format_labelprint">Imprimer l\'étiquette Zébra</string>
+    <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">ajouter un caractère</string>
+    <string name="traits_create_trait">caractère</string>
+    <string name="traits_create_format">format</string>
+    <string name="traits_create_value_default">défaut</string>
+    <string name="traits_create_value_minimum">minimum</string>
+    <string name="traits_create_value_maximum">maximum</string>
+    <string name="traits_create_details">détails</string>
+    <string name="traits_create_optional">optionnel</string>
+    <string name="traits_create_categories_title">catégories</string>
+    <string name="traits_create_photo_maximum">nombre maximum de photos</string>
+    <string name="traits_create_true">vrai</string>
+    <string name="traits_create_false">faux</string>
+    <string name="traits_create_categories_text">séparer les catégories par un /</string>
+    <string name="traits_create_warning_name_blank">le nom du caractère ne peut pas être vide</string>
+    <string name="traits_create_warning_duplicate">le caractère existe déjà</string>
+    <string name="traits_create_warning_numeric_required">défaut, minimum, et maximum doivent être numériques</string>
+    <!-- COLLECT -->
+    <!-- Validation -->
+    <string name="trait_error_minimum_value">la valeur est inférieure au minimum qui a été défini</string>
+    <string name="trait_error_maximum_value">la valeur est supérieure au maximum qui a été défini</string>
+    <string name="trait_error_disease_severity">Sévérité déjà enregistrée</string>
+    <!-- Toolbar -->
+    <string name="main_toolbar_resources">Ressources</string>
+    <string name="main_trait_details">description du caractère</string>
+    <string name="main_infobar_data_missing">aucune donnée</string>
+    <string name="main_toolbar_next_entry_no_data">entrée vide suivante</string>
+    <!-- InfoBars -->
+    <string name="dialog_att_chooser_traits">caractères</string>
+    <!-- ID/Barcode Search -->
+    <string name="main_toolbar_moveto_no_match">aune valeur associée</string>
+    <string name="main_toolbar_moveto">aller à ID</string>
+    <string name="main_toolbar_barcode_scan">Scanner le code-barres</string>
+    <string name="main_toolbar_moveto_scan">Scanner</string>
+    <!-- Search  -->
+    <string name="main_toolbar_search">Rechercher</string>
+    <string name="search_dialog_add">ajouter</string>
+    <string name="search_dialog_clear">effacer</string>
+    <string name="search_dialog_query_is_equal_to">est égal à</string>
+    <string name="search_dialog_query_is_not_equal_to">n\'est pas égal à</string>
+    <string name="search_dialog_query_contains">contient</string>
+    <string name="search_dialog_query_does_not_contain">ne contient pas</string>
+    <string name="search_dialog_query_is_more_than">est supérieur à</string>
+    <string name="search_dialog_query_is_less_than">est inférieur à</string>
+    <string name="search_results_dialog_title">chercher les résultats</string>
+    <string name="search_results_dialog_range">ligne</string>
+    <string name="search_results_dialog_plot">parcelle</string>
+    <string name="search_results_missing">aucun résultat trouvé</string>
+    <!--- Profile -->
+    <string name="activity_collect_dialog_verify_no_button">non</string>
+    <string name="activity_collect_dialog_verify_yes_button">oui</string>
+    <!--- Datagrid -->
+    <!-- Trait Layout: Photo -->
+    <string name="trait_error_hardware_missing">votre appareil ne possède pas le disque dur nécessaire pour cette application</string>
+    <string name="trait_delete_warning_photo">Etes-vous sûre de vouloir effacer cette photo?</string>
+    <!-- Trait Layout: GNSS -->
+    <!-- Trait Layout: Date -->
+    <!-- Trait Layout: Boolean -->
+    <!-- Trait Layout: GoPro -->
+    <!-- Trait Layout: USB Camera -->
+    <!--- Trait Layout: Zebra label print -->
+    <string name="trait_layout_data_stored">les données ont été sauvegardées</string>
+    <string name="trait_layout_print_label_size_title">Taille:</string>
+    <string name="trait_layout_print_text_field_title">Texte:</string>
+    <string name="trait_layout_print_text_field_title_2">Texte2:</string>
+    <string name="trait_layout_print_text_field_title_3">Texte3:</string>
+    <string name="trait_layout_print_text_field_title_4">Texte4:</string>
+    <string name="trait_layout_print_barcode_field_title">Code-barres</string>
+    <!--- Trait Layout: Counter -->
+    <!--- Trait Layout: Location -->
+    <!--- Text to Speech Strings -->
+    <!--- Summary -->
+    <!--- Repeated measures -->
+    <string name="dialog_multi_measure_delete">Effacer</string>
+    <!--- GeoNav -->
+    <!--- Content Descriptions -->
+    <!-- EXPORT -->
+    <!-- Export dialog -->
+    <string name="export_dialog_title">Export Données</string>
+    <string name="export_format_database">base de données</string>
+    <string name="export_format_table">tableau</string>
+    <string name="export_file_name">nom du fichier</string>
+    <string name="export_content_columns_title">Colonnes de l\'essai</string>
+    <string name="export_content_columns_all">Toutes les colonnes de l\'essai</string>
+    <string name="export_content_columns_unique">Identifiant unique seulement</string>
+    <string name="export_content_traits_all">tous les caractères</string>
+    <string name="export_content_traits_active">Seulement les caractères actifs</string>
+    <string name="export_error_general">erreur pendant l\'export</string>
+    <string name="export_error_data_missing">aucune données à exporter</string>
+    <string name="export_complete">export terminé</string>
+    <string name="export_progress">export en cours</string>
+    <string name="export_error_missing_format">le format d\'export doit être sélectionné</string>
+    <string name="export_error_missing_column">Le type de colonne de l\'essai doit être sélectionné</string>
+    <string name="export_error_missing_trait">Le type de caractère doit être sélectionné</string>
+    <string name="export_overwrite">Écraser le fichier précédement exporté</string>
+    <!-- Citation -->
+    <string name="citation_string">Si vous utilisez Field Book pour la recherche, citez l\'article suivant:</string>
+    <!-- SETTINGS -->
+    <!-- General -->
+    <string name="preferences_general_title">Général</string>
+    <string name="preferences_source_default_import">Source d \'import par défault</string>
+    <string name="preferences_source_default_export">Source d \'export par défault</string>
+    <string name="preferences_general_feature_next_missing">activer le bouton pour avancer l\'utilisateur à la prochaine entrée sans donnée</string>
+    <string name="preferences_general_feature_next_missing_description">Ajouter le bouton pour avancer l\'utilisateur à la prochaine entrée sans donnée pour le caractère sélectioné</string>
+    <string name="preferences_general_skip_entries_default">défaut</string>
+    <string name="preferences_general_barcode_camera">Changer d\'entrée via code-barres</string>
+    <string name="preferences_general_barcode_camera_description">Scanner le code-barres et passer a l\'entrée</string>
+    <string name="preferences_general_feature_barcode_text">activer l\'option pour passer à un identifiant unique spécifique</string>
+    <string name="preferences_general_feature_barcode_text_description">Ouvrir la saisie d\'identifiant unique et passer l\'entrée spécifique</string>
+    <string name="preferences_general_feature_datagrid">Grille de données</string>
+    <string name="preferences_general_feature_datagrid_description">Afficher une feuille des parcelles et caractères avec des données collectées</string>
+    <!-- Profile -->
+    <string name="profile_person">personne</string>
+    <string name="profile_person_title">définir la personne</string>
+    <string name="profile_name_first">prénom</string>
+    <string name="profile_name_last">nom</string>
+    <string name="profile_reset">effacer les paramètres</string>
+    <!-- Appearance -->
+    <string name="preferences_appearance_title">Apparence</string>
+    <string name="preferences_appearance_theme_title">Thème</string>
+    <string name="theme_default">défaut</string>
+    <string name="preferences_appearance_language">Langue</string>
+    <string name="preferences_appearance_language_description">Sélection automatique de la langue</string>
+    <string name="preferences_appearance_tutorial_description">Ajouter l\'icone tutoriel aux fenêtres de collecte de données, paramètres, essais et caractères</string>
+    <string name="preferences_appearance_collection_category_title">Ecran de collecte de donnée</string>
+    <string name="preferences_appearance_toolbar_customize">Modifier les icônes de la barre-outil</string>
+    <string name="preferences_appearance_toolbar_customize_description">Modifier les icônes de l\'écran de collecte de données</string>
+    <string name="preferences_appearance_toolbar_customize_search">Recherche</string>
+    <string name="preferences_appearance_toolbar_customize_resources">Ressources</string>
+    <string name="preferences_appearance_toolbar_customize_summary">Sommaire</string>
+    <string name="preferences_appearance_toolbar_customize_lock">Vérouiller</string>
+    <string name="preferences_appearance_infobar_number">Nombre de barres d\'informations</string>
+    <string name="preferences_appearance_infobar_number_description">Ajuster le nombre de barres d\'informations sur l\'écran principal</string>
+    <string name="preferences_appearance_quickgoto">Raccourci rapide</string>
+    <string name="preferences_appearance_quickgoto_description">Changer la section intermédiaire de l\'écran principal pour l\'ancienne version du Quick GoTo</string>
+    <!-- Behavior -->
+    <string name="preferences_behavior_title">Comportement</string>
+    <string name="preferences_behavior_cycle_traits">passer au premier caractère de l\'entrée suivante</string>
+    <string name="preferences_behavior_cycle_traits_description">Après avoir passe tout les caractères en revue, Field Book passe a l\'entrée suivante</string>
+    <string name="preferences_behavior_volume_buttons_navigate">Appliquer les touches de volume a la saisie de données</string>
+    <string name="preferences_behavior_volume_buttons_navigate_description">Les touches de volume vont a l\'entrée suivante ou précédente</string>
+    <string name="preferences_behavior_return_character">Signal de touche retour</string>
+    <string name="preferences_behavior_return_character_next_plot">Parcelle suivante</string>
+    <string name="preferences_behavior_return_character_next_trait">Caractère suivant</string>
+    <string name="preferences_behavior_return_character_do_nothing">Ne rien faire</string>
+    <string name="preferences_behavior_disable_entry_arrow">Désactiver la flèche d\'entrée</string>
+    <string name="preferences_behavior_disable_entry_arrow_left">Gauche</string>
+    <string name="preferences_behavior_disable_entry_arrow_right">Droite</string>
+    <string name="preferences_behavior_disable_entry_arrow_both">Les deux</string>
+    <string name="preferences_general_share_disable">Désactiver le partage fichier</string>
+    <string name="preferences_general_share_disable_description">Lorsque les fichiers sont exportés, le message de partage ne sera pas affiché</string>
+    <string name="preferences_general_use_day_number">remplacer la date par le numéro du jour de l\'année</string>
+    <string name="preferences_general_use_day_number_description">Utiliser le jour de l\'année au lieu de la date</string>
+    <string name="preferences_general_skip_entries_with_data">cacher les données déjà existantes</string>
+    <string name="preferences_general_skip_entries_with_data_description">Exclure les entrées qui ont des données existantes pour ce caractère</string>
+    <!-- GeoNav -->
+    <!-- Sounds -->
+    <string name="preferences_sounds">Sons</string>
+    <string name="preferences_sound_primary_order_sound">Son pour prévenir d\'un changement de premier ordre.</string>
+    <string name="preferences_sound_primary_order_sound_description">Son pour prévenir d\'un changement de premier ordre.</string>
+    <!-- BrAPI preferences are in the BrAPI section below -->
+    <!-- Database -->
+    <string name="database_dialog_title">Base de données</string>
+    <string name="database_import">Importer la Base de données</string>
+    <string name="database_export">Exporter la Base de données</string>
+    <string name="database_reset">réinitialiser la base de données</string>
+    <string name="database_reset_warning1">Toutes les données seront supprimées lors de la réinitialisation. Etes-vous sûr(e)?</string>
+    <string name="database_reset_warning2">Cette action est irréversible. L\'application fermera après avoir effacé la base de données. Voulez-vous continuer?</string>
+    <string name="database_reset_message">la base de données a été supprimée</string>
+    <!-- Beta -->
+    <!-- ABOUT -->
+    <!-- App  -->
+    <string name="about_title">à propos</string>
+    <string name="about_version_title">version</string>
+    <string name="about_rate">Evaluer cette application</string>
+    <!-- Lead  -->
+    <string name="about_project_lead_title">Chef de projet</string>
+    <!-- Support  -->
+    <string name="about_contributors_funding_title">Financement</string>
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <string name="about_technical_title">Details technique 1</string>
+    <!-- Update -->
+    <!-- BRAPI -->
+    <!-- BrAPI preferences -->
+    <string name="brapi_info_title">BrAPI synchronise les informations</string>
+    <string name="brapi_base_url">URL de base BrAPI</string>
+    <string name="brapi_base_url_desc">L\'URL de base pour se connecter a un serveur BrAPI</string>
+    <!-- Authorization -->
+    <string name="brapi_save_authorize">Sauvegarder et autoriser</string>
+    <string name="brapi_revoke_auth">Se déconnecter</string>
+    <string name="brapi_auth_btn">Se connecter au site</string>
+    <string name="brapi_auth_success">Autorisation BrAPI réussie</string>
+    <string name="brapi_auth_deny">Autorisation BrAPI refusée</string>
+    <string name="brapi_auth_error_starting">Erreur au démarrage de l\'authentification BrAPI</string>
+    <string name="brapi_auth_needed_title">Connection requise</string>
+    <string name="brapi_auth_needed">Vous devez être connecté au système avec lequel vous souhaitez synchroniser les données pour pouvoir synchroniser.
+
+Souhaitez-vous vous authentifier maintenant?</string>
+    <!-- BrAPI Import -->
+    <string name="brapi_load_data_button">Charger les champs</string>
+    <string name="brapi_load_traits_button">Charger les caractères</string>
+    <string name="brapi_save_data_button">Sauvegarder le champs</string>
+    <string name="brapi_study_name">Nom</string>
+    <string name="brapi_study_location">Lieu</string>
+    <string name="brapi_study_num_traits">Caractères</string>
+    <string name="brapi_study_detail_error">Une erreur est survenue lors du chargement des données de l\'essai. Essai non sauvegardé.</string>
+    <string name="brapi_plot_detail_error">Erreur lors du chargement des parcelles de l Essai. Essai non sauvegardé.</string>
+    <string name="brapi_study_traits_error">Erreur lors du chargement des caractères pour l Essai. Essai non sauvegardé.</string>
+    <string name="brapi_ontology_error">Erreur BrAPI lors du chargement des caractères.</string>
+    <string name="brapi_save_field_error">Erreur de sauvegarde de l\'essai</string>
+    <string name="brapi_field_not_selected">L\'essai selectionné doit etre importé depuis BrAPI.</string>
+    <string name="brapi_save_trait">Sauvegarder les caractères</string>
+    <string name="brapi_must_configure_url">Vous devez configurer une URL BrAPI valide dans les paramètres. </string>
+    <string name="brapi_export_failed">Export BrAPI a echoué</string>
+    <string name="brapi_export_permission_deny">ERREUR: vous n\'avez pas les permissions d\'envoyer de données au système specifié.</string>
+    <string name="brapi_export_not_supported">ERREUR: le système cible n\'a pas de support BrAPI pour l\'envoi d\'observations.</string>
+    <string name="brapi_export_wrong_num_obs">ERREUR: le nombre d\'observations diffère de la requête.</string>
+    <string name="brapi_export_missing_obs">ERREUR: observation manquante dans la réponse</string>
+    <string name="brapi_export_multiple_obs">ERREUR: multiples observations par variable</string>
+    <string name="brapi_export_unknown_error">ERREUR: erreur inconnue</string>
+    <string name="brapi_export_successful">Export BrAPI réussit</string>
+    <string name="brapi_saving_indicator">Sauvegarde des observations</string>
+    <string name="brapi_field_non_matching_sources">Impossible de synchroniser les données. L\'essai provient de  %1$s , l\'url BrAPI correspond a %2$s. Les deux sources doivent correspondent.</string>
+    <string name="brapi_trait_already_exists">Le caractère existe déjà: %1$s. Non sauvegardé.</string>
+    <string name="brapi_error_saving_all_traits">Erreur lors de la sauvegarde des caractères. Caractères non sauvegardés.</string>
+    <string name="brapi_error_saving_some_traits">Erreur lors de la sauvegarde de certains caractères. Certains caractères non pas été sauvegardés.</string>
+    <string name="brapi_traits_saved_success">Les caractères sélectionnés on été sauvegradés avec succès.</string>
+    <!-- BrAPI Export -->
+    <string name="brapi_export_button">exporter</string>
+    <string name="brapi_export_title">Export Stats BrAPI</string>
+    <string name="brapi_export_num_new_obs">Nouvelle Observations</string>
+    <string name="brapi_export_num_synced_obs">Synchronisation des observations</string>
+    <string name="brapi_export_num_ed_obs">Observations editées</string>
+    <string name="brapi_export_skipped_observations">Observations ignorées</string>
+    <string name="brapi_export_skipped_user_created">Obersavtions de caractères crées par l\'utilisateur</string>
+    <string name="brapi_export_skipped_wrong_source">Différentes sources de données </string>
+    <string name="brapi_export_num_new_imgs">Nouvelles images</string>
+    <string name="brapi_export_num_synced_imgs">Images synchronisées </string>
+    <string name="brapi_export_num_ed_imgs">Images éditées </string>
+    <string name="brapi_export_num_incomplete_imgs">Synchronisation des images incomplètes</string>
+    <string name="brapi_export_skipped_images">Images ignorées</string>
+    <string name="brapi_export_skipped_user_created_images">Images de caractères crées par l\'utilisateur</string>
+    <string name="brapi_delete_message">L\'observation BrAPI synchronisée ne peut pas etre effacée, remplacée par NA</string>
+    <!-- Pagination -->
+    <string name="next">Suivant</string>
+    <string name="prev">précédent</string>
+    <string name="page_one_of_one">Page 1 de 1</string>
+    <!-- General -->
+    <string name="device_offline_warning">Appareil hors-ligne. Connectez vous a un réseau et ré-essayez.</string>
+    <string name="brapi_info_message">Phenotypes et essais importés via BrAPI pourront exporter leurs observations via l\'export BrAPI.
+Phenotypes et essais créés manuellement ou importés via CSV devront être exportés  via le format CSV.</string>
+    <!-- TUTORIAL -->
+    <string name="tutorial_dialog_title">tutoriel</string>
+    <string name="tutorial_dialog_description">Voulez-vous activer le tutoriel? Cette configuration peut être modifiée dans Paramètres Avancés.</string>
+    <string name="tutorial_main_infobars_title">Barre d\'information</string>
+    <string name="tutorial_main_infobars_description">Barre d\'information affiche des données supplémentaires pour chaque entrée et peut être changée en utilisant le menu déroulant</string>
+    <string name="tutorial_main_traits_title">Caractères</string>
+    <string name="tutorial_main_traits_description">Les petites flèches vertes déplacent les caractères</string>
+    <string name="tutorial_main_traitlist_title">Caractères</string>
+    <string name="tutorial_main_traitlist_description">Le caractère selectionné est en train d\'être collecté. Une liste des caractères est affichée lorsque qu\'on clique sur le caractère selectionné</string>
+    <string name="tutorial_main_entries_title">Entrées</string>
+    <string name="tutorial_main_entries_description">Les grandes flèches noires déplacent les parcelles</string>
+    <string name="tutorial_main_navinfo_title">Trier les colonnes dans l\'ordre</string>
+    <string name="tutorial_main_navinfo_description">C\'est ici que sont affichés les ordres primaires et secondaire</string>
+    <string name="tutorial_main_datacollect_title">Entrée de donnée</string>
+    <string name="tutorial_main_datacollect_description">La donnée est entrée dans la partie basse de l\'ecran. Différents types de caractères ont diffèrent format d\'entrée.</string>
+    <string name="tutorial_main_na_title">Donnée manquante</string>
+    <string name="tutorial_main_na_description">Le bouton NA est utilisée pour indiquer une donnée manquante</string>
+    <string name="tutorial_main_delete_title">Effacer la donnée</string>
+    <string name="tutorial_main_delete_description">La donnée est effacée avec ce bouton</string>
+    <string name="tutorial_main_search_title">Rechercher</string>
+    <string name="tutorial_main_search_description">L\'icône recherche permet d\'interroger une base de donnée</string>
+    <string name="tutorial_main_resources_title">Ressources</string>
+    <string name="tutorial_main_resources_description">Afficher une liste de fichiers dans le dossier ressources</string>
+    <string name="tutorial_main_summary_title">Résumé</string>
+    <string name="tutorial_main_summary_description">Affiche un résumé pour l\'entrée sélectionnée</string>
+    <string name="tutorial_main_lockdata_title">Vérouiller les données</string>
+    <string name="tutorial_main_lockdata_description">Vérouille l\'entrée de donnée actuelle</string>
+    <string name="tutorial_settings_fields_title">Essais</string>
+    <string name="tutorial_settings_fields_description">Vous permet d\'importer et gérer les essais</string>
+    <string name="tutorial_settings_fields_import">Pour commencer, importer d\'abord un fichier de plan d\'essai</string>
+    <string name="tutorial_settings_traits_title">Caractères</string>
+    <string name="tutorial_settings_traits_description">Vous permet d\'ajouter, d\'importer et gérer les caractères</string>
+    <string name="tutorial_settings_collect_title">Collecter des données</string>
+    <string name="tutorial_settings_collect_description">Vous permet de collecter des données phénotypiques</string>
+    <string name="tutorial_settings_settings_title">Paramètres</string>
+    <string name="tutorial_settings_settings_description">Permet une configuration additionelle de la collecte des données</string>
+    <string name="tutorial_settings_export_title">exporter</string>
+    <string name="tutorial_settings_export_description">Les données peuvent être exportées en deux formats: base de données ou table</string>
+    <string name="tutorial_fields_add_title">Ajouter un essai</string>
+    <string name="tutorial_fields_add_description">Importer un fichier d\'essai</string>
+    <string name="tutorial_fields_file_description">Les fichiers doivent contenir trois colonnes: un identifiant unique, un ordre primaire et un ordre secondaire. L\'ordre primaire/secondaire sont utilisés pour la navigation dans le champs/essai. </string>
+    <string name="tutorial_fields_select_title">Champs actif</string>
+    <string name="tutorial_fields_select_description">Un essai est selectioné pour la collecte de donnée après avoir été importé.</string>
+    <string name="tutorial_fields_delete_title">Effacer le champs</string>
+    <string name="tutorial_fields_delete_description">Pour effacer un champs, ouvrez le menu sur la gauche du nom du champs et selectionné Effacer.</string>
+    <string name="tutorial_traits_add_title">Ajouter un caractère</string>
+    <string name="tutorial_traits_add_description">Ajouter un caractère créé un nouveau caractère. Differents formats de caractères ont différents formats d\'affichage pour la collecte.</string>
+    <string name="tutorial_traits_format_title">Formats de caractère</string>
+    <string name="tutorial_traits_format_description">Différents formats de caractères sont indiqués avec différents symboles</string>
+    <string name="tutorial_traits_visibility_title">Visibilité du caractère</string>
+    <string name="tutorial_traits_visibility_description">Les caractères peuvent être désactivés de la collecte en décochant la case associée.</string>
+</resources>

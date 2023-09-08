@@ -6,10 +6,17 @@
         versionName="v5.5">
         <new>New GoPro Trait (Hero 11)</new>
         <new>New InfoBar prefix selector</new>
+        <new>Search selections persist</new>
+        <new>Updates available from About</new>
+        <new>Added Vietnamese and Swedish translations</new>
+        <info>Merged barcode and text unique ID search setting</info>
+        <info>Numerous GeoNav improvements</info>
+        <info>Merged duplicate settings</info>
+        <bugfix>Numerous bug fixes</bugfix>
     </release>
 
     <release
-        date="2023-6-01"
+        date="2023-06-01"
         versionCode="540"
         versionName="v5.4">
         <new>Experimental settings section</new>

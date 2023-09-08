@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
@@ -467,27 +468,33 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_DATABASE_EXPORT)
     public void exportDatabaseFilePermission() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(getContext(), perms)) {
-            showDatabaseExportDialog();
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
-                    PERMISSIONS_REQUEST_DATABASE_EXPORT, perms);
-        }
+
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
+            if (EasyPermissions.hasPermissions(getContext(), perms)) {
+                showDatabaseExportDialog();
+            } else {
+                // Do not have permissions, request them now
+                EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
+                        PERMISSIONS_REQUEST_DATABASE_EXPORT, perms);
+            }
+        } else showDatabaseExportDialog();
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_DATABASE_IMPORT)
     public void importDatabaseFilePermission() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (getContext() != null) {
-            if (EasyPermissions.hasPermissions(getContext(), perms)) {
-                showDatabaseImportDialog();
-            } else {
-                // Do not have permissions, request them now
-                EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
-                        PERMISSIONS_REQUEST_DATABASE_IMPORT, perms);
+
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
+            if (getContext() != null) {
+                if (EasyPermissions.hasPermissions(getContext(), perms)) {
+                    showDatabaseImportDialog();
+                } else {
+                    // Do not have permissions, request them now
+                    EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
+                            PERMISSIONS_REQUEST_DATABASE_IMPORT, perms);
+                }
             }
-        }
+        } else showDatabaseImportDialog();
     }
 }
