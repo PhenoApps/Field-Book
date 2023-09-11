@@ -226,7 +226,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
 
         if (preference.equals(brapiDisplayName)) {
-
             brapiDisplayName.setSummary(newValue.toString());
 
         }
@@ -435,7 +434,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private void updateUrls(String newValue) {
         SharedPreferences sp = prefMgr.getSharedPreferences();
         String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
-        String displayName = sp.getString(GeneralKeys.BRAPI_DISPLAY_NAME, "");
+
+        // remove scheme and subdomain for initial display name
+        String displayName = newValue.replaceAll("https?://(?:www\\.)?(.*?)(?:/.*)?$", "$1");
 
         Log.d(TAG, oldBaseUrl + " to " + oldOidcUrl);
 
