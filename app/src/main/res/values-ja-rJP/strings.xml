@@ -208,10 +208,7 @@
     <string name="preferences_general_feature_next_missing">次のデータ未収集エントリーへ移動</string>
     <string name="preferences_general_feature_next_missing_description">選択中の形質の次のデータ未収集エントリーに移動するためのボタンをツールバーに追加</string>
     <string name="preferences_general_skip_entries_default">初期値</string>
-    <string name="preferences_general_barcode_camera">バーコード入力設定</string>
-    <string name="preferences_general_barcode_camera_description">バーコードを読み取り、特定のエントリーに移動</string>
     <string name="preferences_general_feature_barcode_text">ユニークIDへ移動</string>
-    <string name="preferences_general_feature_barcode_text_description">ユニークIDを入力するダイアログを開き、特定のエントリーに移動</string>
     <string name="preferences_general_feature_datagrid">データグリッド</string>
     <string name="preferences_general_feature_datagrid_description">形質の収集データをスプレッドシートにより表示</string>
     <!-- Profile -->
