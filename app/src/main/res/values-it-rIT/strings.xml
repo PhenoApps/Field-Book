@@ -206,10 +206,7 @@
     <string name="preferences_general_feature_next_missing">Prossima voce senza dati</string>
     <string name="preferences_general_feature_next_missing_description">Aggiunge un bottone alla barra degli strumenti</string>
     <string name="preferences_general_skip_entries_default">Impostazioni predefinite</string>
-    <string name="preferences_general_barcode_camera">Passa alla voce tramite codice a barre</string>
-    <string name="preferences_general_barcode_camera_description">Scansiona il codice a barre e passa alla voce specifica</string>
     <string name="preferences_general_feature_barcode_text">Passa all\'identificatore unico</string>
-    <string name="preferences_general_feature_barcode_text_description">Apre la finestra di dialogo per inserire un ID unico e passare a una voce specifica</string>
     <string name="preferences_general_feature_datagrid">Griglia di dati</string>
     <string name="preferences_general_feature_datagrid_description">Visualizza un foglio elettronico con parcelle e caratteri che mostrano i dati raccolti</string>
     <!-- Profile -->
