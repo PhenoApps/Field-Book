@@ -67,7 +67,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private val prefs by lazy {
         controller.getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
     }
-
+    
     private val mGnssResponseReceiver: GNSSResponseReceiver = object : GNSSResponseReceiver() {
         override fun onGNSSParsed(parser: NmeaParser) {
 
@@ -473,6 +473,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 //                                    if (tv != null) {
 //                                        tv.text = id
 //                                    }
+
                                     val btn =
                                         snackView.findViewById<ImageButton>(R.id.geonav_snackbar_btn)
                                     btn?.setOnClickListener { v: View? ->

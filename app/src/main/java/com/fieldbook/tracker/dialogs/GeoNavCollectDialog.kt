@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
-import android.view.LayoutInflater
 import android.widget.CheckBox
 import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
@@ -17,7 +16,7 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
     AlertDialog.Builder(activity, R.style.AppAlertDialog) {
 
     private val TAG: String = "GeoNavCollectDialog"
-
+      
     private val prefs by lazy {
         context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
     }
