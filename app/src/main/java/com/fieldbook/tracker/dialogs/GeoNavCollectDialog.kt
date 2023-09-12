@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
+import android.view.LayoutInflater
 import android.widget.CheckBox
 import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog

@@ -1989,6 +1989,10 @@ public class CollectActivity extends ThemedActivity
         return ep.getBoolean(GeneralKeys.CYCLING_TRAITS_ADVANCES, false);
     }
 
+    public boolean isReturnFirstTrait() {
+        return ep.getBoolean(GeneralKeys.RETURN_FIRST_TRAIT, false);
+    }
+
     /**
      * Inserts a user observation whenever a label is printed.
      * See ResultReceiver onReceiveResult in LabelPrintLayout
