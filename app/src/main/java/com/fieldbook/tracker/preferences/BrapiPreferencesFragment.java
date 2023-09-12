@@ -395,6 +395,33 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             intent.setClassName(context, BrapiAuthActivity.class.getName());
             startActivity(intent);
         }
+        //show a dialog to set new brapi server as default import/export option
+        Log.d("BrapiAuthActivity", "Displaying dialog to set defaults");
+        final String[] options = new String[]{ getString(R.string.import_source_ask), "Default Import Source", "Default Export Source"};
+        final boolean[] checkedOptions = new boolean[options.length];
+
+        final List<String> selectedItems = Arrays.asList(options);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.brapi_choice_to_make_default_dialog_title);
+        builder.setMultiChoiceItems(options, checkedOptions, (dialog, which, isChecked) -> {
+            checkedOptions[which] = isChecked;
+            String currentItem = selectedItems.get(which);
+        });
+        builder.setPositiveButton("Done", (dialog, which) -> {
+            for (int i = 0; i < checkedOptions.length; i++) {
+                if (checkedOptions[i]) {
+                    if (selectedItems.get(i).equals("Default Import Source")) {
+                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "brapi").apply();
+                    } else if (selectedItems.get(i).equals("Default Export Source")) {
+                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "brapi").apply();
+                    }
+                }
+            }
+        });
+        // handle the negative button of the alert dialog
+        builder.setNegativeButton("CANCEL", (dialog, which) -> {});
+        // create the builder
+        builder.create().show();
     }
 
     //checks the uri scheme, uris without http/https causes auth to crash
