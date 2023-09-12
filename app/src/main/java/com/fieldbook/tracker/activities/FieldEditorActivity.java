@@ -185,10 +185,14 @@ public class FieldEditorActivity extends ThemedActivity
         View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
 
         ListView importSourceList = layout.findViewById(R.id.myList);
-        String[] importArray = new String[3];
+        String[] importArray = new String[2];
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_cloud);
-        importArray[2] = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, "BrAPI");
+        if (ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+            String displayName = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, "BrAPI");
+            importArray = Arrays.copyOf(importArray, importArray.length + 1);
+            importArray[2] = displayName;
+        }
 
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, importArray);

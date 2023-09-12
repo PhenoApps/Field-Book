@@ -76,6 +76,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -289,12 +290,9 @@ public class ConfigActivity extends ThemedActivity {
 
                     if (checkTraitsExist() < 0) return;
 
-                    String exporter = ep.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask");
+                    String exporter = ep.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "");
 
                     switch (exporter) {
-                        case "ask":
-                            showExportDialog();
-                            break;
                         case "local":
                             exportPermission();
                             break;
@@ -302,7 +300,12 @@ public class ConfigActivity extends ThemedActivity {
                             exportBrAPI();
                             break;
                         default:
-                            showExportDialog();
+                            // Skip dialog if BrAPI is disabled
+                            if (ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+                                showExportDialog();
+                            } else {
+                                exportPermission();
+                            }
                             break;
                     }
 
