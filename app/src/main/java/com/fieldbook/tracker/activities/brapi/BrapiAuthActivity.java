@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.activities.brapi;
 
+import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +16,7 @@ import androidx.annotation.Nullable;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.ThemedActivity;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import net.openid.appauth.AuthorizationException;
@@ -28,6 +31,8 @@ import net.openid.appauth.connectivity.ConnectionBuilder;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 public class BrapiAuthActivity extends ThemedActivity {
 

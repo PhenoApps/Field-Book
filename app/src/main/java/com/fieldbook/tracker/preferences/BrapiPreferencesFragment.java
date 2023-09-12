@@ -33,6 +33,9 @@ import com.google.zxing.integration.android.IntentResult;
 import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog;
 import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialogFragmentCompat;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * This preference fragment handles all BrAPI related shared preferences.
  *
@@ -333,6 +336,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     brapiURLPreference.setText(text);
                     onPreferenceChange(brapiURLPreference, text);
                     brapiAuth();
+
                 } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
                     brapiDisplayName.setText(text);
                     onPreferenceChange(brapiDisplayName, text);

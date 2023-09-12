@@ -726,16 +726,18 @@
     <string name="preferences_brapi" translatable="false">BrAPI</string>
     <string name="brapi_info_title">Breeding API</string>
 
+    <string name="preferences_brapi_enable_title">Enable BrAPI</string>
+    <string name="preferences_brapi_core_title">Configuration</string>
+
     <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
     <string name="act_brapi_auth_http_warning_title">HTTP Warning</string>
     <string name="act_brapi_auth_http_warning_message">You have entered an http url. There is no guarantee that this connection is secure.</string>
 
-    <string name="preferences_brapi_enable_title">Enable BrAPI</string>
-    <string name="preferences_brapi_core_title">Configuration</string>
-
     <string name="brapi_base_url">Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
     <string name="brapi_base_url_default" translatable="false">https://test-server.brapi.org</string>
+
+    <string name="brapi_choice_to_make_default_dialog_title">Select how you want to use this brapi server:</string>
 
     <string name="brapi_edit_display_name">Edit Display Name</string>
 

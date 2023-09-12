@@ -125,6 +125,7 @@ public class GeneralKeys {
     public static final String THEME = "key_preferences_theme_theme";
     public static final String TEXT_THEME = "key_preferences_theme_text";
     public static final String THEME_FLAG = "key_preferences_theme_theme_flag";
+    public static final String IMPORT_SOURCE_DEFAULT = "IMPORT_SOURCE_DEFAULT";
     public static final String EXPORT_SOURCE_DEFAULT = "EXPORT_SOURCE_DEFAULT";
     public static final String FIRST_RUN = "FirstRun";
     public static final String UPDATE_VERSION = "UpdateVersion";
