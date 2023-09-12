@@ -50,6 +50,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private static final String TAG = BrapiPreferencesFragment.class.getSimpleName();
     private static final int REQUEST_BARCODE_SCAN_BASE_URL = 99;
     private static final int REQUEST_BARCODE_SCAN_OIDC_URL = 98;
+    private static final int AUTH_REQUEST_CODE = 123; // Define your request code
     private static final String DIALOG_FRAGMENT_TAG = "com.tracker.fieldbook.preferences.BRAPI_DIALOG_FRAGMENT";
 
     private Context context;
@@ -393,35 +394,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if (brapiHost != null) {
             Intent intent = new Intent();
             intent.setClassName(context, BrapiAuthActivity.class.getName());
-            startActivity(intent);
+            startActivityForResult(intent, AUTH_REQUEST_CODE);
         }
-        //show a dialog to set new brapi server as default import/export option
-        Log.d("BrapiAuthActivity", "Displaying dialog to set defaults");
-        final String[] options = new String[]{ getString(R.string.import_source_ask), "Default Import Source", "Default Export Source"};
-        final boolean[] checkedOptions = new boolean[options.length];
-
-        final List<String> selectedItems = Arrays.asList(options);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(R.string.brapi_choice_to_make_default_dialog_title);
-        builder.setMultiChoiceItems(options, checkedOptions, (dialog, which, isChecked) -> {
-            checkedOptions[which] = isChecked;
-            String currentItem = selectedItems.get(which);
-        });
-        builder.setPositiveButton("Done", (dialog, which) -> {
-            for (int i = 0; i < checkedOptions.length; i++) {
-                if (checkedOptions[i]) {
-                    if (selectedItems.get(i).equals("Default Import Source")) {
-                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "brapi").apply();
-                    } else if (selectedItems.get(i).equals("Default Export Source")) {
-                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "brapi").apply();
-                    }
-                }
-            }
-        });
-        // handle the negative button of the alert dialog
-        builder.setNegativeButton("CANCEL", (dialog, which) -> {});
-        // create the builder
-        builder.create().show();
     }
 
     //checks the uri scheme, uris without http/https causes auth to crash
@@ -442,6 +416,42 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             startAuth();
 
         }
+    }
+
+    private void displaySuccessDialog() {
+        //show a dialog to set newly authorized brapi server as the default import/export option
+        final String[] options = new String[]{
+                getString(R.string.brapi_choice_to_make_default_import),
+                getString(R.string.brapi_choice_to_make_default_export),
+                getString(R.string.brapi_choice_to_make_default_ask)
+        };
+        final boolean[] checkedOptions = new boolean[options.length];
+
+        final List<String> selectedItems = Arrays.asList(options);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.brapi_choice_to_make_default_dialog_title);
+        builder.setMultiChoiceItems(options, checkedOptions, (dialog, which, isChecked) -> {
+            checkedOptions[which] = isChecked;
+            String currentItem = selectedItems.get(which);
+        });
+        builder.setPositiveButton("Done", (dialog, which) -> {
+            for (int i = 0; i < checkedOptions.length; i++) {
+                if (checkedOptions[i]) {
+                    if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_import))) {
+                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "brapi").apply();
+                    } else if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_export))) {
+                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "brapi").apply();
+                    } else if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_ask))) {
+                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "ask").apply();
+                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
+                    }
+                }
+            }
+        });
+        // handle the negative button of the alert dialog
+        builder.setNegativeButton("CANCEL", (dialog, which) -> {});
+        // create the builder
+        builder.create().show();
     }
 
     private void setServer(String url, String displayName, String oidcUrl, String oidcFlow) {
@@ -564,6 +574,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     oldBaseUrl = brapiURLPreference.getText();
                     String scannedBarcode = plotDataResult.getContents();
                     updateUrls(scannedBarcode);
+                }
+                break;
+            case AUTH_REQUEST_CODE: // Add your new request code here
+                if (resultCode == RESULT_OK) {
+                    displaySuccessDialog();
                 }
                 break;
         }
