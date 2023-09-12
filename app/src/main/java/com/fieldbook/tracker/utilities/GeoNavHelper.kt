@@ -16,7 +16,6 @@ import android.location.Location
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
-import android.provider.ContactsContract.Data
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
@@ -35,14 +34,11 @@ import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.NmeaParser
-import com.fieldbook.tracker.objects.InfoBarModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.impactZoneSearch
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.lowPassFilter
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.writeGeoNavLog
-import com.fieldbook.tracker.utilities.InfoBarHelper
-import com.fieldbook.tracker.utilities.Utils
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.SnackbarLayout
 import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getDirectory
@@ -53,7 +49,7 @@ import javax.inject.Inject
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class GeoNavHelper @Inject constructor(private val controller: CollectController, private val infoBarHelper: InfoBarHelper):
+class GeoNavHelper @Inject constructor(private val controller: CollectController):
     SensorEventListener, GPSTracker.GPSTrackerListener {
 
     /**
@@ -67,6 +63,10 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private var mNotWarnedInterference = true
 
     private var currentFixQuality = false
+
+    private val prefs by lazy {
+        controller.getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+    }
 
     private val mGnssResponseReceiver: GNSSResponseReceiver = object : GNSSResponseReceiver() {
         override fun onGNSSParsed(parser: NmeaParser) {
@@ -467,14 +467,8 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                     val tv =
                                         snackView.findViewById<TextView>(R.id.geonav_snackbar_tv)
 
-                                    // get the first info-bar field displayed on the screen
-                                    val models: List<InfoBarModel>? =
-                                        infoBarHelper?.getInfoBarData()
-
-                                    val firstInfoBar = models?.get(0)?.prefix
-
-                                    // fallback for firstInfoBar will be plot_id
-                                    tv.text = firstInfoBar + ": " + getInfoBarData(id, "${firstInfoBar?: "plot_id"}")
+                                    var popupHeader = prefs.getString(GeneralKeys.GEONAV_POPUP_DISPLAY, "plot_id")
+                                    tv.text = getPopupInfo(id, "${popupHeader?: "plot_id"}")
 
 //                                    if (tv != null) {
 //                                        tv.text = id
@@ -500,7 +494,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         }
     }
 
-    private fun getInfoBarData(id: String, firstInfoBar: String): String {
+    private fun getPopupInfo(id: String, popupHeader: String): String {
 
         var database : DataHelper = controller.getDatabase()
 
@@ -510,9 +504,9 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         val attributes: List<String> = ArrayList(Arrays.asList(*database.rangeColumnNames))
 
         //check if the label is an attribute or a trait
-        val isAttribute = attributes.contains(firstInfoBar)
+        val isAttribute = attributes.contains(popupHeader)
 
-        return controller.queryForLabelValue(id, firstInfoBar, isAttribute)
+        return controller.queryForLabelValue(id, popupHeader, isAttribute)
     }
 
     /**

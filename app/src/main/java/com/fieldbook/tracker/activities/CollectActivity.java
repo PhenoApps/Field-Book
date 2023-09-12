@@ -273,7 +273,7 @@ public class CollectActivity extends ThemedActivity
         secureBluetooth.initialize();
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        geoNavHelper = new GeoNavHelper(this, infoBarHelper);
+        geoNavHelper = new GeoNavHelper(this);
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         ttsHelper = new TextToSpeechHelper(this, () -> {

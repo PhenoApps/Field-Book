@@ -411,6 +411,7 @@
     <string name="dialog_geonav_collect_auto_navigate">Auto Navigate</string>
     <string name="dialog_geonav_collect_notify_on_precision_loss">Audio on precision drop</string>
     <string name="dialog_geonav_collect_precision_threshold_title">Degree of precision</string>
+    <string name="dialog_geonav_collect_geonav_popup_type">GeoNav Popup Type</string>
     <string name="dialog_geonav_collect_reconnect">Reconnect</string>
     <string name="dialog_geonav_collect_reset_start_toast_message">Resetting connection…</string>
     <string name="dialog_geonav_collect_reset_end_toast_message">Connection reset</string>
