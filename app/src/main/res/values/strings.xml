@@ -587,11 +587,17 @@
     <string name="preferences_behavior_cycle_traits">Cycling traits advances entry</string>
     <string name="preferences_behavior_cycle_traits_description">After going through all traits, Field Book goes to the next entry</string>
 
+    <string name="preferences_behavior_volume_buttons_navigate">Map volume keys to trait or entry arrows</string>
+    <string name="preferences_behavior_volume_buttons_navigate_description">Volume keys duplicate selected navigation type</string>
+    <string name="preferences_behavior_volume_buttons_navigate_traits_description">Volume keys duplicate trait navigation arrows</string>
+    <string name="preferences_behavior_volume_buttons_navigate_entries_description">Volume keys duplicate entry navigation arrows</string>
+
+    <string name="preferences_behavior_volume_buttons_navigate_disabled">Disabled</string>
+    <string name="preferences_behavior_volume_buttons_navigate_traits">Navigate traits</string>
+    <string name="preferences_behavior_volume_buttons_navigate_entries">Navigate entries</string>
+
     <string name="preferences_behavior_return_to_first_trait">Advancing entry returns to first trait</string>
     <string name="preferences_behavior_return_to_first_trait_description">When moving to the next entry, Field Book also returns to the first trait</string>
-
-    <string name="preferences_behavior_volume_buttons_navigate">Map volume keys to entry navigation</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">Volume keys go to next or previous entry</string>
 
     <string name="preferences_behavior_return_character">Return key signal</string>
     <string name="preferences_behavior_return_character_next_plot">Next plot</string>

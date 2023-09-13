@@ -66,7 +66,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
         Preference moveToUniqueIdPref = this.findPreference(GeneralKeys.MOVE_TO_UNIQUE_ID);
 
-        if (skipEntriesPref != null) {
+        if (moveToUniqueIdPref != null) {
 
             //set preference change listener to change summary when needed
             moveToUniqueIdPref.setOnPreferenceChangeListener(this);

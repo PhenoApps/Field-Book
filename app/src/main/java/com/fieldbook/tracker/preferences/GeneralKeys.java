@@ -29,7 +29,7 @@ public class GeneralKeys {
 
     // Behavior
     public static final String RETURN_CHARACTER                     = "RETURN_CHARACTER";
-    public static final String VOLUME_NAVIGATION                    = "VOLUME_NAVIGATION";
+    public static final String VOLUME_NAVIGATION                    = "com.fieldbook.tracker.VOLUME_NAVIGATION";
     public static final String CYCLING_TRAITS_ADVANCES              = "CycleTraits";
     public static final String RETURN_FIRST_TRAIT              = "ReturnFirst";
     public static final String DISABLE_ENTRY_ARROW_NO_DATA          = "DISABLE_ENTRY_ARROW_NO_DATA";
