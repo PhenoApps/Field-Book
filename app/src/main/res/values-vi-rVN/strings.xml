@@ -244,8 +244,6 @@
     <string name="preferences_behavior_title">Hành vi</string>
     <string name="preferences_behavior_cycle_traits">Xoay vòng tính trạng tăng lên nghiệm nghiệm thức</string>
     <string name="preferences_behavior_cycle_traits_description">Sau khi đi qua tất cả các tính trạng, Sổ tay đồng ruộng đi đến nghiệm thức tiếp theo</string>
-    <string name="preferences_behavior_volume_buttons_navigate">Đặt các nút âm lượng để điều hướng nghiệm thức</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">Các nút âm lượng đi đến nghiệm thức tiếp theo hoặc nghiệm thức trước</string>
     <string name="preferences_behavior_return_character">Nút Return (Enter)</string>
     <string name="preferences_behavior_return_character_next_plot">Nghiệm thức tiếp theo</string>
     <string name="preferences_behavior_return_character_next_trait">Tính trạng tiếp theo</string>
