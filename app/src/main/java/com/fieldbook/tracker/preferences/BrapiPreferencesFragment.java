@@ -50,7 +50,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private static final String TAG = BrapiPreferencesFragment.class.getSimpleName();
     private static final int REQUEST_BARCODE_SCAN_BASE_URL = 99;
     private static final int REQUEST_BARCODE_SCAN_OIDC_URL = 98;
-    private static final int AUTH_REQUEST_CODE = 123; // Define your request code
+    private static final int AUTH_REQUEST_CODE = 123;
     private static final String DIALOG_FRAGMENT_TAG = "com.tracker.fieldbook.preferences.BRAPI_DIALOG_FRAGMENT";
 
     private Context context;
@@ -428,8 +428,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
     }
 
+    // shows a dialog to set newly authorized brapi server as the default import/export option
     private void displaySuccessDialog() {
-        //show a dialog to set newly authorized brapi server as the default import/export option
         final String[] options = new String[]{
                 getString(R.string.brapi_choice_to_make_default_import),
                 getString(R.string.brapi_choice_to_make_default_export)
@@ -441,7 +441,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         builder.setTitle(R.string.brapi_choice_to_make_default_dialog_title);
         builder.setMultiChoiceItems(options, checkedOptions, (dialog, which, isChecked) -> {
             checkedOptions[which] = isChecked;
-            String currentItem = selectedItems.get(which);
         });
         builder.setPositiveButton(getString(R.string.brapi_choice_to_make_default_positive), (dialog, which) -> {
             for (int i = 0; i < checkedOptions.length; i++) {
@@ -454,9 +453,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 }
             }
         });
-        // handle the negative button of the alert dialog
         builder.setNegativeButton(getString(R.string.brapi_choice_to_make_default_negative), (dialog, which) -> {});
-        // create the builder
         builder.create().show();
     }
 
