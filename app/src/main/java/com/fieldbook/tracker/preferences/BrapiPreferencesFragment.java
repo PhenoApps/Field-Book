@@ -233,7 +233,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     public boolean onPreferenceChange(Preference preference, Object newValue) {
 
         if (preference.equals(brapiURLPreference)) {
-
             updateUrls(newValue.toString());
 
         }
@@ -344,7 +343,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 //positive edit text callback
                 if (preference.getKey().equals(brapiURLPreference.getKey())) {
                     brapiURLPreference.setText(text);
-                    onPreferenceChange(brapiURLPreference, text);
+                    if (!oldBaseUrl.equals(text)) { // skip updates if url hasn't actually changed
+                        onPreferenceChange(brapiURLPreference, text);
+                    }
                     brapiAuth();
 
                 } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
