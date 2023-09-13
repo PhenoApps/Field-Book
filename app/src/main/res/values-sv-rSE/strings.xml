@@ -201,8 +201,6 @@
     <string name="preferences_behavior_title">Beteende</string>
     <string name="preferences_behavior_cycle_traits">Bläddring bland karaktärer leder till nästa post</string>
     <string name="preferences_behavior_cycle_traits_description">Efter att sista karaktären nåtts fortsätter bläddringen till nästa post</string>
-    <string name="preferences_behavior_volume_buttons_navigate">Navigera mellan poster med volymknapparna </string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">Telefonens volymknappar bläddrar till nästa eller föregående post</string>
     <string name="preferences_behavior_return_character">Signal för bakåtknappen</string>
     <string name="preferences_behavior_return_character_next_plot">Nästa parcell</string>
     <string name="preferences_behavior_return_character_next_trait">Nästa karaktär</string>
