@@ -260,7 +260,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
                 String path = root.getUri().getLastPathSegment();
                 if (path == null) {
                     // default to directory name if path is null
-                    path = BaseDocumentTreeUtil.Companion.getStem(root.getUri(), context)
+                    path = BaseDocumentTreeUtil.Companion.getStem(root.getUri(), context);
                 }
 
                 defaultStorageLocation.setSummary(path);
