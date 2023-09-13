@@ -212,10 +212,7 @@
     <string name="preferences_general_feature_next_missing">تفعيل زر الانتقال إلى المدخل التالي الذي لا يتضمن بيانات للمستخدم المتقدم</string>
     <string name="preferences_general_feature_next_missing_description">إضافة زر إلى شريط الأدوات ينتقل إلى المدخل التالي بدون بيانات للسمة الحالية</string>
     <string name="preferences_general_skip_entries_default">افتراضي</string>
-    <string name="preferences_general_barcode_camera">الانتقال المدخل عبر الباركود</string>
-    <string name="preferences_general_barcode_camera_description">إمسح الباركود للانتقال إلى المدخل المحدد</string>
     <string name="preferences_general_feature_barcode_text">تفعيل الخيار للمتقدم لتحديد المعرف الفريد</string>
-    <string name="preferences_general_feature_barcode_text_description">لفتح مربع حوار لإدخال ID فريد والانتقال إلى مدخل محدد</string>
     <string name="preferences_general_feature_datagrid">جدول البيانات</string>
     <string name="preferences_general_feature_datagrid_description">عرض جدول للقطع التجريبية والسمات يظهر البيانات المجموعة</string>
     <!-- Profile -->
@@ -247,8 +244,6 @@
     <string name="preferences_behavior_title">سلوك</string>
     <string name="preferences_behavior_cycle_traits">تحرك متقدما من آخر سمة للمدخل السابق إلى السمة الأولى في المدخل التالي</string>
     <string name="preferences_behavior_cycle_traits_description">بعد المرور بجميع السمات ، ينتقل Field Book إلى المدخل التالي</string>
-    <string name="preferences_behavior_volume_buttons_navigate">مفاتيح مستوى الصوت للتحرك بين المدخلات</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">مفاتيح مستوى الصوت للإنتقال إلى المدخل التالي أو السابق</string>
     <string name="preferences_behavior_return_character">إشارة مفتاح العودة</string>
     <string name="preferences_behavior_return_character_next_plot">القطعة تجريبية الموالية</string>
     <string name="preferences_behavior_return_character_next_trait">السمة الموالية</string>
