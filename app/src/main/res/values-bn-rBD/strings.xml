@@ -169,10 +169,7 @@
     <string name="preferences_general_feature_next_missing">উপাত্তহীন পরবর্তী এন্ট্রি</string>
     <string name="preferences_general_feature_next_missing_description">বর্তমান বৈশিষ্ট্যে উপাত্ত ছাড়াই পরবর্তী এন্ট্রিতে গেলে মনোযোগ আকর্ষণ করুন</string>
     <string name="preferences_general_skip_entries_default">নির্দিষ্ট</string>
-    <string name="preferences_general_barcode_camera">ক্যামেরা বারকোড স্ক্যানার</string>
-    <string name="preferences_general_barcode_camera_description">বারকোড স্ক্যান করার জন্য ক্যামেরা খুলুন এবং নির্ধারিত এন্ট্রিতে যান</string>
     <string name="preferences_general_feature_barcode_text">একই ধরনের সনাক্তকারীর দিকে যান</string>
-    <string name="preferences_general_feature_barcode_text_description">স্বতন্ত্র পরিচয়ের খোলার জন্য ডায়ালগ খুলুন এবং নির্ধারিত এন্ট্রিতে যান</string>
     <string name="preferences_general_feature_datagrid">উপাত্তবাছাই</string>
     <string name="preferences_general_feature_datagrid_description">সংগৃহীত উপাত্তবিশিষ্ট ক্ষেত্র এবং বৈশিষ্ট্যসমূহের বিস্তৃত পাতা দেখান</string>
     <!-- Profile -->
