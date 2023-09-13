@@ -244,8 +244,6 @@
     <string name="preferences_behavior_title">سلوك</string>
     <string name="preferences_behavior_cycle_traits">تحرك متقدما من آخر سمة للمدخل السابق إلى السمة الأولى في المدخل التالي</string>
     <string name="preferences_behavior_cycle_traits_description">بعد المرور بجميع السمات ، ينتقل Field Book إلى المدخل التالي</string>
-    <string name="preferences_behavior_volume_buttons_navigate">مفاتيح مستوى الصوت للتحرك بين المدخلات</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">مفاتيح مستوى الصوت للإنتقال إلى المدخل التالي أو السابق</string>
     <string name="preferences_behavior_return_character">إشارة مفتاح العودة</string>
     <string name="preferences_behavior_return_character_next_plot">القطعة تجريبية الموالية</string>
     <string name="preferences_behavior_return_character_next_trait">السمة الموالية</string>
