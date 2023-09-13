@@ -237,8 +237,6 @@
     <string name="preferences_behavior_title">Comportamiento</string>
     <string name="preferences_behavior_cycle_traits">Al finalizar variables avanzar a la siguiente entrada</string>
     <string name="preferences_behavior_cycle_traits_description">Después de pasar por todas los variables, Field Book pasa a la siguiente entrada</string>
-    <string name="preferences_behavior_volume_buttons_navigate">Asignar teclas de volumen a la navegación de entradas</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">Las teclas de volumen van a la anterior o siguiente entrada</string>
     <string name="preferences_behavior_return_character">Señal de tecla de retorno</string>
     <string name="preferences_behavior_return_character_next_plot">Siguiente parcela</string>
     <string name="preferences_behavior_return_character_next_trait">Siguiente variable</string>
