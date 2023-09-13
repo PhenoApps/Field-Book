@@ -240,8 +240,6 @@
     <string name="preferences_behavior_title">動作設定</string>
     <string name="preferences_behavior_cycle_traits">繰り返し調査設定</string>
     <string name="preferences_behavior_cycle_traits_description">全ての形質を調査した後、次のエントリーに移動</string>
-    <string name="preferences_behavior_volume_buttons_navigate">ボリュームキーをエントリーナビゲーションに位置付け</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">前あるいは後のエントリーへのボリュームキー</string>
     <string name="preferences_behavior_return_character">リターンキーの動作設定</string>
     <string name="preferences_behavior_return_character_next_plot">次のプロット</string>
     <string name="preferences_behavior_return_character_next_trait">次の形質</string>
