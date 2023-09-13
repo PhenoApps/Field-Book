@@ -240,8 +240,6 @@
     <string name="preferences_behavior_title">动作</string>
     <string name="preferences_behavior_cycle_traits">遍历性状然后前进</string>
     <string name="preferences_behavior_cycle_traits_description">采集完所有性状，田间记载本进入下一条记录</string>
-    <string name="preferences_behavior_volume_buttons_navigate">用音量键翻动记录</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">按音量键上翻或下翻记录</string>
     <string name="preferences_behavior_return_character">返回键信号</string>
     <string name="preferences_behavior_return_character_next_plot">下一个小区</string>
     <string name="preferences_behavior_return_character_next_trait">下一个性状</string>
