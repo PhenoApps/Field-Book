@@ -238,8 +238,6 @@
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_cycle_traits">Al termine delle caratteri, passare alla voce successiva</string>
     <string name="preferences_behavior_cycle_traits_description">Dopo aver attraversato tutti i caratteri, Field Book passa alla voce successiva</string>
-    <string name="preferences_behavior_volume_buttons_navigate">Mappare i tasti del volume alla navigazione voce</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">I tasti del volume passano alla voce successiva o precedente</string>
     <string name="preferences_behavior_return_character">Segnale pulsante di ritorno</string>
     <string name="preferences_behavior_return_character_next_plot">Parcella successiva</string>
     <string name="preferences_behavior_return_character_next_trait">Carattere successivo</string>
