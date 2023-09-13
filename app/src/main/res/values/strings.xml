@@ -737,10 +737,11 @@
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
     <string name="brapi_base_url_default" translatable="false">https://test-server.brapi.org</string>
 
-    <string name="brapi_choice_to_make_default_dialog_title">Select how you want to use this brapi server:</string>
+    <string name="brapi_choice_to_make_default_dialog_title">Make this BrAPI server the default source?:</string>
     <string name="brapi_choice_to_make_default_import">Make Default Import Source</string>
     <string name="brapi_choice_to_make_default_export">Make Default Export Source</string>
-    <string name="brapi_choice_to_make_default_ask">Always Ask Source</string>
+    <string name="brapi_choice_to_make_default_negative">No thanks</string>
+    <string name="brapi_choice_to_make_default_positive">Save</string>
 
     <string name="brapi_edit_display_name">Edit Display Name</string>
 
