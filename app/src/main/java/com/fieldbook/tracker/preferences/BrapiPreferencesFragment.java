@@ -89,12 +89,13 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
+        SharedPreferences sp = prefMgr.getSharedPreferences();
 
         //remove old custom fb auth if it is being used
-        if (prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
+        if (sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
                 .equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
 
-            prefMgr.getSharedPreferences().edit().putString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)).apply();
+            sp.edit().putString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)).apply();
 
         }
 
@@ -107,6 +108,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     boolean isChecked = (Boolean) newValue;
+                    if (!isChecked) { // on disable, reset default sources if they were set to brapi
+                        if (sp.getString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "").equals("brapi")) {
+                            sp.edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "ask").apply();
+                        }
+                        if (sp.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "").equals("brapi")) {
+                            sp.edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
+                        }
+                    }
                     updatePreferencesVisibility(isChecked);
                     return true;
                 }
@@ -136,9 +145,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
 
         //set saved urls, default to the test server
-        String url = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
-        String displayName = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
-        String oidcUrl = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
+        String url = sp.getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
+        String displayName = sp.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
+        String oidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
         oldBaseUrl = url;
         brapiURLPreference.setText(url);
         brapiDisplayName.setText(displayName);
@@ -422,8 +431,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         //show a dialog to set newly authorized brapi server as the default import/export option
         final String[] options = new String[]{
                 getString(R.string.brapi_choice_to_make_default_import),
-                getString(R.string.brapi_choice_to_make_default_export),
-                getString(R.string.brapi_choice_to_make_default_ask)
+                getString(R.string.brapi_choice_to_make_default_export)
         };
         final boolean[] checkedOptions = new boolean[options.length];
 
@@ -434,22 +442,19 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             checkedOptions[which] = isChecked;
             String currentItem = selectedItems.get(which);
         });
-        builder.setPositiveButton("Done", (dialog, which) -> {
+        builder.setPositiveButton(getString(R.string.brapi_choice_to_make_default_positive), (dialog, which) -> {
             for (int i = 0; i < checkedOptions.length; i++) {
                 if (checkedOptions[i]) {
                     if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_import))) {
                         prefMgr.getSharedPreferences().edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "brapi").apply();
                     } else if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_export))) {
                         prefMgr.getSharedPreferences().edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "brapi").apply();
-                    } else if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_ask))) {
-                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "ask").apply();
-                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
                     }
                 }
             }
         });
         // handle the negative button of the alert dialog
-        builder.setNegativeButton("CANCEL", (dialog, which) -> {});
+        builder.setNegativeButton(getString(R.string.brapi_choice_to_make_default_negative), (dialog, which) -> {});
         // create the builder
         builder.create().show();
     }
