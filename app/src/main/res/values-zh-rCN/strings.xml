@@ -208,10 +208,7 @@
     <string name="preferences_general_feature_next_missing">下个无数据记录</string>
     <string name="preferences_general_feature_next_missing_description">在工具栏增加一个按钮，跳到下一个当前性状无数据的记录。</string>
     <string name="preferences_general_skip_entries_default">默认值</string>
-    <string name="preferences_general_barcode_camera">转到条码指定的记录</string>
-    <string name="preferences_general_barcode_camera_description">扫描条码，然后转到特定记录</string>
     <string name="preferences_general_feature_barcode_text">转到唯一的标识符</string>
-    <string name="preferences_general_feature_barcode_text_description">打开对话框输入唯一的ID，跳转过去</string>
     <string name="preferences_general_feature_datagrid">数据表格</string>
     <string name="preferences_general_feature_datagrid_description">显示包含小区和性状的电子表来展示收集到的数据</string>
     <!-- Profile -->
@@ -243,8 +240,6 @@
     <string name="preferences_behavior_title">动作</string>
     <string name="preferences_behavior_cycle_traits">遍历性状然后前进</string>
     <string name="preferences_behavior_cycle_traits_description">采集完所有性状，田间记载本进入下一条记录</string>
-    <string name="preferences_behavior_volume_buttons_navigate">用音量键翻动记录</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">按音量键上翻或下翻记录</string>
     <string name="preferences_behavior_return_character">返回键信号</string>
     <string name="preferences_behavior_return_character_next_plot">下一个小区</string>
     <string name="preferences_behavior_return_character_next_trait">下一个性状</string>

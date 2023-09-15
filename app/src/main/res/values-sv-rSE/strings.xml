@@ -171,10 +171,7 @@
     <string name="preferences_general_feature_next_missing">Nästa post utan data</string>
     <string name="preferences_general_feature_next_missing_description">Lägger till en knapp i verktygsfältet som hoppar till nästa post som saknar data för aktuell karaktär </string>
     <string name="preferences_general_skip_entries_default">Standard</string>
-    <string name="preferences_general_barcode_camera">Gå till post med streckkod</string>
-    <string name="preferences_general_barcode_camera_description">Scanna streckkod för att gå till en viss post</string>
     <string name="preferences_general_feature_barcode_text">Gå till unikt ID</string>
-    <string name="preferences_general_feature_barcode_text_description">Öppnar en dialogruta där unikt ID kan anges för att gå till en viss post </string>
     <string name="preferences_general_feature_datagrid">Tabell</string>
     <string name="preferences_general_feature_datagrid_description">Visar ett datablad över parceller och karaktärer med registrerad data</string>
     <!-- Profile -->
@@ -204,8 +201,6 @@
     <string name="preferences_behavior_title">Beteende</string>
     <string name="preferences_behavior_cycle_traits">Bläddring bland karaktärer leder till nästa post</string>
     <string name="preferences_behavior_cycle_traits_description">Efter att sista karaktären nåtts fortsätter bläddringen till nästa post</string>
-    <string name="preferences_behavior_volume_buttons_navigate">Navigera mellan poster med volymknapparna </string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">Telefonens volymknappar bläddrar till nästa eller föregående post</string>
     <string name="preferences_behavior_return_character">Signal för bakåtknappen</string>
     <string name="preferences_behavior_return_character_next_plot">Nästa parcell</string>
     <string name="preferences_behavior_return_character_next_trait">Nästa karaktär</string>

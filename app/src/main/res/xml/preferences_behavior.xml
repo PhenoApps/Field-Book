@@ -8,11 +8,20 @@
         android:key="CycleTraits"
         android:summary="@string/preferences_behavior_cycle_traits_description"
         android:title="@string/preferences_behavior_cycle_traits" />
-
+  
     <CheckBoxPreference
         android:defaultValue="false"
+        android:icon="@drawable/ic_adv_return_first_trait"
+        android:key="ReturnFirst"
+        android:summary="@string/preferences_behavior_return_to_first_trait_description"
+        android:title="@string/preferences_behavior_return_to_first_trait" />
+  
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/pref_remap_volume_buttons"
+        android:entryValues="@array/pref_remap_volume_buttons_values"
         android:icon="@drawable/ic_remap_volume_buttons"
-        android:key="VOLUME_NAVIGATION"
+        android:key="com.fieldbook.tracker.VOLUME_NAVIGATION"
         android:summary="@string/preferences_behavior_volume_buttons_navigate_description"
         android:title="@string/preferences_behavior_volume_buttons_navigate" />
 

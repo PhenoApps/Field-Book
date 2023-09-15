@@ -206,10 +206,7 @@
     <string name="preferences_general_feature_next_missing">Prossima voce senza dati</string>
     <string name="preferences_general_feature_next_missing_description">Aggiunge un bottone alla barra degli strumenti</string>
     <string name="preferences_general_skip_entries_default">Impostazioni predefinite</string>
-    <string name="preferences_general_barcode_camera">Passa alla voce tramite codice a barre</string>
-    <string name="preferences_general_barcode_camera_description">Scansiona il codice a barre e passa alla voce specifica</string>
     <string name="preferences_general_feature_barcode_text">Passa all\'identificatore unico</string>
-    <string name="preferences_general_feature_barcode_text_description">Apre la finestra di dialogo per inserire un ID unico e passare a una voce specifica</string>
     <string name="preferences_general_feature_datagrid">Griglia di dati</string>
     <string name="preferences_general_feature_datagrid_description">Visualizza un foglio elettronico con parcelle e caratteri che mostrano i dati raccolti</string>
     <!-- Profile -->
@@ -241,8 +238,6 @@
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_cycle_traits">Al termine delle caratteri, passare alla voce successiva</string>
     <string name="preferences_behavior_cycle_traits_description">Dopo aver attraversato tutti i caratteri, Field Book passa alla voce successiva</string>
-    <string name="preferences_behavior_volume_buttons_navigate">Mappare i tasti del volume alla navigazione voce</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">I tasti del volume passano alla voce successiva o precedente</string>
     <string name="preferences_behavior_return_character">Segnale pulsante di ritorno</string>
     <string name="preferences_behavior_return_character_next_plot">Parcella successiva</string>
     <string name="preferences_behavior_return_character_next_trait">Carattere successivo</string>

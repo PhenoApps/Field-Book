@@ -35,6 +35,18 @@
         <item>lockData</item>
     </string-array>
 
+    <string-array name="pref_remap_volume_buttons">
+        <item>@string/preferences_behavior_volume_buttons_navigate_disabled</item>
+        <item>@string/preferences_behavior_volume_buttons_navigate_traits</item>
+        <item>@string/preferences_behavior_volume_buttons_navigate_entries</item>
+    </string-array>
+
+    <string-array name="pref_remap_volume_buttons_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
     <string-array name="pref_return_character">
         <item>@string/preferences_behavior_return_character_next_plot</item>
         <item>@string/preferences_behavior_return_character_next_trait</item>

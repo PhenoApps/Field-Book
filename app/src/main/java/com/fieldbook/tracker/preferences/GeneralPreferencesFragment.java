@@ -66,7 +66,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
         Preference moveToUniqueIdPref = this.findPreference(GeneralKeys.MOVE_TO_UNIQUE_ID);
 
-        if (skipEntriesPref != null) {
+        if (moveToUniqueIdPref != null) {
 
             //set preference change listener to change summary when needed
             moveToUniqueIdPref.setOnPreferenceChangeListener(this);
@@ -257,7 +257,11 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
             if (root != null && root.exists()) {
 
-                String path = BaseDocumentTreeUtil.Companion.getStem(root.getUri(), context);
+                String path = root.getUri().getLastPathSegment();
+                if (path == null) {
+                    // default to directory name if path is null
+                    path = BaseDocumentTreeUtil.Companion.getStem(root.getUri(), context);
+                }
 
                 defaultStorageLocation.setSummary(path);
 
