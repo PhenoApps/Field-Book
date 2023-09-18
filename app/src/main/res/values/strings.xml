@@ -636,8 +636,10 @@
     <string name="pref_geonav_log_summary">Write GeoNav steps to a log file in \n storage/geonav/log.txt</string>
 
     <string name="pref_geonav_logging_mode">Current Logging Mode</string>
-    <string name="pref_geonav_shorter">Shorter Log</string>
-    <string name="pref_geonav_verbose">Verbose Log</string>
+    <string name="pref_geonav_closest_observation_unit">Closest observation unit logs</string>
+    <string name="pref_geonav_closest_observation_unit_description">Closest observation unit logs: Logs only the closest observation unit to the user at a given time based on the algorithm used</string>
+    <string name="pref_geonav_verbose">Verbose Logs</string>
+    <string name="pref_geonav_verbose_description">Verbose logs: Logs any location updates along with algorithm steps</string>
 
     <string name="pref_geonav_update_interval_title">Update Interval (s)</string>
     <string name="pref_geonav_update_interval_summary">The time between location updates is %ss.</string>

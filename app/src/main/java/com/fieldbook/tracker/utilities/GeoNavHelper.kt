@@ -92,13 +92,11 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             val altLength = alt.length
             alt = alt.substring(0, altLength - 1) //drop the "M"
 
-            val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, controller.getContext().getString(R.string.pref_geonav_logging_mode)) ?: controller.getContext().getString(R.string.pref_geonav_logging_mode)
-
             //always log location updates for verbose log
-            if (currentLoggingMode != "Shorter Log") {
+            if (currentLoggingMode() != closestObservationUnitLoggingMode()) {
                 writeGeoNavLog(
                     mGeoNavLogWriter,
-                    "$lat,$lng,$time,null,null,null,null,null,null,$fix,null,null,null,null,null\n"
+                    "$lat,$lng,$time,null,null,null,null,null,null,$fix,null,null,null,null\n"
                 )
             }
             mExternalLocation = Location("GeoNav Rover")
@@ -210,6 +208,18 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         initialized = true
     }
 
+    private fun currentLoggingMode() : String {
+        return mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, controller.getContext().getString(R.string.pref_geonav_verbose)) ?: controller.getContext().getString(R.string.pref_geonav_verbose)
+    }
+
+    private fun verboseLoggingMode() : String {
+        return controller.getContext().getString(R.string.pref_geonav_verbose)
+    }
+
+    private fun closestObservationUnitLoggingMode() : String {
+        return controller.getContext().getString(R.string.pref_geonav_closest_observation_unit)
+    }
+
     /**
      * Called when the toolbar enable geonav icon is set to true.
      * Begins listening for sensor events to obtain an azimuth for the user.
@@ -286,7 +296,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
         writeGeoNavLog(
             mGeoNavLogWriter,
-            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, fix, closest, accuracy correction status, unique id, primary id, secondary id\n"
+            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, fix, closest, unique id, primary id, secondary id\n"
         )
     }
 
@@ -388,7 +398,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         val geoNavMethod: String = mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
         val d1: Double = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble() ?: 0.001
         val d2: Double = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble() ?: 0.01
-        val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, controller.getContext().getString(R.string.pref_geonav_logging_mode)) ?: controller.getContext().getString(R.string.pref_geonav_logging_mode)
         //user must have a valid pointing direction before attempting the IZ
         //initialize the start position and fill with external or internal GPS coordinates
         val start: Location? = if (internal) {
@@ -420,7 +429,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
                 //long toc = System.currentTimeMillis();
                 val (first) = impactZoneSearch(
-                    mGeoNavLogWriter, currentLoggingMode,
+                    mGeoNavLogWriter, currentLoggingMode(),
                     start, coordinates.toTypedArray(),
                     azimuth, theta, mTeslas, geoNavMethod, d1, d2
                 )
@@ -539,9 +548,8 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                         .replace(":".toRegex(), "-")
                         .replace("\\s".toRegex(), "_")
                     val thetaPref = mPrefs.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
-                    val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, R.string.pref_geonav_shorter.toString())
-                    // if the currentLoggingMode is for shorter log, use "shorter_" as the prefix for filename
-                    val prefixOfFile = if (currentLoggingMode == "Shorter Log") {
+                    // if the currentLoggingMode is for closest observation unit log, use "shorter_" as the prefix for filename
+                    val prefixOfFile = if (currentLoggingMode() == closestObservationUnitLoggingMode()) {
                         "shorter_"
                     } else{
                         ""
@@ -671,14 +679,12 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
         mInternalLocation = location
 
-        val currentLoggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, controller.getContext().getString(R.string.pref_geonav_logging_mode)) ?: controller.getContext().getString(R.string.pref_geonav_logging_mode)
-
         //always log location updates for verbose log
-        if (currentLoggingMode != "Shorter Log") {
+        if (currentLoggingMode() == verboseLoggingMode()) {
             writeGeoNavLog(
                 mGeoNavLogWriter,
                 """
-                ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,GPS,null,null,null,null,null
+                ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,GPS,null,null,null,null
                 
                 """.trimIndent()
             )

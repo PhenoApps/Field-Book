@@ -70,8 +70,13 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
 
         // when GeoNav screen loads, check if GeoNav Log is checked
-        // if checked, only then display the logging mode
-        geoNavLoggingMode?.isVisible = geoNavLog!!.isChecked
+        // if checked, only then display the logging mode and summary
+        geoNavLoggingMode?.isVisible = geoNavLog?.isChecked == true
+        if (mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, getString(R.string.pref_geonav_verbose)) == getString(R.string.pref_geonav_verbose)){
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_verbose_description)
+        }else{
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_closest_observation_unit_description)
+        }
 
         // if the geonav is checked, only then display the logging mode selection tile
         geoNavLog?.setOnPreferenceChangeListener { preference, newValue ->
@@ -82,7 +87,13 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         // select geonav logging mode
         geoNavLoggingMode?.setOnPreferenceChangeListener { preference, newValue ->
             mPrefs.edit()
-                .putString(GeneralKeys.GEONAV_LOGGING_MODE, newValue as? String ?: "Shorter Log").apply()
+                .putString(GeneralKeys.GEONAV_LOGGING_MODE, newValue as? String ?: getString(R.string.pref_geonav_verbose)).apply()
+
+            if (newValue == getString(R.string.pref_geonav_closest_observation_unit)){
+                geoNavLoggingMode.summary = getString(R.string.pref_geonav_closest_observation_unit_description)
+            }else{
+                geoNavLoggingMode.summary = getString(R.string.pref_geonav_verbose_description)
+            }
 
             true
         }

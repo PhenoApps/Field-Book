@@ -1,9 +1,7 @@
 package com.fieldbook.tracker.utilities
 
 import android.location.Location
-import android.util.Log
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.traits.GNSSTraitLayout
 import com.google.gson.Gson
@@ -83,9 +81,9 @@ class GeodeticUtils {
         //Represents what we print to the log
         data class IzString(val startTime: Long, val uniqueId: String, val primaryId: String, val secondaryId: String,
                             val startLat: Double, val startLng: Double, val endLat: Double, val endLng: Double, val azimuth: Double,
-                            val teslas: Double, var bearing: Double?, val distance: Double, var closest: Int, var fix: String, var accuracyCorrectionStatus: Float) {
+                            val teslas: Double, var bearing: Double?, val distance: Double, var closest: Int, var fix: String) {
             override fun toString(): String {
-                return "$startLat,$startLng,$startTime,$endLat,$endLng,$azimuth,$teslas,$bearing,$distance,$fix,$closest,$accuracyCorrectionStatus,\"${uniqueId.escape()}\",\"${primaryId.escape()}\",\"${secondaryId.escape()}\"\n"
+                return "$startLat,$startLng,$startTime,$endLat,$endLng,$azimuth,$teslas,$bearing,$distance,$fix,$closest,\"${uniqueId.escape()}\",\"${primaryId.escape()}\",\"${secondaryId.escape()}\"\n"
             }
         }
 
@@ -143,7 +141,7 @@ class GeodeticUtils {
 
                     val loggedString = IzString(startTime = start.time, uniqueId = coordinate.observation_unit_db_id, primaryId = coordinate.primary_id, secondaryId = coordinate.secondary_id,
                         startLat = start.latitude, startLng = start.longitude, endLat = location.latitude, endLng = location.longitude, azimuth = azimuth, teslas = teslas, bearing = bearing,
-                        distance = distance, closest = NOT_CLOSEST, fix = fix, accuracyCorrectionStatus = start.accuracy)
+                        distance = distance, closest = NOT_CLOSEST, fix = fix)
 
                     if (geoNavMethod == "0") { //default distance based method
 
@@ -178,9 +176,9 @@ class GeodeticUtils {
             //after a full run of IZ, update the last CLOSEST_UPDATE to CLOSEST_FINAL
             izLogArray.findLast { it.closest == CLOSEST_UPDATE }?.closest = CLOSEST_FINAL
 
-            if(currentLoggingMode == "Shorter Log"){
+            if(currentLoggingMode != "Verbose Logs"){
                 //print only the closest plant to the log
-                izLogArray.forEach { if (it.closest == 1) writeGeoNavLog(log, it.toString()) }
+                izLogArray.forEach { if (it.closest == CLOSEST_FINAL) writeGeoNavLog(log, it.toString()) }
             }else{
                 //print the entire array to log
                 izLogArray.forEach { writeGeoNavLog(log, it.toString()) }

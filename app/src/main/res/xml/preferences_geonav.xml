@@ -27,11 +27,12 @@
         android:title="@string/pref_geonav_log_title" />
 
     <ListPreference
-        android:defaultValue="@string/pref_geonav_shorter"
-        android:entries="@array/pref_geonav_logging_mode"
-        android:entryValues="@array/pref_geonav_logging_mode"
+        android:defaultValue="@string/pref_geonav_verbose"
+        android:entries="@array/pref_geonav_logging_mode_titles"
+        android:entryValues="@array/pref_geonav_logging_mode_titles"
         android:key="com.fieldbook.tracker.geonav.GEONAV_LOGGING_MODE"
         android:summary="%s"
+        android:dialogLayout="@layout/dialog_logging_mode"
         android:title="@string/pref_geonav_logging_mode"/>
 
     <ListPreference
