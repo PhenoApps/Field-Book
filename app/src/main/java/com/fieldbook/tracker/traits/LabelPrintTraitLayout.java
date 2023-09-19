@@ -55,6 +55,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     private Spinner barcodefield;
     private Spinner labelcopies;
 
+    private ImageButton connectPrinter;
     private  ImageView label;
     private ImageButton printLabel;
 
@@ -159,6 +160,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         mActivity = act;
 
+        connectPrinter = act.findViewById(R.id.connectPrinterButton);
         printLabel = act.findViewById(R.id.printLabelButton);
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mPrinterMessageReceiver);
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mPrinterMessageReceiver,
@@ -293,6 +295,17 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
             e.printStackTrace();
 
         }
+        connectPrinter.setOnClickListener(view -> {
+
+            mBluetoothUtil.choose(getContext(), new BluetoothChooseCallback() {
+                @Override
+                public void onDeviceChosen(String newDeviceName) {
+                    Log.d("LabelPrintTraitLayout", "Chosen printerName is " + newDeviceName);
+                    saveDeviceNamePreference(newDeviceName);
+                }
+            });
+
+        });
 
         /*
          * This section handles print events. TODO: Create a label prototype based class. Move most of this logic to a function/class. chaneylc 8/26/2020

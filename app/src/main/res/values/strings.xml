@@ -358,6 +358,7 @@
     <string name="printer_not_connected">Printer not connected</string>
     <string name="no_device_paired">No device paired</string>
 
+    <string name="trait_labelprint_connect_button_description">Button which connects a printer.</string>
     <string name="trait_labelprint_preview_description">Label preview.</string>
     <string name="trait_labelprint_print_button_description">Button which prints labels configured in this dialog.</string>
 
