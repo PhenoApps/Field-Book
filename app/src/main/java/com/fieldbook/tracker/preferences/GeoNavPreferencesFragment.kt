@@ -8,7 +8,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import androidx.preference.*
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
@@ -37,7 +36,6 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         // Show/hide preferences and category titles based on the ENABLE_GEONAV value
         val geonavEnabledPref: CheckBoxPreference? = findPreference("com.fieldbook.tracker.geonav.ENABLE_GEONAV")
         if (geonavEnabledPref != null) {
-            Log.d("GeoNavPref", "changing geonav pref visibility")
             geonavEnabledPref.setOnPreferenceChangeListener(Preference.OnPreferenceChangeListener { preference, newValue ->
                 val isChecked = newValue as Boolean
                 updatePreferencesVisibility(isChecked)
