@@ -8,12 +8,8 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.ListPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceCategory
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
+import android.util.Log
+import androidx.preference.*
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import org.phenoapps.security.Security
@@ -37,6 +33,18 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         advisor.initialize()
 
         setPreferencesFromResource(R.xml.preferences_geonav, rootKey)
+
+        // Show/hide preferences and category titles based on the ENABLE_GEONAV value
+        val geonavEnabledPref: CheckBoxPreference? = findPreference("com.fieldbook.tracker.geonav.ENABLE_GEONAV")
+        if (geonavEnabledPref != null) {
+            Log.d("GeoNavPref", "changing geonav pref visibility")
+            geonavEnabledPref.setOnPreferenceChangeListener(Preference.OnPreferenceChangeListener { preference, newValue ->
+                val isChecked = newValue as Boolean
+                updatePreferencesVisibility(isChecked)
+                true
+            })
+            updatePreferencesVisibility(geonavEnabledPref.isChecked())
+        }
 
         (this.activity as PreferencesActivity?)!!.supportActionBar!!.title = getString(R.string.preferences_geonav_title)
 
@@ -135,6 +143,18 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         trapDst?.summary = getString(R.string.pref_geonav_search_trapezoid_d2_summary, d2)
         trapAngle?.summary = getString(R.string.pref_geonav_search_angle_summary, theta)
         updateInterval?.summary = getString(R.string.pref_geonav_update_interval_summary, interval)
+    }
+
+    private fun updatePreferencesVisibility(isChecked: Boolean) {
+        val preferenceScreen = preferenceScreen
+        for (i in 0 until preferenceScreen.preferenceCount) {
+            val preferenceItem = preferenceScreen.getPreference(i)
+            // Skip the checkbox preference itself
+            if (preferenceItem.key.equals("com.fieldbook.tracker.geonav.ENABLE_GEONAV")) {
+                continue
+            }
+            preferenceItem.isVisible = isChecked
+        }
     }
 
     private fun updateMethodSummaryText() {
