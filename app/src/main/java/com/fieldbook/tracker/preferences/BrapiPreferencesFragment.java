@@ -349,6 +349,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     brapiAuth();
 
                 } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
+                    text = (text == null || text.isEmpty()) ? "BrAPI" : text;
                     brapiDisplayName.setText(text);
                     onPreferenceChange(brapiDisplayName, text);
                 } else {
