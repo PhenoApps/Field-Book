@@ -745,6 +745,7 @@
     <string name="brapi_choice_to_make_default_positive">Save</string>
 
     <string name="brapi_edit_display_name">Edit Display Name</string>
+    <string name="brapi_edit_display_name_server">Server Name</string>
 
     <string name="preferences_brapi_version">BrAPI Version</string>
     <string name="preferences_brapi_version_v1" translatable="false">V1</string>

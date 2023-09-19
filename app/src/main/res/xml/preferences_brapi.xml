@@ -34,6 +34,7 @@
             android:summary="%s"
             android:title="@string/brapi_display_name"
             app:negativeButtonText="@android:string/cancel"
+            app:neutralButtonText="@string/brapi_edit_display_name_server"
             app:positiveButtonText="@android:string/ok" />
 
         <Preference

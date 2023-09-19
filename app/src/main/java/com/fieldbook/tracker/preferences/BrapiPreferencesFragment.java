@@ -325,6 +325,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                             .setBeepEnabled(false)
                             .setRequestCode(REQUEST_BARCODE_SCAN_BASE_URL)
                             .initiateScan();
+                } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
+                    text = oldBaseUrl.replaceAll("https?://(?:www\\.)?(.*?)(?:/.*)?$", "$1");
+                    brapiDisplayName.setText(text);
+                    onPreferenceChange(brapiDisplayName, text);
                 } else {
                     prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
                     new IntentIntegrator(getActivity())
