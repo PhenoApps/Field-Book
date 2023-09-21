@@ -29,9 +29,9 @@ Collect layout
 Troubleshooting
 ---------------
 
-When users experience problems printing labels via Fieldbook, they are often caused by the configuration of the zebra mobile printer. To troubleshoot, install the [Zebra Printer Setup Utility](https://play.google.com/store/apps/details?id=com.zebra.printersetup) on an android device that can connect to the printer and try the following steps.
+Issues with label printing are often caused by incompatible Zebra mobile printer configurations. To troubleshoot, install the [Zebra Printer Setup Utility](https://play.google.com/store/apps/details?id=com.zebra.printersetup) and try the following steps:
 
-1. Download the latest firmware for the mobile printer model from the [Zebra support page](https://www.zebra.com/us/en/support-downloads/printers.html), unzip it, then send the unzipped `.zpl` file to the printer using the **Available Files** option in the Zebra Printer Setup Utility.
-2. With the firmware is updated,  go to **Media Settings** in the Zebra Printer Setup Utility and ensure the media type settings is correct for the type of label (usually `MARK`).
+1. Download the latest firmware for the mobile printer model from the [Zebra support page](https://www.zebra.com/us/en/support-downloads/printers.html), unzip it, and send the unzipped `.zpl` file to the printer using the **Available Files** option in the Zebra Printer Setup Utility.
+2. With the firmware updated, ensure the media type settings in **Media Settings** is correct for the type of label being used (usually `MARK`).
    
-If the above steps don't fix the problem, going to **Printer Actions** in the Zebra Printer Setup Utility and printing a configuration label can help with further troubleshooting.
+If the above steps don't fix the problem, printing a configuration label using **Printer Actions** in the Zebra Printer Setup Utility can help with further troubleshooting.
