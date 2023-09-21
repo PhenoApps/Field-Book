@@ -102,7 +102,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
 
         // Show/hide preferences and category titles based on the BRAPI_ENABLED value
-        CheckBoxPreference brapiEnabledPref = findPreference("BRAPI_ENABLED");
+        CheckBoxPreference brapiEnabledPref = findPreference(GeneralKeys.BRAPI_ENABLED);
         if (brapiEnabledPref != null) {
             brapiEnabledPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -193,7 +193,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         for (int i = 0; i < preferenceScreen.getPreferenceCount(); i++) {
             Preference preferenceItem = preferenceScreen.getPreference(i);
             // Skip the checkbox preference itself
-            if (preferenceItem.getKey().equals("BRAPI_ENABLED")) {
+            if (preferenceItem.getKey().equals(GeneralKeys.BRAPI_ENABLED)) {
                 continue;
             }
             preferenceItem.setVisible(isChecked);
@@ -353,7 +353,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     brapiAuth();
 
                 } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
-                    text = (text == null || text.isEmpty()) ? "BrAPI" : text;
+                    text = (text == null || text.isEmpty()) ? getString(R.string.export_source_brapi) : text;
                     brapiDisplayName.setText(text);
                     onPreferenceChange(brapiDisplayName, text);
                 } else {

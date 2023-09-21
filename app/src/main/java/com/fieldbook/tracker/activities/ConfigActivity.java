@@ -532,7 +532,8 @@ public class ConfigActivity extends ThemedActivity {
 
         String[] exportArray = new String[2];
         exportArray[0] = getString(R.string.export_source_local);
-        exportArray[1] = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, "BrAPI");
+        exportArray[1] = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME,
+                getString(R.string.export_source_brapi));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, exportArray);
         exportSourceList.setAdapter(adapter);

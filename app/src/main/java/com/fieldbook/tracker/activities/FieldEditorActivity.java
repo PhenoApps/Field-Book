@@ -189,7 +189,8 @@ public class FieldEditorActivity extends ThemedActivity
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_cloud);
         if (ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
-            String displayName = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, "BrAPI");
+            String displayName = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME,
+                    getString(R.string.export_source_brapi));
             importArray = Arrays.copyOf(importArray, importArray.length + 1);
             importArray[2] = displayName;
         }
