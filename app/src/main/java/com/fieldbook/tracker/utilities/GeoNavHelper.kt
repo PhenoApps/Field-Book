@@ -74,6 +74,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private val preferenceChangeListener = OnSharedPreferenceChangeListener { prefs, key ->
         if (key.equals(GeneralKeys.GEONAV_POPUP_DISPLAY)) {
             mGeoNavSnackbar?.dismiss()
+            lastPlotIdNav = null
         }
 
     }
