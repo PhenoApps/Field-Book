@@ -72,11 +72,8 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         // when GeoNav screen loads, check if GeoNav Log is checked
         // if checked, only then display the logging mode and summary
         geoNavLoggingMode?.isVisible = geoNavLog?.isChecked == true
-        if (mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, getString(R.string.pref_geonav_verbose)) == getString(R.string.pref_geonav_verbose)){
-            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_verbose_description)
-        }else{
-            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_closest_observation_unit_description)
-        }
+        val loggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, getString(R.string.pref_geonav_verbose))
+        changeGeoNavLoggingModeView(geoNavLoggingMode, loggingMode)
 
         // if the geonav is checked, only then display the logging mode selection tile
         geoNavLog?.setOnPreferenceChangeListener { preference, newValue ->
@@ -89,11 +86,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             mPrefs.edit()
                 .putString(GeneralKeys.GEONAV_LOGGING_MODE, newValue as? String ?: getString(R.string.pref_geonav_verbose)).apply()
 
-            if (newValue == getString(R.string.pref_geonav_closest_observation_unit)){
-                geoNavLoggingMode.summary = getString(R.string.pref_geonav_closest_observation_unit_description)
-            }else{
-                geoNavLoggingMode.summary = getString(R.string.pref_geonav_verbose_description)
-            }
+            changeGeoNavLoggingModeView(geoNavLoggingMode, newValue as String?)
 
             true
         }
@@ -141,6 +134,16 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             updateParametersSummaryText()
 
             true
+        }
+    }
+
+    private fun changeGeoNavLoggingModeView(geoNavLoggingMode: ListPreference?, currentMode : String?) {
+        if (currentMode == getString(R.string.pref_geonav_closest_observation_unit)){
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_closest_observation_unit_description)
+            geoNavLoggingMode?.setIcon(R.drawable.ic_near_me)
+        }else{
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_verbose_description)
+            geoNavLoggingMode?.setIcon(R.drawable.ic_near_me_disabled)
         }
     }
 

@@ -548,9 +548,9 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                         .replace(":".toRegex(), "-")
                         .replace("\\s".toRegex(), "_")
                     val thetaPref = mPrefs.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
-                    // if the currentLoggingMode is for closest observation unit log, use "shorter_" as the prefix for filename
+                    // if the currentLoggingMode is for closest observation unit log, use "closest_" as the prefix for filename
                     val prefixOfFile = if (currentLoggingMode() == closestObservationUnitLoggingMode()) {
-                        "shorter_"
+                        "closest_"
                     } else{
                         ""
                     }
