@@ -6,7 +6,6 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.Color
 import android.hardware.GeomagneticField
@@ -29,7 +28,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.CollectActivity.TAG
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.interfaces.CollectController
@@ -73,8 +71,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     }
 
     // listen to changes for GEONAV_POPUP_DISPLAY
-    // if the user changes the popup type from the geonav config dialog
-    // then dismiss the snack-bar
     private val preferenceChangeListener = OnSharedPreferenceChangeListener { prefs, key ->
         if (key.equals(GeneralKeys.GEONAV_POPUP_DISPLAY)) {
             mGeoNavSnackbar?.dismiss()
@@ -484,6 +480,11 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                     var popupHeader = prefs.getString(GeneralKeys.GEONAV_POPUP_DISPLAY, "plot_id")
                                     tv.text = getPopupInfo(id, "${popupHeader?: "plot_id"}")
 
+                                    // if the value saved in GEONAV_POPUP_DISPLAY was disabled in traits
+                                    // GEONAV_POPUP_DISPLAY will default back to plot_id
+                                    // now set a change listener
+                                    // if the user changes the popup type from the geonav config dialog
+                                    // then dismiss the snack-bar
                                     prefs.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
 
 //                                    if (tv != null) {
