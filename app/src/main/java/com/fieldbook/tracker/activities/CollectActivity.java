@@ -2175,6 +2175,38 @@ public class CollectActivity extends ThemedActivity
             }
         }
     }
+
+    @Override
+    public ArrayList<String> getGeoNavPopupSpinnerItems () {
+        //query database for attributes/traits to use
+        try {
+            List<String> attributes = Arrays.asList(getDatabase().getAllObservationUnitAttributeNames(Integer.parseInt(getStudyId())));
+            TraitObject[] traits = getDatabase().getAllTraitObjects().toArray(new TraitObject[0]);
+
+            ArrayList<TraitObject> visibleTraits = new ArrayList<>();
+            for (TraitObject traitObject : traits) {
+                if (traitObject.getVisible()) {
+                    visibleTraits.add(traitObject);
+                }
+            }
+
+            // Map traits to their names
+            List<String> traitNames = new ArrayList<>();
+            for (TraitObject traitObject : visibleTraits) {
+                traitNames.add(traitObject.getTrait());
+            }
+
+            // Combine attributes and trait names
+            ArrayList<String> result = new ArrayList<>(attributes);
+            result.addAll(traitNames);
+
+            return result;
+        } catch (Exception e) {
+            Log.d(TAG, "Error occurred when querying for attributes in GeoNavCollectDialog.");
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
     
     @NonNull
     @Override

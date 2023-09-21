@@ -6,6 +6,8 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.Color
 import android.hardware.GeomagneticField
 import android.hardware.Sensor
@@ -27,6 +29,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.activities.CollectActivity.TAG
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.interfaces.CollectController
@@ -49,6 +52,7 @@ import javax.inject.Inject
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+
 class GeoNavHelper @Inject constructor(private val controller: CollectController):
     SensorEventListener, GPSTracker.GPSTrackerListener {
 
@@ -67,7 +71,17 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private val prefs by lazy {
         controller.getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
     }
-    
+
+    // listen to changes for GEONAV_POPUP_DISPLAY
+    // if the user changes the popup type from the geonav config dialog
+    // then dismiss the snack-bar
+    private val preferenceChangeListener = OnSharedPreferenceChangeListener { prefs, key ->
+        if (key.equals(GeneralKeys.GEONAV_POPUP_DISPLAY)) {
+            mGeoNavSnackbar?.dismiss()
+        }
+
+    }
+
     private val mGnssResponseReceiver: GNSSResponseReceiver = object : GNSSResponseReceiver() {
         override fun onGNSSParsed(parser: NmeaParser) {
 
@@ -470,6 +484,8 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                     var popupHeader = prefs.getString(GeneralKeys.GEONAV_POPUP_DISPLAY, "plot_id")
                                     tv.text = getPopupInfo(id, "${popupHeader?: "plot_id"}")
 
+                                    prefs.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
+
 //                                    if (tv != null) {
 //                                        tv.text = id
 //                                    }
@@ -496,6 +512,18 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     }
 
     private fun getPopupInfo(id: String, popupHeader: String): String {
+        
+        var newPopupHeader = popupHeader
+
+        // handle the case where trait has been disabled by the user
+        val popupItems = (controller.getContext() as CollectActivity).getGeoNavPopupSpinnerItems()
+        val index = popupItems.indexOf(newPopupHeader)
+        // if the attribute/trait cannot be found
+        // then default to 'plot_id'
+        if (index == -1){
+            ep.edit().putString(GeneralKeys.GEONAV_POPUP_DISPLAY, "plot_id").apply()
+            newPopupHeader = "plot_id"
+        }
 
         var database : DataHelper = controller.getDatabase()
 
@@ -505,9 +533,9 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         val attributes: List<String> = ArrayList(Arrays.asList(*database.rangeColumnNames))
 
         //check if the label is an attribute or a trait
-        val isAttribute = attributes.contains(popupHeader)
+        val isAttribute = attributes.contains(newPopupHeader)
 
-        return controller.queryForLabelValue(id, popupHeader, isAttribute)
+        return controller.queryForLabelValue(id, newPopupHeader, isAttribute)
     }
 
     /**
@@ -533,6 +561,9 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         mConnectThread?.cancel()
 
         initialized = false
+
+        // unregister pref listener
+        prefs.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
     }
 
     fun resetGeoNavMessages() {

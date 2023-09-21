@@ -14,8 +14,6 @@ import com.fieldbook.tracker.utilities.Utils
 
 class GeoNavCollectDialog(private val activity: CollectActivity) :
     AlertDialog.Builder(activity, R.style.AppAlertDialog) {
-
-    private val TAG: String = "GeoNavCollectDialog"
       
     private val prefs by lazy {
         context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
@@ -70,7 +68,7 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
         // fetching spinner items
         val geoNavPopupDisplayAdapter = ArrayAdapter<String>(activity, android.R.layout.simple_spinner_item)
         geoNavPopupDisplayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        geoNavPopupDisplayAdapter.addAll(getGeoNavPopupSpinnerItems().toList())
+        geoNavPopupDisplayAdapter.addAll(activity.getGeoNavPopupSpinnerItems())
 
         // Set the ArrayAdapter to the Spinner
         geoNavPopupDisplaySp?.adapter = geoNavPopupDisplayAdapter
@@ -111,26 +109,13 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
         )
 
         // set text for geoNavPopupDisplaySp based on preferences
-        val popupItem = getGeoNavPopupSpinnerItems()
+        val popupItem = activity.getGeoNavPopupSpinnerItems()
         val index = popupItem.indexOf(geoNavPopupDisplay)
+        // if the attribute/trait cannot be found
+        // then default to 'plot_id'
         val selection = if( index != -1 ) index else 0
+        // preferences will be updated in getPopupInfo method in GeoNavHelper.kt
         geoNavPopupDisplaySp?.setSelection(selection)
-    }
-
-    private fun getGeoNavPopupSpinnerItems(): Array<String> {
-        //query database for attributes/traits to use
-        try {
-            val attributes = activity.getDatabase().getAllObservationUnitAttributeNames(activity.studyId.toInt())
-            var traits = activity.getDatabase().allTraitObjects.toTypedArray()
-            val other = traits.filter { !it.visible }.toTypedArray()
-            traits = traits.filter { it.visible }.toTypedArray()
-
-            return attributes + traits.map { it.trait } + other.map { it.trait }
-        } catch (e: Exception) {
-            Log.d(TAG, "Error occurred when querying for attributes in GeoNavCollectDialog.")
-            e.printStackTrace()
-        }
-        return arrayOf()
     }
 
     private fun saveUiToPreferences() {
