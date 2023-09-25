@@ -25,6 +25,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.BluetoothChooseCallback;
 import com.fieldbook.tracker.utilities.BluetoothUtil;
 import com.fieldbook.tracker.utilities.Constants;
 
@@ -54,6 +55,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     private Spinner barcodefield;
     private Spinner labelcopies;
 
+    private ImageButton connectPrinter;
     private  ImageView label;
     private ImageButton printLabel;
 
@@ -158,8 +160,9 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         mActivity = act;
 
+        connectPrinter = act.findViewById(R.id.connectPrinterButton);
         printLabel = act.findViewById(R.id.printLabelButton);
-
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mPrinterMessageReceiver);
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mPrinterMessageReceiver,
                 new IntentFilter("printer_message"));
 
@@ -292,6 +295,17 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
             e.printStackTrace();
 
         }
+        connectPrinter.setOnClickListener(view -> {
+
+            mBluetoothUtil.choose(getContext(), new BluetoothChooseCallback() {
+                @Override
+                public void onDeviceChosen(String newDeviceName) {
+                    Log.d("LabelPrintTraitLayout", "Chosen printerName is " + newDeviceName);
+                    saveDeviceNamePreference(newDeviceName);
+                }
+            });
+
+        });
 
         /*
          * This section handles print events. TODO: Create a label prototype based class. Move most of this logic to a function/class. chaneylc 8/26/2020
@@ -389,7 +403,11 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                     labelData = labelData.replace("size2", size2);
                     labelData = labelData.replace("size3", size3);
                     labelData = labelData.replace("size4", size4);
-                    labelData = labelData.replace("barcode", barcode);
+                    if (barcode.isEmpty()) { // remove barcode if it will not encode anything
+                        labelData = labelData.replace("^BQ,,sizeb^FDMA,barcode^FS", "");
+                    } else {
+                        labelData = labelData.replace("barcode", barcode);
+                    }
                     labelData = labelData.replace("sizeb", Integer.toString(barcode_size));
 
                 }
@@ -413,7 +431,20 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                          * This bluetooth utility class is used to connect with a paired printer and send print commands.
                          * A local broadcast receiver is used to communicate with the print thread within this utility class.
                          */
-                        mBluetoothUtil.print(getContext(), size, labels);
+                        String printerName = getPrefs().getString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, null);
+                        Log.d("LabelPrintTraitLayout", "retrieved printerName is " + printerName);
+                        if (printerName == null) {
+                            mBluetoothUtil.choose(getContext(), new BluetoothChooseCallback() {
+                                @Override
+                                public void onDeviceChosen(String newDeviceName) {
+                                    Log.d("LabelPrintTraitLayout", "Chosen printerName is " + newDeviceName);
+                                    saveDeviceNamePreference(newDeviceName);
+                                    mBluetoothUtil.print(getContext(), newDeviceName, size, labels);
+                                }
+                            });
+                        } else {
+                            mBluetoothUtil.print(getContext(), printerName, size, labels);
+                        }
                     }
                 }
             } else {
@@ -422,6 +453,12 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
             }
         });
+    }
+
+    private void saveDeviceNamePreference(String newDeviceName) {
+        SharedPreferences.Editor editor = getPrefs().edit();
+        editor.putString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, newDeviceName);
+        editor.apply();
     }
 
     @Override
