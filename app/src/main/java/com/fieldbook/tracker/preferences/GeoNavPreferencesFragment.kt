@@ -8,6 +8,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import androidx.preference.CheckBoxPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -65,6 +66,31 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             true
         }
 
+        val geoNavLog = findPreference<CheckBoxPreference>(GeneralKeys.GEONAV_LOG)
+        val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
+
+        // when GeoNav screen loads, check if GeoNav Log is checked
+        // if checked, only then display the logging mode and summary
+        geoNavLoggingMode?.isVisible = geoNavLog?.isChecked == true
+        val loggingMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, getString(R.string.pref_geonav_verbose))
+        changeGeoNavLoggingModeView(geoNavLoggingMode, loggingMode)
+
+        // if the geonav is checked, only then display the logging mode selection tile
+        geoNavLog?.setOnPreferenceChangeListener { preference, newValue ->
+            geoNavLoggingMode?.isVisible = newValue as Boolean
+            true
+        }
+
+        // select geonav logging mode
+        geoNavLoggingMode?.setOnPreferenceChangeListener { preference, newValue ->
+            mPrefs.edit()
+                .putString(GeneralKeys.GEONAV_LOGGING_MODE, newValue as? String ?: getString(R.string.pref_geonav_verbose)).apply()
+
+            changeGeoNavLoggingModeView(geoNavLoggingMode, newValue as String?)
+
+            true
+        }
+
         val trapBase = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D1)
         val trapDst = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D2)
         val trapAngle = findPreference<ListPreference>(GeneralKeys.SEARCH_ANGLE)
@@ -108,6 +134,16 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             updateParametersSummaryText()
 
             true
+        }
+    }
+
+    private fun changeGeoNavLoggingModeView(geoNavLoggingMode: ListPreference?, currentMode : String?) {
+        if (currentMode == getString(R.string.pref_geonav_closest_observation_unit)){
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_closest_observation_unit_description)
+            geoNavLoggingMode?.setIcon(R.drawable.ic_near_me)
+        }else{
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_verbose_description)
+            geoNavLoggingMode?.setIcon(R.drawable.ic_near_me_disabled)
         }
     }
 

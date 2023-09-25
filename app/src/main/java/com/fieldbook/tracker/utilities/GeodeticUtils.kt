@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.utilities
 
 import android.location.Location
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.traits.GNSSTraitLayout
 import com.google.gson.Gson
@@ -79,8 +80,8 @@ class GeodeticUtils {
 
         //Represents what we print to the log
         data class IzString(val startTime: Long, val uniqueId: String, val primaryId: String, val secondaryId: String,
-            val startLat: Double, val startLng: Double, val endLat: Double, val endLng: Double, val azimuth: Double,
-            val teslas: Double, var bearing: Double?, val distance: Double, var closest: Int, var fix: String) {
+                            val startLat: Double, val startLng: Double, val endLat: Double, val endLng: Double, val azimuth: Double,
+                            val teslas: Double, var bearing: Double?, val distance: Double, var closest: Int, var fix: String) {
             override fun toString(): String {
                 return "$startLat,$startLng,$startTime,$endLat,$endLng,$azimuth,$teslas,$bearing,$distance,$fix,$closest,\"${uniqueId.escape()}\",\"${primaryId.escape()}\",\"${secondaryId.escape()}\"\n"
             }
@@ -110,6 +111,7 @@ class GeodeticUtils {
          * @return a object representing the returned location and it's distance
          **/
         fun impactZoneSearch(log: OutputStreamWriter?,
+                             currentLoggingMode: String,
                              start: Location,
                              coordinates: Array<ObservationUnitModel>,
                              azimuth: Double,
@@ -174,8 +176,13 @@ class GeodeticUtils {
             //after a full run of IZ, update the last CLOSEST_UPDATE to CLOSEST_FINAL
             izLogArray.findLast { it.closest == CLOSEST_UPDATE }?.closest = CLOSEST_FINAL
 
-            //print the entire array to log
-            izLogArray.forEach { writeGeoNavLog(log, it.toString()) }
+            if(currentLoggingMode != "Verbose Logs"){
+                //print only the closest plant to the log
+                izLogArray.forEach { if (it.closest == CLOSEST_FINAL) writeGeoNavLog(log, it.toString()) }
+            }else{
+                //print the entire array to log
+                izLogArray.forEach { writeGeoNavLog(log, it.toString()) }
+            }
 
             return closestPoint to closestDistance
         }
@@ -222,9 +229,9 @@ class GeodeticUtils {
             //2. sl should not intersect uw, wx, or xv which would be outside the trapezoid
             //intersections are handled by Java2D library for line segments
             return isIntersecting(sl, uv)
-                && !isIntersecting(sl, uw)
-                && !isIntersecting(sl, wx)
-                && !isIntersecting(sl, vx)
+                    && !isIntersecting(sl, uw)
+                    && !isIntersecting(sl, wx)
+                    && !isIntersecting(sl, vx)
         }
 
         /**
