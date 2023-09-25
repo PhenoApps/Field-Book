@@ -20,13 +20,17 @@ class CategoryJsonUtil {
         }
 
         fun decode(json: String): ArrayList<BrAPIScaleValidValuesCategories> {
-            return if (json == "NA") arrayListOf(BrAPIScaleValidValuesCategories().apply {
-                label = json
-                value = json
-            }) else Gson().fromJson(
-                json,
-                object : TypeToken<List<BrAPIScaleValidValuesCategories?>>() {}.type
-            )
+            return try {
+                Gson().fromJson(
+                    json,
+                    object : TypeToken<List<BrAPIScaleValidValuesCategories?>>() {}.type
+                )
+            } catch (e: Exception) {
+                arrayListOf(BrAPIScaleValidValuesCategories().apply {
+                    label = json
+                    value = json
+                })
+            }
         }
 
         /**
