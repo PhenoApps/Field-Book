@@ -99,6 +99,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -2136,6 +2137,88 @@ public class CollectActivity extends ThemedActivity
         return secureBluetooth;
     }
 
+    @Override
+    public String queryForLabelValue(
+            String plotId, String label, Boolean isAttribute
+    ) {
+        Context context = this;
+
+        String dataMissingString = context.getString(R.string.main_infobar_data_missing);
+
+        if (isAttribute) {
+
+            String[] values = database.getDropDownRange(label, plotId);
+            if (values == null || values.length == 0) {
+                return dataMissingString;
+            } else {
+                return values[0];
+            }
+
+        } else {
+
+            String value = database.getUserDetail(plotId).get(label);
+            if (value == null) {
+                value = dataMissingString;
+            }
+
+            try {
+
+                String labelValPref = ((CollectActivity) context).getPreferences()
+                        .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value");
+                if (labelValPref == null) {
+                    labelValPref = "value";
+                }
+
+                StringJoiner joiner = new StringJoiner(":");
+                ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
+                for (BrAPIScaleValidValuesCategories s : scale) {
+                    if ("label".equals(labelValPref)) {
+                        joiner.add(s.getLabel());
+                    } else {
+                        joiner.add(s.getValue());
+                    }
+                }
+
+                return joiner.toString();
+
+            } catch (Exception ignore) {
+                return value;
+            }
+        }
+    }
+
+    @Override
+    public ArrayList<String> getGeoNavPopupSpinnerItems () {
+        //query database for attributes/traits to use
+        try {
+            List<String> attributes = Arrays.asList(getDatabase().getAllObservationUnitAttributeNames(Integer.parseInt(getStudyId())));
+            TraitObject[] traits = getDatabase().getAllTraitObjects().toArray(new TraitObject[0]);
+
+            ArrayList<TraitObject> visibleTraits = new ArrayList<>();
+            for (TraitObject traitObject : traits) {
+                if (traitObject.getVisible()) {
+                    visibleTraits.add(traitObject);
+                }
+            }
+
+            // Map traits to their names
+            List<String> traitNames = new ArrayList<>();
+            for (TraitObject traitObject : visibleTraits) {
+                traitNames.add(traitObject.getTrait());
+            }
+
+            // Combine attributes and trait names
+            ArrayList<String> result = new ArrayList<>(attributes);
+            result.addAll(traitNames);
+
+            return result;
+        } catch (Exception e) {
+            Log.d(TAG, "Error occurred when querying for attributes in GeoNavCollectDialog.");
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+    
     @NonNull
     @Override
     public VibrateUtil getVibrator() {

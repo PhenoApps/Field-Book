@@ -2,8 +2,8 @@ package com.fieldbook.tracker.utilities
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.provider.ContactsContract.Data
 import android.util.Log
-import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.CollectAttributeChooserDialog
@@ -17,61 +17,19 @@ import javax.inject.Inject
  * Helper class for handling all infobar data and logic.
  * Used in collect activity.
  */
-class InfoBarHelper @Inject constructor(@ActivityContext private val context: Context) {
+class InfoBarHelper @Inject constructor(@ActivityContext private val context: Context)  {
 
     companion object {
         const val TAG = "InfoBarHelper"
     }
 
-    @Inject
-    lateinit var database: DataHelper
+//    @Inject
+//    override lateinit var database: DataHelper
 
     private val ad = CollectAttributeChooserDialog(context as CollectActivity)
 
     private val ep: SharedPreferences by lazy {
         context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
-    }
-
-    /**
-     * Queries the database for the value of the label.
-     * Attributes use the getDropDownRange call, where traits use getUserDetail
-     */
-    private fun queryForLabelValue(plotId: String, label: String, isAttribute: Boolean): String {
-
-        val dataMissingString: String = context.getString(R.string.main_infobar_data_missing)
-
-        return if (isAttribute) {
-
-            val values = database.getDropDownRange(label, plotId)
-            if (values == null || values.isEmpty()) {
-                dataMissingString
-            } else {
-                values[0]
-            }
-
-        } else {
-
-            var value = database.getUserDetail(plotId)[label] ?: dataMissingString
-
-            value = try {
-
-                val labelValPref: String = (context as CollectActivity).getPreferences()
-                    .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") ?: "value"
-
-                val joiner = StringJoiner(":")
-                val scale = CategoryJsonUtil.decode(value)
-                for (s in scale) {
-                    if (labelValPref == "label") {
-                        joiner.add(s.label)
-                    } else joiner.add(s.value)
-                }
-
-                joiner.toString()
-
-            } catch (ignore: Exception) { value }
-
-            value
-        }
     }
 
     /**
@@ -88,6 +46,8 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
         //iterate and build teh arraylist
         for (i in 0 until numInfoBars) {
 
+            var database : DataHelper = (context as CollectActivity).getDatabase();
+
             //ensure that the initialLabel is actually a plot attribute
 
             //get all plot attribute names for the study
@@ -98,8 +58,10 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
 
             //create a new array with just trait names
             val traitNames = ArrayList<String>()
-            for (t in traits) {
-                traitNames.add(t.trait)
+            if (traits != null) {
+                for (t in traits) {
+                    traitNames.add(t.trait)
+                }
             }
 
             //get the default label for the infobar using 'Select' (used in original adapter code)
@@ -129,7 +91,7 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
             //query the database for the label's value
             (context as? CollectActivity)?.getRangeBox()?.getPlotID()?.let { plot ->
 
-                val value = queryForLabelValue(plot, initialLabel, isAttribute)
+                val value = (context as CollectActivity).queryForLabelValue(plot, initialLabel, isAttribute)
 
                 infoBarModels.add(InfoBarModel(initialLabel, value))
             }
