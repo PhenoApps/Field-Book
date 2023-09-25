@@ -9,13 +9,14 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.preferences.GeneralKeys
 
 interface BluetoothChooseCallback {
     fun onDeviceChosen(deviceName: String)
 }
 //Bluetooth Utility class for printing ZPL code and choosing bluetooth devices to print from.
 class BluetoothUtil {
+
+    private val TAG = BluetoothUtil::class.simpleName
 
     private val mBluetoothAdapter: BluetoothAdapter? by lazy {
         BluetoothAdapter.getDefaultAdapter()
@@ -55,9 +56,8 @@ class BluetoothUtil {
 
                     if (input.checkedRadioButtonId == -1) return@setPositiveButton
                     else {
-                        Log.d("BluetoothUtil", "Setting mBtName")
                         deviceName = map[input.checkedRadioButtonId]?.name ?: ""
-                        Log.d("BluetoothUtil", "Selected Bluetooth Device: $deviceName")
+                        Log.d(TAG, "Selected Bluetooth Device: $deviceName")
                         callback.onDeviceChosen(deviceName)
                     }
                 }
@@ -72,9 +72,9 @@ class BluetoothUtil {
      * button is pressed.
      */
     fun print(ctx: Context, printerName: String, size: String, labelCommand: List<String>) {
-        Log.d("BluetoothUtil", "Label Command is: $labelCommand")
+        Log.d(TAG, "Label zpl is: $labelCommand")
         if (labelCommand.isNotEmpty()) {
-            Log.d("BluetoothUtil", "printing to $printerName")
+            Log.d(TAG, "Sending label zpl to $printerName")
             PrintThread(ctx, printerName).print(size, labelCommand)
         }
     }

@@ -37,6 +37,8 @@ import java.util.HashMap;
 
 public class LabelPrintTraitLayout extends BaseTraitLayout {
 
+    private static final String TAG = LabelPrintTraitLayout.class.getSimpleName();
+
     static public String type = "zebra label print";
 
     private String[] options;
@@ -219,7 +221,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 @Override
                 public void onItemSelected(AdapterView<?> arg0, View arg1,
                                            int pos, long arg3) {
-                    Log.d(CollectActivity.TAG, labelsize.getSelectedItem().toString());
+                    Log.d(TAG, labelsize.getSelectedItem().toString());
 
                     if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed") || labelsize.getSelectedItem().toString().equals("2\" x 1\" detailed")) {
                         ((View) textfield2.getParent()).setVisibility(View.VISIBLE);
@@ -300,7 +302,6 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
             mBluetoothUtil.choose(getContext(), new BluetoothChooseCallback() {
                 @Override
                 public void onDeviceChosen(String newDeviceName) {
-                    Log.d("LabelPrintTraitLayout", "Chosen printerName is " + newDeviceName);
                     saveDeviceNamePreference(newDeviceName);
                 }
             });
@@ -432,12 +433,12 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                          * A local broadcast receiver is used to communicate with the print thread within this utility class.
                          */
                         String printerName = getPrefs().getString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, null);
-                        Log.d("LabelPrintTraitLayout", "retrieved printerName is " + printerName);
+                        Log.d(TAG, "retrieved printerName is " + printerName);
                         if (printerName == null) {
                             mBluetoothUtil.choose(getContext(), new BluetoothChooseCallback() {
                                 @Override
                                 public void onDeviceChosen(String newDeviceName) {
-                                    Log.d("LabelPrintTraitLayout", "Chosen printerName is " + newDeviceName);
+                                    Log.d(TAG, "Chosen printerName is " + newDeviceName);
                                     saveDeviceNamePreference(newDeviceName);
                                     mBluetoothUtil.print(getContext(), newDeviceName, size, labels);
                                 }
