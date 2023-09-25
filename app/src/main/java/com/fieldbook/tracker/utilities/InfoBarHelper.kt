@@ -10,7 +10,8 @@ import com.fieldbook.tracker.dialogs.CollectAttributeChooserDialog
 import com.fieldbook.tracker.objects.InfoBarModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.qualifiers.ActivityContext
-import java.util.*
+import java.util.Arrays
+import java.util.StringJoiner
 import javax.inject.Inject
 
 /**
@@ -35,7 +36,7 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
     /**
      * Reads the number of preference infobars and creates models for each one
      */
-    fun getInfoBarData(): ArrayList<InfoBarModel>? {
+    fun getInfoBarData(): ArrayList<InfoBarModel> {
 
         //get the preference number of infobars to load
         val numInfoBars: Int = ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2)
@@ -43,7 +44,7 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
         //initialize a list of infobar models that will be served to the adapter
         val infoBarModels = ArrayList<InfoBarModel>()
 
-        //iterate and build teh arraylist
+        //iterate and build the arraylist
         for (i in 0 until numInfoBars) {
 
             var database : DataHelper = (context as CollectActivity).getDatabase();
