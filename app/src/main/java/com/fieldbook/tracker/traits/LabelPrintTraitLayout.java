@@ -403,7 +403,11 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                     labelData = labelData.replace("size2", size2);
                     labelData = labelData.replace("size3", size3);
                     labelData = labelData.replace("size4", size4);
-                    labelData = labelData.replace("barcode", barcode);
+                    if (barcode.isEmpty()) { // remove barcode if it will not encode anything
+                        labelData = labelData.replace("^BQ,,sizeb^FDMA,barcode^FS", "");
+                    } else {
+                        labelData = labelData.replace("barcode", barcode);
+                    }
                     labelData = labelData.replace("sizeb", Integer.toString(barcode_size));
 
                 }
