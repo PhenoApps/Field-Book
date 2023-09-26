@@ -154,7 +154,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             if (preferenceItem.key == "com.fieldbook.tracker.geonav.ENABLE_GEONAV") {
                 continue
             }
-            
+
             val isParameter = preferenceItem.key.startsWith("com.fieldbook.tracker.geonav.parameters.")
             if (isParameter && searchMethodPref?.value == "0") { // Set parameter visibility to false if search method is distance
                 preferenceItem.isVisible = false
@@ -190,25 +190,6 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             }
         }
     }
-
-//        val geonavEnabledPref = findPreference<CheckBoxPreference>("com.fieldbook.tracker.geonav.ENABLE_GEONAV")
-//        val geoNavCat = findPreference<PreferenceCategory>(GeneralKeys.GEONAV_PARAMETERS_CATEGORY)
-//
-//        when (mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0")) {
-//
-//            "0" -> { //distance based
-//
-//                geoNavCat?.isVisible = false
-//            }
-//
-//            else -> { //trapezoidal
-//                val isChecked = geonavEnabledPref.isChecked() as Boolean
-//                if (isChecked) {
-//                    geoNavCat?.isVisible = true
-//                }
-//            }
-//        }
-//    }
 
     /**
      * Updates the pair device preference summary with the currently preferred device mac address.
