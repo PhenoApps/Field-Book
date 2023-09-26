@@ -159,7 +159,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         String categoryString = getCurrentTrait().getCategories();
         try {
 
-            cats = CategoryJsonUtil.Companion.decode(categoryString);
+            cats = CategoryJsonUtil.Companion.decodeCategories(categoryString);
 
         } catch (Exception e) {
 

@@ -187,7 +187,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
         try {
 
-            scale = CategoryJsonUtil.Companion.decode(value);
+            scale = CategoryJsonUtil.Companion.decodeCategories(value);
 
         } catch (Exception e) {
 
@@ -265,7 +265,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         String categoryString = getCurrentTrait().getCategories();
         try {
 
-            ArrayList<BrAPIScaleValidValuesCategories> json = CategoryJsonUtil.Companion.decode(categoryString);
+            ArrayList<BrAPIScaleValidValuesCategories> json = CategoryJsonUtil.Companion.decodeCategories(categoryString);
 
             if (!json.isEmpty()) {
 

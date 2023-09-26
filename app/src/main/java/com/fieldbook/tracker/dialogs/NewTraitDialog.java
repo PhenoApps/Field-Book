@@ -423,7 +423,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
 
         try {
 
-            ArrayList<BrAPIScaleValidValuesCategories> json = CategoryJsonUtil.Companion.decode(traitObject.getCategories());
+            ArrayList<BrAPIScaleValidValuesCategories> json = CategoryJsonUtil.Companion.decodeCategories(traitObject.getCategories());
 
             if (!json.isEmpty()) {
 
