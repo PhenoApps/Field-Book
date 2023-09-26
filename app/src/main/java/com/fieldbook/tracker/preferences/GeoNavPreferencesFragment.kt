@@ -145,13 +145,22 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
     private fun updatePreferencesVisibility(isChecked: Boolean) {
         val preferenceScreen = preferenceScreen
+        val searchMethodPref = findPreference<ListPreference>("com.fieldbook.tracker.geonav.SEARCH_METHOD")
+
         for (i in 0 until preferenceScreen.preferenceCount) {
             val preferenceItem = preferenceScreen.getPreference(i)
+
             // Skip the checkbox preference itself
-            if (preferenceItem.key.equals("com.fieldbook.tracker.geonav.ENABLE_GEONAV")) {
+            if (preferenceItem.key == "com.fieldbook.tracker.geonav.ENABLE_GEONAV") {
                 continue
             }
-            preferenceItem.isVisible = isChecked
+            
+            val isParameter = preferenceItem.key.startsWith("com.fieldbook.tracker.geonav.parameters.")
+            if (isParameter && searchMethodPref?.value == "0") { // Set parameter visibility to false if search method is distance
+                preferenceItem.isVisible = false
+            } else {
+                preferenceItem.isVisible = isChecked
+            }
         }
     }
 
@@ -166,22 +175,40 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     private fun updateParametersVisibility() {
-
         val geoNavCat = findPreference<PreferenceCategory>(GeneralKeys.GEONAV_PARAMETERS_CATEGORY)
+        val geonavEnabled = mPrefs.getBoolean("com.fieldbook.tracker.geonav.ENABLE_GEONAV", false)
 
-        when (mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0")) {
-
-            "0" -> { //distance based
-
+        when {
+            !geonavEnabled -> {
                 geoNavCat?.isVisible = false
             }
-
-            else -> { //trapezoidal
-
+            mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") == "0" -> { // Distance based
+                geoNavCat?.isVisible = false
+            }
+            else -> { // Trapezoidal
                 geoNavCat?.isVisible = true
             }
         }
     }
+
+//        val geonavEnabledPref = findPreference<CheckBoxPreference>("com.fieldbook.tracker.geonav.ENABLE_GEONAV")
+//        val geoNavCat = findPreference<PreferenceCategory>(GeneralKeys.GEONAV_PARAMETERS_CATEGORY)
+//
+//        when (mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0")) {
+//
+//            "0" -> { //distance based
+//
+//                geoNavCat?.isVisible = false
+//            }
+//
+//            else -> { //trapezoidal
+//                val isChecked = geonavEnabledPref.isChecked() as Boolean
+//                if (isChecked) {
+//                    geoNavCat?.isVisible = true
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Updates the pair device preference summary with the currently preferred device mac address.
