@@ -57,6 +57,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private PreferenceManager prefMgr;
     private PreferenceCategory brapiPrefCategory;
     private Preference brapiLogoutButton;
+    private Menu mMenu;
     private NeutralButtonEditTextDialog brapiURLPreference;
     private NeutralButtonEditTextDialog brapiDisplayName;
     private NeutralButtonEditTextDialog brapiOIDCURLPreference;
@@ -192,11 +193,18 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         PreferenceScreen preferenceScreen = getPreferenceScreen();
         for (int i = 0; i < preferenceScreen.getPreferenceCount(); i++) {
             Preference preferenceItem = preferenceScreen.getPreference(i);
-            // Skip the checkbox preference itself
-            if (preferenceItem.getKey().equals(GeneralKeys.BRAPI_ENABLED)) {
+            if (preferenceItem.getKey().equals(GeneralKeys.BRAPI_ENABLED)) { // Skip the checkbox preference itself
                 continue;
             }
             preferenceItem.setVisible(isChecked);
+        }
+
+        // Also show/hide the BrAPI toolbar authentication option
+        if (mMenu != null) {
+            MenuItem brapiPrefAuthItem = mMenu.findItem(R.id.action_menu_brapi_pref_auth);
+            if (brapiPrefAuthItem != null) {
+                brapiPrefAuthItem.setVisible(isChecked);
+            }
         }
     }
 
@@ -204,6 +212,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         menu.clear();
         inflater.inflate(R.menu.menu_brapi_pref, menu);
+        mMenu = menu; // Store a reference to the menu
+        CheckBoxPreference brapiEnabledPref = findPreference(GeneralKeys.BRAPI_ENABLED);
+        updatePreferencesVisibility(brapiEnabledPref.isChecked());
         super.onCreateOptionsMenu(menu, inflater);
     }
 
