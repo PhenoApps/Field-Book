@@ -20,7 +20,7 @@
         app:iconSpaceReserved="false">
 
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:icon="@drawable/ic_pref_profile_verify"
             android:key="com.tracker.fieldbook.preference.require_user_to_collect"
             android:title="@string/pref_profile_title" />
