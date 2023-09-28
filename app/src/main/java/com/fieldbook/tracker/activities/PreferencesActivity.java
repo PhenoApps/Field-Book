@@ -46,6 +46,12 @@ public class PreferencesActivity extends ThemedActivity implements PreferenceFra
             profile.setArguments(personUpdate);
             getSupportFragmentManager().beginTransaction().replace(android.R.id.content, profile).commit();
 
+        } else if (extras != null && extras.getBoolean(GeneralKeys.MODIFY_PROFILE_SETTINGS, false)) {
+
+            //starts profile fragment without opening the person setting
+            Fragment profile = new ProfilePreferencesFragment();
+            getSupportFragmentManager().beginTransaction().replace(android.R.id.content, profile).commit();
+
         }
 
         boolean flag = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(GeneralKeys.THEME_FLAG, false);

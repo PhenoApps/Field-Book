@@ -76,17 +76,15 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
             .setPositiveButton(
                 positive
             ) { dialog: DialogInterface, _: Int -> dialog.dismiss() } //yes, don't ask again button
-            .setNeutralButton(neutral) { dialog: DialogInterface, _: Int ->
+            .setNeutralButton(neutral) { dialog: DialogInterface, _: Int -> //modify settings (navigates to profile preferences)
                 dialog.dismiss()
-                prefs.edit().putBoolean(GeneralKeys.REQUIRE_USER_TO_COLLECT, false).apply()
+                val preferenceIntent = Intent(context, PreferencesActivity::class.java)
+                preferenceIntent.putExtra("ModifyProfileSettings", true)
+                context.startActivity(preferenceIntent)
             } //no (navigates to the person preference)
             .setNegativeButton(negative) { dialog: DialogInterface, _: Int ->
                 dialog.dismiss()
-                val preferenceIntent = Intent()
-                preferenceIntent.setClassName(
-                    context,
-                    PreferencesActivity::class.java.name
-                )
+                val preferenceIntent = Intent(context, PreferencesActivity::class.java)
                 preferenceIntent.putExtra("PersonUpdate", true)
                 context.startActivity(preferenceIntent)
             }
