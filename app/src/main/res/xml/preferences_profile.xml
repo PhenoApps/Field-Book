@@ -26,6 +26,7 @@
             android:title="@string/pref_profile_title" />
 
         <ListPreference
+            android:defaultValue="1"
             android:entries="@array/preferences_profile_ask_user_interval_entries"
             android:entryValues="@array/preferences_profile_ask_user_interval_values"
             android:icon="@drawable/hours_24"

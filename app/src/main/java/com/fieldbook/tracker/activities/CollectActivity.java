@@ -297,6 +297,8 @@ public class CollectActivity extends ThemedActivity
         loadScreen();
 
         checkForInitialBarcodeSearch();
+
+        verifyPersonHelper.checkLastOpened();
     }
 
     private void switchField(int studyId, @Nullable String obsUnitId) {
@@ -830,8 +832,6 @@ public class CollectActivity extends ThemedActivity
             Log.e(TAG, e.getMessage());
         }
 
-        verifyPersonHelper.updateLastOpenedTime();
-
         geoNavHelper.stopGeoNav();
 
         gnssThreadHelper.stop();
@@ -946,8 +946,6 @@ public class CollectActivity extends ThemedActivity
 
             startGeoNav();
         }
-
-        verifyPersonHelper.checkLastOpened();
 
         if (!mSkipLastUsedTrait) {
 
