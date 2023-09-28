@@ -178,6 +178,8 @@
     <!-- Update -->
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="brapi_choice_to_make_default_negative">Ballessi</string>
+    <string name="brapi_choice_to_make_default_positive">Olkaa\'i</string>
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->

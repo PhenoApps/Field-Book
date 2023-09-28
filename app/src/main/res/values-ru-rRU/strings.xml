@@ -182,6 +182,8 @@
     <!-- Update -->
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="brapi_choice_to_make_default_negative">Отменить</string>
+    <string name="brapi_choice_to_make_default_positive">Сохранить</string>
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
