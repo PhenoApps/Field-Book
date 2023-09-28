@@ -3,7 +3,6 @@ package com.fieldbook.tracker.utilities
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
@@ -16,8 +15,6 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
     val prefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
 
     private fun Int.hourToNano() = this * 3600 * 1e9.toLong()
-
-    private val TAG = "VerifyPersonHelper"
 
     /**
      * Simple function that checks if the collect activity was opened >24hrs ago.
