@@ -173,6 +173,8 @@
     <!-- Update -->
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="brapi_choice_to_make_default_negative">Abbrechen</string>
+    <string name="brapi_choice_to_make_default_positive">Speichern</string>
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
