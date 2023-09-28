@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_adv_brapi"
+        android:key="BRAPI_ENABLED"
+        android:summary="@string/preferences_brapi_enable_summary"
+        android:title="@string/preferences_brapi_enable_title" />
+
     <PreferenceCategory
         android:key="brapi_category"
         android:title="@string/preferences_brapi_core_title"
@@ -12,11 +20,22 @@
             android:dialogTitle="@string/brapi_base_url"
             android:icon="@drawable/ic_adv_brapi_base"
             android:key="BRAPI_BASE_URL"
-            app:positiveButtonText="@string/brapi_save_authorize"
+            android:summary="%s"
+            android:title="@string/brapi_base_url"
             app:negativeButtonText="@android:string/cancel"
             app:neutralButtonText="@string/dialog_scan"
+            app:positiveButtonText="@string/brapi_save_authorize" />
+
+        <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
+            android:defaultValue="@string/preferences_brapi_server_test"
+            android:dialogTitle="@string/brapi_edit_display_name"
+            android:icon="@drawable/ic_pref_brapi_name"
+            android:key="BRAPI_DISPLAY_NAME"
             android:summary="%s"
-            android:title="@string/brapi_base_url" />
+            android:title="@string/brapi_display_name"
+            app:negativeButtonText="@android:string/cancel"
+            app:neutralButtonText="@string/brapi_edit_display_name_server"
+            app:positiveButtonText="@android:string/ok" />
 
         <Preference
             android:icon="@drawable/ic_pref_brapi_logout"
@@ -82,13 +101,14 @@
             android:key="BRAPI_OIDC_URL"
             android:summary="@string/brapi_oidc_url_desc"
             android:title="@string/brapi_oidc_url"
-            app:positiveButtonText="@android:string/ok"
             app:negativeButtonText="@android:string/cancel"
-            app:neutralButtonText="@string/dialog_scan"/>
+            app:neutralButtonText="@string/dialog_scan"
+            app:positiveButtonText="@android:string/ok" />
 
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="brapi_variables"
         android:title="@string/preferences_brapi_traits_title"
         app:iconSpaceReserved="false">
         <ListPreference

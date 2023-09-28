@@ -17,7 +17,8 @@
         android:icon="@drawable/ic_function_variant"
         android:key="com.fieldbook.tracker.geonav.SEARCH_METHOD"
         android:summary="@string/pref_geonav_search_method_summary"
-        android:title="@string/pref_geonav_search_method_title" />
+        android:title="@string/pref_geonav_search_method_title"
+        app:allowDividerAbove="true" />
 
     <CheckBoxPreference
         android:defaultValue="false"
