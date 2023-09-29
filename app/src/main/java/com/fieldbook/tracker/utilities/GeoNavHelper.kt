@@ -110,7 +110,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             alt = alt.substring(0, altLength - 1) //drop the "M"
 
             //always log location updates for verbose log
-            if (currentLoggingMode() != closestObservationUnitLoggingMode()) {
+            if (currentLoggingMode() == "2") {
                 writeGeoNavLog(
                     mGeoNavLogWriter,
                     "$lat,$lng,$time,null,null,null,null,null,null,$fix,null,null,null,null\n"
@@ -226,15 +226,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     }
 
     private fun currentLoggingMode() : String {
-        return mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, controller.getContext().getString(R.string.pref_geonav_verbose)) ?: controller.getContext().getString(R.string.pref_geonav_verbose)
-    }
-
-    private fun verboseLoggingMode() : String {
-        return controller.getContext().getString(R.string.pref_geonav_verbose)
-    }
-
-    private fun closestObservationUnitLoggingMode() : String {
-        return controller.getContext().getString(R.string.pref_geonav_closest_observation_unit)
+        return mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0") ?: "0"
     }
 
     /**
@@ -597,7 +589,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
      * Starts a file in storage/geonav/log.txt
      */
     fun setupGeoNavLogger() {
-        if (mPrefs.getBoolean(GeneralKeys.GEONAV_LOG, false)) {
+        if (currentLoggingMode() != "0") {
             try {
                 val resolver: ContentResolver = controller.getContext().contentResolver
                 val geoNavFolder = getDirectory(controller.getContext(), R.string.dir_geonav)
@@ -608,9 +600,9 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                         .replace("\\s".toRegex(), "_")
                     val thetaPref = mPrefs.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
                     // if the currentLoggingMode is for closest observation unit log, use "closest_" as the prefix for filename
-                    val prefixOfFile = if (currentLoggingMode() == closestObservationUnitLoggingMode()) {
+                    val prefixOfFile = if (currentLoggingMode() == "1") {
                         "closest_"
-                    } else{
+                    } else {
                         ""
                     }
                     val fileName = prefixOfFile + "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv"
@@ -739,7 +731,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         mInternalLocation = location
 
         //always log location updates for verbose log
-        if (currentLoggingMode() == verboseLoggingMode()) {
+        if (currentLoggingMode() == "2") {
             writeGeoNavLog(
                 mGeoNavLogWriter,
                 """

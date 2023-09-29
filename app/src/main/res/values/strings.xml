@@ -651,14 +651,13 @@
     <string name="pref_geonav_search_angle_summary">GeoNav creates a trapezoid in front of the user, the angle closest to the user is defined as %s°.</string>
     <string name="pref_geonav_search_angle_title">GeoNav Search Angle (degrees)</string>
 
-    <string name="pref_geonav_log_title">GeoNav Log</string>
-    <string name="pref_geonav_log_summary">Write GeoNav steps to a log file in \n storage/geonav/log.txt</string>
-
-    <string name="pref_geonav_logging_mode">Current Logging Mode</string>
-    <string name="pref_geonav_closest_observation_unit">Closest observation unit logs</string>
-    <string name="pref_geonav_closest_observation_unit_description">Closest observation unit logs: Logs only the closest observation unit to the user at a given time based on the algorithm used</string>
-    <string name="pref_geonav_verbose">Verbose Logs</string>
-    <string name="pref_geonav_verbose_description">Verbose logs: Logs any location updates along with algorithm steps</string>
+    <string name="pref_geonav_log">GeoNav Log</string>
+    <string name="pref_geonav_log_off">Off</string>
+    <string name="pref_geonav_log_off_description">Off: No logs being recorded</string>
+    <string name="pref_geonav_log_closest_entry">Closest</string>
+    <string name="pref_geonav_log_closest_entry_description">Closest: Logging closest entry to storage/geonav/closest_log.txt</string>
+    <string name="pref_geonav_log_verbose">Verbose</string>
+    <string name="pref_geonav_log_verbose_description">Verbose: Logging all location updates and algorithm steps to storage/geonav/log.txt</string>
 
     <string name="pref_geonav_update_interval_title">Update Interval (s)</string>
     <string name="pref_geonav_update_interval_summary">The time between location updates is %ss.</string>

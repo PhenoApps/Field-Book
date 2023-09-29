@@ -176,10 +176,10 @@ class GeodeticUtils {
             //after a full run of IZ, update the last CLOSEST_UPDATE to CLOSEST_FINAL
             izLogArray.findLast { it.closest == CLOSEST_UPDATE }?.closest = CLOSEST_FINAL
 
-            if(currentLoggingMode != "Verbose Logs"){
+            if (currentLoggingMode == "1") {
                 //print only the closest plant to the log
                 izLogArray.forEach { if (it.closest == CLOSEST_FINAL) writeGeoNavLog(log, it.toString()) }
-            }else{
+            } else if (currentLoggingMode == "2") {
                 //print the entire array to log
                 izLogArray.forEach { writeGeoNavLog(log, it.toString()) }
             }

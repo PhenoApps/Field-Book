@@ -146,9 +146,16 @@
         <item>@string/location_level_study</item>
     </string-array>
 
-    <string-array name="pref_geonav_logging_mode_titles">
-        <item>@string/pref_geonav_verbose</item>
-        <item>@string/pref_geonav_closest_observation_unit</item>
+    <string-array name="pref_geonav_logging_modes">
+        <item>@string/pref_geonav_log_off</item>
+        <item>@string/pref_geonav_log_closest_entry</item>
+        <item>@string/pref_geonav_log_verbose</item>
+    </string-array>
+
+    <string-array name="pref_geonav_logging_mode_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
     </string-array>
 
     <string-array name="pref_general_move_to_unique_id_entries">
