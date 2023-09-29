@@ -142,10 +142,10 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_off_description)
             geoNavLoggingMode?.setIcon(R.drawable.ic_note_off_outline)
         } else if (currentMode == "1") {
-            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_closest_entry_description)
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_limited_description)
             geoNavLoggingMode?.setIcon(R.drawable.ic_note_outline)
         } else {
-            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_verbose_description)
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_full_description)
             geoNavLoggingMode?.setIcon(R.drawable.ic_note_multiple_outline)
         }
     }

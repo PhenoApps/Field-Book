@@ -148,8 +148,8 @@
 
     <string-array name="pref_geonav_logging_modes">
         <item>@string/pref_geonav_log_off</item>
-        <item>@string/pref_geonav_log_closest_entry</item>
-        <item>@string/pref_geonav_log_verbose</item>
+        <item>@string/pref_geonav_log_limited</item>
+        <item>@string/pref_geonav_log_full</item>
     </string-array>
 
     <string-array name="pref_geonav_logging_mode_values">
