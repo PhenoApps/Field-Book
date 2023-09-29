@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.ThemedActivity;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import net.openid.appauth.AuthorizationException;

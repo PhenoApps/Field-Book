@@ -12,6 +12,7 @@ import com.fieldbook.tracker.views.CollectInputView
 import com.fieldbook.tracker.views.RangeBoxView
 import com.fieldbook.tracker.views.TraitBoxView
 import org.phenoapps.security.SecureBluetoothActivityImpl
+import java.util.ArrayList
 
 interface CollectController: FieldController {
     fun getContext(): Context
@@ -33,4 +34,9 @@ interface CollectController: FieldController {
                      plotId: String?,
                      data: String?,
                      traitIndex: Int): Boolean
+    fun queryForLabelValue(
+        plotId: String, label: String, isAttribute: Boolean?
+    ) : String
+
+    fun getGeoNavPopupSpinnerItems(): ArrayList<String>
 }

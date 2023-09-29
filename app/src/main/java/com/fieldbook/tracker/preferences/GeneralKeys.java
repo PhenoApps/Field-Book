@@ -63,15 +63,18 @@ public class GeneralKeys {
     public static final String DELETE_OBSERVATION_SOUND             = "DELETE_OBSERVATION_SOUND";
 
     //BrAPI
+    public static final String BRAPI_ENABLED                        = "BRAPI_ENABLED";
     public static final String BRAPI_BASE_URL                       = "BRAPI_BASE_URL";
     public static final String BRAPI_OIDC_URL                       = "BRAPI_OIDC_URL";
     public static final String BRAPI_OIDC_FLOW                      = "BRAPI_OIDC_FLOW";
-    public static final String BRAPI_EXPLICIT_OIDC_URL             = "BRAPI_EXPLICIT_OIDC_URL";
+    public static final String BRAPI_EXPLICIT_OIDC_URL              = "BRAPI_EXPLICIT_OIDC_URL";
     public static final String BRAPI_TOKEN                          = "BRAPI_TOKEN";
     public static final String BRAPI_VERSION                        = "BRAPI_VERSION";
     public static final String BRAPI_PAGE_SIZE                      = "BRAPI_PAGE_SIZE";
     public static final String BRAPI_TIMEOUT                        = "BRAPI_TIMEOUT";
     public static final String BRAPI_CHUNK_SIZE                     = "BRAPI_CHUNK_SIZE";
+
+    public static final String BRAPI_DISPLAY_NAME                   = "BRAPI_DISPLAY_NAME";
 
     //GeoNav
     private static final String GEONAV_PREFIX                       = "com.fieldbook.tracker.geonav.";
@@ -96,6 +99,8 @@ public class GeneralKeys {
     public static final String GEONAV_CONFIG_AUDIO_ON_DROP          = GEONAV_PREFIX + "AUDIO_ON_DROP";
 
     public static final String GEONAV_CONFIG_DEGREE_PRECISION       = GEONAV_PREFIX + "DEGREE_PRECISION";
+  
+    public static final String GEONAV_POPUP_DISPLAY       = GEONAV_PREFIX + "POPUP_DISPLAY";
     // @formatter:on
 
     // GNSS
@@ -125,6 +130,7 @@ public class GeneralKeys {
     public static final String THEME = "key_preferences_theme_theme";
     public static final String TEXT_THEME = "key_preferences_theme_text";
     public static final String THEME_FLAG = "key_preferences_theme_theme_flag";
+    public static final String IMPORT_SOURCE_DEFAULT = "IMPORT_SOURCE_DEFAULT";
     public static final String EXPORT_SOURCE_DEFAULT = "EXPORT_SOURCE_DEFAULT";
     public static final String FIRST_RUN = "FirstRun";
     public static final String UPDATE_VERSION = "UpdateVersion";
@@ -186,6 +192,9 @@ public class GeneralKeys {
 
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
+
+    //Zebra Label Print Trait
+    public static final String LABEL_PRINT_DEVICE_NAME      = "LABEL_PRINT_DEVICE_NAME";
 
     //Dialog Export
     public static final String DIALOG_EXPORT_BUNDLE_CHECKED = "com.fieldbook.tracker.DIALOG_EXPORT_BUNDLE_CHECKED";

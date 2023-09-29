@@ -358,6 +358,7 @@
     <string name="printer_not_connected">Printer not connected</string>
     <string name="no_device_paired">No device paired</string>
 
+    <string name="trait_labelprint_connect_button_description">Button which connects a printer.</string>
     <string name="trait_labelprint_preview_description">Label preview.</string>
     <string name="trait_labelprint_print_button_description">Button which prints labels configured in this dialog.</string>
 
@@ -419,6 +420,7 @@
     <string name="dialog_geonav_collect_auto_navigate">Auto Navigate</string>
     <string name="dialog_geonav_collect_notify_on_precision_loss">Audio on precision drop</string>
     <string name="dialog_geonav_collect_precision_threshold_title">Degree of precision</string>
+    <string name="dialog_geonav_collect_geonav_popup_type">GeoNav Popup Type</string>
     <string name="dialog_geonav_collect_reconnect">Reconnect</string>
     <string name="dialog_geonav_collect_reset_start_toast_message">Resetting connection…</string>
     <string name="dialog_geonav_collect_reset_end_toast_message">Connection reset</string>
@@ -749,15 +751,26 @@
     <string name="preferences_brapi" translatable="false">BrAPI</string>
     <string name="brapi_info_title">Breeding API</string>
 
+    <string name="preferences_brapi_enable_title">Enable BrAPI</string>
+    <string name="preferences_brapi_enable_summary">The Breeding API allows simple data transfer to compatible databases.</string>
+    <string name="preferences_brapi_core_title">Configuration</string>
+
     <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
     <string name="act_brapi_auth_http_warning_title">HTTP Warning</string>
     <string name="act_brapi_auth_http_warning_message">You have entered an http url. There is no guarantee that this connection is secure.</string>
 
-    <string name="preferences_brapi_core_title">Configuration</string>
-
     <string name="brapi_base_url">Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
     <string name="brapi_base_url_default" translatable="false">https://test-server.brapi.org</string>
+
+    <string name="brapi_choice_to_make_default_dialog_title">Make this BrAPI server the default:</string>
+    <string name="brapi_choice_to_make_default_import">Import Source</string>
+    <string name="brapi_choice_to_make_default_export">Export Source</string>
+    <string name="brapi_choice_to_make_default_negative">Cancel</string>
+    <string name="brapi_choice_to_make_default_positive">Save</string>
+
+    <string name="brapi_edit_display_name">Edit Display Name</string>
+    <string name="brapi_edit_display_name_server">Server Name</string>
 
     <string name="preferences_brapi_version">BrAPI Version</string>
     <string name="preferences_brapi_version_v1" translatable="false">V1</string>
@@ -767,7 +780,7 @@
     <string name="brapi_timeout">Server Timeout</string>
     <string name="brapi_chunk_size">Chunk Size</string>
 
-    <string name="preferences_brapi_advanced_title">Advanced Auth Settings</string>
+    <string name="preferences_brapi_advanced_title">Auth Settings</string>
 
     <string name="preferences_brapi_oidc_flow" translatable="false">OIDC Flow</string>
     <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
@@ -790,11 +803,12 @@
     <string name="preferences_brapi_server_t3_wheat" translatable="false">T3 Wheat Sandbox</string>
     <string name="preferences_brapi_server_t3_oat" translatable="false">T3 Oat Sandbox</string>
     <string name="preferences_brapi_server_t3_barley" translatable="false">T3 Barley Sandbox</string>
-    <string name="preferences_brapi_server_test">Default Test Server</string>
+    <string name="preferences_brapi_server_test">BrAPI Test Server</string>
     <string name="preferences_brapi_server_add">Submit a server</string>
 
     <!-- Authorization -->
     <string name="brapi_save_authorize">Authorize</string>
+    <string name="brapi_display_name">Display Name</string>
     <string name="brapi_revoke_auth">Log Out</string>
     <string name="brapi_auth_btn">Log In to Site</string>
     <string name="brapi_auth_success">BrAPI Authorization Successful</string>

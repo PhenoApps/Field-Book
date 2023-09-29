@@ -57,4 +57,21 @@
             android:entries="@array/dialog_geonav_collect_degrees_of_precision"/>
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_margin="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_geonav_collect_geonav_popup_type" />
+
+        <Spinner
+            android:id="@+id/dialog_geonav_popup_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
 </LinearLayout>

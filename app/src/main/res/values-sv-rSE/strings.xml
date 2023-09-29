@@ -245,6 +245,8 @@
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
     <string name="brapi_info_title">Information om BrAPI-synkning</string>
+    <string name="brapi_choice_to_make_default_negative">Avbryt</string>
+    <string name="brapi_choice_to_make_default_positive">Spara</string>
     <!-- Authorization -->
     <string name="brapi_auth_btn">Logga in på sida</string>
     <string name="brapi_auth_needed_title">Inloggning krävs</string>

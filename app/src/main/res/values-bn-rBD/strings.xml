@@ -222,6 +222,8 @@
     <!-- Update -->
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="brapi_choice_to_make_default_negative">বাতিল</string>
+    <string name="brapi_choice_to_make_default_positive">সঞ্চিত করা</string>
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->

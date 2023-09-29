@@ -289,12 +289,9 @@ public class ConfigActivity extends ThemedActivity {
 
                     if (checkTraitsExist() < 0) return;
 
-                    String exporter = ep.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask");
+                    String exporter = ep.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "");
 
                     switch (exporter) {
-                        case "ask":
-                            showExportDialog();
-                            break;
                         case "local":
                             exportPermission();
                             break;
@@ -302,7 +299,12 @@ public class ConfigActivity extends ThemedActivity {
                             exportBrAPI();
                             break;
                         default:
-                            showExportDialog();
+                            // Skip dialog if BrAPI is disabled
+                            if (ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+                                showExportDialog();
+                            } else {
+                                exportPermission();
+                            }
                             break;
                     }
 
@@ -530,7 +532,7 @@ public class ConfigActivity extends ThemedActivity {
 
         String[] exportArray = new String[2];
         exportArray[0] = getString(R.string.export_source_local);
-        exportArray[1] = getString(R.string.export_source_brapi);
+        exportArray[1] = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, exportArray);
         exportSourceList.setAdapter(adapter);

@@ -182,6 +182,8 @@
     <!-- Update -->
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="brapi_choice_to_make_default_negative">रद्द करें</string>
+    <string name="brapi_choice_to_make_default_positive">सुरक्षित करें</string>
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
