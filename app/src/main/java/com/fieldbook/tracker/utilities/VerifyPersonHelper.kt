@@ -23,17 +23,19 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
     fun checkLastOpened() {
 
         val lastOpen: Long = prefs.getLong(GeneralKeys.LAST_TIME_OPENED, 0L)
+        val alreadyAsked: Boolean = prefs.getBoolean(GeneralKeys.ASKED_SINCE_OPENED, false)
         val systemTime = System.nanoTime()
 
         //number of hours to wait before asking for user, pref found in profile
-        val interval = when (prefs.getString(GeneralKeys.REQUIRE_USER_INTERVAL, "0")) {
+        val interval = when (prefs.getString(GeneralKeys.REQUIRE_USER_INTERVAL, "1")) {
             "1" -> 0
             "2" -> 12
             else -> 24
         }
 
         val nanosToWait = 1e9.toLong() * 3600 * interval
-        if (lastOpen != 0L && systemTime - lastOpen > nanosToWait) {
+        if ((interval == 0 && !alreadyAsked) // ask on opening and app just opened
+            || (interval > 0 && lastOpen != 0L && systemTime - lastOpen > nanosToWait)) { //ask after interval and interval has elapsed
             val verify: Boolean = prefs.getBoolean(GeneralKeys.REQUIRE_USER_TO_COLLECT, true)
             if (verify) {
                 val firstName: String = prefs.getString(GeneralKeys.FIRST_NAME, "") ?: ""
@@ -57,7 +59,7 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
                 }
             }
         }
-        updateLastOpenedTime()
+        prefs.edit().putBoolean(GeneralKeys.ASKED_SINCE_OPENED, true).apply()
     }
 
     private fun showAskCollectorDialog(
@@ -71,17 +73,15 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
             .setPositiveButton(
                 positive
             ) { dialog: DialogInterface, _: Int -> dialog.dismiss() } //yes, don't ask again button
-            .setNeutralButton(neutral) { dialog: DialogInterface, _: Int ->
+            .setNeutralButton(neutral) { dialog: DialogInterface, _: Int -> //modify settings (navigates to profile preferences)
                 dialog.dismiss()
-                prefs.edit().putBoolean(GeneralKeys.REQUIRE_USER_TO_COLLECT, false).apply()
+                val preferenceIntent = Intent(context, PreferencesActivity::class.java)
+                preferenceIntent.putExtra("ModifyProfileSettings", true)
+                context.startActivity(preferenceIntent)
             } //no (navigates to the person preference)
             .setNegativeButton(negative) { dialog: DialogInterface, _: Int ->
                 dialog.dismiss()
-                val preferenceIntent = Intent()
-                preferenceIntent.setClassName(
-                    context,
-                    PreferencesActivity::class.java.name
-                )
+                val preferenceIntent = Intent(context, PreferencesActivity::class.java)
                 preferenceIntent.putExtra("PersonUpdate", true)
                 context.startActivity(preferenceIntent)
             }
@@ -90,5 +90,7 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
 
     fun updateLastOpenedTime() {
         prefs.edit().putLong(GeneralKeys.LAST_TIME_OPENED, System.nanoTime()).apply()
+        prefs.edit().putBoolean(GeneralKeys.ASKED_SINCE_OPENED, false).apply()
     }
 }
+

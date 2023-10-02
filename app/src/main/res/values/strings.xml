@@ -276,7 +276,7 @@
     <string name="activity_collect_dialog_verify_collector">Is this still</string>
     <string name="activity_collect_dialog_verify_no_button">No</string>
     <string name="activity_collect_dialog_verify_yes_button">Yes</string>
-    <string name="activity_collect_dialog_neutral_button">Don\'t ask again</string>
+    <string name="activity_collect_dialog_neutral_button">Modify settings</string>
     <string name="activity_collect_dialog_new_collector">Do you want to save the name of the person collecting data?</string>
 
     <!--- Datagrid -->
