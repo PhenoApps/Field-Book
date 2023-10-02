@@ -8,7 +8,13 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import androidx.preference.*
+import androidx.preference.CheckBoxPreference
+import androidx.preference.EditTextPreference
+import androidx.preference.ListPreference
+import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import org.phenoapps.security.Security
@@ -71,6 +77,17 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             true
         }
 
+        val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
+        changeGeoNavLoggingModeView()
+        geoNavLoggingMode?.setOnPreferenceChangeListener { _, newValue ->
+            mPrefs.edit()
+                .putString(GeneralKeys.GEONAV_LOGGING_MODE, newValue as? String ?: "0").apply()
+
+            changeGeoNavLoggingModeView()
+
+            true
+        }
+
         val trapBase = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D1)
         val trapDst = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D2)
         val trapAngle = findPreference<ListPreference>(GeneralKeys.SEARCH_ANGLE)
@@ -114,6 +131,22 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             updateParametersSummaryText()
 
             true
+        }
+    }
+
+    private fun changeGeoNavLoggingModeView() {
+        val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
+        val currentMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0")
+
+        if (currentMode == "0") {
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_off_description)
+            geoNavLoggingMode?.setIcon(R.drawable.ic_note_off_outline)
+        } else if (currentMode == "1") {
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_limited_description)
+            geoNavLoggingMode?.setIcon(R.drawable.ic_note_outline)
+        } else {
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_full_description)
+            geoNavLoggingMode?.setIcon(R.drawable.ic_note_multiple_outline)
         }
     }
 

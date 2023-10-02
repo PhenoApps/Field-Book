@@ -109,11 +109,13 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             val altLength = alt.length
             alt = alt.substring(0, altLength - 1) //drop the "M"
 
-            //always log external gps updates
-            writeGeoNavLog(
-                mGeoNavLogWriter,
-                "$lat,$lng,$time,null,null,null,null,null,null,$fix,null,null,null,null\n"
-            )
+            //always log location updates for verbose log
+            if (currentLoggingMode() == "2") {
+                writeGeoNavLog(
+                    mGeoNavLogWriter,
+                    "$lat,$lng,$time,null,null,null,null,null,null,$fix,null,null,null,null\n"
+                )
+            }
             mExternalLocation = Location("GeoNav Rover")
 
             //initialize the double values, attempt to parse the strings, if impossible then don't update the coordinate.
@@ -221,6 +223,10 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         mAverageHandlerThread.looper
         averageHandler = Handler(mAverageHandlerThread.looper)
         initialized = true
+    }
+
+    private fun currentLoggingMode() : String {
+        return mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0") ?: "0"
     }
 
     /**
@@ -401,7 +407,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         val geoNavMethod: String = mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
         val d1: Double = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble() ?: 0.001
         val d2: Double = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble() ?: 0.01
-
         //user must have a valid pointing direction before attempting the IZ
         //initialize the start position and fill with external or internal GPS coordinates
         val start: Location? = if (internal) {
@@ -433,11 +438,10 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
                 //long toc = System.currentTimeMillis();
                 val (first) = impactZoneSearch(
-                    mGeoNavLogWriter, start,
-                    coordinates.toTypedArray(),
+                    mGeoNavLogWriter, currentLoggingMode(),
+                    start, coordinates.toTypedArray(),
                     azimuth, theta, mTeslas, geoNavMethod, d1, d2
                 )
-
                 //long tic = System.currentTimeMillis();
 
                 //if we received a result then show it to the user, create a button to navigate to the plot
@@ -585,7 +589,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
      * Starts a file in storage/geonav/log.txt
      */
     fun setupGeoNavLogger() {
-        if (mPrefs.getBoolean(GeneralKeys.GEONAV_LOG, false)) {
+        if (currentLoggingMode() != "0") {
             try {
                 val resolver: ContentResolver = controller.getContext().contentResolver
                 val geoNavFolder = getDirectory(controller.getContext(), R.string.dir_geonav)
@@ -595,8 +599,13 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                         .replace(":".toRegex(), "-")
                         .replace("\\s".toRegex(), "_")
                     val thetaPref = mPrefs.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
-                    val fileName =
-                        "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv"
+                    // if the currentLoggingMode is for limited logging, use "limited_" as the prefix for filename
+                    val prefixOfFile = if (currentLoggingMode() == "1") {
+                        "limited_"
+                    } else {
+                        ""
+                    }
+                    val fileName = prefixOfFile + "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv"
                     val geoNavLogFile = geoNavFolder.createFile("*/csv", fileName)
                     if (geoNavLogFile != null && geoNavLogFile.exists()) {
                         val outputStream = resolver.openOutputStream(geoNavLogFile.uri)
@@ -721,14 +730,19 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
         mInternalLocation = location
 
-        //always log location updates
-        writeGeoNavLog(
-            mGeoNavLogWriter,
-            """
-        ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,GPS,null,null,null,null
-        
-        """.trimIndent()
-        )
+        //always log location updates for verbose log
+        if (currentLoggingMode() == "2") {
+            writeGeoNavLog(
+                mGeoNavLogWriter,
+                """
+                ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,GPS,null,null,null,null
+                
+                """.trimIndent()
+            )
+        }
+
+        //don't log the location update for geonav_shorter
+        // because closest would always be written as null in this case
     }
 
     public fun getAverageHandler(): Handler? {

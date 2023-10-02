@@ -85,13 +85,14 @@ public class GeneralKeys {
     public static final String PAIRED_DEVICE_ADDRESS                = GEONAV_PREFIX + "PAIRED_DEVICE_ADDRESS";
     public static final String GEONAV_AUTO                          = GEONAV_PREFIX + "GEONAV_AUTO";
     public static final String GEONAV_COMPASS                       = GEONAV_PREFIX + "GEONAV_COMPASS";
-    public static final String GEONAV_LOG                           = GEONAV_PREFIX + "GEONAV_LOG";
     public static final String GEONAV_AVERAGING                     = GEONAV_PREFIX + "GEONAV_AVERAGING";
     public static final String GEONAV_AVERAGING_INTERVAL            = GEONAV_PREFIX + "GEONAV_AVERAGIN_INTERVAL";
     public static final String GEONAV_PARAMETERS_CATEGORY           = GEONAV_PREFIX + "parameters.CATEGORY_KEY";
     public static final String GEONAV_PARAMETER_D1                  = GEONAV_PREFIX + "parameters.trapezoid.D1";
     public static final String GEONAV_PARAMETER_D2                  = GEONAV_PREFIX + "parameters.trapezoid.D2";
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
+
+    public static final String GEONAV_LOGGING_MODE                 = GEONAV_PREFIX + "GEONAV_LOGGING_MODE";
 
     // GeoNav Configuration Preferences
     public static final String GEONAV_CONFIG_AUDIO_ON_DROP          = GEONAV_PREFIX + "AUDIO_ON_DROP";

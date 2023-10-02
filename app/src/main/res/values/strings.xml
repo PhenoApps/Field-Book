@@ -651,8 +651,13 @@
     <string name="pref_geonav_search_angle_summary">GeoNav creates a trapezoid in front of the user, the angle closest to the user is defined as %s°.</string>
     <string name="pref_geonav_search_angle_title">GeoNav Search Angle (degrees)</string>
 
-    <string name="pref_geonav_log_title">GeoNav Log</string>
-    <string name="pref_geonav_log_summary">Write GeoNav steps to a log file in \n storage/geonav/log.txt</string>
+    <string name="pref_geonav_log">GeoNav Log</string>
+    <string name="pref_geonav_log_off">Off</string>
+    <string name="pref_geonav_log_off_description">Off: No logs being recorded</string>
+    <string name="pref_geonav_log_limited">Limited</string>
+    <string name="pref_geonav_log_limited_description">Limited: Logging closest entry to storage/geonav/limited_log.txt</string>
+    <string name="pref_geonav_log_full">Full</string>
+    <string name="pref_geonav_log_full_description">Full: Logging all location updates and algorithm steps to storage/geonav/log.txt</string>
 
     <string name="pref_geonav_update_interval_title">Update Interval (s)</string>
     <string name="pref_geonav_update_interval_summary">The time between location updates is %ss.</string>
