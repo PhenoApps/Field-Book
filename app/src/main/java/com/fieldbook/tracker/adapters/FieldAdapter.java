@@ -41,6 +41,13 @@ public class FieldAdapter extends BaseAdapter {
     private final Context context;
     private SharedPreferences ep;
     private final FieldSwitcher fieldSwitcher;
+    public interface OnFieldSelectedListener {
+        void onFieldSelected(FieldObject field);
+    }
+    private OnFieldSelectedListener listener;
+    public void setOnFieldSelectedListener(OnFieldSelectedListener listener) {
+        this.listener = listener;
+    }
     public FieldAdapter(Context context, ArrayList<FieldObject> list, FieldSwitcher switcher) {
         this.context = context;
         mLayoutInflater = LayoutInflater.from(context);
@@ -115,6 +122,9 @@ public class FieldAdapter extends BaseAdapter {
         convertView.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 fieldClick(getItem(position));
+                if (listener != null) {
+                    listener.onFieldSelected(getItem(position));
+                }
             }
         });
 

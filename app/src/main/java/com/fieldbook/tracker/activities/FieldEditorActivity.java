@@ -81,7 +81,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
 public class FieldEditorActivity extends ThemedActivity
-        implements FieldSortController, FieldAdapterController {
+        implements FieldSortController, FieldAdapterController, FieldAdapter.OnFieldSelectedListener {
 
     private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -123,10 +123,22 @@ public class FieldEditorActivity extends ThemedActivity
         }
     };
 
+    @Override
+    public void onFieldSelected(FieldObject field) {
+
+        FieldDetailFragment fragment = new FieldDetailFragment();
+        getSupportFragmentManager().beginTransaction()
+                .add(android.R.id.content, fragment)
+                .addToBackStack(null)
+                .commit();
+
+    }
+
     // Helper function to load data
     public void loadData(ArrayList<FieldObject> fields) {
         try {
             mAdapter = new FieldAdapter(thisActivity, fields, fieldSwitcher);
+            mAdapter.setOnFieldSelectedListener(this);
             fieldList.setAdapter(mAdapter);
         } catch (Exception e) {
             e.printStackTrace();
@@ -177,6 +189,7 @@ public class FieldEditorActivity extends ThemedActivity
         database.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
+        mAdapter.setOnFieldSelectedListener(this);
         fieldList.setAdapter(mAdapter);
     }
 
@@ -367,6 +380,7 @@ public class FieldEditorActivity extends ThemedActivity
                     //update list of fields
                     fieldList = findViewById(R.id.myList);
                     mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
+                    mAdapter.setOnFieldSelectedListener(this);
                     fieldList.setAdapter(mAdapter);
 
                 }));
