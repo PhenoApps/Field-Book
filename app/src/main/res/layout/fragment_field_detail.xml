@@ -28,14 +28,6 @@ android:orientation="vertical">
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/fieldNameTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Field Name"
-            android:textSize="20sp"
-            android:layout_marginBottom="16dp" />
-
         <!-- Field Stats -->
         <TextView
             android:layout_width="wrap_content"
@@ -43,6 +35,38 @@ android:orientation="vertical">
             android:text="Summary Stats"
             android:textStyle="bold"
             android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/importDateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Import Date"
+            android:textSize="18sp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/editDateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit Date"
+            android:textSize="18sp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/exportDateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Export Date"
+            android:textSize="18sp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/countTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Count"
+            android:textSize="18sp"
+            android:layout_marginBottom="16dp" />
 
         <!-- Traits Stats -->
         <TextView

@@ -125,13 +125,18 @@ public class FieldEditorActivity extends ThemedActivity
 
     @Override
     public void onFieldSelected(FieldObject field) {
+        FieldDetailFragment fragment = FieldDetailFragmentKt.newFieldDetailFragment(
+                field.getExp_name(),
+                field.getDate_import(),
+                field.getDate_export(),
+                field.getDate_edit(),
+                field.getCount()
+        );
 
-        FieldDetailFragment fragment = new FieldDetailFragment();
         getSupportFragmentManager().beginTransaction()
-                .add(android.R.id.content, fragment)
+                .replace(android.R.id.content, fragment)
                 .addToBackStack(null)
                 .commit();
-
     }
 
     // Helper function to load data
