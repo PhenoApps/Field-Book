@@ -12,4 +12,10 @@
         android:defaultValue="false"
         android:icon="@drawable/ic_beta"/>
 
+    <Preference
+        android:icon="@drawable/ic_pref_database_import"
+        android:key="pref_beta_upload_files"
+        android:summary="@string/pref_beta_upload_files_summary"
+        android:title="@string/pref_beta_upload_files" />
+
 </PreferenceScreen>

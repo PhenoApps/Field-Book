@@ -675,6 +675,9 @@
     <string name="field_audio_recording_start">Recording field level audio.</string>
     <string name="field_audio_recording_stop">A new field level audio file was saved.</string>
 
+    <string name="pref_beta_upload_files">Upload files</string>
+    <string name="pref_beta_upload_files_summary">Upload files to process audio and extract info.</string>
+
 
     <!-- ABOUT -->
     <!-- App  -->
