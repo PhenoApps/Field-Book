@@ -4,9 +4,6 @@ import com.fieldbook.tracker.traits.CategoricalTraitLayout
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 
 
 /**
@@ -24,7 +21,7 @@ class CategoryJsonUtil {
         }
 
         fun decode(json: String): ArrayList<BrAPIScaleValidValuesCategories> {
-            return if (json == "NA" || !isJsonValid(json)) arrayListOf(BrAPIScaleValidValuesCategories().apply {
+            return if (json == "NA" || !JsonUtil.isJsonValid(json)) arrayListOf(BrAPIScaleValidValuesCategories().apply {
                 label = json
                 value = json
             }) else Gson().fromJson(
@@ -38,22 +35,6 @@ class CategoryJsonUtil {
                 json,
                 object : TypeToken<List<BrAPIScaleValidValuesCategories?>>() {}.type
             )
-        }
-
-        fun isJsonValid(test: String?): Boolean {
-            if (test == null) return false
-            try {
-                JSONObject(test)
-            } catch (ex: JSONException) {
-                // edited, to include @Arthur's comment
-                // e.g. in case JSONArray is valid as well...
-                try {
-                    JSONArray(test)
-                } catch (ex1: JSONException) {
-                    return false
-                }
-            }
-            return true
         }
 
         /**

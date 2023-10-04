@@ -35,6 +35,7 @@ import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.GeoJsonUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
@@ -67,7 +68,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
 public class DataHelper {
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 9;
+    public static final int DATABASE_VERSION = 10;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -207,6 +208,29 @@ public class DataHelper {
     }
 
     /**
+     * Issue 753, lat/lngs are saved in the incorrect order and need to be swapped
+     */
+    public void fixGeoCoordinates(SQLiteDatabase db) {
+
+        db.beginTransaction();
+
+        try {
+
+            GeoJsonUtil.Companion.fixGeoCoordinates(this, db);
+
+            db.setTransactionSuccessful();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+            db.endTransaction();
+        }
+    }
+
+    /**
      * Helper function to change visibility of a trait. Used in the ratings
      * screen
      */
@@ -234,6 +258,11 @@ public class DataHelper {
         open();
 
         return ObservationUnitDao.Companion.getAll();
+    }
+
+    public ObservationUnitModel[] getAllObservationUnits(SQLiteDatabase db) {
+
+        return ObservationUnitDao.Companion.getAll(db);
     }
 
     public ObservationUnitModel[] getAllObservationUnits(int studyId) {
@@ -719,6 +748,32 @@ public class DataHelper {
 //        }
 //
 //        return images;
+    }
+
+    public void updateObservationUnitModels(List<ObservationUnitModel> models) {
+
+        open();
+
+        ObservationUnitDao.Companion.updateObservationUnitModels(models);
+    }
+
+    public void updateObservationUnitModels(SQLiteDatabase db, List<ObservationUnitModel> models) {
+
+        ObservationUnitDao.Companion.updateObservationUnitModels(db, models);
+    }
+
+    public void updateObservationModels(List<ObservationModel> observations) {
+
+        open();
+
+        ObservationDao.Companion.updateObservationModels(observations);
+
+    }
+
+    public void updateObservationModels(SQLiteDatabase db, List<ObservationModel> observations) {
+
+        ObservationDao.Companion.updateObservationModels(db, observations);
+
     }
 
     /**
@@ -2609,6 +2664,11 @@ public class DataHelper {
         return ObservationDao.Companion.getAll();
     }
 
+    public ObservationModel[] getAllObservations(SQLiteDatabase db) {
+
+        return ObservationDao.Companion.getAll(db);
+    }
+
     public ObservationModel[] getAllObservations(String studyId) {
 
         open();
@@ -2877,6 +2937,12 @@ public class DataHelper {
                 Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
 
                 ep2.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
+            }
+
+            if (oldVersion <= 9 && newVersion >= 10) {
+
+                helper.fixGeoCoordinates(db);
+
             }
         }
     }

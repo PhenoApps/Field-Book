@@ -34,11 +34,11 @@ import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.Companion.ACTION_BROADCAST_GNSS_TRAIT
 import com.fieldbook.tracker.location.gnss.NmeaParser
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.GeoJsonUtil
 import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.fieldbook.tracker.utilities.GnssThreadHelper
 import com.google.android.material.chip.ChipGroup
-import org.json.JSONObject
 import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -300,45 +300,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         }
     }
 
-    //based on RFC 7956
-    //{
-    //  "type": "Feature",
-    //  "geometry": {
-    //    "type": "Point",
-    //    "coordinates": [125.6, 10.1]
-    //  },
-    //  "properties": {
-    //    "name": "Dinagat Islands"
-    //  }
-    //}
-    data class Geometry(val type: String = "Point", val coordinates: Array<String>) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as Geometry
-
-            if (type != other.type) return false
-            if (!coordinates.contentEquals(other.coordinates)) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = type.hashCode()
-            result = 31 * result + coordinates.contentHashCode()
-            return result
-        }
-    }
-
-    data class GeoJSON(val type: String = "Feature", val geometry: Geometry, val properties: Map<String, String>? = null) {
-        fun toJson() = JSONObject(mapOf("type" to this.type,
-                "geometry" to mapOf("type" to this.geometry.type,
-                        "coordinates" to this.geometry.coordinates,
-                        "properties" to properties
-                )))
-    }
-
     /**
      * This function is called to make a database update statement.
      * First the selected studyDbId is found in the preferences, and the static ObservationUnitDao
@@ -352,8 +313,10 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
             //geo json object : elevation (stored in obs. units, used in navigation)
             //geo json has properties map for additional info
-            val geoJson = GeoJSON(geometry = Geometry(coordinates = arrayOf(latitude, longitude)),
-                    properties = mapOf("altitude" to elevation, "fix" to precision))
+            val geoJson = GeoJsonUtil.GeoJSON(
+                geometry = GeoJsonUtil.Geometry(coordinates = arrayOf(longitude, latitude)),
+                properties = mapOf("altitude" to elevation, "fix" to precision)
+            )
 
             //save fix length to truncate the average later if needed
             val latLength = latitude.length
@@ -445,9 +408,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         }
     }
 
-    private fun updateCoordinateObservation(unit: ObservationUnitModel, json: GeoJSON) {
+    private fun updateCoordinateObservation(unit: ObservationUnitModel, json: GeoJsonUtil.GeoJSON) {
 
-        val coordinates = "${json.geometry.coordinates[0]}; ${json.geometry.coordinates[1]}; ${json.properties?.get("fix")}"
+        val coordinates = "${json.geometry.coordinates[1]}; ${json.geometry.coordinates[0]}; ${json.properties?.get("fix")}"
 
         ObservationUnitDao.updateObservationUnit(unit, json.toJson().toString())
 
@@ -507,11 +470,15 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         } else 0.0 to 0.0
 
-        val averageJson = GeoJSON(geometry = Geometry(
-            coordinates = arrayOf(avgPoint.first.toString(), avgPoint.second.toString())),
+        val averageJson = GeoJsonUtil.GeoJSON(
+            geometry = GeoJsonUtil.Geometry(
+                coordinates = arrayOf(avgPoint.second.toString(), avgPoint.first.toString())
+            ),
             properties = mapOf(
                 "altitude" to (location?.altitude?.toString() ?: ""),
-                "fix" to info.precision))
+                "fix" to info.precision
+            )
+        )
 
         updateCoordinateObservation(unit, averageJson)
     }
