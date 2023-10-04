@@ -3,6 +3,7 @@ package com.fieldbook.tracker.utilities
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.fieldbook.tracker.database.DataHelper
+import com.google.gson.Gson
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -45,11 +46,15 @@ class GeoJsonUtil {
                 "coordinates" to this.geometry.coordinates,
                 "properties" to properties
             )))
+
+        fun toCoordinateString(delim: String) = "${geometry.coordinates[0]}$delim ${geometry.coordinates[1]}"
     }
 
     companion object {
 
         private const val TAG = "GeoJSON"
+
+        fun decode(json: String) = Gson().fromJson(json, GeoJSON::class.java)
 
         @Throws(Exception::class)
         fun fixGeoCoordinates(helper: DataHelper, db: SQLiteDatabase) {
@@ -132,27 +137,16 @@ class GeoJsonUtil {
             if (JsonUtil.isJsonValid(latlng)) {
 
                 //decode to the GeoJSON object
-                val json = JSONObject(latlng)
+                val geoJson = decode(latlng)
 
-                if (json.has("geometry")) {
-
-                    val geo = json.getJSONObject("geometry")
-
-                    if (geo.has("coordinates")) {
-
-                        val coords = geo.getJSONArray("coordinates")
-
-                        //flip the coordinate indices
-                        geo.put("coordinates", JSONArray().apply {
-                            put(coords[1])
-                            put(coords[0])
-                        })
-
-                        json.put("geometry", geo)
-
-                        lnglat = json.toString()
-                    }
+                //flip the coordinate indices
+                geoJson.geometry.coordinates.apply {
+                    val old = this
+                    this[0] = old[1]
+                    this[1] = old[0]
                 }
+
+                lnglat = geoJson.toString()
 
             } else {
 
@@ -163,9 +157,9 @@ class GeoJsonUtil {
                     //check if fix is included
                     lnglat = when (tokens.size) {
 
-                        2 -> "${tokens[1]};${tokens[0]}"
+                        2 -> "${tokens[1]}; ${tokens[0]}"
 
-                        else -> "${tokens[1]};${tokens[0]};${tokens[2]}"
+                        else -> "${tokens[1]}; ${tokens[0]}; ${tokens[2]}"
                     }
                 }
             }

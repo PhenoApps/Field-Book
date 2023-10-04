@@ -79,7 +79,7 @@ class ObservationUnitDao {
 
         }
 
-        fun updateObservationUnit(db: SQLiteDatabase, unit: ObservationUnitModel, geoCoordinates: String) {
+        fun updateObservationUnitModel(db: SQLiteDatabase, unit: ObservationUnitModel, geoCoordinates: String) {
 
             db.update(ObservationUnit.tableName,
                 ContentValues().apply {
@@ -101,7 +101,7 @@ class ObservationUnitDao {
 
             models.forEach { unit ->
 
-                updateObservationUnit(unit, unit.geo_coordinates ?: "")
+                updateObservationUnitModel(db, unit, unit.geo_coordinates ?: "")
             }
         }
     }

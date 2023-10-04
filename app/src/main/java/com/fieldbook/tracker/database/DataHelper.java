@@ -2919,7 +2919,7 @@ public class DataHelper {
 
             }
 
-            if (oldVersion <= 9 & newVersion >= 9) {
+            if (oldVersion < 9 & newVersion >= 9) {
 
                 // Backup database
                 try {
@@ -2933,7 +2933,7 @@ public class DataHelper {
                     e.printStackTrace();
                     Log.e(TAG, e.getMessage());
                 }
-                
+
                 Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
 
                 ep2.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
@@ -2942,6 +2942,8 @@ public class DataHelper {
             if (oldVersion <= 9 && newVersion >= 10) {
 
                 helper.fixGeoCoordinates(db);
+
+                ep2.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
 
             }
         }
