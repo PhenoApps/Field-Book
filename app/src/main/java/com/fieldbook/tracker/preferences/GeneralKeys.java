@@ -182,7 +182,7 @@ public class GeneralKeys {
     public static final String EXPORT_TRAITS_ALL = "EXPORT_TRAITS_ALL";
     public static final String EXPORT_TRAITS_ACTIVE = "EXPORT_TRAITS_ACTIVE";
     public static final String EXPORT_FORMAT_TABLE = "EXPORT_FORMAT_TABLE";
-    public static final String EXPORT_FORMAT_DATABSE = "EXPORT_FORMAT_DATABASE";
+    public static final String EXPORT_FORMAT_DATABASE = "EXPORT_FORMAT_DATABASE";
     public static final String EXPORT_OVERWRITE = "Overwrite";
 
     //Data grid

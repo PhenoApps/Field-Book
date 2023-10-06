@@ -10,12 +10,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.utilities.Utils
+import com.fieldbook.tracker.utilities.ExportUtil
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
@@ -47,6 +47,7 @@ class FieldDetailFragment : Fragment() {
     private val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
     private val ep: SharedPreferences? = null
 
+    private lateinit var exportUtil: ExportUtil
     private lateinit var importDateTextView: TextView
     private lateinit var editDateTextView: TextView
     private lateinit var exportDateTextView: TextView
@@ -57,13 +58,13 @@ class FieldDetailFragment : Fragment() {
     ): View? {
 
         val view = inflater.inflate(R.layout.fragment_field_detail, container, false)
-
         val toolbar: Toolbar = view.findViewById(R.id.toolbar)
 
         importDateTextView = view.findViewById(R.id.importDateTextView)
         editDateTextView = view.findViewById(R.id.editDateTextView)
         exportDateTextView = view.findViewById(R.id.exportDateTextView)
         countTextView = view.findViewById(R.id.countTextView)
+        exportUtil = ExportUtil(requireActivity(), database)
 
         val collectButton: Button = view.findViewById(R.id.collectButton)
         val exportButton: Button = view.findViewById(R.id.exportButton)
@@ -81,43 +82,57 @@ class FieldDetailFragment : Fragment() {
         }
 
         collectButton.setOnClickListener {
-            var perms = arrayOf<String?>(
-                Manifest.permission.VIBRATE,
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA
-            )
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                perms = arrayOf(
-                    Manifest.permission.VIBRATE,
-                    Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.CAMERA
-                )
-            }
-            if (EasyPermissions.hasPermissions(requireActivity(), *perms)) {
-                val intent = Intent()
-                intent.setClassName(
-                    requireActivity(),
-                    "com.fieldbook.tracker.activities.CollectActivity"
-                )
-                startActivity(intent)
-            } else {
-                // Do not have permissions, request them now
-                EasyPermissions.requestPermissions(
-                    this, getString(R.string.permission_rationale_trait_features),
-                    PERMISSIONS_REQUEST_TRAIT_DATA, *perms
-                )
-            }
+            if (checkTraitsExist() >= 0) collectDataFilePermission()
         }
 
         exportButton.setOnClickListener {
-
-//            startActivity(intent)
-
+            if (checkTraitsExist() >= 0) exportUtil.exportDataBasedOnPreference()
         }
 
         return view
+    }
+
+    fun checkTraitsExist(): Int {
+        val traits = database.getVisibleTrait()
+
+        return when {
+            traits.isEmpty() -> {
+                Toast.makeText(context, R.string.warning_traits_missing, Toast.LENGTH_SHORT).show()
+                -1
+            }
+            else -> 1
+        }
+    }
+
+    fun collectDataFilePermission() {
+        var perms = arrayOf<String?>(
+            Manifest.permission.VIBRATE,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            perms = arrayOf(
+                Manifest.permission.VIBRATE,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.CAMERA
+            )
+        }
+        if (EasyPermissions.hasPermissions(requireActivity(), *perms)) {
+            val intent = Intent()
+            intent.setClassName(
+                requireActivity(),
+                "com.fieldbook.tracker.activities.CollectActivity"
+            )
+            startActivity(intent)
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(
+                this, getString(R.string.permission_rationale_trait_features),
+                PERMISSIONS_REQUEST_TRAIT_DATA, *perms
+            )
+        }
     }
 }
