@@ -11,15 +11,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:gravity="center_horizontal">
+
         <TextView
             android:id="@+id/audioFileName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@id/pickAudioButton"
-            android:layout_centerHorizontal="true"
             android:visibility="visible"
-            android:text=""
+            android:text="fwsf"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -27,10 +28,7 @@
             android:id="@+id/pickAudioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:text="Select Audio File" />
     </LinearLayout>
-
-
 
 </RelativeLayout>
