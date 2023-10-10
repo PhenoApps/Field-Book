@@ -62,10 +62,12 @@ import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
+import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -2149,7 +2151,15 @@ public class CollectActivity extends ThemedActivity
             if (values == null || values.length == 0) {
                 return dataMissingString;
             } else {
-                return values[0];
+                if (label.equals("geo_coordinates") && JsonUtil.Companion.isJsonValid(values[0])) {
+
+                    return GeoJsonUtil.Companion.decode(values[0]).toCoordinateString(";");
+
+                } else {
+
+                    return values[0];
+
+                }
             }
 
         } else {

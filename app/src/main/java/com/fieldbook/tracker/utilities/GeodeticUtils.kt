@@ -1,9 +1,7 @@
 package com.fieldbook.tracker.utilities
 
 import android.location.Location
-import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.models.ObservationUnitModel
-import com.fieldbook.tracker.traits.GNSSTraitLayout
 import com.google.gson.Gson
 import math.geom2d.Point2D
 import math.geom2d.line.Line2D
@@ -253,11 +251,11 @@ class GeodeticUtils {
 
             try {
 
-                val geoJson = Gson().fromJson(coords, GNSSTraitLayout.GeoJSON::class.java)
+                val geoJson = Gson().fromJson(coords, GeoJsonUtil.GeoJSON::class.java)
 
-                location.latitude = geoJson.geometry.coordinates[0].toDouble()
+                location.latitude = geoJson.geometry.coordinates[1].toDouble()
 
-                location.longitude = geoJson.geometry.coordinates[1].toDouble()
+                location.longitude = geoJson.geometry.coordinates[0].toDouble()
 
                 geoJson.properties?.get("fix")?.let { fix ->
 
@@ -276,13 +274,13 @@ class GeodeticUtils {
 
                 val latLngTokens = coords.split(";")
 
-                if (latLngTokens.size == 2) {
+                if (latLngTokens.size >= 2) {
 
                     try {
 
-                        location.latitude = latLngTokens[0].toDouble()
+                        location.latitude = latLngTokens[1].toDouble()
 
-                        location.longitude = latLngTokens[1].toDouble()
+                        location.longitude = latLngTokens[0].toDouble()
 
                         failed = false
 
