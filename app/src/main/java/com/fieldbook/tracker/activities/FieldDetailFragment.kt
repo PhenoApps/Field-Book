@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities
 
 import android.Manifest
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
@@ -11,10 +12,18 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
+import com.fieldbook.tracker.interfaces.FieldAdapterController
+import com.fieldbook.tracker.interfaces.FieldSortController
+import com.fieldbook.tracker.objects.FieldObject
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
@@ -26,7 +35,8 @@ fun newFieldDetailFragment(
     importDate: String,
     exportDate: String,
     editDate: String,
-    count: String
+    count: String,
+    observationLevel: String
 ): FieldDetailFragment {
     val fragment = FieldDetailFragment()
     val args = Bundle()
@@ -35,6 +45,7 @@ fun newFieldDetailFragment(
     args.putString("EXPORT_DATE", exportDate)
     args.putString("EDIT_DATE", editDate)
     args.putString("COUNT", count)
+    args.putString("OBSERVATION_LEVEL", observationLevel)
     fragment.arguments = args
     return fragment
 }
@@ -44,42 +55,40 @@ class FieldDetailFragment : Fragment() {
 
     @Inject
     lateinit var database: DataHelper
+    private var toolbar: Toolbar? = null
     private val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
-    private val ep: SharedPreferences? = null
 
     private lateinit var exportUtil: ExportUtil
     private lateinit var importDateTextView: TextView
     private lateinit var editDateTextView: TextView
     private lateinit var exportDateTextView: TextView
     private lateinit var countTextView: TextView
+    private lateinit var observationLevelTextView: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
 
         val view = inflater.inflate(R.layout.fragment_field_detail, container, false)
-        val toolbar: Toolbar = view.findViewById(R.id.toolbar)
+        val args = requireArguments()
+        toolbar = view.findViewById(R.id.toolbar)
+        setupToolbar()
 
         importDateTextView = view.findViewById(R.id.importDateTextView)
         editDateTextView = view.findViewById(R.id.editDateTextView)
         exportDateTextView = view.findViewById(R.id.exportDateTextView)
         countTextView = view.findViewById(R.id.countTextView)
+        observationLevelTextView = view.findViewById(R.id.observationLevelTextView)
         exportUtil = ExportUtil(requireActivity(), database)
 
         val collectButton: Button = view.findViewById(R.id.collectButton)
         val exportButton: Button = view.findViewById(R.id.exportButton)
 
-        val args = requireArguments()
-        toolbar.title = args.getString("FIELD_NAME")
         importDateTextView.text = "Import Date: ${args.getString("IMPORT_DATE")}"
         editDateTextView.text = "Edit Date: ${args.getString("EDIT_DATE")}"
         exportDateTextView.text = "Export Date: ${args.getString("EXPORT_DATE")}"
         countTextView.text = "Count: ${args.getString("COUNT")}"
-
-        toolbar.setNavigationIcon(R.drawable.arrow_left)
-        toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
+        observationLevelTextView.text = "Entry Type: ${args.getString("OBSERVATION_LEVEL")}"
 
         collectButton.setOnClickListener {
             if (checkTraitsExist() >= 0) collectDataFilePermission()
@@ -90,6 +99,93 @@ class FieldDetailFragment : Fragment() {
         }
 
         return view
+    }
+
+    private fun setupToolbar() {
+
+        with(activity as? FieldEditorActivity) {
+
+            this?.let { editorActivity ->
+
+                val field = editorActivity.fieldObject
+
+                toolbar?.inflateMenu(R.menu.menu_field_details)
+
+                toolbar?.setTitle(field.getExp_name())
+
+                toolbar?.setNavigationIcon(R.drawable.arrow_left)
+
+                toolbar?.setNavigationOnClickListener {
+
+                    parentFragmentManager.popBackStack()
+                }
+
+                toolbar?.setOnMenuItemClickListener { item ->
+
+                    when (item.itemId) {
+                        android.R.id.home -> {
+                            parentFragmentManager.popBackStack()
+                        }
+                        R.id.sort -> {
+                            (activity as? FieldSortController)?.showSortDialog(field)
+                        }
+                        R.id.syncObs -> {
+                            val alert = BrapiSyncObsDialog(requireContext())
+                            alert.setFieldObject(field)
+                            alert.show()
+                        }
+                        R.id.delete -> {
+                            createDeleteItemAlertDialog(field)?.show()
+                        }
+                    }
+
+                    true
+                }
+            }
+        }
+    }
+
+    private fun makeConfirmDeleteListener(field: FieldObject): DialogInterface.OnClickListener? {
+        return DialogInterface.OnClickListener { dialog, which ->
+
+            // Do it when clicking Yes or No
+            dialog.dismiss()
+
+            val ep = activity?.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, AppCompatActivity.MODE_PRIVATE)
+            (activity as? FieldAdapterController)?.getDatabase()?.deleteField(field.getExp_id())
+            if (field.getExp_id() == ep!!.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
+                val ed = ep.edit()
+                ed.putString(GeneralKeys.FIELD_FILE, null)
+                ed.putString(GeneralKeys.FIELD_OBS_LEVEL, null)
+                ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1)
+                ed.putString(GeneralKeys.UNIQUE_NAME, null)
+                ed.putString(GeneralKeys.PRIMARY_NAME, null)
+                ed.putString(GeneralKeys.SECONDARY_NAME, null)
+                ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
+                ed.putString(GeneralKeys.LAST_PLOT, null)
+                ed.apply()
+            }
+            (activity as? FieldAdapterController)?.queryAndLoadFields()
+            CollectActivity.reloadData = true
+            parentFragmentManager.popBackStack()
+        }
+    }
+
+    private fun createDeleteItemAlertDialog(field: FieldObject): AlertDialog? {
+        val builder =
+            AlertDialog.Builder(
+                requireContext(), R.style.AppAlertDialog
+            )
+        builder.setTitle(requireContext().getString(R.string.fields_delete_study))
+        builder.setMessage(requireContext().getString(R.string.fields_delete_study_confirmation))
+        builder.setPositiveButton(
+            requireContext().getString(R.string.dialog_yes),
+            makeConfirmDeleteListener(field)
+        )
+        builder.setNegativeButton(
+            requireContext().getString(R.string.dialog_no)
+        ) { dialog, which -> dialog.dismiss() }
+        return builder.create()
     }
 
     fun checkTraitsExist(): Int {

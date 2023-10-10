@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Rect;
+import androidx.lifecycle.MutableLiveData;
 import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -95,6 +96,7 @@ public class FieldEditorActivity extends ThemedActivity
     public static EditText trait;
     private static final Handler mHandler = new Handler();
     private static FieldFileObject.FieldFileBase fieldFile;
+    public FieldObject fieldObject;
     private static SharedPreferences ep;
     private Toolbar toolbar;
     private final int PERMISSIONS_REQUEST_STORAGE = 998;
@@ -125,12 +127,14 @@ public class FieldEditorActivity extends ThemedActivity
 
     @Override
     public void onFieldSelected(FieldObject field) {
+        fieldObject = field;
         FieldDetailFragment fragment = FieldDetailFragmentKt.newFieldDetailFragment(
                 field.getExp_name(),
                 field.getDate_import(),
                 field.getDate_export(),
                 field.getDate_edit(),
-                field.getCount()
+                field.getCount(),
+                field.getObservation_level()
         );
 
         getSupportFragmentManager().beginTransaction()
