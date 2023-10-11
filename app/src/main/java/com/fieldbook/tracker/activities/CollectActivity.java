@@ -785,6 +785,11 @@ public class CollectActivity extends ThemedActivity
     }
 
     @Override
+    public boolean isFieldAudioRecording(){
+        return fieldAudioObject.isRecording();
+    }
+
+    @Override
     public void onPause() {
 
         guiThread.quit();
@@ -1281,13 +1286,14 @@ public class CollectActivity extends ThemedActivity
             case R.id.field_audio_mic:
                 MenuItem micItem = systemMenu.findItem(R.id.field_audio_mic);
 
-                if(fieldAudioObject.getButtonState() == "mic_off"){
+                if(!fieldAudioObject.isRecording()){
                     fieldAudioObject.startRecording();
                     Toast.makeText(
                         this, R.string.field_audio_recording_start,
                         Toast.LENGTH_SHORT
                     ).show();
                     micItem.setIcon(R.drawable.ic_tb_field_mic_on);
+                    micItem.setTitle(R.string.menu_collect_stop_field_audio);
                 }else{
                     fieldAudioObject.stopRecording();
                     Toast.makeText(
@@ -1295,6 +1301,7 @@ public class CollectActivity extends ThemedActivity
                         Toast.LENGTH_SHORT
                     ).show();
                     micItem.setIcon(R.drawable.ic_tb_field_mic_off);
+                    micItem.setTitle(R.string.menu_collect_start_field_audio);
                 }
 
                 return true;

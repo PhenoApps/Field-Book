@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.documentfile.provider.DocumentFile;
 
@@ -187,14 +188,24 @@ public class AudioTraitLayout extends BaseTraitLayout {
                     buttonState = ButtonState.WAITING_FOR_PLAYBACK;
                     break;
                 case WAITING_FOR_PLAYBACK:
-                    startPlayback();
-                    buttonState = ButtonState.PLAYING;
-                    enableNavigation = false;
+                    // check if field audio is already recording
+                    if(controller.isFieldAudioRecording()){
+                        Toast.makeText((Context) controller, R.string.field_audio_recording_warning, Toast.LENGTH_SHORT).show();
+                    }else {
+                        startPlayback();
+                        buttonState = ButtonState.PLAYING;
+                        enableNavigation = false;
+                    }
                     break;
                 case WAITING_FOR_RECORDING:
-                    startRecording();
-                    buttonState = ButtonState.RECORDING;
-                    enableNavigation = false;
+                    // check if field audio is already recording
+                    if(controller.isFieldAudioRecording()){
+                        Toast.makeText((Context) controller, R.string.field_audio_recording_warning, Toast.LENGTH_SHORT).show();
+                    }else{
+                        startRecording();
+                        buttonState = ButtonState.RECORDING;
+                        enableNavigation = false;
+                    }
                     break;
             }
 

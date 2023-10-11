@@ -2,15 +2,15 @@ package com.fieldbook.tracker.objects;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
+import android.content.SharedPreferences;
 import android.media.MediaRecorder;
 import android.net.Uri;
-import android.view.MenuItem;
 
 import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
 import java.io.FileDescriptor;
@@ -21,26 +21,24 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class FieldAudioObject {
-
-    static public String type = "audio";
-
     private Context context;
 
     private MediaRecorder mediaRecorder;
-    private MediaPlayer mediaPlayer;
     private Uri recordingLocation;
-    private MenuItem controlButton;
+
+    private SharedPreferences ep;
 
     private ButtonState buttonState = ButtonState.WAITING_FOR_RECORDING;
 
 
     public FieldAudioObject(Context context) {
         this.context = context;
+        ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
     }
 
-    public String getButtonState() {
-        if (buttonState == ButtonState.WAITING_FOR_RECORDING) return "mic_off";
-        else return "mic_on";
+    public boolean isRecording() {
+        if (buttonState == ButtonState.WAITING_FOR_RECORDING) return false;
+        else return true;
     }
 
     public void startRecording() {
@@ -62,9 +60,6 @@ public class FieldAudioObject {
             mediaRecorder.stop();
             buttonState = ButtonState.WAITING_FOR_RECORDING;
             releaseRecorder();
-//            updateObservation(getCurrentTrait().getTrait(), "audio", recordingLocation.toString());
-//                audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
-//            getCollectInputView().setText(recordingLocation.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -93,6 +88,8 @@ public class FieldAudioObject {
 
         stopAllAudioForPlayback();
 
+
+
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
@@ -104,8 +101,9 @@ public class FieldAudioObject {
         Calendar c = Calendar.getInstance();
 
         String mGeneratedName;
+        String fieldAlias = ep.getString(GeneralKeys.FIELD_FILE, "");
         try {
-            mGeneratedName = "field_audio_" + ((CollectActivity) context).getCRange().plot_id + " " + timeStamp.format(c.getTime());
+            mGeneratedName = "field_audio_" + ((CollectActivity) context).getCRange().plot_id + "_" + fieldAlias + " " + timeStamp.format(c.getTime());
         } catch (Exception e) {
             mGeneratedName = "error " + timeStamp.format(c.getTime());
         }
@@ -134,18 +132,12 @@ public class FieldAudioObject {
 
     private enum ButtonState {
         WAITING_FOR_RECORDING(R.drawable.ic_tb_field_mic_off),
-        RECORDING(R.drawable.ic_tb_field_mic_on),
-
-        WAITING_FOR_PLAYBACK(R.drawable.ic_tb_help);
+        RECORDING(R.drawable.ic_tb_field_mic_on);
 
         private int imageId;
 
         ButtonState(int imageId) {
             this.imageId = imageId;
-        }
-
-        public int getImageId() {
-            return imageId;
         }
     }
 }
