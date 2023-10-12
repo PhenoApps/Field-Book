@@ -20,6 +20,11 @@ sphinx:
    configuration: docs/source/conf.py
    fail_on_warning: true
 
+# Explicitly set the version of Python and its requirements
+python:
+  install:
+    - requirements: docs/requirements.txt
+    
 # If using Sphinx, optionally build your docs in additional formats such as PDF
 formats:
   - pdf
