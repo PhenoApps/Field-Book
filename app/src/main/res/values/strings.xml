@@ -753,6 +753,7 @@
     <string name="preferences_brapi_enable_title">Enable BrAPI</string>
     <string name="preferences_brapi_enable_summary">The Breeding API allows simple data transfer to compatible databases.</string>
     <string name="preferences_brapi_core_title">Configuration</string>
+    <string name="preferences_brapi_code_barcode">Scan a configuration code</string>
 
     <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
     <string name="act_brapi_auth_http_warning_title">HTTP Warning</string>

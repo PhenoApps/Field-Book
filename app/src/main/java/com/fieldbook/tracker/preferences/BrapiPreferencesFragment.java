@@ -27,6 +27,8 @@ import androidx.preference.PreferenceScreen;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
+import com.fieldbook.tracker.objects.BrAPIConfig;
+import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -50,6 +52,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private static final String TAG = BrapiPreferencesFragment.class.getSimpleName();
     private static final int REQUEST_BARCODE_SCAN_BASE_URL = 99;
     private static final int REQUEST_BARCODE_SCAN_OIDC_URL = 98;
+    private static final int REQUEST_BARCODE_SCAN_BRAPI_CONFIG = 97;
     private static final int AUTH_REQUEST_CODE = 123;
     private static final String DIALOG_FRAGMENT_TAG = "com.tracker.fieldbook.preferences.BRAPI_DIALOG_FRAGMENT";
 
@@ -183,6 +186,20 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                         .setPrompt(getString(R.string.barcode_scanner_text))
                         .setBeepEnabled(true)
                         .setRequestCode(IntentIntegrator.REQUEST_CODE)
+                        .initiateScan();
+                return true;
+            });
+        }
+
+        //set barcode click listener to start zxing intent
+        Preference brapiConfigBarcode = findPreference("brapi_config_barcode");
+        if (brapiConfigBarcode != null) {
+            brapiConfigBarcode.setOnPreferenceClickListener(preference -> {
+
+                new IntentIntegrator(getActivity())
+                        .setPrompt(getString(R.string.barcode_scanner_text))
+                        .setBeepEnabled(true)
+                        .setRequestCode(REQUEST_BARCODE_SCAN_BRAPI_CONFIG)
                         .initiateScan();
                 return true;
             });
@@ -484,7 +501,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if(oidcFlow != null)
             brapiOIDCFlow.setValue(oidcFlow);
 
-        setBaseURLSummary();
+//        setBaseURLSummary();
         setOidcFlowUi();
         brapiAuth();
     }
@@ -595,6 +612,37 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     oldBaseUrl = brapiURLPreference.getText();
                     String scannedBarcode = plotDataResult.getContents();
                     updateUrls(scannedBarcode);
+                }
+                break;
+            case REQUEST_BARCODE_SCAN_BRAPI_CONFIG: //barcode scan result for brapi config
+                if(resultCode == RESULT_OK) {
+                    Log.d(TAG, "onActivityResult: processing config code scan!");
+                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    String scannedConfigJson = plotDataResult.getContents();
+                    Log.d(TAG, "onActivityResult: config data received: " + scannedConfigJson);
+                    BrAPIConfig brAPIConfig = new Gson().fromJson(scannedConfigJson, BrAPIConfig.class);
+
+                    String brapiVersion = getString(R.string.preferences_brapi_version_v2);
+                    if("v1".equalsIgnoreCase(brAPIConfig.getVersion())) {
+                        brapiVersion = getString(R.string.preferences_brapi_version_v1);
+                    }
+                    ((ListPreference)findPreference(GeneralKeys.BRAPI_VERSION)).setValue(brapiVersion);
+                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_PAGE_SIZE)).setText(brAPIConfig.getPageSize()+"");
+                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize()+"");
+                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli()+"");
+
+                    String catDisplay = getString(R.string.preferences_appearance_collect_labelval_customize_value);
+                    if("label".equalsIgnoreCase(brAPIConfig.getCatDisplay())) {
+                        catDisplay = getString(R.string.preferences_appearance_collect_labelval_customize_label);
+                    }
+                    ((ListPreference)findPreference(GeneralKeys.LABELVAL_CUSTOMIZE)).setValue(catDisplay);
+
+                    String oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_implicit);
+                    if("code".equalsIgnoreCase(brAPIConfig.getAuthFlow())) {
+                        oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);
+                    }
+
+                    setServer(brAPIConfig.getUrl(), brAPIConfig.getName(), brAPIConfig.getOidcUrl(), oidcFlow);
                 }
                 break;
             case AUTH_REQUEST_CODE: // Add your new request code here
