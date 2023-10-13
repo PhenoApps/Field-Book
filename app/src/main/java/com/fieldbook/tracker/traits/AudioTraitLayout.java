@@ -154,6 +154,16 @@ public class AudioTraitLayout extends BaseTraitLayout {
         }
     }
 
+    public boolean isAudioRecording(){
+        if (buttonState == ButtonState.RECORDING) return true;
+        else return false;
+    }
+
+    public boolean isAudioPlaybackPlaying(){
+        if (buttonState == ButtonState.PLAYING) return true;
+        else return false;
+    }
+
     private enum ButtonState {
         WAITING_FOR_RECORDING(R.drawable.trait_audio),
         RECORDING(R.drawable.trait_audio_stop),
