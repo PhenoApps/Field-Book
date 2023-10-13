@@ -54,6 +54,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -378,6 +379,16 @@ public class DataHelper {
     public void setTraitObservations(Integer expId, Observation observation) {
         ObservationDao.Companion.insertObservation(expId, observation);
     }
+
+    public Map<String, Integer> getTraitCountsForStudy() {
+
+        open();
+
+        int exp_id = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        return StudyDao.Companion.getTraitCountsForStudy(exp_id);
+    }
+
 
     /**
      * Get user created trait observations for currently selected study

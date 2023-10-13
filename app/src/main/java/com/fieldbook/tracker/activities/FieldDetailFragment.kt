@@ -3,20 +3,20 @@ package com.fieldbook.tracker.activities
 import android.Manifest
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
@@ -68,11 +68,12 @@ class FieldDetailFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-
+        Log.d("onCreateView", "Start")
         val view = inflater.inflate(R.layout.fragment_field_detail, container, false)
         val args = requireArguments()
         toolbar = view.findViewById(R.id.toolbar)
         setupToolbar()
+        displayTraitCounts(view)
 
         importDateTextView = view.findViewById(R.id.importDateTextView)
         editDateTextView = view.findViewById(R.id.editDateTextView)
@@ -98,6 +99,7 @@ class FieldDetailFragment : Fragment() {
             if (checkTraitsExist() >= 0) exportUtil.exportDataBasedOnPreference()
         }
 
+        Log.d("onCreateView", "End")
         return view
     }
 
@@ -229,6 +231,30 @@ class FieldDetailFragment : Fragment() {
                 this, getString(R.string.permission_rationale_trait_features),
                 PERMISSIONS_REQUEST_TRAIT_DATA, *perms
             )
+        }
+    }
+
+    private fun displayTraitCounts(view: View) {
+        val dataHelper = DataHelper(requireContext())
+        val traitCounts = dataHelper.getTraitCountsForStudy()
+        Log.d("TraitCounts", "TraitCounts: $traitCounts")
+
+        val layout: LinearLayout = view.findViewById(R.id.traitCountsLayout) ?: return
+        Log.d("Layout", "Layout: $layout")
+        layout.removeAllViews()
+
+        val inflater = LayoutInflater.from(context)
+        traitCounts.forEach { (traitName, count) ->
+            if(traitName != null) {
+                Log.d("TraitLoop", "TraitName: $traitName, Count: $count")
+                val textView = inflater.inflate(R.layout.list_item_field_trait, layout, false) as TextView
+                Log.d("Inflate", "TextView: $textView")
+                textView.text = "$traitName: $count"
+                textView.id = View.generateViewId()
+                layout.addView(textView)
+            } else {
+                Log.d("TraitCountDetail", "TraitName is null.")
+            }
         }
     }
 }

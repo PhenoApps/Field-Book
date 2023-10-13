@@ -207,6 +207,33 @@ class StudyDao {
                     orderBy = Study.PK).toFirst().toFieldObject()
         }
 
+        fun getTraitCountsForStudy(studyId: Int): Map<String, Int> {
+            return withDatabase { db ->
+                val traitCounts = mutableMapOf<String, Int>()
+
+                val cursor = db.rawQuery("""
+                    SELECT ov.observation_variable_name, COUNT(*) as count
+                    FROM observations o
+                    INNER JOIN observation_units ou ON o.observation_unit_id = ou.observation_unit_db_id
+                    INNER JOIN observation_variables ov ON o.observation_variable_db_id = ov.internal_id_observation_variable
+                    WHERE ou.study_id = ?
+                    GROUP BY ov.observation_variable_name
+                """, arrayOf(studyId.toString())
+                )
+
+                if (cursor.moveToFirst()) {
+                    do {
+                        val traitName = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name"))
+                        val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
+                        traitCounts[traitName] = count
+                    } while (cursor.moveToNext())
+                }
+
+                cursor.close()
+                traitCounts
+            } ?: emptyMap()
+        }
+
         /**
          * This function uses a field object to create a exp/study row in the database.
          * Columns are new observation unit attribute names that are inserted as well.

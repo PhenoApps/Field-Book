@@ -82,8 +82,16 @@
                 android:layout_height="wrap_content"
                 android:text="Traits"
                 android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_marginTop="16dp" />
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:id="@+id/traitCountsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
