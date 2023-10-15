@@ -676,6 +676,7 @@
     <string name="field_audio_recording_stop">A new field level audio file was saved.</string>
     <string name="field_audio_recording_warning">Field level audio is already recording. Stop that first.</string>
     <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
+    <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
 
 
     <!-- ABOUT -->

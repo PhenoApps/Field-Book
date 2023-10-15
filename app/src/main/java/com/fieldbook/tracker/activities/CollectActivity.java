@@ -1305,7 +1305,17 @@ public class CollectActivity extends ThemedActivity
                             this, R.string.trait_audio_recording_warning,
                             Toast.LENGTH_SHORT
                     ).show();
-                }else if(!fieldAudioHelper.isRecording()){
+                }
+                // if trait audio is playing, give a warning
+                else if(isTraitAudioPlaying){
+                    Toast.makeText(
+                            this, R.string.trait_audio_recording_warning,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+                // if trait audio isn't recording or playing
+                // record or stop the field audio depending on its state
+                else if(!fieldAudioHelper.isRecording()){
                     // TODO: add trait audio playback stopping logic
                     fieldAudioHelper.startRecording();
                     Toast.makeText(
