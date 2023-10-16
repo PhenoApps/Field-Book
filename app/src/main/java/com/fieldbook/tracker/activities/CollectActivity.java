@@ -35,6 +35,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -66,6 +67,7 @@ import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
+import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -127,6 +129,9 @@ public class CollectActivity extends ThemedActivity
     public static final int BARCODE_SEARCH_CODE = 98;
 
     private GeoNavHelper geoNavHelper;
+
+    @Inject
+    KeyboardListenerHelper keyboardListenerHelper;
 
     @Inject
     VibrateUtil vibrator;
@@ -467,7 +472,46 @@ public class CollectActivity extends ThemedActivity
 
         Log.d(TAG, "Load screen.");
 
+        //connect keyboard listener to the main collect container
+        ConstraintLayout layoutMain = findViewById(R.id.layout_main);
+        keyboardListenerHelper.connect(layoutMain, (visible, height) -> {
+            onSoftKeyboardChanged(visible, height);
+            return null;
+        });
+
         refreshInfoBarAdapter();
+    }
+
+    //when softkeyboard is displayed, reset the snackbar to redisplay with a calculated bottom margin
+    //this is necessary when its needed to display content above the keyboard without using adjustPan,
+    //such as the geonav snackbar messages
+    private void onSoftKeyboardChanged(Boolean visible, int keypadHeight) {
+
+        geoNavHelper.resetGeoNavMessages();
+
+        if (visible) {
+
+            try {
+
+                TraitObject trait = getCurrentTrait();
+
+                if (trait != null) {
+
+                    geoNavHelper.setSnackBarBottomMargin(keypadHeight);
+
+                }
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+            }
+
+        } else {
+
+            geoNavHelper.setSnackBarBottomMargin(0);
+
+        }
     }
 
     /**
