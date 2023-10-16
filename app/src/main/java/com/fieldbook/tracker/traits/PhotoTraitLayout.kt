@@ -22,13 +22,15 @@ import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getPlotMedia
+import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
@@ -147,10 +149,12 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
             currentTrait.trait?.let { traitName ->
 
+                val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+
                 val studyId = (context as CollectActivity).studyId
-                val photosDir = getFieldMediaDirectory(context, traitName)
+                val photosDir = getFieldMediaDirectory(context, sanitizedTraitName)
                 val unit = currentRange.plot_id
-                val dir = getFieldMediaDirectory(context, traitName)
+                val dir = getFieldMediaDirectory(context, sanitizedTraitName)
 
                 if (dir != null) {
 
@@ -165,7 +169,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                             val rep = database.getNextRep(studyId, unit, traitName)
 
                             val generatedName =
-                                currentRange.plot_id + "_" + traitName + "_" + rep + "_" + timeStamp.format(
+                                currentRange.plot_id + "_" + sanitizedTraitName + "_" + rep + "_" + timeStamp.format(
                                     Calendar.getInstance().time
                                 ) + ".jpg"
 

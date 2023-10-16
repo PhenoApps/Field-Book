@@ -27,6 +27,11 @@ public final class FileUtil {
 
     private static final String PRIMARY_VOLUME_NAME = "primary";
 
+    //https://stackoverflow.com/questions/2679699/what-characters-allowed-in-file-names-on-android
+    public static String sanitizeFileName(String name) {
+        return name.replaceAll("[|\\?\\*<\"\\\\:>\'\";]*", "_");
+    }
+
     /**
      * Scan file to update file list and share exported file
      */

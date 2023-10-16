@@ -31,6 +31,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.receivers.UsbAttachReceiver
 import com.fieldbook.tracker.receivers.UsbDetachReceiver
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
+import com.fieldbook.tracker.utilities.FileUtil
 import com.serenegiant.SimpleUVCCameraTextureView
 import com.serenegiant.usb.UVCCamera
 import kotlinx.coroutines.delay
@@ -420,10 +421,12 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         //get current trait's trait name, use it as a plot_media directory
         currentTrait.trait?.let { traitName ->
 
+            val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+
             //get the bitmap from the texture view, only use it if its not null
             textureView?.bitmap?.let { bmp ->
 
-                DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { usbPhotosDir ->
+                DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { usbPhotosDir ->
 
                     val plot = currentRange.plot_id
 
@@ -431,7 +434,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                     val time = Utils.getDateTime()
 
-                    val name = "${traitName}_${plot}_$time.png"
+                    val name = "${sanitizedTraitName}_${plot}_$time.png"
 
                     usbPhotosDir.createFile("*/*", name)?.let { file ->
 
@@ -449,7 +452,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                                 null
                             )
 
-                            createThumbnail(traitName, name, bmp)
+                            createThumbnail(sanitizedTraitName, name, bmp)
                         }
                     }
                 }
@@ -498,7 +501,9 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         //get current trait's trait name, use it as a plot_media directory
         currentTrait?.trait?.let { traitName ->
 
-            DocumentTreeUtil.getThumbnailsDir(context, traitName)?.let { thumbnailDir ->
+            val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+
+            DocumentTreeUtil.getThumbnailsDir(context, sanitizedTraitName)?.let { thumbnailDir ->
 
                 val plot = currentRange.plot_id
 
@@ -523,7 +528,9 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         //get current trait's trait name, use it as a plot_media directory
         currentTrait?.trait?.let { traitName ->
 
-            DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
+            val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+
+            DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { fieldDir ->
 
                 val plot = currentRange.plot_id
 
@@ -558,7 +565,9 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
             //get current trait's trait name, use it as a plot_media directory
             currentTrait?.trait?.let { traitName ->
 
-                DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
+                val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+
+                DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { fieldDir ->
 
                     val plot = currentRange.plot_id
 
