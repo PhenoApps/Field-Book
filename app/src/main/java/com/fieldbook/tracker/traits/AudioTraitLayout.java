@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -19,6 +20,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.FieldAudioHelper;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -183,6 +185,10 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     public class AudioTraitOnClickListener implements OnClickListener {
 
+        // use FieldAudioHelper mainly to start and stop recording
+        // eliminates repeated methods
+        FieldAudioHelper fieldAudioHelper = new FieldAudioHelper((Context) controller);
+
         @Override
         public void onClick(View view) {
             ((CollectActivity) getContext()).setNewTraits(getDatabase().getUserDetail(getCurrentRange().plot_id));
@@ -199,9 +205,9 @@ public class AudioTraitLayout extends BaseTraitLayout {
                     break;
                 case WAITING_FOR_PLAYBACK:
                     // check if field audio is already recording
-                    if(controller.isFieldAudioRecording()){
+                    if (controller.isFieldAudioRecording()) {
                         Toast.makeText((Context) controller, R.string.field_audio_recording_warning, Toast.LENGTH_SHORT).show();
-                    }else {
+                    } else {
                         startPlayback();
                         buttonState = ButtonState.PLAYING;
                         enableNavigation = false;
@@ -209,9 +215,9 @@ public class AudioTraitLayout extends BaseTraitLayout {
                     break;
                 case WAITING_FOR_RECORDING:
                     // check if field audio is already recording
-                    if(controller.isFieldAudioRecording()){
+                    if (controller.isFieldAudioRecording()) {
                         Toast.makeText((Context) controller, R.string.field_audio_recording_warning, Toast.LENGTH_SHORT).show();
-                    }else{
+                    } else {
                         startRecording();
                         buttonState = ButtonState.RECORDING;
                         enableNavigation = false;
@@ -230,7 +236,15 @@ public class AudioTraitLayout extends BaseTraitLayout {
                     mediaPlayer.reset();
                     mediaPlayer.release();
                 }
-                mediaPlayer = MediaPlayer.create(getContext(),recordingLocation);
+                // if getRecordingLocation returns null, default back to recordingLocation
+
+                // when audio is just recorded and played, uri comes from getRecordingLocation
+                // when user changes the plot or exits collect screen, uri comes from recordingLocation in afterLoadExists
+                if (fieldAudioHelper.getRecordingLocation() != null) {
+                    mediaPlayer = MediaPlayer.create(getContext(), fieldAudioHelper.getRecordingLocation());
+                } else {
+                    mediaPlayer = MediaPlayer.create(getContext(), recordingLocation);
+                }
                 mediaPlayer.setOnCompletionListener(mp -> {
                     stopPlayback();
                     buttonState = ButtonState.WAITING_FOR_PLAYBACK;
@@ -254,10 +268,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
             try {
                 removeTrait(getCurrentTrait().getTrait());
                 audioRecordingText.setText("");
-                prepareRecorder();
-                if (mediaRecorder != null) {
-                    mediaRecorder.start();
-                }
+                fieldAudioHelper.startRecording(false);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -265,11 +276,10 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         private void stopRecording() {
             try {
-                mediaRecorder.stop();
-                releaseRecorder();
-                updateObservation(getCurrentTrait().getTrait(), "audio", recordingLocation.toString());
+                fieldAudioHelper.stopRecording();
+                updateObservation(getCurrentTrait().getTrait(), "audio", fieldAudioHelper.getRecordingLocation().toString());
                 audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
-                getCollectInputView().setText(recordingLocation.toString());
+                getCollectInputView().setText(fieldAudioHelper.getRecordingLocation().toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -287,69 +297,6 @@ public class AudioTraitLayout extends BaseTraitLayout {
             traitLeft.setEnabled(enabled);
             traitRight.setEnabled(enabled);
             deleteValue.setEnabled(enabled);
-        }
-
-        // For audio trait type
-        private void setRecordingLocation(String recordingName) {
-            DocumentFile audioDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "audio");
-            if (audioDir != null && audioDir.exists()) {
-                DocumentFile audioFile = audioDir.createFile("*/mp4", recordingName + ".mp4");
-                if (audioFile != null) {
-                    recordingLocation = audioFile.getUri();
-                }
-            }
-        }
-
-        // Make sure we're not recording music playing in the background; ask the
-        // MediaPlaybackService to pause playback
-        private void stopAllAudioForPlayback() {
-            Intent i = new Intent("com.android.music.musicservicecommand");
-            i.putExtra("command", "pause");
-            getContext().sendBroadcast(i);
-        }
-
-        // Reset the recorder to default state so it can begin recording
-        private void prepareRecorder() {
-
-            stopAllAudioForPlayback();
-
-            mediaRecorder = new MediaRecorder();
-            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-
-            SimpleDateFormat timeStamp = new SimpleDateFormat(
-                    "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
-
-            Calendar c = Calendar.getInstance();
-
-            String mGeneratedName;
-            try {
-                mGeneratedName = getCurrentRange().plot_id + " " + timeStamp.format(c.getTime());
-            } catch (Exception e) {
-                mGeneratedName = "error " + timeStamp.format(c.getTime());
-            }
-
-            setRecordingLocation(mGeneratedName);
-            try {
-                FileDescriptor fd = getContext().getContentResolver().openFileDescriptor(recordingLocation, "rw").getFileDescriptor();
-                mediaRecorder.setOutputFile(fd);
-            } catch (FileNotFoundException | IllegalStateException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                mediaRecorder.prepare();
-            } catch (IllegalStateException | IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        // Remove the recorder resource
-        private void releaseRecorder() {
-            if (mediaRecorder != null) {
-                mediaRecorder.release();
-            }
         }
     }
 }

@@ -1317,7 +1317,7 @@ public class CollectActivity extends ThemedActivity
                 // record or stop the field audio depending on its state
                 else if(!fieldAudioHelper.isRecording()){
                     // TODO: add trait audio playback stopping logic
-                    fieldAudioHelper.startRecording();
+                    fieldAudioHelper.startRecording(true);
                     Toast.makeText(
                         this, R.string.field_audio_recording_start,
                         Toast.LENGTH_SHORT

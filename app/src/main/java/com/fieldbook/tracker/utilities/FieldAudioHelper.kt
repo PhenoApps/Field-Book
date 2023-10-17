@@ -9,22 +9,27 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
+import dagger.hilt.android.qualifiers.ActivityContext
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
 
 
 /**
  * Helper class for recording field level audio
  * Used in collect activity.
- * Stores the files in /field_sample/field_audio/
+ *
+ * Stores the
+ *      file audio in /field_sample/field_audio/
+ *      trait audio in /field_sample/audio/
  *
  * Field level audio and log file together can be used
  * for digital phenotyping
+ *
+ * AudioTraitLayout also uses methods from this helper
  */
 class FieldAudioHelper @Inject constructor(@ActivityContext private val context: Context) {
 
@@ -40,11 +45,11 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
     val isRecording: Boolean
         get() = buttonState != ButtonState.WAITING_FOR_RECORDING
 
-    fun startRecording() {
+    fun startRecording(isFieldAudio: Boolean = true) {
         try {
-            prepareRecorder()
+            prepareRecorder(isFieldAudio)
             if (mediaRecorder != null) {
-                mediaRecorder!!.start()
+                mediaRecorder?.start()
                 buttonState = ButtonState.RECORDING
             }
         } catch (e: Exception) {
@@ -54,7 +59,7 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
 
     fun stopRecording() {
         try {
-            mediaRecorder!!.stop()
+            mediaRecorder?.stop()
             buttonState = ButtonState.WAITING_FOR_RECORDING
             releaseRecorder()
         } catch (e: Exception) {
@@ -62,8 +67,12 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
         }
     }
 
-    private fun setRecordingLocation(recordingName: String) {
-        val audioDir = getFieldMediaDirectory(context, "field_audio")
+    // used in AudioTraitLayout
+    fun getRecordingLocation(): Uri? {
+        return recordingLocation
+    }
+    private fun setRecordingLocation(recordingName: String, storageDirectory: String) {
+        val audioDir = getFieldMediaDirectory(context, storageDirectory)
         if (audioDir != null && audioDir.exists()) {
             val audioFile = audioDir.createFile("*/mp4", "$recordingName.mp4")
             if (audioFile != null) {
@@ -81,12 +90,12 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
     }
 
     // Reset the recorder to default state so it can begin recording
-    private fun prepareRecorder() {
+    private fun prepareRecorder(isFieldAudio: Boolean) {
         stopAllAudioForPlayback()
         mediaRecorder = MediaRecorder()
-        mediaRecorder!!.setAudioSource(MediaRecorder.AudioSource.MIC)
-        mediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-        mediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT)
+        mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
+        mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+        mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT)
         val timeStamp = SimpleDateFormat(
             "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
         )
@@ -94,24 +103,27 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
         val mGeneratedName: String
         val fieldAlias = ep.getString(GeneralKeys.FIELD_FILE, "")
         mGeneratedName = try {
-            "field_audio_" + (context as CollectActivity).cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(
-                c.time
-            )
+            if (isFieldAudio)
+                "field_audio_" + (context as CollectActivity).cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(
+                    c.time
+                )
+            else
+                (context as CollectActivity).cRange.plot_id + " " + timeStamp.format(c.time)
         } catch (e: Exception) {
             "error " + timeStamp.format(c.time)
         }
-        setRecordingLocation(mGeneratedName)
+        setRecordingLocation(mGeneratedName, if (isFieldAudio) "field_audio" else "audio")
         try {
-            val fd = context.contentResolver.openFileDescriptor(recordingLocation!!, "rw")!!
-                .fileDescriptor
-            mediaRecorder!!.setOutputFile(fd)
+            val fd = recordingLocation?.let { context.contentResolver.openFileDescriptor(it, "rw") }
+                ?.fileDescriptor
+            mediaRecorder?.setOutputFile(fd)
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         } catch (e: IllegalStateException) {
             e.printStackTrace()
         }
         try {
-            mediaRecorder!!.prepare()
+            mediaRecorder?.prepare()
         } catch (e: IllegalStateException) {
             e.printStackTrace()
         } catch (e: IOException) {
@@ -122,7 +134,7 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
     // Remove the recorder resource
     private fun releaseRecorder() {
         if (mediaRecorder != null) {
-            mediaRecorder!!.release()
+            mediaRecorder?.release()
         }
     }
 
