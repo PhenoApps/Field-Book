@@ -1309,7 +1309,7 @@ public class CollectActivity extends ThemedActivity
                 // if trait audio is playing, give a warning
                 else if(isTraitAudioPlaying){
                     Toast.makeText(
-                            this, R.string.trait_audio_recording_warning,
+                            this, R.string.trait_audio_playing_warning,
                             Toast.LENGTH_SHORT
                     ).show();
                 }
