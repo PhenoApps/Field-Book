@@ -421,12 +421,10 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         //get current trait's trait name, use it as a plot_media directory
         currentTrait.trait?.let { traitName ->
 
-            val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
-
             //get the bitmap from the texture view, only use it if its not null
             textureView?.bitmap?.let { bmp ->
 
-                DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { usbPhotosDir ->
+                DocumentTreeUtil.getFieldMediaDirectory(context, currentTrait.id)?.let { usbPhotosDir ->
 
                     val plot = currentRange.plot_id
 
@@ -434,7 +432,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                     val time = Utils.getDateTime()
 
-                    val name = "${sanitizedTraitName}_${plot}_$time.png"
+                    val name = "${currentTrait.id}_${plot}_$time.png"
 
                     usbPhotosDir.createFile("*/*", name)?.let { file ->
 
@@ -452,7 +450,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                                 null
                             )
 
-                            createThumbnail(sanitizedTraitName, name, bmp)
+                            createThumbnail(currentTrait.id, name, bmp)
                         }
                     }
                 }
@@ -460,9 +458,9 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         }
     }
 
-    private fun createThumbnail(traitName: String, name: String, bitmap: Bitmap) {
+    private fun createThumbnail(traitId: String, name: String, bitmap: Bitmap) {
 
-        DocumentTreeUtil.getThumbnailsDir(context, traitName)?.let { thumbnails ->
+        DocumentTreeUtil.getThumbnailsDir(context, traitId)?.let { thumbnails ->
 
             var thumbnailWidth = resources.getInteger(R.integer.thumbnailWidth)
             var thumbnailHeight = resources.getInteger(R.integer.thumbnailHeight)
@@ -528,9 +526,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         //get current trait's trait name, use it as a plot_media directory
         currentTrait?.trait?.let { traitName ->
 
-            val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
-
-            DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { fieldDir ->
+            DocumentTreeUtil.getFieldMediaDirectory(context, currentTrait.id)?.let { fieldDir ->
 
                 val plot = currentRange.plot_id
 
@@ -565,9 +561,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
             //get current trait's trait name, use it as a plot_media directory
             currentTrait?.trait?.let { traitName ->
 
-                val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
-
-                DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { fieldDir ->
+                DocumentTreeUtil.getFieldMediaDirectory(context, currentTrait.id)?.let { fieldDir ->
 
                     val plot = currentRange.plot_id
 

@@ -7,7 +7,6 @@ import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
 import org.phenoapps.utils.BaseDocumentTreeUtil
-import java.lang.UnsupportedOperationException
 
 @RequiresApi(Build.VERSION_CODES.KITKAT)
 class DocumentTreeUtil: BaseDocumentTreeUtil() {
@@ -52,9 +51,9 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
 
         /**
          * Gets a specific directory for the currently chosen plot.
-         * @param traitName: trait name of the folder, also photos and audio
+         * @param traitId: folder name for the trait, which should be the db id, also photos and audio
          */
-        fun getFieldMediaDirectory(context: Context?, traitName: String): DocumentFile? {
+        fun getFieldMediaDirectory(context: Context?, traitId: String): DocumentFile? {
 
             if (context != null) {
 
@@ -65,11 +64,11 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
                     val plotDataDirName = context.getString(R.string.dir_plot_data)
                     val fieldDir = createDir(context, plotDataDirName, field)
                     if (fieldDir != null) {
-                        val traitDir = fieldDir.findFile(traitName)
+                        val traitDir = fieldDir.findFile(traitId)
                         if (traitDir == null || !traitDir.exists()) {
-                            fieldDir.createDirectory(traitName)
+                            fieldDir.createDirectory(traitId)
                         }
-                        return fieldDir.findFile(traitName)
+                        return fieldDir.findFile(traitId)
                     }
                 } else return null
             }
@@ -85,27 +84,9 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
             return getPlotMedia(mediaDir, plot).filter { it.name?.endsWith(ext) == true }
         }
 
-        fun getTraitMediaDir(context: Context?, trait: String, format: String): DocumentFile? {
+        fun getThumbnailsDir(context: Context, traitId: String): DocumentFile? {
 
-            var traitDir: DocumentFile? = null
-
-            getFieldMediaDirectory(context, format)?.let { mediaDir ->
-
-                traitDir = mediaDir.findFile(trait)
-
-                if (traitDir == null) {
-
-                    traitDir = mediaDir.createDirectory(trait)
-
-                }
-            }
-
-            return traitDir
-        }
-
-        fun getThumbnailsDir(context: Context, traitName: String): DocumentFile? {
-
-            val dir = getFieldMediaDirectory(context, traitName)
+            val dir = getFieldMediaDirectory(context, traitId)
             var thumbs = dir?.findFile(".thumbnails")
 
             if (thumbs == null) {

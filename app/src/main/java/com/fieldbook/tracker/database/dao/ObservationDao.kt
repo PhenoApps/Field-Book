@@ -106,7 +106,7 @@ class ObservationDao {
                 
         """.trimIndent(), arrayOf(hostUrl)).toTable().mapNotNull { row ->
                 if (getStringVal(row, "observation_variable_name") != null)
-                    FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "observation_variable_name"), missingPhoto).apply {
+                    FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "internal_id_observation_variable"), missingPhoto).apply {
                     rep = getStringVal(row, "rep")
                     unitDbId = getStringVal(row, "uniqueName")
                     setDescriptiveOntologyTerms(listOf(getStringVal(row, "external_db_id")))
@@ -185,7 +185,7 @@ class ObservationDao {
 
             db.query(sRemoteImageObservationsViewName, where = "trait_data_source <> ?", whereArgs = arrayOf(hostUrl)).toTable()
                     .mapNotNull { row -> if (getStringVal(row, "observation_variable_name") != null)
-                        FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "observation_variable_name"), missingPhoto).apply {
+                        FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "internal_id_observation_variable"), missingPhoto).apply {
                         this.fieldBookDbId = getStringVal(row, "id")
                         } else null
                     }
@@ -214,7 +214,7 @@ class ObservationDao {
                         if (getStringVal(row, "observation_variable_name") != null)
                             FieldBookImage(ctx,
                                 getStringVal(row, "value"),
-                                getStringVal(row, "observation_variable_name"),
+                                getStringVal(row, "internal_id_observation_variable"),
                                 missingPhoto).apply {
                             this.fieldBookDbId = getStringVal(row, "id")
                         } else null

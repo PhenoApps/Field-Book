@@ -610,7 +610,7 @@ class GoProTraitLayout :
                 //get current trait's trait name, use it as a plot_media directory
                 currentTrait.trait?.let { traitName ->
 
-                    DocumentTreeUtil.getFieldMediaDirectory(context, traitName)
+                    DocumentTreeUtil.getFieldMediaDirectory(context, currentTrait.id)
                         ?.let { usbPhotosDir ->
 
                             val plot = data["plot"]
@@ -701,7 +701,7 @@ class GoProTraitLayout :
         //get current trait's trait name, use it as a plot_media directory
         currentTrait?.trait?.let { traitName ->
 
-            DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
+            DocumentTreeUtil.getFieldMediaDirectory(context, currentTrait.id)?.let { fieldDir ->
 
                 val plot = currentRange.plot_id
 
@@ -825,7 +825,7 @@ class GoProTraitLayout :
                 //get current trait's trait name, use it as a plot_media directory
                 currentTrait?.trait?.let { traitName ->
 
-                    DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
+                    DocumentTreeUtil.getFieldMediaDirectory(context, currentTrait.id)?.let { fieldDir ->
 
                         val plot = currentRange.plot_id
 

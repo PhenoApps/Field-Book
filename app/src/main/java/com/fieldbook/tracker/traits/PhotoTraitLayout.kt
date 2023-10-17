@@ -22,7 +22,6 @@ import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getPlotMedia
-import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -149,78 +148,73 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
             currentTrait.trait?.let { traitName ->
 
-                val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
-
                 val studyId = (context as CollectActivity).studyId
-                val photosDir = getFieldMediaDirectory(context, sanitizedTraitName)
+                val photosDir = getFieldMediaDirectory(context, currentTrait.id)
                 val unit = currentRange.plot_id
-                val dir = getFieldMediaDirectory(context, sanitizedTraitName)
 
-                if (dir != null) {
+                try {
 
-                    try {
+                    if (photosDir != null) {
 
-                        if (photosDir != null) {
+                        val cache = File(context.cacheDir, "temp.jpg")
 
-                            val cache = File(context.cacheDir, "temp.jpg")
+                        val uri = GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", cache)
 
-                            val uri = GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", cache)
+                        val rep = database.getNextRep(studyId, unit, traitName)
 
-                            val rep = database.getNextRep(studyId, unit, traitName)
+                        val generatedName =
+                            currentRange.plot_id + "_" + currentTrait.trait + "_" + rep + "_" + timeStamp.format(
+                                Calendar.getInstance().time
+                            ) + ".jpg"
 
-                            val generatedName =
-                                currentRange.plot_id + "_" + sanitizedTraitName + "_" + rep + "_" + timeStamp.format(
-                                    Calendar.getInstance().time
-                                ) + ".jpg"
+                        Log.w(TAG, photosDir.uri.toString() + generatedName)
 
-                            Log.w(TAG, dir.uri.toString() + generatedName)
+                        val file = photosDir.createFile("image/jpg", generatedName)
 
-                            val file = dir.createFile("image/jpg", generatedName)
+                        if (file != null) {
 
-                            if (file != null) {
-
-                                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                                    context.contentResolver.openOutputStream(file.uri)?.use { outputStream ->
-                                        inputStream.copyTo(outputStream)
-                                    }
-                                }
-
-                                if (success) {
-
-                                    try {
-
-                                        Utils.scanFile(context, file.uri.toString(), "image/*")
-
-                                        updateTraitAllowDuplicates(
-                                            plotId = unit,
-                                            traitName,
-                                            type,
-                                            file.uri.toString(),
-                                            null,
-                                            newTraits,
-                                            rep
-                                        )
-
-                                    } catch (e: Exception) {
-
-                                        e.printStackTrace()
-
-                                    }
-
-                                } else {
-
-                                    file.delete()
-
+                            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                                context.contentResolver.openOutputStream(file.uri)?.use { outputStream ->
+                                    inputStream.copyTo(outputStream)
                                 }
                             }
+
+                            if (success) {
+
+                                try {
+
+                                    Utils.scanFile(context, file.uri.toString(), "image/*")
+
+                                    updateTraitAllowDuplicates(
+                                        plotId = unit,
+                                        traitName,
+                                        type,
+                                        file.uri.toString(),
+                                        null,
+                                        newTraits,
+                                        rep
+                                    )
+
+                                } catch (e: Exception) {
+
+                                    e.printStackTrace()
+
+                                }
+
+                            } else {
+
+                                file.delete()
+
+                            }
                         }
-
-                    } catch (e: Exception) {
-
-                        e.printStackTrace()
-
                     }
+
+                } catch (e: Exception) {
+
+                    e.printStackTrace()
+
                 }
+
 
                 activity?.runOnUiThread {
 
