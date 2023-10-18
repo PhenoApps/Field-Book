@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_alignLeft="@id/pickAudioButton"
             android:visibility="visible"
-            android:text="fwsf"
+            android:text=""
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -29,6 +29,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Select Audio File" />
+
+        <TextView
+            android:id="@+id/uploadStatusMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_alignLeft="@id/pickAudioButton"
+            android:visibility="visible"
+            android:text=""
+            android:textColor="@color/RED"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/uploadFileButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload File" />
     </LinearLayout>
 
 </RelativeLayout>
