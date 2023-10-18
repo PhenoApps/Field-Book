@@ -140,16 +140,15 @@
     <string name="activity_field_editor_no_location_yet">No location found yet.</string>
     <string name="activity_field_editor_switch_field_same">Closest field already selected.</string>
 
-    <!-- Unimplemented -->
-    <string name="fields_study_statistics">Statistics</string>
-    <string name="fields_date_imported">Import date</string>
-    <string name="fields_date_edited">Edit date</string>
-    <string name="fields_date_exported">Export date</string>
-    <string name="fields_summary">Field summary</string>
+    <!-- Field details -->
+    <string name="fields_summary">Summary</string>
+    <string name="fields_import_date">Import:</string>
+    <string name="fields_last_edit">Last Edit:</string>
+    <string name="fields_last_export">Last Export:</string>
+    <string name="fields_entry_count">Entry Count:</string>
+    <string name="fields_entry_type">Entry Type:</string>
+    <string name="fields_trait_statistics">Trait Statistics</string>
     <string name="fields_options">Options</string>
-
-
-
 
     <!-- TRAITS -->
     <!-- Sort -->

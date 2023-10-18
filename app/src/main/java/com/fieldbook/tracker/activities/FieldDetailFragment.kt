@@ -85,11 +85,11 @@ class FieldDetailFragment : Fragment() {
         val collectButton: Button = view.findViewById(R.id.collectButton)
         val exportButton: Button = view.findViewById(R.id.exportButton)
 
-        importDateTextView.text = "Import Date: ${args.getString("IMPORT_DATE")}"
-        editDateTextView.text = "Edit Date: ${args.getString("EDIT_DATE")}"
-        exportDateTextView.text = "Export Date: ${args.getString("EXPORT_DATE")}"
-        countTextView.text = "Count: ${args.getString("COUNT")}"
-        observationLevelTextView.text = "Entry Type: ${args.getString("OBSERVATION_LEVEL")}"
+        importDateTextView.text = " ${args.getString("IMPORT_DATE")}"
+        editDateTextView.text = " ${args.getString("EDIT_DATE")}"
+        exportDateTextView.text = " ${args.getString("EXPORT_DATE")}"
+        countTextView.text = " ${args.getString("COUNT")}"
+        observationLevelTextView.text = " ${args.getString("OBSERVATION_LEVEL")}"
 
         collectButton.setOnClickListener {
             if (checkTraitsExist() >= 0) collectDataFilePermission()
@@ -247,11 +247,13 @@ class FieldDetailFragment : Fragment() {
         traitCounts.forEach { (traitName, count) ->
             if(traitName != null) {
                 Log.d("TraitLoop", "TraitName: $traitName, Count: $count")
-                val textView = inflater.inflate(R.layout.list_item_field_trait, layout, false) as TextView
-                Log.d("Inflate", "TextView: $textView")
-                textView.text = "$traitName: $count"
-                textView.id = View.generateViewId()
-                layout.addView(textView)
+                val view = inflater.inflate(R.layout.list_item_field_trait, layout, false) as View
+                val nameTextView: TextView = view.findViewById(R.id.traitNameTextView)
+                val countTextView: TextView = view.findViewById(R.id.traitCountTextView)
+                nameTextView.text = traitName
+                countTextView.text = count.toString()
+                view.id = View.generateViewId()
+                layout.addView(view)
             } else {
                 Log.d("TraitCountDetail", "TraitName is null.")
             }

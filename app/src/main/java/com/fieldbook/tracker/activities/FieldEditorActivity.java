@@ -130,9 +130,9 @@ public class FieldEditorActivity extends ThemedActivity
         fieldObject = field;
         FieldDetailFragment fragment = FieldDetailFragmentKt.newFieldDetailFragment(
                 field.getExp_name(),
-                field.getDate_import(),
-                field.getDate_export(),
-                field.getDate_edit(),
+                field.getDate_import().split(" ")[0],
+                field.getDate_export().split(" ")[0],
+                field.getDate_edit().split(" ")[0],
                 field.getCount(),
                 field.getObservation_level()
         );

@@ -32,55 +32,116 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Details"
+                android:text="@string/fields_summary"
                 android:textStyle="bold"
+                android:layout_marginBottom="16dp"
                 android:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/importDateTextView"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Import Date"
-                android:textSize="18sp"
-                android:layout_marginBottom="16dp" />
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
 
-            <TextView
-                android:id="@+id/editDateTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Edit Date"
-                android:textSize="18sp"
-                android:layout_marginBottom="16dp" />
+                <TextView style="@style/TextViewStyle.Bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/fields_import_date"
+                    android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/exportDateTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Export Date"
-                android:textSize="18sp"
-                android:layout_marginBottom="16dp" />
+                <TextView
+                    android:id="@+id/importDateTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/countTextView"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Count"
-                android:textSize="18sp"
-                android:layout_marginBottom="16dp" />
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
 
-            <TextView
-                android:id="@+id/observationLevelTextView"
-                android:layout_width="wrap_content"
+                <TextView style="@style/TextViewStyle.Bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/fields_last_edit"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/editDateTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Observation Level"
-                android:textSize="18sp"
-                android:layout_marginBottom="16dp" />
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <TextView style="@style/TextViewStyle.Bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/fields_last_export"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/exportDateTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <TextView style="@style/TextViewStyle.Bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/fields_entry_count"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/countTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <TextView style="@style/TextViewStyle.Bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/fields_entry_type"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/observationLevelTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
             <!-- Traits Stats -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Traits"
+                android:text="@string/fields_trait_statistics"
                 android:textStyle="bold"
                 android:textSize="18sp" />
 
@@ -89,7 +150,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="8dp">
 
             </LinearLayout>
 
