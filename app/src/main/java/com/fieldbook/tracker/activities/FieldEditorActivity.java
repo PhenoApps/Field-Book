@@ -533,9 +533,15 @@ public class FieldEditorActivity extends ThemedActivity
         return result;
     }
 
+    @Override
     public void onBackPressed() {
-        CollectActivity.reloadData = true;
-        finish();
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            // Return to Fields screen if pressed in detail fragment
+            getSupportFragmentManager().popBackStack();
+        } else {
+            CollectActivity.reloadData = true;
+            finish();
+        }
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
