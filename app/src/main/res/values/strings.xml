@@ -82,6 +82,9 @@
     <string name="dialog_field_sort_toggle_order_content_description">Reverses sort order.</string>
     <string name="dialog_field_sort_add_content_description">Opens a dialog to add a new attribute to sort by.</string>
 
+    <!-- Rename -->
+    <string name="fields_rename_study">Rename</string>
+
     <!-- Delete -->
     <string name="fields_delete">Delete</string>
     <string name="fields_delete_study">Delete field</string>
@@ -142,11 +145,12 @@
 
     <!-- Field details -->
     <string name="fields_summary">Summary</string>
-    <string name="fields_import_date">Import:</string>
-    <string name="fields_last_edit">Last Edit:</string>
+    <string name="fields_import_date">Import Date:</string>
+    <string name="fields_last_edit">Last Edited:</string>
     <string name="fields_last_export">Last Export:</string>
     <string name="fields_entry_count">Entry Count:</string>
     <string name="fields_entry_type">Entry Type:</string>
+    <string name="fields_brapi_details">BrAPI</string>
     <string name="fields_trait_statistics">Trait Statistics</string>
     <string name="fields_options">Options</string>
 

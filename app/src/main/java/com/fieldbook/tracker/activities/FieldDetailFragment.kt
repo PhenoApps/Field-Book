@@ -128,14 +128,16 @@ class FieldDetailFragment : Fragment() {
                         android.R.id.home -> {
                             parentFragmentManager.popBackStack()
                         }
+                        R.id.rename -> {
+                        }
                         R.id.sort -> {
                             (activity as? FieldSortController)?.showSortDialog(field)
                         }
-                        R.id.syncObs -> {
-                            val alert = BrapiSyncObsDialog(requireContext())
-                            alert.setFieldObject(field)
-                            alert.show()
-                        }
+//                        R.id.syncObs -> {
+//                            val alert = BrapiSyncObsDialog(requireContext())
+//                            alert.setFieldObject(field)
+//                            alert.show()
+//                        }
                         R.id.delete -> {
                             createDeleteItemAlertDialog(field)?.show()
                         }
@@ -251,7 +253,7 @@ class FieldDetailFragment : Fragment() {
                 val nameTextView: TextView = view.findViewById(R.id.traitNameTextView)
                 val countTextView: TextView = view.findViewById(R.id.traitCountTextView)
                 nameTextView.text = traitName
-                countTextView.text = count.toString()
+                countTextView.text = count.toString() + " observations"
                 view.id = View.generateViewId()
                 layout.addView(view)
             } else {

@@ -3,16 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/rename"
+        android:icon="@drawable/pencil"
+        app:showAsAction="always"
+        android:title="@string/fields_rename_study" />
+
+    <item
         android:id="@+id/sort"
         android:icon="@drawable/ic_field_sort"
         app:showAsAction="always"
         android:title="@string/fields_sort_update" />
-
-    <item
-        android:id="@+id/syncObs"
-        android:icon="@drawable/ic_field_sync"
-        app:showAsAction="always"
-        android:title="@string/brapi_obs_sync_menu_name" />
 
     <item
         android:id="@+id/delete"

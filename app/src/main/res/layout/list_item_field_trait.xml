@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <TextView style="@style/TextViewStyle.Bold"
+    <TextView
         android:id="@+id/traitNameTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -17,12 +17,21 @@
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <TextView
+        style="@style/TextViewStyle.Bold"
         android:id="@+id/traitCountTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/traitNameTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/centerGuide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
