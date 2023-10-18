@@ -135,6 +135,16 @@ public class ConfigActivity extends ThemedActivity {
         instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, id);
     }
 
+    /**
+     *
+     */
+    private void checkBrapiToken() {
+        String token = ep.getString(GeneralKeys.BRAPI_TOKEN, "");
+        if (!token.isEmpty()) {
+            ep.edit().putBoolean(GeneralKeys.BRAPI_ENABLED, true).apply();
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
@@ -144,6 +154,8 @@ public class ConfigActivity extends ThemedActivity {
         super.onCreate(savedInstanceState);
 
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+
+        checkBrapiToken();
 
         setCrashlyticsUserId();
         invalidateOptionsMenu();
