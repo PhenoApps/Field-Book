@@ -16,12 +16,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.ImageTraitAdapter
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
-import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getPlotMedia
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.Utils
 import kotlinx.coroutines.CoroutineScope
@@ -393,6 +393,17 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
         }
     }
 
+    private fun getImageObservations(): Array<ObservationModel> {
+
+        val traitName = collectActivity.traitName
+        val plot = collectActivity.observationUnit
+        val studyId = collectActivity.studyId
+
+        return database.getAllObservations(studyId).filter {
+            it.observation_variable_name == traitName && it.observation_unit_id == plot
+        }.toTypedArray()
+    }
+
     private inner class PhotoTraitOnClickListener : OnClickListener {
         override fun onClick(view: View) {
             if (!isLocked) {
@@ -402,18 +413,14 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                     } catch (n: Exception) {
                         0
                     }
-                    val photosDir = getFieldMediaDirectory(context, "photos")
-                    val plot = currentRange.plot_id
-                    val locations = getPlotMedia(photosDir, plot, ".jpg")
-                    if (photosDir != null) {
-                        // Do not take photos if limit is reached
-                        if (m == 0 || locations.size < m) {
-                            takePicture()
-                        } else Utils.makeToast(
-                            context,
-                            context.getString(R.string.traits_create_photo_maximum)
-                        )
-                    }
+                    val locations = getImageObservations()
+                    // Do not take photos if limit is reached
+                    if (m == 0 || locations.size < m) {
+                        takePicture()
+                    } else Utils.makeToast(
+                        context,
+                        context.getString(R.string.traits_create_photo_maximum)
+                    )
                 } catch (e: Exception) {
                     e.printStackTrace()
                     Utils.makeToast(context, context.getString(R.string.trait_error_hardware_missing))

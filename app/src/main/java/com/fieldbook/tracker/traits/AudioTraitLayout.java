@@ -18,6 +18,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.FileUtil;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -270,7 +271,9 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         // For audio trait type
         private void setRecordingLocation(String recordingName) {
-            DocumentFile audioDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "audio");
+            String traitName = getCollectActivity().getTraitName();
+            String sanitizedName = FileUtil.sanitizeFileName(traitName);
+            DocumentFile audioDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), sanitizedName);
             if (audioDir != null && audioDir.exists()) {
                 DocumentFile audioFile = audioDir.createFile("*/mp4", recordingName + ".mp4");
                 if (audioFile != null) {
@@ -310,6 +313,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
             }
 
             setRecordingLocation(mGeneratedName);
+
             try {
                 FileDescriptor fd = getContext().getContentResolver().openFileDescriptor(recordingLocation, "rw").getFileDescriptor();
                 mediaRecorder.setOutputFile(fd);

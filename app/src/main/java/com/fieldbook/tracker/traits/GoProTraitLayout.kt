@@ -26,9 +26,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.ImageTraitAdapter
-import com.fieldbook.tracker.database.dao.ObservationDao
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
+import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.GoProWrapper
 import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.ExoPlayer
@@ -541,6 +542,7 @@ class GoProTraitLayout :
 
                 val imageView = ImageView(context)
 
+                //TODO check performance replacing this with DocumentsContract thumbnail function
                 val bmp = BitmapFactory.decodeStream(input)
 
                 val scaled = bmp.scale(512, 512, true)
@@ -610,7 +612,9 @@ class GoProTraitLayout :
                 //get current trait's trait name, use it as a plot_media directory
                 currentTrait.trait?.let { traitName ->
 
-                    DocumentTreeUtil.getFieldMediaDirectory(context, traitName)
+                    val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+
+                    DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)
                         ?.let { usbPhotosDir ->
 
                             val plot = data["plot"]
@@ -694,6 +698,17 @@ class GoProTraitLayout :
         }
     }
 
+    private fun getImageObservations(): Array<ObservationModel> {
+
+        val traitName = collectActivity.traitName
+        val plot = collectActivity.observationUnit
+        val studyId = collectActivity.studyId
+
+        return database.getAllObservations(studyId).filter {
+            it.observation_variable_name == traitName && it.observation_unit_id == plot
+        }.toTypedArray()
+    }
+
     private fun deleteItem(model: ImageTraitAdapter.Model) {
 
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
@@ -701,39 +716,36 @@ class GoProTraitLayout :
         //get current trait's trait name, use it as a plot_media directory
         currentTrait?.trait?.let { traitName ->
 
-            DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
+            val plot = currentRange.plot_id
 
-                val plot = currentRange.plot_id
+            getImageObservations().firstOrNull { it.value == model.uri }?.let { observation ->
 
-                DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
+                try {
 
-                    highResImages.firstOrNull {
-                        it.name == (DocumentFile.fromSingleUri(
-                            context,
-                            Uri.parse(model.uri)
-                        )?.name ?: String())
-                    }?.let { image ->
+                    DocumentFile.fromSingleUri(context, Uri.parse(observation.value))?.let { image ->
 
-                        try {
+                        val result = image.delete()
 
-                            image.delete()
-                            DocumentFile.fromSingleUri(context, Uri.parse(model.uri))?.delete()
+                        if (result) {
 
-                            ObservationDao.deleteTraitByValue(
-                                studyId,
-                                plot,
-                                traitName,
-                                image.uri.toString()
-                            )
+                            database.deleteTraitByValue(studyId, plot, traitName, image.uri.toString())
 
                             loadAdapterItems()
 
-                        } catch (e: Exception) {
+                        } else {
 
-                            Log.e(TAG, "Failed to delete images.", e)
+                            collectActivity.runOnUiThread {
 
+                                Toast.makeText(context, R.string.photo_failed_to_delete, Toast.LENGTH_SHORT).show()
+
+                            }
                         }
                     }
+
+                } catch (e: Exception) {
+
+                    Log.e(TAG, "Failed to delete images.", e)
+
                 }
             }
         }
@@ -818,39 +830,17 @@ class GoProTraitLayout :
 
     override fun onItemClicked(model: ImageTraitAdapter.Model) {
 
-        try {
+        if (!isLocked) {
 
-            if (!isLocked) {
+            getImageObservations().firstOrNull { it.value == model.uri }?.let { observation ->
 
-                //get current trait's trait name, use it as a plot_media directory
-                currentTrait?.trait?.let { traitName ->
+                DocumentFile.fromSingleUri(context, Uri.parse(observation.value))?.let { image ->
 
-                    DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
-
-                        val plot = currentRange.plot_id
-
-                        DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
-
-                            highResImages.firstOrNull {
-                                it.name == (DocumentFile.fromSingleUri(
-                                    context,
-                                    Uri.parse(model.uri)
-                                )?.name ?: String())
-                            }?.let { image ->
-
-                                activity?.startActivity(Intent(Intent.ACTION_VIEW, image.uri).also {
-                                    it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                })
-                            }
-                        }
-                    }
+                    activity?.startActivity(Intent(Intent.ACTION_VIEW, image.uri).also {
+                        it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    })
                 }
             }
-
-        } catch (e: Exception) {
-
-            e.printStackTrace()
-
         }
     }
 
