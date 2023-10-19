@@ -45,8 +45,8 @@ public class FieldBookImage extends BrapiObservation {
 
     }
 
-    public FieldBookImage(Context ctx, String filePath, String traitName, Bitmap missingPhoto) {
-        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(ctx, traitName);
+    public FieldBookImage(Context ctx, String filePath, String traitId, Bitmap missingPhoto) {
+        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(ctx, traitId);
 
         this.missing = missingPhoto;
         this.location = new GeoJSON();

@@ -13,7 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 class OldPhotosMigrator {
 
@@ -48,7 +49,7 @@ class OldPhotosMigrator {
 
                         if (t.trait != "photos") { //edge case where trait name is actually photos
 
-                            val photoDir = DocumentTreeUtil.getFieldMediaDirectory(context, t.trait)
+                            val photoDir = DocumentTreeUtil.getFieldMediaDirectory(context, t.id)
                             val oldPhotos = DocumentTreeUtil.getFieldMediaDirectory(context, "photos")
 
                             traitPhotos.forEach { photo ->

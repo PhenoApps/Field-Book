@@ -29,7 +29,7 @@ public final class FileUtil {
 
     //https://stackoverflow.com/questions/2679699/what-characters-allowed-in-file-names-on-android
     public static String sanitizeFileName(String name) {
-        return name.replaceAll("[|\\?\\*<\"\\\\:>\'\";]*", "_");
+        return name.replaceAll("[|\\?\\*<\"\\\\:>\'\";]", "_");
     }
 
     /**
