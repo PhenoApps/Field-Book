@@ -64,6 +64,10 @@ import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.mlkit.vision.barcode.common.Barcode;
+import com.google.mlkit.vision.barcode.BarcodeScanner;
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
+import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.michaelflisar.changelog.ChangelogBuilder;
@@ -340,12 +344,19 @@ public class ConfigActivity extends ThemedActivity {
         }
 
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
+//        barcodeSearchFab.setOnClickListener(v -> {
+//            new IntentIntegrator(this)
+//                    .setPrompt(getString(R.string.barcode_scanner_text))
+//                    .setBeepEnabled(false)
+//                    .setRequestCode(REQUEST_BARCODE)
+//                    .initiateScan();
+//        });
         barcodeSearchFab.setOnClickListener(v -> {
-            new IntentIntegrator(this)
-                    .setPrompt(getString(R.string.barcode_scanner_text))
-                    .setBeepEnabled(false)
-                    .setRequestCode(REQUEST_BARCODE)
-                    .initiateScan();
+            System.out.println("Hello");
+            BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
+                            .setBarcodeFormats(Barcode.FORMAT_QR_CODE, Barcode.FORMAT_DATA_MATRIX)
+                            .build();
+            BarcodeScanner scanner = BarcodeScanning.getClient();
         });
 
         //this must happen after migrations and can't be injected in config

@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities;
 
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -32,6 +34,8 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -106,6 +110,11 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
+
+import static com.fieldbook.tracker.utilities.BarcodeScannerUtilsKt.cameraPermissionRequest;
+import static com.fieldbook.tracker.utilities.BarcodeScannerUtilsKt.isPermissionGranted;
 
 /**
  * All main screen logic resides here
@@ -233,12 +242,7 @@ public class CollectActivity extends ThemedActivity
      */
     private androidx.appcompat.app.AlertDialog dialogGeoNav;
     private androidx.appcompat.app.AlertDialog dialogPrecisionLoss;
-
-    public void triggerTts(String text) {
-        if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
-            ttsHelper.speak(text);
-        }
-    }
+    private String cameraPermission = android.Manifest.permission.CAMERA;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -299,6 +303,12 @@ public class CollectActivity extends ThemedActivity
         checkForInitialBarcodeSearch();
 
         verifyPersonHelper.checkLastOpened();
+    }
+
+    public void triggerTts(String text) {
+        if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
+            ttsHelper.speak(text);
+        }
     }
 
     private void switchField(int studyId, @Nullable String obsUnitId) {
@@ -585,11 +595,20 @@ public class CollectActivity extends ThemedActivity
         barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);
         barcodeInput.setOnClickListener(v -> {
             triggerTts(barcodeTts);
-            new IntentIntegrator(CollectActivity.this)
-                    .setPrompt(getString(R.string.barcode_scanner_text))
-                    .setBeepEnabled(false)
-                    .setRequestCode(BARCODE_COLLECT_CODE)
-                    .initiateScan();
+//            if(ep.getBoolean((GeneralKeys.MLKIT_PREFERENCE_KEY), false)){
+                //MLKit scanning code
+                Log.d("MyActivity", "MLKit");
+                requestCameraAndStartScanner();
+//            }
+//            else{
+//                Log.d("MyActivity", GeneralKeys.MLKIT_PREFERENCE_KEY);
+//                new IntentIntegrator(CollectActivity.this)
+//                        .setPrompt(getString(R.string.barcode_scanner_text))
+//                        .setBeepEnabled(false)
+//                        .setRequestCode(BARCODE_COLLECT_CODE)
+//                        .initiateScan();
+//            }
+
         });
 
         deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
@@ -2281,5 +2300,40 @@ public class CollectActivity extends ThemedActivity
         if (gps == null) return null;
 
         return gps.getLocation(0, 0);
+    }
+
+//    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+//        if(isGranted){
+//            //start scanner
+//        }
+//    }
+
+    private ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted->{
+        if(isGranted){
+            //start scanner
+            ScannerActivity.Companion.startScanner(this, ()-> null);
+        }
+    });
+
+    private void requestCameraAndStartScanner(){
+        Context context = this;
+        if(isPermissionGranted(context, cameraPermission)){
+            //start scanner
+            ScannerActivity.Companion.startScanner(this, ()-> null);
+        }
+        else{
+            requestCameraPermission();
+        }
+    }
+    private void requestCameraPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Context context = this;
+            if(shouldShowRequestPermissionRationale(cameraPermission)){
+                    cameraPermissionRequest(context);
+            }
+            else{
+                requestPermissionLauncher.launch(cameraPermission);
+            }
+        }
     }
 }

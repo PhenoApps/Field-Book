@@ -5,4 +5,10 @@
         android:summary="@string/pref_beta_repeated_values_summary"
         android:defaultValue="false"
         android:icon="@drawable/ic_beta"/>
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_beta"
+        android:key="com.tracker.fieldbook.preferences.keys.mlkit"
+        android:summary="@string/pref_beta_mlkit_summary"
+        android:title="@string/pref_beta_mlkit_title" />
 </PreferenceScreen>
