@@ -124,39 +124,45 @@
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"/>
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_marginBottom="16dp">
 
                 <TextView
+                    android:id="@+id/entryTypeTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
                     android:text="@string/fields_entry_type"
                     android:textSize="16sp" />
 
-                <TextView style="@style/TextViewStyle.Bold"
+                <TextView
                     android:id="@+id/observationLevelTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp" />
+                    android:layout_toEndOf="@+id/entryTypeTextView"
+                    android:layout_marginStart="8dp"
+                    android:layout_centerVertical="true"
+                    android:textSize="16sp"
+                    style="@style/TextViewStyle.Bold"/>
 
                 <Button
                     android:id="@+id/brapiSync"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="right|center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/rectangular_button_background"
+                    android:drawableEnd="@drawable/ic_field_sync"
+                    android:paddingEnd="8dp"
                     android:text="@string/brapi_obs_sync_menu_name"
-                    android:textSize="16sp"
-                    android:drawablePadding="8dp"
-                    android:drawableRight="@drawable/ic_field_sync"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:layout_marginStart="8dp"/>
-            </LinearLayout>
-
+                    android:textSize="16sp" />
+            </RelativeLayout>
 
             <!-- Traits Stats -->
             <TextView style="@style/TextViewStyle.Bold"

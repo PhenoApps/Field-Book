@@ -29,29 +29,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
 
-
-fun newFieldDetailFragment(
-    fieldName: String,
-    importDate: String,
-    exportDate: String,
-    editDate: String,
-    count: String,
-    observationLevel: String
-): FieldDetailFragment {
-    val fragment = FieldDetailFragment()
-    val args = Bundle()
-    args.putString("FIELD_NAME", fieldName)
-    args.putString("IMPORT_DATE", importDate)
-    args.putString("EXPORT_DATE", exportDate)
-    args.putString("EDIT_DATE", editDate)
-    args.putString("COUNT", count)
-    args.putString("OBSERVATION_LEVEL", observationLevel)
-    fragment.arguments = args
-    return fragment
-}
-
 @AndroidEntryPoint
-class FieldDetailFragment : Fragment() {
+class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
     @Inject
     lateinit var database: DataHelper
@@ -70,7 +49,6 @@ class FieldDetailFragment : Fragment() {
     ): View? {
         Log.d("onCreateView", "Start")
         val view = inflater.inflate(R.layout.fragment_field_detail, container, false)
-        val args = requireArguments()
         toolbar = view.findViewById(R.id.toolbar)
         setupToolbar()
         displayTraitCounts(view)
@@ -82,14 +60,21 @@ class FieldDetailFragment : Fragment() {
         observationLevelTextView = view.findViewById(R.id.observationLevelTextView)
         exportUtil = ExportUtil(requireActivity(), database)
 
+        importDateTextView.text = " ${field.getDate_import().split(" ")[0]}"
+        editDateTextView.text = " ${field.getDate_edit().split(" ")[0]}"
+        exportDateTextView.text = " ${field.getDate_export().split(" ")[0]}"
+        countTextView.text = " ${field.getCount()}"
+        observationLevelTextView.text = " ${field.getObservation_level()}"
+
         val collectButton: Button = view.findViewById(R.id.collectButton)
         val exportButton: Button = view.findViewById(R.id.exportButton)
+        val syncObsButton: Button = view.findViewById(R.id.brapiSync)
 
-        importDateTextView.text = " ${args.getString("IMPORT_DATE")}"
-        editDateTextView.text = " ${args.getString("EDIT_DATE")}"
-        exportDateTextView.text = " ${args.getString("EXPORT_DATE")}"
-        countTextView.text = " ${args.getString("COUNT")}"
-        observationLevelTextView.text = " ${args.getString("OBSERVATION_LEVEL")}"
+        syncObsButton.setOnClickListener {
+            val alert = BrapiSyncObsDialog(requireContext())
+            alert.setFieldObject(field)
+            alert.show()
+        }
 
         collectButton.setOnClickListener {
             if (checkTraitsExist() >= 0) collectDataFilePermission()
@@ -105,47 +90,34 @@ class FieldDetailFragment : Fragment() {
 
     private fun setupToolbar() {
 
-        with(activity as? FieldEditorActivity) {
+        toolbar?.inflateMenu(R.menu.menu_field_details)
 
-            this?.let { editorActivity ->
+        toolbar?.setTitle(field.getExp_name())
 
-                val field = editorActivity.fieldObject
+        toolbar?.setNavigationIcon(R.drawable.arrow_left)
 
-                toolbar?.inflateMenu(R.menu.menu_field_details)
+        toolbar?.setNavigationOnClickListener {
 
-                toolbar?.setTitle(field.getExp_name())
+            parentFragmentManager.popBackStack()
+        }
 
-                toolbar?.setNavigationIcon(R.drawable.arrow_left)
+        toolbar?.setOnMenuItemClickListener { item ->
 
-                toolbar?.setNavigationOnClickListener {
-
+            when (item.itemId) {
+                android.R.id.home -> {
                     parentFragmentManager.popBackStack()
                 }
-
-                toolbar?.setOnMenuItemClickListener { item ->
-
-                    when (item.itemId) {
-                        android.R.id.home -> {
-                            parentFragmentManager.popBackStack()
-                        }
-                        R.id.rename -> {
-                        }
-                        R.id.sort -> {
-                            (activity as? FieldSortController)?.showSortDialog(field)
-                        }
-//                        R.id.syncObs -> {
-//                            val alert = BrapiSyncObsDialog(requireContext())
-//                            alert.setFieldObject(field)
-//                            alert.show()
-//                        }
-                        R.id.delete -> {
-                            createDeleteItemAlertDialog(field)?.show()
-                        }
-                    }
-
-                    true
+                R.id.rename -> {
+                }
+                R.id.sort -> {
+                    (activity as? FieldSortController)?.showSortDialog(field)
+                }
+                R.id.delete -> {
+                    createDeleteItemAlertDialog(field)?.show()
                 }
             }
+
+            true
         }
     }
 
