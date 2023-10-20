@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -34,8 +33,6 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -110,11 +107,8 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
 
-import static com.fieldbook.tracker.utilities.BarcodeScannerUtilsKt.cameraPermissionRequest;
-import static com.fieldbook.tracker.utilities.BarcodeScannerUtilsKt.isPermissionGranted;
+import static com.fieldbook.tracker.utilities.BarcodeScannerUtilsKt.requestCameraAndStartScanner;
 
 /**
  * All main screen logic resides here
@@ -242,7 +236,7 @@ public class CollectActivity extends ThemedActivity
      */
     private androidx.appcompat.app.AlertDialog dialogGeoNav;
     private androidx.appcompat.app.AlertDialog dialogPrecisionLoss;
-    private String cameraPermission = android.Manifest.permission.CAMERA;
+    private boolean mlkitEnabled;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -297,6 +291,8 @@ public class CollectActivity extends ThemedActivity
         mUsbCameraHelper = new UsbCameraHelper(this);
 
         goProWrapper.attach();
+
+        mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
 
         loadScreen();
 
@@ -595,19 +591,16 @@ public class CollectActivity extends ThemedActivity
         barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);
         barcodeInput.setOnClickListener(v -> {
             triggerTts(barcodeTts);
-//            if(ep.getBoolean((GeneralKeys.MLKIT_PREFERENCE_KEY), false)){
-                //MLKit scanning code
-                Log.d("MyActivity", "MLKit");
-                requestCameraAndStartScanner();
-//            }
-//            else{
-//                Log.d("MyActivity", GeneralKeys.MLKIT_PREFERENCE_KEY);
-//                new IntentIntegrator(CollectActivity.this)
-//                        .setPrompt(getString(R.string.barcode_scanner_text))
-//                        .setBeepEnabled(false)
-//                        .setRequestCode(BARCODE_COLLECT_CODE)
-//                        .initiateScan();
-//            }
+            if(mlkitEnabled) {
+                requestCameraAndStartScanner(this, BARCODE_COLLECT_CODE);
+            }
+            else {
+                new IntentIntegrator(CollectActivity.this)
+                        .setPrompt(getString(R.string.barcode_scanner_text))
+                        .setBeepEnabled(false)
+                        .setRequestCode(BARCODE_COLLECT_CODE)
+                        .initiateScan();
+            }
 
         });
 
@@ -1262,11 +1255,16 @@ public class CollectActivity extends ThemedActivity
                 if (moveToUniqueIdValue.equals("2")) {
                     moveToPlotID();
                 } else if (moveToUniqueIdValue.equals("3")) {
-                    new IntentIntegrator(this)
-                            .setPrompt(getString(R.string.barcode_scanner_text))
-                            .setBeepEnabled(false)
-                            .setRequestCode(BARCODE_SEARCH_CODE)
-                            .initiateScan();
+                    if(mlkitEnabled) {
+                        requestCameraAndStartScanner(this, BARCODE_SEARCH_CODE);
+                    }
+                    else {
+                        new IntentIntegrator(this)
+                                .setPrompt(getString(R.string.barcode_scanner_text))
+                                .setBeepEnabled(false)
+                                .setRequestCode(BARCODE_SEARCH_CODE)
+                                .initiateScan();
+                    }
                 }
                 break;
             case summaryId:
@@ -1555,11 +1553,16 @@ public class CollectActivity extends ThemedActivity
         builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                new IntentIntegrator(CollectActivity.this)
-                        .setPrompt(getString(R.string.barcode_scanner_text))
-                        .setBeepEnabled(false)
-                        .setRequestCode(BARCODE_SEARCH_CODE)
-                        .initiateScan();
+                if(mlkitEnabled) {
+                    requestCameraAndStartScanner(CollectActivity.this, BARCODE_SEARCH_CODE);
+                }
+                else {
+                    new IntentIntegrator(CollectActivity.this)
+                            .setPrompt(getString(R.string.barcode_scanner_text))
+                            .setBeepEnabled(false)
+                            .setRequestCode(BARCODE_SEARCH_CODE)
+                            .initiateScan();
+                }
             }
         });
 
@@ -1677,6 +1680,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
@@ -1722,9 +1726,13 @@ public class CollectActivity extends ThemedActivity
                 if(resultCode == RESULT_OK) {
 
                     if (geoNavHelper.getSnackbar() != null) geoNavHelper.getSnackbar().dismiss();
-
-                    IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                    inputPlotId = plotSearchResult.getContents();
+                    if(mlkitEnabled) {
+                        inputPlotId = data.getStringExtra("barcode");
+                    }
+                    else {
+                        IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                        inputPlotId = plotSearchResult.getContents();
+                    }
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
                     boolean success = moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
@@ -1771,8 +1779,15 @@ public class CollectActivity extends ThemedActivity
             case BARCODE_COLLECT_CODE:
                 if(resultCode == RESULT_OK) {
                     // store barcode value as data
-                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                    String scannedBarcode = plotDataResult.getContents();
+
+                    String scannedBarcode;
+                    if(mlkitEnabled) {
+                        scannedBarcode = data.getStringExtra("barcode");
+                    }
+                    else {
+                        IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                        scannedBarcode = plotDataResult.getContents();
+                    }
                     TraitObject currentTrait = traitBox.getCurrentTrait();
                     BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
                     currentTraitLayout.loadLayout();
@@ -2302,38 +2317,4 @@ public class CollectActivity extends ThemedActivity
         return gps.getLocation(0, 0);
     }
 
-//    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-//        if(isGranted){
-//            //start scanner
-//        }
-//    }
-
-    private ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted->{
-        if(isGranted){
-            //start scanner
-            ScannerActivity.Companion.startScanner(this, ()-> null);
-        }
-    });
-
-    private void requestCameraAndStartScanner(){
-        Context context = this;
-        if(isPermissionGranted(context, cameraPermission)){
-            //start scanner
-            ScannerActivity.Companion.startScanner(this, ()-> null);
-        }
-        else{
-            requestCameraPermission();
-        }
-    }
-    private void requestCameraPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Context context = this;
-            if(shouldShowRequestPermissionRationale(cameraPermission)){
-                    cameraPermissionRequest(context);
-            }
-            else{
-                requestPermissionLauncher.launch(cameraPermission);
-            }
-        }
-    }
 }
