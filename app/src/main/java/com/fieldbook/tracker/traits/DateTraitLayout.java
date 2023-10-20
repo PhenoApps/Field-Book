@@ -108,7 +108,7 @@ public class DateTraitLayout extends BaseTraitLayout {
                 String rep = ((CollectActivity) getContext()).getRep();
 
                 //save date to db
-                updateObservation(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
+                updateObservation(getCurrentTrait(), dateFormat.format(calendar.getTime()));
 
                 triggerTts(getTtsFromCalendar(calendar));
 
@@ -184,9 +184,9 @@ public class DateTraitLayout extends BaseTraitLayout {
 
             if (!getCollectInputView().getText().equals("NA")) { //issue 413, don't update NA when save button is pressed
                 if (getPrefs().getBoolean(GeneralKeys.USE_DAY_OF_YEAR, false)) {
-                    updateObservation(getCurrentTrait().getTrait(), "date", String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
+                    updateObservation(getCurrentTrait(), String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
                 } else {
-                    updateObservation(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
+                    updateObservation(getCurrentTrait(), dateFormat.format(calendar.getTime()));
                 }
             }
 

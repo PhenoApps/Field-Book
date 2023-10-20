@@ -246,9 +246,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
                 String json = CategoryJsonUtil.Companion.encode(categoryList);
 
-                updateObservation(getCurrentTrait().getTrait(),
-                        getCurrentTrait().getFormat(),
-                        json);
+                updateObservation(getCurrentTrait(), json);
 
                 if (showLabel) {
                     triggerTts(cat.getLabel());
