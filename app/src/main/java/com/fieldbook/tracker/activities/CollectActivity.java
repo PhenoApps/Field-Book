@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -82,6 +83,7 @@ import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -102,6 +104,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
@@ -597,11 +600,9 @@ public class CollectActivity extends ThemedActivity
             triggerTts(barcodeTts);
 //            if(ep.getBoolean((GeneralKeys.MLKIT_PREFERENCE_KEY), false)){
                 //MLKit scanning code
-                Log.d("MyActivity", "MLKit");
                 requestCameraAndStartScanner();
 //            }
 //            else{
-//                Log.d("MyActivity", GeneralKeys.MLKIT_PREFERENCE_KEY);
 //                new IntentIntegrator(CollectActivity.this)
 //                        .setPrompt(getString(R.string.barcode_scanner_text))
 //                        .setBeepEnabled(false)
@@ -1677,8 +1678,12 @@ public class CollectActivity extends ThemedActivity
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("MyActivity", "Hello");
+
         super.onActivityResult(requestCode, resultCode, data);
 
+        Log.d("MyActivity", String.valueOf(requestCode));
+        Log.d("MyActivity", String.valueOf(resultCode));
         switch (requestCode) {
             case REQUEST_FILE_EXPLORER_CODE:
                 if (resultCode == RESULT_OK) {
@@ -1722,7 +1727,6 @@ public class CollectActivity extends ThemedActivity
                 if(resultCode == RESULT_OK) {
 
                     if (geoNavHelper.getSnackbar() != null) geoNavHelper.getSnackbar().dismiss();
-
                     IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
                     inputPlotId = plotSearchResult.getContents();
                     rangeBox.setAllRangeID();
@@ -1771,6 +1775,11 @@ public class CollectActivity extends ThemedActivity
             case BARCODE_COLLECT_CODE:
                 if(resultCode == RESULT_OK) {
                     // store barcode value as data
+//                    Log.d("MyActivity", data.getAction());
+//                    Log.d("MyActivity", data.toString());
+//                    Log.d("MyActivity", data.getData().toString());
+                    Log.d("MyActivity", String.valueOf(resultCode));
+                    Log.d("MyActivity", String.valueOf(requestCode));
                     IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
                     String scannedBarcode = plotDataResult.getContents();
                     TraitObject currentTrait = traitBox.getCurrentTrait();
@@ -2302,16 +2311,10 @@ public class CollectActivity extends ThemedActivity
         return gps.getLocation(0, 0);
     }
 
-//    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-//        if(isGranted){
-//            //start scanner
-//        }
-//    }
-
     private ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted->{
         if(isGranted){
             //start scanner
-            ScannerActivity.Companion.startScanner(this, ()-> null);
+            startScanner();
         }
     });
 
@@ -2319,11 +2322,28 @@ public class CollectActivity extends ThemedActivity
         Context context = this;
         if(isPermissionGranted(context, cameraPermission)){
             //start scanner
-            ScannerActivity.Companion.startScanner(this, ()-> null);
+            startScanner();
         }
         else{
             requestCameraPermission();
         }
+    }
+
+    private void startScanner() {
+
+        ScannerActivity.Companion.startScanner(this, (barcodes -> {
+//            String barcodeValue = "";
+            for(Barcode barcode: barcodes)
+            {
+                Log.d("MyActivity", barcode.getDisplayValue());
+//                barcodeValue = barcode.getDisplayValue();
+            }
+//            Intent resultIntent = new Intent();
+//            resultIntent.setData(Uri.parse(barcodeValue));
+//            setResult(RESULT_OK, resultIntent);
+//            finish();
+            return null;
+        }));
     }
     private void requestCameraPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
