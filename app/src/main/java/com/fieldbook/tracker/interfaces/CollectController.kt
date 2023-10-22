@@ -25,4 +25,6 @@ interface CollectController: FieldController {
                      plotId: String?,
                      data: String?,
                      traitIndex: Int): Boolean
+
+    fun isFieldAudioRecording(): Boolean
 }
