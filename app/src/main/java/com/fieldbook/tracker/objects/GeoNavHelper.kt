@@ -13,6 +13,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Location
+import android.net.Uri
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
@@ -139,6 +140,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
     private val mPrefs = PreferenceManager.getDefaultSharedPreferences(context)
     private val ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
     private var mGeoNavLogWriter: OutputStreamWriter? = null
+    private var mGeoNavLogWriterUri: Uri? = null
 
     var initialized: Boolean = false
 
@@ -156,6 +158,10 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
         mAverageHandlerThread.looper
         averageHandler = Handler(mAverageHandlerThread.looper)
         initialized = true
+    }
+
+    fun getGeoNavLogWriterUri(): Uri? {
+        return mGeoNavLogWriterUri
     }
 
     /**
@@ -483,6 +489,7 @@ class GeoNavHelper @Inject constructor(@ActivityContext private val context: Con
                     if (geoNavLogFile != null && geoNavLogFile.exists()) {
                         val outputStream = resolver.openOutputStream(geoNavLogFile.uri)
                         Log.d(CollectActivity.TAG, "GeoNav Logger started successfully.")
+                        mGeoNavLogWriterUri = geoNavLogFile.uri
                         mGeoNavLogWriter = OutputStreamWriter(outputStream)
                     } else {
                         Log.d(CollectActivity.TAG, "GeoNav Logger start failed.")

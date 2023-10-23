@@ -6,6 +6,7 @@
     <string name="dir_trait" translatable="false">trait</string>
     <string name="dir_field_import" translatable="false">field_import</string>
     <string name="dir_field_export" translatable="false">field_export</string>
+    <string name="dir_field_audio_log_zip" translatable="false">field_audio_log_zip</string>
     <string name="dir_geonav" translatable="false">geonav</string>
     <string name="dir_database" translatable="false">database</string>
     <string name="dir_updates" translatable="false">updates</string>
