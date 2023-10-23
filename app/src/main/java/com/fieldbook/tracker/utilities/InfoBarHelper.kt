@@ -2,7 +2,6 @@ package com.fieldbook.tracker.utilities
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.provider.ContactsContract.Data
 import android.util.Log
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.DataHelper
@@ -10,8 +9,7 @@ import com.fieldbook.tracker.dialogs.CollectAttributeChooserDialog
 import com.fieldbook.tracker.objects.InfoBarModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.qualifiers.ActivityContext
-import java.util.Arrays
-import java.util.StringJoiner
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -38,13 +36,17 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
      */
     fun getInfoBarData(): ArrayList<InfoBarModel> {
 
-        var database : DataHelper = (context as CollectActivity).getDatabase();
+        var database : DataHelper = (context as CollectActivity).getDatabase()
+
+        val fieldId: Int = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 1)
+        val fieldName: String =database.getFieldObject(fieldId).getExp_name()
 
         //get the preference number of infobars to load
         val numInfoBars: Int = ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2)
 
         //get all plot attribute names for the study
-        val attributes: List<String> = ArrayList(Arrays.asList(*database.rangeColumnNames))
+        val attributes: MutableList<String> = ArrayList(database.rangeColumnNames.toList())
+        attributes.add(0, "field name")
 
         //get all traits for this study
         val traits = database.allTraitObjects

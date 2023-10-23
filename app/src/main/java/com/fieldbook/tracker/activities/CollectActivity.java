@@ -2147,6 +2147,13 @@ public class CollectActivity extends ThemedActivity
 
         if (isAttribute) {
 
+            // Handle special case when label is "field name"
+            if (label.equals("field name")) {
+                ObservationUnitModel model = database.getObservationUnitById(plotId);
+                String fieldName = database.getFieldObject(model.getStudy_id()).getExp_name();
+                return (fieldName == null || fieldName.isEmpty()) ? dataMissingString : fieldName;
+            }
+
             String[] values = database.getDropDownRange(label, plotId);
             if (values == null || values.length == 0) {
                 return dataMissingString;
