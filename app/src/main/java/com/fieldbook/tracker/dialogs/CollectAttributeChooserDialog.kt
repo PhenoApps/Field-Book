@@ -69,7 +69,7 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
             try {
                 attributes = activity.getDatabase().getAllObservationUnitAttributeNames(activity.studyId.toInt())
                 val attributesList = attributes.toMutableList()
-                attributesList.add(0, "field name")
+                attributesList.add(0, context.getString(R.string.field_name_attribute))
                 attributes = attributesList.toTypedArray()
                 traits = activity.getDatabase().allTraitObjects.toTypedArray()
                 other = traits.filter { !it.visible }.toTypedArray()

@@ -3,6 +3,7 @@ package com.fieldbook.tracker.utilities
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.CollectAttributeChooserDialog
@@ -36,17 +37,14 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
      */
     fun getInfoBarData(): ArrayList<InfoBarModel> {
 
-        var database : DataHelper = (context as CollectActivity).getDatabase()
-
-        val fieldId: Int = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 1)
-        val fieldName: String =database.getFieldObject(fieldId).getExp_name()
+        val database : DataHelper = (context as CollectActivity).getDatabase()
 
         //get the preference number of infobars to load
         val numInfoBars: Int = ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2)
 
         //get all plot attribute names for the study
         val attributes: MutableList<String> = ArrayList(database.rangeColumnNames.toList())
-        attributes.add(0, "field name")
+        attributes.add(0, context.getString(R.string.field_name_attribute))
 
         //get all traits for this study
         val traits = database.allTraitObjects
@@ -67,7 +65,7 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
 
             //get the preferred infobar label, default to "Select" if it doesn't exist for this position
             //adapter preferred values are saved as DROP1, DROP2, DROP3, DROP4, DROP5 in preferences, initialize the label with it
-            var initialLabel: String = ep.getString("DROP$i", "Select") ?: "Select"
+            var initialLabel: String = ep.getString("DROP$i", context.getString(R.string.infobars_attribute_placeholder)) ?: context.getString(R.string.infobars_attribute_placeholder)
 
             //check if the label is an attribute or a trait, this will decide how to query the database for the value
             var isAttribute = attributes.contains(initialLabel)
@@ -80,7 +78,7 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
                         initialLabel = attributes[i]
                         isAttribute = true
                     } else {
-                        initialLabel = "Select"
+                        initialLabel = context.getString(R.string.infobars_attribute_placeholder)
                     }
                 }
             }
@@ -88,7 +86,7 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
             //query the database for the label's value
             (context as? CollectActivity)?.getRangeBox()?.getPlotID()?.let { plot ->
 
-                val value = (context as CollectActivity).queryForLabelValue(plot, initialLabel, isAttribute)
+                val value = (context).queryForLabelValue(plot, initialLabel, isAttribute)
 
                 infoBarModels.add(InfoBarModel(initialLabel, value))
             }
