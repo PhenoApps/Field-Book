@@ -2250,7 +2250,7 @@ public class CollectActivity extends ThemedActivity
         }
         return new ArrayList<>();
     }
-    
+
     @NonNull
     @Override
     public VibrateUtil getVibrator() {
