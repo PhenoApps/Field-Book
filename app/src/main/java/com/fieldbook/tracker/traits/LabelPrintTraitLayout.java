@@ -173,11 +173,11 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 new IntentFilter("printer_message"));
 
         mBluetoothUtil = new BluetoothUtil();
-
-        String[] prefixTraits = getDatabase().getRangeColumnNames();
+        Integer studyId = getPrefs().getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+        String[] prefixTraits = getDatabase().getAllObservationUnitAttributeNames(studyId);
         optionsList = new ArrayList<>(Arrays.asList(prefixTraits));
+        optionsList.add(0, getContext().getString(R.string.field_name_attribute));
         optionsList.add(getContext().getString(R.string.trait_layout_print_label_date_option));
-        optionsList.add(getContext().getString(R.string.field_name_attribute));
         optionsList.add(getContext().getString(R.string.trait_layout_print_label_blank_option));
         options = new String[optionsList.size()];
         optionsList.toArray(options);
@@ -252,23 +252,38 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 }
             });
 
+//            SharedPreferences.Editor editor = getPrefs().edit();
+//
+//// Unset preferences
+//            editor.remove("SIZE");
+//            editor.remove("TEXT");
+//            editor.remove("TEXT2");
+//            editor.remove("TEXT3");
+//            editor.remove("TEXT4");
+//            editor.remove("BARCODE");
+//            editor.remove("COPIES");
+//
+//// Commit the changes
+//            editor.apply();
+
+
             //region SpinnersEnabledFix
             labelsize.setSelection(sizeArrayAdapter.getPosition(getPrefs().getString("SIZE", labelSizeArray[0])));
             labelsize.setEnabled(true);
 
-            textfield1.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT", options[0])));
+            textfield1.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT", options[1])));
             textfield1.setEnabled(true);
 
-            textfield2.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT2", options[0])));
+            textfield2.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT2", options[2])));
             textfield2.setEnabled(true);
 
-            textfield3.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT3", options[0])));
+            textfield3.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT3", getContext().getString(R.string.trait_layout_print_label_date_option))));
             textfield3.setEnabled(true);
 
-            textfield4.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT4", options[0])));
+            textfield4.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT4", getContext().getString(R.string.field_name_attribute))));
             textfield4.setEnabled(true);
 
-            barcodefield.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("BARCODE", options[0])));
+            barcodefield.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("BARCODE", getPrefs().getString(GeneralKeys.UNIQUE_NAME, ""))));
             barcodefield.setEnabled(true);
 
             labelcopies.setSelection(copiesArrayAdapter.getPosition(getPrefs().getString("COPIES", labelCopiesArray[0])));
