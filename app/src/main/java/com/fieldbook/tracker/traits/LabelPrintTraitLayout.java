@@ -252,21 +252,6 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 }
             });
 
-//            SharedPreferences.Editor editor = getPrefs().edit();
-//
-//// Unset preferences
-//            editor.remove("SIZE");
-//            editor.remove("TEXT");
-//            editor.remove("TEXT2");
-//            editor.remove("TEXT3");
-//            editor.remove("TEXT4");
-//            editor.remove("BARCODE");
-//            editor.remove("COPIES");
-//
-//// Commit the changes
-//            editor.apply();
-
-
             //region SpinnersEnabledFix
             labelsize.setSelection(sizeArrayAdapter.getPosition(getPrefs().getString("SIZE", labelSizeArray[0])));
             labelsize.setEnabled(true);
