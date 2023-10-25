@@ -8,6 +8,7 @@ import android.net.Uri
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldDataDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import dagger.hilt.android.qualifiers.ActivityContext
 import java.io.FileNotFoundException
@@ -71,8 +72,14 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
     fun getRecordingLocation(): Uri? {
         return recordingLocation
     }
-    private fun setRecordingLocation(recordingName: String, storageDirectory: String) {
-        val audioDir = getFieldMediaDirectory(context, storageDirectory)
+
+    private fun setRecordingLocation(recordingName: String, isFieldAudio: Boolean) {
+        // get directory based on type of audio being recorded
+        val audioDir = if (isFieldAudio) getFieldDataDirectory(
+            context, "field_audio"
+        ) else getFieldMediaDirectory(
+            context, "audio"
+        )
         if (audioDir != null && audioDir.exists()) {
             val audioFile = audioDir.createFile("*/mp4", "$recordingName.mp4")
             if (audioFile != null) {
@@ -103,19 +110,21 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
         val mGeneratedName: String
         val fieldAlias = ep.getString(GeneralKeys.FIELD_FILE, "")
         mGeneratedName = try {
-            if (isFieldAudio)
-                "field_audio_" + (context as CollectActivity).cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(
-                    c.time
-                )
-            else
-                (context as CollectActivity).cRange.plot_id + " " + timeStamp.format(c.time)
+            if (isFieldAudio) "field_audio_" + (context as CollectActivity).cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(
+                c.time
+            )
+            else (context as CollectActivity).cRange.plot_id + " " + timeStamp.format(c.time)
         } catch (e: Exception) {
             "error " + timeStamp.format(c.time)
         }
-        setRecordingLocation(mGeneratedName, if (isFieldAudio) "field_audio" else "audio")
+        setRecordingLocation(mGeneratedName, isFieldAudio)
         try {
-            val fd = recordingLocation?.let { context.contentResolver.openFileDescriptor(it, "rw") }
-                ?.fileDescriptor
+            val fd = recordingLocation?.let {
+                context.contentResolver.openFileDescriptor(
+                    it,
+                    "rw"
+                )
+            }?.fileDescriptor
             mediaRecorder?.setOutputFile(fd)
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
