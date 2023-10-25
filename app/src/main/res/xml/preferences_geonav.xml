@@ -17,14 +17,15 @@
         android:icon="@drawable/ic_function_variant"
         android:key="com.fieldbook.tracker.geonav.SEARCH_METHOD"
         android:summary="@string/pref_geonav_search_method_summary"
-        android:title="@string/pref_geonav_search_method_title" />
+        android:title="@string/pref_geonav_search_method_title"
+        app:allowDividerAbove="true" />
 
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_script_text_outline"
-        android:key="com.fieldbook.tracker.geonav.GEONAV_LOG"
-        android:summary="@string/pref_geonav_log_summary"
-        android:title="@string/pref_geonav_log_title" />
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/pref_geonav_logging_modes"
+        android:entryValues="@array/pref_geonav_logging_mode_values"
+        android:key="com.fieldbook.tracker.geonav.GEONAV_LOGGING_MODE"
+        android:title="@string/pref_geonav_log"/>
 
     <ListPreference
         android:defaultValue="0"

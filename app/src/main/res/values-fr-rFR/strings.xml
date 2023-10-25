@@ -205,10 +205,7 @@
     <string name="preferences_general_feature_next_missing">activer le bouton pour avancer l\'utilisateur à la prochaine entrée sans donnée</string>
     <string name="preferences_general_feature_next_missing_description">Ajouter le bouton pour avancer l\'utilisateur à la prochaine entrée sans donnée pour le caractère sélectioné</string>
     <string name="preferences_general_skip_entries_default">défaut</string>
-    <string name="preferences_general_barcode_camera">Changer d\'entrée via code-barres</string>
-    <string name="preferences_general_barcode_camera_description">Scanner le code-barres et passer a l\'entrée</string>
     <string name="preferences_general_feature_barcode_text">activer l\'option pour passer à un identifiant unique spécifique</string>
-    <string name="preferences_general_feature_barcode_text_description">Ouvrir la saisie d\'identifiant unique et passer l\'entrée spécifique</string>
     <string name="preferences_general_feature_datagrid">Grille de données</string>
     <string name="preferences_general_feature_datagrid_description">Afficher une feuille des parcelles et caractères avec des données collectées</string>
     <!-- Profile -->
@@ -239,8 +236,6 @@
     <string name="preferences_behavior_title">Comportement</string>
     <string name="preferences_behavior_cycle_traits">passer au premier caractère de l\'entrée suivante</string>
     <string name="preferences_behavior_cycle_traits_description">Après avoir passe tout les caractères en revue, Field Book passe a l\'entrée suivante</string>
-    <string name="preferences_behavior_volume_buttons_navigate">Appliquer les touches de volume a la saisie de données</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">Les touches de volume vont a l\'entrée suivante ou précédente</string>
     <string name="preferences_behavior_return_character">Signal de touche retour</string>
     <string name="preferences_behavior_return_character_next_plot">Parcelle suivante</string>
     <string name="preferences_behavior_return_character_next_trait">Caractère suivant</string>
@@ -288,6 +283,8 @@
     <string name="brapi_info_title">BrAPI synchronise les informations</string>
     <string name="brapi_base_url">URL de base BrAPI</string>
     <string name="brapi_base_url_desc">L\'URL de base pour se connecter a un serveur BrAPI</string>
+    <string name="brapi_choice_to_make_default_negative">Annuler</string>
+    <string name="brapi_choice_to_make_default_positive">enregistrer</string>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Sauvegarder et autoriser</string>
     <string name="brapi_revoke_auth">Se déconnecter</string>

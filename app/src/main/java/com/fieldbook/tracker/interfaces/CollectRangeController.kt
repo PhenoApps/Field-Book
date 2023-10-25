@@ -8,6 +8,7 @@ interface CollectRangeController: CollectController {
     fun cancelAndFinish()
     fun callFinish()
     fun refreshMain()
+    fun isReturnFirstTrait(): Boolean
     fun getNonExistingTraits(plotIndex: Int): List<Int>
     fun existsAllTraits(traitIndex: Int, plotIndex: Int): Int
     fun existsTrait(plotIndex: Int): Boolean

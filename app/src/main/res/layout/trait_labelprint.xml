@@ -14,10 +14,23 @@
         android:gravity="center"
         android:orientation="horizontal">
 
+        <ImageButton
+            android:id="@+id/connectPrinterButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:background="@drawable/custom_round_button"
+            android:gravity="center"
+            android:padding="10dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/connection"
+            android:contentDescription="@string/trait_labelprint_connect_button_description" />
+
         <ImageView
             android:id="@+id/labelPreview"
-            android:layout_width="125dp"
-            android:layout_height="88dp"
+            android:layout_width="150dp"
+            android:layout_height="100dp"
             android:layout_gravity="center"
             android:layout_margin="15dip"
             android:adjustViewBounds="false"
@@ -27,8 +40,8 @@
 
         <ImageButton
             android:id="@+id/printLabelButton"
-            android:layout_width="65dp"
-            android:layout_height="65dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_gravity="center"
             android:layout_margin="10dp"
             android:background="@drawable/custom_round_button"
@@ -74,9 +87,10 @@
 
         <Spinner
             android:id="@+id/textfield"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp" />
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:maxLines="1" />
     </LinearLayout>
 
     <LinearLayout
@@ -95,9 +109,10 @@
 
         <Spinner
             android:id="@+id/textfield2"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp" />
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:maxLines="1" />
     </LinearLayout>
 
     <LinearLayout style="@style/TextViewStyle.Bold"
@@ -116,9 +131,10 @@
 
         <Spinner
             android:id="@+id/textfield3"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp" />
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:maxLines="1" />
     </LinearLayout>
 
     <LinearLayout
@@ -137,9 +153,10 @@
 
         <Spinner
             android:id="@+id/textfield4"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp" />
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:maxLines="1" />
     </LinearLayout>
 
     <LinearLayout
@@ -157,9 +174,10 @@
 
         <Spinner
             android:id="@+id/barcodefield"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp" />
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:maxLines="1" />
     </LinearLayout>
 
     <LinearLayout

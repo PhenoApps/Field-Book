@@ -16,11 +16,13 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.DialogFragment;
+import androidx.preference.CheckBoxPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
+import androidx.preference.PreferenceScreen;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
@@ -30,6 +32,9 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog;
 import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialogFragmentCompat;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This preference fragment handles all BrAPI related shared preferences.
@@ -45,13 +50,16 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private static final String TAG = BrapiPreferencesFragment.class.getSimpleName();
     private static final int REQUEST_BARCODE_SCAN_BASE_URL = 99;
     private static final int REQUEST_BARCODE_SCAN_OIDC_URL = 98;
+    private static final int AUTH_REQUEST_CODE = 123;
     private static final String DIALOG_FRAGMENT_TAG = "com.tracker.fieldbook.preferences.BRAPI_DIALOG_FRAGMENT";
 
     private Context context;
     private PreferenceManager prefMgr;
     private PreferenceCategory brapiPrefCategory;
     private Preference brapiLogoutButton;
+    private Menu mMenu;
     private NeutralButtonEditTextDialog brapiURLPreference;
+    private NeutralButtonEditTextDialog brapiDisplayName;
     private NeutralButtonEditTextDialog brapiOIDCURLPreference;
     private ListPreference brapiOIDCFlow;
 
@@ -82,16 +90,41 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
+        SharedPreferences sp = prefMgr.getSharedPreferences();
 
         //remove old custom fb auth if it is being used
-        if (prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
+        if (sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
                 .equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
 
-            prefMgr.getSharedPreferences().edit().putString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)).apply();
+            sp.edit().putString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)).apply();
 
         }
 
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
+
+        // Show/hide preferences and category titles based on the BRAPI_ENABLED value
+        CheckBoxPreference brapiEnabledPref = findPreference(GeneralKeys.BRAPI_ENABLED);
+        if (brapiEnabledPref != null) {
+            brapiEnabledPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    boolean isChecked = (Boolean) newValue;
+                    if (!isChecked) { // on disable, reset default sources if they were set to brapi
+                        if (sp.getString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "").equals("brapi")) {
+                            sp.edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "ask").apply();
+                        }
+                        if (sp.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "").equals("brapi")) {
+                            sp.edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
+                        }
+                        // remove brapi auth token when brapi is disabled
+                        sp.edit().remove(GeneralKeys.BRAPI_TOKEN).apply();
+                    }
+                    updatePreferencesVisibility(isChecked);
+                    return true;
+                }
+            });
+            updatePreferencesVisibility(brapiEnabledPref.isChecked());
+        }
 
         setupToolbar();
         setHasOptionsMenu(true);
@@ -100,8 +133,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiLogoutButton = findPreference("revokeBrapiAuth");
 
         brapiURLPreference = findPreference(GeneralKeys.BRAPI_BASE_URL);
+        brapiDisplayName = findPreference(GeneralKeys.BRAPI_DISPLAY_NAME);
         if (brapiURLPreference != null) {
             brapiURLPreference.setOnPreferenceChangeListener(this);
+        }
+        if (brapiDisplayName != null) {
+            brapiDisplayName.setOnPreferenceChangeListener(this);
         }
 
         brapiOIDCURLPreference = findPreference(GeneralKeys.BRAPI_OIDC_URL);
@@ -111,10 +148,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
 
         //set saved urls, default to the test server
-        String url = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
-        String oidcUrl = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
+        String url = sp.getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
+        String displayName = sp.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
+        String oidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
         oldBaseUrl = url;
         brapiURLPreference.setText(url);
+        brapiDisplayName.setText(displayName);
         brapiOIDCURLPreference.setText(oidcUrl);
 
         //set logout button
@@ -152,10 +191,32 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         setOidcFlowUi();
     }
 
+    private void updatePreferencesVisibility(boolean isChecked) {
+        PreferenceScreen preferenceScreen = getPreferenceScreen();
+        for (int i = 0; i < preferenceScreen.getPreferenceCount(); i++) {
+            Preference preferenceItem = preferenceScreen.getPreference(i);
+            if (preferenceItem.getKey().equals(GeneralKeys.BRAPI_ENABLED)) { // Skip the checkbox preference itself
+                continue;
+            }
+            preferenceItem.setVisible(isChecked);
+        }
+
+        // Also show/hide the BrAPI toolbar authentication option
+        if (mMenu != null) {
+            MenuItem brapiPrefAuthItem = mMenu.findItem(R.id.action_menu_brapi_pref_auth);
+            if (brapiPrefAuthItem != null) {
+                brapiPrefAuthItem.setVisible(isChecked);
+            }
+        }
+    }
+
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         menu.clear();
         inflater.inflate(R.menu.menu_brapi_pref, menu);
+        mMenu = menu; // Store a reference to the menu
+        CheckBoxPreference brapiEnabledPref = findPreference(GeneralKeys.BRAPI_ENABLED);
+        updatePreferencesVisibility(brapiEnabledPref.isChecked());
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -185,8 +246,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     public boolean onPreferenceChange(Preference preference, Object newValue) {
 
         if (preference.equals(brapiURLPreference)) {
-
             updateUrls(newValue.toString());
+
+        }
+
+        if (preference.equals(brapiDisplayName)) {
+            brapiDisplayName.setSummary(newValue.toString());
 
         }
 
@@ -202,34 +267,40 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     @Override
     public boolean onPreferenceTreeClick(Preference preference) {
+        SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
         switch (preference.getKey()){
             case "brapi_server_cassavabase":
-                prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
                 setServer("https://www.cassavabase.org",
+                        getString(R.string.preferences_brapi_server_cassavabase),
                         "https://www.cassavabase.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_wheat":
-                prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
                 setServer("https://wheat-sandbox.triticeaetoolbox.org",
+                        getString(R.string.preferences_brapi_server_t3_wheat),
                         "https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_oat":
-                prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
                 setServer("https://oat-sandbox.triticeaetoolbox.org",
+                        getString(R.string.preferences_brapi_server_t3_oat),
                         "https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_barley":
-                prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
                 setServer("https://barley-sandbox.triticeaetoolbox.org",
+                        getString(R.string.preferences_brapi_server_t3_barley),
                         "https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_default":
-                prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
+                editor.putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
                 setServer(getString(R.string.brapi_base_url_default),
+                        getString(R.string.preferences_brapi_server_test),
                         getString(R.string.brapi_oidc_url_default),
                         getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
@@ -267,6 +338,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                             .setBeepEnabled(false)
                             .setRequestCode(REQUEST_BARCODE_SCAN_BASE_URL)
                             .initiateScan();
+                } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
+                    text = oldBaseUrl.replaceAll("https?://(?:www\\.)?(.*?)(?:/.*)?$", "$1");
+                    brapiDisplayName.setText(text);
+                    onPreferenceChange(brapiDisplayName, text);
                 } else {
                     prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
                     new IntentIntegrator(getActivity())
@@ -285,8 +360,15 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 //positive edit text callback
                 if (preference.getKey().equals(brapiURLPreference.getKey())) {
                     brapiURLPreference.setText(text);
-                    onPreferenceChange(brapiURLPreference, text);
+                    if (!oldBaseUrl.equals(text)) { // skip updates if url hasn't actually changed
+                        onPreferenceChange(brapiURLPreference, text);
+                    }
                     brapiAuth();
+
+                } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
+                    text = (text == null || text.isEmpty()) ? getString(R.string.export_source_brapi) : text;
+                    brapiDisplayName.setText(text);
+                    onPreferenceChange(brapiDisplayName, text);
                 } else {
                     prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
                     brapiOIDCURLPreference.setText(text);
@@ -329,7 +411,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     private void setBaseURLSummary() {
         String url = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_BASE_URL, "https://test-server.brapi.org");
+        String displayName = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
         brapiURLPreference.setSummary(url);
+        brapiDisplayName.setSummary(displayName);
     }
 
     //should only be called from brapi auth or the warning dialog
@@ -338,7 +422,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if (brapiHost != null) {
             Intent intent = new Intent();
             intent.setClassName(context, BrapiAuthActivity.class.getName());
-            startActivity(intent);
+            startActivityForResult(intent, AUTH_REQUEST_CODE);
         }
     }
 
@@ -362,9 +446,39 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
     }
 
-    private void setServer(String url, String oidcUrl, String oidcFlow) {
+    // shows a dialog to set newly authorized brapi server as the default import/export option
+    private void displaySuccessDialog() {
+        final String[] options = new String[]{
+                getString(R.string.brapi_choice_to_make_default_import),
+                getString(R.string.brapi_choice_to_make_default_export)
+        };
+        final boolean[] checkedOptions = new boolean[options.length];
+
+        final List<String> selectedItems = Arrays.asList(options);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.brapi_choice_to_make_default_dialog_title);
+        builder.setMultiChoiceItems(options, checkedOptions, (dialog, which, isChecked) -> {
+            checkedOptions[which] = isChecked;
+        });
+        builder.setPositiveButton(getString(R.string.brapi_choice_to_make_default_positive), (dialog, which) -> {
+            for (int i = 0; i < checkedOptions.length; i++) {
+                if (checkedOptions[i]) {
+                    if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_import))) {
+                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "brapi").apply();
+                    } else if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_export))) {
+                        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "brapi").apply();
+                    }
+                }
+            }
+        });
+        builder.setNegativeButton(getString(R.string.brapi_choice_to_make_default_negative), (dialog, which) -> {});
+        builder.create().show();
+    }
+
+    private void setServer(String url, String displayName, String oidcUrl, String oidcFlow) {
         oldBaseUrl = url;
         brapiURLPreference.setText(url);
+        brapiDisplayName.setText(displayName);
         brapiOIDCURLPreference.setText(oidcUrl);
         prefMgr.getSharedPreferences().edit().putString(GeneralKeys.BRAPI_OIDC_URL, oidcUrl).apply();
         if(oidcFlow != null)
@@ -383,6 +497,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         SharedPreferences sp = prefMgr.getSharedPreferences();
         String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
 
+        // remove scheme and subdomain for initial display name
+        String displayName = newValue.replaceAll("https?://(?:www\\.)?(.*?)(?:/.*)?$", "$1");
+
         Log.d(TAG, oldBaseUrl + " to " + oldOidcUrl);
 
         if (!sp.getBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false)) {
@@ -394,7 +511,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
             Log.d(TAG, newOidcUrl);
 
-            setServer(newValue, newOidcUrl, null);
+            setServer(newValue, displayName, newOidcUrl, null);
         }
 
         oldBaseUrl = newValue;
@@ -478,6 +595,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     oldBaseUrl = brapiURLPreference.getText();
                     String scannedBarcode = plotDataResult.getContents();
                     updateUrls(scannedBarcode);
+                }
+                break;
+            case AUTH_REQUEST_CODE: // Add your new request code here
+                if (resultCode == RESULT_OK) {
+                    displaySuccessDialog();
                 }
                 break;
         }

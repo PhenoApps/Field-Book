@@ -3,10 +3,12 @@ package com.fieldbook.tracker.activities;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,31 +46,37 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
+import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldObject;
-import com.fieldbook.tracker.objects.GeoNavHelper;
 import com.fieldbook.tracker.objects.InfoBarModel;
-import com.fieldbook.tracker.objects.GoProWrapper;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.objects.VerifyPersonHelper;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
+import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
+import com.fieldbook.tracker.utilities.GeoJsonUtil;
+import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
+import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.utilities.VerifyPersonHelper;
+import com.fieldbook.tracker.utilities.VibrateUtil;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
@@ -95,6 +103,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -114,13 +123,17 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.interfaces.CollectRangeController,
         com.fieldbook.tracker.interfaces.CollectTraitController,
         InfoBarAdapter.InfoBarController,
-        GoProTraitLayout.GoProCollector {
+        GoProTraitLayout.GoProCollector,
+        GPSTracker.GPSTrackerListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
 
     private GeoNavHelper geoNavHelper;
+
+    @Inject
+    VibrateUtil vibrator;
 
     @Inject
     GnssThreadHelper gnssThreadHelper;
@@ -146,6 +159,8 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     GoProWrapper goProWrapper;
+
+    private GPSTracker gps;
 
     public static boolean searchReload;
     public static String searchRange;
@@ -220,6 +235,12 @@ public class CollectActivity extends ThemedActivity
     private AlertDialog dialogMultiMeasureDelete;
     private AlertDialog dialogMultiMeasureConfirmDelete;
 
+    /**
+     * GeoNav dialog
+     */
+    private androidx.appcompat.app.AlertDialog dialogGeoNav;
+    private androidx.appcompat.app.AlertDialog dialogPrecisionLoss;
+
     public void triggerTts(String text) {
         if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
             ttsHelper.speak(text);
@@ -228,6 +249,8 @@ public class CollectActivity extends ThemedActivity
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        gps = new GPSTracker(this, this, 0, 10000);
 
         guiThread.start();
         myGuiHandler = new Handler(guiThread.getLooper()) {
@@ -281,6 +304,8 @@ public class CollectActivity extends ThemedActivity
         loadScreen();
 
         checkForInitialBarcodeSearch();
+
+        verifyPersonHelper.checkLastOpened();
     }
 
     private void switchField(int studyId, @Nullable String obsUnitId) {
@@ -819,9 +844,9 @@ public class CollectActivity extends ThemedActivity
             Log.e(TAG, e.getMessage());
         }
 
-        verifyPersonHelper.updateLastOpenedTime();
-
         geoNavHelper.stopGeoNav();
+
+        gnssThreadHelper.stop();
 
         //save the last used trait
         if (traitBox.getCurrentTrait() != null)
@@ -931,13 +956,8 @@ public class CollectActivity extends ThemedActivity
             //setup logger whenever activity resumes
             geoNavHelper.setupGeoNavLogger();
 
-            secureBluetooth.withNearby((adapter) -> {
-                geoNavHelper.startGeoNav();
-                return null;
-            });
+            startGeoNav();
         }
-
-        verifyPersonHelper.checkLastOpened();
 
         if (!mSkipLastUsedTrait) {
 
@@ -950,6 +970,17 @@ public class CollectActivity extends ThemedActivity
         dataLocked = ep.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
 
         refreshLock();
+    }
+
+    private void startGeoNav() {
+        try {
+            secureBluetooth.withNearby((adapter) -> {
+                geoNavHelper.startGeoNav();
+                return null;
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -1264,21 +1295,18 @@ public class CollectActivity extends ThemedActivity
 
                 Log.d(GEOTAG, "Menu item clicked.");
 
-                geoNavHelper.setMGeoNavActivated(!geoNavHelper.getMGeoNavActivated());
-                MenuItem navItem = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
-                if (geoNavHelper.getMGeoNavActivated()) {
+                dialogGeoNav = new GeoNavCollectDialog(this).create();
 
-                    navItem.setIcon(R.drawable.ic_explore_black_24dp);
+                if (!dialogGeoNav.isShowing()) {
 
-                    mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, true).apply();
+                    if (getWindow().isActive()) {
 
-                }
-                else {
-
-                    navItem.setIcon(R.drawable.ic_explore_off_black_24dp);
-
-                    mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply();
-
+                        try {
+                            dialogGeoNav.show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
 
                 return true;
@@ -1649,9 +1677,15 @@ public class CollectActivity extends ThemedActivity
     public boolean dispatchKeyEvent(KeyEvent event) {
         int action = event.getAction();
         int keyCode = event.getKeyCode();
+        String volumeNavigation = ep.getString(GeneralKeys.VOLUME_NAVIGATION, "0");
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
-                if (ep.getBoolean(GeneralKeys.VOLUME_NAVIGATION, false)) {
+                if (volumeNavigation.equals("1")) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        traitBox.moveTrait("right");
+                    }
+                    return true;
+                } else if (volumeNavigation.equals("2")) {
                     if (action == KeyEvent.ACTION_UP) {
                         rangeBox.moveEntryRight();
                     }
@@ -1659,7 +1693,12 @@ public class CollectActivity extends ThemedActivity
                 }
                 return false;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-                if (ep.getBoolean(GeneralKeys.VOLUME_NAVIGATION, false)) {
+                if (volumeNavigation.equals("1")) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        traitBox.moveTrait("left");
+                    }
+                    return true;
+                } else if (volumeNavigation.equals("2")) {
                     if (action == KeyEvent.ACTION_UP) {
                         rangeBox.moveEntryLeft();
                     }
@@ -1766,7 +1805,7 @@ public class CollectActivity extends ThemedActivity
 
                             String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
 
-                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, 8000, null,
+                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, R.id.toolbarBottom,8000, null,
                                 (v) -> switchField(studyId, null));
 
                         } else {
@@ -2027,6 +2066,10 @@ public class CollectActivity extends ThemedActivity
         return ep.getBoolean(GeneralKeys.CYCLING_TRAITS_ADVANCES, false);
     }
 
+    public boolean isReturnFirstTrait() {
+        return ep.getBoolean(GeneralKeys.RETURN_FIRST_TRAIT, false);
+    }
+
     /**
      * Inserts a user observation whenever a label is printed.
      * See ResultReceiver onReceiveResult in LabelPrintLayout
@@ -2160,4 +2203,159 @@ public class CollectActivity extends ThemedActivity
         return secureBluetooth;
     }
 
+    @Override
+    public String queryForLabelValue(
+            String plotId, String label, Boolean isAttribute
+    ) {
+        Context context = this;
+
+        String dataMissingString = context.getString(R.string.main_infobar_data_missing);
+
+        if (isAttribute) {
+
+            String[] values = database.getDropDownRange(label, plotId);
+            if (values == null || values.length == 0) {
+                return dataMissingString;
+            } else {
+                if (label.equals("geo_coordinates") && JsonUtil.Companion.isJsonValid(values[0])) {
+
+                    return GeoJsonUtil.Companion.decode(values[0]).toCoordinateString(";");
+
+                } else {
+
+                    return values[0];
+
+                }
+            }
+
+        } else {
+
+            String value = database.getUserDetail(plotId).get(label);
+            if (value == null) {
+                value = dataMissingString;
+            }
+
+            try {
+
+                String labelValPref = ((CollectActivity) context).getPreferences()
+                        .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value");
+                if (labelValPref == null) {
+                    labelValPref = "value";
+                }
+
+                StringJoiner joiner = new StringJoiner(":");
+                ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
+                for (BrAPIScaleValidValuesCategories s : scale) {
+                    if ("label".equals(labelValPref)) {
+                        joiner.add(s.getLabel());
+                    } else {
+                        joiner.add(s.getValue());
+                    }
+                }
+
+                return joiner.toString();
+
+            } catch (Exception ignore) {
+                return value;
+            }
+        }
+    }
+
+    @Override
+    public ArrayList<String> getGeoNavPopupSpinnerItems () {
+        //query database for attributes/traits to use
+        try {
+            List<String> attributes = Arrays.asList(getDatabase().getAllObservationUnitAttributeNames(Integer.parseInt(getStudyId())));
+            TraitObject[] traits = getDatabase().getAllTraitObjects().toArray(new TraitObject[0]);
+
+            ArrayList<TraitObject> visibleTraits = new ArrayList<>();
+            for (TraitObject traitObject : traits) {
+                if (traitObject.getVisible()) {
+                    visibleTraits.add(traitObject);
+                }
+            }
+
+            // Map traits to their names
+            List<String> traitNames = new ArrayList<>();
+            for (TraitObject traitObject : visibleTraits) {
+                traitNames.add(traitObject.getTrait());
+            }
+
+            // Combine attributes and trait names
+            ArrayList<String> result = new ArrayList<>(attributes);
+            result.addAll(traitNames);
+
+            return result;
+        } catch (Exception e) {
+            Log.d(TAG, "Error occurred when querying for attributes in GeoNavCollectDialog.");
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+    
+    @NonNull
+    @Override
+    public VibrateUtil getVibrator() {
+        return vibrator;
+    }
+
+    @NonNull
+    @Override
+    public Context getContext() {
+        return this;
+    }
+
+    public void showLocationPrecisionLossDialog() {
+
+        if (getWindow().isActive()) {
+
+            try {
+
+                if (dialogPrecisionLoss != null) {
+                    dialogPrecisionLoss.dismiss();
+                }
+
+                dialogPrecisionLoss = new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle(getString(R.string.dialog_geonav_precision_loss_title))
+                        .setMessage(getString(R.string.dialog_geonav_precision_loss_msg))
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            dialog.dismiss();
+                        })
+                        .show();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @NonNull
+    @Override
+    public GPSTracker getGps() {
+        return gps;
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+
+        TraitObject trait = getCurrentTrait();
+
+        if (trait != null) {
+
+            if (trait.getFormat().equals("gnss")) {
+
+                ((GNSSTraitLayout) traitLayouts.getTraitLayout("gnss"))
+                        .onLocationChanged(location);
+
+            }
+        }
+    }
+
+    @Override
+    public Location getLocation() {
+
+        if (gps == null) return null;
+
+        return gps.getLocation(0, 0);
+    }
 }

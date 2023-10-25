@@ -35,6 +35,18 @@
         <item>lockData</item>
     </string-array>
 
+    <string-array name="pref_remap_volume_buttons">
+        <item>@string/preferences_behavior_volume_buttons_navigate_disabled</item>
+        <item>@string/preferences_behavior_volume_buttons_navigate_traits</item>
+        <item>@string/preferences_behavior_volume_buttons_navigate_entries</item>
+    </string-array>
+
+    <string-array name="pref_remap_volume_buttons_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
     <string-array name="pref_return_character">
         <item>@string/preferences_behavior_return_character_next_plot</item>
         <item>@string/preferences_behavior_return_character_next_trait</item>
@@ -134,6 +146,18 @@
         <item>@string/location_level_study</item>
     </string-array>
 
+    <string-array name="pref_geonav_logging_modes">
+        <item>@string/pref_geonav_log_off</item>
+        <item>@string/pref_geonav_log_limited</item>
+        <item>@string/pref_geonav_log_full</item>
+    </string-array>
+
+    <string-array name="pref_geonav_logging_mode_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
     <string-array name="pref_general_move_to_unique_id_entries">
         <item>@string/move_to_unique_id_disabled</item>
         <item>@string/move_to_unique_id_text_or_scan</item>
@@ -144,5 +168,14 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
+    </string-array>
+
+
+    <!-- degrees of precision to be used in spinner -->
+    <string-array name="dialog_geonav_collect_degrees_of_precision">
+        <item>Any</item>
+        <item>GPS</item>
+        <item>RTK</item>
+        <item>Float RTK</item>
     </string-array>
 </resources>

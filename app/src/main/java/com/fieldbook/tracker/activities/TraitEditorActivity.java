@@ -532,10 +532,14 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
 
         ListView myList = layout.findViewById(R.id.myList);
-        String[] importArray = new String[3];
+        String[] importArray = new String[2];
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_cloud);
-        importArray[2] = getString(R.string.import_source_brapi);
+        if (ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+            String displayName = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
+            importArray = Arrays.copyOf(importArray, importArray.length + 1);
+            importArray[2] = displayName;
+        }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, importArray);
         myList.setAdapter(adapter);
@@ -769,7 +773,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         builder.setMessage(getString(R.string.dialog_delete_traits_message));
 
         builder.setPositiveButton(getString(android.R.string.yes), onPositive);
-        builder.setNegativeButton(getString(android.R.string.no), onNegative);
+        builder.setNegativeButton(getString(R.string.dialog_no), onNegative);
         builder.setOnDismissListener(onDismiss);
 
         AlertDialog alert = builder.create();

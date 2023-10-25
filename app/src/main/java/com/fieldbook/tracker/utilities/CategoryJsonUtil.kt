@@ -5,6 +5,7 @@ import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
 
+
 /**
  * Simple util class to encode/decode category objects.
  */
@@ -20,10 +21,17 @@ class CategoryJsonUtil {
         }
 
         fun decode(json: String): ArrayList<BrAPIScaleValidValuesCategories> {
-            return if (json == "NA") arrayListOf(BrAPIScaleValidValuesCategories().apply {
+            return if (json == "NA" || !JsonUtil.isJsonValid(json)) arrayListOf(BrAPIScaleValidValuesCategories().apply {
                 label = json
                 value = json
             }) else Gson().fromJson(
+                json,
+                object : TypeToken<List<BrAPIScaleValidValuesCategories?>>() {}.type
+            )
+        }
+
+        fun decodeCategories(json: String): ArrayList<BrAPIScaleValidValuesCategories> {
+            return Gson().fromJson(
                 json,
                 object : TypeToken<List<BrAPIScaleValidValuesCategories?>>() {}.type
             )

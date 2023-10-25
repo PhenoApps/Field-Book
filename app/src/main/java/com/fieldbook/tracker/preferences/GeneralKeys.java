@@ -15,6 +15,7 @@ public class GeneralKeys {
     public static final String FIRST_NAME = "FirstName";
     public static final String LAST_NAME = "LastName";
     public static final String PERSON_UPDATE = "PersonUpdate";
+    public static final String MODIFY_PROFILE_SETTINGS = "ModifyProfileSettings";
     public static final String REQUIRE_USER_TO_COLLECT              = "com.tracker.fieldbook.preference.require_user_to_collect";
     public static final String REQUIRE_USER_INTERVAL              = "com.tracker.fieldbook.preference.require_user_interval";
 
@@ -29,8 +30,9 @@ public class GeneralKeys {
 
     // Behavior
     public static final String RETURN_CHARACTER                     = "RETURN_CHARACTER";
-    public static final String VOLUME_NAVIGATION                    = "VOLUME_NAVIGATION";
+    public static final String VOLUME_NAVIGATION                    = "com.fieldbook.tracker.VOLUME_NAVIGATION";
     public static final String CYCLING_TRAITS_ADVANCES              = "CycleTraits";
+    public static final String RETURN_FIRST_TRAIT              = "ReturnFirst";
     public static final String DISABLE_ENTRY_ARROW_NO_DATA          = "DISABLE_ENTRY_ARROW_NO_DATA";
 
     // General
@@ -62,15 +64,18 @@ public class GeneralKeys {
     public static final String DELETE_OBSERVATION_SOUND             = "DELETE_OBSERVATION_SOUND";
 
     //BrAPI
+    public static final String BRAPI_ENABLED                        = "BRAPI_ENABLED";
     public static final String BRAPI_BASE_URL                       = "BRAPI_BASE_URL";
     public static final String BRAPI_OIDC_URL                       = "BRAPI_OIDC_URL";
     public static final String BRAPI_OIDC_FLOW                      = "BRAPI_OIDC_FLOW";
-    public static final String BRAPI_EXPLICIT_OIDC_URL             = "BRAPI_EXPLICIT_OIDC_URL";
+    public static final String BRAPI_EXPLICIT_OIDC_URL              = "BRAPI_EXPLICIT_OIDC_URL";
     public static final String BRAPI_TOKEN                          = "BRAPI_TOKEN";
     public static final String BRAPI_VERSION                        = "BRAPI_VERSION";
     public static final String BRAPI_PAGE_SIZE                      = "BRAPI_PAGE_SIZE";
     public static final String BRAPI_TIMEOUT                        = "BRAPI_TIMEOUT";
     public static final String BRAPI_CHUNK_SIZE                     = "BRAPI_CHUNK_SIZE";
+
+    public static final String BRAPI_DISPLAY_NAME                   = "BRAPI_DISPLAY_NAME";
 
     //GeoNav
     private static final String GEONAV_PREFIX                       = "com.fieldbook.tracker.geonav.";
@@ -81,17 +86,31 @@ public class GeneralKeys {
     public static final String PAIRED_DEVICE_ADDRESS                = GEONAV_PREFIX + "PAIRED_DEVICE_ADDRESS";
     public static final String GEONAV_AUTO                          = GEONAV_PREFIX + "GEONAV_AUTO";
     public static final String GEONAV_COMPASS                       = GEONAV_PREFIX + "GEONAV_COMPASS";
-    public static final String GEONAV_LOG                           = GEONAV_PREFIX + "GEONAV_LOG";
     public static final String GEONAV_AVERAGING                     = GEONAV_PREFIX + "GEONAV_AVERAGING";
     public static final String GEONAV_AVERAGING_INTERVAL            = GEONAV_PREFIX + "GEONAV_AVERAGIN_INTERVAL";
     public static final String GEONAV_PARAMETERS_CATEGORY           = GEONAV_PREFIX + "parameters.CATEGORY_KEY";
     public static final String GEONAV_PARAMETER_D1                  = GEONAV_PREFIX + "parameters.trapezoid.D1";
     public static final String GEONAV_PARAMETER_D2                  = GEONAV_PREFIX + "parameters.trapezoid.D2";
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
+
+    public static final String GEONAV_LOGGING_MODE                 = GEONAV_PREFIX + "GEONAV_LOGGING_MODE";
+
+    // GeoNav Configuration Preferences
+    public static final String GEONAV_CONFIG_AUDIO_ON_DROP          = GEONAV_PREFIX + "AUDIO_ON_DROP";
+
+    public static final String GEONAV_CONFIG_DEGREE_PRECISION       = GEONAV_PREFIX + "DEGREE_PRECISION";
+  
+    public static final String GEONAV_POPUP_DISPLAY       = GEONAV_PREFIX + "POPUP_DISPLAY";
     // @formatter:on
 
     // GNSS
     public static final String GNSS_LAST_PAIRED_DEVICE_NAME      = "GNSS_LAST_PAIRED_DEVICE_NAME";
+
+    public static final String GNSS_LAST_CHOSEN_PRECISION        = "GNSS_LAST_CHOSEN_PRECISION";
+
+    public static final String GNSS_WARNED_PRECISION             = "GNSS_WARNED_PRECISION";
+
+    public static final String GNSS_PRECISION_OK_SOUND           = "GNSS_PRECISION_OK_SOUND";
 
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
@@ -99,6 +118,7 @@ public class GeneralKeys {
     public static final String ENABLE_FIELD_AUDIO = "com.tracker.fieldbook.preferences.keys.enable_field_audio";
 
     public static final String LAST_TIME_OPENED = "LastTimeAppOpened";
+    public static final String ASKED_SINCE_OPENED = "AskedSinceAppOpened";
     public static final String VERIFY_USER = "VerifyUserEvery24Hours";
 
     public static final String FLIP_FLOP_ARROWS = "FLIP_FLOP_ARROWS";
@@ -113,6 +133,7 @@ public class GeneralKeys {
     public static final String THEME = "key_preferences_theme_theme";
     public static final String TEXT_THEME = "key_preferences_theme_text";
     public static final String THEME_FLAG = "key_preferences_theme_theme_flag";
+    public static final String IMPORT_SOURCE_DEFAULT = "IMPORT_SOURCE_DEFAULT";
     public static final String EXPORT_SOURCE_DEFAULT = "EXPORT_SOURCE_DEFAULT";
     public static final String FIRST_RUN = "FirstRun";
     public static final String UPDATE_VERSION = "UpdateVersion";
@@ -174,6 +195,9 @@ public class GeneralKeys {
 
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
+
+    //Zebra Label Print Trait
+    public static final String LABEL_PRINT_DEVICE_NAME      = "LABEL_PRINT_DEVICE_NAME";
 
     //Dialog Export
     public static final String DIALOG_EXPORT_BUNDLE_CHECKED = "com.fieldbook.tracker.DIALOG_EXPORT_BUNDLE_CHECKED";

@@ -56,7 +56,6 @@
             android:title="@string/preferences_general_feature_next_missing"
             android:entries="@array/pref_general_skip_entries_entries"
             android:entryValues="@array/pref_general_skip_entries_values"
-            app:allowDividerAbove="true"
             android:defaultValue="1"/>
 
         <ListPreference

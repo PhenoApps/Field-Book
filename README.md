@@ -17,7 +17,7 @@ Check the [user manual](https://docs.fieldbook.phenoapps.org/en/latest/field-boo
 Visit our [translation page](https://crowdin.com/project/field-book) to help translate Field Book to your language. To submit code or new features, please review our [contribution guidelines](https://github.com/PhenoApps/Field-Book/wiki/Contributing) before opening a [pull request](https://github.com/PhenoApps/Field-Book/pulls).
 
 ## ⬇️ Updates
-Field Book regularly receives new updates to improve performance or add new features. To ensure these changes don't interfere with most field seasons, we do not update the [Google Play version](https://play.google.com/store/apps/details?id=com.fieldbook.tracker) of the app between May 1 and September 1. An up-to-date version can be downloaded from the `About` section within the app or through our [GitHub releases](https://github.com/PhenoApps/Field-Book/releases/latest).
+Field Book regularly receives new updates to improve performance or add new features. To ensure these changes don't interfere with most field seasons, we do not update the [Google Play version](https://play.google.com/store/apps/details?id=com.fieldbook.tracker) of the app between April 15 and September 15. An up-to-date version can be downloaded from the `About` section within the app or through our [GitHub releases](https://github.com/PhenoApps/Field-Book/releases/latest).
 
 ## 💰 Funding 
 Development of Field Book is possible because of the support received from the following organizations:

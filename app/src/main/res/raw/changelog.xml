@@ -1,14 +1,20 @@
 <changelog>
 
     <release
-        date="2023-08-01"
+        date="2023-09-13"
         versionCode="550"
         versionName="v5.5">
         <new>New GoPro Trait (Hero 11)</new>
         <new>New InfoBar prefix selector</new>
         <new>Search selections persist</new>
+        <new>Updates available from About</new>
         <new>Added Vietnamese and Swedish translations</new>
+        <new>Added option to return to first trait on entry navigation</new>
+        <new>Volume buttons can be remapped to move to next trait or plot</new>
         <info>Merged barcode and text unique ID search setting</info>
+        <info>Numerous GeoNav improvements</info>
+        <info>Merged duplicate settings</info>
+        <bugfix>Numerous bug fixes</bugfix>
     </release>
 
     <release

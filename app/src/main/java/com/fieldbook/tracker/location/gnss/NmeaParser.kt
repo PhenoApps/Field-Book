@@ -3,7 +3,6 @@ package com.fieldbook.tracker.location.gnss
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.ParseException
-import java.util.*
 
 /**
  * NMEA 0183 parser.
@@ -87,8 +86,8 @@ class NmeaParser {
             }
 
             //use the nmea type to lead the parsing
-            when (nmeaType) {
-                "NZDA", "NGGA", "GGA", "PGGA" -> {
+            when {
+                "GGA" in nmeaType || "ZDA" in nmeaType -> {
                     mPrevSentence = "GGA"
                     try {
                         //utc = format.parse(sentence[1]).toString().split(" ")[3] ?: ""
@@ -104,7 +103,7 @@ class NmeaParser {
                     altitude = sentence[9] + sentence[10]
                     meanSeaLevel = sentence[11] + sentence[12]
                 }
-                "NRMC", "RMC" -> { //recommended minimum specific gnss data
+                "RMC" in nmeaType -> { //recommended minimum specific gnss data
                     if (sentence.size == 14) {
 
                         mPrevSentence = "RMC"
@@ -122,7 +121,7 @@ class NmeaParser {
                         modeIndicator = sentence[9]
                     }
                 }
-                "LGSA", "AGSA", "GSA", "PGSA" -> {
+                "GSA" in nmeaType -> {
                     //GPS receiver operating mode
                     mPrevSentence = "GSA"
                     if (sentence.size == 19) {
@@ -135,7 +134,7 @@ class NmeaParser {
                     }
                 }
                 //TODO parse GSV messages
-                "AGSV", "PGSV", "LGSV", "BGSV", "GSV" -> {
+                "GSV" in nmeaType -> {
                     if (sentence.size >= 13) {
                         mPrevSentence = "GSV"
                         if (numGsv != sentence[1].toInt()) {
@@ -165,7 +164,7 @@ class NmeaParser {
                         }
                     }
                 }
-                "GLL" -> {
+                "GLL" in nmeaType -> {
                     mPrevSentence = "GLL"
                     latitude = if (sentence[2] == "S") "-" + sentence[1] else sentence[1]
                     longitude = if (sentence[4] == "W") "-" + sentence[3] else sentence[3]
@@ -176,7 +175,7 @@ class NmeaParser {
 
                     }
                 }
-                "NVTG", "NGST" -> {
+                "NVTG" in nmeaType || "NGST" in nmeaType -> {
                     //println("Todo")
                     //TODO
                 }
@@ -224,5 +223,28 @@ class NmeaParser {
             "8" -> "simulation"
             else -> "invalid"
         }
+    }
+
+    /**
+     * For now just display GPS, RTK, Float RTK, or invalid
+     */
+    fun getSimpleFix() = when (fix) {
+        "GPS", "DGPS", "PPS" -> "GPS"
+        "RTK" -> "RTK"
+        "invalid" -> "invalid"
+        else -> "Float RTK"
+    }
+
+    fun compareFix(fix: String, precisionThresh: String): Boolean {
+
+        if (precisionThresh == "Any") return true
+
+        if (precisionThresh == "Float RTK" && fix == "Float RTK") return true
+
+        if (precisionThresh == "RTK" && (fix == "RTK" || fix == "Float RTK")) return true
+
+        if (precisionThresh == "GPS" && (fix == "GPS" || fix == "RTK" || fix == "Float RTK")) return true
+
+        return false
     }
 }

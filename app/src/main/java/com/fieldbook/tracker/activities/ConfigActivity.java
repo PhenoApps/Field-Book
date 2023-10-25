@@ -57,6 +57,7 @@ import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.utilities.VerifyPersonHelper;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -117,6 +118,8 @@ public class ConfigActivity extends ThemedActivity {
     public DataHelper database;
     @Inject
     public SoundHelperImpl soundHelper;
+    @Inject
+    VerifyPersonHelper verifyPersonHelper;
     public FieldSwitchImpl fieldSwitcher = null;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
@@ -167,6 +170,16 @@ public class ConfigActivity extends ThemedActivity {
         instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, id);
     }
 
+    /**
+     *
+     */
+    private void checkBrapiToken() {
+        String token = ep.getString(GeneralKeys.BRAPI_TOKEN, "");
+        if (!token.isEmpty()) {
+            ep.edit().putBoolean(GeneralKeys.BRAPI_ENABLED, true).apply();
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
@@ -176,6 +189,8 @@ public class ConfigActivity extends ThemedActivity {
         super.onCreate(savedInstanceState);
 
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+
+        checkBrapiToken();
 
         setCrashlyticsUserId();
         invalidateOptionsMenu();
@@ -227,6 +242,8 @@ public class ConfigActivity extends ThemedActivity {
             startActivityForResult(new Intent(this, DefineStorageActivity.class),
                     REQUEST_STORAGE_DEFINER);
         }
+
+        verifyPersonHelper.updateLastOpenedTime();
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {
@@ -289,12 +306,9 @@ public class ConfigActivity extends ThemedActivity {
 
                     if (checkTraitsExist() < 0) return;
 
-                    String exporter = ep.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask");
+                    String exporter = ep.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "");
 
                     switch (exporter) {
-                        case "ask":
-                            showExportDialog();
-                            break;
                         case "local":
                             exportPermission();
                             break;
@@ -302,7 +316,12 @@ public class ConfigActivity extends ThemedActivity {
                             exportBrAPI();
                             break;
                         default:
-                            showExportDialog();
+                            // Skip dialog if BrAPI is disabled
+                            if (ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+                                showExportDialog();
+                            } else {
+                                exportPermission();
+                            }
                             break;
                     }
 
@@ -530,7 +549,7 @@ public class ConfigActivity extends ThemedActivity {
 
         String[] exportArray = new String[2];
         exportArray[0] = getString(R.string.export_source_local);
-        exportArray[1] = getString(R.string.export_source_brapi);
+        exportArray[1] = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, exportArray);
         exportSourceList.setAdapter(adapter);
@@ -865,10 +884,10 @@ public class ConfigActivity extends ThemedActivity {
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_TRAIT_DATA)
     public void collectDataFilePermission() {
-        String[] perms = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+        String[] perms = {Manifest.permission.VIBRATE, Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            perms = new String[] {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
+            perms = new String[] {Manifest.permission.VIBRATE, Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
         }
 
         if (EasyPermissions.hasPermissions(this, perms)) {

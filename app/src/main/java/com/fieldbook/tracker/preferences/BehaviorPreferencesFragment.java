@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.preference.Preference;
@@ -46,6 +47,20 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
             String skipMode = prefMgr.getSharedPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1");
 
             switchSkipPreferenceMode(skipMode, skipEntriesPref);
+
+        }
+
+        Preference switchVolumePref = this.findPreference(GeneralKeys.VOLUME_NAVIGATION);
+
+        if (switchVolumePref != null) {
+
+            //set preference change listener to change summary when needed
+            switchVolumePref.setOnPreferenceChangeListener(this);
+
+            //also initialize the summary whenever the fragment is opened, or else it defaults to "disabled"
+            String switchMode = prefMgr.getSharedPreferences().getString(GeneralKeys.VOLUME_NAVIGATION, "0");
+
+            switchVolumePreferenceMode(switchMode, switchVolumePref);
 
         }
 
@@ -94,7 +109,6 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
 
-
         //When the skip entries preference is changed, update the summary that is defined in string.xml.
         if (preference.hasKey()) {
 
@@ -102,7 +116,12 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
                 switchSkipPreferenceMode((String) newValue, preference);
 
+            } else if (preference.getKey().equals(GeneralKeys.VOLUME_NAVIGATION)) {
+
+                switchVolumePreferenceMode((String) newValue, preference);
+
             }
+
         }
 
         return true;
@@ -131,6 +150,34 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
             default: {
 
                 preference.setSummary(R.string.preferences_general_skip_entries_disabled);
+
+                break;
+
+            }
+        }
+    }
+
+    private void switchVolumePreferenceMode(String mode, Preference preference) {
+
+        switch (mode) {
+
+            case "1": {
+                preference.setSummary(R.string.preferences_behavior_volume_buttons_navigate_traits_description);
+
+                break;
+
+            }
+
+            case "2": {
+                preference.setSummary(R.string.preferences_behavior_volume_buttons_navigate_entries_description);
+
+                break;
+
+            }
+
+            default: {
+
+                preference.setSummary(R.string.preferences_behavior_volume_buttons_navigate_description);
 
                 break;
 
