@@ -10,11 +10,11 @@ public class BrAPIConfig {
     @SerializedName("v")
     private String version;
     @SerializedName("ps")
-    private int pageSize;
+    private String pageSize;
     @SerializedName("cs")
-    private int chunkSize;
+    private String chunkSize;
     @SerializedName("st")
-    private int serverTimeoutMilli;
+    private String serverTimeoutMilli;
     @SerializedName("flow")
     private String authFlow;
     @SerializedName("oidc")
@@ -46,27 +46,27 @@ public class BrAPIConfig {
         this.version = version;
     }
 
-    public int getPageSize() {
+    public String getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(int pageSize) {
+    public void setPageSize(String pageSize) {
         this.pageSize = pageSize;
     }
 
-    public int getChunkSize() {
+    public String getChunkSize() {
         return chunkSize;
     }
 
-    public void setChunkSize(int chunkSize) {
+    public void setChunkSize(String chunkSize) {
         this.chunkSize = chunkSize;
     }
 
-    public int getServerTimeoutMilli() {
+    public String getServerTimeoutMilli() {
         return serverTimeoutMilli;
     }
 
-    public void setServerTimeoutMilli(int serverTimeoutMilli) {
+    public void setServerTimeoutMilli(String serverTimeoutMilli) {
         this.serverTimeoutMilli = serverTimeoutMilli;
     }
 

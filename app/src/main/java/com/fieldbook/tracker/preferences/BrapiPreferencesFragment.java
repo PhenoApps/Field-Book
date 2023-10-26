@@ -7,11 +7,16 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -29,9 +34,15 @@ import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.objects.BrAPIConfig;
 import com.google.gson.Gson;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.BarcodeFormat;
+
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.json.JSONObject;
 import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog;
 import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialogFragmentCompat;
 
@@ -195,12 +206,23 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         Preference brapiConfigBarcode = findPreference("brapi_config_barcode");
         if (brapiConfigBarcode != null) {
             brapiConfigBarcode.setOnPreferenceClickListener(preference -> {
-
-                new IntentIntegrator(getActivity())
-                        .setPrompt(getString(R.string.barcode_scanner_text))
-                        .setBeepEnabled(true)
-                        .setRequestCode(REQUEST_BARCODE_SCAN_BRAPI_CONFIG)
-                        .initiateScan();
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Choose Action")
+                        .setItems(new String[]{getString(R.string.preferences_brapi_barcode_config_scan), getString(R.string.preferences_brapi_barcode_config_share)}, (dialog, which) -> {
+                            switch (which) {
+                                case 0: // Scan QR Code to import settings
+                                    new IntentIntegrator(getActivity())
+                                            .setPrompt(getString(R.string.barcode_scanner_text))
+                                            .setBeepEnabled(true)
+                                            .setRequestCode(REQUEST_BARCODE_SCAN_BRAPI_CONFIG)
+                                            .initiateScan();
+                                    break;
+                                case 1: // Generate QR Code for sharing settings
+                                    generateQRCodeFromPreferences();
+                                    break;
+                            }
+                        })
+                        .show();
                 return true;
             });
         }
@@ -226,6 +248,58 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             }
         }
     }
+
+    private void generateQRCodeFromPreferences() {
+        try {
+            BrAPIConfig config = new BrAPIConfig();
+            SharedPreferences ep = prefMgr.getSharedPreferences();
+            config.setUrl(ep.getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default)));
+            config.setName(ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test)));
+            config.setVersion(ep.getString(GeneralKeys.BRAPI_VERSION, "V2"));
+            config.setPageSize(ep.getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
+            config.setChunkSize(ep.getString(GeneralKeys.BRAPI_CHUNK_SIZE, "500"));
+            config.setServerTimeoutMilli(ep.getString(GeneralKeys.BRAPI_TIMEOUT, "120"));
+            config.setAuthFlow(ep.getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)));
+            config.setOidcUrl(ep.getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default)));
+            config.setCatDisplay(ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value"));
+
+            Gson gson = new Gson();
+            String jsonConfig = gson.toJson(config);
+
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int screenWidth = displayMetrics.widthPixels;
+
+// Set the QR Code size to be 80% of the screen width
+            int qrCodeSize = (int) (screenWidth * 0.8);
+
+            BitMatrix bitMatrix = new MultiFormatWriter().encode(jsonConfig, BarcodeFormat.QR_CODE, qrCodeSize, qrCodeSize);
+
+            int width = bitMatrix.getWidth();
+            int height = bitMatrix.getHeight();
+            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                }
+            }
+
+            ImageView imageView = new ImageView(getContext());
+            imageView.setImageBitmap(bmp);
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            imageView.setAdjustViewBounds(true);
+
+            new AlertDialog.Builder(getContext())
+                    .setTitle(getString(R.string.preferences_brapi_barcode_config_dialog_title))
+                    .setView(imageView)
+                    .setPositiveButton(getString(R.string.dialog_close), null)
+                    .show();
+
+        } catch (WriterException e) {
+            Toast.makeText(getContext(), "Error generating QR code", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
@@ -627,9 +701,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                         brapiVersion = getString(R.string.preferences_brapi_version_v1);
                     }
                     ((ListPreference)findPreference(GeneralKeys.BRAPI_VERSION)).setValue(brapiVersion);
-                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_PAGE_SIZE)).setText(brAPIConfig.getPageSize()+"");
-                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize()+"");
-                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli()+"");
+                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_PAGE_SIZE)).setText(brAPIConfig.getPageSize());
+                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize());
+                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli());
 
                     String catDisplay = getString(R.string.preferences_appearance_collect_labelval_customize_value);
                     if("label".equalsIgnoreCase(brAPIConfig.getCatDisplay())) {
