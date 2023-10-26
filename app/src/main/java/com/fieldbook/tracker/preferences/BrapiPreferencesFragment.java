@@ -703,12 +703,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_PAGE_SIZE)).setText(brAPIConfig.getPageSize());
                     ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize());
                     ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli());
-
-                    String catDisplay = getString(R.string.preferences_appearance_collect_labelval_customize_value);
-                    if("label".equalsIgnoreCase(brAPIConfig.getCatDisplay())) {
-                        catDisplay = getString(R.string.preferences_appearance_collect_labelval_customize_label);
-                    }
-                    ((ListPreference)findPreference(GeneralKeys.LABELVAL_CUSTOMIZE)).setValue(catDisplay);
+                    ((ListPreference)findPreference(GeneralKeys.LABELVAL_CUSTOMIZE)).setValue(brAPIConfig.getCatDisplay());
 
                     String oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_implicit);
                     if("code".equalsIgnoreCase(brAPIConfig.getAuthFlow())) {
