@@ -77,6 +77,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -138,7 +139,7 @@ public class ConfigActivity extends ThemedActivity {
     private RadioButton allTraits;
     private RadioButton activeTraits;
     private ArrayList<String> newRange;
-    private ArrayList<String> exportTrait;
+    private ArrayList<TraitObject> exportTrait;
     private Menu systemMenu;
     //barcode search fab
     private FloatingActionButton barcodeSearchFab;
@@ -717,13 +718,17 @@ public class ConfigActivity extends ThemedActivity {
             exportTrait = new ArrayList<>();
 
             if (activeTraits.isChecked()) {
-                String[] traits = database.getVisibleTrait();
-                Collections.addAll(exportTrait, traits);
+                ArrayList<TraitObject> traits = database.getAllTraitObjects();
+                for (TraitObject t : traits) {
+                    if (t.getVisible()) {
+                        exportTrait.add(t);
+                    }
+                }
             }
 
             if (allTraits.isChecked()) {
-                String[] traits = database.getAllTraits();
-                Collections.addAll(exportTrait, traits);
+                ArrayList<TraitObject> traits = database.getAllTraitObjects();
+                exportTrait.addAll(traits);
             }
 
             checkDbBool = checkDB.isChecked();
@@ -1065,17 +1070,16 @@ public class ConfigActivity extends ThemedActivity {
             }
 
             String[] newRanges = newRange.toArray(new String[newRange.size()]);
-            String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);
 
             // Retrieves the data needed for export
-            Cursor exportData = database.getExportDBData(newRanges, exportTraits);
+            Cursor exportData = database.getExportDBData(newRanges, exportTrait);
 
             for (String i : newRanges) {
                 Log.i("Field Book : Ranges : ", i);
             }
 
-            for (String j : exportTraits) {
-                Log.i("Field Book : Traits : ", j);
+            for (TraitObject j : exportTrait) {
+                Log.i("Field Book : Traits : ", j.getTrait());
             }
 
             if (exportData.getCount() == 0) {
@@ -1144,10 +1148,14 @@ public class ConfigActivity extends ThemedActivity {
                         OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(ConfigActivity.this, R.string.dir_field_export, tableFileName);
                         OutputStreamWriter fw = new OutputStreamWriter(output);
 
-                        exportData = database.convertDatabaseToTable(newRanges, exportTraits);
+                        exportData = database.convertDatabaseToTable(newRanges, exportTrait);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length, traits);
+                        ArrayList<String> labels = new ArrayList<>();
+                        labels.addAll(Arrays.asList(newRanges));
+                        for (TraitObject trait : exportTrait) labels.add(trait.getTrait());
+
+                        csvWriter.writeTableFormat(labels.toArray(new String[] {}), labels.size(), traits);
 
                     } catch (Exception e) {
                         fail = true;

@@ -423,6 +423,10 @@ public class CollectActivity extends ThemedActivity
         return getCurrentTrait().getTrait();
     }
 
+    public String getTraitDbId() {
+        return getCurrentTrait().getId();
+    }
+
     public String getTraitFormat() {
         return getCurrentTrait().getFormat();
     }
@@ -624,7 +628,7 @@ public class CollectActivity extends ThemedActivity
         missingValue.setOnClickListener(v -> {
             triggerTts(naTts);
             TraitObject currentTrait = traitBox.getCurrentTrait();
-            updateObservation(currentTrait.getTrait(), currentTrait.getFormat(), "NA", null);
+            updateObservation(currentTrait, "NA", null);
             setNaText();
         });
 
@@ -640,7 +644,7 @@ public class CollectActivity extends ThemedActivity
 
         deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
         deleteValue.setOnClickListener(v -> {
-            boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitName(), getRep());
+            boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitDbId(), getRep());
             // if a brapi observation that has been synced, don't allow deleting
             if (status) {
                 if (getTraitFormat().equals("photo")) {
@@ -673,7 +677,7 @@ public class CollectActivity extends ThemedActivity
 
             return collectInputView.getRep(); //gets the selected repeated value index from view
 
-        } else return database.getDefaultRep(getStudyId(), getObservationUnit(), getTraitName());
+        } else return database.getDefaultRep(getStudyId(), getObservationUnit(), getTraitDbId());
         //gets the minimum default index
     }
 
@@ -1052,18 +1056,17 @@ public class CollectActivity extends ThemedActivity
     /**
      * Helper function update user data in the memory based hashmap as well as
      * the database
-     * @param traitName the trait name
-     * @param traitFormat the trait format
+     * @param trait, the TraitObject to be updated
      * @param value the new string value to be saved in the database
      * @param nullableRep the repeated value to update, could be null to represent the latest rep value
      */
-    public void updateObservation(String traitName, String traitFormat, String value, @Nullable String nullableRep) {
+    public void updateObservation(TraitObject trait, String value, @Nullable String nullableRep) {
 
         if (rangeBox.isEmpty()) {
             return;
         }
 
-        traitBox.update(traitName, value);
+        traitBox.update(trait.getTrait(), value);
 
         String studyId = getStudyId();
         String obsUnit = getObservationUnit();
@@ -1077,21 +1080,21 @@ public class CollectActivity extends ThemedActivity
             rep = getRep();
         }
 
-        Observation observation = database.getObservation(studyId, obsUnit, traitName, rep);
+        Observation observation = database.getObservation(studyId, obsUnit, trait.getId(), rep);
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        database.deleteTrait(studyId, obsUnit, traitName, rep);
+        database.deleteTrait(studyId, obsUnit, trait.getId(), rep);
 
         if (!value.isEmpty()) {
 
             //don't update the database if the value is blank or undesirable
             boolean pass = false;
 
-            if (traitFormat.equals("multicat")
-                || CategoricalTraitLayout.isTraitCategorical(traitFormat)) {
+            if (trait.getFormat().equals("multicat")
+                || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
 
                 if (value.equals("[]")) {
 
@@ -1100,7 +1103,7 @@ public class CollectActivity extends ThemedActivity
             }
 
             if (!pass) {
-                database.insertObservation(obsUnit, traitName, traitFormat, value, person,
+                database.insertObservation(obsUnit, trait.getId(), value, person,
                         getLocationByPreferences(), "", studyId, observationDbId,
                         lastSyncedTime, rep);
             }
@@ -1111,22 +1114,24 @@ public class CollectActivity extends ThemedActivity
         refreshRepeatedValuesToolbarIndicator();
     }
 
-    public void insertRep(String parent, String trait, String value, String rep) {
+    public void insertRep(String value, String rep) {
 
         String expId = getStudyId();
         String obsUnit = getObservationUnit();
         String person = getPerson();
+        String traitDbId = getTraitDbId();
 
-        database.insertObservation(obsUnit, parent, trait, value, person,
+        database.insertObservation(obsUnit, traitDbId, value, person,
                 getLocationByPreferences(), "", expId, null, null, rep);
     }
 
-    public void deleteRep(String trait, String rep) {
+    public void deleteRep(String rep) {
 
         String expId = getStudyId();
         String obsUnit = getObservationUnit();
+        String traitDbId = getTraitDbId();
 
-        database.deleteTrait(expId, obsUnit, trait, rep);
+        database.deleteTrait(expId, obsUnit, traitDbId, rep);
     }
 
     public String getLocationByPreferences() {
@@ -1141,7 +1146,7 @@ public class CollectActivity extends ThemedActivity
     private void brapiDelete(String parent, Boolean hint) {
         Toast.makeText(getApplicationContext(), getString(R.string.brapi_delete_message), Toast.LENGTH_LONG).show();
         TraitObject trait = traitBox.getCurrentTrait();
-        updateObservation(parent, trait.getFormat(), getString(R.string.brapi_na), null);
+        updateObservation(trait, getString(R.string.brapi_na), null);
         if (hint) {
             setNaTextBrapiEmptyField();
         } else {
@@ -1355,7 +1360,7 @@ public class CollectActivity extends ThemedActivity
         String labelValPref = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
 
         ObservationModel[] values = database.getRepeatedValues(
-                getStudyId(), getObservationUnit(), getTraitName());
+                getStudyId(), getObservationUnit(), getTraitDbId());
 
         ArrayList<String> is = new ArrayList<>();
         for (ObservationModel m: values) {
@@ -1467,9 +1472,9 @@ public class CollectActivity extends ThemedActivity
 
         for (ObservationModel model : models) {
 
-            deleteRep(model.getObservation_variable_name(), model.getRep());
+            deleteRep(model.getRep());
 
-            ObservationModel[] currentModels = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
+            ObservationModel[] currentModels = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
 
             if (currentModels.length == 0) {
 
@@ -1805,7 +1810,7 @@ public class CollectActivity extends ThemedActivity
                     currentTraitLayout.loadLayout();
 
 
-                    updateObservation(currentTrait.getTrait(), currentTrait.getFormat(), scannedBarcode, null);
+                    updateObservation(currentTrait, scannedBarcode, null);
                     currentTraitLayout.loadLayout();
                     validateData();
                 }
@@ -1850,7 +1855,7 @@ public class CollectActivity extends ThemedActivity
 
                 item.setVisible(true);
 
-                ObservationModel[] values = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
+                ObservationModel[] values = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
 
                 int n = values.length;
 
@@ -1935,38 +1940,36 @@ public class CollectActivity extends ThemedActivity
     }
 
     @Override
-    public boolean existsTrait(final int ID) {
+    public boolean existsTrait(final int plotId) {
         final TraitObject trait = traitBox.getCurrentTrait();
         if (trait != null) {
-            return database.getTraitExists(ID, trait.getTrait(), trait.getFormat());
+            return database.getTraitExists(plotId, trait.getId());
         } else return false;
     }
 
     /**
      * Iterates over all traits for the given ID and returns the trait's index which is missing
      * @param traitIndex current trait index
-     * @param ID the plot identifier
+     * @param plotId the plot identifier
      * @return index of the trait missing or -1 if all traits exist
      */
     @Override
-    public int existsAllTraits(final int traitIndex, final int ID) {
-        final String[] traits = database.getVisibleTrait();
-        final String[] formats = database.getFormat();
-        for (int i = 0; i < traits.length; i++) {
+    public int existsAllTraits(final int traitIndex, final int plotId) {
+        final ArrayList<TraitObject> traits = database.getAllTraitObjects();
+        for (int i = 0; i < traits.size(); i++) {
             if (i != traitIndex
-                    && !database.getTraitExists(ID, traits[i], formats[i])) return i;
+                    && !database.getTraitExists(plotId, traits.get(i).getId())) return i;
         }
         return -1;
     }
 
     @NonNull
     @Override
-    public List<Integer> getNonExistingTraits(final int ID) {
-        final String[] traits = database.getVisibleTrait();
-        final String[] formats = database.getFormat();
+    public List<Integer> getNonExistingTraits(final int plotId) {
+        final ArrayList<TraitObject> traits = database.getAllTraitObjects();
         final ArrayList<Integer> indices = new ArrayList<>();
-        for (int i = 0; i < traits.length; i++) {
-            if (!database.getTraitExists(ID, traits[i], formats[i]))
+        for (int i = 0; i < traits.size(); i++) {
+            if (!database.getTraitExists(plotId, traits.get(i).getId()))
                 indices.add(i);
         }
         return indices;
@@ -2059,7 +2062,7 @@ public class CollectActivity extends ThemedActivity
 
         String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertObservation(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
+        database.insertObservation(rangeBox.getPlotID(), trait.getId(), size,
                 ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);

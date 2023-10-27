@@ -105,7 +105,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
         ObservationModel[] observations = getDatabase().getRepeatedValues(
                 act.getStudyId(),
                 act.getObservationUnit(),
-                act.getTraitName()
+                act.getTraitDbId()
         );
 
         //clear old list of repeated values each time a new trait is loaded
@@ -160,7 +160,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
             String defaultValue = trait.getDefaultValue();
             getCollectInputView().setText(defaultValue);
-            updateObservation(trait.getTrait(), trait.getFormat(), defaultValue);
+            updateObservation(trait, defaultValue);
             afterLoadDefault(act);
 
         } else {
@@ -293,12 +293,11 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     /**
      * Calls the collect activities db function to insert an observation row.
-     * @param traitName the name of the trait s.a "My Height Trait", "Height" (defined by user / FB)
-     * @param traitType the type of trait s.a "Numeric", "Categorical" (defined by FB)
+     * @param trait the TraitObject to be updated
      * @param value the Text value to be saved in the row
      */
-    public void updateObservation(String traitName, String traitType, String value) {
-        ((CollectActivity) getContext()).updateObservation(traitName, traitType, value, null);
+    public void updateObservation(TraitObject trait, String value) {
+        ((CollectActivity) getContext()).updateObservation(trait, value, null);
     }
 
     public void removeTrait(String parent) {
@@ -311,7 +310,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     protected List<ObservationModel> getObservations() {
         CollectActivity act = getCollectActivity();
-        return Arrays.asList(getDatabase().getRepeatedValues(act.getStudyId(), act.getObservationUnit(), act.getTraitName()));
+        return Arrays.asList(getDatabase().getRepeatedValues(act.getStudyId(), act.getObservationUnit(), act.getTraitDbId()));
     }
 
     protected ObservationModel getCurrentObservation() {
