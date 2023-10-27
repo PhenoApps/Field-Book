@@ -3,6 +3,7 @@ package com.fieldbook.tracker.database.dao
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.core.content.contentValuesOf
@@ -29,6 +30,11 @@ class ObservationDao {
                 .toTypedArray()
 
         } ?: emptyArray()
+
+        fun getAll(db: SQLiteDatabase): Array<ObservationModel> = db.query(Observation.tableName)
+            .toTable()
+            .map { ObservationModel(it) }
+            .toTypedArray()
 
         fun getAll(studyId: String): Array<ObservationModel> = withDatabase { db ->
 
@@ -452,6 +458,34 @@ class ObservationDao {
             db.delete(Observation.tableName,
                     "${Study.FK} = ? AND ${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ? AND value = ?",
                     arrayOf(expId, rid, parent, value))
+        }
+
+        fun updateObservationModels(observations: List<ObservationModel>) = withDatabase { db ->
+
+            observations.forEach {
+
+                db.update(Observation.tableName,
+                    ContentValues().apply {
+                        put(Observation.PK, it.internal_id_observation)
+                        put("value", it.value)
+                    },
+                    "${Observation.PK} = ?", arrayOf(it.internal_id_observation.toString()))
+
+            }
+        }
+
+        fun updateObservationModels(db: SQLiteDatabase, observations: List<ObservationModel>) {
+
+            observations.forEach {
+
+                db.update(Observation.tableName,
+                    ContentValues().apply {
+                        put(Observation.PK, it.internal_id_observation)
+                        put("value", it.value)
+                    },
+                    "${Observation.PK} = ?", arrayOf(it.internal_id_observation.toString()))
+
+            }
         }
 
         /**

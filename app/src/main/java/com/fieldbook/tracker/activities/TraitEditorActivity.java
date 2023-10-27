@@ -773,7 +773,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         builder.setMessage(getString(R.string.dialog_delete_traits_message));
 
         builder.setPositiveButton(getString(android.R.string.yes), onPositive);
-        builder.setNegativeButton(getString(android.R.string.no), onNegative);
+        builder.setNegativeButton(getString(R.string.dialog_no), onNegative);
         builder.setOnDismissListener(onDismiss);
 
         AlertDialog alert = builder.create();
