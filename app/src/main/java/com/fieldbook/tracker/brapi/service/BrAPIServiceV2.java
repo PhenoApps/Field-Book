@@ -78,7 +78,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.function.BiFunction;
 
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
@@ -516,21 +519,37 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data) {
+        Logger logger = Logger.getLogger(getClass().getName());
+
         List<String> attributes = study.getAttributes();
+        logger.info("Initial attributes: " + attributes);
+
+        Set<String> germplasmNames = data.stream()
+                .filter(unit -> unit.getGermplasmName() != null)
+                .map(BrAPIObservationUnit::getGermplasmName)
+                .collect(Collectors.toSet());
+        logger.info("Germplasm names are: " + germplasmNames);
+
         List<List<String>> attributesTable = new ArrayList<>();
 
         for (BrAPIObservationUnit unit : data) {
+            logger.info("Processing observation unit: " + unit);
+
             Map<String, String> attributesMap = new HashMap<>();
 
             BrAPIObservationUnitPosition pos = unit.getObservationUnitPosition();
             if (pos != null) {
+                logger.info("Found position for unit: " + pos);
+
                 List<BrAPIObservationUnitLevelRelationship> levels = pos.getObservationLevelRelationships();
                 levels.add(pos.getObservationLevel());
+
                 for(BrAPIObservationUnitLevelRelationship level: levels){
                     if(level.getLevelName() != null) {
                         String attributeName = level.getLevelName();
                         attributeName = attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1).toLowerCase();
                         attributesMap.put(attributeName, level.getLevelCode());
+                        logger.info("Mapped attribute " + attributeName + " to " + level.getLevelCode());
                     }
                 }
 
@@ -540,6 +559,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         rowColStr = "Row";
                     }
                     attributesMap.put(rowColStr, pos.getPositionCoordinateX());
+                    logger.info("Mapped X-coordinate " + rowColStr + " to " + pos.getPositionCoordinateX());
                 }
 
                 if (pos.getPositionCoordinateY() != null){
@@ -548,37 +568,49 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         rowColStr = "Column";
                     }
                     attributesMap.put(rowColStr, pos.getPositionCoordinateY());
+                    logger.info("Mapped Y-coordinate " + rowColStr + " to " + pos.getPositionCoordinateY());
                 }
 
-                if (pos.getEntryType() != null && pos.getEntryType().getBrapiValue() != null)
+                if (pos.getEntryType() != null && pos.getEntryType().getBrapiValue() != null) {
                     attributesMap.put("EntryType", pos.getEntryType().getBrapiValue());
+                    logger.info("Mapped EntryType to " + pos.getEntryType().getBrapiValue());
+                }
             }
 
-            if (unit.getGermplasmName() != null)
+            if (unit.getGermplasmName() != null) {
                 attributesMap.put("Germplasm", unit.getGermplasmName());
-            if (unit.getObservationUnitDbId() != null)
+                logger.info("Mapped Germplasm to " + unit.getGermplasmName());
+            }
+            if (unit.getObservationUnitDbId() != null) {
                 attributesMap.put("ObservationUnitDbId", unit.getObservationUnitDbId());
-            if (unit.getObservationUnitName() != null)
+                logger.info("Mapped ObservationUnitDbId to " + unit.getObservationUnitDbId());
+            }
+            if (unit.getObservationUnitName() != null) {
                 attributesMap.put("ObservationUnitName", unit.getObservationUnitName());
+                logger.info("Mapped ObservationUnitName to " + unit.getObservationUnitName());
+            }
 
             List<String> dataRow = new ArrayList<>();
             if(attributes.isEmpty()){
                 attributes.addAll(attributesMap.keySet());
                 study.setAttributes(attributes);
                 dataRow.addAll(attributesMap.values());
-            }else{
+                logger.info("Added new attributes to the study. Current attributes: " + attributes);
+            } else {
                 for(String attr: attributes){
                     if(attributesMap.containsKey(attr)){
                         dataRow.add(attributesMap.get(attr));
-                    }else{
+                    } else {
                         dataRow.add("");
                     }
                 }
             }
             attributesTable.add(dataRow);
+            logger.info("Added new data row to attributes table: " + dataRow);
         }
 
         study.getValues().addAll(attributesTable);
+        logger.info("Updated study values with attributes table.");
     }
 
     private String getRowColStr(BrAPIPositionCoordinateTypeEnum type) {
@@ -1216,6 +1248,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                 for (List<String> dataRow : studyDetails.getValues()) {
                     dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
+                    System.out.println("Saving: Attributes: "+studyDetails.getAttributes());
+                    System.out.println("Saving: dataRow: "+dataRow);
                 }
 
                 // Insert the traits already associated with this study
