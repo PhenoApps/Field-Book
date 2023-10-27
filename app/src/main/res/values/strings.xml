@@ -62,9 +62,6 @@
     <string name="changelog_title">Changelog</string>
 
 
-
-
-
     <!-- FIELDS -->
     <!-- General -->
     <string name="list_item_field_popup_menu_content_description">Opens a menu for the selected field.</string>
@@ -149,8 +146,6 @@
     <string name="fields_options">Options</string>
 
 
-
-
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sort</string>
@@ -225,8 +220,6 @@
     <string name="traits_create_categories_value_text">Enter category value here</string>
     <string name="list_item_category_delete_content_description">Delete the category.</string>
     <string name="dialog_new_trait_add_category_content_description">Add new category.</string>
-
-
 
 
     <!-- COLLECT -->
@@ -438,8 +431,6 @@
     <string name="act_collect_na_value_button_content_description">Fill value with not available.</string>
 
 
-
-
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Local</string>
@@ -467,10 +458,6 @@
     <string name="citation_title">Citation</string>
     <string name="citation_string">If you utilize Field Book for research, please cite the following journal article:</string>
     <string name="citation_text" translatable="false">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
-
-
-
-
 
 
     <!-- SETTINGS -->
@@ -703,9 +690,10 @@
     <string name="pref_beta_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
     <string name="pref_beta_repeated_values_disabled_title">Repeated Measures Disabled</string>
     <string name="pref_beta_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable.</string>
-
-
-
+    <string name="pref_beta_mlkit_title">MLKit Library</string>
+    <string name="pref_beta_mlkit_summary">This option uses the MLKit library instead of the ZXing library for scanning barcodes</string>
+    <string name="pref_beta_mlkit_enabled_title">Barcode Scanning using MLKit enabled</string>
+    <string name="pref_beta_mlkit_enabled_message">Enabling this feature will switch the barcode scanning library from ZXing to MLKit.</string>
 
 
     <!-- ABOUT -->
@@ -739,9 +727,6 @@
     <string name="check_updates_title">Checking for Updates…</string>
     <string name="found_updates_title">Download Latest Version</string>
     <string name="no_updates_title">Running Latest Version</string>
-
-
-
 
 
     <!-- BRAPI -->
@@ -909,9 +894,6 @@
         Traits and fields created manually or imported via CSV will need to be exported via CSV format.
     </string>
     <string name="brapi_na">NA</string>
-
-
-
 
 
     <!-- TUTORIAL -->

@@ -37,6 +37,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiExportActivity;
@@ -88,6 +89,8 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
+
+import static com.fieldbook.tracker.utilities.BarcodeScannerUtilsKt.requestCameraAndStartScanner;
 
 /**
  * The main page of FieldBook.
@@ -142,6 +145,7 @@ public class ConfigActivity extends ThemedActivity {
     private Menu systemMenu;
     //barcode search fab
     private FloatingActionButton barcodeSearchFab;
+    private boolean mlkitEnabled;
 
     private void invokeDatabaseImport(DocumentFile doc) {
 
@@ -351,13 +355,20 @@ public class ConfigActivity extends ThemedActivity {
             loadSampleDataDialog();
         }
 
+        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
+
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
-            new IntentIntegrator(this)
-                    .setPrompt(getString(R.string.barcode_scanner_text))
-                    .setBeepEnabled(false)
-                    .setRequestCode(REQUEST_BARCODE)
-                    .initiateScan();
+            if(mlkitEnabled) {
+                requestCameraAndStartScanner(this, REQUEST_BARCODE);
+            }
+            else {
+                new IntentIntegrator(this)
+                        .setPrompt(getString(R.string.barcode_scanner_text))
+                        .setBeepEnabled(false)
+                        .setRequestCode(REQUEST_BARCODE)
+                        .initiateScan();
+            }
         });
 
         //this must happen after migrations and can't be injected in config
@@ -850,9 +861,14 @@ public class ConfigActivity extends ThemedActivity {
             if (resultCode == RESULT_OK) {
 
                 // get barcode from scan result
-                IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                String scannedBarcode = plotDataResult.getContents();
-
+                String scannedBarcode;
+                if(mlkitEnabled){
+                    scannedBarcode = data.getStringExtra("barcode");
+                }
+                else {
+                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    scannedBarcode = plotDataResult.getContents();
+                }
                 try {
 
                     fuzzyBarcodeSearch(scannedBarcode);

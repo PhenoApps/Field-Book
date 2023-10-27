@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities;
 
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -110,6 +111,8 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+
+import static com.fieldbook.tracker.utilities.BarcodeScannerUtilsKt.requestCameraAndStartScanner;
 
 /**
  * All main screen logic resides here
@@ -240,12 +243,7 @@ public class CollectActivity extends ThemedActivity
      */
     private androidx.appcompat.app.AlertDialog dialogGeoNav;
     private androidx.appcompat.app.AlertDialog dialogPrecisionLoss;
-
-    public void triggerTts(String text) {
-        if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
-            ttsHelper.speak(text);
-        }
-    }
+    private boolean mlkitEnabled;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -301,11 +299,19 @@ public class CollectActivity extends ThemedActivity
 
         goProWrapper.attach();
 
+        mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
+
         loadScreen();
 
         checkForInitialBarcodeSearch();
 
         verifyPersonHelper.checkLastOpened();
+    }
+
+    public void triggerTts(String text) {
+        if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
+            ttsHelper.speak(text);
+        }
     }
 
     private void switchField(int studyId, @Nullable String obsUnitId) {
@@ -631,11 +637,17 @@ public class CollectActivity extends ThemedActivity
         barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);
         barcodeInput.setOnClickListener(v -> {
             triggerTts(barcodeTts);
-            new IntentIntegrator(CollectActivity.this)
-                    .setPrompt(getString(R.string.barcode_scanner_text))
-                    .setBeepEnabled(false)
-                    .setRequestCode(BARCODE_COLLECT_CODE)
-                    .initiateScan();
+            if(mlkitEnabled) {
+                requestCameraAndStartScanner(this, BARCODE_COLLECT_CODE);
+            }
+            else {
+                new IntentIntegrator(CollectActivity.this)
+                        .setPrompt(getString(R.string.barcode_scanner_text))
+                        .setBeepEnabled(false)
+                        .setRequestCode(BARCODE_COLLECT_CODE)
+                        .initiateScan();
+            }
+
         });
 
         deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
@@ -1289,11 +1301,16 @@ public class CollectActivity extends ThemedActivity
                 if (moveToUniqueIdValue.equals("2")) {
                     moveToPlotID();
                 } else if (moveToUniqueIdValue.equals("3")) {
-                    new IntentIntegrator(this)
-                            .setPrompt(getString(R.string.barcode_scanner_text))
-                            .setBeepEnabled(false)
-                            .setRequestCode(BARCODE_SEARCH_CODE)
-                            .initiateScan();
+                    if(mlkitEnabled) {
+                        requestCameraAndStartScanner(this, BARCODE_SEARCH_CODE);
+                    }
+                    else {
+                        new IntentIntegrator(this)
+                                .setPrompt(getString(R.string.barcode_scanner_text))
+                                .setBeepEnabled(false)
+                                .setRequestCode(BARCODE_SEARCH_CODE)
+                                .initiateScan();
+                    }
                 }
                 break;
             case summaryId:
@@ -1582,11 +1599,16 @@ public class CollectActivity extends ThemedActivity
         builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                new IntentIntegrator(CollectActivity.this)
-                        .setPrompt(getString(R.string.barcode_scanner_text))
-                        .setBeepEnabled(false)
-                        .setRequestCode(BARCODE_SEARCH_CODE)
-                        .initiateScan();
+                if(mlkitEnabled) {
+                    requestCameraAndStartScanner(CollectActivity.this, BARCODE_SEARCH_CODE);
+                }
+                else {
+                    new IntentIntegrator(CollectActivity.this)
+                            .setPrompt(getString(R.string.barcode_scanner_text))
+                            .setBeepEnabled(false)
+                            .setRequestCode(BARCODE_SEARCH_CODE)
+                            .initiateScan();
+                }
             }
         });
 
@@ -1704,6 +1726,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
@@ -1749,9 +1772,13 @@ public class CollectActivity extends ThemedActivity
                 if(resultCode == RESULT_OK) {
 
                     if (geoNavHelper.getSnackbar() != null) geoNavHelper.getSnackbar().dismiss();
-
-                    IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                    inputPlotId = plotSearchResult.getContents();
+                    if(mlkitEnabled) {
+                        inputPlotId = data.getStringExtra("barcode");
+                    }
+                    else {
+                        IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                        inputPlotId = plotSearchResult.getContents();
+                    }
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
                     boolean success = moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
@@ -1798,8 +1825,15 @@ public class CollectActivity extends ThemedActivity
             case BARCODE_COLLECT_CODE:
                 if(resultCode == RESULT_OK) {
                     // store barcode value as data
-                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                    String scannedBarcode = plotDataResult.getContents();
+
+                    String scannedBarcode;
+                    if(mlkitEnabled) {
+                        scannedBarcode = data.getStringExtra("barcode");
+                    }
+                    else {
+                        IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                        scannedBarcode = plotDataResult.getContents();
+                    }
                     TraitObject currentTrait = traitBox.getCurrentTrait();
                     BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
                     currentTraitLayout.loadLayout();
@@ -2270,7 +2304,7 @@ public class CollectActivity extends ThemedActivity
         }
         return new ArrayList<>();
     }
-    
+
     @NonNull
     @Override
     public VibrateUtil getVibrator() {
@@ -2336,4 +2370,5 @@ public class CollectActivity extends ThemedActivity
 
         return gps.getLocation(0, 0);
     }
+
 }
