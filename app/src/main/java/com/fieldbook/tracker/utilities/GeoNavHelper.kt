@@ -18,6 +18,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -206,6 +207,8 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private val mPrefs = PreferenceManager.getDefaultSharedPreferences(controller.getContext())
     private val ep = controller.getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
     private var mGeoNavLogWriter: OutputStreamWriter? = null
+
+    var snackBarBottomMargin: Int = 0
 
     var initialized: Boolean = false
 
@@ -475,6 +478,20 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                             LinearLayout.LayoutParams.MATCH_PARENT,
                                             LinearLayout.LayoutParams.WRAP_CONTENT
                                         )
+
+                                    //adjust position based on softkeyboard, so it displays above it
+                                    if (snackBarBottomMargin != 0) { //0 if keyboard is not displayed
+
+                                        //read the minimum action bar size based on theme
+                                        val typedValue = TypedValue()
+                                        if (controller.getContext().theme.resolveAttribute(android.R.attr.actionBarSize, typedValue, true)) {
+                                            val actionBarHeight = TypedValue.complexToDimensionPixelSize(typedValue.data, resources.displayMetrics)
+
+                                            //adjust bottom margin based on keyboard height, action bar height, and slight padding to mimic how it looks normally
+                                            params.bottomMargin = snackBarBottomMargin - actionBarHeight + snackView.paddingBottom / 2
+                                        }
+                                    }
+
                                     params.bottomToTop = R.id.toolbarBottom
                                     snackView.layoutParams = params
                                     snackLayout.addView(snackView)
@@ -502,6 +519,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                         mGeoNavSnackbar?.dismiss()
                                         lastPlotIdNav = null
 
+                                        println(snackView.height)
                                         //when navigate button is pressed use rangeBox to go to the plot id
                                         moveToSearch("id", getRangeBox().getRangeID(), null, null, id, -1)
                                     }
