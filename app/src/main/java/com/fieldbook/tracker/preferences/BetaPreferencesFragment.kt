@@ -35,18 +35,6 @@ class BetaPreferencesFragment : PreferenceFragmentCompat() {
 
         val barcode = findPreference<CheckBoxPreference>(GeneralKeys.MLKIT_PREFERENCE_KEY)
         barcode?.setOnPreferenceChangeListener { _, newValue ->
-
-            if (newValue == true) {
-
-                if (isAdded) {
-                    AlertDialog.Builder(context)
-                            .setTitle(getString(R.string.pref_beta_mlkit_enabled_title))
-                            .setMessage(getString(R.string.pref_beta_mlkit_enabled_message))
-                            .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
-                            .show()
-                }
-            }
-
             true
         }
     }
