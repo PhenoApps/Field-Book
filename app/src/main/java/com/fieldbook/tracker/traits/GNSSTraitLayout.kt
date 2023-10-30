@@ -416,7 +416,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         collectInputView.text = coordinates
 
-        updateObservation(currentTrait.trait, "gnss", coordinates)
+        updateObservation(currentTrait, coordinates)
 
     }
 

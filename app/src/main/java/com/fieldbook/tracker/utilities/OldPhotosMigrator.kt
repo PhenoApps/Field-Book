@@ -13,7 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 class OldPhotosMigrator {
 
@@ -53,7 +54,7 @@ class OldPhotosMigrator {
 
                             traitPhotos.forEach { photo ->
 
-                                val repeatedValue = database.getRep(expId, photo.observation_unit_id, t.trait)
+                                val repeatedValue = database.getRep(expId, photo.observation_unit_id, t.id)
                                 val generatedName =
                                     photo.observation_unit_id + "_" + t.trait + "_" + repeatedValue + "_" + timeStamp.format(
                                         Calendar.getInstance().time

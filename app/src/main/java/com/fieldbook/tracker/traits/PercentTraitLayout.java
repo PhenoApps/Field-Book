@@ -71,7 +71,7 @@ public class PercentTraitLayout extends BaseTraitLayout {
             }
 
             public void onStopTrackingTouch(SeekBar sb) {
-                updateObservation(getCurrentTrait().getTrait(), "percent", String.valueOf(seekBar.getProgress()));
+                updateObservation(getCurrentTrait(), String.valueOf(seekBar.getProgress()));
                 triggerTts(String.valueOf(sb.getProgress()));
             }
         };

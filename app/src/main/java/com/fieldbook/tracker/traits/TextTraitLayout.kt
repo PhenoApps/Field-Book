@@ -45,7 +45,7 @@ class TextTraitLayout : BaseTraitLayout {
 
             collectInputView.text = value
 
-            updateObservation(currentTrait.trait, currentTrait.format, value)
+            updateObservation(currentTrait, value)
 
         }
 

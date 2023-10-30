@@ -311,7 +311,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         mValues.firstOrNull { it.model.rep == repToDelete }?.let { deleteItem ->
 
-            (context as? CollectActivity)?.deleteRep(deleteItem.model.observation_variable_name, deleteItem.model.rep)
+            (context as? CollectActivity)?.deleteRep(deleteItem.model.rep)
 
         }
     }
@@ -331,7 +331,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         with (context as CollectActivity) {
 
-            insertRep(traitName, traitFormat, "", rep)
+            insertRep("", rep)
 
             return ObservationModel(mapOf(
                 "observation_variable_db_id" to currentTrait.id,

@@ -117,7 +117,7 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
                 || (value.equalsIgnoreCase("false") && state == ThreeState.OFF);
 
         if (flag) {
-            updateObservation(getCurrentTrait().getTrait(), type(), value);
+            updateObservation(getCurrentTrait(), value);
             getCollectInputView().setText(value);
         }
     }
@@ -148,7 +148,7 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
         //else if (state == ThreeState.NEUTRAL) newVal = "unset";
 
         if (getCurrentTrait() != null) {
-            updateObservation(getCurrentTrait().getTrait(), type(), newVal);
+            updateObservation(getCurrentTrait(), newVal);
             getCollectInputView().setText(newVal);
         }
     }

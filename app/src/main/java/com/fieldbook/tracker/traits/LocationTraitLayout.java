@@ -63,7 +63,7 @@ public class LocationTraitLayout extends BaseTraitLayout {
                 getContext().startActivity(intent);
             }
             getCollectInputView().setText(fullLocation);
-            updateObservation(getCurrentTrait().getTrait(), "location", fullLocation);
+            updateObservation(getCurrentTrait(), fullLocation);
             triggerTts(locationSavedTts);
         });
 

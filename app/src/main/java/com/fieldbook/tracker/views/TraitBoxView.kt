@@ -287,7 +287,8 @@ class TraitBoxView : ConstraintLayout {
         if (newTraits.containsKey(traitName)) newTraits.remove(traitName)
         val studyId =
             controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        controller.getDatabase().deleteTrait(studyId, plotID, traitName, rep)
+        val traitDbId = controller.getDatabase().getTraitByName(traitName).id
+        controller.getDatabase().deleteTrait(studyId, plotID, traitDbId, rep)
     }
 
     fun remove(trait: TraitObject, plotID: String, rep: String) {

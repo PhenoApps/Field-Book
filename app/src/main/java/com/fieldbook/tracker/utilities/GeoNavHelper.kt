@@ -18,6 +18,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -54,6 +55,57 @@ import kotlin.math.sqrt
 class GeoNavHelper @Inject constructor(private val controller: CollectController):
     SensorEventListener, GPSTracker.GPSTrackerListener {
 
+    //simple data class used to track columns in each line of the geonav log
+    data class GeoNavLine(
+        var startLat: String? = null,
+        var startLng: String? = null,
+        var utc: String? = null,
+        var endLat: String? = null,
+        var endLng: String? = null,
+        var azimuth: String? = null,
+        var teslas: String? = null,
+        var bearing: String? = null,
+        var distance: String? = null,
+        var interval: String? = null,
+        var address: String? = null,
+        var thetaParameter: String? = null,
+        var method: String? = null,
+        var d1: String? = null,
+        var d2: String? = null,
+        var fix: String? = null,
+        var closest: String? = null,
+        var uniqueId: String? = null,
+        var primaryId: String? = null,
+        var secondaryId: String? = null
+    ) {
+        companion object {
+            val HeaderLine = GeoNavLine(
+                startLat = "start latitude",
+                startLng = "start longitude",
+                utc = "UTC",
+                endLat = "end latitude",
+                endLng = "end longitude",
+                azimuth = "azimuth",
+                teslas = "teslas",
+                bearing = "bearing",
+                distance = "distance",
+                interval = "interval",
+                address = "address",
+                thetaParameter = "thetaParameter",
+                fix = "fix",
+                closest = "closest",
+                uniqueId = "unique id",
+                primaryId = "primary id",
+                secondaryId = "secondary id",
+                d1 = "d1",
+                d2 = "d2",
+                method = "method"
+            )
+        }
+        override fun toString() = "$startLat, $startLng, $utc, $endLat, $endLng, $azimuth, $teslas, $bearing, $distance, $interval, $address, $thetaParameter, $method, $d1, $d2, $fix, $closest, $uniqueId, $primaryId, $secondaryId"
+
+    }
+
     /**
      * GeoNav sensors and variables
      */
@@ -68,6 +120,10 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
     private val prefs by lazy {
         controller.getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+    }
+
+    private val geoNavPrefs by lazy {
+        PreferenceManager.getDefaultSharedPreferences(controller.getContext())
     }
 
     // listen to changes for GEONAV_POPUP_DISPLAY
@@ -111,9 +167,19 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
             //always log location updates for verbose log
             if (currentLoggingMode() == "2") {
+
+                val geoNavLine = GeoNavLine(
+                    startLat = lat,
+                    startLng = lng,
+                    utc = time.toString(),
+                    fix = fix
+                )
+
                 writeGeoNavLog(
+                    prefs,
+                    geoNavPrefs,
                     mGeoNavLogWriter,
-                    "$lat,$lng,$time,null,null,null,null,null,null,$fix,null,null,null,null\n"
+                    geoNavLine
                 )
             }
             mExternalLocation = Location("GeoNav Rover")
@@ -206,6 +272,8 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private val mPrefs = PreferenceManager.getDefaultSharedPreferences(controller.getContext())
     private val ep = controller.getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
     private var mGeoNavLogWriter: OutputStreamWriter? = null
+
+    var snackBarBottomMargin: Int = 0
 
     var initialized: Boolean = false
 
@@ -302,11 +370,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
         //start the timer and schedule the IZ algorithm
         runScheduler(internal, period)
-
-        writeGeoNavLog(
-            mGeoNavLogWriter,
-            "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, fix, closest, unique id, primary id, secondary id\n"
-        )
     }
 
     /**
@@ -436,9 +499,11 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
             mAzimuth?.let { azimuth ->
 
+                val geoNavPrefs = PreferenceManager.getDefaultSharedPreferences(controller.getContext())
+
                 //long toc = System.currentTimeMillis();
                 val (first) = impactZoneSearch(
-                    mGeoNavLogWriter, currentLoggingMode(),
+                    mGeoNavLogWriter, prefs, geoNavPrefs, currentLoggingMode(),
                     start, coordinates.toTypedArray(),
                     azimuth, theta, mTeslas, geoNavMethod, d1, d2
                 )
@@ -475,6 +540,20 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                             LinearLayout.LayoutParams.MATCH_PARENT,
                                             LinearLayout.LayoutParams.WRAP_CONTENT
                                         )
+
+                                    //adjust position based on softkeyboard, so it displays above it
+                                    if (snackBarBottomMargin != 0) { //0 if keyboard is not displayed
+
+                                        //read the minimum action bar size based on theme
+                                        val typedValue = TypedValue()
+                                        if (controller.getContext().theme.resolveAttribute(android.R.attr.actionBarSize, typedValue, true)) {
+                                            val actionBarHeight = TypedValue.complexToDimensionPixelSize(typedValue.data, resources.displayMetrics)
+
+                                            //adjust bottom margin based on keyboard height, action bar height, and slight padding to mimic how it looks normally
+                                            params.bottomMargin = snackBarBottomMargin - actionBarHeight + snackView.paddingBottom / 2
+                                        }
+                                    }
+
                                     params.bottomToTop = R.id.toolbarBottom
                                     snackView.layoutParams = params
                                     snackLayout.addView(snackView)
@@ -502,6 +581,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                         mGeoNavSnackbar?.dismiss()
                                         lastPlotIdNav = null
 
+                                        println(snackView.height)
                                         //when navigate button is pressed use rangeBox to go to the plot id
                                         moveToSearch("id", getRangeBox().getRangeID(), null, null, id, -1)
                                     }
@@ -605,12 +685,29 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                     } else {
                         ""
                     }
-                    val fileName = prefixOfFile + "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv"
-                    val geoNavLogFile = geoNavFolder.createFile("*/csv", fileName)
+                    val fileName = "${prefixOfFile}log.csv"
+                    var isNew = false
+                    var geoNavLogFile = geoNavFolder.findFile(fileName)
+                    if (geoNavLogFile == null) {
+                        geoNavLogFile = geoNavFolder.createFile("*/csv", fileName)
+                        isNew = true
+                    }
                     if (geoNavLogFile != null && geoNavLogFile.exists()) {
-                        val outputStream = resolver.openOutputStream(geoNavLogFile.uri)
+                        //open the only log file in 'write append' mode
+                        val outputStream = resolver.openOutputStream(geoNavLogFile.uri, "wa")
                         Log.d(CollectActivity.TAG, "GeoNav Logger started successfully.")
                         mGeoNavLogWriter = OutputStreamWriter(outputStream)
+
+                        if (isNew) {
+                            writeGeoNavLog(
+                                prefs,
+                                geoNavPrefs,
+                                mGeoNavLogWriter,
+                                GeoNavLine.HeaderLine,
+                                isHeader = true
+                            )
+                        }
+
                     } else {
                         Log.d(CollectActivity.TAG, "GeoNav Logger start failed.")
                     }
@@ -732,12 +829,18 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
         //always log location updates for verbose log
         if (currentLoggingMode() == "2") {
+
+            val geoNavLine = GeoNavLine(
+                startLat = location.latitude.toString(),
+                startLng = location.longitude.toString(),
+                utc = location.time.toString(),
+            )
+
             writeGeoNavLog(
+                prefs,
+                geoNavPrefs,
                 mGeoNavLogWriter,
-                """
-                ${location.latitude},${location.longitude},${location.time},null,null,null,null,null,null,GPS,null,null,null,null
-                
-                """.trimIndent()
+                geoNavLine
             )
         }
 
