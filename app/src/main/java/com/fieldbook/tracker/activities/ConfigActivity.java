@@ -53,6 +53,7 @@ import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
+import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -515,23 +516,6 @@ public class ConfigActivity extends ThemedActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
-    }
-
-    /**
-     * Scan file to update file list and share exported file
-     */
-    private void shareFile(DocumentFile docFile) {
-        if (!ep.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
-            Intent intent = new Intent();
-            intent.setAction(android.content.Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_STREAM, docFile.getUri());
-            try {
-                startActivity(Intent.createChooser(intent, "Sending File..."));
-            } catch (Exception e) {
-                Log.e("Field Book", "" + e.getMessage());
-            }
-        }
     }
 
     // Helper function to merge arrays
@@ -1213,7 +1197,7 @@ public class ConfigActivity extends ThemedActivity {
                                     if (tableFile != null && tableFile.exists()) tableFile.delete();
 
                                     //share the zip file
-                                    shareFile(zipFile);
+                                    new FileUtil().shareFile(ConfigActivity.this, ep, zipFile);
                                 }
                             }
                         }
@@ -1243,15 +1227,15 @@ public class ConfigActivity extends ThemedActivity {
                             if (dbFile != null) dbFile.delete();
                             if (tableFile != null) tableFile.delete();
 
-                            shareFile(zipFile);
+                            new FileUtil().shareFile(ConfigActivity.this, ep, zipFile);
 
                         } else if (checkDbBool) {
 
-                            shareFile(dbFile);
+                            new FileUtil().shareFile(ConfigActivity.this, ep, dbFile);
 
                         } else if (checkExcelBool) {
 
-                            shareFile(tableFile);
+                            new FileUtil().shareFile(ConfigActivity.this, ep, tableFile);
                         }
                     }
                 }
