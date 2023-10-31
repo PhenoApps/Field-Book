@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.activities;
 
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -107,8 +106,6 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-
-import static com.fieldbook.tracker.utilities.BarcodeScannerUtilsKt.requestCameraAndStartScanner;
 
 /**
  * All main screen logic resides here
@@ -592,7 +589,9 @@ public class CollectActivity extends ThemedActivity
         barcodeInput.setOnClickListener(v -> {
             triggerTts(barcodeTts);
             if(mlkitEnabled) {
-                requestCameraAndStartScanner(this, BARCODE_COLLECT_CODE);
+                ScannerActivity.Companion.requestCameraAndStartScanner(this,
+                        BARCODE_COLLECT_CODE,
+                        getCurrentTrait().getId(), getObservationUnit(), getRep());
             }
             else {
                 new IntentIntegrator(CollectActivity.this)
@@ -1256,7 +1255,7 @@ public class CollectActivity extends ThemedActivity
                     moveToPlotID();
                 } else if (moveToUniqueIdValue.equals("3")) {
                     if(mlkitEnabled) {
-                        requestCameraAndStartScanner(this, BARCODE_SEARCH_CODE);
+                        ScannerActivity.Companion.requestCameraAndStartScanner(this, BARCODE_SEARCH_CODE, null, null, null);
                     }
                     else {
                         new IntentIntegrator(this)
@@ -1554,7 +1553,7 @@ public class CollectActivity extends ThemedActivity
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if(mlkitEnabled) {
-                    requestCameraAndStartScanner(CollectActivity.this, BARCODE_SEARCH_CODE);
+                    ScannerActivity.Companion.requestCameraAndStartScanner(CollectActivity.this, BARCODE_SEARCH_CODE, null, null, null);
                 }
                 else {
                     new IntentIntegrator(CollectActivity.this)
@@ -1779,15 +1778,27 @@ public class CollectActivity extends ThemedActivity
             case BARCODE_COLLECT_CODE:
                 if(resultCode == RESULT_OK) {
                     // store barcode value as data
+                    String scannedBarcode = "";
 
-                    String scannedBarcode;
-                    if(mlkitEnabled) {
-                        scannedBarcode = data.getStringExtra("barcode");
-                    }
-                    else {
+                    if (mlkitEnabled) {
+
+                        if (data.hasExtra(ScannerActivity.EXTRA_BARCODE)) {
+
+                            scannedBarcode = data.getStringExtra("barcode");
+
+                        } else if (data.hasExtra(ScannerActivity.EXTRA_PHOTO_URI)) {
+
+                            String uri = data.getStringExtra(ScannerActivity.EXTRA_PHOTO_URI);
+                            database.insertObservation(getObservationUnit(), getCurrentTrait().getId(), "photo", uri, getPerson(), getLocationByPreferences(), "", getStudyId(), "", null, getRep());
+                        }
+
+                    } else {
+
                         IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
                         scannedBarcode = plotDataResult.getContents();
+
                     }
+
                     TraitObject currentTrait = traitBox.getCurrentTrait();
                     BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
                     currentTraitLayout.loadLayout();
