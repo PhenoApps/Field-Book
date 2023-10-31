@@ -119,7 +119,7 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
 
         //manually select the first tab based on preferences
         val tabIndex = activity.getPreferences()
-            .getInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, 1)
+            .getInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, 0)
 
         tabLayout.selectTab(tabLayout.getTabAt(tabIndex))
     }
