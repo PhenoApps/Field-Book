@@ -90,8 +90,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-import static com.fieldbook.tracker.utilities.BarcodeScannerUtilsKt.requestCameraAndStartScanner;
-
 /**
  * The main page of FieldBook.
  * <p>
@@ -360,7 +358,7 @@ public class ConfigActivity extends ThemedActivity {
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
             if(mlkitEnabled) {
-                requestCameraAndStartScanner(this, REQUEST_BARCODE);
+                ScannerActivity.Companion.requestCameraAndStartScanner(this, REQUEST_BARCODE, null, null, null);
             }
             else {
                 new IntentIntegrator(this)

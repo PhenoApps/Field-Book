@@ -10,4 +10,19 @@
         android:id="@+id/preview_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <ImageButton
+        android:id="@+id/act_scanner_capture_btn"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/circle_background"
+        android:contentDescription="@string/shutter_capture_content_description"
+        android:padding="8dp"
+        android:text="@string/trait_go_pro_capture_button_text"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/preview_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
