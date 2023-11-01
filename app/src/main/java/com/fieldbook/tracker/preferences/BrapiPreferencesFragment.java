@@ -205,8 +205,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         Preference brapiConfigBarcode = findPreference("brapi_config_barcode");
         if (brapiConfigBarcode != null) {
             brapiConfigBarcode.setOnPreferenceClickListener(preference -> {
+                String title = getString(R.string.qr_code_share_choose_action_title);
                 new AlertDialog.Builder(getContext())
-                        .setTitle("Choose Action")
+                        .setTitle(title)
                         .setItems(new String[]{getString(R.string.preferences_brapi_barcode_config_scan), getString(R.string.preferences_brapi_barcode_config_share)}, (dialog, which) -> {
                             switch (which) {
                                 case 0: // Scan QR Code to import settings
@@ -706,7 +707,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     ((ListPreference)findPreference(GeneralKeys.LABELVAL_CUSTOMIZE)).setValue(brAPIConfig.getCatDisplay());
 
                     String oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_implicit);
-                    if("code".equalsIgnoreCase(brAPIConfig.getAuthFlow())) {
+                    String codeFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);
+                    if(codeFlow.equalsIgnoreCase(brAPIConfig.getAuthFlow())) {
                         oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);
                     }
 
