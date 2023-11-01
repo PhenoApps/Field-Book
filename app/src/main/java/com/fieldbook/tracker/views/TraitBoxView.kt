@@ -10,6 +10,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -28,6 +29,8 @@ class TraitBoxView : ConstraintLayout {
     private var traitDetails: TextView
     private var traitLeft: ImageView
     private var traitRight: ImageView
+
+    private var traitsProgressBar: ProgressBar
 
     var currentTrait: TraitObject? = null
 
@@ -52,6 +55,8 @@ class TraitBoxView : ConstraintLayout {
         prefixTraits = controller.getDatabase().rangeColumnNames
         newTraits = HashMap()
         traitType = findViewById(R.id.traitType)
+
+        traitsProgressBar = findViewById(R.id.traitsProgressBar)
     }
 
     constructor(ctx: Context) : super(ctx)
@@ -160,6 +165,8 @@ class TraitBoxView : ConstraintLayout {
                         .toString()
                 )
 
+                updateTraitProgressBar()
+
                 val imm =
                     context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
                 if (currentTrait!!.format != "text") {
@@ -201,6 +208,23 @@ class TraitBoxView : ConstraintLayout {
         }
 
         setSelection(traitPosition)
+    }
+
+    private fun updateTraitProgressBar() {
+        var traits = controller.getDatabase().allTraitObjects
+
+        // a new trait object is made while assigning to currentTrait
+        // so instead of finding the index of currentTrait object
+        // we find the index of the trait name
+        val visibleTraits = ArrayList<String>()
+        for (traitObject in traits) {
+            if (traitObject.visible) {
+                visibleTraits.add(traitObject.trait)
+            }
+        }
+
+        traitsProgressBar.max = visibleTraits.size
+        traitsProgressBar.progress = visibleTraits.indexOf(currentTrait?.trait) + 1
     }
 
     fun getNewTraits(): Map<String, String> {

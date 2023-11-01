@@ -4,6 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <ProgressBar
+        android:id="@+id/traitsProgressBar"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleHorizontal"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <ImageView
         android:id="@+id/traitLeft"
         android:layout_width="wrap_content"
@@ -17,7 +26,7 @@
         android:src="@drawable/trait_chevron_left"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/traitsProgressBar"/>
 
     <ImageView
         android:id="@+id/traitRight"
@@ -32,7 +41,7 @@
         android:src="@drawable/trait_chevron_right"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/traitsProgressBar" />
 
     <Spinner
         android:id="@+id/traitType"
@@ -44,7 +53,7 @@
         app:layout_constraintBottom_toTopOf="@id/traitDetails"
         app:layout_constraintEnd_toStartOf="@id/traitRight"
         app:layout_constraintStart_toEndOf="@id/traitLeft"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/traitsProgressBar" />
 
     <TextView
         android:id="@+id/traitDetails"
