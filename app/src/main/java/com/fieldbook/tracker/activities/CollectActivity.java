@@ -2261,6 +2261,11 @@ public class CollectActivity extends ThemedActivity
 
         if (isAttribute) {
 
+            if (label.equals(context.getString(R.string.field_name_attribute))) {
+                String fieldName = ((CollectActivity) context).getPreferences().getString(GeneralKeys.FIELD_FILE, "");
+                return (fieldName == null || fieldName.isEmpty()) ? dataMissingString : fieldName;
+            }
+
             String[] values = database.getDropDownRange(label, plotId);
             if (values == null || values.length == 0) {
                 return dataMissingString;

@@ -248,6 +248,8 @@
     <string name="dialog_att_chooser_traits">Traits</string>
     <string name="dialog_att_chooser_other">Other</string>
     <string name="dialog_collect_att_chooser_title">Choose an attribute</string>
+    <string name="infobars_attribute_placeholder">Select</string>
+    <string name="field_name_attribute">field_name</string>
 
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
@@ -351,6 +353,10 @@
     <string name="trait_layout_print_text_field_title_4">Text4:</string>
     <string name="trait_layout_print_barcode_field_title">Barcode:</string>
     <string name="trait_layout_print_label_copies_title">Copies:</string>
+    <string name="trait_layout_print_label_simple_text">simple</string>
+    <string name="trait_layout_print_label_detailed_text">detailed</string>
+    <string name="trait_layout_print_label_date_option">date</string>
+    <string name="trait_layout_print_label_blank_option">blank</string>
 
     <string name="printer_open">Printer is open</string>
     <string name="printer_paused">Printer is paused</string>
