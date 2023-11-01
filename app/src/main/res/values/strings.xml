@@ -704,8 +704,15 @@
     <string name="pref_beta_repeated_values_disabled_title">Repeated Measures Disabled</string>
     <string name="pref_beta_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable.</string>
 
-
-
+    <string name="pref_beta_enable_field_audio_title">Enable Field Audio</string>
+    <string name="pref_beta_enable_field_audio_summary">Enable audio recording feature for the entire field.</string>
+    <string name="menu_collect_start_field_audio">Start Recorder</string>
+    <string name="menu_collect_stop_field_audio">Stop Recorder</string>
+    <string name="field_audio_recording_start">Recording field level audio.</string>
+    <string name="field_audio_recording_stop">A new field level audio file was saved.</string>
+    <string name="field_audio_recording_warning">Field level audio is already recording. Stop that first.</string>
+    <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
+    <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
 
 
     <!-- ABOUT -->

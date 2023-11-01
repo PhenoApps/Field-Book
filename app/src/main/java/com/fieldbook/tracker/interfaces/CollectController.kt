@@ -34,9 +34,9 @@ interface CollectController: FieldController {
                      plotId: String?,
                      data: String?,
                      traitIndex: Int): Boolean
+    fun isFieldAudioRecording(): Boolean
     fun queryForLabelValue(
         plotId: String, label: String, isAttribute: Boolean?
     ) : String
-
     fun getGeoNavPopupSpinnerItems(): ArrayList<String>
 }
