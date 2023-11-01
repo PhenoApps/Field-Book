@@ -1197,7 +1197,7 @@ public class ConfigActivity extends ThemedActivity {
                                     if (tableFile != null && tableFile.exists()) tableFile.delete();
 
                                     //share the zip file
-                                    new FileUtil().shareFile(ConfigActivity.this, ep, zipFile);
+                                    FileUtil.shareFile(ConfigActivity.this, ep, zipFile);
                                 }
                             }
                         }
@@ -1227,15 +1227,15 @@ public class ConfigActivity extends ThemedActivity {
                             if (dbFile != null) dbFile.delete();
                             if (tableFile != null) tableFile.delete();
 
-                            new FileUtil().shareFile(ConfigActivity.this, ep, zipFile);
+                            FileUtil.shareFile(ConfigActivity.this, ep, zipFile);
 
                         } else if (checkDbBool) {
 
-                            new FileUtil().shareFile(ConfigActivity.this, ep, dbFile);
+                            FileUtil.shareFile(ConfigActivity.this, ep, dbFile);
 
                         } else if (checkExcelBool) {
 
-                            new FileUtil().shareFile(ConfigActivity.this, ep, tableFile);
+                            FileUtil.shareFile(ConfigActivity.this, ep, tableFile);
                         }
                     }
                 }
