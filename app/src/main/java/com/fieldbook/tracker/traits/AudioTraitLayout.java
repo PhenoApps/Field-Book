@@ -277,7 +277,6 @@ public class AudioTraitLayout extends BaseTraitLayout {
         private void stopRecording() {
             try {
                 mediaRecorder.stop();
-                releaseRecorder();
                 updateObservation(getCurrentTrait(), recordingLocation.toString());
                 audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
                 getCollectInputView().setText(fieldAudioHelper.getRecordingLocation().toString());
