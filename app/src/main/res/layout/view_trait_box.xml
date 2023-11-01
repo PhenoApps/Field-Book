@@ -4,15 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ProgressBar
-        android:id="@+id/traitsProgressBar"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="?android:attr/progressBarStyleHorizontal"
-        app:layout_constraintTop_toTopOf="parent"/>
-
     <ImageView
         android:id="@+id/traitLeft"
         android:layout_width="wrap_content"
@@ -24,9 +15,9 @@
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:src="@drawable/trait_chevron_left"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/traitsProgressBar"/>
+        app:layout_constraintBottom_toTopOf="@id/traitsProgressBar"
+        app:layout_constraintTop_toTopOf="@+id/traitType"
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <ImageView
         android:id="@+id/traitRight"
@@ -39,21 +30,21 @@
         android:paddingEnd="0dp"
         android:paddingBottom="10dp"
         android:src="@drawable/trait_chevron_right"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/traitsProgressBar" />
+        app:layout_constraintTop_toTopOf="@+id/traitType"
+        app:layout_constraintBottom_toTopOf="@id/traitsProgressBar" />
 
     <Spinner
         android:id="@+id/traitType"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:layout_marginBottom="25dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         android:gravity="center"
         app:layout_constraintBottom_toTopOf="@id/traitDetails"
         app:layout_constraintEnd_toStartOf="@id/traitRight"
-        app:layout_constraintStart_toEndOf="@id/traitLeft"
-        app:layout_constraintTop_toBottomOf="@id/traitsProgressBar" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/traitLeft" />
 
     <TextView
         android:id="@+id/traitDetails"
@@ -68,6 +59,16 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/traitType" />
+        app:layout_constraintTop_toBottomOf="@id/traitType"
+        app:layout_constraintBottom_toTopOf="@id/traitsProgressBar" />
+
+    <ProgressBar
+        android:id="@+id/traitsProgressBar"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleHorizontal"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
