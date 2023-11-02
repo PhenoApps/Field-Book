@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -29,6 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
 
+
 @AndroidEntryPoint
 class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
@@ -42,6 +44,9 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private lateinit var editDateTextView: TextView
     private lateinit var exportDateTextView: TextView
     private lateinit var countTextView: TextView
+
+    private lateinit var brapiDetailsTextView: TextView
+    private lateinit var brapiDetailsRelativeLayout: RelativeLayout
     private lateinit var observationLevelTextView: TextView
 
     override fun onCreateView(
@@ -64,7 +69,21 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         editDateTextView.text = " ${field.getDate_edit().split(" ")[0]}"
         exportDateTextView.text = " ${field.getDate_export().split(" ")[0]}"
         countTextView.text = " ${field.getCount()}"
-        observationLevelTextView.text = " ${field.getObservation_level()}"
+
+        // Only display BrAPI section if field was imported via BrAPI
+        brapiDetailsTextView = view.findViewById(R.id.brapiDetailsTextView)
+        brapiDetailsRelativeLayout = view.findViewById(R.id.brapiDetailsRelativeLayout)
+        val observationLevel = field.getObservation_level()
+
+        if (observationLevel != null && !observationLevel.isEmpty()) {
+            brapiDetailsTextView.visibility = View.VISIBLE
+            brapiDetailsRelativeLayout.visibility = View.VISIBLE
+            observationLevelTextView.text = observationLevel
+
+        } else {
+            brapiDetailsTextView.visibility = View.GONE
+            brapiDetailsRelativeLayout.visibility = View.GONE
+        }
 
         val collectButton: Button = view.findViewById(R.id.collectButton)
         val exportButton: Button = view.findViewById(R.id.exportButton)
