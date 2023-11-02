@@ -33,15 +33,6 @@
             android:singleLine="true"
             tools:text="field_sample"/>
 
-        <TextView style="@style/TextViewStyle.Sub"
-            android:id="@+id/observationLevelLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:minWidth="40dp"
-            android:singleLine="true"
-            android:textSize="@dimen/text_size_small"/>
-
     </LinearLayout>
 
 </LinearLayout>

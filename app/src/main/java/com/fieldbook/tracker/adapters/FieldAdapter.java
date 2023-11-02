@@ -102,7 +102,7 @@ public class FieldAdapter extends BaseAdapter {
 //            holder.exportDate = convertView.findViewById(R.id.field_export_date);
             holder.active = convertView.findViewById(R.id.fieldRadio);
 //            holder.menuPopup = convertView.findViewById(R.id.popupMenu);
-            holder.observationLevel = convertView.findViewById(R.id.observationLevelLbl);
+//            holder.observationLevel = convertView.findViewById(R.id.observationLevelLbl);
 
             convertView.setTag(holder);
         } else {
@@ -121,7 +121,7 @@ public class FieldAdapter extends BaseAdapter {
 //        String importDate = getItem(position).getDate_import();
 //        String editDate = getItem(position).getDate_edit();
 //        String exportDate = getItem(position).getDate_export();
-        String observationLevel = getItem(position).getObservation_level();
+//        String observationLevel = getItem(position).getObservation_level();
 
 //        if (importDate != null) {
 //            importDate = importDate.split(" ")[0];
@@ -135,18 +135,18 @@ public class FieldAdapter extends BaseAdapter {
 //            exportDate = exportDate.split(" ")[0];
 //        }
 //
-        if (observationLevel == null) {
-            holder.observationLevel.setVisibility(View.GONE);//make invisible
-        } else {
-            holder.observationLevel.setVisibility(View.VISIBLE);
-        }
+//        if (observationLevel == null) {
+//            holder.observationLevel.setVisibility(View.GONE);//make invisible
+//        } else {
+//            holder.observationLevel.setVisibility(View.VISIBLE);
+//        }
 
         holder.fieldName.setText(getItem(position).getExp_name());
 //        holder.count.setText(getItem(position).getCount());
 //        holder.importDate.setText(importDate);
 //        holder.editDate.setText(editDate);
 //        holder.exportDate.setText(exportDate);
-        holder.observationLevel.setText(observationLevel);
+//        holder.observationLevel.setText(observationLevel);
 
         holder.active.setOnClickListener(v -> fieldClick(getItem(position)));
 
@@ -156,14 +156,11 @@ public class FieldAdapter extends BaseAdapter {
 
             if (field.getExp_source() == null) {
                 holder.active.setChecked((ep.getString(GeneralKeys.FIELD_FILE, "")
-                        .contentEquals(holder.fieldName.getText())) &&
-                        (ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "")
-                                .contentEquals(holder.observationLevel.getText())));
+                        .contentEquals(holder.fieldName.getText())));
             } else if (field.getExp_alias() != null) {
                 String alias = ep.getString(GeneralKeys.FIELD_ALIAS, "");
                 String level = ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "");
-                holder.active.setChecked(alias.contentEquals(field.getExp_alias())
-                        && level.contentEquals(holder.observationLevel.getText()));
+                holder.active.setChecked(alias.contentEquals(field.getExp_alias()));
             }
 
         } else holder.active.setChecked(false);
