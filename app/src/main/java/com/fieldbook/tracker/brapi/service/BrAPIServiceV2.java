@@ -26,7 +26,7 @@ import com.fieldbook.tracker.utilities.SuccessFunction;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
-
+import org.brapi.client.v2.ApiResponse;
 import org.brapi.client.v2.BrAPIClient;
 import org.brapi.client.v2.model.exceptions.ApiException;
 import org.brapi.client.v2.model.queryParams.core.ProgramQueryParams;
@@ -35,6 +35,7 @@ import org.brapi.client.v2.model.queryParams.core.TrialQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams;
+import org.brapi.client.v2.model.queryParams.germplasm.GermplasmQueryParams;
 import org.brapi.client.v2.modules.core.ProgramsApi;
 import org.brapi.client.v2.modules.core.StudiesApi;
 import org.brapi.client.v2.modules.core.TrialsApi;
@@ -42,16 +43,20 @@ import org.brapi.client.v2.modules.phenotype.ImagesApi;
 import org.brapi.client.v2.modules.phenotype.ObservationUnitsApi;
 import org.brapi.client.v2.modules.phenotype.ObservationVariablesApi;
 import org.brapi.client.v2.modules.phenotype.ObservationsApi;
+import org.brapi.client.v2.modules.germplasm.GermplasmApi;
 import org.brapi.v2.model.BrAPIExternalReference;
 import org.brapi.v2.model.BrAPIMetadata;
+import org.brapi.v2.model.BrAPIResponse;
 import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
 import org.brapi.v2.model.core.BrAPITrial;
+import org.brapi.v2.model.germ.BrAPIGermplasm;
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudyListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudySingleResponse;
 import org.brapi.v2.model.core.response.BrAPITrialListResponse;
+import org.brapi.v2.model.germ.request.BrAPIGermplasmSearchRequest;
 import org.brapi.v2.model.pheno.BrAPIImage;
 import org.brapi.v2.model.pheno.BrAPIObservation;
 import org.brapi.v2.model.pheno.BrAPIObservationUnit;
@@ -67,6 +72,9 @@ import org.brapi.v2.model.pheno.response.BrAPIObservationLevelListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
+import org.brapi.v2.model.germ.BrAPIGermplasm;
+import org.brapi.v2.model.germ.response.BrAPIGermplasmListResponse;
+import org.brapi.v2.model.BrAPIAcceptedSearchResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,9 +85,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.function.BiFunction;
@@ -99,6 +109,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     private final TrialsApi trialsApi;
     private final ObservationsApi observationsApi;
     private final ObservationUnitsApi observationUnitsApi;
+    private final GermplasmApi germplasmApi;
     private final ObservationVariablesApi traitsApi;
 
     public BrAPIServiceV2(Context context) {
@@ -113,6 +124,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
         this.observationUnitsApi = new ObservationUnitsApi(apiClient);
+        this.germplasmApi = new GermplasmApi(apiClient);
     }
 
     @Override
@@ -462,6 +474,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
+            final BrAPIObservationUnit allAttributeValues = new BrAPIObservationUnit();
+            Set<String> allGermplasmNames = new HashSet<>();
+            Logger logger = Logger.getLogger(getClass().getName());
 
             ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
             queryParams.studyDbId(studyDbId);
@@ -480,9 +495,20 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     }
 
                     //every time
-                    mapAttributeValues(study, response.getResult().getData());
+//                    mapAttributeValues(study, response.getResult().getData());
+
+//                    allAttributeValues.addAll(response.getResult().getData());
 
                     queryParams.page(queryParams.page() + 1);
+
+                    // Extract germplasm names
+//                    Set<String> germplasmNames = extractGermplasmNames(response.getResult().getData());
+                    Set<String> germplasmNames = (response.getResult().getData().stream()
+                            .filter(unit -> unit.getGermplasmName() != null)
+                            .map(BrAPIObservationUnit::getGermplasmName)
+                            .collect(Collectors.toSet()));
+                    logger.info("Germplasm names are: " + germplasmNames);
+                    allGermplasmNames.addAll(germplasmNames);
 
                     // Stop after 50 iterations (for safety)
                     // Stop if the current page is the last page according to the server
@@ -490,9 +516,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     if((queryParams.page() > 50)
                             || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
                             || (response.getResult().getData().size() == 0)){
-                        // Stop recursive loop
-                        function.apply(study);
-                    }else {
+
+                        getGermplasmDetails(allGermplasmNames, failFunction);
+//                        mapAttributeValues(study, allAttributeValues, germplasmDetails);
+
+                    } else {
                         try {
                             observationUnitsApi.observationunitsGetAsync(queryParams, this);
                         } catch (ApiException error) {
@@ -518,17 +546,17 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data) {
+    private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data, List<BrAPIGermplasm> germplasm) {
         Logger logger = Logger.getLogger(getClass().getName());
 
         List<String> attributes = study.getAttributes();
         logger.info("Initial attributes: " + attributes);
 
-        Set<String> germplasmNames = data.stream()
-                .filter(unit -> unit.getGermplasmName() != null)
-                .map(BrAPIObservationUnit::getGermplasmName)
-                .collect(Collectors.toSet());
-        logger.info("Germplasm names are: " + germplasmNames);
+//        Set<String> germplasmNames = data.stream()
+//                .filter(unit -> unit.getGermplasmName() != null)
+//                .map(BrAPIObservationUnit::getGermplasmName)
+//                .collect(Collectors.toSet());
+//        logger.info("Germplasm names are: " + germplasmNames);
 
         List<List<String>> attributesTable = new ArrayList<>();
 
@@ -578,6 +606,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             }
 
             if (unit.getGermplasmName() != null) {
+
+                // find matching germplasm details and extract synonyms and pedigree
+
                 attributesMap.put("Germplasm", unit.getGermplasmName());
                 logger.info("Mapped Germplasm to " + unit.getGermplasmName());
             }
@@ -611,6 +642,56 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
         study.getValues().addAll(attributesTable);
         logger.info("Updated study values with attributes table.");
+    }
+
+//    public class BrapiV2ApiCallBack implements ApiCallback<ApiResponse<Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>>> {
+//        @Override
+//        public void onSuccess(ApiResponse<Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> response, int statusCode, Map<String, List<String>> responseHeaders) {
+//            if (response.getData() != null) {
+//                Optional<BrAPIGermplasmListResponse> germplasmResponse = response.getData().getLeft();
+//                if (germplasmResponse.isPresent()) {
+//                    // Process the germplasmResponse here
+//                    logger.info("Germplasm list response is: " + germplasmResponse.get());
+//                } else {
+//                    // Handle the case when the response doesn't contain the expected data
+//                    // You can decide how to handle this situation based on your requirements
+//                }
+//            }
+//        }
+//
+//        @Override
+//        public void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders) {
+//            failFunction.apply(error.getCode());
+//            Log.e("BrAPIServiceV2", "API Exception", error);
+//        }
+//    }
+
+
+    public void getGermplasmDetails(Set<String> allGermplasmNames, final Function<Integer, Void> failFunction) {
+        try {
+            final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
+
+            BrAPIGermplasmSearchRequest body = new BrAPIGermplasmSearchRequest();
+            List<String> germplasmNamesList = new ArrayList<>(allGermplasmNames);
+
+            body.setGermplasmNames(germplasmNamesList);
+            body.page(0).pageSize(pageSize);
+            Logger logger = Logger.getLogger(getClass().getName());
+
+            ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> response = germplasmApi.searchGermplasmPost(body);
+            if (response.getBody().getLeft().isPresent()) {
+                BrAPIGermplasmListResponse listResponse = response.getBody().getLeft().get();
+                logger.info("Retrieved BrAPIGermplasmListResponse: " + listResponse);
+            } else {
+                BrAPIAcceptedSearchResponse searchResponse = response.getBody().getRight().get();
+                logger.info("Retrieved BrAPIAcceptedSearchResponse: " + searchResponse);
+            }
+
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
+        }
     }
 
     private String getRowColStr(BrAPIPositionCoordinateTypeEnum type) {
