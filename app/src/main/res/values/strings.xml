@@ -62,9 +62,6 @@
     <string name="changelog_title">Changelog</string>
 
 
-
-
-
     <!-- FIELDS -->
     <!-- General -->
     <string name="list_item_field_popup_menu_content_description">Opens a menu for the selected field.</string>
@@ -149,8 +146,6 @@
     <string name="fields_options">Options</string>
 
 
-
-
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sort</string>
@@ -225,8 +220,6 @@
     <string name="traits_create_categories_value_text">Enter category value here</string>
     <string name="list_item_category_delete_content_description">Delete the category.</string>
     <string name="dialog_new_trait_add_category_content_description">Add new category.</string>
-
-
 
 
     <!-- COLLECT -->
@@ -438,8 +431,6 @@
     <string name="act_collect_na_value_button_content_description">Fill value with not available.</string>
 
 
-
-
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Local</string>
@@ -467,10 +458,6 @@
     <string name="citation_title">Citation</string>
     <string name="citation_string">If you utilize Field Book for research, please cite the following journal article:</string>
     <string name="citation_text" translatable="false">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
-
-
-
-
 
 
     <!-- SETTINGS -->
@@ -705,9 +692,6 @@
     <string name="pref_beta_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable.</string>
 
 
-
-
-
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">About</string>
@@ -739,9 +723,6 @@
     <string name="check_updates_title">Checking for Updates…</string>
     <string name="found_updates_title">Download Latest Version</string>
     <string name="no_updates_title">Running Latest Version</string>
-
-
-
 
 
     <!-- BRAPI -->
@@ -911,9 +892,6 @@
     <string name="brapi_na">NA</string>
 
 
-
-
-
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">Would you like to enable the tutorial? This setting can be changed in the Settings.</string>
@@ -969,5 +947,7 @@
     <string name="tutorial_traits_format_description">Different trait formats are indicated with different icons.</string>
     <string name="tutorial_traits_visibility_title">Trait Visibility</string>
     <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

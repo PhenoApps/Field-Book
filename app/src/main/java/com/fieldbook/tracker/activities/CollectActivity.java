@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -48,6 +49,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
+import com.fieldbook.tracker.dialogs.SearchDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -1269,9 +1271,12 @@ public class CollectActivity extends ThemedActivity
                 sequence.start();
                 break;
             case searchId:
-                intent.setClassName(CollectActivity.this,
-                        SearchActivity.class.getName());
-                startActivity(intent);
+//                intent.setClassName(CollectActivity.this,
+//                        SearchActivity.class.getName());
+//                startActivity(intent);
+
+                SearchDialog searchdialog = new SearchDialog(this);
+                searchdialog.show(getSupportFragmentManager(), "DialogTag");
                 break;
 
             case resourcesId:
