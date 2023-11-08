@@ -34,6 +34,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
+import com.fieldbook.tracker.utilities.FileUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -326,6 +327,9 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
                         ZipUtil.Companion.zip(context,
                                 new DocumentFile[] { DocumentFile.fromFile(new File(dbPath)), tempOutput },
                                 zipOutput);
+
+                        // share the zip file
+                        new FileUtil().shareFile(context, ep, zipFile);
 
                         if (tempOutput != null && !tempOutput.delete()) {
 

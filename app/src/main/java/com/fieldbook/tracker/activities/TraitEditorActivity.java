@@ -891,7 +891,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                         osw.close();
                         output.close();
 
-                        new FileUtil().shareFile(this, ep, exportDoc);
+                        FileUtil.shareFile(this, ep, exportDoc);
                     }
                 }
             }

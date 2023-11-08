@@ -5,4 +5,11 @@
         android:summary="@string/pref_beta_repeated_values_summary"
         android:defaultValue="false"
         android:icon="@drawable/ic_beta"/>
+
+    <CheckBoxPreference android:key="com.tracker.fieldbook.preferences.keys.enable_field_audio"
+        android:title="@string/pref_beta_enable_field_audio_title"
+        android:summary="@string/pref_beta_enable_field_audio_summary"
+        android:defaultValue="false"
+        android:icon="@drawable/ic_tb_field_mic_on"/>
+
 </PreferenceScreen>
