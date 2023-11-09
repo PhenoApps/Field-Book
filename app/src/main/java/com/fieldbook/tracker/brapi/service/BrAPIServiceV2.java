@@ -475,7 +475,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
             List<BrAPIObservationUnit> allAttributeValues = new ArrayList<>();
-            Set<String> allGermplasmNames = new HashSet<>();
+            List<String> allGermplasmDbIds = new ArrayList<>();
 
             ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
             queryParams.studyDbId(studyDbId);
@@ -496,13 +496,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                     queryParams.page(queryParams.page() + 1);
 
-                    // Extract germplasm names
-                    Set<String> germplasmNames = (response.getResult().getData().stream()
-                            .filter(unit -> unit.getGermplasmName() != null)
-                            .map(BrAPIObservationUnit::getGermplasmName)
-                            .collect(Collectors.toSet()));
-//                    logger.info("Germplasm names are: " + germplasmNames);
-                    allGermplasmNames.addAll(germplasmNames);
+                    // Extract unique germplasm info
+                    List<String> germplasmDbIds = response.getResult().getData().stream()
+                            .filter(unit -> unit.getGermplasmDbId() != null)
+                            .map(BrAPIObservationUnit::getGermplasmDbId)
+                            .collect(Collectors.toList());
+//                    logger.info("Germplasm DbIds are: " + germplasmDbIds);
+                    allGermplasmDbIds.addAll(germplasmDbIds);
 
                     // Stop after 50 iterations (for safety)
                     // Stop if the current page is the last page according to the server
@@ -511,7 +511,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                             || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
                             || (response.getResult().getData().size() == 0)){
                         List<BrAPIGermplasm> germplasmDetails;
-                        germplasmDetails = getGermplasmDetails(allGermplasmNames, failFunction);
+                        germplasmDetails = getGermplasmDetails(allGermplasmDbIds, failFunction);
                         mapAttributeValues(study, allAttributeValues, germplasmDetails);
                         function.apply(study);
 
@@ -667,22 +667,20 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         return null; // Germplasm with the given dbId not found
     }
 
-    public List<BrAPIGermplasm> getGermplasmDetails(Set<String> allGermplasmNames, final Function<Integer, Void> failFunction) {
+    public List<BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
         List<BrAPIGermplasm> germplasmDetails = new ArrayList<>();
         try {
             final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
                     .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
 
             BrAPIGermplasmSearchRequest body = new BrAPIGermplasmSearchRequest();
-            List<String> germplasmNamesList = new ArrayList<>(allGermplasmNames);
-//            List<BrAPIGermplasm> germplasmDetails = new ArrayList<>();
             String searchResultsDbId;
 
-            body.setGermplasmNames(germplasmNamesList);
+            body.setGermplasmDbIds(allGermplasmDbIds);
             body.page(0).pageSize(pageSize);
             Logger logger = Logger.getLogger(getClass().getName());
 
-            logger.info("All germplasm names are: " + allGermplasmNames);
+            logger.info("All germplasm ids are: " + allGermplasmDbIds);
 
             ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> response = germplasmApi.searchGermplasmPost(body);
             if (response.getBody().getLeft().isPresent()) { // Handle case where results are returned immediately
