@@ -270,7 +270,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             int screenWidth = displayMetrics.widthPixels;
 
-// Set the QR Code size to be 80% of the screen width
+            // Set the QR Code size to be 80% of the screen width
             int qrCodeSize = (int) (screenWidth * 0.8);
 
             BitMatrix bitMatrix = new MultiFormatWriter().encode(jsonConfig, BarcodeFormat.QR_CODE, qrCodeSize, qrCodeSize);
@@ -575,7 +575,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if(oidcFlow != null)
             brapiOIDCFlow.setValue(oidcFlow);
 
-//        setBaseURLSummary();
         setOidcFlowUi();
         brapiAuth();
     }
@@ -606,8 +605,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
 
         oldBaseUrl = newValue;
-
-        setBaseURLSummary();
     }
 
     /**
