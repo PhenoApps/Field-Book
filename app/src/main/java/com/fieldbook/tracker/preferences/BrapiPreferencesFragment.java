@@ -116,6 +116,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                         if (sp.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "").equals("brapi")) {
                             sp.edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
                         }
+                        // remove brapi auth token when brapi is disabled
+                        sp.edit().remove(GeneralKeys.BRAPI_TOKEN).apply();
                     }
                     updatePreferencesVisibility(isChecked);
                     return true;

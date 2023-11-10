@@ -240,7 +240,6 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                             }
                         }
 
-
                     } catch (e: Exception) {
 
                         e.printStackTrace()

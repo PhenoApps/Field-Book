@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.fieldbook.tracker.database.DataHelper
 import com.google.gson.Gson
+import org.json.JSONArray
 import org.json.JSONObject
 
 class GeoJsonUtil {
@@ -39,24 +40,14 @@ class GeoJsonUtil {
         }
     }
 
-    data class GeoJSON(
-        val type: String = "Feature",
-        val geometry: Geometry,
-        val properties: Map<String, String>? = null
-    ) {
-        fun toJson() = JSONObject(
-            mapOf(
-                "type" to this.type,
-                "geometry" to mapOf(
-                    "type" to this.geometry.type,
-                    "coordinates" to this.geometry.coordinates,
-                    "properties" to properties
-                )
-            )
-        )
+    data class GeoJSON(val type: String = "Feature", val geometry: Geometry, val properties: Map<String, String>? = null) {
+        fun toJson() = JSONObject(mapOf("type" to this.type,
+            "geometry" to mapOf("type" to this.geometry.type,
+                "coordinates" to this.geometry.coordinates,
+                "properties" to properties
+            )))
 
-        fun toCoordinateString(delim: String) =
-            "${geometry.coordinates[0]}$delim ${geometry.coordinates[1]}"
+        fun toCoordinateString(delim: String) = "${geometry.coordinates[0]}$delim ${geometry.coordinates[1]}"
     }
 
     companion object {
@@ -105,18 +96,17 @@ class GeoJsonUtil {
 
         private fun fixObservationUnitCoordinates(helper: DataHelper, db: SQLiteDatabase) {
 
-            val updatedObservationUnits =
-                helper.queryObservationUnitsWithGeoCoordinates(db).map { model ->
+            val updatedObservationUnits = helper.queryObservationUnitsWithGeoCoordinates(db).map { model ->
 
-                    model.apply {
+                model.apply {
 
-                        geo_coordinates?.let { coords ->
+                    geo_coordinates?.let { coords ->
 
-                            geo_coordinates = swap(coords)
+                        geo_coordinates = swap(coords)
 
-                        }
                     }
                 }
+            }
 
             //update the database study models
             helper.updateObservationUnitModels(db, updatedObservationUnits)
@@ -136,6 +126,8 @@ class GeoJsonUtil {
             helper.updateObservationModels(db, updatedObservations)
         }
 
+        private fun DataHelper.queryObservationUnitsWithGeoCoordinates(db: SQLiteDatabase) = getAllObservationUnits(db).filter { it.geo_coordinates !in setOf(null, "null") && it.geo_coordinates?.isNotBlank() == true }
+        private fun DataHelper.queryLocationObservations(db: SQLiteDatabase) = getAllObservations(db).filter { it.observation_variable_field_book_format in setOf("location", "gnss") }
         private fun DataHelper.queryObservationUnitsWithGeoCoordinates(db: SQLiteDatabase) =
             getAllObservationUnits(db).filter {
                 it.geo_coordinates !in setOf(

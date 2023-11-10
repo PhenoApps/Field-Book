@@ -222,9 +222,7 @@ class ObservationUnitPropertyDao {
                         AND obs.${Study.FK} = $studyId
                         AND obs.value IS NOT NULL
                         AND vars.observation_variable_name = obs.observation_variable_name
-                        AND vars.internal_id_observation_variable in ${
-                    traits.map { "?" }.joinToString(",", "(", ")")
-                }
+                        AND vars.internal_id_observation_variable in ${traits.map { "?" }.joinToString(",", "(", ")")}
                     
                 """.trimIndent()
 

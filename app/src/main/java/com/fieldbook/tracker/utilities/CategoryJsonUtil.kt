@@ -4,6 +4,9 @@ import com.fieldbook.tracker.traits.CategoricalTraitLayout
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 
 
 /**

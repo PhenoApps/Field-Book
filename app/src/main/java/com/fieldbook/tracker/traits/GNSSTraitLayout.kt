@@ -108,9 +108,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         true
     }
 
-    constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    constructor(context: Context?) : super(context) {}
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {}
 
     data class AverageInfo(var unit: ObservationUnitModel, var location: Location?,
                            var points: List<Pair<Double, Double>>,
@@ -411,9 +411,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private fun updateCoordinateObservation(unit: ObservationUnitModel, json: GeoJsonUtil.GeoJSON) {
 
-        val coordinates = "${json.geometry.coordinates[1]}; ${json.geometry.coordinates[0]}; ${
-            json.properties?.get("fix")
-        }"
+        val coordinates = "${json.geometry.coordinates[1]}; ${json.geometry.coordinates[0]}; ${json.properties?.get("fix")}"
 
         ObservationUnitDao.updateObservationUnit(unit, json.toJson().toString())
 

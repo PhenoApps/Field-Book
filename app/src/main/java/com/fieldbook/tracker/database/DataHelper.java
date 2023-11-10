@@ -174,7 +174,7 @@ public class DataHelper {
      * Helper function to convert array to csv format
      */
     private static String convertToCommaDelimited(String[] list) {
-        StringBuilder ret = new StringBuilder();
+        StringBuilder ret = new StringBuilder("");
         for (int i = 0; list != null && i < list.length; i++) {
             ret.append(list[i]);
             if (i < list.length - 1) {

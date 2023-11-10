@@ -69,7 +69,6 @@ class ObservationUnitDao {
 
         } ?: emptyArray()
 
-
         /**
          * Updates a given observation unit row with a geo coordinates string.
          */

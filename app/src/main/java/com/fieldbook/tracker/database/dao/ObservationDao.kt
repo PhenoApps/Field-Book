@@ -54,8 +54,7 @@ class ObservationDao {
 
         } ?: emptyArray()
 
-        fun getAll(studyId: String, obsUnit: String, traitDbId: String): Array<ObservationModel> =
-            withDatabase { db ->
+        fun getAll(studyId: String, obsUnit: String, traitDbId: String): Array<ObservationModel> = withDatabase { db ->
 
                 val traitObj = ObservationVariableDao.getTraitById(traitDbId.toInt())
                 db.query(
