@@ -29,6 +29,7 @@ import com.fieldbook.tracker.adapters.ImageTraitAdapter
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
+import com.fieldbook.tracker.utilities.ExifUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.GoProWrapper
 import com.google.android.exoplayer2.DefaultLoadControl
@@ -294,7 +295,8 @@ class GoProTraitLayout :
         val plot = currentRange.plot_id
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
         val traitName = currentTrait.trait
-        val traitType = type
+        val traitFormat = type
+        val traitDbId = currentTrait.id
         val time = Utils.getDateTime()
         val name = "${traitName}_${plot}_$time.png"
 
@@ -303,7 +305,8 @@ class GoProTraitLayout :
             "studyId" to studyId,
             "plot" to plot,
             "traitName" to traitName,
-            "traitType" to traitType,
+            "traitFormat" to traitFormat,
+            "traitDbId" to traitDbId,
             "name" to name
         )
 
@@ -542,7 +545,6 @@ class GoProTraitLayout :
 
                 val imageView = ImageView(context)
 
-                //TODO check performance replacing this with DocumentsContract thumbnail function
                 val bmp = BitmapFactory.decodeStream(input)
 
                 val scaled = bmp.scale(512, 512, true)
@@ -580,8 +582,8 @@ class GoProTraitLayout :
 
                 database.insertObservation(
                     plot,
-                    data["traitName"],
-                    data["traitType"],
+                    data["traitDbId"],
+                    data["traitFormat"],
                     name,
                     prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
                             + prefs.getString(GeneralKeys.LAST_NAME, ""),
@@ -612,6 +614,8 @@ class GoProTraitLayout :
                 //get current trait's trait name, use it as a plot_media directory
                 currentTrait.trait?.let { traitName ->
 
+                    val traitDbId = currentTrait.id
+
                     val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
 
                     DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)
@@ -619,7 +623,7 @@ class GoProTraitLayout :
 
                             val plot = data["plot"]
 
-                            val studyId = data["studyId"]
+                            val studyId = data["studyId"] ?: String()
 
                             val name = data["name"] ?: String()
 
@@ -629,15 +633,14 @@ class GoProTraitLayout :
 
                                     bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
 
-                                    database.deleteTraitByValue(studyId, plot, traitName, name)
+                                    database.deleteTraitByValue(studyId, plot, traitDbId, name)
 
                                     database.insertObservation(
                                         plot,
-                                        data["traitName"],
-                                        data["traitType"],
+                                        data["traitDbId"],
+                                        data["traitFormat"],
                                         file.uri.toString(),
-                                        prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
-                                                + prefs.getString(GeneralKeys.LAST_NAME, ""),
+                                        (activity as? CollectActivity)?.person,
                                         (activity as? CollectActivity)?.locationByPreferences,
                                         "",
                                         studyId,
@@ -645,6 +648,20 @@ class GoProTraitLayout :
                                         null,
                                         null
                                     )
+
+                                    //if sdk > 24, can write exif information to the image
+                                    //goal is to encode observation variable model into the user comments
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+                                        ExifUtil.saveVariableUnitModelToExif(
+                                            context,
+                                            database.getStudyById(studyId),
+                                            database.getObservationUnitById(currentRange.plot_id),
+                                            database.getObservationVariableById(currentTrait.id),
+                                            file.uri
+                                        )
+
+                                    }
 
                                     activity?.runOnUiThread {
 
@@ -672,9 +689,11 @@ class GoProTraitLayout :
 
             try {
 
+                val traitDbId = currentTrait.id
+
                 val plot = currentRange.plot_id
                 val toc = System.currentTimeMillis()
-                val uris = database.getAllObservations(studyId, plot, traitName)
+                val uris = database.getAllObservations(studyId, plot, traitDbId)
                 val tic = System.currentTimeMillis()
 
                 Log.d(TAG, "Photo trait query time ${uris.size} photos: ${(tic - toc) * 1e-3}")
@@ -700,12 +719,12 @@ class GoProTraitLayout :
 
     private fun getImageObservations(): Array<ObservationModel> {
 
-        val traitName = collectActivity.traitName
+        val traitDbId = collectActivity.traitDbId.toInt()
         val plot = collectActivity.observationUnit
         val studyId = collectActivity.studyId
 
         return database.getAllObservations(studyId).filter {
-            it.observation_variable_name == traitName && it.observation_unit_id == plot
+            it.observation_variable_db_id == traitDbId && it.observation_unit_id == plot
         }.toTypedArray()
     }
 
@@ -728,7 +747,12 @@ class GoProTraitLayout :
 
                         if (result) {
 
-                            database.deleteTraitByValue(studyId, plot, traitName, image.uri.toString())
+                            database.deleteTraitByValue(
+                                studyId,
+                                plot,
+                                currentTrait.id,
+                                image.uri.toString()
+                            )
 
                             loadAdapterItems()
 

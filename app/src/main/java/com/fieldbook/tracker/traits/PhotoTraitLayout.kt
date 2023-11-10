@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import android.util.AttributeSet
 import android.util.Log
@@ -22,6 +23,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
+import com.fieldbook.tracker.utilities.ExifUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.Utils
 import kotlinx.coroutines.CoroutineScope
@@ -44,7 +46,6 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
     private var uris = arrayListOf<Uri>()
 
-    private var currentPhotoPath: Uri? = null
     private var activity: Activity? = null
 
     private lateinit var recyclerView: RecyclerView
@@ -75,7 +76,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
         recyclerView = act.findViewById(R.id.trait_photo_rv)
         recyclerView.adapter = ImageTraitAdapter(context, this)
 
-        recyclerView.requestFocus();
+        recyclerView.requestFocus()
     }
 
     override fun loadLayout() {
@@ -94,15 +95,22 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
             try {
 
+                val traitDbId = currentTrait.id
+
                 scope.launch {
 
                     val plot = currentRange.plot_id
                     val toc = System.currentTimeMillis()
-                    val uris = database.getAllObservations(studyId, plot, traitName)
+                    val uris = database.getAllObservations(studyId, plot, traitDbId)
                     val tic = System.currentTimeMillis()
-                    Log.d(TAG, "Photo trait query time ${uris.size} photos: ${(tic-toc)*1e-3}")
+                    Log.d(TAG, "Photo trait query time ${uris.size} photos: ${(tic - toc) * 1e-3}")
 
-                    val models = uris.mapIndexed { index, model -> ImageTraitAdapter.Model(model.value, index) }
+                    val models = uris.mapIndexed { index, model ->
+                        ImageTraitAdapter.Model(
+                            model.value,
+                            index
+                        )
+                    }
 
                     activity?.runOnUiThread {
                         (recyclerView.adapter as ImageTraitAdapter).submitList(models)
@@ -151,69 +159,87 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
                 val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
 
+                val traitDbId = currentTrait.id
                 val studyId = (context as CollectActivity).studyId
                 val photosDir = getFieldMediaDirectory(context, sanitizedTraitName)
                 val unit = currentRange.plot_id
-                val dir = getFieldMediaDirectory(context, sanitizedTraitName)
 
-                if (dir != null) {
+                if (photosDir != null) {
 
                     try {
 
-                        if (photosDir != null) {
+                        val cache = File(context.cacheDir, "temp.jpg")
 
-                            val cache = File(context.cacheDir, "temp.jpg")
+                        val uri = GenericFileProvider.getUriForFile(
+                            context,
+                            "com.fieldbook.tracker.fileprovider",
+                            cache
+                        )
 
-                            val uri = GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", cache)
+                        val rep = database.getNextRep(studyId, unit, traitDbId)
 
-                            val rep = database.getNextRep(studyId, unit, traitName)
+                        val generatedName =
+                            currentRange.plot_id + "_" + sanitizedTraitName + "_" + rep + "_" + timeStamp.format(
+                                Calendar.getInstance().time
+                            ) + ".jpg"
 
-                            val generatedName =
-                                currentRange.plot_id + "_" + sanitizedTraitName + "_" + rep + "_" + timeStamp.format(
-                                    Calendar.getInstance().time
-                                ) + ".jpg"
+                        Log.w(TAG, photosDir.uri.toString() + generatedName)
 
-                            Log.w(TAG, dir.uri.toString() + generatedName)
+                        val file = photosDir.createFile("image/jpg", generatedName)
 
-                            val file = dir.createFile("image/jpg", generatedName)
+                        if (file != null) {
 
-                            if (file != null) {
-
-                                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                                    context.contentResolver.openOutputStream(file.uri)?.use { outputStream ->
+                            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                                context.contentResolver.openOutputStream(file.uri)
+                                    ?.use { outputStream ->
                                         inputStream.copyTo(outputStream)
+
+                                        //if sdk > 24, can write exif information to the image
+                                        //goal is to encode observation variable model into the user comments
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+                                            ExifUtil.saveVariableUnitModelToExif(
+                                                context,
+                                                database.getStudyById(studyId),
+                                                database.getObservationUnitById(currentRange.plot_id),
+                                                database.getObservationVariableById(currentTrait.id),
+                                                file.uri
+                                            )
+
+                                        }
                                     }
+                            }
+
+                            if (success) {
+
+                                try {
+
+                                    Utils.scanFile(context, file.uri.toString(), "image/*")
+
+                                    updateTraitAllowDuplicates(
+                                        plotId = unit,
+                                        traitDbId,
+                                        traitName,
+                                        type,
+                                        file.uri.toString(),
+                                        null,
+                                        newTraits,
+                                        rep
+                                    )
+
+                                } catch (e: Exception) {
+
+                                    e.printStackTrace()
+
                                 }
 
-                                if (success) {
+                            } else {
 
-                                    try {
+                                file.delete()
 
-                                        Utils.scanFile(context, file.uri.toString(), "image/*")
-
-                                        updateTraitAllowDuplicates(
-                                            plotId = unit,
-                                            traitName,
-                                            type,
-                                            file.uri.toString(),
-                                            null,
-                                            newTraits,
-                                            rep
-                                        )
-
-                                    } catch (e: Exception) {
-
-                                        e.printStackTrace()
-
-                                    }
-
-                                } else {
-
-                                    file.delete()
-
-                                }
                             }
                         }
+
 
                     } catch (e: Exception) {
 
@@ -235,6 +261,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
     private fun updateTraitAllowDuplicates(
         plotId: String,
+        traitDbId: String,
         traitName: String,
         format: String,
         value: String?,
@@ -254,11 +281,11 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                 newTraits?.set(traitName, v)
                 val studyId = (context as CollectActivity).studyId
                 val observation =
-                    database.getObservationByValue(studyId, plotId, traitName, v)
-                database.deleteTraitByValue(studyId, plotId, traitName, v)
+                    database.getObservationByValue(studyId, plotId, traitDbId, v)
+                database.deleteTraitByValue(studyId, plotId, traitDbId, v)
                 database.insertObservation(
                     plotId,
-                    traitName,
+                    traitDbId,
                     format,
                     newValue ?: v,
                     prefs.getString(
@@ -311,6 +338,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                             if (isBrapi) {
                                 updateTraitAllowDuplicates(
                                     currentRange.plot_id,
+                                    currentTrait.id,
                                     currentTrait.trait,
                                     "photo",
                                     m.uri,
@@ -322,7 +350,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                                 database.deleteTraitByValue(
                                     studyId,
                                     currentRange.plot_id,
-                                    currentTrait.trait,
+                                    currentTrait.id,
                                     m.uri
                                 )
                             }
@@ -339,7 +367,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                         database.deleteTraitByValue(
                             studyId,
                             currentRange.plot_id,
-                            currentTrait.trait,
+                            currentTrait.id,
                             "NA"
                         )
                     }
@@ -395,12 +423,12 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
     private fun getImageObservations(): Array<ObservationModel> {
 
-        val traitName = collectActivity.traitName
+        val traitDbId = collectActivity.traitDbId.toInt()
         val plot = collectActivity.observationUnit
         val studyId = collectActivity.studyId
 
         return database.getAllObservations(studyId).filter {
-            it.observation_variable_name == traitName && it.observation_unit_id == plot
+            it.observation_variable_db_id == traitDbId && it.observation_unit_id == plot
         }.toTypedArray()
     }
 
@@ -439,7 +467,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
         val studyId = (context as CollectActivity).studyId
         val rep = (context as CollectActivity).rep
-        val status = database.isBrapiSynced(studyId, currentRange.plot_id, currentTrait.trait, rep)
+        val status = database.isBrapiSynced(studyId, currentRange.plot_id, currentTrait.id, rep)
 
         deletePhoto(status, model)
 

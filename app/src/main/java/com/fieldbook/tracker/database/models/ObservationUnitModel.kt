@@ -2,9 +2,8 @@ package com.fieldbook.tracker.database.models
 
 import android.location.Location
 import com.fieldbook.tracker.database.Row
-import com.fieldbook.tracker.traits.GNSSTraitLayout
+import com.fieldbook.tracker.utilities.GeoJsonUtil
 import com.google.gson.Gson
-import java.lang.NumberFormatException
 
 /**
  * Plot-level table structure.
@@ -16,7 +15,7 @@ data class ObservationUnitModel(val map: Row) {
     val observation_unit_db_id: String by map //unique id
     val primary_id: String by map
     val secondary_id: String by map
-    val geo_coordinates: String? by map //blob?
+    var geo_coordinates: String? = (map["geo_coordinates"] as? String) ?: "" //blob?
     val additionalInfo: String? by map //blob, can be replaced with value/attr query?
     val germplasmDbId: String? by map //brapId ?
     val germplasmName: String? by map
@@ -40,11 +39,11 @@ data class ObservationUnitModel(val map: Row) {
 
         try {
 
-            val geoJson = Gson().fromJson(geo_coordinates, GNSSTraitLayout.GeoJSON::class.java)
+            val geoJson = Gson().fromJson(geo_coordinates, GeoJsonUtil.GeoJSON::class.java)
 
-            location.latitude = geoJson.geometry.coordinates[0].toDouble()
+            location.latitude = geoJson.geometry.coordinates[1].toDouble()
 
-            location.longitude = geoJson.geometry.coordinates[1].toDouble()
+            location.longitude = geoJson.geometry.coordinates[0].toDouble()
 
         } catch (e: Exception) {  //could be a NPE, number format exception, index out of bounds or json syntax exception,
 
@@ -55,24 +54,28 @@ data class ObservationUnitModel(val map: Row) {
 
         if (nonJson) { //check semi colon delimited values can be parsed to doubles
 
-            val latLngTokens = geo_coordinates?.split(";")
+            geo_coordinates?.let { coords ->
 
-            if (latLngTokens?.size == 2) {
+                val latLngTokens = coords.split(";")
 
-                try {
+                if (latLngTokens.size >= 2) {
 
-                        location.latitude = latLngTokens[0].toDouble()
+                    try {
 
-                        location.longitude = latLngTokens[1].toDouble()
+                        location.latitude = latLngTokens[1].toDouble()
+
+                        location.longitude = latLngTokens[0].toDouble()
 
                         failed = false
 
-                } catch (e: NumberFormatException) {
+                    } catch (e: NumberFormatException) {
 
                         failed = true
 
+                    }
                 }
             }
+
         }
 
         return if (!failed) location

@@ -56,14 +56,14 @@ public class LocationTraitLayout extends BaseTraitLayout {
             if (gps.canGetLocation()) { //GPS enabled
                 lat = gps.getLatitude(); // returns latitude
                 lng = gps.getLongitude(); // returns longitude
-                fullLocation = Utils.truncateDecimalString(String.valueOf(lat), 8) + "; " + Utils.truncateDecimalString(String.valueOf(lng), 8);
+                fullLocation = Utils.truncateDecimalString(String.valueOf(lng), 8) + "; " + Utils.truncateDecimalString(String.valueOf(lat), 8);
             } else {
                 Intent intent = new Intent(
                         Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 getContext().startActivity(intent);
             }
             getCollectInputView().setText(fullLocation);
-            updateObservation(getCurrentTrait().getTrait(), "location", fullLocation);
+            updateObservation(getCurrentTrait(), fullLocation);
             triggerTts(locationSavedTts);
         });
 

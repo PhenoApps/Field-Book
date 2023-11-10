@@ -160,7 +160,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
         WAITING_FOR_PLAYBACK(R.drawable.trait_audio_play),
         PLAYING(R.drawable.trait_audio_stop);
 
-        private int imageId;
+        private final int imageId;
 
         ButtonState(int imageId) {
             this.imageId = imageId;
@@ -247,7 +247,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
             try {
                 mediaRecorder.stop();
                 releaseRecorder();
-                updateObservation(getCurrentTrait().getTrait(), "audio", recordingLocation.toString());
+                updateObservation(getCurrentTrait(), recordingLocation.toString());
                 audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
                 getCollectInputView().setText(recordingLocation.toString());
             } catch (Exception e) {

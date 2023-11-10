@@ -20,40 +20,10 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
         const val TAG = "DocumentTreeUtil"
 
         /**
-         * Creates a media directory for a given plot, media directories contain photos and audio folders.
-         */
-        fun createFieldDir(context: Context?, fieldFileName: String) {
-
-            context?.let { ctx ->
-
-                getDirectory(ctx, R.string.dir_plot_data)?.let { dir ->
-
-                    if (dir.exists()) {
-
-                        dir.getOrCreate(fieldFileName)?.let { fieldDir ->
-
-                            val photos = ctx.getString(R.string.dir_media_photos)
-                            val audio = ctx.getString(R.string.dir_media_audio)
-                            val thumbnails = ctx.getString(R.string.hidden_file_thumbnails)
-
-                            val photosDir = fieldDir.getOrCreate(photos)
-                            val audioDir = fieldDir.getOrCreate(audio)
-                            val thumbnailsDir = photosDir?.getOrCreate(thumbnails)
-
-                            photosDir?.logDirectoryExists(ctx, photos)
-                            audioDir?.logDirectoryExists(ctx, audio)
-                            thumbnailsDir?.logDirectoryExists(ctx, thumbnails)
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
          * Gets a specific directory for the currently chosen plot.
-         * @param traitId: folder name for the trait, which should be the db id, also photos and audio
+         * @param traitName: trait name of the folder, also photos and audio
          */
-        fun getFieldMediaDirectory(context: Context?, traitId: String): DocumentFile? {
+        fun getFieldMediaDirectory(context: Context?, traitName: String): DocumentFile? {
 
             if (context != null) {
 
@@ -64,11 +34,11 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
                     val plotDataDirName = context.getString(R.string.dir_plot_data)
                     val fieldDir = createDir(context, plotDataDirName, field)
                     if (fieldDir != null) {
-                        val traitDir = fieldDir.findFile(traitId)
+                        val traitDir = fieldDir.findFile(traitName)
                         if (traitDir == null || !traitDir.exists()) {
-                            fieldDir.createDirectory(traitId)
+                            fieldDir.createDirectory(traitName)
                         }
-                        return fieldDir.findFile(traitId)
+                        return fieldDir.findFile(traitName)
                     }
                 } else return null
             }
@@ -82,27 +52,6 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
         fun getPlotMedia(mediaDir: DocumentFile?, plot: String, ext: String): List<DocumentFile> {
 
             return getPlotMedia(mediaDir, plot).filter { it.name?.endsWith(ext) == true }
-        }
-
-        fun getThumbnailsDir(context: Context, traitId: String): DocumentFile? {
-
-            val dir = getFieldMediaDirectory(context, traitId)
-            var thumbs = dir?.findFile(".thumbnails")
-
-            if (thumbs == null) {
-
-                thumbs = dir?.createDirectory(".thumbnails")
-
-            }
-
-            if (thumbs?.findFile(".nomedia") == null) {
-
-                thumbs?.createFile("*/*", ".nomedia")
-
-            }
-
-            return thumbs
-
         }
 
         /**

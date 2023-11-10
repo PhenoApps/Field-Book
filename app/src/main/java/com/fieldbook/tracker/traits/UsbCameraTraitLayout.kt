@@ -34,6 +34,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.receivers.UsbAttachReceiver
 import com.fieldbook.tracker.receivers.UsbDetachReceiver
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
+import com.fieldbook.tracker.utilities.ExifUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.serenegiant.SimpleUVCCameraTextureView
 import kotlinx.coroutines.delay
@@ -430,15 +431,18 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
             val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
 
+            val traitDbId = currentTrait.id
+
             //get the bitmap from the texture view, only use it if its not null
             textureView?.bitmap?.let { bmp ->
 
-                DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { usbPhotosDir ->
+                DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)
+                    ?.let { usbPhotosDir ->
 
-                    val plot = collectActivity.observationUnit
-                    val studyId = collectActivity.studyId
-                    val time = Utils.getDateTime()
-                    val name = "${sanitizedTraitName}_${plot}_$time.png"
+                        val plot = collectActivity.observationUnit
+                        val studyId = collectActivity.studyId
+                        val time = Utils.getDateTime()
+                        val name = "${sanitizedTraitName}_${plot}_$time.png"
 
                     usbPhotosDir.createFile("*/*", name)?.let { file ->
 
@@ -447,14 +451,25 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                             bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
 
                             database.insertObservation(
-                                plot, traitName, type, file.uri.toString(),
-                                prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
-                                        + prefs.getString(GeneralKeys.LAST_NAME, ""),
+                                plot, traitDbId, type, file.uri.toString(),
+                                (activity as? CollectActivity)?.person,
                                 (activity as? CollectActivity)?.locationByPreferences, "", studyId,
                                 null,
                                 null,
                                 null
                             )
+
+                            //if sdk > 24, can write exif information to the image
+                            //goal is to encode observation variable model into the user comments
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+                                ExifUtil.saveJsonToExif(
+                                    context,
+                                    currentTrait,
+                                    file.uri
+                                )
+
+                            }
                         }
                     }
 
@@ -463,43 +478,6 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
             }
         }
     }
-
-//replaced with DocumentContracts thumbnail function
-//    private fun createThumbnail(traitName: String, name: String, bitmap: Bitmap) {
-//
-//        DocumentTreeUtil.getThumbnailsDir(context, traitName)?.let { thumbnails ->
-//
-//            var thumbnailWidth = resources.getInteger(R.integer.thumbnailWidth)
-//            var thumbnailHeight = resources.getInteger(R.integer.thumbnailHeight)
-//            var aspectRatio = mUsbCameraHelper?.aspectRatio ?: (UVCCamera.DEFAULT_PREVIEW_WIDTH / UVCCamera.DEFAULT_PREVIEW_HEIGHT).toDouble()
-//
-//            val aspectKeys = resources.getStringArray(R.array.aspect_ratio_keys)
-//            val aspectValues = resources.getStringArray(R.array.aspect_ratio_values)
-//            aspectKeys.minByOrNull { abs(it.toDouble() - aspectRatio) }?.let { closest ->
-//                val index = aspectKeys.indexOf(closest)
-//                if (index < aspectValues.size) {
-//                    val (width, height) = aspectValues[index].split("x")
-//                    thumbnailWidth = width.toInt()
-//                    thumbnailHeight = height.toInt()
-//                    aspectRatio = thumbnailWidth / thumbnailHeight.toDouble()
-//
-//                    Log.d(TAG, "Chosen thumbnail: $thumbnailWidth x $thumbnailHeight a.r: $aspectRatio")
-//                }
-//            }
-//
-//            val thumbnailBitmap = Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, true)
-//
-//            thumbnails.createFile("image/png", name)?.let { thumbnail ->
-//
-//                context?.contentResolver?.openOutputStream(thumbnail.uri)?.use { output ->
-//
-//                    thumbnailBitmap.compress(Bitmap.CompressFormat.PNG, 100, output)
-//
-//                    loadAdapterItems()
-//                }
-//            }
-//        }
-//    }
 
     private fun loadAdapterItems() {
 
@@ -531,12 +509,12 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
     private fun getImageObservations(): Array<ObservationModel> {
 
-        val traitName = collectActivity.traitName
+        val traitDbId = collectActivity.traitDbId.toInt()
         val plot = collectActivity.observationUnit
         val studyId = collectActivity.studyId
 
         return database.getAllObservations(studyId).filter {
-            it.observation_variable_name == traitName && it.observation_unit_id == plot
+            it.observation_variable_db_id == traitDbId && it.observation_unit_id == plot
         }.toTypedArray()
     }
 
@@ -549,17 +527,25 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
             val plot = currentRange.plot_id
 
+            val traitDbId = currentTrait.id
+
             getImageObservations().firstOrNull { it.value == model.uri }?.let { observation ->
 
                 try {
 
-                    DocumentFile.fromSingleUri(context, Uri.parse(observation.value))?.let { image ->
+                    DocumentFile.fromSingleUri(context, Uri.parse(observation.value))
+                        ?.let { image ->
 
-                        val result = image.delete()
+                            val result = image.delete()
 
-                        if (result) {
+                            if (result) {
 
-                            database.deleteTraitByValue(studyId, plot, traitName, image.uri.toString())
+                                database.deleteTraitByValue(
+                                    studyId,
+                                    plot,
+                                    traitDbId,
+                                    image.uri.toString()
+                                )
 
                             loadAdapterItems()
 

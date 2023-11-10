@@ -10,6 +10,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.FileUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -45,8 +46,10 @@ public class FieldBookImage extends BrapiObservation {
 
     }
 
-    public FieldBookImage(Context ctx, String filePath, String traitId, Bitmap missingPhoto) {
-        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(ctx, traitId);
+    public FieldBookImage(Context ctx, String filePath, String traitName, Bitmap missingPhoto) {
+
+        String sanitizedTraitName = FileUtil.sanitizeFileName(traitName);
+        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(ctx, sanitizedTraitName);
 
         this.missing = missingPhoto;
         this.location = new GeoJSON();

@@ -7,6 +7,7 @@ import android.database.MatrixCursor
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
+import com.fieldbook.tracker.database.models.ObservationVariableModel
 import com.fieldbook.tracker.objects.TraitObject
 
 class ObservationVariableDao {
@@ -78,26 +79,29 @@ class ObservationVariableDao {
             it.externalDbId = this["external_db_id"].toString()
             it.traitDataSource = this["trait_data_source"].toString()
 
-        }}
+        }
+        }
+
         /**
          * TODO: Replace with View.
          */
         @SuppressLint("Recycle")
-        fun getTraitExists(uniqueName: String, id: Int, parent: String, trait: String): Boolean = withDatabase { db ->
+        fun getTraitExists(uniqueName: String, id: Int, traitDbId: String): Boolean =
+            withDatabase { db ->
 
-            val query = """
+                val query = """
                 SELECT id, value
                 FROM observations, ObservationUnitProperty
                 WHERE observations.observation_unit_id = ObservationUnitProperty.'$uniqueName' 
                     AND ObservationUnitProperty.id = ? 
-                    AND observations.observation_variable_name LIKE ? 
-                    AND observations.observation_variable_field_book_format LIKE ?
+                    AND observations.observation_variable_db_id = ? 
                 """.trimIndent()
 
 //            println("$id $parent $trait")
 //            println(query)
 
-            val columnNames = db.rawQuery(query, arrayOf(id.toString(), parent, trait)).toFirst().keys
+                val columnNames =
+                    db.rawQuery(query, arrayOf(id.toString(), traitDbId)).toFirst().keys
 
             "value" in columnNames
 
@@ -203,6 +207,17 @@ class ObservationVariableDao {
                     })
                 }
             }
+        }
+
+        fun getById(id: String): ObservationVariableModel? = withDatabase { db ->
+
+            ObservationVariableModel(
+                db.query(
+                    ObservationVariable.tableName,
+                    where = "internal_id_observation_variable = ?",
+                    whereArgs = arrayOf(id)
+                ).toFirst()
+            )
         }
 
         fun getAllTraitObjects(): ArrayList<TraitObject> = withDatabase { db ->
@@ -337,12 +352,14 @@ class ObservationVariableDao {
 
         } ?: -1L
 
-        fun updateTraitVisibility(trait: String, visible: String) = withDatabase { db ->
+        fun updateTraitVisibility(traitDbId: String, visible: String) = withDatabase { db ->
 
-            db.update(ObservationVariable.tableName,
-                    ContentValues().apply { put("visible", visible) },
-                    "observation_variable_name LIKE ?",
-                    arrayOf(trait))
+            db.update(
+                ObservationVariable.tableName,
+                ContentValues().apply { put("visible", visible) },
+                "internal_id_observation_variable = ?",
+                arrayOf(traitDbId)
+            )
         }
 
         fun writeNewPosition(column: String, id: String, position: String) = withDatabase { db ->

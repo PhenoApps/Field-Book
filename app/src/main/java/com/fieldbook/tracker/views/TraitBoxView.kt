@@ -224,11 +224,11 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun getTraitLeft(): ImageView {
-        return findViewById(R.id.traitLeft) as ImageView
+        return findViewById<ImageView>(R.id.traitLeft)
     }
 
     fun getTraitRight(): ImageView {
-        return findViewById(R.id.traitRight) as ImageView
+        return findViewById<ImageView>(R.id.traitRight)
     }
 
     fun existsNewTraits(): Boolean {
@@ -256,7 +256,7 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun existsTrait(): Boolean {
-        return newTraits!!.containsKey(currentTrait!!.trait)
+        return newTraits.containsKey(currentTrait!!.trait)
     }
 
     fun createSummaryText(plotID: String?): String {
@@ -287,7 +287,8 @@ class TraitBoxView : ConstraintLayout {
         if (newTraits.containsKey(traitName)) newTraits.remove(traitName)
         val studyId =
             controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        controller.getDatabase().deleteTrait(studyId, plotID, traitName, rep)
+        val traitDbId = controller.getDatabase().getTraitByName(traitName).id
+        controller.getDatabase().deleteTrait(studyId, plotID, traitDbId, rep)
     }
 
     fun remove(trait: TraitObject, plotID: String, rep: String) {
