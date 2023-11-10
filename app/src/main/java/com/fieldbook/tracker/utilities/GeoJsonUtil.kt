@@ -4,7 +4,6 @@ import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.fieldbook.tracker.database.DataHelper
 import com.google.gson.Gson
-import org.json.JSONArray
 import org.json.JSONObject
 
 class GeoJsonUtil {
@@ -125,9 +124,6 @@ class GeoJsonUtil {
             //update the database observation value
             helper.updateObservationModels(db, updatedObservations)
         }
-
-        private fun DataHelper.queryObservationUnitsWithGeoCoordinates(db: SQLiteDatabase) = getAllObservationUnits(db).filter { it.geo_coordinates !in setOf(null, "null") && it.geo_coordinates?.isNotBlank() == true }
-        private fun DataHelper.queryLocationObservations(db: SQLiteDatabase) = getAllObservations(db).filter { it.observation_variable_field_book_format in setOf("location", "gnss") }
         private fun DataHelper.queryObservationUnitsWithGeoCoordinates(db: SQLiteDatabase) =
             getAllObservationUnits(db).filter {
                 it.geo_coordinates !in setOf(
