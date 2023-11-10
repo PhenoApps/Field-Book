@@ -87,7 +87,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -501,7 +500,6 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                             .filter(unit -> unit.getGermplasmDbId() != null)
                             .map(BrAPIObservationUnit::getGermplasmDbId)
                             .collect(Collectors.toList());
-//                    logger.info("Germplasm DbIds are: " + germplasmDbIds);
                     allGermplasmDbIds.addAll(germplasmDbIds);
 
                     // Stop after 50 iterations (for safety)
@@ -542,9 +540,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data, List<BrAPIGermplasm> germplasmDetails) {
-        Logger logger = Logger.getLogger(getClass().getName());
 
         Map<String, Map<String, String>> unitAttributes = new HashMap<>(); // Map to store attributes for each unit
+        Log.d("BrAPIServiceV2","Mapping attribute values");
 
         for (BrAPIObservationUnit unit : data) {
 
@@ -564,7 +562,6 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         String attributeName = level.getLevelName();
                         attributeName = attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1).toLowerCase();
                         attributesMap.put(attributeName, level.getLevelCode());
-//                        logger.info("Mapped attribute " + attributeName + " to " + level.getLevelCode());
                     }
                 }
 
@@ -574,7 +571,6 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         rowColStr = "Row";
                     }
                     attributesMap.put(rowColStr, pos.getPositionCoordinateX());
-//                    logger.info("Mapped X-coordinate " + rowColStr + " to " + pos.getPositionCoordinateX());
                 }
 
                 if (pos.getPositionCoordinateY() != null){
@@ -583,17 +579,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         rowColStr = "Column";
                     }
                     attributesMap.put(rowColStr, pos.getPositionCoordinateY());
-//                    logger.info("Mapped Y-coordinate " + rowColStr + " to " + pos.getPositionCoordinateY());
                 }
 
                 if (pos.getEntryType() != null && pos.getEntryType().getBrapiValue() != null) {
                     attributesMap.put("EntryType", pos.getEntryType().getBrapiValue());
-//                    logger.info("Mapped EntryType to " + pos.getEntryType().getBrapiValue());
                 }
             }
             if (unit.getGermplasmName() != null) {
                 attributesMap.put("Germplasm", unit.getGermplasmName());
-//                logger.info("Mapped Germplasm to " + unit.getGermplasmName());
             }
             if (unit.getGermplasmDbId() != null) {
                 // find matching germplasm in germplasmDetails and extract synonyms and pedigree
@@ -603,7 +596,6 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     // Extract pedigree and synonyms from the matching germplasm if defined
                     if (matchingGermplasm.getPedigree() != null) {
                         attributesMap.put("Pedigree", matchingGermplasm.getPedigree());
-//                        logger.info("Mapped Pedigree to " + matchingGermplasm.getPedigree());
                     }
 
                     List<BrAPIGermplasmSynonyms> synonymsList = matchingGermplasm.getSynonyms();
@@ -613,17 +605,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                             synonyms.add(synonym.getSynonym());
                         }
                         attributesMap.put("Synonyms", String.join(",", synonyms));
-//                        logger.info("Mapped Synonyms to " + String.join(",", synonyms));
                     }
                 }
             }
             if (unit.getObservationUnitDbId() != null) {
                 attributesMap.put("ObservationUnitDbId", unit.getObservationUnitDbId());
-//                logger.info("Mapped ObservationUnitDbId to " + unit.getObservationUnitDbId());
             }
             if (unit.getObservationUnitName() != null) {
                 attributesMap.put("ObservationUnitName", unit.getObservationUnitName());
-//                logger.info("Mapped ObservationUnitName to " + unit.getObservationUnitName());
             }
         }
 
@@ -632,15 +621,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         for (Map<String, String> attributesMap : unitAttributes.values()) {
             uniqueAttributes.addAll(attributesMap.keySet());
         }
-        study.setAttributes(new ArrayList<>(uniqueAttributes)); // Set the unique attribute names
-        logger.info("Added attributes to the study. Current attributes: " + study.getAttributes());
+        study.setAttributes(new ArrayList<>(uniqueAttributes));
+        Log.d("BrAPIServiceV2","Added attributes to the study. Current attributes are: " + study.getAttributes());
 
         // Assemble the attributesTable
         List<List<String>> attributesTable = new ArrayList<>();
         for (BrAPIObservationUnit unit : data) {
             String unitDbId = unit.getObservationUnitDbId();
-
-            // Get the unit's attributes hashmap
             Map<String, String> attributesMap = unitAttributes.get(unitDbId);
 
             // Create a data row for each unit using the unique attribute names
@@ -649,12 +636,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 dataRow.add(attributesMap.getOrDefault(attr, ""));
             }
             attributesTable.add(dataRow);
-            logger.info("Added new data row to attributes table: " + dataRow);
+//            Log.d("BrAPIServiceV2","Added new data row to attributes table: " + dataRow);
         }
 
-        // Save the attributesTable to the study or perform any other necessary action
+        // Save the attributesTable to the study
         study.getValues().addAll(attributesTable);
-        logger.info("Updated study values with attributes table.");
+        Log.d("BrAPIServiceV2","Updated study with mapped attributes");
     }
 
     // Helper method to find germplasm by dbId in the germplasmDetails list
@@ -678,14 +665,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             body.setGermplasmDbIds(allGermplasmDbIds);
             body.page(0).pageSize(pageSize);
-            Logger logger = Logger.getLogger(getClass().getName());
-
-            logger.info("All germplasm ids are: " + allGermplasmDbIds);
+            Log.d("BrAPIServiceV2","Retrieving germplasm details");
 
             ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> response = germplasmApi.searchGermplasmPost(body);
+
             if (response.getBody().getLeft().isPresent()) { // Handle case where results are returned immediately
                 BrAPIGermplasmListResponse listResponse = response.getBody().getLeft().get();
-//                logger.info("Retrieved BrAPIGermplasmListResponse: " + listResponse);
                 germplasmDetails = getListResult(response);
                 if(hasMorePages(listResponse)) {
                     int currentPage = listResponse.getMetadata().getPagination().getCurrentPage() + 1;
@@ -702,14 +687,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 }
             } else { // Handle case where searchResultDbId is returned, follow up with call to searchGermplasmSearchResultsDbIdGet
                 BrAPIAcceptedSearchResponse searchResponse = response.getBody().getRight().get();
-//                logger.info("Retrieved BrAPIAcceptedSearchResponse: " + searchResponse);
                 searchResultsDbId = searchResponse.getResult().getSearchResultsDbId();
                 ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> getResponse = germplasmApi.searchGermplasmSearchResultsDbIdGet(searchResultsDbId, 0, pageSize);
                 if (getResponse.getBody().getLeft().isPresent()) { // Should have this now for sure
                     BrAPIGermplasmListResponse listResponse = getResponse.getBody().getLeft().get();
-//                    logger.info("Finally retrieved BrAPIGermplasmListResponse: " + listResponse);
                     germplasmDetails = getListResult(getResponse);
                     if(hasMorePages(listResponse)) {
+
                         int currentPage = listResponse.getMetadata().getPagination().getCurrentPage() + 1;
                         int totalPages = listResponse.getMetadata().getPagination().getTotalPages();
 
@@ -721,10 +705,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                             currentPage++;
                         }
                     }
+                } else {
+                    Log.d("BrAPIServiceV2","Unable to retrieve a germplasm search results");
                 }
             }
 
-//            logger.info("Final germplasmDetails are: " + germplasmDetails);
             return germplasmDetails;
 
         } catch (ApiException error) {
