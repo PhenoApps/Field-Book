@@ -103,7 +103,7 @@ public class BrAPIConfig {
             return false;
         }
         BrAPIConfig that = (BrAPIConfig) o;
-        return pageSize == that.pageSize && chunkSize == that.chunkSize && serverTimeoutMilli == that.serverTimeoutMilli && url.equals(that.url) && name.equals(that.name) && version.equals(that.version) && authFlow.equals(that.authFlow) && oidcUrl.equals(
+        return pageSize.equals(that.pageSize) && chunkSize.equals(that.chunkSize) && serverTimeoutMilli.equals(that.serverTimeoutMilli) && url.equals(that.url) && name.equals(that.name) && version.equals(that.version) && authFlow.equals(that.authFlow) && oidcUrl.equals(
                 that.oidcUrl) && catDisplay.equals(that.catDisplay);
     }
 
