@@ -508,9 +508,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     if((queryParams.page() > 50)
                             || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
                             || (response.getResult().getData().size() == 0)){
-                        List<BrAPIGermplasm> germplasmDetails;
-                        germplasmDetails = getGermplasmDetails(allGermplasmDbIds, failFunction);
-                        mapAttributeValues(study, allAttributeValues, germplasmDetails);
+
+                        mapAttributeValues(study, allAttributeValues, getGermplasmDetails(allGermplasmDbIds, failFunction));
                         function.apply(study);
 
                     } else {
@@ -539,7 +538,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data, List<BrAPIGermplasm> germplasmDetails) {
+    private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data, Map<String, BrAPIGermplasm> germplasmDetailsMap) {
 
         Map<String, Map<String, String>> unitAttributes = new HashMap<>(); // Map to store attributes for each unit
         Log.d("BrAPIServiceV2","Mapping attribute values");
@@ -589,11 +588,10 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 attributesMap.put("Germplasm", unit.getGermplasmName());
             }
             if (unit.getGermplasmDbId() != null) {
-                // find matching germplasm in germplasmDetails and extract synonyms and pedigree
-                BrAPIGermplasm matchingGermplasm = findGermplasmByDbId(unit.getGermplasmDbId(), germplasmDetails);
+                // find matching germplasm in germplasmDetailsMap and extract synonyms and pedigree
+                BrAPIGermplasm matchingGermplasm = germplasmDetailsMap.get(unit.getGermplasmDbId());
 
                 if (matchingGermplasm != null) {
-                    // Extract pedigree and synonyms from the matching germplasm if defined
                     if (matchingGermplasm.getPedigree() != null) {
                         attributesMap.put("Pedigree", matchingGermplasm.getPedigree());
                     }
@@ -644,18 +642,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         Log.d("BrAPIServiceV2","Updated study with mapped attributes");
     }
 
-    // Helper method to find germplasm by dbId in the germplasmDetails list
-    private BrAPIGermplasm findGermplasmByDbId(String germplasmDbId, List<BrAPIGermplasm> germplasmDetails) {
-        for (BrAPIGermplasm germplasm : germplasmDetails) {
-            if (germplasm.getGermplasmDbId().equals(germplasmDbId)) {
-                return germplasm;
-            }
-        }
-        return null; // Germplasm with the given dbId not found
-    }
-
-    public List<BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
-        List<BrAPIGermplasm> germplasmDetails = new ArrayList<>();
+    public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
+        Map<String, BrAPIGermplasm> germplasmDetailsMap = new HashMap<>();
         try {
             final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
                     .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
@@ -671,7 +659,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             if (response.getBody().getLeft().isPresent()) { // Handle case where results are returned immediately
                 BrAPIGermplasmListResponse listResponse = response.getBody().getLeft().get();
-                germplasmDetails = getListResult(response);
+                germplasmDetailsMap = getListResultAsMap(response);
                 if(hasMorePages(listResponse)) {
                     int currentPage = listResponse.getMetadata().getPagination().getCurrentPage() + 1;
                     int totalPages = listResponse.getMetadata().getPagination().getTotalPages();
@@ -680,7 +668,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         body.setPage(currentPage);
                         response = germplasmApi.searchGermplasmPost(body);
                         if (response.getBody().getLeft().isPresent()) {
-                            germplasmDetails.addAll(getListResult(response));
+                            germplasmDetailsMap.putAll(getListResultAsMap(response));
                         }
                         currentPage++;
                     }
@@ -691,7 +679,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> getResponse = germplasmApi.searchGermplasmSearchResultsDbIdGet(searchResultsDbId, 0, pageSize);
                 if (getResponse.getBody().getLeft().isPresent()) { // Should have this now for sure
                     BrAPIGermplasmListResponse listResponse = getResponse.getBody().getLeft().get();
-                    germplasmDetails = getListResult(getResponse);
+                    germplasmDetailsMap = getListResultAsMap(getResponse);
                     if(hasMorePages(listResponse)) {
 
                         int currentPage = listResponse.getMetadata().getPagination().getCurrentPage() + 1;
@@ -700,7 +688,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         while (currentPage < totalPages) {
                             getResponse = germplasmApi.searchGermplasmSearchResultsDbIdGet(searchResultsDbId, currentPage, pageSize);
                             if (getResponse.getBody().getLeft().isPresent()) {
-                                germplasmDetails.addAll(getListResult(getResponse));
+                                germplasmDetailsMap.putAll(getListResultAsMap(getResponse));
                             }
                             currentPage++;
                         }
@@ -710,13 +698,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 }
             }
 
-            return germplasmDetails;
-
         } catch (ApiException error) {
             failFunction.apply(error.getCode());
             Log.e("BrAPIServiceV2", "API Exception", error);
         }
-        return germplasmDetails;
+        return germplasmDetailsMap;
     }
 
     private boolean hasMorePages(BrAPIResponse listResponse) {
@@ -725,11 +711,17 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 && listResponse.getMetadata().getPagination().getCurrentPage() < listResponse.getMetadata().getPagination().getTotalPages() - 1;
     }
 
-    private <T, V> List<V> getListResult(ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<T>, Optional<BrAPIAcceptedSearchResponse>>> searchGetResponse) {
+    private <T, V extends BrAPIGermplasm> Map<String, V> getListResultAsMap(ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<T>, Optional<BrAPIAcceptedSearchResponse>>> searchGetResponse) {
+        Map<String, V> resultMap = new HashMap<>();
         BrAPIResponse listResponse = (BrAPIResponse) searchGetResponse.getBody().getLeft().get();
-        BrAPIResponseResult responseResult = (BrAPIResponseResult) listResponse.getResult();
-        return responseResult != null ? responseResult.getData() :
-                new ArrayList<>();
+        BrAPIResponseResult<V> responseResult = (BrAPIResponseResult<V>) listResponse.getResult();
+
+        if (responseResult != null && responseResult.getData() != null) {
+            for (V item : responseResult.getData()) {
+                resultMap.put(item.getGermplasmDbId(), item);
+            }
+        }
+        return resultMap;
     }
 
     private String getRowColStr(BrAPIPositionCoordinateTypeEnum type) {
