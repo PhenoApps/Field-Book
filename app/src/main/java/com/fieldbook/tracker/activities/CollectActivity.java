@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
@@ -84,6 +85,7 @@ import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -197,6 +199,8 @@ public class CollectActivity extends ThemedActivity
     private TraitBoxView traitBox;
     private RangeBoxView rangeBox;
     private RecyclerView infoBarRv;
+
+    private FloatingActionButton observationInfoButton;
 
     /**
      * Trait-related elements
@@ -479,6 +483,15 @@ public class CollectActivity extends ThemedActivity
         infoBarRv = findViewById(R.id.act_collect_infobar_rv);
         infoBarRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
+        observationInfoButton = findViewById(R.id.observationInfoButton);
+
+        observationInfoButton.setOnClickListener(view -> {
+            ObservationModel observationModel = getCurrentObservation();
+            Map<String, Object> message = observationModel.showNonNullAttributesDialog();
+
+            showObservationMetadata(message);
+        });
+
         initCurrentVals();
 
         Log.d(TAG, "Load screen.");
@@ -662,6 +675,8 @@ public class CollectActivity extends ThemedActivity
             } else {
                 traitLayouts.deleteTraitListener(getTraitFormat());
             }
+
+            updateObservationInfoButton();
 
             triggerTts(deleteTts);
         });
@@ -2199,6 +2214,7 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void inflateTrait(@NonNull BaseTraitLayout layout) {
+        Log.d(TAG, "inflateTrait: ");
         getTraitLayout().onExit();
         View v = LayoutInflater.from(this).inflate(layout.layoutId(), null);
         LinearLayout holder = findViewById(R.id.traitHolder);
@@ -2206,6 +2222,8 @@ public class CollectActivity extends ThemedActivity
         holder.addView(v);
         layout.init(this);
         v.setVisibility(View.VISIBLE);
+
+        updateObservationInfoButton();
     }
 
     @Override
@@ -2410,5 +2428,51 @@ public class CollectActivity extends ThemedActivity
         if (gps == null) return null;
 
         return gps.getLocation(0, 0);
+    }
+
+    // updates the state of the info button
+    @Override
+    public void updateObservationInfoButton() {
+        ObservationModel currentObservation = getCurrentObservation();
+        if(currentObservation == null){
+            // if no observation is found, disable click
+            observationInfoButton.setClickable(false);
+            observationInfoButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.main_primary_transparent)));
+        }else{
+            // if no observation is found, enable click
+            observationInfoButton.setClickable(true);
+            Log.d(TAG, "updateObservationInfoButton: " +
+                    observationInfoButton.getBackgroundTintList());
+            observationInfoButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.main_primary)));
+        }
+    }
+
+    private ObservationModel getCurrentObservation() {
+        String rep = getCollectInputView().getRep();
+        List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
+        for (ObservationModel m : models) {
+            if (rep.equals(m.getRep())) {
+                return m;
+            }
+        }
+        return null;
+    }
+
+    private void showObservationMetadata(Map<String, Object> message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        StringBuilder formattedAttributes = new StringBuilder();
+        for (Map.Entry<String, Object> entry : message.entrySet()) {
+            formattedAttributes.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+        }
+
+        builder.setTitle("Metadata")
+                .setCancelable(true)
+                .setMessage(formattedAttributes.toString())
+                .setPositiveButton(android.R.string.ok, (d, which) -> {
+                    d.dismiss();
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

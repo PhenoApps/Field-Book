@@ -1,7 +1,10 @@
 package com.fieldbook.tracker.database.models
 
+import android.util.Log
 import com.fieldbook.tracker.database.Row
 import com.fieldbook.tracker.database.dao.ObservationVariableDao
+import java.lang.reflect.Field
+import java.util.Locale
 
 data class ObservationModel(val map: Row) {
         val internal_id_observation: Int by map
@@ -31,5 +34,43 @@ data class ObservationModel(val map: Row) {
                         "observation_variable_db_id" to variableDbId,
                         "observation_variable_name" to traitName
                 ))
+        }
+
+        fun showNonNullAttributesDialog(): MutableMap<String, Any> {
+                val nonNullAttributes = mutableMapOf<String, Any>()
+
+                // get the "map" property
+                val mapProperty = ObservationModel::class.java.declaredFields.firstOrNull { it.name == "map" }
+                mapProperty?.isAccessible = true
+                try {
+                        if (mapProperty != null) {
+                                mapProperty.isAccessible = true
+                                val mapValue = mapProperty.get(this)
+
+                                if (mapValue is Map<*, *>) {
+                                        // Iterate through the attributes
+                                        for ((key, value) in mapValue) {
+                                                if (
+                                                        (value != null) &&
+                                                        value.toString().isNotEmpty() &&
+                                                        (value.toString().trim() != "")
+                                                ) {
+                                                        nonNullAttributes[formattedName(key.toString())] = value
+                                                }
+                                        }
+                                }
+                        }
+                } catch (e: IllegalAccessException) {
+                        e.printStackTrace()
+                }
+
+                return nonNullAttributes
+        }
+
+        private fun formattedName(attributeName : String) : String {
+                val parts = attributeName.split("_").mapIndexed { _, part ->
+                        part.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                }
+                return parts.joinToString(" ")
         }
 }
