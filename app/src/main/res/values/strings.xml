@@ -443,6 +443,9 @@
     <string name="act_collect_barcode_button_content_description">Start a barcode scanner.</string>
     <string name="act_collect_na_value_button_content_description">Fill value with not available.</string>
 
+    <!-- Observation Info -->
+    <string name="observation_metadata_title">Observation Metadata</string>
+
 
 
 

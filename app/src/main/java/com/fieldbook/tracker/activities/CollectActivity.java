@@ -2436,13 +2436,11 @@ public class CollectActivity extends ThemedActivity
         ObservationModel currentObservation = getCurrentObservation();
         if(currentObservation == null){
             // if no observation is found, disable click
-            observationInfoButton.setClickable(false);
+            observationInfoButton.setEnabled(false);
             observationInfoButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.main_primary_transparent)));
         }else{
             // if no observation is found, enable click
-            observationInfoButton.setClickable(true);
-            Log.d(TAG, "updateObservationInfoButton: " +
-                    observationInfoButton.getBackgroundTintList());
+            observationInfoButton.setEnabled(true);
             observationInfoButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.main_primary)));
         }
     }
@@ -2466,7 +2464,7 @@ public class CollectActivity extends ThemedActivity
             formattedAttributes.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
         }
 
-        builder.setTitle("Metadata")
+        builder.setTitle(R.string.observation_metadata_title)
                 .setCancelable(true)
                 .setMessage(formattedAttributes.toString())
                 .setPositiveButton(android.R.string.ok, (d, which) -> {
