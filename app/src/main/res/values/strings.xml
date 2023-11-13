@@ -723,6 +723,9 @@
     <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
     <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
 
+    <string name="pref_beta_enable_individual_field_page_title">Enable Individual Field Pages</string>
+    <string name="pref_beta_enable_individual_field_page_summary">Selecting a field in the fields list opens a detail page</string>
+
 
     <!-- ABOUT -->
     <!-- App  -->

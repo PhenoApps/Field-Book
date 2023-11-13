@@ -12,4 +12,10 @@
         android:defaultValue="false"
         android:icon="@drawable/ic_tb_field_mic_on"/>
 
+    <CheckBoxPreference android:key="com.tracker.fieldbook.preferences.keys.enable_individual_field_page"
+        android:title="@string/pref_beta_enable_individual_field_page_title"
+        android:summary="@string/pref_beta_enable_individual_field_page_summary"
+        android:defaultValue="false"
+        android:icon="@drawable/ic_page_next_outline"/>
+
 </PreferenceScreen>
