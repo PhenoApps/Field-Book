@@ -2461,7 +2461,7 @@ public class CollectActivity extends ThemedActivity
 
         StringBuilder formattedAttributes = new StringBuilder();
         for (Map.Entry<String, Object> entry : message.entrySet()) {
-            formattedAttributes.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+            formattedAttributes.append(entry.getKey()).append(": \n\t\t\t").append(entry.getValue()).append("\n");
         }
 
         builder.setTitle(R.string.observation_metadata_title)
