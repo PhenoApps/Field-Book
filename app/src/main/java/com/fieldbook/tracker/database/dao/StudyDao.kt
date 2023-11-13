@@ -64,7 +64,7 @@ class StudyDao {
 
             //combine the case statements with commas
             val selectStatement = if (select.isNotEmpty()) {
-                ", " + select.joinToString(", ")
+                select.joinToString(", ") + ", "
             } else ""
 
             /**
@@ -73,7 +73,7 @@ class StudyDao {
              */
             val query = """
             CREATE TABLE IF NOT EXISTS $sObservationUnitPropertyViewName AS 
-            SELECT units.${ObservationUnit.PK} AS id, units.`geo_coordinates` as "geo_coordinates" $selectStatement
+            SELECT $selectStatement units.${ObservationUnit.PK} AS id, units.`geo_coordinates` as "geo_coordinates"
             FROM ${ObservationUnit.tableName} AS units
             LEFT JOIN ${ObservationUnitValue.tableName} AS vals ON units.${ObservationUnit.PK} = vals.${ObservationUnit.FK}
             LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr on vals.${ObservationUnitAttribute.FK} = attr.${ObservationUnitAttribute.PK}

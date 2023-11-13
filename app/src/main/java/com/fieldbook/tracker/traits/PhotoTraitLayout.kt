@@ -28,7 +28,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
@@ -92,11 +93,13 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
             try {
 
+                val traitDbId = currentTrait.id
+
                 scope.launch {
 
                     val plot = currentRange.plot_id
                     val toc = System.currentTimeMillis()
-                    val uris = database.getAllObservations(studyId, plot, traitName)
+                    val uris = database.getAllObservations(studyId, plot, traitDbId)
                     val tic = System.currentTimeMillis()
                     Log.d(TAG, "Photo trait query time ${uris.size} photos: ${(tic-toc)*1e-3}")
 
@@ -147,6 +150,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
             currentTrait.trait?.let { traitName ->
 
+                val traitDbId = currentTrait.id
                 val studyId = (context as CollectActivity).studyId
                 val photosDir = getFieldMediaDirectory(context, traitName)
                 val unit = currentRange.plot_id
@@ -162,7 +166,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
                             val uri = GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", cache)
 
-                            val rep = database.getNextRep(studyId, unit, traitName)
+                            val rep = database.getNextRep(studyId, unit, traitDbId)
 
                             val generatedName =
                                 currentRange.plot_id + "_" + traitName + "_" + rep + "_" + timeStamp.format(
@@ -189,6 +193,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
                                         updateTraitAllowDuplicates(
                                             plotId = unit,
+                                            traitDbId,
                                             traitName,
                                             type,
                                             file.uri.toString(),
@@ -231,6 +236,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
     private fun updateTraitAllowDuplicates(
         plotId: String,
+        traitDbId: String,
         traitName: String,
         format: String,
         value: String?,
@@ -250,12 +256,11 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                 newTraits?.set(traitName, v)
                 val studyId = (context as CollectActivity).studyId
                 val observation =
-                    database.getObservationByValue(studyId, plotId, traitName, v)
-                database.deleteTraitByValue(studyId, plotId, traitName, v)
+                    database.getObservationByValue(studyId, plotId, traitDbId, v)
+                database.deleteTraitByValue(studyId, plotId, traitDbId, v)
                 database.insertObservation(
                     plotId,
-                    traitName,
-                    format,
+                    traitDbId,
                     newValue ?: v,
                     prefs.getString(
                         GeneralKeys.FIRST_NAME,
@@ -307,6 +312,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                             if (isBrapi) {
                                 updateTraitAllowDuplicates(
                                     currentRange.plot_id,
+                                    currentTrait.id,
                                     currentTrait.trait,
                                     "photo",
                                     m.uri,

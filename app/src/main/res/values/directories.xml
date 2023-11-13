@@ -3,6 +3,7 @@
     <!-- Field Book directory structure names -->
     <string name="dir_resources" translatable="false">resources</string>
     <string name="dir_plot_data" translatable="false">plot_data</string>
+    <string name="dir_field_data" translatable="false">field_data</string>
     <string name="dir_trait" translatable="false">trait</string>
     <string name="dir_field_import" translatable="false">field_import</string>
     <string name="dir_field_export" translatable="false">field_export</string>

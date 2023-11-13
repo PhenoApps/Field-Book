@@ -200,7 +200,7 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
                 } else {
                     String value = textValue + v;
                     getCollectInputView().setText(value);
-                    updateObservation(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
+                    updateObservation(getCurrentTrait(), value);
                 }
             }
         }

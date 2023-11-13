@@ -112,12 +112,12 @@ public class NumericTraitLayout extends BaseTraitLayout {
                     if (length > 0) {
                         value = curText.substring(0, length - 1);
                         getCollectInputView().setText(value);
-                        updateObservation(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
+                        updateObservation(getCurrentTrait(), value);
                     }
                 } else if (numberButtons.containsKey(view.getId())) {
                     value = curText + numberButtons.get(view.getId()).getText().toString();
                     getCollectInputView().setText(value);
-                    updateObservation(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
+                    updateObservation(getCurrentTrait(), value);
                 }
             }
         }

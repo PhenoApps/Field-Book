@@ -1,7 +1,12 @@
 package com.fieldbook.tracker.utilities
 
+import android.content.SharedPreferences
 import android.location.Location
+import androidx.browser.trusted.sharing.ShareData
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.models.ObservationUnitModel
+import com.fieldbook.tracker.location.GPSTracker
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.gson.Gson
 import math.geom2d.Point2D
 import math.geom2d.line.Line2D
@@ -62,13 +67,48 @@ class GeodeticUtils {
          *
          *  Update (8/2/23): "fix" has been added as a header to the log file, it is the tenth item. This can be any value GPS, RTK, or RTK Float
          */
-        fun writeGeoNavLog(log: OutputStreamWriter?, line: String) {
+        fun writeGeoNavLog(prefs: SharedPreferences, geoNavPrefs: SharedPreferences, log: OutputStreamWriter?, geoNavLine: GeoNavHelper.GeoNavLine, isHeader: Boolean = false) {
 
             log?.let { geonav ->
 
+                if (!isHeader) {
+                    //update the geonav log line with the shared preference parameters
+                    //set update interval from the preferences can be 1s, 5s or 10s
+                    val interval = prefs.getString(GeneralKeys.UPDATE_INTERVAL, "1") ?: "1"
+                    //find the mac address of the device, if not found then start the internal GPS
+                    val address: String = (prefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "internal") ?: "")
+                        .replace(":".toRegex(), "-")
+                        .replace("\\s".toRegex(), "_")
+                    //the angle of the IZ algorithm to use, see Geodetic util class for more details
+                    val theta: String = geoNavPrefs.getString(GeneralKeys.SEARCH_ANGLE, "0") ?: "0"
+                    val geoNavMethod: String = geoNavPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
+                    val d1: Double = geoNavPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble() ?: 0.001
+                    val d2: Double = geoNavPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble() ?: 0.01
+
+                    geoNavLine.address = address
+                    geoNavLine.interval = interval
+                    geoNavLine.thetaParameter = theta
+                    geoNavLine.method = geoNavMethod
+                    geoNavLine.d1 = d1.toString()
+                    geoNavLine.d2 = d2.toString()
+
+                    //escape the fb id's
+                    if (geoNavLine.uniqueId != null) {
+                        geoNavLine.uniqueId = "\"${geoNavLine.uniqueId.escape()}\""
+                    }
+
+                    if (geoNavLine.primaryId != null) {
+                        geoNavLine.primaryId = "\"${geoNavLine.primaryId.escape()}\""
+                    }
+
+                    if (geoNavLine.secondaryId != null) {
+                        geoNavLine.secondaryId = "\"${geoNavLine.secondaryId.escape()}\""
+                    }
+                }
+
                 try {
 
-                    geonav.append(line)
+                    geonav.append(geoNavLine.toString() + "\n")
 
                     geonav.flush()
 
@@ -76,16 +116,7 @@ class GeodeticUtils {
             }
         }
 
-        //Represents what we print to the log
-        data class IzString(val startTime: Long, val uniqueId: String, val primaryId: String, val secondaryId: String,
-                            val startLat: Double, val startLng: Double, val endLat: Double, val endLng: Double, val azimuth: Double,
-                            val teslas: Double, var bearing: Double?, val distance: Double, var closest: Int, var fix: String) {
-            override fun toString(): String {
-                return "$startLat,$startLng,$startTime,$endLat,$endLng,$azimuth,$teslas,$bearing,$distance,$fix,$closest,\"${uniqueId.escape()}\",\"${primaryId.escape()}\",\"${secondaryId.escape()}\"\n"
-            }
-        }
-
-        private fun String.escape() = this.replace("\"", "\"\"")
+        private fun String?.escape() = this?.replace("\"", "\"\"")
 
         private const val NOT_CLOSEST = 0
         private const val CLOSEST_UPDATE = 1
@@ -109,6 +140,8 @@ class GeodeticUtils {
          * @return a object representing the returned location and it's distance
          **/
         fun impactZoneSearch(log: OutputStreamWriter?,
+                             prefs: SharedPreferences,
+                             geoNavPrefs: SharedPreferences,
                              currentLoggingMode: String,
                              start: Location,
                              coordinates: Array<ObservationUnitModel>,
@@ -123,7 +156,7 @@ class GeodeticUtils {
             var closestDistance = Double.MAX_VALUE
             var closestPoint: ObservationUnitModel? = null
 
-            val izLogArray = arrayListOf<IzString>()
+            val izLogArray = arrayListOf<GeoNavHelper.GeoNavLine>()
 
             coordinates.forEach { coordinate ->
 
@@ -137,16 +170,20 @@ class GeodeticUtils {
 
                     val fix = start.extras?.getString("fix") ?: "invalid"
 
-                    val loggedString = IzString(startTime = start.time, uniqueId = coordinate.observation_unit_db_id, primaryId = coordinate.primary_id, secondaryId = coordinate.secondary_id,
-                        startLat = start.latitude, startLng = start.longitude, endLat = location.latitude, endLng = location.longitude, azimuth = azimuth, teslas = teslas, bearing = bearing,
-                        distance = distance, closest = NOT_CLOSEST, fix = fix)
+                    val loggedString = GeoNavHelper.GeoNavLine(
+                        utc = start.time.toString(),
+                        uniqueId = coordinate.observation_unit_db_id, primaryId = coordinate.primary_id, secondaryId = coordinate.secondary_id,
+                        startLat = start.latitude.toString(), startLng = start.longitude.toString(),
+                        endLat = location.latitude.toString(), endLng = location.longitude.toString(),
+                        azimuth = azimuth.toString(), teslas = teslas.toString(), bearing = bearing.toString(),
+                        distance = distance.toString(), closest = NOT_CLOSEST.toString(), fix = fix)
 
                     if (geoNavMethod == "0") { //default distance based method
 
                         if (closestDistance > distance) {
 
                             //update the closest value to updated
-                            loggedString.closest = CLOSEST_UPDATE
+                            loggedString.closest = CLOSEST_UPDATE.toString()
                             closestDistance = distance
                             closestPoint = coordinate
 
@@ -158,7 +195,7 @@ class GeodeticUtils {
 
                             if (closestDistance > distance) {
 
-                                loggedString.closest = CLOSEST_UPDATE
+                                loggedString.closest = CLOSEST_UPDATE.toString()
                                 closestDistance = distance
                                 closestPoint = coordinate
 
@@ -172,14 +209,14 @@ class GeodeticUtils {
             }
 
             //after a full run of IZ, update the last CLOSEST_UPDATE to CLOSEST_FINAL
-            izLogArray.findLast { it.closest == CLOSEST_UPDATE }?.closest = CLOSEST_FINAL
+            izLogArray.findLast { it.closest == CLOSEST_UPDATE.toString() }?.closest = CLOSEST_FINAL.toString()
 
             if (currentLoggingMode == "1") {
                 //print only the closest plant to the log
-                izLogArray.forEach { if (it.closest == CLOSEST_FINAL) writeGeoNavLog(log, it.toString()) }
+                izLogArray.forEach { if (it.closest == CLOSEST_FINAL.toString()) writeGeoNavLog(prefs, geoNavPrefs, log, it) }
             } else if (currentLoggingMode == "2") {
                 //print the entire array to log
-                izLogArray.forEach { writeGeoNavLog(log, it.toString()) }
+                izLogArray.forEach { writeGeoNavLog(prefs, geoNavPrefs, log, it) }
             }
 
             return closestPoint to closestDistance

@@ -432,7 +432,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         globalVis = !allTraits.stream().allMatch(TraitObject::getVisible);
 
         for (TraitObject allTrait : allTraits) {
-            database.updateTraitVisibility(allTrait.getTrait(), globalVis);
+            database.updateTraitVisibility(allTrait.getId(), globalVis);
             Log.d(TAG, allTrait.getTrait());
         }
 
@@ -891,7 +891,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                         osw.close();
                         output.close();
 
-                        new FileUtil().shareFile(this, ep, exportDoc);
+                        FileUtil.shareFile(this, ep, exportDoc);
                     }
                 }
             }

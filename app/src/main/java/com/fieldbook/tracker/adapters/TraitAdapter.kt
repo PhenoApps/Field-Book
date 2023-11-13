@@ -54,9 +54,9 @@ class TraitAdapter(private val sorter: TraitSorter):
                 val trait = view.tag as TraitObject
 
                 if (visibleCheckBox.isChecked) {
-                    sorter.getDatabase().updateTraitVisibility(trait.trait, true)
+                    sorter.getDatabase().updateTraitVisibility(trait.id, true)
                 } else {
-                    sorter.getDatabase().updateTraitVisibility(trait.trait, false)
+                    sorter.getDatabase().updateTraitVisibility(trait.id, false)
                 }
             }
 

@@ -5,10 +5,18 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.util.Log
 import androidx.preference.PreferenceManager
-import com.fieldbook.tracker.database.*
-import com.fieldbook.tracker.database.Migrator.*
+import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
+import com.fieldbook.tracker.database.Migrator.Observation
+import com.fieldbook.tracker.database.Migrator.ObservationUnit
+import com.fieldbook.tracker.database.Migrator.ObservationVariable
+import com.fieldbook.tracker.database.Migrator.Study
+import com.fieldbook.tracker.database.query
+import com.fieldbook.tracker.database.toFirst
+import com.fieldbook.tracker.database.toTable
+import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.RangeObject
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 
@@ -187,7 +195,7 @@ class ObservationUnitPropertyDao {
          * "plot_id","column","plot","tray_row","tray_id","seed_id","seed_name","pedigree","trait","value","timestamp","person","location","number"
          * "13RPN00001","1","1","1","13RPN_TRAY001","12GHT00001B","Kharkof","Kharkof","height","3","2021-08-05 11:52:45.379-05:00"," ","","2"
          */
-        fun getExportDbData(expId: Int, uniqueName: String, fieldList: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
+        fun getExportDbData(studyId: Int, uniqueName: String, fieldList: Array<String?>, traits: ArrayList<TraitObject>): Cursor? = withDatabase { db ->
 
             val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
             val requiredFields = fieldList + traitRequiredFields
@@ -203,14 +211,14 @@ class ObservationUnitPropertyDao {
                          $sObservationUnitPropertyViewName AS props, 
                          ${ObservationVariable.tableName} AS vars
                     WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
-                        AND obs.${Study.FK} = $expId
+                        AND obs.${Study.FK} = $studyId
                         AND obs.value IS NOT NULL
                         AND vars.observation_variable_name = obs.observation_variable_name
-                        AND vars.observation_variable_name in ${traits.map { "?" }.joinToString(",", "(", ")")}
+                        AND vars.internal_id_observation_variable in ${traits.map { "?" }.joinToString(",", "(", ")")}
                     
                 """.trimIndent()
 
-                val table = db.rawQuery(query, traits).toTable()
+                val table = db.rawQuery(query, traits.map { it.id }.toTypedArray()).toTable()
 
                 table.forEach { row ->
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
@@ -243,9 +251,9 @@ class ObservationUnitPropertyDao {
          * @param traits the list of traits to print, either all traits or just the active ones
          * @return a cursor that is used in CSVWriter and closed elsewhere
          */
-        fun convertDatabaseToTable(expId: Int, uniqueName: String, col: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
+        fun convertDatabaseToTable(expId: Int, uniqueName: String, col: Array<String?>, traits: ArrayList<TraitObject>): Cursor? = withDatabase { db ->
 
-            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it) }
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.trait) }
             val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }
 
             val maxStatements = arrayListOf<String>()

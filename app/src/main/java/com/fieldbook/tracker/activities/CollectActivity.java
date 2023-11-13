@@ -35,6 +35,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -54,6 +55,7 @@ import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
@@ -67,6 +69,8 @@ import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
+import com.fieldbook.tracker.utilities.FieldAudioHelper;
+import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
@@ -131,6 +135,9 @@ public class CollectActivity extends ThemedActivity
     private GeoNavHelper geoNavHelper;
 
     @Inject
+    KeyboardListenerHelper keyboardListenerHelper;
+
+    @Inject
     VibrateUtil vibrator;
 
     @Inject
@@ -145,6 +152,9 @@ public class CollectActivity extends ThemedActivity
     //used to query for infobar prefix/value pairs and building InfoBarModels
     @Inject
     InfoBarHelper infoBarHelper;
+
+    @Inject
+    FieldAudioHelper fieldAudioHelper;
 
     @Inject
     FieldSwitchImpl fieldSwitcher;
@@ -418,6 +428,10 @@ public class CollectActivity extends ThemedActivity
         return getCurrentTrait().getTrait();
     }
 
+    public String getTraitDbId() {
+        return getCurrentTrait().getId();
+    }
+
     public String getTraitFormat() {
         return getCurrentTrait().getFormat();
     }
@@ -469,7 +483,46 @@ public class CollectActivity extends ThemedActivity
 
         Log.d(TAG, "Load screen.");
 
+        //connect keyboard listener to the main collect container
+        ConstraintLayout layoutMain = findViewById(R.id.layout_main);
+        keyboardListenerHelper.connect(layoutMain, (visible, height) -> {
+            onSoftKeyboardChanged(visible, height);
+            return null;
+        });
+
         refreshInfoBarAdapter();
+    }
+
+    //when softkeyboard is displayed, reset the snackbar to redisplay with a calculated bottom margin
+    //this is necessary when its needed to display content above the keyboard without using adjustPan,
+    //such as the geonav snackbar messages
+    private void onSoftKeyboardChanged(Boolean visible, int keypadHeight) {
+
+        geoNavHelper.resetGeoNavMessages();
+
+        if (visible) {
+
+            try {
+
+                TraitObject trait = getCurrentTrait();
+
+                if (trait != null) {
+
+                    geoNavHelper.setSnackBarBottomMargin(keypadHeight);
+
+                }
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+            }
+
+        } else {
+
+            geoNavHelper.setSnackBarBottomMargin(0);
+
+        }
     }
 
     /**
@@ -580,7 +633,7 @@ public class CollectActivity extends ThemedActivity
         missingValue.setOnClickListener(v -> {
             triggerTts(naTts);
             TraitObject currentTrait = traitBox.getCurrentTrait();
-            updateObservation(currentTrait.getTrait(), currentTrait.getFormat(), "NA", null);
+            updateObservation(currentTrait, "NA", null);
             setNaText();
         });
 
@@ -596,7 +649,7 @@ public class CollectActivity extends ThemedActivity
 
         deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
         deleteValue.setOnClickListener(v -> {
-            boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitName(), getRep());
+            boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitDbId(), getRep());
             // if a brapi observation that has been synced, don't allow deleting
             if (status) {
                 if (getTraitFormat().equals("photo")) {
@@ -629,7 +682,7 @@ public class CollectActivity extends ThemedActivity
 
             return collectInputView.getRep(); //gets the selected repeated value index from view
 
-        } else return database.getDefaultRep(getStudyId(), getObservationUnit(), getTraitName());
+        } else return database.getDefaultRep(getStudyId(), getObservationUnit(), getTraitDbId());
         //gets the minimum default index
     }
 
@@ -803,6 +856,11 @@ public class CollectActivity extends ThemedActivity
         Log.d(TAG, "Move to result core: " + j);
 
         initWidgets(false);
+    }
+
+    @Override
+    public boolean isFieldAudioRecording(){
+        return fieldAudioHelper.isRecording();
     }
 
     @Override
@@ -1008,18 +1066,17 @@ public class CollectActivity extends ThemedActivity
     /**
      * Helper function update user data in the memory based hashmap as well as
      * the database
-     * @param traitName the trait name
-     * @param traitFormat the trait format
+     * @param trait, the TraitObject to be updated
      * @param value the new string value to be saved in the database
      * @param nullableRep the repeated value to update, could be null to represent the latest rep value
      */
-    public void updateObservation(String traitName, String traitFormat, String value, @Nullable String nullableRep) {
+    public void updateObservation(TraitObject trait, String value, @Nullable String nullableRep) {
 
         if (rangeBox.isEmpty()) {
             return;
         }
 
-        traitBox.update(traitName, value);
+        traitBox.update(trait.getTrait(), value);
 
         String studyId = getStudyId();
         String obsUnit = getObservationUnit();
@@ -1033,21 +1090,21 @@ public class CollectActivity extends ThemedActivity
             rep = getRep();
         }
 
-        Observation observation = database.getObservation(studyId, obsUnit, traitName, rep);
+        Observation observation = database.getObservation(studyId, obsUnit, trait.getId(), rep);
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        database.deleteTrait(studyId, obsUnit, traitName, rep);
+        database.deleteTrait(studyId, obsUnit, trait.getId(), rep);
 
         if (!value.isEmpty()) {
 
             //don't update the database if the value is blank or undesirable
             boolean pass = false;
 
-            if (traitFormat.equals("multicat")
-                || CategoricalTraitLayout.isTraitCategorical(traitFormat)) {
+            if (trait.getFormat().equals("multicat")
+                || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
 
                 if (value.equals("[]")) {
 
@@ -1056,7 +1113,7 @@ public class CollectActivity extends ThemedActivity
             }
 
             if (!pass) {
-                database.insertObservation(obsUnit, traitName, traitFormat, value, person,
+                database.insertObservation(obsUnit, trait.getId(), value, person,
                         getLocationByPreferences(), "", studyId, observationDbId,
                         lastSyncedTime, rep);
             }
@@ -1067,22 +1124,24 @@ public class CollectActivity extends ThemedActivity
         refreshRepeatedValuesToolbarIndicator();
     }
 
-    public void insertRep(String parent, String trait, String value, String rep) {
+    public void insertRep(String value, String rep) {
 
         String expId = getStudyId();
         String obsUnit = getObservationUnit();
         String person = getPerson();
+        String traitDbId = getTraitDbId();
 
-        database.insertObservation(obsUnit, parent, trait, value, person,
+        database.insertObservation(obsUnit, traitDbId, value, person,
                 getLocationByPreferences(), "", expId, null, null, rep);
     }
 
-    public void deleteRep(String trait, String rep) {
+    public void deleteRep(String rep) {
 
         String expId = getStudyId();
         String obsUnit = getObservationUnit();
+        String traitDbId = getTraitDbId();
 
-        database.deleteTrait(expId, obsUnit, trait, rep);
+        database.deleteTrait(expId, obsUnit, traitDbId, rep);
     }
 
     public String getLocationByPreferences() {
@@ -1097,7 +1156,7 @@ public class CollectActivity extends ThemedActivity
     private void brapiDelete(String parent, Boolean hint) {
         Toast.makeText(getApplicationContext(), getString(R.string.brapi_delete_message), Toast.LENGTH_LONG).show();
         TraitObject trait = traitBox.getCurrentTrait();
-        updateObservation(parent, trait.getFormat(), getString(R.string.brapi_na), null);
+        updateObservation(trait, getString(R.string.brapi_na), null);
         if (hint) {
             setNaTextBrapiEmptyField();
         } else {
@@ -1159,6 +1218,9 @@ public class CollectActivity extends ThemedActivity
 //        View actionView = MenuItemCompat.getActionView(geoNavEnable);
 //        actionView.setOnClickListener((View) -> onOptionsItemSelected(geoNavEnable));
 
+        MenuItem fieldAudioMic = systemMenu.findItem(R.id.field_audio_mic);
+        fieldAudioMic.setVisible(mPrefs.getBoolean(GeneralKeys.ENABLE_FIELD_AUDIO, false));
+
         customizeToolbarIcons();
 
         return true;
@@ -1192,6 +1254,7 @@ public class CollectActivity extends ThemedActivity
         final int lockDataId = R.id.lockData;
         final int summaryId = R.id.summary;
         final int geonavId = R.id.action_act_collect_geonav_sw;
+        final int fieldAudioMicId = R.id.field_audio_mic;
         switch (item.getItemId()) {
             case helpId:
                 TapTargetSequence sequence = new TapTargetSequence(this)
@@ -1297,6 +1360,59 @@ public class CollectActivity extends ThemedActivity
 
                 return true;
 
+            case R.id.field_audio_mic:
+                MenuItem micItem = systemMenu.findItem(R.id.field_audio_mic);
+
+                // get status from AudioTraitLayout
+                TraitObject currentTrait = traitBox.getCurrentTrait();
+                BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
+
+                boolean isTraitAudioLayout = currentTraitLayout.isTraitType(AudioTraitLayout.type);
+                boolean isTraitAudioRecording = false;
+                boolean isTraitAudioPlaying = false;
+                if(isTraitAudioLayout){
+                    AudioTraitLayout audioTraitLayout = (AudioTraitLayout) currentTraitLayout;
+                    isTraitAudioRecording = audioTraitLayout.isAudioRecording();
+                    isTraitAudioPlaying = audioTraitLayout.isAudioPlaybackPlaying();
+                }
+
+                // if trait audio is recording, give a warning
+                if(isTraitAudioRecording){
+                    Toast.makeText(
+                            this, R.string.trait_audio_recording_warning,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+                // if trait audio is playing, give a warning
+                else if(isTraitAudioPlaying){
+                    Toast.makeText(
+                            this, R.string.trait_audio_playing_warning,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+                // if trait audio isn't recording or playing
+                // record or stop the field audio depending on its state
+                else if(!fieldAudioHelper.isRecording()){
+                    // TODO: add trait audio playback stopping logic
+                    fieldAudioHelper.startRecording(true);
+                    Toast.makeText(
+                        this, R.string.field_audio_recording_start,
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    micItem.setIcon(R.drawable.ic_tb_field_mic_on);
+                    micItem.setTitle(R.string.menu_collect_stop_field_audio);
+                }else{
+                    fieldAudioHelper.stopRecording();
+                    Toast.makeText(
+                        this, R.string.field_audio_recording_stop,
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    micItem.setIcon(R.drawable.ic_tb_field_mic_off);
+                    micItem.setTitle(R.string.menu_collect_start_field_audio);
+                }
+
+                return true;
+
             case R.id.action_act_collect_repeated_values_indicator:
 
                 showMultiMeasureDeleteDialog();
@@ -1311,7 +1427,7 @@ public class CollectActivity extends ThemedActivity
         String labelValPref = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
 
         ObservationModel[] values = database.getRepeatedValues(
-                getStudyId(), getObservationUnit(), getTraitName());
+                getStudyId(), getObservationUnit(), getTraitDbId());
 
         ArrayList<String> is = new ArrayList<>();
         for (ObservationModel m: values) {
@@ -1423,9 +1539,9 @@ public class CollectActivity extends ThemedActivity
 
         for (ObservationModel model : models) {
 
-            deleteRep(model.getObservation_variable_name(), model.getRep());
+            deleteRep(model.getRep());
 
-            ObservationModel[] currentModels = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
+            ObservationModel[] currentModels = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
 
             if (currentModels.length == 0) {
 
@@ -1761,7 +1877,7 @@ public class CollectActivity extends ThemedActivity
                     currentTraitLayout.loadLayout();
 
 
-                    updateObservation(currentTrait.getTrait(), currentTrait.getFormat(), scannedBarcode, null);
+                    updateObservation(currentTrait, scannedBarcode, null);
                     currentTraitLayout.loadLayout();
                     validateData();
                 }
@@ -1806,7 +1922,7 @@ public class CollectActivity extends ThemedActivity
 
                 item.setVisible(true);
 
-                ObservationModel[] values = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
+                ObservationModel[] values = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
 
                 int n = values.length;
 
@@ -1891,38 +2007,36 @@ public class CollectActivity extends ThemedActivity
     }
 
     @Override
-    public boolean existsTrait(final int ID) {
+    public boolean existsTrait(final int plotId) {
         final TraitObject trait = traitBox.getCurrentTrait();
         if (trait != null) {
-            return database.getTraitExists(ID, trait.getTrait(), trait.getFormat());
+            return database.getTraitExists(plotId, trait.getId());
         } else return false;
     }
 
     /**
      * Iterates over all traits for the given ID and returns the trait's index which is missing
      * @param traitIndex current trait index
-     * @param ID the plot identifier
+     * @param plotId the plot identifier
      * @return index of the trait missing or -1 if all traits exist
      */
     @Override
-    public int existsAllTraits(final int traitIndex, final int ID) {
-        final String[] traits = database.getVisibleTrait();
-        final String[] formats = database.getFormat();
-        for (int i = 0; i < traits.length; i++) {
+    public int existsAllTraits(final int traitIndex, final int plotId) {
+        final ArrayList<TraitObject> traits = database.getAllTraitObjects();
+        for (int i = 0; i < traits.size(); i++) {
             if (i != traitIndex
-                    && !database.getTraitExists(ID, traits[i], formats[i])) return i;
+                    && !database.getTraitExists(plotId, traits.get(i).getId())) return i;
         }
         return -1;
     }
 
     @NonNull
     @Override
-    public List<Integer> getNonExistingTraits(final int ID) {
-        final String[] traits = database.getVisibleTrait();
-        final String[] formats = database.getFormat();
+    public List<Integer> getNonExistingTraits(final int plotId) {
+        final ArrayList<TraitObject> traits = database.getAllTraitObjects();
         final ArrayList<Integer> indices = new ArrayList<>();
-        for (int i = 0; i < traits.length; i++) {
-            if (!database.getTraitExists(ID, traits[i], formats[i]))
+        for (int i = 0; i < traits.size(); i++) {
+            if (!database.getTraitExists(plotId, traits.get(i).getId()))
                 indices.add(i);
         }
         return indices;
@@ -2015,7 +2129,7 @@ public class CollectActivity extends ThemedActivity
 
         String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertObservation(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
+        database.insertObservation(rangeBox.getPlotID(), trait.getId(), size,
                 ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);
@@ -2146,6 +2260,11 @@ public class CollectActivity extends ThemedActivity
         String dataMissingString = context.getString(R.string.main_infobar_data_missing);
 
         if (isAttribute) {
+
+            if (label.equals(context.getString(R.string.field_name_attribute))) {
+                String fieldName = ((CollectActivity) context).getPreferences().getString(GeneralKeys.FIELD_FILE, "");
+                return (fieldName == null || fieldName.isEmpty()) ? dataMissingString : fieldName;
+            }
 
             String[] values = database.getDropDownRange(label, plotId);
             if (values == null || values.length == 0) {

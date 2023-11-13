@@ -390,7 +390,6 @@ public class ConfigActivity extends ThemedActivity {
         alert.show();
     }
 
-
     // Helper function to merge arrays
     String[] concat(String[] a1, String[] a2) {
         String[] n = new String[a1.length + a2.length];

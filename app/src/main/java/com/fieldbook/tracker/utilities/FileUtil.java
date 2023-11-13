@@ -15,6 +15,7 @@ import android.provider.OpenableColumns;
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
+import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.io.File;
@@ -30,14 +31,15 @@ public final class FileUtil {
     /**
      * Scan file to update file list and share exported file
      */
-    public void shareFile(Context context, SharedPreferences ep, DocumentFile docFile) {
+    public static void shareFile(Context context, SharedPreferences ep, DocumentFile docFile) {
         if (docFile != null && docFile.exists()) {
             if (!ep.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
                 Intent intent = new Intent();
                 intent.setAction(android.content.Intent.ACTION_SEND);
                 intent.setType("text/plain");
                 intent.putExtra(Intent.EXTRA_STREAM, docFile.getUri());
-                context.startActivity(Intent.createChooser(intent, "Sending File..."));
+                String sendingFileText = context.getString(R.string.share_file_title);
+                context.startActivity(Intent.createChooser(intent, sendingFileText));
             }
         }
     }

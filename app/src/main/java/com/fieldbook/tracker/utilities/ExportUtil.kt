@@ -24,6 +24,7 @@ import com.fieldbook.tracker.brapi.BrapiAuthDialog
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.dao.StudyDao
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.qualifiers.ActivityContext
 import org.phenoapps.utils.BaseDocumentTreeUtil
@@ -33,6 +34,7 @@ import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
+
 
 /**
  * Checks preconditions before collect and export.
@@ -51,7 +53,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private var allTraits: RadioButton? = null
     private var activeTraits: RadioButton? = null
     private var newRange: ArrayList<String> = arrayListOf()
-    private var exportTrait: ArrayList<String> = arrayListOf()
+    private var exportTrait: ArrayList<TraitObject> = arrayListOf()
     private var checkDbBool = false
     private var checkExcelBool = false
     private var exportFileString = ""
@@ -196,12 +198,16 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             }
 
             if (isActiveTraitsChecked) {
-                val traits = database.getVisibleTrait()
-                exportTrait.addAll(traits)
+                val traits = database.allTraitObjects
+                for (t in traits) {
+                    if (t.visible) {
+                        exportTrait.add(t)
+                    }
+                }
             }
 
             if (isAllTraitsChecked) {
-                val traits = database.getAllTraits()
+                val traits = database.allTraitObjects
                 exportTrait.addAll(traits)
             }
 
@@ -346,17 +352,16 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             }
 
             val newRanges = newRange.toTypedArray()
-            val exportTraits = exportTrait.toTypedArray()
 
             // Retrieves the data needed for export
-            val exportData = database.getExportDBData(newRanges, exportTraits)
+            val exportData = database.getExportDBData(newRanges, exportTrait)
 
             newRanges.forEach {
                 Log.i("Field Book : Ranges : ", it)
             }
 
-            exportTraits.forEach {
-                Log.i("Field Book : Traits : ", it)
+            exportTrait.forEach {
+                Log.i("Field Book : Traits : ", it.trait)
             }
 
             if (exportData.count == 0) {
@@ -419,9 +424,12 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                         val output = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, tableFileName)
                         val fw = OutputStreamWriter(output)
 
-                        val convertedExportData = database.convertDatabaseToTable(newRanges, exportTraits)
+                        val convertedExportData = database.convertDatabaseToTable(newRanges, exportTrait)
                         val csvWriter = CSVWriter(fw, convertedExportData)
-                        csvWriter.writeTableFormat(newRanges.plus(exportTraits), newRanges.size, traits)
+
+                        val labels = ArrayList<String>()
+                        for (trait in exportTrait) labels.add(trait.trait)
+                        csvWriter.writeTableFormat(newRanges.plus(labels), newRanges.size, traits)
 
                     } catch (e: Exception) {
                         fail = true
