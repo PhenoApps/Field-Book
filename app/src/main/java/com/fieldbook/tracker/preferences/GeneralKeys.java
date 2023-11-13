@@ -117,7 +117,7 @@ public class GeneralKeys {
 
     public static final String ENABLE_FIELD_AUDIO = "com.tracker.fieldbook.preferences.keys.enable_field_audio";
 
-    public static final String ENABLE_FIELD_DETAIL_VIEW = "com.tracker.fieldbook.preferences.keys.enable_field_detail_view";
+    public static final String INDIVIDUAL_FIELD_PAGE_ENABLED = "com.tracker.fieldbook.preferences.keys.enable_individual_field_page";
 
     public static final String LAST_TIME_OPENED = "LastTimeAppOpened";
     public static final String ASKED_SINCE_OPENED = "AskedSinceAppOpened";
