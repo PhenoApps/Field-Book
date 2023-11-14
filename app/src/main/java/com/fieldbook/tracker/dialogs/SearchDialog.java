@@ -28,11 +28,13 @@ import androidx.fragment.app.DialogFragment;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.adapters.SearchAdapter;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.views.RangeBoxView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SearchDialog extends DialogFragment {
@@ -89,6 +91,7 @@ public class SearchDialog extends DialogFragment {
 
                 boolean threeTables = false;
 
+                ArrayList<String> columnsList = new ArrayList<>();
                 for (int i = 0; i < parent.getChildCount(); i++) {
                     LinearLayout child = (LinearLayout) parent.getChildAt(i);
 
@@ -118,6 +121,8 @@ public class SearchDialog extends DialogFragment {
                     // For example 'plot\'s', we only want plot\'s
                     if (trunc.length() > 3)
                         trunc = trunc.substring(1, trunc.length() - 2);
+
+                    columnsList.add(c.getSelectedItem().toString());
 
                     switch (s.getSelectedItemPosition()) {
 
@@ -184,6 +189,25 @@ public class SearchDialog extends DialogFragment {
                     sql = sql1 + sql;
 
                 final SearchData[] data = originActivity.getDatabase().getRangeBySql(sql);
+                ObservationModel[] observations = originActivity.getDatabase().getAllObservations();
+
+                ArrayList<ArrayList<String>> traitData = new ArrayList<>();
+
+                for (SearchData searchdata: data)
+                {
+                    ArrayList<String> temp = new ArrayList<>();
+                    for (String column: columnsList)
+                    {
+                        for (ObservationModel observation : observations)
+                        {
+                            if (observation.getObservation_variable_name().equals(column) && observation.getObservation_unit_id().equals(searchdata.unique))
+                            {
+                                temp.add(observation.getValue());
+                            }
+                        }
+                    }
+                    traitData.add(temp);
+                }
 
                 AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity(), R.style.AppAlertDialog);
 
@@ -204,6 +228,15 @@ public class SearchDialog extends DialogFragment {
 
                 primaryTitle.setText(ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)));
                 secondaryTitle.setText(ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_plot)));
+
+                LinearLayout results_parent = layout.findViewById(R.id.search_results_parent);
+                for (String column: columnsList)
+                {
+                    View v = getLayoutInflater().inflate(R.layout.dialog_search_results_trait_headers, null);
+                    TextView textView = v.findViewById(R.id.trait_header);
+                    textView.setText(column);
+                    results_parent.addView(textView);
+                }
 
                 Button closeBtn = layout.findViewById(R.id.closeBtn);
                 ListView myList = layout.findViewById(R.id.myList);
@@ -231,7 +264,7 @@ public class SearchDialog extends DialogFragment {
 
                 // If search has results, show them, otherwise display error message
                 if (data != null) {
-                    myList.setAdapter(new SearchAdapter(getActivity(), data));
+                    myList.setAdapter(new SearchAdapter(getActivity(), data, traitData));
                     //Dismiss the search dialog
                     dismiss();
                     //Show the results dialog

@@ -268,7 +268,7 @@ public class SearchActivity extends ThemedActivity {
 
                     // If search has results, show them, otherwise display error message
                     if (data != null) {
-                        myList.setAdapter(new SearchAdapter(SearchActivity.this, data));
+//                        myList.setAdapter(new SearchAdapter(SearchActivity.this, data));
 
                         dialog.show();
                     } else {

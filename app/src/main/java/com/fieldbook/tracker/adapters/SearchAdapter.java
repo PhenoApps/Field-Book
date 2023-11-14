@@ -1,14 +1,18 @@
 package com.fieldbook.tracker.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.objects.SearchData;
+
+import java.util.ArrayList;
 
 /**
  * Loads data on search screen
@@ -17,10 +21,14 @@ public class SearchAdapter extends BaseAdapter {
 
     private LayoutInflater mLayoutInflater;
     private SearchData[] data;
+    private ArrayList<ArrayList<String>> traitData;
+    private int number_of_traits;
 
-    public SearchAdapter(Context context, SearchData[] data) {
+    public SearchAdapter(Context context, SearchData[] data, ArrayList<ArrayList<String>> traitData) {
         this.data = data;
         mLayoutInflater = LayoutInflater.from(context);
+        this.traitData = traitData;
+        this.number_of_traits = traitData.get(0).size();
     }
 
     public int getCount() {
@@ -47,6 +55,7 @@ public class SearchAdapter extends BaseAdapter {
             convertView = mLayoutInflater.inflate(R.layout.listitem_search_results, null);
             holder.range = convertView.findViewById(R.id.range);
             holder.plot = convertView.findViewById(R.id.plot);
+            holder.itemContainer = convertView.findViewById(R.id.search_results_list_parent);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -54,6 +63,15 @@ public class SearchAdapter extends BaseAdapter {
 
         holder.range.setText(getItem(position).range);
         holder.plot.setText(getItem(position).plot);
+        ArrayList<String> itemData = traitData.get(position);
+        for (int i = 0; i < number_of_traits; i++)
+        {
+            View v = mLayoutInflater.inflate(R.layout.listitem_search_results_traits, null);
+            TextView textView = v.findViewById(R.id.trait_value);
+            textView.setText(itemData.get(i));
+//            Log.d("MyApp", itemData.get(i));
+            holder.itemContainer.addView(textView);
+        }
 
         return convertView;
     }
@@ -61,5 +79,6 @@ public class SearchAdapter extends BaseAdapter {
     private class ViewHolder {
         TextView range;
         TextView plot;
+        LinearLayout itemContainer;
     }
 }
