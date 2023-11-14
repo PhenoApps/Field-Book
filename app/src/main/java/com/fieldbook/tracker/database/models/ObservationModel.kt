@@ -1,9 +1,11 @@
 package com.fieldbook.tracker.database.models
 
+import android.content.Context
 import android.util.Log
 import com.fieldbook.tracker.database.Row
 import com.fieldbook.tracker.database.dao.ObservationVariableDao
-import java.lang.reflect.Field
+import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.traits.CategoricalTraitLayout
 import java.util.Locale
 
 data class ObservationModel(val map: Row) {
@@ -36,7 +38,11 @@ data class ObservationModel(val map: Row) {
                 ))
         }
 
-        fun showNonNullAttributesDialog(): MutableMap<String, Any> {
+        fun showNonNullAttributesDialog(
+                context: Context,
+                currentTrait: TraitObject,
+                fieldName: String
+        ): MutableMap<String, Any> {
                 val nonNullAttributes = mutableMapOf<String, Any>()
 
                 // get the "map" property
@@ -47,7 +53,16 @@ data class ObservationModel(val map: Row) {
                                 mapProperty.isAccessible = true
                                 val mapValue = mapProperty.get(this)
 
-                                if (mapValue is Map<*, *>) {
+
+                                if (mapValue is MutableMap<*, *>) {
+                                        // remove unwanted fields
+                                        mapValue.remove("internal_id_observation")
+                                        mapValue.remove("study_id")
+                                        mapValue.remove("observation_variable_db_id")
+
+                                        // add study name to result
+                                        nonNullAttributes[formattedName("study_name")] = fieldName
+
                                         // Iterate through the attributes
                                         for ((key, value) in mapValue) {
                                                 if (
@@ -55,7 +70,18 @@ data class ObservationModel(val map: Row) {
                                                         value.toString().isNotEmpty() &&
                                                         (value.toString().trim() != "")
                                                 ) {
-                                                        nonNullAttributes[formattedName(key.toString())] = value
+                                                        // if the trait is categorical, the "value" field should be decoded
+                                                        val isTraitCategoricalOrMulticategorical = currentTrait.format == "multicat" || CategoricalTraitLayout.isTraitCategorical(
+                                                        currentTrait.format
+                                                        )
+                                                        if ( isTraitCategoricalOrMulticategorical && key == "value"){
+                                                                val decodedValue : String = CategoricalTraitLayout(context).decodeValue(
+                                                                        value.toString()
+                                                                )
+                                                                nonNullAttributes[formattedName(key.toString())] = decodedValue
+                                                        }else{
+                                                                nonNullAttributes[formattedName(key.toString())] = value
+                                                        }
                                                 }
                                         }
                                 }
@@ -68,9 +94,18 @@ data class ObservationModel(val map: Row) {
         }
 
         private fun formattedName(attributeName : String) : String {
+                val renameMap : Map<String, String> = mapOf(
+                        "Observation Unit Id" to "Entry Id",
+                        "Observation Variable Name" to "Trait Name",
+                        "Observation Variable Field Book Format" to "Trait Format"
+                )
                 val parts = attributeName.split("_").mapIndexed { _, part ->
                         part.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
                 }
-                return parts.joinToString(" ")
+
+                val formattedKey = parts.joinToString(" ")
+
+                // replace the key if it belongs to renameMap
+                return renameMap[formattedKey] ?: formattedKey
         }
 }

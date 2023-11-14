@@ -487,7 +487,8 @@ public class CollectActivity extends ThemedActivity
 
         observationInfoButton.setOnClickListener(view -> {
             ObservationModel observationModel = getCurrentObservation();
-            Map<String, Object> message = observationModel.showNonNullAttributesDialog();
+            String fieldName = ((CollectActivity) getContext()).getPreferences().getString(GeneralKeys.FIELD_FILE, "");
+            Map<String, Object> message = observationModel.showNonNullAttributesDialog(getContext(), getCurrentTrait(), fieldName);
 
             showObservationMetadata(message);
         });
@@ -2435,20 +2436,17 @@ public class CollectActivity extends ThemedActivity
     public void updateObservationInfoButton() {
         ObservationModel currentObservation = getCurrentObservation();
         if(currentObservation == null){
-            // if no observation is found, disable click
-            observationInfoButton.setEnabled(false);
-            observationInfoButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.main_primary_transparent)));
+            // if no observation is found, hide the FAB
+            observationInfoButton.setVisibility(View.GONE);
         }else{
-            // if no observation is found, enable click
-            observationInfoButton.setEnabled(true);
-            observationInfoButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.main_primary)));
+            observationInfoButton.setVisibility(View.VISIBLE);
         }
     }
 
     private ObservationModel getCurrentObservation() {
         String rep = getCollectInputView().getRep();
         List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
-        for (ObservationModel m : models) {
+            for (ObservationModel m : models) {
             if (rep.equals(m.getRep())) {
                 return m;
             }
