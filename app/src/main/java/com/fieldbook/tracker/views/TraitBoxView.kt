@@ -1,7 +1,9 @@
 package com.fieldbook.tracker.views
 
+import android.app.AlertDialog
 import android.app.Service
 import android.content.Context
+import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -20,12 +22,14 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.BaseTraitLayout
 
+
 class TraitBoxView : ConstraintLayout {
 
     private var controller: CollectTraitController
     private var prefixTraits: Array<String>
 
     private var traitType: Spinner
+    private var traitTypeTv: TextView
     private var traitDetails: TextView
     private var traitLeft: ImageView
     private var traitRight: ImageView
@@ -55,6 +59,8 @@ class TraitBoxView : ConstraintLayout {
         prefixTraits = controller.getDatabase().rangeColumnNames
         newTraits = HashMap()
         traitType = findViewById(R.id.traitType)
+        traitType.visibility = View.INVISIBLE
+        traitTypeTv = findViewById(R.id.traitTypeTv)
 
         traitsProgressBar = findViewById(R.id.traitsProgressBar)
     }
@@ -153,6 +159,9 @@ class TraitBoxView : ConstraintLayout {
     ) {
         val traitPosition = getSelectedItemPosition()
         traitType.adapter = adaptor
+        traitTypeTv.setOnClickListener{
+            showTraitPickerDialog(adaptor)
+        }
         traitType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 arg0: AdapterView<*>?, arg1: View?,
@@ -164,6 +173,8 @@ class TraitBoxView : ConstraintLayout {
                     traitType.selectedItem
                         .toString()
                 )
+
+                traitTypeTv.text = currentTrait?.trait
 
                 updateTraitProgressBar()
 
@@ -208,6 +219,24 @@ class TraitBoxView : ConstraintLayout {
         }
 
         setSelection(traitPosition)
+    }
+
+    private fun showTraitPickerDialog(adaptor: ArrayAdapter<String?>?) {
+        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+
+        builder.setTitle(R.string.select_trait)
+            .setCancelable(true)
+            .setAdapter(adaptor){ _, which ->
+                // Handle trait selection
+                setSelection(which)
+            }
+            .setPositiveButton(
+                android.R.string.ok
+            ) {
+                    d: DialogInterface, _: Int -> d.dismiss()
+            }
+        val dialog = builder.create()
+        dialog.show()
     }
 
     private fun updateTraitProgressBar() {
