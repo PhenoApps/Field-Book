@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RadioButton;
@@ -17,9 +18,11 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
@@ -34,15 +37,12 @@ import java.util.ArrayList;
  * Loads data on field manager screen
  */
 
-public class FieldAdapter extends BaseAdapter {
+public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> {
 
     private static final String TAG = "FieldAdapter";
-
     private final LayoutInflater mLayoutInflater;
     private final ArrayList<FieldObject> list;
     private final Context context;
-    private SharedPreferences ep;
-    private boolean INDIVIDUAL_FIELD_PAGE_ENABLED;
     private final FieldSwitcher fieldSwitcher;
     public interface OnFieldSelectedListener {
         void onFieldSelected(FieldObject field);
@@ -58,162 +58,162 @@ public class FieldAdapter extends BaseAdapter {
         this.fieldSwitcher = switcher;
     }
 
-    public int getCount() {
-        return list.size();
-    }
+//    public int getCount() {
+//        return list.size();
+//    }
+//
+//    public FieldObject getItem(int position) {
+//        return list.get(position);
+//    }
 
-    public FieldObject getItem(int position) {
-        return list.get(position);
-    }
+//    public long getItemId(int position) {
+//
+//        if (position < 0) {
+//            return -1;
+//        }
+//
+//        return position;
+//    }
 
-    public long getItemId(int position) {
+//    private void setEditorItem(SharedPreferences ep, FieldObject item) {
+//        SharedPreferences.Editor ed = ep.edit();
+//        boolean has_contents = item != null;
+//        if (has_contents) {
+//            ed.putString(GeneralKeys.FIELD_FILE, item.getExp_name());
+//            ed.putString(GeneralKeys.FIELD_OBS_LEVEL, item.getObservation_level());
+//            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, item.getExp_id());
+//            ed.putString(GeneralKeys.UNIQUE_NAME, item.getUnique_id());
+//            ed.putString(GeneralKeys.PRIMARY_NAME, item.getPrimary_id());
+//            ed.putString(GeneralKeys.SECONDARY_NAME, item.getSecondary_id());
+//        } else {
+//            ed.putString(GeneralKeys.FIELD_FILE, null);
+//            ed.putString(GeneralKeys.FIELD_OBS_LEVEL, null);
+//            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+//            ed.putString(GeneralKeys.UNIQUE_NAME, null);
+//            ed.putString(GeneralKeys.PRIMARY_NAME, null);
+//            ed.putString(GeneralKeys.SECONDARY_NAME, null);
+//        }
+//        ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, has_contents);
+//        ed.putString(GeneralKeys.LAST_PLOT, null);
+//        ed.apply();
+//    }
 
-        if (position < 0) {
-            return -1;
-        }
-
-        return position;
-    }
-
-    private void setEditorItem(SharedPreferences ep, FieldObject item) {
-        SharedPreferences.Editor ed = ep.edit();
-        boolean has_contents = item != null;
-        if (has_contents) {
-            ed.putString(GeneralKeys.FIELD_FILE, item.getExp_name());
-            ed.putString(GeneralKeys.FIELD_OBS_LEVEL, item.getObservation_level());
-            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, item.getExp_id());
-            ed.putString(GeneralKeys.UNIQUE_NAME, item.getUnique_id());
-            ed.putString(GeneralKeys.PRIMARY_NAME, item.getPrimary_id());
-            ed.putString(GeneralKeys.SECONDARY_NAME, item.getSecondary_id());
-        } else {
-            ed.putString(GeneralKeys.FIELD_FILE, null);
-            ed.putString(GeneralKeys.FIELD_OBS_LEVEL, null);
-            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-            ed.putString(GeneralKeys.UNIQUE_NAME, null);
-            ed.putString(GeneralKeys.PRIMARY_NAME, null);
-            ed.putString(GeneralKeys.SECONDARY_NAME, null);
-        }
-        ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, has_contents);
-        ed.putString(GeneralKeys.LAST_PLOT, null);
-        ed.apply();
-    }
-
-    @Override
-    public View getView(final int position, View convertView, final ViewGroup parent) {
-        ep = PreferenceManager.getDefaultSharedPreferences(context);
-        INDIVIDUAL_FIELD_PAGE_ENABLED = ep.getBoolean(GeneralKeys.INDIVIDUAL_FIELD_PAGE_ENABLED, false);
-
-        ViewHolder holder;
-        if (convertView == null) {
-            holder = new ViewHolder();
-
-            if (INDIVIDUAL_FIELD_PAGE_ENABLED) {
-                convertView = mLayoutInflater.inflate(R.layout.list_item_field_new, null);
-
-                holder.fieldName = convertView.findViewById(R.id.list_item_trait_trait_name);
-                holder.active = convertView.findViewById(R.id.fieldRadio);
-            } else {
-                convertView = mLayoutInflater.inflate(R.layout.list_item_field, null);
-
-                holder.fieldName = convertView.findViewById(R.id.list_item_trait_trait_name);
-                holder.count = convertView.findViewById(R.id.field_count);
-                holder.importDate = convertView.findViewById(R.id.field_import_date);
-                holder.editDate = convertView.findViewById(R.id.field_edit_date);
-                holder.exportDate = convertView.findViewById(R.id.field_export_date);
-                holder.active = convertView.findViewById(R.id.fieldRadio);
-                holder.menuPopup = convertView.findViewById(R.id.popupMenu);
-                holder.observationLevel = convertView.findViewById(R.id.observationLevelLbl);
-            }
-
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-
-        convertView.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                fieldClick(getItem(position));
-                if (listener != null && INDIVIDUAL_FIELD_PAGE_ENABLED) {
-                    listener.onFieldSelected(getItem(position));
-                }
-            }
-        });
-
-        if (INDIVIDUAL_FIELD_PAGE_ENABLED) {
-
-            holder.fieldName.setText(getItem(position).getExp_name());
-            holder.active.setOnClickListener(v -> fieldClick(getItem(position)));
-
-            //Check both file name and observation level
-            if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) != -1) {
-                FieldObject field = getItem(position);
-
-                if (field.getExp_source() == null) {
-                    holder.active.setChecked((ep.getString(GeneralKeys.FIELD_FILE, "")
-                            .contentEquals(holder.fieldName.getText())));
-                } else if (field.getExp_alias() != null) {
-                    String alias = ep.getString(GeneralKeys.FIELD_ALIAS, "");
-                    String level = ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "");
-                    holder.active.setChecked(alias.contentEquals(field.getExp_alias()));
-                }
-
-            } else holder.active.setChecked(false);
-
-        } else {
-            String importDate = getItem(position).getDate_import();
-            String editDate = getItem(position).getDate_edit();
-            String exportDate = getItem(position).getDate_export();
-            String observationLevel = getItem(position).getObservation_level();
-
-            if (importDate != null) {
-                importDate = importDate.split(" ")[0];
-            }
-
-            if (editDate != null) {
-                editDate = editDate.split(" ")[0];
-            }
-
-            if (exportDate != null) {
-                exportDate = exportDate.split(" ")[0];
-            }
-
-            if (observationLevel == null) {
-                holder.observationLevel.setVisibility(View.GONE);//make invisible
-            } else {
-                holder.observationLevel.setVisibility(View.VISIBLE);
-            }
-
-            holder.fieldName.setText(getItem(position).getExp_name());
-            holder.count.setText(getItem(position).getCount());
-            holder.importDate.setText(importDate);
-            holder.editDate.setText(editDate);
-            holder.exportDate.setText(exportDate);
-            holder.observationLevel.setText(observationLevel);
-
-            holder.active.setOnClickListener(v -> fieldClick(getItem(position)));
-
-            //Check both file name and observation level
-            if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) != -1) {
-                FieldObject field = getItem(position);
-
-                if (field.getExp_source() == null) {
-                    holder.active.setChecked((ep.getString(GeneralKeys.FIELD_FILE, "")
-                            .contentEquals(holder.fieldName.getText())) &&
-                            (ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "")
-                                    .contentEquals(holder.observationLevel.getText())));
-                } else if (field.getExp_alias() != null) {
-                    String alias = ep.getString(GeneralKeys.FIELD_ALIAS, "");
-                    String level = ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "");
-                    holder.active.setChecked(alias.contentEquals(field.getExp_alias())
-                            && level.contentEquals(holder.observationLevel.getText()));
-                }
-
-            } else holder.active.setChecked(false);
-
-            holder.menuPopup.setOnClickListener(makeMenuPopListener(position));
-        }
-        return convertView;
-    }
+//    @Override
+//    public View getView(final int position, View convertView, final ViewGroup parent) {
+//        ep = PreferenceManager.getDefaultSharedPreferences(context);
+//        INDIVIDUAL_FIELD_PAGE_ENABLED = ep.getBoolean(GeneralKeys.INDIVIDUAL_FIELD_PAGE_ENABLED, false);
+//
+//        ViewHolder holder;
+//        if (convertView == null) {
+//            holder = new ViewHolder();
+//
+//            if (INDIVIDUAL_FIELD_PAGE_ENABLED) {
+//                convertView = mLayoutInflater.inflate(R.layout.list_item_field_new, null);
+//
+//                holder.fieldName = convertView.findViewById(R.id.list_item_trait_trait_name);
+//                holder.active = convertView.findViewById(R.id.fieldRadio);
+//            } else {
+//                convertView = mLayoutInflater.inflate(R.layout.list_item_field, null);
+//
+//                holder.fieldName = convertView.findViewById(R.id.list_item_trait_trait_name);
+//                holder.count = convertView.findViewById(R.id.field_count);
+//                holder.importDate = convertView.findViewById(R.id.field_import_date);
+//                holder.editDate = convertView.findViewById(R.id.field_edit_date);
+//                holder.exportDate = convertView.findViewById(R.id.field_export_date);
+//                holder.active = convertView.findViewById(R.id.fieldRadio);
+//                holder.menuPopup = convertView.findViewById(R.id.popupMenu);
+//                holder.observationLevel = convertView.findViewById(R.id.observationLevelLbl);
+//            }
+//
+//            convertView.setTag(holder);
+//        } else {
+//            holder = (ViewHolder) convertView.getTag();
+//        }
+//
+//        convertView.setOnClickListener(new OnClickListener() {
+//            public void onClick(View v) {
+//                fieldClick(getItem(position));
+//                if (listener != null && INDIVIDUAL_FIELD_PAGE_ENABLED) {
+//                    listener.onFieldSelected(getItem(position));
+//                }
+//            }
+//        });
+//
+//        if (INDIVIDUAL_FIELD_PAGE_ENABLED) {
+//
+//            holder.fieldName.setText(getItem(position).getExp_name());
+//            holder.active.setOnClickListener(v -> fieldClick(getItem(position)));
+//
+//            //Check both file name and observation level
+//            if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) != -1) {
+//                FieldObject field = getItem(position);
+//
+//                if (field.getExp_source() == null) {
+//                    holder.active.setChecked((ep.getString(GeneralKeys.FIELD_FILE, "")
+//                            .contentEquals(holder.fieldName.getText())));
+//                } else if (field.getExp_alias() != null) {
+//                    String alias = ep.getString(GeneralKeys.FIELD_ALIAS, "");
+//                    String level = ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "");
+//                    holder.active.setChecked(alias.contentEquals(field.getExp_alias()));
+//                }
+//
+//            } else holder.active.setChecked(false);
+//
+//        } else {
+//            String importDate = getItem(position).getDate_import();
+//            String editDate = getItem(position).getDate_edit();
+//            String exportDate = getItem(position).getDate_export();
+//            String observationLevel = getItem(position).getObservation_level();
+//
+//            if (importDate != null) {
+//                importDate = importDate.split(" ")[0];
+//            }
+//
+//            if (editDate != null) {
+//                editDate = editDate.split(" ")[0];
+//            }
+//
+//            if (exportDate != null) {
+//                exportDate = exportDate.split(" ")[0];
+//            }
+//
+//            if (observationLevel == null) {
+//                holder.observationLevel.setVisibility(View.GONE);//make invisible
+//            } else {
+//                holder.observationLevel.setVisibility(View.VISIBLE);
+//            }
+//
+//            holder.fieldName.setText(getItem(position).getExp_name());
+//            holder.count.setText(getItem(position).getCount());
+//            holder.importDate.setText(importDate);
+//            holder.editDate.setText(editDate);
+//            holder.exportDate.setText(exportDate);
+//            holder.observationLevel.setText(observationLevel);
+//
+//            holder.active.setOnClickListener(v -> fieldClick(getItem(position)));
+//
+//            //Check both file name and observation level
+//            if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) != -1) {
+//                FieldObject field = getItem(position);
+//
+//                if (field.getExp_source() == null) {
+//                    holder.active.setChecked((ep.getString(GeneralKeys.FIELD_FILE, "")
+//                            .contentEquals(holder.fieldName.getText())) &&
+//                            (ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "")
+//                                    .contentEquals(holder.observationLevel.getText())));
+//                } else if (field.getExp_alias() != null) {
+//                    String alias = ep.getString(GeneralKeys.FIELD_ALIAS, "");
+//                    String level = ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "");
+//                    holder.active.setChecked(alias.contentEquals(field.getExp_alias())
+//                            && level.contentEquals(holder.observationLevel.getText()));
+//                }
+//
+//            } else holder.active.setChecked(false);
+//
+//            holder.menuPopup.setOnClickListener(makeMenuPopListener(position));
+//        }
+//        return convertView;
+//    }
 
     private View.OnClickListener makeMenuPopListener(final int position) {
         return new View.OnClickListener() {
@@ -236,15 +236,17 @@ public class FieldAdapter extends BaseAdapter {
             // Do it when selecting Delete or Statistics
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                FieldObject field = list.get(position);
+
                 if (item.getItemId() == R.id.delete) {
                     createDeleteItemAlertDialog(position).show();
                 } else if (item.getItemId() == R.id.sort) {
-                    showSortDialog(position);
+                    ((FieldSortController) context).showSortDialog(field);
                     //DialogUtils.styleDialogs(alert);
                 }
                 else if (item.getItemId() == R.id.syncObs) {
                     BrapiSyncObsDialog alert = new BrapiSyncObsDialog(context);
-                    alert.setFieldObject(getItem(position));
+                    alert.setFieldObject(field);
                     alert.show();
                 }
 
@@ -260,24 +262,19 @@ public class FieldAdapter extends BaseAdapter {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
 
-                ((FieldAdapterController) context).getDatabase().deleteField(getItem(position).getExp_id());
+                FieldObject field = list.get(position);
+                ((FieldAdapterController) context).getDatabase().deleteField(field.getExp_id());
 
-                if (getItem(position).getExp_id() == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
-                    setEditorItem(ep, null);
-                }
+//                if (field.getExp_id() == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
+//                    setEditorItem(ep, null);
+                    ((FieldEditorActivity) context).updateCurrentFieldSettings(null);
+//                }
 
                 ((FieldAdapterController) context).queryAndLoadFields();
 
                 CollectActivity.reloadData = true;
             }
         };
-    }
-
-    private void showSortDialog(final int position) {
-
-        FieldObject field = getItem(position);
-
-        ((FieldSortController) context).showSortDialog(field);
     }
 
     private AlertDialog createDeleteItemAlertDialog(final int position) {
@@ -299,8 +296,8 @@ public class FieldAdapter extends BaseAdapter {
 
     private void fieldClick(FieldObject selectedField) {
 
-        setEditorItem(ep, selectedField);
-
+//        setEditorItem(ep, selectedField);
+        ((FieldEditorActivity) context).updateCurrentFieldSettings(selectedField);
         fieldSwitcher.switchField(selectedField);
 
         CollectActivity.reloadData = true;
@@ -317,14 +314,57 @@ public class FieldAdapter extends BaseAdapter {
         }
     }
 
-    private class ViewHolder {
-        ImageView menuPopup;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        CheckBox checkBox;
+        ImageView sourceIcon;
         TextView fieldName;
+        ImageView menuPopup;
         TextView count;
-        TextView importDate;
-        TextView editDate;
-        TextView exportDate;
-        RadioButton active;
-        TextView observationLevel;
+
+        ViewHolder(View itemView) {
+            super(itemView);
+            checkBox = itemView.findViewById(R.id.fieldCheckBox);
+            sourceIcon = itemView.findViewById(R.id.fieldSourceIcon);
+            fieldName = itemView.findViewById(R.id.fieldName);
+            // initialize other views
+        }
     }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_field_recycler, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        FieldObject field = list.get(position);
+        holder.fieldName.setText(field.getExp_name());
+        // Set other view attributes
+
+        // Setting item click listener
+        holder.itemView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onFieldSelected(field);
+                }
+            }
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return list.size();
+    }
+
+    public void selectItem(int position) {
+        FieldObject field = list.get(position);
+        // Perform the actions you would do on click
+        if (listener != null) {
+            listener.onFieldSelected(field);
+        }
+        // Any additional logic for selecting the item
+    }
+
 }

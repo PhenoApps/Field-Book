@@ -73,12 +73,12 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         // Only display BrAPI section if field was imported via BrAPI
         brapiDetailsTextView = view.findViewById(R.id.brapiDetailsTextView)
         brapiDetailsRelativeLayout = view.findViewById(R.id.brapiDetailsRelativeLayout)
-        val observationLevel = field.getObservation_level()
+        val source = field.getExp_source()
 
-        if (observationLevel != null && !observationLevel.isEmpty()) {
+        if (!source.isNullOrEmpty() && source != "local") {
             brapiDetailsTextView.visibility = View.VISIBLE
             brapiDetailsRelativeLayout.visibility = View.VISIBLE
-            observationLevelTextView.text = observationLevel
+            observationLevelTextView.text = field.getObservation_level()
 
         } else {
             brapiDetailsTextView.visibility = View.GONE

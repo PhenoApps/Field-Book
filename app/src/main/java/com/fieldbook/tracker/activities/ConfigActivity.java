@@ -28,6 +28,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
@@ -251,10 +252,17 @@ public class ConfigActivity extends ThemedActivity {
             Intent intent = new Intent();
             switch (position) {
                 case 0:
-                    intent.setClassName(ConfigActivity.this,
-                            FieldEditorActivity.class.getName());
+                    ep = PreferenceManager.getDefaultSharedPreferences(this);
+                    if (ep.getBoolean(GeneralKeys.INDIVIDUAL_FIELD_PAGE_ENABLED, false)) {
+                        Log.d("Config", "individual field enabled");
+                        intent.setClassName(ConfigActivity.this,
+                                FieldEditorActivity.class.getName());
+                    } else {
+                        Log.d("Config", "individual field disabled");
+                        intent.setClassName(ConfigActivity.this,
+                                FieldEditorActivityOld.class.getName());
+                    }
                     startActivity(intent);
-
                     break;
                 case 1:
                     intent.setClassName(ConfigActivity.this,

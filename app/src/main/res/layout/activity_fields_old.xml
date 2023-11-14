@@ -22,15 +22,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ListView
-            android:id="@+id/myList"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:choiceMode="singleChoice"
-            android:dividerHeight="1px"
-            android:minHeight="48dp"
-            android:padding="3dp" />
+                <ListView
+                    android:id="@+id/myList"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:choiceMode="singleChoice"
+                    android:dividerHeight="1px"
+                    android:minHeight="48dp"
+                    android:padding="3dp" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </LinearLayout>
