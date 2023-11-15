@@ -642,6 +642,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         Log.d("BrAPIServiceV2","Updated study with mapped attributes");
     }
 
+    // TODO: Refactor to a more generic function for accessing additional BrAPI search endpoints
     public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
         Map<String, BrAPIGermplasm> germplasmDetailsMap = new HashMap<>();
         try {
