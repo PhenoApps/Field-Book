@@ -41,12 +41,15 @@ class TextTraitLayout : BaseTraitLayout {
 
             val value = en.toString()
 
-            triggerTts(value)
+            //check that the string is not all zero-byte which usb barcode readers send at end
+            if (!value.toByteArray().all { it.toInt() == 0 }) {
 
-            collectInputView.text = value
+                triggerTts(value)
 
-            updateObservation(currentTrait, value)
+                collectInputView.text = value
 
+                updateObservation(currentTrait, value)
+            }
         }
 
         override fun beforeTextChanged(
@@ -101,7 +104,7 @@ class TextTraitLayout : BaseTraitLayout {
                         controller.getTraitBox().moveTrait("right")
                     }
 
-                    ""
+                    scan
 
                 }
             } else if (event.action == KeyEvent.ACTION_UP
