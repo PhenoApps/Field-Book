@@ -342,9 +342,20 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
         FieldObject field = list.get(position);
         holder.name.setText(field.getExp_name());
         holder.count.setText(field.getCount());
-        // Set other view attributes
 
-        // Setting item click listener
+        // Set source icon
+        String source = field.getExp_source();
+        Log.d("FieldAdapter", "Source for field " + field.getExp_name() + ": " + source);
+        if ("local".equals(source)) {
+            holder.sourceIcon.setImageResource(R.drawable.ic_file_generic);
+        } else if ("brapi".equals(source)) {
+            holder.sourceIcon.setImageResource(R.drawable.ic_api);
+        } else if ("cloud".equals(source)) {
+            holder.sourceIcon.setImageResource(R.drawable.ic_cloud_outline);
+        } else {
+            holder.sourceIcon.setImageResource(R.mipmap.ic_launcher);
+        }
+
         holder.itemView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
