@@ -317,7 +317,7 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
     class ViewHolder extends RecyclerView.ViewHolder {
         CheckBox checkBox;
         ImageView sourceIcon;
-        TextView fieldName;
+        TextView name;
         ImageView menuPopup;
         TextView count;
 
@@ -325,7 +325,8 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
             super(itemView);
             checkBox = itemView.findViewById(R.id.fieldCheckBox);
             sourceIcon = itemView.findViewById(R.id.fieldSourceIcon);
-            fieldName = itemView.findViewById(R.id.fieldName);
+            name = itemView.findViewById(R.id.fieldName);
+            count = itemView.findViewById(R.id.fieldCount);
             // initialize other views
         }
     }
@@ -339,7 +340,8 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         FieldObject field = list.get(position);
-        holder.fieldName.setText(field.getExp_name());
+        holder.name.setText(field.getExp_name());
+        holder.count.setText(field.getCount());
         // Set other view attributes
 
         // Setting item click listener
