@@ -304,10 +304,8 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
         notifyDataSetChanged();
 
         // Check if this is a BrAPI field and show BrAPI info dialog if so
-        if (selectedField.getExp_source() != null &&
-                !selectedField.getExp_source().equals("") &&
-                !selectedField.getExp_source().equals("local")) {
-
+        String source = selectedField.getExp_source();
+        if (source != null && !source.equals("csv") && !source.equals("excel")) {
             BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context,
                     context.getResources().getString(R.string.brapi_info_message));
             brapiInfo.show();
@@ -340,20 +338,19 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         FieldObject field = list.get(position);
-        holder.name.setText(field.getExp_name());
+        String name = field.getExp_name();
+        holder.name.setText(name);
         holder.count.setText(field.getCount());
 
         // Set source icon
         String source = field.getExp_source();
-        Log.d("FieldAdapter", "Source for field " + field.getExp_name() + ": " + source);
-        if ("local".equals(source)) {
-            holder.sourceIcon.setImageResource(R.drawable.ic_file_generic);
-        } else if ("brapi".equals(source)) {
-            holder.sourceIcon.setImageResource(R.drawable.ic_api);
-        } else if ("cloud".equals(source)) {
-            holder.sourceIcon.setImageResource(R.drawable.ic_cloud_outline);
-        } else {
-            holder.sourceIcon.setImageResource(R.mipmap.ic_launcher);
+        Log.d("FieldAdapter", "Source for field " + name + ": " + source);
+        if (source == null || "csv".equals(source)) {
+            holder.sourceIcon.setImageResource(R.drawable.ic_file_csv);
+        } else if ("excel".equals(source)) {
+            holder.sourceIcon.setImageResource(R.drawable.ic_file_xls);
+        } else { // brapi import
+            holder.sourceIcon.setImageResource(R.drawable.ic_adv_brapi);
         }
 
         holder.itemView.setOnClickListener(new OnClickListener() {

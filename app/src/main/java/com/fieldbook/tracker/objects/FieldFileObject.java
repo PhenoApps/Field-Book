@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -148,6 +149,11 @@ public class FieldFileObject {
             FieldObject f = new FieldObject();
             f.setExp_name(this.getStem());
             f.setExp_alias(this.getStem());
+            if (this.isCSV()) {
+                f.setExp_source("csv");
+            } else if (this.isExcel()) {
+                f.setExp_source("excel");
+            }
             return f;
         }
 

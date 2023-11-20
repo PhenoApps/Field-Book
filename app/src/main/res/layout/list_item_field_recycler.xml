@@ -5,33 +5,42 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp">
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <CheckBox
         android:id="@+id/fieldCheckBox"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:minWidth="48dp"
+        android:padding="8dp" />
 
     <ImageView
         android:id="@+id/fieldSourceIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="12dp"/>
 
-    <TextView style="@style/TextViewStyle.Bold"
+    <TextView
+        style="@style/TextViewStyle.Bold"
         android:id="@+id/fieldName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:ellipsize="end"
-        android:minWidth="120dp"
+        android:gravity="start"
         android:singleLine="true"
+        android:textSize="@dimen/text_size_large"
         tools:text="field_sample"/>
 
-    <TextView style="@style/TextViewStyle.Sub"
+    <TextView
+        style="@style/TextViewStyle.Sub"
         android:id="@+id/fieldCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ellipsize="end"
+        android:gravity="start"
         android:minWidth="40dp"
         android:singleLine="true"
         android:textSize="@dimen/text_size_small" />
