@@ -74,11 +74,15 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
     }
 
     private fun setRecordingLocation(recordingName: String, isFieldAudio: Boolean) {
+
+        val traitName = (context as CollectActivity).traitName
+        val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+
         // get directory based on type of audio being recorded
         val audioDir = if (isFieldAudio) getFieldDataDirectory(
             context, "field_audio"
         ) else getFieldMediaDirectory(
-            context, "audio"
+            context, sanitizedTraitName
         )
         if (audioDir != null && audioDir.exists()) {
             val audioFile = audioDir.createFile("*/mp4", "$recordingName.mp4")

@@ -2,7 +2,6 @@ package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -148,13 +147,11 @@ public class AudioTraitLayout extends BaseTraitLayout {
     }
 
     public boolean isAudioRecording(){
-        if (buttonState == ButtonState.RECORDING) return true;
-        else return false;
+        return buttonState == ButtonState.RECORDING;
     }
 
     public boolean isAudioPlaybackPlaying(){
-        if (buttonState == ButtonState.PLAYING) return true;
-        else return false;
+        return buttonState == ButtonState.PLAYING;
     }
 
     private enum ButtonState {
