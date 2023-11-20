@@ -15,6 +15,7 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import java.util.ArrayList
 
 /**
  * A tab layout with tabs: attributes, traits, and other.
@@ -67,6 +68,9 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
             //query database for attributes/traits to use
             try {
                 attributes = activity.getDatabase().getAllObservationUnitAttributeNames(activity.studyId.toInt())
+                val attributesList = attributes.toMutableList()
+                attributesList.add(0, context.getString(R.string.field_name_attribute))
+                attributes = attributesList.toTypedArray()
                 traits = activity.getDatabase().allTraitObjects.toTypedArray()
                 other = traits.filter { !it.visible }.toTypedArray()
                 traits = traits.filter { it.visible }.toTypedArray()
@@ -115,7 +119,7 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
 
         //manually select the first tab based on preferences
         val tabIndex = activity.getPreferences()
-            .getInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, 1)
+            .getInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, 0)
 
         tabLayout.selectTab(tabLayout.getTabAt(tabIndex))
     }

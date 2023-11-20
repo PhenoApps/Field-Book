@@ -47,6 +47,34 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
         }
 
         /**
+         * Gets a specific directory for the currently chosen field.
+         * @param attributeName: attribute name of the folder
+         * currently used for field_audio, can be used in future for other types od field data
+         */
+        fun getFieldDataDirectory(context: Context?, attributeName: String): DocumentFile? {
+
+            if (context != null) {
+
+                val prefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+                val field = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
+
+                if (field.isNotBlank()) {
+                    val fieldDataDirName = context.getString(R.string.dir_field_data)
+                    val fieldDir = createDir(context, fieldDataDirName, field)
+                    if (fieldDir != null) {
+                        val attributeDir = fieldDir.findFile(attributeName)
+                        if (attributeDir == null || !attributeDir.exists()) {
+                            fieldDir.createDirectory(attributeName)
+                        }
+                        return fieldDir.findFile(attributeName)
+                    }
+                } else return null
+            }
+
+            return null
+        }
+
+        /**
          * Gets plot media for a given plot based on its extension
          */
         fun getPlotMedia(mediaDir: DocumentFile?, plot: String, ext: String): List<DocumentFile> {

@@ -108,9 +108,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         true
     }
 
-    constructor(context: Context?) : super(context) {}
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {}
+    constructor(context: Context?) : super(context)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     data class AverageInfo(var unit: ObservationUnitModel, var location: Location?,
                            var points: List<Pair<Double, Double>>,
@@ -188,6 +188,13 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         }
     }
 
+    private fun unregisterGnssReceiver() {
+        try {
+            mLocalBroadcastManager.unregisterReceiver(receiver)
+        } catch (ignore: Exception) {
+        }
+    }
+
     private fun initialize() {
 
         mProgressDialog = AlertDialog.Builder(context)
@@ -201,6 +208,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(context)
         val filter = IntentFilter()
         filter.addAction(ACTION_BROADCAST_GNSS_TRAIT)
+
+        unregisterGnssReceiver()
 
         /**
          * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
@@ -708,7 +717,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         setupAveragingUi()
 
-        connectionCheckHandler()
+        if (!connectionCheckRunning)
+            connectionCheckHandler()
 
     }
 
@@ -726,7 +736,10 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         }
     }
 
+    private var connectionCheckRunning = false
     private fun connectionCheckHandler() {
+
+        connectionCheckRunning = true
 
         val deviceName = prefs.getString(GeneralKeys.GNSS_LAST_PAIRED_DEVICE_NAME, null)
 

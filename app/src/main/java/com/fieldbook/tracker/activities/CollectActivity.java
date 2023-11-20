@@ -54,6 +54,7 @@ import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
@@ -67,6 +68,7 @@ import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
+import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.JsonUtil;
@@ -150,6 +152,9 @@ public class CollectActivity extends ThemedActivity
     //used to query for infobar prefix/value pairs and building InfoBarModels
     @Inject
     InfoBarHelper infoBarHelper;
+
+    @Inject
+    FieldAudioHelper fieldAudioHelper;
 
     @Inject
     FieldSwitchImpl fieldSwitcher;
@@ -854,6 +859,11 @@ public class CollectActivity extends ThemedActivity
     }
 
     @Override
+    public boolean isFieldAudioRecording(){
+        return fieldAudioHelper.isRecording();
+    }
+
+    @Override
     public void onPause() {
 
         guiThread.quit();
@@ -1209,6 +1219,9 @@ public class CollectActivity extends ThemedActivity
 //        View actionView = MenuItemCompat.getActionView(geoNavEnable);
 //        actionView.setOnClickListener((View) -> onOptionsItemSelected(geoNavEnable));
 
+        MenuItem fieldAudioMic = systemMenu.findItem(R.id.field_audio_mic);
+        fieldAudioMic.setVisible(mPrefs.getBoolean(GeneralKeys.ENABLE_FIELD_AUDIO, false));
+
         customizeToolbarIcons();
 
         return true;
@@ -1242,6 +1255,7 @@ public class CollectActivity extends ThemedActivity
         final int lockDataId = R.id.lockData;
         final int summaryId = R.id.summary;
         final int geonavId = R.id.action_act_collect_geonav_sw;
+        final int fieldAudioMicId = R.id.field_audio_mic;
         switch (item.getItemId()) {
             case helpId:
                 TapTargetSequence sequence = new TapTargetSequence(this)
@@ -1343,6 +1357,59 @@ public class CollectActivity extends ThemedActivity
                             e.printStackTrace();
                         }
                     }
+                }
+
+                return true;
+
+            case R.id.field_audio_mic:
+                MenuItem micItem = systemMenu.findItem(R.id.field_audio_mic);
+
+                // get status from AudioTraitLayout
+                TraitObject currentTrait = traitBox.getCurrentTrait();
+                BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
+
+                boolean isTraitAudioLayout = currentTraitLayout.isTraitType(AudioTraitLayout.type);
+                boolean isTraitAudioRecording = false;
+                boolean isTraitAudioPlaying = false;
+                if(isTraitAudioLayout){
+                    AudioTraitLayout audioTraitLayout = (AudioTraitLayout) currentTraitLayout;
+                    isTraitAudioRecording = audioTraitLayout.isAudioRecording();
+                    isTraitAudioPlaying = audioTraitLayout.isAudioPlaybackPlaying();
+                }
+
+                // if trait audio is recording, give a warning
+                if(isTraitAudioRecording){
+                    Toast.makeText(
+                            this, R.string.trait_audio_recording_warning,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+                // if trait audio is playing, give a warning
+                else if(isTraitAudioPlaying){
+                    Toast.makeText(
+                            this, R.string.trait_audio_playing_warning,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+                // if trait audio isn't recording or playing
+                // record or stop the field audio depending on its state
+                else if(!fieldAudioHelper.isRecording()){
+                    // TODO: add trait audio playback stopping logic
+                    fieldAudioHelper.startRecording(true);
+                    Toast.makeText(
+                        this, R.string.field_audio_recording_start,
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    micItem.setIcon(R.drawable.ic_tb_field_mic_on);
+                    micItem.setTitle(R.string.menu_collect_stop_field_audio);
+                }else{
+                    fieldAudioHelper.stopRecording();
+                    Toast.makeText(
+                        this, R.string.field_audio_recording_stop,
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    micItem.setIcon(R.drawable.ic_tb_field_mic_off);
+                    micItem.setTitle(R.string.menu_collect_start_field_audio);
                 }
 
                 return true;
@@ -2194,6 +2261,11 @@ public class CollectActivity extends ThemedActivity
         String dataMissingString = context.getString(R.string.main_infobar_data_missing);
 
         if (isAttribute) {
+
+            if (label.equals(context.getString(R.string.field_name_attribute))) {
+                String fieldName = ((CollectActivity) context).getPreferences().getString(GeneralKeys.FIELD_FILE, "");
+                return (fieldName == null || fieldName.isEmpty()) ? dataMissingString : fieldName;
+            }
 
             String[] values = database.getDropDownRange(label, plotId);
             if (values == null || values.length == 0) {

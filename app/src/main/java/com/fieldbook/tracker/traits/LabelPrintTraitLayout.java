@@ -44,6 +44,10 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     private String[] options;
     private String[] labelCopiesArray;
     private String[] labelSizeArray;
+    private String simpleSmall;
+    private String detailedSmall;
+    private String simpleLarge;
+    private String detailedLarge;
     private ArrayList<String> optionsList;
     private ArrayAdapter<String> sizeArrayAdapter;
     private ArrayAdapter<String> fieldArrayAdapter;
@@ -169,19 +173,24 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 new IntentFilter("printer_message"));
 
         mBluetoothUtil = new BluetoothUtil();
-
-        String[] prefixTraits = getDatabase().getRangeColumnNames();
+        Integer studyId = getPrefs().getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+        String[] prefixTraits = getDatabase().getAllObservationUnitAttributeNames(studyId);
         optionsList = new ArrayList<>(Arrays.asList(prefixTraits));
-        optionsList.add("date");
-        optionsList.add("trial_name");
-        optionsList.add("blank");
+        optionsList.add(0, getContext().getString(R.string.field_name_attribute));
+        optionsList.add(getContext().getString(R.string.trait_layout_print_label_date_option));
+        optionsList.add(getContext().getString(R.string.trait_layout_print_label_blank_option));
         options = new String[optionsList.size()];
         optionsList.toArray(options);
 
         fieldArrayAdapter = new ArrayAdapter<>(
                 getContext(), R.layout.custom_spinner_layout, options);
 
-        labelSizeArray = new String[]{"3\" x 2\" simple", "3\" x 2\" detailed", "2\" x 1\" simple", "2\" x 1\" detailed"};
+        simpleSmall = "2\" x 1\" " + getContext().getString(R.string.trait_layout_print_label_simple_text);
+        detailedSmall = "2\" x 1\" " + getContext().getString(R.string.trait_layout_print_label_detailed_text);
+        simpleLarge = "3\" x 2\" " + getContext().getString(R.string.trait_layout_print_label_simple_text);
+        detailedLarge = "3\" x 2\" " + getContext().getString(R.string.trait_layout_print_label_detailed_text);
+
+        labelSizeArray = new String[]{simpleLarge, detailedLarge, simpleSmall, detailedSmall};
         sizeArrayAdapter = new ArrayAdapter<>(
                 getContext(), R.layout.custom_spinner_layout, labelSizeArray);
 
@@ -223,7 +232,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                                            int pos, long arg3) {
                     Log.d(TAG, labelsize.getSelectedItem().toString());
 
-                    if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed") || labelsize.getSelectedItem().toString().equals("2\" x 1\" detailed")) {
+                    if (labelsize.getSelectedItem().toString().equals(detailedLarge) || labelsize.getSelectedItem().toString().equals(detailedSmall)) {
                         ((View) textfield2.getParent()).setVisibility(View.VISIBLE);
                         ((View) textfield3.getParent()).setVisibility(View.VISIBLE);
                         ((View) textfield4.getParent()).setVisibility(View.VISIBLE);
@@ -247,19 +256,19 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
             labelsize.setSelection(sizeArrayAdapter.getPosition(getPrefs().getString("SIZE", labelSizeArray[0])));
             labelsize.setEnabled(true);
 
-            textfield1.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT", options[0])));
+            textfield1.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT", options[1])));
             textfield1.setEnabled(true);
 
-            textfield2.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT2", options[0])));
+            textfield2.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT2", options[2])));
             textfield2.setEnabled(true);
 
-            textfield3.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT3", options[0])));
+            textfield3.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT3", getContext().getString(R.string.trait_layout_print_label_date_option))));
             textfield3.setEnabled(true);
 
-            textfield4.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT4", options[0])));
+            textfield4.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("TEXT4", getContext().getString(R.string.field_name_attribute))));
             textfield4.setEnabled(true);
 
-            barcodefield.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("BARCODE", options[0])));
+            barcodefield.setSelection(fieldArrayAdapter.getPosition(getPrefs().getString("BARCODE", getPrefs().getString(GeneralKeys.UNIQUE_NAME, ""))));
             barcodefield.setEnabled(true);
 
             labelcopies.setSelection(copiesArrayAdapter.getPosition(getPrefs().getString("COPIES", labelCopiesArray[0])));
@@ -354,30 +363,22 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 ed.apply();
 
                 int length = barcode.length();
-                int barcode_size = 6;
+                int barcode_size = 6; // size for simpleSmall labels
 
-                // Scale barcode based on label size and variable field length
-                switch (size) {
-                    case "3\" x 2\" simple":
-                        barcode_size = 10 - (length / 15);
-                        break;
-                    case "3\" x 2\" detailed":
-                        barcode_size = 9 - (length / 15);
-                        break;
-                    case "2\" x 1\" simple":
-                    case "2\" x 1\" detailed":
-                        barcode_size = 5 - (length / 15);
-                        break;
-                    default:
-                        //Log.d(((MainActivity) getContext()).TAG, "Matched no sizes");
-                        break;
+                // Scale barcode size by label size and variable field length
+                if (size.equals(detailedSmall)) {
+                    barcode_size = 5 - (length / 15);
+                } else if (size.equals(simpleLarge)) {
+                    barcode_size = 10 - (length / 15);
+                } else if (size.equals(detailedLarge)) {
+                    barcode_size = 9 - (length / 15);
                 }
 
                 int dotsAvailable1;
                 int dotsAvailable2;
 
                 // Scale text based on label size and variable field length
-                if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
+                if (size.equals(simpleSmall) || size.equals(detailedSmall)) {
                     dotsAvailable1 = 399;
                     dotsAvailable2 = 250;
 
@@ -482,11 +483,11 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
         String item = (String) spinner.getSelectedItem();
 
         if (item != null) {
-            if (item.equals("date")) {
+            if (item.equals(getContext().getString(R.string.trait_layout_print_label_date_option))) {
                 value = dateFormat.format(calendar.getTime());
-            } else if (item.equals("trial_name")) {
+            } else if (item.equals(getContext().getString(R.string.field_name_attribute))) {
                 value = getPrefs().getString(GeneralKeys.FIELD_FILE, "");
-            } else if (item.equals("blank")) {
+            } else if (item.equals(getContext().getString(R.string.trait_layout_print_label_blank_option))) {
                 value = "";
             } else {
                 int pos = spinner.getSelectedItemPosition();
