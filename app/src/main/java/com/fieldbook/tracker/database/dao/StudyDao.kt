@@ -177,18 +177,6 @@ class StudyDao {
             }
         }
 
-        fun preprocessDate(dateString: String): String {
-            return if (dateString.contains("-") || dateString.contains("+")) {
-                // Assuming the format is like '2017-06-15 05:32:50-0700'
-                // Split at the timezone part and insert a colon
-                val parts = dateString.split("(?<=\\d{2})(?=-\\d{4}|\\+\\d{4})".toRegex())
-                if (parts.size > 1) "${parts[0]}${parts[1].substring(0, 3)}:${parts[1].substring(3)}"
-                else dateString
-            } else {
-                dateString
-            }
-        }
-
         fun getAllFieldObjects(): ArrayList<FieldObject> = withDatabase { db ->
 
             val studies = ArrayList<FieldObject>()
@@ -199,10 +187,8 @@ class StudyDao {
                         studies.add(model.toFieldObject())
                     }
 
-            // Define the date format without milliseconds and timezone
+            // Sort fields by most recent import/edit activity
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-
-            // Function to truncate and parse date
             fun parseDate(date: String): Date? {
                 return if (date.isBlank()) null
                 else {
@@ -215,7 +201,6 @@ class StudyDao {
                 }
             }
 
-            // Sort the studies list in Kotlin
             val sortedStudies = studies.sortedWith(compareByDescending<FieldObject> { fieldObject ->
                 listOfNotNull(
                         parseDate(fieldObject.date_edit),
@@ -223,10 +208,9 @@ class StudyDao {
                 ).maxOrNull() ?: Date(0)
             })
 
-            // Logging the sorted results
-            sortedStudies.forEach { fieldObject ->
-                Log.d("StudyDao", "FieldObject: ${fieldObject.exp_id}, Import Date: ${fieldObject.date_import}, Edit Date: ${fieldObject.date_edit}")
-            }
+//            sortedStudies.forEach { fieldObject ->
+//                Log.d("StudyDao", "FieldObject: ${fieldObject.exp_id}, Import Date: ${fieldObject.date_import}, Edit Date: ${fieldObject.date_edit}")
+//            }
 
             ArrayList(sortedStudies)
 
