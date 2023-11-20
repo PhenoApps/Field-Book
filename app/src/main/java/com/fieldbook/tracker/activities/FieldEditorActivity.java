@@ -135,6 +135,10 @@ public class FieldEditorActivity extends ThemedActivity
                 .replace(android.R.id.content, fragment)
                 .addToBackStack(null)
                 .commit();
+
+        updateCurrentFieldSettings(field);
+        fieldSwitcher.switchField(field);
+        CollectActivity.reloadData = true;
     }
 
     // Helper function to load data

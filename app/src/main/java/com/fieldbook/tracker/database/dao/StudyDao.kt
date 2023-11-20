@@ -17,6 +17,11 @@ import com.fieldbook.tracker.database.toFirst
 import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
+import java.text.SimpleDateFormat
+import java.text.ParseException
+import java.util.Date
+import java.util.Locale
+
 
 
 class StudyDao {
@@ -172,26 +177,58 @@ class StudyDao {
             }
         }
 
+        fun preprocessDate(dateString: String): String {
+            return if (dateString.contains("-") || dateString.contains("+")) {
+                // Assuming the format is like '2017-06-15 05:32:50-0700'
+                // Split at the timezone part and insert a colon
+                val parts = dateString.split("(?<=\\d{2})(?=-\\d{4}|\\+\\d{4})".toRegex())
+                if (parts.size > 1) "${parts[0]}${parts[1].substring(0, 3)}:${parts[1].substring(3)}"
+                else dateString
+            } else {
+                dateString
+            }
+        }
+
         fun getAllFieldObjects(): ArrayList<FieldObject> = withDatabase { db ->
 
             val studies = ArrayList<FieldObject>()
-            // order fields by most recent edit/import
-            val queryOrderBy = """ 
-                CASE 
-                    WHEN strftime('%Y-%m-%d %H:%M:%f', date_edit) IS NULL THEN strftime('%Y-%m-%d %H:%M:%f', date_import)
-                    ELSE MAX(strftime('%Y-%m-%d %H:%M:%f', date_import), strftime('%Y-%m-%d %H:%M:%f', date_edit))
-                END DESC
-            """.trimIndent()
 
-            db.query(Study.tableName, orderBy = queryOrderBy)
+            db.query(Study.tableName)
                     .toTable()
                     .forEach { model ->
-
-                        val fieldObject = model.toFieldObject()
-                        studies.add(fieldObject)
+                        studies.add(model.toFieldObject())
                     }
 
-            studies
+            // Define the date format without milliseconds and timezone
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+            // Function to truncate and parse date
+            fun parseDate(date: String): Date? {
+                return if (date.isBlank()) null
+                else {
+                    try {
+                        dateFormat.parse(date.substring(0, 19)) // Truncate to "yyyy-MM-dd HH:mm:ss"
+                    } catch (e: ParseException) {
+                        Log.e("StudyDao", "Error parsing date: $date", e)
+                        null
+                    }
+                }
+            }
+
+            // Sort the studies list in Kotlin
+            val sortedStudies = studies.sortedWith(compareByDescending<FieldObject> { fieldObject ->
+                listOfNotNull(
+                        parseDate(fieldObject.date_edit),
+                        parseDate(fieldObject.date_import)
+                ).maxOrNull() ?: Date(0)
+            })
+
+            // Logging the sorted results
+            sortedStudies.forEach { fieldObject ->
+                Log.d("StudyDao", "FieldObject: ${fieldObject.exp_id}, Import Date: ${fieldObject.date_import}, Edit Date: ${fieldObject.date_edit}")
+            }
+
+            ArrayList(sortedStudies)
 
         } ?: ArrayList()
 
