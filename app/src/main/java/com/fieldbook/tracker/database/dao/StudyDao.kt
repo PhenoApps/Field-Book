@@ -175,16 +175,26 @@ class StudyDao {
         fun getAllFieldObjects(): ArrayList<FieldObject> = withDatabase { db ->
 
             val studies = ArrayList<FieldObject>()
+            // order fields by most recent edit/import
+            val queryOrderBy = """ 
+                CASE 
+                    WHEN strftime('%Y-%m-%d %H:%M:%f', date_edit) IS NULL THEN strftime('%Y-%m-%d %H:%M:%f', date_import)
+                    ELSE MAX(strftime('%Y-%m-%d %H:%M:%f', date_import), strftime('%Y-%m-%d %H:%M:%f', date_edit))
+                END DESC
+            """.trimIndent()
 
-            db.query(Study.tableName).toTable().forEach { model ->
+            db.query(Study.tableName, orderBy = queryOrderBy)
+                    .toTable()
+                    .forEach { model ->
 
-                studies.add(model.toFieldObject())
-
-            }
+                        val fieldObject = model.toFieldObject()
+                        studies.add(fieldObject)
+                    }
 
             studies
 
         } ?: ArrayList()
+
 
         //TODO query missing count/date_edit
         fun getFieldObject(exp_id: Int): FieldObject? = withDatabase { db ->
