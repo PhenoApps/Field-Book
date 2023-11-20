@@ -75,7 +75,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         brapiDetailsRelativeLayout = view.findViewById(R.id.brapiDetailsRelativeLayout)
 
         // Check if this is a BrAPI field and show BrAPI info dialog if so
-        val source: String = field.getExp_source()
+        val source: String? = field.getExp_source()
         if (source != null && source != "csv" && source != "excel") {
             brapiDetailsTextView.visibility = View.VISIBLE
             brapiDetailsRelativeLayout.visibility = View.VISIBLE
