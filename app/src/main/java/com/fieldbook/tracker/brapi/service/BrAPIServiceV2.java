@@ -1190,7 +1190,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             // Construct our map to check for uniques
             for (List<String> dataRow : studyDetails.getValues()) {
-                Integer idColumn = studyDetails.getAttributes().indexOf(observationLevel);
+                Integer idColumn = studyDetails.getAttributes().indexOf("ObservationUnitName");
                 checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
             }
 
