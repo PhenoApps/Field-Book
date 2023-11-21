@@ -58,10 +58,12 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
         }
     }
 
-    fun stopRecording() {
+    fun stopRecording(isFieldAudio: Boolean = true) {
         try {
             mediaRecorder?.stop()
-            buttonState = ButtonState.WAITING_FOR_RECORDING
+            if(isFieldAudio){
+                buttonState = ButtonState.WAITING_FOR_RECORDING
+            }
             releaseRecorder()
         } catch (e: Exception) {
             e.printStackTrace()

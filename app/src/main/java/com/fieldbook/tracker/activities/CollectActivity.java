@@ -1402,7 +1402,7 @@ public class CollectActivity extends ThemedActivity
                     micItem.setIcon(R.drawable.ic_tb_field_mic_on);
                     micItem.setTitle(R.string.menu_collect_stop_field_audio);
                 }else{
-                    fieldAudioHelper.stopRecording();
+                    fieldAudioHelper.stopRecording(true);
                     Toast.makeText(
                         this, R.string.field_audio_recording_stop,
                         Toast.LENGTH_SHORT
