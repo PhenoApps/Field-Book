@@ -68,6 +68,7 @@
     <!-- FIELDS -->
     <!-- General -->
     <string name="list_item_field_popup_menu_content_description">Opens a menu for the selected field.</string>
+    <string name="selected_count">%1$d selected</string>
 
     <!-- Sort -->
     <string name="fields_sort_update">Sort</string>

@@ -1,0 +1,7 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_delete"
+        android:icon="@drawable/ic_tb_delete"
+        android:title="@string/fields_delete"
+        android:showAsAction="ifRoom|withText"/>
+</menu>

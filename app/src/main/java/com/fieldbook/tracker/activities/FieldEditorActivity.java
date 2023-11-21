@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.Rect;
-import androidx.lifecycle.MutableLiveData;
 import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -17,28 +17,31 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.OpenableColumns;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiActivity;
 import com.fieldbook.tracker.adapters.FieldAdapter;
@@ -61,9 +64,7 @@ import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
-
 import org.phenoapps.utils.BaseDocumentTreeUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,21 +76,18 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.StringJoiner;
-
 import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
 public class FieldEditorActivity extends ThemedActivity
-        implements FieldSortController, FieldAdapterController, FieldAdapter.OnFieldSelectedListener {
+        implements FieldSortController, FieldAdapterController, FieldAdapter.OnFieldSelectedListener, FieldAdapter.AdapterCallback {
 
     private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
     private static final int REQUEST_CLOUD_FILE_CODE = 5;
-
     private static final int DIALOG_LOAD_FIELDFILECSV = 1000;
     private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
     private ArrayList<FieldObject> fieldList;
@@ -106,8 +104,11 @@ public class FieldEditorActivity extends ThemedActivity
     Spinner primary;
     Spinner secondary;
     private Menu systemMenu;
-
     private GPSTracker mGpsTracker;
+    private ActionMode actionMode;
+//    private GestureDetector gestureDetector;
+    private FieldAdapter adapter;
+    private TextView customTitleView;
 
     @Inject
     DataHelper database;
@@ -129,6 +130,9 @@ public class FieldEditorActivity extends ThemedActivity
     };
 
     public void onFieldSelected(FieldObject field) {
+        if (actionMode != null) {
+            actionMode.finish();  // Finish the action mode if it's active
+        }
         FieldDetailFragment fragment = new FieldDetailFragment(field);
 
         getSupportFragmentManager().beginTransaction()
@@ -144,7 +148,7 @@ public class FieldEditorActivity extends ThemedActivity
     // Helper function to load data
     public void loadData(ArrayList<FieldObject> fields) {
         try {
-            mAdapter = new FieldAdapter(thisActivity, fields, fieldSwitcher);
+            mAdapter = new FieldAdapter(thisActivity, fields, fieldSwitcher, this);
             mAdapter.setOnFieldSelectedListener(this);
             recyclerView.setAdapter(mAdapter);
         } catch (Exception e) {
@@ -182,12 +186,7 @@ public class FieldEditorActivity extends ThemedActivity
 
         setContentView(R.layout.activity_fields);
 
-//        recyclerView = findViewById(R.id.fieldRecyclerView);
-//        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-//        mAdapter = new FieldAdapter(/* Pass necessary data */);
-//        recyclerView.setAdapter(mAdapter);
-
-        toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.field_toolbar);
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
@@ -199,17 +198,111 @@ public class FieldEditorActivity extends ThemedActivity
 
         thisActivity = this;
         database.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-//        fieldList = findViewById(R.id.myList);
-//        mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
-//        mAdapter.setOnFieldSelectedListener(this);
-//        fieldList.setAdapter(mAdapter);
         recyclerView = findViewById(R.id.fieldRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         fieldList = database.getAllFieldObjects();
-        mAdapter = new FieldAdapter(this, fieldList, fieldSwitcher);
+        mAdapter = new FieldAdapter(this, fieldList, fieldSwitcher, this);
         mAdapter.setOnFieldSelectedListener(this);
         recyclerView.setAdapter(mAdapter);
+
+//        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+//            @Override
+//            public void onLongPress(MotionEvent e) {
+//                View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
+//                if (actionMode != null || view == null) {
+//                    return;
+//                }
+//                int idx = recyclerView.getChildAdapterPosition(view);
+//                toggleSelection(idx);
+//                super.onLongPress(e);
+//            }
+//        });
+
+        recyclerView.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+//                gestureDetector.onTouchEvent(e);
+                return false;
+            }
+        });
+
     }
+
+    // Implementations of methods from FieldAdapter.AdapterCallback
+    @Override
+    public void onItemSelected(int count) {
+        // Handle item selection update
+    }
+
+    @Override
+    public void onItemClear() {
+        // Handle clearing of selections
+    }
+
+    public void toggleSelection(int idx) {
+        mAdapter.toggleSelection(idx);
+        int selectedCount = mAdapter.getSelectedItemCount();
+
+        if (selectedCount == 0 && actionMode != null) {
+            actionMode.finish();
+        } else if (selectedCount > 0 && actionMode == null) {
+            actionMode = startSupportActionMode(actionModeCallback);
+        }
+
+        if (actionMode != null && customTitleView != null) {
+            customTitleView.setText(getString(R.string.selected_count, selectedCount));
+        }
+    }
+
+    private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.cab_menu, menu);
+            toolbar.setVisibility(View.GONE);
+
+            // Create and style the custom title view
+            customTitleView = new TextView(FieldEditorActivity.this);
+            customTitleView.setTextColor(Color.BLACK); // Set text color
+            customTitleView.setTextSize(18); // Set text size
+
+            // Set layout parameters
+            ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    ActionBar.LayoutParams.WRAP_CONTENT);
+            customTitleView.setLayoutParams(layoutParams);
+
+            // Set the custom view
+            mode.setCustomView(customTitleView);
+
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            if (item.getItemId() == R.id.menu_delete) {
+                List<Integer> selectedItemPositions = mAdapter.getSelectedItems();
+                for (int position : selectedItemPositions) {
+                    mAdapter.removeItem(position);
+                }
+                mode.finish();
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mAdapter.clearSelections();
+            actionMode = null;
+            toolbar.setVisibility(View.VISIBLE);
+        }
+    };
 
     private void showFileDialog() {
         LayoutInflater inflater = this.getLayoutInflater();
@@ -395,15 +488,10 @@ public class FieldEditorActivity extends ThemedActivity
                 //when the dialog is dismissed, the field data is created or failed
                 dialog.setOnDismissListener((dismiss -> {
 
-                    //update list of fields
-//                    fieldList = findViewById(R.id.myList);
-//                    mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
-//                    mAdapter.setOnFieldSelectedListener(this);
-//                    fieldList.setAdapter(mAdapter);
                     recyclerView = findViewById(R.id.fieldRecyclerView);
                     recyclerView.setLayoutManager(new LinearLayoutManager(this));
                     fieldList = database.getAllFieldObjects();
-                    mAdapter = new FieldAdapter(this, fieldList, fieldSwitcher);
+                    mAdapter = new FieldAdapter(this, fieldList, fieldSwitcher, this);
                     mAdapter.setOnFieldSelectedListener(this);
                     recyclerView.setAdapter(mAdapter);
 
@@ -486,8 +574,6 @@ public class FieldEditorActivity extends ThemedActivity
                                 null,
                                 8000, null, null
                                 );
-//                        Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
-//                                Snackbar.LENGTH_LONG).show();
 
                     } else {
 
@@ -498,17 +584,7 @@ public class FieldEditorActivity extends ThemedActivity
                                 null,
                                 8000,
                                 null, (v) -> selectClosestField(studyId)
-//                                {
-//                                    int count = mAdapter.getCount();
-//
-//                                    for (int i = 0; i < count; i++) {
-//                                        FieldObject field = mAdapter.getItem(i);
-//                                        if (field.getExp_id() == studyId) {
-//                                            mAdapter.getView(i, null, null).performClick();
-//                                        }
-//                                    }
-//                                }
-                                );
+                        );
                     }
                 }
 
@@ -702,14 +778,6 @@ public class FieldEditorActivity extends ThemedActivity
         }
     }
 
-    /**
-     * The user selects between the columns in fieldFile to determine the primary/secondary/unique ids
-     * These ids are used to navigate between plots in the collect activity.
-     * Sanitization has to happen here to ensure no empty string column is selected.
-     * Also special characters are checked for and replaced here, if they exist a message is shown to the user.
-     *
-     * @param fieldFile contains the parsed input file which has columns
-     */
     private void loadFile(FieldFileObject.FieldFileBase fieldFile) {
 
         String[] importColumns = fieldFile.getColumns();

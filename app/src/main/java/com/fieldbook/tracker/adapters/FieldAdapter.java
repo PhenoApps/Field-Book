@@ -2,22 +2,18 @@ package com.fieldbook.tracker.adapters;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
-import android.widget.RadioButton;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
@@ -29,21 +25,24 @@ import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 
 /**
  * Loads data on field manager screen
  */
 
 public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> {
-
+    private SparseBooleanArray selectedItems = new SparseBooleanArray();
     private static final String TAG = "FieldAdapter";
     private final LayoutInflater mLayoutInflater;
     private final ArrayList<FieldObject> list;
     private final Context context;
     private final FieldSwitcher fieldSwitcher;
+    private AdapterCallback callback;
     public interface OnFieldSelectedListener {
         void onFieldSelected(FieldObject field);
     }
@@ -51,11 +50,68 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
     public void setOnFieldSelectedListener(OnFieldSelectedListener listener) {
         this.listener = listener;
     }
-    public FieldAdapter(Context context, ArrayList<FieldObject> list, FieldSwitcher switcher) {
+    public FieldAdapter(Context context, ArrayList<FieldObject> list, FieldSwitcher switcher, AdapterCallback callback) {
         this.context = context;
         mLayoutInflater = LayoutInflater.from(context);
         this.list = list;
         this.fieldSwitcher = switcher;
+        this.callback = callback;
+    }
+
+    public interface AdapterCallback {
+        void onItemSelected(int count);
+        void onItemClear();
+    }
+
+    public void toggleSelection(int pos) {
+        if (selectedItems.get(pos, false)) {
+            selectedItems.delete(pos);
+        } else {
+            selectedItems.put(pos, true);
+        }
+        notifyItemChanged(pos);
+        if (callback != null) {
+            callback.onItemSelected(getSelectedItemCount());
+        }
+    }
+
+    public int getSelectedItemCount() {
+        return selectedItems.size();
+    }
+
+    public List<Integer> getSelectedItems() {
+        List<Integer> items = new ArrayList<>();
+        for (int i = 0; i < selectedItems.size(); i++) {
+            items.add(selectedItems.keyAt(i));
+        }
+        return items;
+    }
+
+    public void clearSelections() {
+        selectedItems.clear();
+        notifyDataSetChanged();
+        if (callback != null) {
+            callback.onItemClear();
+        }
+    }
+
+    public void removeItem(int position) {
+        if (position >= 0 && position < list.size()) {
+            list.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+    // Additional method to remove multiple items (useful for action mode operations)
+    public void removeItems(List<Integer> positions) {
+        // Sort positions in reverse order to avoid index conflicts during removal
+        Collections.sort(positions, Collections.reverseOrder());
+        for (int position : positions) {
+            if (position >= 0 && position < list.size()) {
+                list.remove(position);
+                notifyItemRemoved(position);
+            }
+        }
     }
 
     private View.OnClickListener makeMenuPopListener(final int position) {
@@ -137,26 +193,8 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
         return alert;
     }
 
-    private void fieldClick(FieldObject selectedField) {
-
-//        setEditorItem(ep, selectedField);
-        ((FieldEditorActivity) context).updateCurrentFieldSettings(selectedField);
-        fieldSwitcher.switchField(selectedField);
-
-        CollectActivity.reloadData = true;
-        notifyDataSetChanged();
-
-        // Check if this is a BrAPI field and show BrAPI info dialog if so
-        String source = selectedField.getExp_source();
-        if (source != null && !source.equals("csv") && !source.equals("excel")) {
-            BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context,
-                    context.getResources().getString(R.string.brapi_info_message));
-            brapiInfo.show();
-        }
-    }
-
     class ViewHolder extends RecyclerView.ViewHolder {
-        CheckBox checkBox;
+//        CheckBox checkBox;
         ImageView sourceIcon;
         TextView name;
         ImageView menuPopup;
@@ -164,11 +202,25 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
 
         ViewHolder(View itemView) {
             super(itemView);
-            checkBox = itemView.findViewById(R.id.fieldCheckBox);
+//            checkBox = itemView.findViewById(R.id.fieldCheckBox);
             sourceIcon = itemView.findViewById(R.id.fieldSourceIcon);
             name = itemView.findViewById(R.id.fieldName);
             count = itemView.findViewById(R.id.fieldCount);
-            // initialize other views
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        if (context instanceof FieldEditorActivity) {
+                            ((FieldEditorActivity) context).toggleSelection(position);
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            });
+
         }
     }
 
@@ -204,6 +256,7 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
                 }
             }
         });
+        holder.itemView.setActivated(selectedItems.get(position, false));
     }
 
     @Override
