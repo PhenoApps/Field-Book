@@ -37,6 +37,7 @@ import java.util.List;
 
 public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> {
     private SparseBooleanArray selectedItems = new SparseBooleanArray();
+    private boolean isInSelectionMode = false;
     private static final String TAG = "FieldAdapter";
     private final LayoutInflater mLayoutInflater;
     private final ArrayList<FieldObject> list;
@@ -70,6 +71,11 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
             selectedItems.put(pos, true);
         }
         notifyItemChanged(pos);
+
+        if (selectedItems.size() == 0) {
+            isInSelectionMode = false; // Exit selection mode if no items are selected
+        }
+
         if (callback != null) {
             callback.onItemSelected(getSelectedItemCount());
         }
@@ -194,7 +200,6 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-//        CheckBox checkBox;
         ImageView sourceIcon;
         TextView name;
         ImageView menuPopup;
@@ -202,25 +207,30 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
 
         ViewHolder(View itemView) {
             super(itemView);
-//            checkBox = itemView.findViewById(R.id.fieldCheckBox);
             sourceIcon = itemView.findViewById(R.id.fieldSourceIcon);
             name = itemView.findViewById(R.id.fieldName);
             count = itemView.findViewById(R.id.fieldCount);
 
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        if (context instanceof FieldEditorActivity) {
-                            ((FieldEditorActivity) context).toggleSelection(position);
-                        }
-                        return true;
-                    }
-                    return false;
+            itemView.setOnLongClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    isInSelectionMode = true; // Enable selection mode on long press
+                    ((FieldEditorActivity) context).toggleSelection(position);
+                    return true;
                 }
+                return false;
             });
 
+            itemView.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    if (isInSelectionMode) {
+                        ((FieldEditorActivity) context).toggleSelection(position); // Toggle selection in selection mode
+                    } else if (listener != null) {
+                        listener.onFieldSelected(list.get(position));
+                    }
+                }
+            });
         }
     }
 
@@ -233,6 +243,7 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         FieldObject field = list.get(position);
+        holder.itemView.setActivated(selectedItems.get(position, false));
         String name = field.getExp_name();
         holder.name.setText(name);
         holder.count.setText(field.getCount());
@@ -248,15 +259,6 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
             holder.sourceIcon.setImageResource(R.drawable.ic_adv_brapi);
         }
 
-        holder.itemView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (listener != null) {
-                    listener.onFieldSelected(field);
-                }
-            }
-        });
-        holder.itemView.setActivated(selectedItems.get(position, false));
     }
 
     @Override
