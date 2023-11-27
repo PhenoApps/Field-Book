@@ -40,6 +40,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
 
     private lateinit var exportUtil: ExportUtil
+    private lateinit var rootView: View
     private lateinit var importDateTextView: TextView
     private lateinit var editDateTextView: TextView
     private lateinit var exportDateTextView: TextView
@@ -53,28 +54,24 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         Log.d("onCreateView", "Start")
-        val view = inflater.inflate(R.layout.fragment_field_detail, container, false)
-        toolbar = view.findViewById(R.id.toolbar)
+        rootView = inflater.inflate(R.layout.fragment_field_detail, container, false)
+        toolbar = rootView.findViewById(R.id.toolbar)
         setupToolbar()
-        displayTraitCounts(view)
 
-        importDateTextView = view.findViewById(R.id.importDateTextView)
-        editDateTextView = view.findViewById(R.id.editDateTextView)
-        exportDateTextView = view.findViewById(R.id.exportDateTextView)
-        countTextView = view.findViewById(R.id.countTextView)
-        observationLevelTextView = view.findViewById(R.id.observationLevelTextView)
+        importDateTextView = rootView.findViewById(R.id.importDateTextView)
+        editDateTextView = rootView.findViewById(R.id.editDateTextView)
+        exportDateTextView = rootView.findViewById(R.id.exportDateTextView)
+        countTextView = rootView.findViewById(R.id.countTextView)
+        observationLevelTextView = rootView.findViewById(R.id.observationLevelTextView)
         exportUtil = ExportUtil(requireActivity(), database)
-
-        importDateTextView.text = " ${field.getDate_import().split(" ")[0]}"
-        editDateTextView.text = " ${field.getDate_edit().split(" ")[0]}"
-        exportDateTextView.text = " ${field.getDate_export().split(" ")[0]}"
-        countTextView.text = " ${field.getCount()}"
+        updateFieldData()
+        displayTraitCounts(rootView)
 
         // Only display BrAPI section if field was imported via BrAPI
-        brapiDetailsTextView = view.findViewById(R.id.brapiDetailsTextView)
-        brapiDetailsRelativeLayout = view.findViewById(R.id.brapiDetailsRelativeLayout)
+        brapiDetailsTextView = rootView.findViewById(R.id.brapiDetailsTextView)
+        brapiDetailsRelativeLayout = rootView.findViewById(R.id.brapiDetailsRelativeLayout)
 
-        // Check if this is a BrAPI field and show BrAPI info dialog if so
+        // Only display BrAPI section if field was imported via BrAPI
         val source: String? = field.getExp_source()
         if (source != null && source != "csv" && source != "excel") {
             brapiDetailsTextView.visibility = View.VISIBLE
@@ -86,9 +83,9 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
             brapiDetailsRelativeLayout.visibility = View.GONE
         }
 
-        val collectButton: Button = view.findViewById(R.id.collectButton)
-        val exportButton: Button = view.findViewById(R.id.exportButton)
-        val syncObsButton: Button = view.findViewById(R.id.brapiSync)
+        val collectButton: Button = rootView.findViewById(R.id.collectButton)
+        val exportButton: Button = rootView.findViewById(R.id.exportButton)
+        val syncObsButton: Button = rootView.findViewById(R.id.brapiSync)
 
         syncObsButton.setOnClickListener {
             val alert = BrapiSyncObsDialog(requireContext())
@@ -105,7 +102,20 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         }
 
         Log.d("onCreateView", "End")
-        return view
+        return rootView
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateFieldData()
+        displayTraitCounts(rootView)
+    }
+
+    private fun updateFieldData() {
+        importDateTextView.text = " ${field.getDate_import().split(" ")[0]}"
+        editDateTextView.text = " ${field.getDate_edit().split(" ")[0]}"
+        exportDateTextView.text = " ${field.getDate_export().split(" ")[0]}"
+        countTextView.text = " ${field.getCount()}"
     }
 
     private fun setupToolbar() {
@@ -229,13 +239,18 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     }
 
     private fun displayTraitCounts(view: View) {
+
+        val layout: LinearLayout = view.findViewById(R.id.traitCountsLayout) ?: return
+        layout.removeAllViews()
+
         val dataHelper = DataHelper(requireContext())
         val traitCounts = dataHelper.getTraitCountsForStudy()
         Log.d("TraitCounts", "TraitCounts: $traitCounts")
 
-        val layout: LinearLayout = view.findViewById(R.id.traitCountsLayout) ?: return
-        Log.d("Layout", "Layout: $layout")
-        layout.removeAllViews()
+        // Check if there are any traits to display
+        if (traitCounts.isNullOrEmpty()) {
+            return
+        }
 
         val inflater = LayoutInflater.from(context)
         traitCounts.forEach { (traitName, count) ->
