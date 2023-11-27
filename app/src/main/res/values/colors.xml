@@ -16,7 +16,7 @@
     <color name="main_color_text_dark">@color/BLACK</color>
     <color name="main_color_text_button_background">#ffd6d7d7</color>
     <color name="main_color_icon_tint">@color/BLACK</color>
-    <color name="main_color_icon_fill_tint">@color/WHITE</color>
+    <color name="main_color_icon_fill_tint">@color/BLACK</color>
     <color name="main_trait_boolean_false_color">@color/RED</color>
     <color name="main_trait_boolean_true_color">#689F38</color>
     <color name="main_bluetooth_connected_color">#33b5e5</color>
