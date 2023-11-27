@@ -17,13 +17,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.OpenableColumns;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -106,7 +104,6 @@ public class FieldEditorActivity extends ThemedActivity
     private Menu systemMenu;
     private GPSTracker mGpsTracker;
     private ActionMode actionMode;
-//    private GestureDetector gestureDetector;
     private FieldAdapter adapter;
     private TextView customTitleView;
 
@@ -205,27 +202,6 @@ public class FieldEditorActivity extends ThemedActivity
         mAdapter.setOnFieldSelectedListener(this);
         recyclerView.setAdapter(mAdapter);
 
-//        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-//            @Override
-//            public void onLongPress(MotionEvent e) {
-//                View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
-//                if (actionMode != null || view == null) {
-//                    return;
-//                }
-//                int idx = recyclerView.getChildAdapterPosition(view);
-//                toggleSelection(idx);
-//                super.onLongPress(e);
-//            }
-//        });
-
-        recyclerView.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-//                gestureDetector.onTouchEvent(e);
-                return false;
-            }
-        });
-
     }
 
     // Implementations of methods from FieldAdapter.AdapterCallback
@@ -249,6 +225,9 @@ public class FieldEditorActivity extends ThemedActivity
             actionMode = startSupportActionMode(actionModeCallback);
         }
 
+//        if (actionMode != null) {
+//            actionMode.setTitle(getString(R.string.selected_count, selectedCount));
+//        }
         if (actionMode != null && customTitleView != null) {
             customTitleView.setText(getString(R.string.selected_count, selectedCount));
         }
@@ -259,7 +238,6 @@ public class FieldEditorActivity extends ThemedActivity
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.cab_menu, menu);
-            toolbar.setVisibility(View.GONE);
 
             // Create and style the custom title view
             customTitleView = new TextView(FieldEditorActivity.this);
@@ -285,22 +263,23 @@ public class FieldEditorActivity extends ThemedActivity
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            if (item.getItemId() == R.id.menu_delete) {
-                List<Integer> selectedItemPositions = mAdapter.getSelectedItems();
-                for (int position : selectedItemPositions) {
-                    mAdapter.removeItem(position);
-                }
-                mode.finish();
-                return true;
+            switch (item.getItemId()) {
+                case R.id.menu_delete:
+                    List<Integer> selectedItemPositions = mAdapter.getSelectedItems();
+                    for (int position : selectedItemPositions) {
+                        mAdapter.removeItem(position);
+                    }
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
             }
-            return false;
         }
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             mAdapter.clearSelections();
             actionMode = null;
-            toolbar.setVisibility(View.VISIBLE);
         }
     };
 

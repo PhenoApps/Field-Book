@@ -10,7 +10,9 @@
     <style name="BaseAppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
 
         <item name="android:windowActivityTransitions">false</item>
-
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeBackground">@color/main_primary</item>
         <item name="fb_color_primary">@color/main_primary</item>
         <item name="fb_color_primary_dark">@color/main_primary_dark</item>
         <item name="fb_color_accent">@color/main_color_accent</item>

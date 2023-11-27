@@ -83,8 +83,10 @@
     <string name="dialog_field_sort_toggle_order_content_description">Reverses sort order.</string>
     <string name="dialog_field_sort_add_content_description">Opens a dialog to add a new attribute to sort by.</string>
 
-    <!-- Rename -->
+    <!-- Modify -->
     <string name="fields_rename_study">Rename</string>
+    <string name="fields_export">Export</string>
+    <string name="fields_archive">Archive</string>
 
     <!-- Delete -->
     <string name="fields_delete">Delete</string>
