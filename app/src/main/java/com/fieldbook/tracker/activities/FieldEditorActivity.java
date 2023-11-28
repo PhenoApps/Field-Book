@@ -143,9 +143,13 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     // Helper function to load data
-    public void loadData(ArrayList<FieldObject> fields) {
+    public void loadData() {
         try {
-            mAdapter = new FieldAdapter(thisActivity, fields, fieldSwitcher, this);
+            database.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+            recyclerView = findViewById(R.id.fieldRecyclerView);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            fieldList = database.getAllFieldObjects();
+            mAdapter = new FieldAdapter(this, fieldList, fieldSwitcher, this);
             mAdapter.setOnFieldSelectedListener(this);
             recyclerView.setAdapter(mAdapter);
         } catch (Exception e) {
@@ -170,8 +174,7 @@ public class FieldEditorActivity extends ThemedActivity
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
 
-        loadData(database.getAllFieldObjects());
-
+        loadData();
         mGpsTracker = new GPSTracker(this);
     }
 
@@ -194,14 +197,7 @@ public class FieldEditorActivity extends ThemedActivity
         }
 
         thisActivity = this;
-        database.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-        recyclerView = findViewById(R.id.fieldRecyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        fieldList = database.getAllFieldObjects();
-        mAdapter = new FieldAdapter(this, fieldList, fieldSwitcher, this);
-        mAdapter.setOnFieldSelectedListener(this);
-        recyclerView.setAdapter(mAdapter);
-
+        loadData();
     }
 
     // Implementations of methods from FieldAdapter.AdapterCallback
@@ -955,13 +951,13 @@ public class FieldEditorActivity extends ThemedActivity
                     .show();
         }
 
-        loadData(database.getAllFieldObjects());
+        loadData();
 
     }
 
     @Override
     public void queryAndLoadFields() {
-        loadData(database.getAllFieldObjects());
+        loadData();
     }
 
     @NonNull
