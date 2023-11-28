@@ -229,7 +229,7 @@
     <string name="database_reset_warning1">All data kommer raderas. Är du säker på att du vill återställa databasen?</string>
     <string name="database_reset_warning2">En databasåterställning kan inte ångras. Appen kommer stängas efter att databasen tömts. Är du verkligen säker på att du vill förtsätta?</string>
     <string name="database_reset_message">Databasen har tagits bort.</string>
-    <!-- Beta -->
+    <!-- Experimental -->
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Om</string>
