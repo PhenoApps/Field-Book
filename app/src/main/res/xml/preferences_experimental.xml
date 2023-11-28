@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:key="stable_experimental_settings"
+        android:title="@string/preferences_experimental_stable_title"
+        app:iconSpaceReserved="false"/>
+
+    <PreferenceCategory
+        android:key="brapi_oidc_settings"
+        android:title="@string/preferences_experimental_beta_title"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference android:key="com.tracker.fieldbook.preferences.keys.repeated_values"
+            android:title="@string/pref_experimental_repeated_values_title"
+            android:summary="@string/pref_experimental_repeated_values_summary"
+            android:defaultValue="false"
+            android:icon="@drawable/ic_experimental"/>
+
+        <CheckBoxPreference android:key="com.tracker.fieldbook.preferences.keys.enable_field_audio"
+            android:title="@string/pref_experimental_enable_field_audio_title"
+            android:summary="@string/pref_experimental_enable_field_audio_summary"
+            android:defaultValue="false"
+            android:icon="@drawable/ic_tb_field_mic_on"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+    android:key="brapi_oidc_settings"
+    android:title="@string/preferences_experimental_alpha_title"
+    app:iconSpaceReserved="false"/>
+
+</PreferenceScreen>
