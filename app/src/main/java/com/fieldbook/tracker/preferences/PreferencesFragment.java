@@ -39,7 +39,7 @@ public class PreferencesFragment extends BasePreferenceFragment {
         config.index(R.xml.preferences_general);
         config.index(R.xml.preferences_profile);
         config.index(R.xml.preferences_sounds);
-        config.index(R.xml.preferences_beta);
+        config.index(R.xml.preferences_experimental);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
     }

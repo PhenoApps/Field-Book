@@ -170,7 +170,7 @@
     <string name="database_reset_warning1">Todos os dados serão excluídos em Redefinir. Você tem certeza disso?</string>
     <string name="database_reset_warning2">Essa ação não pode ser revertida. O aplicativo vai fechar depois de limpar o banco de dados. Você ainda deseja continuar?</string>
     <string name="database_reset_message">O banco de dados foi excluído</string>
-    <!-- Beta -->
+    <!-- Experimental -->
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Sobre</string>
