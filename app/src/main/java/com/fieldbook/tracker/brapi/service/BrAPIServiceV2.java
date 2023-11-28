@@ -597,12 +597,17 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     }
 
                     List<BrAPIGermplasmSynonyms> synonymsList = matchingGermplasm.getSynonyms();
-                    if (synonymsList != null && !synonymsList.isEmpty()) {
-                        List<String> synonyms = new ArrayList<>();
+                    if (synonymsList != null) {
+                        List<String> sanitizedSynonyms = new ArrayList<>();
                         for (BrAPIGermplasmSynonyms synonym : synonymsList) {
-                            synonyms.add(synonym.getSynonym());
+                            if (synonym != null && synonym.getSynonym() != null) {
+                                String sanitizedSynonym = sanitizeSynonym(synonym.getSynonym());
+                                sanitizedSynonyms.add(sanitizedSynonym);
+                            }
                         }
-                        attributesMap.put("Synonyms", String.join(",", synonyms));
+                        if (!sanitizedSynonyms.isEmpty()) {
+                            attributesMap.put("Synonyms", String.join(",", sanitizedSynonyms));
+                        }
                     }
                 }
             }
@@ -640,6 +645,10 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         // Save the attributesTable to the study
         study.getValues().addAll(attributesTable);
         Log.d("BrAPIServiceV2","Updated study with mapped attributes");
+    }
+
+    private String sanitizeSynonym(String synonym) {
+        return synonym.replace(",", "\\,"); // Escape commas
     }
 
     // TODO: Refactor to a more generic function for accessing additional BrAPI search endpoints
