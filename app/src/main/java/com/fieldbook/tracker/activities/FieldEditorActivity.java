@@ -264,11 +264,20 @@ public class FieldEditorActivity extends ThemedActivity
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
+                case R.id.menu_export:
+                    Toast.makeText(getApplicationContext(), "Batch export not yet implemented", Toast.LENGTH_SHORT).show();
+                    mode.finish();
+                    return true;
+                case R.id.menu_archive:
+                    Toast.makeText(getApplicationContext(), "Archive not yet implemented", Toast.LENGTH_SHORT).show();
+                    mode.finish();
+                    return true;
                 case R.id.menu_delete:
-                    List<Integer> selectedItemPositions = mAdapter.getSelectedItems();
-                    for (int position : selectedItemPositions) {
-                        mAdapter.removeItem(position);
-                    }
+//                    List<Integer> selectedItemPositions = mAdapter.getSelectedItems();
+//                    for (int position : selectedItemPositions) {
+//                        mAdapter.removeItem(position);
+//                    }
+                    Toast.makeText(getApplicationContext(), "Batch delete not yet implemented", Toast.LENGTH_SHORT).show();
                     mode.finish();
                     return true;
                 default:
