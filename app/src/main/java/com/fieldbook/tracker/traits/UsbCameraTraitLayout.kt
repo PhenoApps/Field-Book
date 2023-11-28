@@ -420,6 +420,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         //get current trait's trait name, use it as a plot_media directory
         currentTrait.trait?.let { traitName ->
 
+            val traitDbId = currentTrait.id
+
             //get the bitmap from the texture view, only use it if its not null
             textureView?.bitmap?.let { bmp ->
 
@@ -440,7 +442,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                             bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
 
                             database.insertObservation(
-                                plot, traitName, type, file.uri.toString(),
+                                plot, traitDbId, file.uri.toString(),
                                 prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
                                         + prefs.getString(GeneralKeys.LAST_NAME, ""),
                                 (activity as? CollectActivity)?.locationByPreferences, "", studyId,
@@ -523,6 +525,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         //get current trait's trait name, use it as a plot_media directory
         currentTrait?.trait?.let { traitName ->
 
+            val traitDbId = currentTrait.id
+
             DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
 
                 val plot = currentRange.plot_id
@@ -536,7 +540,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                             image.delete()
                             DocumentFile.fromSingleUri(context, Uri.parse(model.uri))?.delete()
 
-                            ObservationDao.deleteTraitByValue(studyId, plot, traitName, image.uri.toString())
+                            ObservationDao.deleteTraitByValue(studyId, plot, traitDbId, image.uri.toString())
 
                             loadAdapterItems()
 

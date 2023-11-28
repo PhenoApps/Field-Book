@@ -59,7 +59,7 @@ public class CounterTraitLayout extends BaseTraitLayout {
                     }
                 }
                 String value = getCollectInputView().getText();
-                updateObservation(getCurrentTrait().getTrait(), "counter", value);
+                updateObservation(getCurrentTrait(), value);
                 triggerTts(value);
             } else {
                 Context ctx = getContext();
@@ -80,7 +80,7 @@ public class CounterTraitLayout extends BaseTraitLayout {
                 }
             }
             String value = getCollectInputView().getText();
-            updateObservation(getCurrentTrait().getTrait(), "counter", value);
+            updateObservation(getCurrentTrait(), value);
             triggerTts(value);
         });
 

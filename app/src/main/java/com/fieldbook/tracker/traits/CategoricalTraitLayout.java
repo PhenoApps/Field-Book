@@ -286,9 +286,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
                 getCollectInputView().setText(currentCat);
 
-                updateObservation(getCurrentTrait().getTrait(),
-                        getCurrentTrait().getFormat(),
-                        CategoryJsonUtil.Companion.encode(scale));
+                updateObservation(getCurrentTrait(), CategoryJsonUtil.Companion.encode(scale));
 
                 triggerTts(category);
 

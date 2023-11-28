@@ -57,7 +57,6 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=format:"%b" || git log -1 --pretty=format:"%B")
           source version.properties
           BUMP_TYPE="patchVersion"
-          buildNumber=${{ github.run_number }}
 
           if [[ $COMMIT_MSG == *"BREAKING CHANGE"* || $COMMIT_MSG == *"!"* || $COMMIT_MSG == *"major:"* ]]; then
               majorVersion=$((majorVersion + 1))
@@ -75,9 +74,8 @@ jobs:
           echo "majorVersion=$majorVersion" > version.properties
           echo "minorVersion=$minorVersion" >> version.properties
           echo "patchVersion=$patchVersion" >> version.properties
-          echo "buildNumber=$buildNumber" >> version.properties
 
-          VERSION=$majorVersion.$minorVersion.$patchVersion.$buildNumber
+          VERSION=$majorVersion.$minorVersion.$patchVersion
           RELEASE=$majorVersion.$minorVersion
           echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV

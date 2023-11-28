@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -234,11 +233,11 @@ public class DataHelper {
      * Helper function to change visibility of a trait. Used in the ratings
      * screen
      */
-    public void updateTraitVisibility(String trait, boolean val) {
+    public void updateTraitVisibility(String traitDbId, boolean val) {
 
         open();
 
-        ObservationVariableDao.Companion.updateTraitVisibility(trait, String.valueOf(val));
+        ObservationVariableDao.Companion.updateTraitVisibility(traitDbId, String.valueOf(val));
 
 //        db.execSQL("update " + TRAITS
 //                + " set isVisible = ? where trait like ?", new String[]{
@@ -286,11 +285,11 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertObservation(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
+    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
 
         open();
 
-        return ObservationDao.Companion.insertObservation(rid, parent, trait, userValue, person, location, notes, exp_id, observationDbId, lastSyncedTime, rep);
+        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, lastSyncedTime, rep);
 
 //        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
 //        int rep = cursor.getCount() + 1;
@@ -327,31 +326,31 @@ public class DataHelper {
     /**
      * Get rep of current plot/trait combination
      */
-    public int getRep(String studyId, String plot, String trait) {
+    public int getRep(String studyId, String plot, String traitDbId) {
 
         open();
 
-        return ObservationDao.Companion.getRep(studyId, plot, trait) + 1;
+        return ObservationDao.Companion.getRep(studyId, plot, traitDbId) + 1;
 
 //        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{plot, trait});
 //        return cursor.getCount() + 1;
     }
 
     @NonNull
-    public String getNextRep(String studyId, String unit, String trait) {
+    public String getNextRep(String studyId, String unit, String traitDbId) {
 
         open();
 
-        return String.valueOf(ObservationDao.Companion.getNextRepeatedValue(studyId, unit, trait));
+        return String.valueOf(ObservationDao.Companion.getNextRepeatedValue(studyId, unit, traitDbId));
 
     }
 
     @NonNull
-    public String getDefaultRep(String studyId, String unit, String trait) {
+    public String getDefaultRep(String studyId, String unit, String traitDbId) {
 
         open();
 
-        return ObservationDao.Companion.getDefaultRepeatedValue(studyId, unit, trait);
+        return ObservationDao.Companion.getDefaultRepeatedValue(studyId, unit, traitDbId);
 
     }
 
@@ -376,11 +375,11 @@ public class DataHelper {
 //        return largest;
     }
 
-    public Boolean isBrapiSynced(String exp_id, String rid, String parent, String rep) {
+    public Boolean isBrapiSynced(String studyId, String plotId, String traitDbId, String rep) {
 
         open();
 
-        return ObservationDao.Companion.isBrapiSynced(exp_id, rid, parent, rep);
+        return ObservationDao.Companion.isBrapiSynced(studyId, plotId, traitDbId, rep);
 
 //        Boolean synced = false;
 //        Observation o = new Observation();
@@ -404,8 +403,8 @@ public class DataHelper {
 //        return synced;
     }
 
-    public void setTraitObservations(Integer expId, Observation observation) {
-        ObservationDao.Companion.insertObservation(expId, observation);
+    public void setTraitObservations(Integer studyId, Observation observation) {
+        ObservationDao.Companion.insertObservation(studyId, observation);
     }
 
     /**
@@ -415,9 +414,9 @@ public class DataHelper {
 
         open();
 
-        String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        return ObservationDao.Companion.getUserTraitObservations(exp_id);
+        return ObservationDao.Companion.getUserTraitObservations(studyId);
 
 //        List<Observation> observations = new ArrayList<>();
 //
@@ -464,9 +463,9 @@ public class DataHelper {
 
         open();
 
-        String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        return ObservationDao.Companion.getUserTraitImageObservations(ctx, exp_id, missingPhoto);
+        return ObservationDao.Companion.getUserTraitImageObservations(ctx, studyId, missingPhoto);
 
 //        List<Image> images = new ArrayList<>();
 //
@@ -895,7 +894,7 @@ public class DataHelper {
     /**
      * Retrieves the columns needed for export using a join statement
      */
-    public Cursor getExportDBData(String[] fieldList, String[] traits) {
+    public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits) {
 
         open();
 
@@ -950,7 +949,7 @@ public class DataHelper {
          * Convert EAV database to relational
          * TODO add where statement for repeated values
          */
-    public Cursor convertDatabaseToTable(String[] col, String[] traits) {
+    public Cursor convertDatabaseToTable(String[] col, ArrayList<TraitObject> traits) {
 
         open();
 
@@ -1224,11 +1223,11 @@ public class DataHelper {
 //        return list;
     }
 
-    public FieldObject getFieldObject(Integer exp_id) {
+    public FieldObject getFieldObject(Integer studyId) {
 
         open();
 
-        return StudyDao.Companion.getFieldObject(exp_id);
+        return StudyDao.Companion.getFieldObject(studyId);
 
 //        Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
 //                        "secondary_id", "date_import", "date_edit", "date_export", "count", "exp_source"},
@@ -1378,9 +1377,9 @@ public class DataHelper {
 
         open();
 
-        String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        return ObservationDao.Companion.getUserDetail(exp_id, plotId);
+        return ObservationDao.Companion.getUserDetail(studyId, plotId);
 
 //        HashMap data = new HashMap();
 //
@@ -1405,11 +1404,11 @@ public class DataHelper {
     /**
      * Get observation data that needs to be saved on edits
      */
-    public Observation getObservation(String exp_id, String plotId, String parent, String rep) {
+    public Observation getObservation(String studyId, String plotId, String traitDbId, String rep) {
 
         open();
 
-        return ObservationDao.Companion.getObservation(exp_id, plotId, parent, rep);
+        return ObservationDao.Companion.getObservation(studyId, plotId, traitDbId, rep);
 
         //        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ?", new String[]{plotId, parent},
 //                null, null, null
@@ -1428,11 +1427,11 @@ public class DataHelper {
 
     }
 
-    public Observation getObservationByValue(String exp_id, String plotId, String parent, String value) {
+    public Observation getObservationByValue(String studyId, String plotId, String traitDbId, String value) {
 
         open();
 
-        return ObservationDao.Companion.getObservationByValue(exp_id, plotId, parent, value);
+        return ObservationDao.Companion.getObservationByValue(studyId, plotId, traitDbId, value);
 
 //        Observation o = new Observation();
 //
@@ -1458,11 +1457,11 @@ public class DataHelper {
      * Check if a trait exists within the database
      * v1.6 - Amended to consider both trait and format
      */
-    public boolean getTraitExists(int id, String parent, String trait) {
+    public boolean getTraitExists(int plotId, String traitDbId) {
 
         open();
 
-        return ObservationVariableDao.Companion.getTraitExists(ep.getString(GeneralKeys.UNIQUE_NAME, ""), id, parent, trait);
+        return ObservationVariableDao.Companion.getTraitExists(ep.getString(GeneralKeys.UNIQUE_NAME, ""), plotId, traitDbId);
 
 //        boolean haveData = false;
 //
@@ -1662,54 +1661,17 @@ public class DataHelper {
      * Helper function
      * v2.5
      */
-    public void deleteTraitByValue(String expId, String rid, String parent, String value) {
+    public void deleteTraitByValue(String studyId, String plotId, String traitDbId, String value) {
 
         open();
 
-        ObservationDao.Companion.deleteTraitByValue(expId, rid, parent, value);
+        ObservationDao.Companion.deleteTraitByValue(studyId, plotId, traitDbId, value);
 
 //        try {
 //            db.delete(USER_TRAITS, "rid like ? and parent like ? and userValue = ?",
 //                    new String[]{rid, parent, value});
 //        } catch (Exception e) {
 //            Log.e(TAG, e.getMessage());
-//        }
-    }
-
-    /**
-     * Returns list of files associated with a specific plot
-     */
-
-    public ArrayList<Uri> getPlotPhotos(String exp_id, String plot, String trait) {
-
-        return ObservationDao.Companion.getPlotPhotos(exp_id, plot, trait);
-
-//        try {
-//            //Cursor cursor = db.query(USER_TRAITS, new String[]{"userValue"}, "rid like ? and trait like ?", new String[]{plot, trait},
-//            //       null, null, null);
-//
-//            Cursor cursor = db.rawQuery(
-//                    "select userValue FROM user_traits where user_traits.rid = ? and user_traits.parent like ?",
-//                    new String[]{plot, trait}
-//            );
-//
-//            ArrayList<String> photoList = new ArrayList<>();
-//            Log.d("Field", Integer.toString(cursor.getCount()));
-//
-//            if (cursor.moveToFirst()) {
-//                do {
-//                    photoList.add(cursor.getString(0));
-//                }
-//                while (cursor.moveToNext());
-//            }
-//
-//            if (!cursor.isClosed()) {
-//                cursor.close();
-//            }
-//
-//            return photoList;
-//        } catch (Exception e) {
-//            return null;
 //        }
     }
 
@@ -1832,11 +1794,11 @@ public class DataHelper {
      * Helper function
      * v1.6 - Amended to consider trait
      */
-    public void deleteTrait(String exp_id, String rid, String parent, String rep) {
+    public void deleteTrait(String studyId, String plotId, String traitDbId, String rep) {
 
         open();
 
-        ObservationDao.Companion.deleteTrait(exp_id, rid, parent, rep);
+        ObservationDao.Companion.deleteTrait(studyId, plotId, traitDbId, rep);
 
 //        try {
 //            db.delete(USER_TRAITS, "rid like ? and parent like ?",
@@ -2046,12 +2008,12 @@ public class DataHelper {
     /**
      * V2 - Edit existing trait
      */
-    public long editTraits(String id, String trait, String format, String defaultValue,
+    public long editTraits(String traitDbId, String trait, String format, String defaultValue,
                            String minimum, String maximum, String details, String categories) {
 
         open();
 
-        return ObservationVariableDao.Companion.editTraits(id, trait, format, defaultValue,
+        return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
                 minimum, maximum, details, categories);
 //        try {
 //            ContentValues c = new ContentValues();
@@ -2114,11 +2076,11 @@ public class DataHelper {
 //        return true;
     }
 
-    public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int exp_id) {
+    public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int studyId) {
 
         open();
 
-        StudyDao.Companion.updateStudyTable(imp, ed, ex, exp_id);
+        StudyDao.Companion.updateStudyTable(imp, ed, ex, studyId);
 
 //        ConfigActivity.dt.open();
 //        Cursor cursor = db.rawQuery("SELECT * from " + EXP_INDEX, null);
@@ -2334,11 +2296,11 @@ public class DataHelper {
 //        return (int) exp_id;
     }
 
-    public void createFieldData(int exp_id, List<String> columns, List<String> data) {
+    public void createFieldData(int studyId, List<String> columns, List<String> data) {
 
         open();
 
-        StudyDao.Companion.createFieldData(exp_id, columns, data);
+        StudyDao.Companion.createFieldData(studyId, columns, data);
 
 //        // get unique_id, primary_id, secondary_id names from exp_id
 //        Cursor cursor = db.rawQuery("SELECT exp_id.unique_id, exp_id.primary_id, exp_id.secondary_id from exp_id where exp_id.exp_id = " + exp_id, null);
@@ -2683,18 +2645,18 @@ public class DataHelper {
         return ObservationDao.Companion.getAll(studyId, unit);
     }
 
-    public ObservationModel[] getAllObservations(String studyId, String unit, String trait) {
+    public ObservationModel[] getAllObservations(String studyId, String unit, String traitDbId) {
 
         open();
 
-        return ObservationDao.Companion.getAll(studyId, unit, trait);
+        return ObservationDao.Companion.getAll(studyId, unit, traitDbId);
     }
 
-    public ObservationModel[] getRepeatedValues(String studyId, String unit, String trait) {
+    public ObservationModel[] getRepeatedValues(String studyId, String unit, String traitDbId) {
 
         open();
 
-        return ObservationDao.Companion.getAllRepeatedValues(studyId, unit, trait);
+        return ObservationDao.Companion.getAllRepeatedValues(studyId, unit, traitDbId);
     }
 
     /**

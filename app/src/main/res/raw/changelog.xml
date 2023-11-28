@@ -1,6 +1,27 @@
 <changelog>
 
     <release
+        date="2023-12-01"
+        versionCode="50525"
+        versionName="v5.5.25">
+        <info>Beta settings renamed to Experimental</info>
+    </release>
+
+    <release
+        date="2023-11-01"
+        versionCode="50524"
+        versionName="v5.5.24">
+        <new>Progress bar in Collect screen</new>
+        <new>Person now required by default</new>
+        <new>Coordinate format modified to match ISO (longitude; latitude)</new>
+        <new>GeoNav logging updates and bugfixes</new>
+        <new>Capture field level audio (beta)</new>
+        <new>Field name visible in InfoBars</new>
+        <info>Merged duplicate settings</info>
+        <bugfix>Numerous bug fixes</bugfix>
+    </release>
+
+    <release
         date="2023-09-13"
         versionCode="550"
         versionName="v5.5">
