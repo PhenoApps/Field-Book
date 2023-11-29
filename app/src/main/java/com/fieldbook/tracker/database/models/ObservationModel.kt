@@ -1,12 +1,11 @@
 package com.fieldbook.tracker.database.models
 
 import android.content.Context
-import android.util.Log
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.Row
 import com.fieldbook.tracker.database.dao.ObservationVariableDao
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.CategoricalTraitLayout
-import java.util.Locale
 
 data class ObservationModel(val map: Row) {
         val internal_id_observation: Int by map
@@ -38,7 +37,7 @@ data class ObservationModel(val map: Row) {
                 ))
         }
 
-        fun showNonNullAttributesDialog(
+        fun getNonNullAttributes(
                 context: Context,
                 currentTrait: TraitObject,
                 fieldName: String
@@ -46,42 +45,34 @@ data class ObservationModel(val map: Row) {
                 val nonNullAttributes = mutableMapOf<String, Any>()
 
                 // get the "map" property
-                val mapProperty = ObservationModel::class.java.declaredFields.firstOrNull { it.name == "map" }
-                mapProperty?.isAccessible = true
+                val mapProperty = map.toMutableMap()
                 try {
                         if (mapProperty != null) {
-                                mapProperty.isAccessible = true
-                                val mapValue = mapProperty.get(this)
+                                // remove unwanted fields
+                                mapProperty.remove("internal_id_observation")
+                                mapProperty.remove("study_id")
+                                mapProperty.remove("observation_variable_db_id")
 
+                                // add study name to result
+                                nonNullAttributes[getKeyDisplayName(context,"study_name")] = fieldName
 
-                                if (mapValue is MutableMap<*, *>) {
-                                        // remove unwanted fields
-                                        mapValue.remove("internal_id_observation")
-                                        mapValue.remove("study_id")
-                                        mapValue.remove("observation_variable_db_id")
-
-                                        // add study name to result
-                                        nonNullAttributes[formattedName("study_name")] = fieldName
-
-                                        // Iterate through the attributes
-                                        for ((key, value) in mapValue) {
-                                                if (
-                                                        (value != null) &&
-                                                        value.toString().isNotEmpty() &&
-                                                        (value.toString().trim() != "")
-                                                ) {
-                                                        // if the trait is categorical, the "value" field should be decoded
-                                                        val isTraitCategoricalOrMulticategorical = currentTrait.format == "multicat" || CategoricalTraitLayout.isTraitCategorical(
-                                                        currentTrait.format
+                                // Iterate through the attributes
+                                for ((key, value) in mapProperty) {
+                                        if (
+                                                (value != null) &&
+                                                (value.toString().trim().isNotEmpty())
+                                        ) {
+                                                // if the trait is categorical, the "value" field should be decoded
+                                                val isTraitCategoricalOrMulticategorical = currentTrait.format == "multicat" || CategoricalTraitLayout.isTraitCategorical(
+                                                currentTrait.format
+                                                )
+                                                if ( isTraitCategoricalOrMulticategorical && key == "value"){
+                                                        val decodedValue : String = CategoricalTraitLayout(context).decodeValue(
+                                                                value.toString()
                                                         )
-                                                        if ( isTraitCategoricalOrMulticategorical && key == "value"){
-                                                                val decodedValue : String = CategoricalTraitLayout(context).decodeValue(
-                                                                        value.toString()
-                                                                )
-                                                                nonNullAttributes[formattedName(key.toString())] = decodedValue
-                                                        }else{
-                                                                nonNullAttributes[formattedName(key.toString())] = value
-                                                        }
+                                                        nonNullAttributes[getKeyDisplayName(context, key)] = decodedValue
+                                                }else{
+                                                        nonNullAttributes[getKeyDisplayName(context, key)] = value
                                                 }
                                         }
                                 }
@@ -93,19 +84,19 @@ data class ObservationModel(val map: Row) {
                 return nonNullAttributes
         }
 
-        private fun formattedName(attributeName : String) : String {
-                val renameMap : Map<String, String> = mapOf(
-                        "Observation Unit Id" to "Entry Id",
-                        "Observation Variable Name" to "Trait Name",
-                        "Observation Variable Field Book Format" to "Trait Format"
-                )
-                val parts = attributeName.split("_").mapIndexed { _, part ->
-                        part.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+        private fun getKeyDisplayName(context: Context, attributeName : String) : String =
+                when (attributeName){
+                        "study_name" -> context.getString(R.string.observation_info_study_name)
+                        "observation_unit_id" -> context.getString(R.string.observation_info_entry_id)
+                        "observation_variable_field_book_format" -> context.getString(R.string.observation_info_trait_format)
+                        "observation_variable_name" -> context.getString(R.string.observation_info_trait_name)
+                        "value" -> context.getString(R.string.observation_info_value)
+                        "observation_time_stamp" -> context.getString(R.string.observation_info_timestamp)
+                        "collector" -> context.getString(R.string.observation_info_collector)
+                        "geo_coordinates" -> context.getString(R.string.observations_info_geo_coordinates)
+                        "last_synced_time" -> context.getString(R.string.observation_info_last_synced_time)
+                        "additional_info" -> context.getString(R.string.observation_info_additional_info)
+                        "rep" -> context.getString(R.string.observation_info_rep)
+                        else -> context.getString(R.string.observation_info_other)
                 }
-
-                val formattedKey = parts.joinToString(" ")
-
-                // replace the key if it belongs to renameMap
-                return renameMap[formattedKey] ?: formattedKey
-        }
 }
