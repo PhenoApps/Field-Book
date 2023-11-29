@@ -41,8 +41,10 @@ class TextTraitLayout : BaseTraitLayout {
 
             val value = en.toString()
 
+            val bytes = value.toByteArray()
+
             //check that the string is not all zero-byte which usb barcode readers send at end
-            if (!value.toByteArray().all { it.toInt() == 0 }) {
+            if (bytes.isEmpty() || !value.toByteArray().all { it.toInt() == 0 }) {
 
                 triggerTts(value)
 
@@ -84,17 +86,20 @@ class TextTraitLayout : BaseTraitLayout {
 
             if (event.action == KeyEvent.ACTION_DOWN) {
 
-                scan = if (event.unicodeChar != 10) {
+                scan = if (code != KeyEvent.KEYCODE_ENTER && event.unicodeChar != 10) {
 
-                    "$scan${event.unicodeChar.toChar()}"
+                    val newScan = "$scan${event.unicodeChar.toChar()}"
+
+                    //set text for current trait/plot
+                    inputEditText?.setText(newScan)
+
+                    newScan
 
                 } else {
 
-                    //set text for current trait/plot
-                    inputEditText?.setText(scan)
-
                     //check system setting to navigate to next plot/trait
-                    val actionOnScanLineFeed = prefs.getString(GeneralKeys.RETURN_CHARACTER, "0") ?: "0"
+                    val actionOnScanLineFeed =
+                        prefs.getString(GeneralKeys.RETURN_CHARACTER, "0") ?: "0"
 
                     if (actionOnScanLineFeed == "0") {
                         controller.getRangeBox().moveEntryRight()
@@ -104,7 +109,7 @@ class TextTraitLayout : BaseTraitLayout {
                         controller.getTraitBox().moveTrait("right")
                     }
 
-                    scan
+                    "" //reset the scan
 
                 }
             } else if (event.action == KeyEvent.ACTION_UP
