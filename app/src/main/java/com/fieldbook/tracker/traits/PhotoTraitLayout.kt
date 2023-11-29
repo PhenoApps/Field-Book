@@ -31,7 +31,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
 
 class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
@@ -149,7 +148,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
     fun makeImage(currentTrait: TraitObject, newTraits: MutableMap<String, String>?, success: Boolean) {
 
-        val timeStamp = SimpleDateFormat(
+        val timeFormat = SimpleDateFormat(
             "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
         )
 
@@ -178,10 +177,10 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
                         val rep = database.getNextRep(studyId, unit, traitDbId)
 
+                        val time = org.phenoapps.androidlibrary.Utils.getDateTime()
+
                         val generatedName =
-                            currentRange.plot_id + "_" + sanitizedTraitName + "_" + rep + "_" + timeStamp.format(
-                                Calendar.getInstance().time
-                            ) + ".jpg"
+                            currentRange.plot_id + "_" + sanitizedTraitName + "_" + rep + "_" + time + ".jpg"
 
                         Log.w(TAG, photosDir.uri.toString() + generatedName)
 
@@ -200,6 +199,8 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
                                             ExifUtil.saveVariableUnitModelToExif(
                                                 context,
+                                                (controller.getContext() as CollectActivity).person,
+                                                time,
                                                 database.getStudyById(studyId),
                                                 database.getObservationUnitById(currentRange.plot_id),
                                                 database.getObservationVariableById(currentTrait.id),

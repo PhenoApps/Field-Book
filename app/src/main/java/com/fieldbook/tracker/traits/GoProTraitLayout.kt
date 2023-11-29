@@ -69,7 +69,7 @@ class GoProTraitLayout :
     GattCallbackInterface,
     GoProGattInterface,
     GoProGatt.GoProGattController,
-    GoProHelper.OnGoProStreamReady{
+    GoProHelper.OnGoProStreamReady {
 
     //go pro specific collector interface
     interface GoProCollector {
@@ -627,6 +627,8 @@ class GoProTraitLayout :
 
                             val name = data["name"] ?: String()
 
+                            val timestamp = Utils.getDateTime()
+
                             usbPhotosDir.createFile("*/*", name)?.let { file ->
 
                                 context.contentResolver.openOutputStream(file.uri)?.let { output ->
@@ -655,6 +657,8 @@ class GoProTraitLayout :
 
                                         ExifUtil.saveVariableUnitModelToExif(
                                             context,
+                                            (controller.getContext() as CollectActivity).person,
+                                            timestamp,
                                             database.getStudyById(studyId),
                                             database.getObservationUnitById(currentRange.plot_id),
                                             database.getObservationVariableById(currentTrait.id),

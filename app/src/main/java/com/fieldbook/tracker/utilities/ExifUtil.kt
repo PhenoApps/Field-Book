@@ -98,10 +98,15 @@ class ExifUtil {
          *  "default_value":"",
          *  "external_db_id":"variable1",
          *  "trait_data_source":"test-server.brapi.org",
-         *  "observation_variable_details":"Test"}}
+         *  "observation_variable_details":"Test"},
+         *  "collector": "FirstName LastName",
+         *  "timestamp": "yyyy-MM-dd-hh-mm-ss"
+         *  }
          */
         fun saveVariableUnitModelToExif(
             context: Context,
+            collector: String,
+            timestamp: String,
             study: StudyModel?,
             unit: ObservationUnitModel?,
             variable: ObservationVariableModel?,
@@ -150,6 +155,9 @@ class ExifUtil {
 
                 modelToSave.add("observation_variable", variableData)
             }
+
+            modelToSave.addProperty("collector", collector)
+            modelToSave.addProperty("timestamp", timestamp)
 
             saveStringToExif(context, modelToSave.toString(), uri)
         }

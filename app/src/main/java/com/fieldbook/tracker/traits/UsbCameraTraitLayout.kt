@@ -448,6 +448,21 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                         context.contentResolver.openOutputStream(file.uri)?.let { output ->
 
+                            //if sdk > 24, can write exif information to the image
+                            //goal is to encode observation variable model into the user comments
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+                                ExifUtil.saveVariableUnitModelToExif(
+                                    context,
+                                    (controller.getContext() as CollectActivity).person,
+                                    time,
+                                    database.getStudyById(studyId),
+                                    database.getObservationUnitById(currentRange.plot_id),
+                                    database.getObservationVariableById(currentTrait.id),
+                                    file.uri
+                                )
+                            }
+
                             bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
 
                             database.insertObservation(
