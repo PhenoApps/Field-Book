@@ -598,15 +598,19 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                     List<BrAPIGermplasmSynonyms> synonymsList = matchingGermplasm.getSynonyms();
                     if (synonymsList != null) {
-                        List<String> sanitizedSynonyms = new ArrayList<>();
-                        for (BrAPIGermplasmSynonyms synonym : synonymsList) {
-                            if (synonym != null && synonym.getSynonym() != null) {
-                                String sanitizedSynonym = sanitizeSynonym(synonym.getSynonym());
-                                sanitizedSynonyms.add(sanitizedSynonym);
+                        List<String> processedSynonyms = new ArrayList<>();
+
+                        for (BrAPIGermplasmSynonyms synonymObj : synonymsList) {
+                            if (synonymObj != null && synonymObj.getSynonym() != null) {
+                                // Escape any double quotes within synonyms
+                                String synonym = synonymObj.getSynonym().replace("\"", "\"\"");
+                                processedSynonyms.add(synonym);
                             }
                         }
-                        if (!sanitizedSynonyms.isEmpty()) {
-                            attributesMap.put("Synonyms", String.join(",", sanitizedSynonyms));
+
+                        if (!processedSynonyms.isEmpty()) {
+                            String synonymsString = processedSynonyms.size() > 1 ? String.join("; ", processedSynonyms) : processedSynonyms.get(0);
+                            attributesMap.put("Synonyms", synonymsString);
                         }
                     }
                 }
@@ -646,11 +650,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         study.getValues().addAll(attributesTable);
         Log.d("BrAPIServiceV2","Updated study with mapped attributes");
     }
-
-    private String sanitizeSynonym(String synonym) {
-        return synonym.replace(",", "\\,"); // Escape commas
-    }
-
+    
     // TODO: Refactor to a more generic function for accessing additional BrAPI search endpoints
     public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
         Map<String, BrAPIGermplasm> germplasmDetailsMap = new HashMap<>();
