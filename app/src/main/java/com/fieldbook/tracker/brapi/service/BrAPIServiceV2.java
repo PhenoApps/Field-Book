@@ -71,6 +71,7 @@ import org.brapi.v2.model.pheno.response.BrAPIImageSingleResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationLevelListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
+import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponseResult;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
 import org.brapi.v2.model.germ.BrAPIGermplasmSynonyms;
 import org.brapi.v2.model.germ.response.BrAPIGermplasmListResponse;
@@ -491,7 +492,10 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         //one time code
                         study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
                     }
-                    allAttributeValues.addAll(response.getResult().getData());
+
+                    Optional.ofNullable(response.getResult())
+                            .map(BrAPIObservationUnitListResponseResult::getData)
+                            .ifPresent(allAttributeValues::addAll);
 
                     queryParams.page(queryParams.page() + 1);
 
@@ -650,7 +654,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         study.getValues().addAll(attributesTable);
         Log.d("BrAPIServiceV2","Updated study with mapped attributes");
     }
-    
+
     // TODO: Refactor to a more generic function for accessing additional BrAPI search endpoints
     public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
         Map<String, BrAPIGermplasm> germplasmDetailsMap = new HashMap<>();
