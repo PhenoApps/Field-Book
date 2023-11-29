@@ -1,84 +1,96 @@
 package com.fieldbook.tracker.adapters;
 
 import android.content.Context;
-import android.util.Log;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.objects.SearchData;
+import com.fieldbook.tracker.dialogs.OperatorDialog;
+import com.fieldbook.tracker.objects.SearchDialogDataModel;
 
-import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Loads data on search screen
- */
-public class SearchAdapter extends BaseAdapter {
 
-    private LayoutInflater mLayoutInflater;
-    private SearchData[] data;
-    private ArrayList<ArrayList<String>> traitData;
-    private int number_of_traits;
+public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewHolder> {
+    List<SearchDialogDataModel> dataSet;
+    private static OperatorDialog.OnOperatorClickedListener onOperatorClickedListener;
+    private onEditTextChangedListener onEditTextChangedListener;
+    private static Context context;
+    boolean isOnTextChanged = false;
 
-    public SearchAdapter(Context context, SearchData[] data, ArrayList<ArrayList<String>> traitData) {
-        this.data = data;
-        mLayoutInflater = LayoutInflater.from(context);
-        this.traitData = traitData;
-        this.number_of_traits = traitData.get(0).size();
+    public SearchAdapter(List<SearchDialogDataModel> dataSet, OperatorDialog.OnOperatorClickedListener onOperatorClickedListener, onEditTextChangedListener onEditTextChangedListener, Context context) {
+        this.dataSet = dataSet;
+        SearchAdapter.onOperatorClickedListener = onOperatorClickedListener;
+        this.onEditTextChangedListener = onEditTextChangedListener;
+        SearchAdapter.context = context;
+
     }
 
-    public int getCount() {
-        return data.length;
-    }
+    public static class SearchViewHolder extends RecyclerView.ViewHolder {
+        TextView c;
+        ImageView l;
+        EditText e;
 
-    public SearchData getItem(int position) {
-        if (position >= 0 && position < data.length) {
-            return data[position];
-        } else {
-            return null;
+        public SearchViewHolder(View itemView) {
+            super(itemView);
+            c = itemView.findViewById(R.id.list_item_search_columns);
+            l = itemView.findViewById(R.id.list_item_search_like);
+            e = itemView.findViewById(R.id.list_item_search_search_text);
+
+            l.setOnClickListener(arg0 -> {
+                OperatorDialog od = new OperatorDialog(context, onOperatorClickedListener, getBindingAdapterPosition());
+                od.show();
+            });
+
         }
     }
 
-    public long getItemId(int position) {
-        return position;
+    @Override
+    public SearchViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_search, parent, false);
+        return new SearchViewHolder(itemView);
     }
 
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
+    @Override
+    public void onBindViewHolder(@NonNull SearchViewHolder holder, int position) {
+        holder.c.setText(dataSet.get(position).getAttribute());
+        holder.l.setImageResource(dataSet.get(position).getImageResourceId());
+        holder.e.setText(dataSet.get(position).getEditText());
+        holder.e.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
-        if (convertView == null) {
-            holder = new ViewHolder();
-            convertView = mLayoutInflater.inflate(R.layout.listitem_search_results, null);
-            holder.range = convertView.findViewById(R.id.range);
-            holder.plot = convertView.findViewById(R.id.plot);
-            holder.itemContainer = convertView.findViewById(R.id.search_results_list_parent);
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                isOnTextChanged = true;
+            }
 
-        holder.range.setText(getItem(position).range);
-        holder.plot.setText(getItem(position).plot);
-        ArrayList<String> itemData = traitData.get(position);
-        for (int i = 0; i < number_of_traits; i++)
-        {
-            View v = mLayoutInflater.inflate(R.layout.listitem_search_results_traits, null);
-            TextView textView = v.findViewById(R.id.trait_value);
-            textView.setText(itemData.get(i));
-//            Log.d("MyApp", itemData.get(i));
-            holder.itemContainer.addView(textView);
-        }
-
-        return convertView;
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (isOnTextChanged) {
+                    isOnTextChanged = false;
+                    onEditTextChangedListener.onEditTextChanged(holder.getBindingAdapterPosition(), String.valueOf(editable));
+                }
+            }
+        });
     }
 
-    private class ViewHolder {
-        TextView range;
-        TextView plot;
-        LinearLayout itemContainer;
+    @Override
+    public int getItemCount() {
+        return dataSet.size();
+    }
+
+    public interface onEditTextChangedListener {
+        void onEditTextChanged(int pos, String editText);
     }
 }

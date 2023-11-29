@@ -21,7 +21,7 @@ import java.util.ArrayList
  * A tab layout with tabs: attributes, traits, and other.
  * Each tab will load data into a recycler view that lets user choose infobar prefixes.
  */
-class CollectAttributeChooserDialog(private val activity: CollectActivity):
+open class CollectAttributeChooserDialog(private val activity: CollectActivity):
     Dialog(activity, R.style.AppAlertDialog),
     AttributeAdapter.AttributeAdapterController,
     CoroutineScope by MainScope() {

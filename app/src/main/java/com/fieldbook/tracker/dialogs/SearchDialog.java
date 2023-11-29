@@ -1,49 +1,51 @@
 package com.fieldbook.tracker.dialogs;
 
-import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.DatabaseUtils;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.adapters.SearchAdapter;
+import com.fieldbook.tracker.adapters.SearchResultsAdapter;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.SearchData;
+import com.fieldbook.tracker.objects.SearchDialogDataModel;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.views.RangeBoxView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
-public class SearchDialog extends DialogFragment {
+public class SearchDialog extends DialogFragment implements SearchAtrributeChooserDialog.OnAttributeClickedListener, OperatorDialog.OnOperatorClickedListener, SearchAdapter.onEditTextChangedListener {
 
+    private static final String TAG = "Field Book";
     public static String TICK = "\"";
-    private static String TAG = "Field Book";
+    private static CollectActivity originActivity;
+    SearchAdapter searchAdapter;
     private SharedPreferences ep;
     private int rangeUntil;
-    private CollectActivity originActivity;
+    private List<SearchDialogDataModel> dataSet;
+
     public SearchDialog(CollectActivity activity) {
         originActivity = activity;
     }
@@ -54,33 +56,38 @@ public class SearchDialog extends DialogFragment {
 
         ep = requireContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppAlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
 
-        View customView = getLayoutInflater().inflate(R.layout.activity_search, null);
+        View customView = getLayoutInflater().inflate(R.layout.dialog_search, null);
         builder.setTitle("Search");
         builder.setView(customView);
 
-        LinearLayout parent = customView.findViewById(R.id.rowParent);
+        dataSet = new ArrayList<>();
+        searchAdapter = new SearchAdapter(dataSet, this, this, getContext());
+        RecyclerView recyclerView = customView.findViewById(R.id.dialog_search_rv);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(searchAdapter);
 
-        Button start = customView.findViewById(R.id.startBtn);
-        Button close = customView.findViewById(R.id.closeBtn);
-        Button clear = customView.findViewById(R.id.clearBtn);
-        Button add = customView.findViewById(R.id.addBtn);
+        ImageButton add = customView.findViewById(R.id.dialog_search_add_btn);
+        ImageButton clear = customView.findViewById(R.id.dialog_search_delete_all_btn);
+        ImageButton toggle = customView.findViewById(R.id.dialog_search_toggle_order_btn);
+        Button start = customView.findViewById(R.id.dialog_search_ok_btn);
+        Button close = customView.findViewById(R.id.dialog_search_close_btn);
 
         start.setTransformationMethod(null);
         close.setTransformationMethod(null);
-        clear.setTransformationMethod(null);
-        add.setTransformationMethod(null);
 
-        addRow("", parent);
+        add.setOnClickListener(arg0 -> {
+            createSearchAttributeChooserDialog();
+        });
 
         start.setOnClickListener(arg0 -> {
-            Spinner c = parent.getChildAt(0).findViewById(R.id.columns);
-            Spinner s = parent.getChildAt(0).findViewById(R.id.like);
-            SharedPreferences.Editor ed = ep.edit();
-            ed.putInt(GeneralKeys.SEARCH_COLUMN_DEFAULT, c.getSelectedItemPosition());
-            ed.putInt(GeneralKeys.SEARCH_LIKE_DEFAULT, s.getSelectedItemPosition());
-            ed.apply();
+//            Spinner c = parent.getChildAt(0).findViewById(R.id.columns);
+//            Spinner s = parent.getChildAt(0).findViewById(R.id.like);
+//            SharedPreferences.Editor ed = ep.edit();
+//            ed.putInt(GeneralKeys.SEARCH_COLUMN_DEFAULT, c.getSelectedItemPosition());
+//            ed.putInt(GeneralKeys.SEARCH_LIKE_DEFAULT, s.getSelectedItemPosition());
+//            ed.apply();
 
             try {
                 // Create the sql query based on user selection
@@ -92,20 +99,19 @@ public class SearchDialog extends DialogFragment {
                 boolean threeTables = false;
 
                 ArrayList<String> columnsList = new ArrayList<>();
-                for (int i = 0; i < parent.getChildCount(); i++) {
-                    LinearLayout child = (LinearLayout) parent.getChildAt(i);
+                for (int i = 0; i < dataSet.size(); i++) {
 
-                    EditText t = child.findViewById(R.id.searchText);
+                    String c = dataSet.get(i).getAttribute();
+                    int s = dataSet.get(i).getImageResourceId();
+                    String t = dataSet.get(i).getEditText();
 
-                    c = child.findViewById(R.id.columns);
-                    s = child.findViewById(R.id.like);
 
                     String value = "";
                     String prefix;
 
                     boolean before;
 
-                    if (c.getSelectedItemPosition() < rangeUntil) {
+                    if (i < rangeUntil) {
                         before = true;
                         prefix = "ObservationUnitProperty.";
                     } else {
@@ -115,68 +121,68 @@ public class SearchDialog extends DialogFragment {
                     }
 
                     // This is to prevent crashes when the user uses special characters
-                    String trunc = DatabaseUtils.sqlEscapeString(t.getText().toString());
+                    String trunc = DatabaseUtils.sqlEscapeString(t);
 
                     // We only want to escape the string, but not the encapsulating "'"
                     // For example 'plot\'s', we only want plot\'s
                     if (trunc.length() > 3)
                         trunc = trunc.substring(1, trunc.length() - 2);
 
-                    columnsList.add(c.getSelectedItem().toString());
+                    columnsList.add(c);
 
-                    switch (s.getSelectedItemPosition()) {
+                    switch (s) {
 
                         // 0: Equals to
-                        case 0:
+                        case R.drawable.ic_tb_equal:
                             if (before)
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " = " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
+                                value = prefix + TICK + c + TICK + " = " + DatabaseUtils.sqlEscapeString(t) + "";
                             else
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and value = " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
+                                value = prefix + TICK + c + TICK + " and value = " + DatabaseUtils.sqlEscapeString(t) + "";
                             break;
 
                         // 1: Not equals to
-                        case 1:
+                        case R.drawable.ic_tb_not_equal:
                             if (before)
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " != " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
+                                value = prefix + TICK + c + TICK + " != " + DatabaseUtils.sqlEscapeString(t) + "";
                             else
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and value != " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
+                                value = prefix + TICK + c + TICK + " and value != " + DatabaseUtils.sqlEscapeString(t) + "";
                             break;
 
-                        // 2: Is Like
-                        case 2:
+                        // 2: Contains
+                        case R.drawable.ic_tb_contains:
                             if (before)
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
+                                value = prefix + TICK + c + TICK + " like " + DatabaseUtils.sqlEscapeString("%" + t + "%") + "";
                             else
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and observations.value like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
+                                value = prefix + TICK + c + TICK + " and observations.value like " + DatabaseUtils.sqlEscapeString("%" + t + "%") + "";
                             break;
 
-                        // 3: Not is like
-                        case 3:
+                        // 3: Does not contain
+                        case R.drawable.ic_tb_does_not_contain:
                             if (before)
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " not like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
+                                value = prefix + TICK + c + TICK + " not like " + DatabaseUtils.sqlEscapeString("%" + t + "%") + "";
                             else
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and observations.value not like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
+                                value = prefix + TICK + c + TICK + " and observations.value not like " + DatabaseUtils.sqlEscapeString("%" + t + "%") + "";
                             break;
 
                         // 4: More than
-                        case 4:
+                        case R.drawable.ic_tb_greater_than:
                             if (before)
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " > " + trunc;
+                                value = prefix + TICK + c + TICK + " > " + trunc;
                             else
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and value > " + trunc;
+                                value = prefix + TICK + c + TICK + " and value > " + trunc;
                             break;
 
                         // 5: less than
-                        case 5:
+                        case R.drawable.ic_tb_less_than:
                             if (before)
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " < " + trunc;
+                                value = prefix + TICK + c + TICK + " < " + trunc;
                             else
-                                value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and value < " + trunc;
+                                value = prefix + TICK + c + TICK + " and value < " + trunc;
                             break;
 
                     }
 
-                    if (i == parent.getChildCount() - 1)
+                    if (i == dataSet.size() - 1)
                         sql += "and " + value + " ";
                     else
                         sql += "and " + value + " ";
@@ -193,15 +199,11 @@ public class SearchDialog extends DialogFragment {
 
                 ArrayList<ArrayList<String>> traitData = new ArrayList<>();
 
-                for (SearchData searchdata: data)
-                {
+                for (SearchData searchdata : data) {
                     ArrayList<String> temp = new ArrayList<>();
-                    for (String column: columnsList)
-                    {
-                        for (ObservationModel observation : observations)
-                        {
-                            if (observation.getObservation_variable_name().equals(column) && observation.getObservation_unit_id().equals(searchdata.unique))
-                            {
+                    for (String column : columnsList) {
+                        for (ObservationModel observation : observations) {
+                            if (observation.getObservation_variable_name().equals(column) && observation.getObservation_unit_id().equals(searchdata.unique)) {
                                 temp.add(observation.getValue());
                             }
                         }
@@ -230,8 +232,7 @@ public class SearchDialog extends DialogFragment {
                 secondaryTitle.setText(ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_plot)));
 
                 LinearLayout results_parent = layout.findViewById(R.id.search_results_parent);
-                for (String column: columnsList)
-                {
+                for (String column : columnsList) {
                     View v = getLayoutInflater().inflate(R.layout.dialog_search_results_trait_headers, null);
                     TextView textView = v.findViewById(R.id.trait_header);
                     textView.setText(column);
@@ -264,82 +265,55 @@ public class SearchDialog extends DialogFragment {
 
                 // If search has results, show them, otherwise display error message
                 if (data != null) {
-                    myList.setAdapter(new SearchAdapter(getActivity(), data, traitData));
+                    myList.setAdapter(new SearchResultsAdapter(getActivity(), data, traitData));
                     //Dismiss the search dialog
                     dismiss();
                     //Show the results dialog
                     dialog.show();
                 } else {
-                    Utils.makeToast(getActivity(),getString(R.string.search_results_missing));
+                    Utils.makeToast(getActivity(), getString(R.string.search_results_missing));
                 }
             } catch (Exception z) {
                 Log.e(TAG, "" + z.getMessage());
             }
         });
-        add.setOnClickListener(arg0 -> addRow("", parent));
 
         close.setOnClickListener(arg0 -> dismiss());
 
         clear.setOnClickListener(arg0 -> {
-            parent.removeAllViews();
-            addRow("", parent);
+            dataSet.clear();
+            searchAdapter.notifyDataSetChanged();
         });
 
-        return builder.create();
+        toggle.setOnClickListener(arg0 -> {
+            //TODO
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(d -> dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM));
+        return dialog;
     }
 
-    public void addRow(String text, LinearLayout parent) {
-        LayoutInflater vi = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = vi.inflate(R.layout.list_item_search_constructor, null);
 
-        Spinner c = v.findViewById(R.id.columns);
-        Spinner s = v.findViewById(R.id.like);
-        EditText e = v.findViewById(R.id.searchText);
-
-        String[] likes = new String[6];
-
-        likes[0] = getString(R.string.search_dialog_query_is_equal_to);
-        likes[1] = getString(R.string.search_dialog_query_is_not_equal_to);
-        likes[2] = getString(R.string.search_dialog_query_contains);
-        likes[3] = getString(R.string.search_dialog_query_does_not_contain);
-        likes[4] = getString(R.string.search_dialog_query_is_more_than);
-        likes[5] = getString(R.string.search_dialog_query_is_less_than);
-
-        ArrayAdapter adapter = new ArrayAdapter(getActivity(), R.layout.custom_spinner_layout, likes);
-        //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        s.setAdapter(adapter);
-
-        String[] col = originActivity.getDatabase().getRangeColumns();
-
-        if (col != null) {
-            rangeUntil = col.length;
-
-            ArrayAdapter adapter2 = new ArrayAdapter(getActivity(), R.layout.custom_spinner_layout,
-                    concat(col, originActivity.getDatabase().getVisibleTrait()));
-//            adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-            c.setAdapter(adapter2);
-
-            if (text.length() > 0)
-                e.setText(text);
-
-            parent.addView(v);
-        }
-        int columnDefault = ep.getInt(GeneralKeys.SEARCH_COLUMN_DEFAULT, 0);
-        int likeDefault = ep.getInt(GeneralKeys.SEARCH_LIKE_DEFAULT, 0);
-        if (columnDefault < c.getCount()) {
-            c.setSelection(columnDefault);
-        } else {
-            // Set to first column if the default is not present.
-            c.setSelection(0);
-        }
-        s.setSelection(likeDefault);
+    public void createSearchAttributeChooserDialog() {
+        SearchAtrributeChooserDialog sacd = new SearchAtrributeChooserDialog(originActivity, this);
+        sacd.show();
     }
 
-    public static <T> T[] concat(T[] first, T[] second) {
-        //TODO NullPointerException
-        T[] result = Arrays.copyOf(first, first.length + second.length);
-        System.arraycopy(second, 0, result, first.length, second.length);
-        return result;
+    @Override
+    public void onAttributeSelected(String selectedAttribute) {
+        dataSet.add(new SearchDialogDataModel(selectedAttribute, R.drawable.ic_tb_equal, ""));
+        searchAdapter.notifyItemInserted(dataSet.size() - 1);
+    }
+
+    @Override
+    public void onOperatorSelected(int pos, int imageId) {
+        dataSet.get(pos).setImageResourceId(imageId);
+        searchAdapter.notifyItemChanged(pos);
+    }
+
+    @Override
+    public void onEditTextChanged(int pos, String editText) {
+        dataSet.get(pos).setEditText(editText);
     }
 }
