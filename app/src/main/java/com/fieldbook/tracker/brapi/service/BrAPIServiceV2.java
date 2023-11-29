@@ -94,6 +94,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.function.BiFunction;
 
+import io.swagger.client.model.ListResponse;
+
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
     private static final String ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES = "observationLevelNames";
@@ -670,8 +672,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             Log.d("BrAPIServiceV2","Retrieving germplasm details");
 
             ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> response = germplasmApi.searchGermplasmPost(body);
-
-            if (response.getBody().getLeft().isPresent()) { // Handle case where results are returned immediately
+            Log.d("BrAPIServiceV2","Body class type: " + response.getBody().getClass().getName());
+            Log.d("BrAPIServiceV2","Left class type: " + response.getBody().getLeft().getClass().getName());
+            if (hasListResult(response)) { // Handle case where results are returned immediately
                 BrAPIGermplasmListResponse listResponse = response.getBody().getLeft().get();
                 germplasmDetailsMap = getListResultAsMap(response);
                 if(hasMorePages(listResponse)) {
@@ -681,7 +684,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     while (currentPage < totalPages) {
                         body.setPage(currentPage);
                         response = germplasmApi.searchGermplasmPost(body);
-                        if (response.getBody().getLeft().isPresent()) {
+                        if (hasListResult(response)) {
                             germplasmDetailsMap.putAll(getListResultAsMap(response));
                         }
                         currentPage++;
@@ -691,7 +694,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 BrAPIAcceptedSearchResponse searchResponse = response.getBody().getRight().get();
                 searchResultsDbId = searchResponse.getResult().getSearchResultsDbId();
                 ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> getResponse = germplasmApi.searchGermplasmSearchResultsDbIdGet(searchResultsDbId, 0, pageSize);
-                if (getResponse.getBody().getLeft().isPresent()) { // Should have this now for sure
+                if (hasListResult(getResponse)) { // Should have this now for sure
                     BrAPIGermplasmListResponse listResponse = getResponse.getBody().getLeft().get();
                     germplasmDetailsMap = getListResultAsMap(getResponse);
                     if(hasMorePages(listResponse)) {
@@ -701,7 +704,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                         while (currentPage < totalPages) {
                             getResponse = germplasmApi.searchGermplasmSearchResultsDbIdGet(searchResultsDbId, currentPage, pageSize);
-                            if (getResponse.getBody().getLeft().isPresent()) {
+                            if (hasListResult(getResponse)) {
                                 germplasmDetailsMap.putAll(getListResultAsMap(getResponse));
                             }
                             currentPage++;
@@ -717,6 +720,15 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             Log.e("BrAPIServiceV2", "API Exception", error);
         }
         return germplasmDetailsMap;
+    }
+
+    private boolean hasListResult(ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> response) {
+        if (response == null || response.getBody() == null) {
+            return false;
+        }
+        org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>> body = response.getBody();
+        Optional<BrAPIGermplasmListResponse> list = body.getLeft();
+        return list.isPresent();
     }
 
     private boolean hasMorePages(BrAPIResponse listResponse) {
