@@ -383,6 +383,8 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <string name="tutorial_main_search_title">Tìm kiếm</string>
     <string name="tutorial_main_search_description">Biểu tượng tìm kiếm cho phép truy vấn cơ sở dữ liệu.</string>
     <string name="tutorial_main_resources_title">Tài nguyên</string>
+    <string name="tutorial_fields_add_title">Thêm Ruộng</string>
+    <string name="tutorial_fields_add_description">Nhập một tập tin Ruộng</string>
     <string name="tutorial_main_resources_description">Hiển thị danh sách các tập tin ở trong thư mục Tài nguyên.</string>
     <string name="tutorial_main_summary_title">Tóm tắt</string>
     <string name="tutorial_main_summary_description">Hiển thị tóm tắt tất cả dữ liệu của nghiệm thức hiện tại.</string>
@@ -399,8 +401,6 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <string name="tutorial_settings_settings_description">cho phép bổ sung các tùy chỉnh cho việc thu thập dữ liệu</string>
     <string name="tutorial_settings_export_title">Xuất</string>
     <string name="tutorial_settings_export_description">Dữ liệu có thể được xuất dưới 2 định dạng: cơ sở dữ liệu hoặc bảng.</string>
-    <string name="tutorial_fields_add_title">Thêm Ruộng</string>
-    <string name="tutorial_fields_add_description">Nhập một tập tin Ruộng</string>
     <string name="tutorial_fields_file_description">Các tập tin phải bao gồm 3 cột: một định danh độc nhất, một thứ tự chủ yếu, và một thứ tự thứ yếu. Thứ tự chủ yếu / thứ yếu được sử dụng để định hướng trên ruộng.</string>
     <string name="tutorial_fields_select_title">Ruộng đang làm việc</string>
     <string name="tutorial_fields_select_description">Một ruộng đang được chọn để thu thập số liệu sau khi được nhập.</string>
