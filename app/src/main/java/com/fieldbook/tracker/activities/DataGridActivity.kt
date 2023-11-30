@@ -219,7 +219,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                     }
                 }
 
-                val traits = database.allTraitObjects;
+                val traits = database.allTraitObjects
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
                 val cursor = database.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
@@ -255,7 +255,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                                 mTraits.forEachIndexed { _, variable ->
 
-                                    val index = cursor.getColumnIndex(variable.trait)
+                                    val index = cursor.getColumnIndex(variable.name)
 
                                     if (index > -1) {
 
@@ -275,7 +275,10 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                                             try {
 
                                                 cellValue = CategoryJsonUtil
-                                                    .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel)
+                                                    .flattenMultiCategoryValue(
+                                                        decode(value),
+                                                        showLabel
+                                                    )
 
                                             } catch (e: Exception) {
 
@@ -327,9 +330,11 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                         mTableView.setAdapter(mAdapter)
 
-                        mAdapter.setAllItems(mTraits.map { HeaderData(it.trait, it.trait) },
+                        mAdapter.setAllItems(
+                            mTraits.map { HeaderData(it.name, it.name) },
                             mRowHeaders.map { HeaderData(it, it) },
-                            dataMap.toList())
+                            dataMap.toList()
+                        )
 
                         //scroll to the position of the current trait/plot id
                         if (plotId != null && trait != null) {

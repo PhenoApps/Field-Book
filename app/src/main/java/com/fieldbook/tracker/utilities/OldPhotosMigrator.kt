@@ -45,34 +45,41 @@ class OldPhotosMigrator {
 
                         val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-                        val traitPhotos = database.getAllObservations(expId).filter { it.observation_variable_name == t.trait }
+                        val traitPhotos = database.getAllObservations(expId)
+                            .filter { it.observation_variable_name == t.name }
 
-                        if (t.trait != "photos") { //edge case where trait name is actually photos
+                        if (t.name != "photos") { //edge case where trait name is actually photos
 
-                            val photoDir = DocumentTreeUtil.getFieldMediaDirectory(context, t.trait)
-                            val oldPhotos = DocumentTreeUtil.getFieldMediaDirectory(context, "photos")
+                            val photoDir = DocumentTreeUtil.getFieldMediaDirectory(context, t.name)
+                            val oldPhotos =
+                                DocumentTreeUtil.getFieldMediaDirectory(context, "photos")
 
                             traitPhotos.forEach { photo ->
 
-                                val repeatedValue = database.getRep(expId, photo.observation_unit_id, t.id)
+                                val repeatedValue =
+                                    database.getRep(expId, photo.observation_unit_id, t.id)
                                 val generatedName =
-                                    photo.observation_unit_id + "_" + t.trait + "_" + repeatedValue + "_" + timeStamp.format(
+                                    photo.observation_unit_id + "_" + t.name + "_" + repeatedValue + "_" + timeStamp.format(
                                         Calendar.getInstance().time
                                     ) + ".jpg"
 
                                 //load uri and check if its parent is "photos" old photo dir
                                 oldPhotos?.findFile(photo.value)?.let { photoFile ->
 
-                                    photoDir?.createFile("*/jpg", photoFile.name ?: generatedName)?.let { newFile ->
+                                    photoDir?.createFile("*/jpg", photoFile.name ?: generatedName)
+                                        ?.let { newFile ->
 
-                                        context.contentResolver?.openInputStream(photoFile.uri)?.use { input ->
+                                            context.contentResolver?.openInputStream(photoFile.uri)
+                                                ?.use { input ->
 
-                                            context.contentResolver?.openOutputStream(newFile.uri)?.use { output ->
+                                                    context.contentResolver?.openOutputStream(
+                                                        newFile.uri
+                                                    )?.use { output ->
 
-                                                input.copyTo(output)
+                                                        input.copyTo(output)
 
-                                            }
-                                        }
+                                                    }
+                                                }
 
                                         ObservationDao.updateObservation(ObservationModel(
                                             photo.createMap().apply {

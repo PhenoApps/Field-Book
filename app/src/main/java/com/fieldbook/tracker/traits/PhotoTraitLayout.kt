@@ -74,7 +74,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
         recyclerView = act.findViewById(R.id.trait_photo_rv)
         recyclerView.adapter = ImageTraitAdapter(context, this)
 
-        recyclerView.requestFocus();
+        recyclerView.requestFocus()
     }
 
     override fun loadLayout() {
@@ -89,7 +89,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
         uris = arrayListOf()
 
-        currentTrait.trait?.let { traitName ->
+        currentTrait.name?.let { traitName ->
 
             try {
 
@@ -148,7 +148,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
         scope.launch {
 
-            currentTrait.trait?.let { traitName ->
+            currentTrait.name?.let { traitName ->
 
                 val traitDbId = currentTrait.id
                 val studyId = (context as CollectActivity).studyId
@@ -313,7 +313,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                                 updateTraitAllowDuplicates(
                                     currentRange.plot_id,
                                     currentTrait.id,
-                                    currentTrait.trait,
+                                    currentTrait.name,
                                     "photo",
                                     m.uri,
                                     "NA",
@@ -324,7 +324,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                                 database.deleteTraitByValue(
                                     studyId,
                                     currentRange.plot_id,
-                                    currentTrait.trait,
+                                    currentTrait.name,
                                     m.uri
                                 )
                             }
@@ -341,7 +341,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                         database.deleteTraitByValue(
                             studyId,
                             currentRange.plot_id,
-                            currentTrait.trait,
+                            currentTrait.name,
                             "NA"
                         )
                     }
@@ -434,7 +434,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
         val studyId = (context as CollectActivity).studyId
         val rep = (context as CollectActivity).rep
-        val status = database.isBrapiSynced(studyId, currentRange.plot_id, currentTrait.trait, rep)
+        val status = database.isBrapiSynced(studyId, currentRange.plot_id, currentTrait.name, rep)
 
         deletePhoto(status, model)
 

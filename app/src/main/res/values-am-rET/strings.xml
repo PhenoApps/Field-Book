@@ -62,7 +62,7 @@
     <string name="traits_format_audio">ድምጽ፤</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">ጸባይ ጨምር</string>
-    <string name="traits_create_trait">ጸባይ</string>
+    <string name="traits_create_name">ጸባይ</string>
     <string name="traits_create_format">ፎርማት</string>
     <string name="traits_create_value_default">እንደነበረ</string>
     <string name="traits_create_value_minimum">ትንሹ</string>

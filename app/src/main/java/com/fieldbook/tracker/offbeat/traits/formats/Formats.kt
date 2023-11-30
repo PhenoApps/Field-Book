@@ -1,0 +1,62 @@
+package com.fieldbook.tracker.offbeat.traits.formats
+
+import android.content.Context
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.AudioFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.BooleanFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.CategoricalFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.CounterFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.DateFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.DiseaseRatingFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.GnssFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.GoProFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.LocationFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.MultiCategoricalFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.NumericFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.PercentFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.PhotoFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.TextFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.UsbCameraFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.ZebraLabelPrintFormat
+
+enum class Formats(val type: Types = Types.SYSTEM) {
+
+    //SYSTEM formats
+    AUDIO, BOOLEAN, CAMERA, CATEGORICAL, MULTI_CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT,
+
+    //CUSTOM formats
+    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM), USB_CAMERA(Types.CUSTOM), GO_PRO(Types.CUSTOM),
+    LABEL_PRINT(Types.CUSTOM);
+
+    fun getTraitFormatDefinition() = when (this) {
+        AUDIO -> AudioFormat()
+        BOOLEAN -> BooleanFormat()
+        CAMERA -> PhotoFormat()
+        USB_CAMERA -> UsbCameraFormat()
+        GO_PRO -> GoProFormat()
+        CATEGORICAL -> CategoricalFormat()
+        MULTI_CATEGORICAL -> MultiCategoricalFormat()
+        COUNTER -> CounterFormat()
+        DATE -> DateFormat()
+        LOCATION -> LocationFormat()
+        GNSS -> GnssFormat()
+        NUMERIC -> NumericFormat()
+        PERCENT -> PercentFormat()
+        DISEASE_RATING -> DiseaseRatingFormat()
+        LABEL_PRINT -> ZebraLabelPrintFormat()
+        else -> TextFormat()
+    }
+
+    /**
+     * This is the trait format DISPLAY name, which tends to be uppercase: Categorical, Numerical
+     */
+    fun getName(ctx: Context) = ctx.getString(getTraitFormatDefinition().getName())
+
+    /**
+     *  FB classically enforces lower cased names in the database, when querying make sure to
+     *  use this function
+     */
+    fun getDatabaseName(ctx: Context) = getName(ctx).lowercase()
+
+    fun getIcon() = getTraitFormatDefinition().getIcon()
+
+}

@@ -292,7 +292,7 @@ class GoProTraitLayout :
 
         val plot = currentRange.plot_id
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        val traitName = currentTrait.trait
+        val traitName = currentTrait.name
         val traitType = type
         val traitDbId = currentTrait.id
         val time = Utils.getDateTime()
@@ -609,7 +609,7 @@ class GoProTraitLayout :
             withContext(Dispatchers.IO) {
 
                 //get current trait's trait name, use it as a plot_media directory
-                currentTrait.trait?.let { traitName ->
+                currentTrait.name?.let { traitName ->
 
                     val traitDbId = currentTrait.id
 
@@ -666,7 +666,7 @@ class GoProTraitLayout :
 
         imageRecyclerView.adapter = ImageTraitAdapter(context, this, hasProgressBar = true)
 
-        currentTrait.trait?.let { traitName ->
+        currentTrait.name?.let { traitName ->
 
             try {
 
@@ -703,7 +703,7 @@ class GoProTraitLayout :
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
         //get current trait's trait name, use it as a plot_media directory
-        currentTrait?.trait?.let { traitName ->
+        currentTrait?.name?.let { traitName ->
 
             val traitDbId = currentTrait.id
 
@@ -829,7 +829,7 @@ class GoProTraitLayout :
             if (!isLocked) {
 
                 //get current trait's trait name, use it as a plot_media directory
-                currentTrait?.trait?.let { traitName ->
+                currentTrait?.name?.let { traitName ->
 
                     DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
 

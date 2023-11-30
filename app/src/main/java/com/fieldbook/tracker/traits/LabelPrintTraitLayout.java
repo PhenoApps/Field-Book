@@ -88,7 +88,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
     @Override
     public int layoutId() {
-        return R.layout.trait_labelprint;
+        return R.layout.trait_label_print;
     }
 
     private boolean checkPermissions(Activity act) {

@@ -123,6 +123,8 @@ public class GeneralKeys {
 
     public static final String FLIP_FLOP_ARROWS = "FLIP_FLOP_ARROWS";
 
+    //TODO is this CREATE_TRAIT_FINISHED every actually used...?
+    // STOPSHIP: 11/21/2023
     public static final String CREATE_TRAIT_FINISHED = "CreateTraitFinished";
     public static final String TRAITS_EXPORTED = "TraitsExported";
     public static final String ALL_TRAITS_VISIBLE = "allTraitsVisible";

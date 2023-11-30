@@ -59,7 +59,7 @@
     <string name="traits_format_audio">Sagalee</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Amala dabali</string>
-    <string name="traits_create_trait">Amala</string>
+    <string name="traits_create_name">Amala</string>
     <string name="traits_create_format">Haala itti baasuu barbaaddu</string>
     <string name="traits_create_value_default">Akkuma jirutti</string>
     <string name="traits_create_value_minimum">Hundarra xiqqaa</string>

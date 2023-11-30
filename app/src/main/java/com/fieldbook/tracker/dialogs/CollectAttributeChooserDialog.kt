@@ -15,7 +15,6 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
-import java.util.ArrayList
 
 /**
  * A tab layout with tabs: attributes, traits, and other.
@@ -135,8 +134,8 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
         //get values to display based on cached arrays
         val infoBarLabels = when (label) {
             attributesLabel -> attributes
-            traitsLabel -> traits.filter { it.visible }.map { it.trait }.toTypedArray()
-            else -> other.map { it.trait }.toTypedArray()
+            traitsLabel -> traits.filter { it.visible }.map { it.name }.toTypedArray()
+            else -> other.map { it.name }.toTypedArray()
         }
 
         //create adapter of labels s.a : plot/column/block or height/picture/notes depending on what tab is selected

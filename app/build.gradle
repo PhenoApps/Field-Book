@@ -99,6 +99,7 @@ android {
     lintOptions {
         checkReleaseBuilds false
         disable 'MissingTranslation'
+        fatal 'StopShip'
     }
 
     testOptions {

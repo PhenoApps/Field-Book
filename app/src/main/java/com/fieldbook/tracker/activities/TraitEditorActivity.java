@@ -70,10 +70,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -177,15 +175,16 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 brapiDialogShown = false;
             }
 
-            //traitAdapter = new TraitAdapter(this);
-
             if (traitAdapter != null) {
+
                 traitAdapter.submitList(traits);
-                traitAdapter.notifyDataSetChanged();
+
             }
 
         } catch (Exception e) {
+
             e.printStackTrace();
+
         }
     }
 
@@ -217,7 +216,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
                     // Just returns an empty trait object in the case the trait isn't found
                     TraitObject trait = database.getDetail(traitName);
-                    if (trait.getTrait() == null) {
+                    if (trait.getName() == null) {
                         return false;
                     }
 
@@ -326,9 +325,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         itemTouchHelper.attachToRecyclerView(traitList);
 
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_new_trait, null);
-        traitDialog = new NewTraitDialog(layout, this);
+        traitDialog = new NewTraitDialog(this);
 
         FloatingActionButton fab = findViewById(R.id.newTrait);
         fab.setOnClickListener(v -> showCreateTraitDialog());
@@ -433,7 +430,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         for (TraitObject allTrait : allTraits) {
             database.updateTraitVisibility(allTrait.getId(), globalVis);
-            Log.d(TAG, allTrait.getTrait());
+            Log.d(TAG, allTrait.getName());
         }
 
         globalVis = !globalVis;
@@ -781,9 +778,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     private void showCreateTraitDialog() {
-        traitDialog.initTrait();
-        traitDialog.show(false);
-        traitDialog.prepareFields(0);
+        traitDialog.show(getSupportFragmentManager(), "NewTraitDialog");
+        //traitDialog.prepareFields(0);
     }
 
     public void onBackPressed() {
@@ -913,13 +909,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     @Override
     public void queryAndLoadTraits() {
-        //database holds boolean values as string, this creates a new map that casts those values to Booleans
-        HashMap<String, String> vis = database.getTraitVisibility();
-        HashMap<String, Boolean> visCast = new HashMap<>();
-        for (Map.Entry<String, String> v : vis.entrySet()) {
-            visCast.put(v.getKey(), v.getValue().equals("true"));
-        }
+
         loadData(database.getAllTraitObjects());
+
     }
 
     @NonNull
@@ -973,9 +965,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     // When a trait is selected, alter the layout of the edit dialog accordingly
     private void showEditTraitDialog(TraitObject trait) {
 
-        traitDialog.setTraitObject(trait);
         queryAndLoadTraits();
-        traitDialog.show(true);
+        traitDialog.setTraitObject(trait);
+        traitDialog.show(getSupportFragmentManager(), "NewTraitDialog");
     }
 
     // Delete trait
@@ -1028,9 +1020,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         int pos = getDatabase().getMaxPositionFromTraits() + 1;
 
-        final String newTraitName = copyTraitName(trait.getTrait());
+        final String newTraitName = copyTraitName(trait.getName());
 
-        trait.setTrait(newTraitName);
+        trait.setName(newTraitName);
         trait.setVisible(true);
         trait.setRealPosition(pos);
 

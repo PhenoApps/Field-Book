@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.brapi;
 
 import android.app.Activity;
-import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -20,14 +19,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
-import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
@@ -42,14 +42,14 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     private BrapiStudyDetails study;
     private BrapiStudyDetails studyDetails;
     private BrAPIService brAPIService;
-    private Context context;
+    private final Context context;
     private Boolean studyLoadStatus = false;
     private Boolean plotLoadStatus = false;
     private Boolean traitLoadStatus = false;
     private BrapiPaginationManager paginationManager;
 
     // Creates a new thread to do importing
-    private Runnable importRunnable = new Runnable() {
+    private final Runnable importRunnable = new Runnable() {
         public void run() {
             new BrapiLoadDialog.ImportRunnableTask().execute(0);
         }
@@ -264,8 +264,8 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             @Override
             public Void apply(BrapiStudyDetails input) {
                 for(TraitObject obj : input.getTraits()) {
-                    System.out.println("Trait:"+obj.getTrait());
-                    System.out.println("ObsIds: "+obj.getExternalDbId());
+                    System.out.println("Trait:" + obj.getName());
+                    System.out.println("ObsIds: " + obj.getExternalDbId());
                     observationVariableDbIds.add(obj.getExternalDbId());
                 }
 

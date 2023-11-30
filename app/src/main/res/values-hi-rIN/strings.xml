@@ -62,7 +62,7 @@
     <string name="traits_format_audio">श्रव्य</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">विशेषता जोड़ें</string>
-    <string name="traits_create_trait">विशेषता</string>
+    <string name="traits_create_name">विशेषता</string>
     <string name="traits_create_format">संरूप</string>
     <string name="traits_create_value_default">पूर्व निर्धारित</string>
     <string name="traits_create_value_minimum">न्यूनतम</string>
