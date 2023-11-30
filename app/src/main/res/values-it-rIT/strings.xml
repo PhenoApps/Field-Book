@@ -376,6 +376,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_search_title">Cerca</string>
     <string name="tutorial_main_search_description">L\'icona di ricerca consente le domanda del database.</string>
     <string name="tutorial_main_resources_title">Risorse</string>
+    <string name="tutorial_fields_add_title">Aggiungi Campo</string>
+    <string name="tutorial_fields_add_description">Importa un file di campo.</string>
     <string name="tutorial_main_resources_description">Questo visualizza un elenco di file nella cartella Risorse.</string>
     <string name="tutorial_main_summary_title">Riassunto</string>
     <string name="tutorial_main_summary_description">Questo visualizza un riassunto di tutti i dati per la voce corrente.</string>
@@ -392,8 +394,6 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_settings_settings_description">consente una configurazione aggiuntiva per la raccolta dei dati.</string>
     <string name="tutorial_settings_export_title">Esporta</string>
     <string name="tutorial_settings_export_description">I dati possono essere esportati in due formati: database o tabella.</string>
-    <string name="tutorial_fields_add_title">Aggiungi Campo</string>
-    <string name="tutorial_fields_add_description">Importa un file di campo.</string>
     <string name="tutorial_fields_file_description">I file devono contenere tre colonne: un identificatore unico, un ordine primario e un ordine secondario. L\'ordine primario/secondario viene utilizzato per la navigazione nel campo.</string>
     <string name="tutorial_fields_select_title">Campo attivo</string>
     <string name="tutorial_fields_select_description">Un campo viene selezionato per la raccolta dei dati dopo l\'importazione.</string>
