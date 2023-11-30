@@ -960,10 +960,10 @@
     <string name="tutorial_main_delete_description">Data is deleted using this button.</string>
     <string name="tutorial_main_search_title">Search</string>
     <string name="tutorial_main_search_description">The search icon allows database queries.</string>
-    <string name="tutorial_main_resou exported in two formats: database or table.</string>
+    <string name="tutorial_main_resources_title">Resources</string>
 
     <string name="tutorial_fields_add_title">Add Field</string>
-    <string name="tutorial_fields_add_description">Import a field file.</strrces_title">Resources</string>
+    <string name="tutorial_fields_add_description">Import a field file.</string>
     <string name="tutorial_main_resources_description">This displays a list of files in the Resources folder.</string>
     <string name="tutorial_main_summary_title">Summary</string>
     <string name="tutorial_main_summary_description">This displays a summary of all data for the current entry.</string>
@@ -980,7 +980,7 @@
     <string name="tutorial_settings_settings_title">Settings</string>
     <string name="tutorial_settings_settings_description">allows additional configuration for data collection.</string>
     <string name="tutorial_settings_export_title">Export</string>
-    <string name="tutorial_settings_export_description">Data can being>
+    <string name="tutorial_settings_export_description">Data can be exported in two formats: database or table.</string>
     <string name="tutorial_fields_file_description">Files must contain three columns: a unique identifier, a primary order, and a secondary order. The primary/secondary order are used for navigation in the field.</string>
     <string name="tutorial_fields_select_title">Active Field</string>
     <string name="tutorial_fields_select_description">A field is selected for data collection after being imported.</string>
