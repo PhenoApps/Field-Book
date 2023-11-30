@@ -248,6 +248,8 @@
     <string name="dialog_att_chooser_traits">Traits</string>
     <string name="dialog_att_chooser_other">Other</string>
     <string name="dialog_collect_att_chooser_title">Choose an attribute</string>
+    <string name="infobars_attribute_placeholder">Select</string>
+    <string name="field_name_attribute">field_name</string>
 
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
@@ -351,6 +353,10 @@
     <string name="trait_layout_print_text_field_title_4">Text4:</string>
     <string name="trait_layout_print_barcode_field_title">Barcode:</string>
     <string name="trait_layout_print_label_copies_title">Copies:</string>
+    <string name="trait_layout_print_label_simple_text">simple</string>
+    <string name="trait_layout_print_label_detailed_text">detailed</string>
+    <string name="trait_layout_print_label_date_option">date</string>
+    <string name="trait_layout_print_label_blank_option">blank</string>
 
     <string name="printer_open">Printer is open</string>
     <string name="printer_paused">Printer is paused</string>
@@ -696,16 +702,27 @@
     <string name="database_reset_warning1">All data will be deleted. Are you sure you want to reset the database?</string>
     <string name="database_reset_warning2">A database reset cannot be reversed. The app will quit after clearing the database. Are you really sure you want to continue?</string>
     <string name="database_reset_message">Database has been deleted</string>
+    <string name="share_file_title">Sending file…</string>
+  
+    <!-- Experimental -->
+    <string name="preferences_experimental_title">Experimental</string>
+    <string name="preferences_experimental_stable_title">Stable</string>
+    <string name="preferences_experimental_beta_title">Beta</string>
+    <string name="preferences_experimental_alpha_title">Alpha</string>
+    <string name="pref_experimental_repeated_values_title">Repeated Measures</string>
+    <string name="pref_experimental_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
+    <string name="pref_experimental_repeated_values_disabled_title">Repeated Measures Disabled</string>
+    <string name="pref_experimental_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable.</string>
 
-    <!-- Beta -->
-    <string name="preferences_beta_title">Beta</string>
-    <string name="pref_beta_repeated_values_title">Repeated Measures</string>
-    <string name="pref_beta_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
-    <string name="pref_beta_repeated_values_disabled_title">Repeated Measures Disabled</string>
-    <string name="pref_beta_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable.</string>
-
-
-
+    <string name="pref_experimental_enable_field_audio_title">Enable Field Audio</string>
+    <string name="pref_experimental_enable_field_audio_summary">Enable audio recording feature for the entire field.</string>
+    <string name="menu_collect_start_field_audio">Start Recorder</string>
+    <string name="menu_collect_stop_field_audio">Stop Recorder</string>
+    <string name="field_audio_recording_start">Recording field level audio.</string>
+    <string name="field_audio_recording_stop">A new field level audio file was saved.</string>
+    <string name="field_audio_recording_warning">Field level audio is already recording. Stop that first.</string>
+    <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
+    <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
 
 
     <!-- ABOUT -->
@@ -758,7 +775,8 @@
     <string name="preferences_brapi_barcode_config_scan">Import new settings</string>
     <string name="preferences_brapi_barcode_config_share">Share current settings</string>
     <string name="preferences_brapi_barcode_config_dialog_title">Scannable BrAPI Configuration</string>
-
+    <string name="qr_code_share_choose_action_title">Choose Action</string>
+  
     <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
     <string name="act_brapi_auth_http_warning_title">HTTP Warning</string>
     <string name="act_brapi_auth_http_warning_message">You have entered an http url. There is no guarantee that this connection is secure.</string>
@@ -941,7 +959,10 @@
     <string name="tutorial_main_delete_description">Data is deleted using this button.</string>
     <string name="tutorial_main_search_title">Search</string>
     <string name="tutorial_main_search_description">The search icon allows database queries.</string>
-    <string name="tutorial_main_resources_title">Resources</string>
+    <string name="tutorial_main_resou exported in two formats: database or table.</string>
+
+    <string name="tutorial_fields_add_title">Add Field</string>
+    <string name="tutorial_fields_add_description">Import a field file.</strrces_title">Resources</string>
     <string name="tutorial_main_resources_description">This displays a list of files in the Resources folder.</string>
     <string name="tutorial_main_summary_title">Summary</string>
     <string name="tutorial_main_summary_description">This displays a summary of all data for the current entry.</string>
@@ -958,10 +979,7 @@
     <string name="tutorial_settings_settings_title">Settings</string>
     <string name="tutorial_settings_settings_description">allows additional configuration for data collection.</string>
     <string name="tutorial_settings_export_title">Export</string>
-    <string name="tutorial_settings_export_description">Data can be exported in two formats: database or table.</string>
-
-    <string name="tutorial_fields_add_title">Add Field</string>
-    <string name="tutorial_fields_add_description">Import a field file.</string>
+    <string name="tutorial_settings_export_description">Data can being>
     <string name="tutorial_fields_file_description">Files must contain three columns: a unique identifier, a primary order, and a secondary order. The primary/secondary order are used for navigation in the field.</string>
     <string name="tutorial_fields_select_title">Active Field</string>
     <string name="tutorial_fields_select_description">A field is selected for data collection after being imported.</string>
@@ -974,6 +992,8 @@
     <string name="tutorial_traits_format_description">Different trait formats are indicated with different icons.</string>
     <string name="tutorial_traits_visibility_title">Trait Visibility</string>
     <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
-    <string name="qr_code_share_choose_action_title">Choose Action</string>
+    
+    
+
 
 </resources>

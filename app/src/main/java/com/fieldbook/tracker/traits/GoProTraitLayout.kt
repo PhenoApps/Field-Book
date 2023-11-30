@@ -294,6 +294,7 @@ class GoProTraitLayout :
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
         val traitName = currentTrait.trait
         val traitType = type
+        val traitDbId = currentTrait.id
         val time = Utils.getDateTime()
         val name = "${traitName}_${plot}_$time.png"
 
@@ -303,6 +304,7 @@ class GoProTraitLayout :
             "plot" to plot,
             "traitName" to traitName,
             "traitType" to traitType,
+            "traitDbId" to traitDbId,
             "name" to name
         )
 
@@ -578,8 +580,7 @@ class GoProTraitLayout :
 
                 database.insertObservation(
                     plot,
-                    data["traitName"],
-                    data["traitType"],
+                    data["traitDbId"],
                     name,
                     prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
                             + prefs.getString(GeneralKeys.LAST_NAME, ""),
@@ -610,6 +611,8 @@ class GoProTraitLayout :
                 //get current trait's trait name, use it as a plot_media directory
                 currentTrait.trait?.let { traitName ->
 
+                    val traitDbId = currentTrait.id
+
                     DocumentTreeUtil.getFieldMediaDirectory(context, traitName)
                         ?.let { usbPhotosDir ->
 
@@ -625,12 +628,11 @@ class GoProTraitLayout :
 
                                     bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
 
-                                    database.deleteTraitByValue(studyId, plot, traitName, name)
+                                    database.deleteTraitByValue(studyId, plot, traitDbId, name)
 
                                     database.insertObservation(
                                         plot,
-                                        data["traitName"],
-                                        data["traitType"],
+                                        data["traitDbId"],
                                         file.uri.toString(),
                                         prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
                                                 + prefs.getString(GeneralKeys.LAST_NAME, ""),
@@ -668,9 +670,11 @@ class GoProTraitLayout :
 
             try {
 
+                val traitDbId = currentTrait.id
+
                 val plot = currentRange.plot_id
                 val toc = System.currentTimeMillis()
-                val uris = database.getAllObservations(studyId, plot, traitName)
+                val uris = database.getAllObservations(studyId, plot, traitDbId)
                 val tic = System.currentTimeMillis()
 
                 Log.d(TAG, "Photo trait query time ${uris.size} photos: ${(tic - toc) * 1e-3}")
@@ -701,6 +705,8 @@ class GoProTraitLayout :
         //get current trait's trait name, use it as a plot_media directory
         currentTrait?.trait?.let { traitName ->
 
+            val traitDbId = currentTrait.id
+
             DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
 
                 val plot = currentRange.plot_id
@@ -722,7 +728,7 @@ class GoProTraitLayout :
                             ObservationDao.deleteTraitByValue(
                                 studyId,
                                 plot,
-                                traitName,
+                                traitDbId,
                                 image.uri.toString()
                             )
 

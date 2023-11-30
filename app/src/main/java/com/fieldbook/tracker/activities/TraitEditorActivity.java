@@ -432,7 +432,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         globalVis = !allTraits.stream().allMatch(TraitObject::getVisible);
 
         for (TraitObject allTrait : allTraits) {
-            database.updateTraitVisibility(allTrait.getTrait(), globalVis);
+            database.updateTraitVisibility(allTrait.getId(), globalVis);
             Log.d(TAG, allTrait.getTrait());
         }
 
@@ -773,7 +773,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         builder.setMessage(getString(R.string.dialog_delete_traits_message));
 
         builder.setPositiveButton(getString(android.R.string.yes), onPositive);
-        builder.setNegativeButton(getString(android.R.string.no), onNegative);
+        builder.setNegativeButton(getString(R.string.dialog_no), onNegative);
         builder.setOnDismissListener(onDismiss);
 
         AlertDialog alert = builder.create();
@@ -891,7 +891,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                         osw.close();
                         output.close();
 
-                        new FileUtil().shareFile(this, ep, exportDoc);
+                        FileUtil.shareFile(this, ep, exportDoc);
                     }
                 }
             }

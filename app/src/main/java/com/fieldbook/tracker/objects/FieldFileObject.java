@@ -517,6 +517,8 @@ public class FieldFileObject {
      */
     private static String getCellStringValue(XSSFCell cell) {
 
+        if (cell == null) return "";
+
         FormulaEvaluator evaluator = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
 
         switch (cell.getCellType()) {

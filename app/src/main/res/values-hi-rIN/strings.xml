@@ -170,7 +170,7 @@
     <string name="database_reset_warning1">पुनः तैयारी पर सभी आंकड़े मिटा दिए जाएँगे। क्या आप यही चाहते हैं?</string>
     <string name="database_reset_warning2">इस क्रिया को उल्टा नहीं जा सकता। एप्लिकेशन आंकड़ा कोष को साफ करने के बाद बंद हो जाएगी। क्या आप अभी भी यही चाहते हैं?</string>
     <string name="database_reset_message">आंकड़ा कोष मिटा दिया गया है</string>
-    <!-- Beta -->
+    <!-- Experimental -->
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">के बारे में</string>

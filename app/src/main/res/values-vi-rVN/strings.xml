@@ -272,7 +272,7 @@
     <string name="database_reset_warning1">Tất cả dữ liệu sẽ bị xóa. Bạn có chắc bạn muốn thiết lập lại cơ sở dữ liệu?</string>
     <string name="database_reset_warning2">Việc thiết lập lại cơ sở dữ liệu không thể đảo ngược lại. Phần mềm sẽ tắt sau khi xóa cơ sở dữ liệu. Bạn có thực sự chắc chắn bạn muốn tiếp tục?</string>
     <string name="database_reset_message">Cơ sở dữ liệu đã được xóa</string>
-    <!-- Beta -->
+    <!-- Experimental -->
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Thông tin phần mềm</string>

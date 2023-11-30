@@ -18,6 +18,7 @@ import com.fieldbook.tracker.adapters.DataGridAdapter
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.CategoryJsonUtil.Companion.decode
@@ -89,7 +90,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
     private lateinit var mAdapter: DataGridAdapter
     private lateinit var mRowHeaders: ArrayList<String>
     private lateinit var mPlotIds: ArrayList<String>
-    private lateinit var mTraits: Array<String>
+    private var mTraits: ArrayList<TraitObject> = ArrayList()
 
     @Inject
     lateinit var database: DataHelper
@@ -209,7 +210,14 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
             scope.launch {
 
                 //query database for visible traits
-                mTraits = database.visibleTrait
+                mTraits.clear()
+
+                val traitObjects = database.allTraitObjects
+                traitObjects.forEach {
+                    if (it.visible) {
+                        mTraits.add(it)
+                    }
+                }
 
                 val traits = database.allTraitObjects;
 
@@ -247,7 +255,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                                 mTraits.forEachIndexed { _, variable ->
 
-                                    val index = cursor.getColumnIndex(variable)
+                                    val index = cursor.getColumnIndex(variable.trait)
 
                                     if (index > -1) {
 
@@ -255,7 +263,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                                         val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
 
-                                        val repeatedValues = database.getRepeatedValues(studyId, id, variable)
+                                        val repeatedValues = database.getRepeatedValues(studyId, id, variable.id)
                                         if (repeatedValues.size > 1) {
                                             println("$studyId $id $variable has repeated values...!")
                                         }
@@ -319,7 +327,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                         mTableView.setAdapter(mAdapter)
 
-                        mAdapter.setAllItems(mTraits.map { HeaderData(it, it) },
+                        mAdapter.setAllItems(mTraits.map { HeaderData(it.trait, it.trait) },
                             mRowHeaders.map { HeaderData(it, it) },
                             dataMap.toList())
 
@@ -358,7 +366,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
         val trait = mTraits[column]
 
-        val repeatedValues = database.getRepeatedValues(studyId, plotId, trait)
+        val repeatedValues = database.getRepeatedValues(studyId, plotId, trait.id)
 
         if (repeatedValues.size <= 1) {
 
@@ -426,7 +434,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                 val plotId = value.observation_unit_id
 
-                val traitIndex = mTraits.indexOf(value.observation_variable_name)
+                val traitIndex = mTraits.indexOfFirst { it.id == value.observation_variable_db_id.toString() }
 
                 navigateFromValueClicked(plotId, traitIndex, which + 1)
 
