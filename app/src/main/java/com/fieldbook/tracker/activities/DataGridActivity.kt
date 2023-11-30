@@ -219,10 +219,11 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                     }
                 }
 
-                val traits = database.allTraitObjects;
+                val traits = database.allTraitObjects
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
-                val cursor = database.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
+                val cursor =
+                    database.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
 
                 if (cursor.moveToFirst()) {
 
@@ -263,7 +264,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                                         val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
 
-                                        val repeatedValues = database.getRepeatedValues(studyId, id, variable.id)
+                                        val repeatedValues =
+                                            database.getRepeatedValues(studyId, id, variable.id)
                                         if (repeatedValues.size > 1) {
                                             println("$studyId $id $variable has repeated values...!")
                                         }
@@ -275,7 +277,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                                             try {
 
                                                 cellValue = CategoryJsonUtil
-                                                    .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel)
+                                                    .flattenMultiCategoryValue(decode(value), showLabel)
 
                                             } catch (e: Exception) {
 
@@ -327,9 +329,11 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                         mTableView.setAdapter(mAdapter)
 
-                        mAdapter.setAllItems(mTraits.map { HeaderData(it.trait, it.trait) },
+                        mAdapter.setAllItems(
+                            mTraits.map { HeaderData(it.trait, it.trait) },
                             mRowHeaders.map { HeaderData(it, it) },
-                            dataMap.toList())
+                            dataMap.toList()
+                        )
 
                         //scroll to the position of the current trait/plot id
                         if (plotId != null && trait != null) {
@@ -434,7 +438,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                 val plotId = value.observation_unit_id
 
-                val traitIndex = mTraits.indexOfFirst { it.id == value.observation_variable_db_id.toString() }
+                val traitIndex =
+                    mTraits.indexOfFirst { it.id == value.observation_variable_db_id.toString() }
 
                 navigateFromValueClicked(plotId, traitIndex, which + 1)
 

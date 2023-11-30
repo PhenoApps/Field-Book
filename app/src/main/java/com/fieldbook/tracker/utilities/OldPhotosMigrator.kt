@@ -49,12 +49,16 @@ class OldPhotosMigrator {
 
                         if (t.trait != "photos") { //edge case where trait name is actually photos
 
-                            val photoDir = DocumentTreeUtil.getFieldMediaDirectory(context, t.trait)
-                            val oldPhotos = DocumentTreeUtil.getFieldMediaDirectory(context, "photos")
+                            val sanitizedTraitName = FileUtil.sanitizeFileName(t.trait)
+                            val photoDir =
+                                DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)
+                            val oldPhotos =
+                                DocumentTreeUtil.getFieldMediaDirectory(context, "photos")
 
                             traitPhotos.forEach { photo ->
 
-                                val repeatedValue = database.getRep(expId, photo.observation_unit_id, t.id)
+                                val repeatedValue =
+                                    database.getRep(expId, photo.observation_unit_id, t.id)
                                 val generatedName =
                                     photo.observation_unit_id + "_" + t.trait + "_" + repeatedValue + "_" + timeStamp.format(
                                         Calendar.getInstance().time

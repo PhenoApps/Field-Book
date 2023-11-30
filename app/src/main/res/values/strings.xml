@@ -291,7 +291,8 @@
     <string name="trait_error_hardware_missing">Your device does not have a camera that can be used to take a photo.</string>
     <string name="trait_delete_warning_photo">Are you sure you want to delete this photo?</string>
     <string name="trait_photo_capture_button_content_description">Press to open a camera view for capturing.</string>
-
+    <string name="photo_failed_to_delete">Failed to delete file.</string>
+  
     <!-- Trait Layout: GNSS -->
     <string name="trait_gnss_geo_coord_update_dialog_title">Coordinate Update Warning</string>
     <string name="trait_gnss_geo_coord_update_dialog_message">You have a saved coordinate for this unit, are you sure you want to update it?</string>
@@ -959,10 +960,10 @@
     <string name="tutorial_main_delete_description">Data is deleted using this button.</string>
     <string name="tutorial_main_search_title">Search</string>
     <string name="tutorial_main_search_description">The search icon allows database queries.</string>
-    <string name="tutorial_main_resou exported in two formats: database or table.</string>
+    <string name="tutorial_main_resources_title">Resources</string>
 
     <string name="tutorial_fields_add_title">Add Field</string>
-    <string name="tutorial_fields_add_description">Import a field file.</strrces_title">Resources</string>
+    <string name="tutorial_fields_add_description">Import a field file.</string>
     <string name="tutorial_main_resources_description">This displays a list of files in the Resources folder.</string>
     <string name="tutorial_main_summary_title">Summary</string>
     <string name="tutorial_main_summary_description">This displays a summary of all data for the current entry.</string>
@@ -979,7 +980,7 @@
     <string name="tutorial_settings_settings_title">Settings</string>
     <string name="tutorial_settings_settings_description">allows additional configuration for data collection.</string>
     <string name="tutorial_settings_export_title">Export</string>
-    <string name="tutorial_settings_export_description">Data can being>
+    <string name="tutorial_settings_export_description">Data can be exported in two formats: database or table.</string>
     <string name="tutorial_fields_file_description">Files must contain three columns: a unique identifier, a primary order, and a secondary order. The primary/secondary order are used for navigation in the field.</string>
     <string name="tutorial_fields_select_title">Active Field</string>
     <string name="tutorial_fields_select_description">A field is selected for data collection after being imported.</string>
@@ -992,8 +993,4 @@
     <string name="tutorial_traits_format_description">Different trait formats are indicated with different icons.</string>
     <string name="tutorial_traits_visibility_title">Trait Visibility</string>
     <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
-    
-    
-
-
 </resources>

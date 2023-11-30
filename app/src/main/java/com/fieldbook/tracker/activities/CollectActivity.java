@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.activities;
 
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -71,6 +70,7 @@ import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
@@ -1066,8 +1066,9 @@ public class CollectActivity extends ThemedActivity
     /**
      * Helper function update user data in the memory based hashmap as well as
      * the database
-     * @param trait, the TraitObject to be updated
-     * @param value the new string value to be saved in the database
+     *
+     * @param trait       the trait object to update
+     * @param value       the new string value to be saved in the database
      * @param nullableRep the repeated value to update, could be null to represent the latest rep value
      */
     public void updateObservation(TraitObject trait, String value, @Nullable String nullableRep) {
@@ -1104,7 +1105,7 @@ public class CollectActivity extends ThemedActivity
             boolean pass = false;
 
             if (trait.getFormat().equals("multicat")
-                || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
+                    || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
 
                 if (value.equals("[]")) {
 
@@ -1113,7 +1114,7 @@ public class CollectActivity extends ThemedActivity
             }
 
             if (!pass) {
-                database.insertObservation(obsUnit, trait.getId(), value, person,
+                database.insertObservation(obsUnit, trait.getId(), trait.getFormat(), value, person,
                         getLocationByPreferences(), "", studyId, observationDbId,
                         lastSyncedTime, rep);
             }
@@ -1131,7 +1132,7 @@ public class CollectActivity extends ThemedActivity
         String person = getPerson();
         String traitDbId = getTraitDbId();
 
-        database.insertObservation(obsUnit, traitDbId, value, person,
+        database.insertObservation(obsUnit, traitDbId, getTraitFormat(), value, person,
                 getLocationByPreferences(), "", expId, null, null, rep);
     }
 
@@ -1172,7 +1173,7 @@ public class CollectActivity extends ThemedActivity
 
         String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         TraitObject trait = traitBox.getCurrentTrait();
-        if (database.isBrapiSynced(exp_id, getObservationUnit(), trait.getTrait(), getRep())) {
+        if (database.isBrapiSynced(exp_id, getObservationUnit(), trait.getId(), getRep())) {
             brapiDelete(parent, true);
         } else {
             // Always remove existing trait before inserting again
@@ -1424,7 +1425,7 @@ public class CollectActivity extends ThemedActivity
 
     private void showMultiMeasureDeleteDialog() {
 
-        String labelValPref = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
+        String labelValPref = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value");
 
         ObservationModel[] values = database.getRepeatedValues(
                 getStudyId(), getObservationUnit(), getTraitDbId());
@@ -2129,8 +2130,8 @@ public class CollectActivity extends ThemedActivity
 
         String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertObservation(rangeBox.getPlotID(), trait.getId(), size,
-                ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
+        database.insertObservation(rangeBox.getPlotID(), trait.getId(), trait.getFormat(), size,
+                getPerson(),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);
 
@@ -2345,7 +2346,7 @@ public class CollectActivity extends ThemedActivity
         }
         return new ArrayList<>();
     }
-    
+
     @NonNull
     @Override
     public VibrateUtil getVibrator() {

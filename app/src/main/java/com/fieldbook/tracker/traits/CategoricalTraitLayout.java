@@ -46,9 +46,9 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    static public boolean isTraitCategorical(String traitName) {
+    static public boolean isTraitCategorical(String traitFormat) {
         for (String name : POSSIBLE_VALUES) {
-            if (name.equals(traitName)) return true;
+            if (name.equals(traitFormat)) return true;
         }
         return false;
     }
@@ -286,7 +286,8 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
                 getCollectInputView().setText(currentCat);
 
-                updateObservation(getCurrentTrait(), CategoryJsonUtil.Companion.encode(scale));
+                updateObservation(getCurrentTrait(),
+                        CategoryJsonUtil.Companion.encode(scale));
 
                 triggerTts(category);
 

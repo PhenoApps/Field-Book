@@ -2,12 +2,10 @@ package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -19,15 +17,7 @@ import androidx.documentfile.provider.DocumentFile;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
-
-import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
 
 public class AudioTraitLayout extends BaseTraitLayout {
 
@@ -157,13 +147,11 @@ public class AudioTraitLayout extends BaseTraitLayout {
     }
 
     public boolean isAudioRecording(){
-        if (buttonState == ButtonState.RECORDING) return true;
-        else return false;
+        return buttonState == ButtonState.RECORDING;
     }
 
     public boolean isAudioPlaybackPlaying(){
-        if (buttonState == ButtonState.PLAYING) return true;
-        else return false;
+        return buttonState == ButtonState.PLAYING;
     }
 
     private enum ButtonState {
@@ -172,7 +160,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
         WAITING_FOR_PLAYBACK(R.drawable.trait_audio_play),
         PLAYING(R.drawable.trait_audio_stop);
 
-        private int imageId;
+        private final int imageId;
 
         ButtonState(int imageId) {
             this.imageId = imageId;
@@ -276,8 +264,8 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         private void stopRecording() {
             try {
-                mediaRecorder.stop();
-                updateObservation(getCurrentTrait(), recordingLocation.toString());
+                fieldAudioHelper.stopRecording();
+                updateObservation(getCurrentTrait(), fieldAudioHelper.getRecordingLocation().toString());
                 audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
                 getCollectInputView().setText(fieldAudioHelper.getRecordingLocation().toString());
             } catch (Exception e) {

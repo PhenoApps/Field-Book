@@ -29,6 +29,8 @@ import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.database.models.ObservationVariableModel;
+import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
@@ -75,8 +77,8 @@ public class DataHelper {
     private static final String PLOT_ATTRIBUTES = "plot_attributes";
     private static final String PLOT_VALUES = "plot_values";
     public static SQLiteDatabase db;
-    private static String TAG = "Field Book";
-    private static String TICK = "`";
+    private static final String TAG = "Field Book";
+    private static final String TICK = "`";
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
     private Context context;
     private SimpleDateFormat timeStamp;
@@ -118,7 +120,7 @@ public class DataHelper {
      */
     public static String replaceSpecialChars(String s) {
 
-        final Pattern p = Pattern.compile("[\\[\\]`\"\']");
+        final Pattern p = Pattern.compile("[\\[\\]`\"']");
 
         int lastIndex = 0;
 
@@ -161,7 +163,7 @@ public class DataHelper {
      */
     public static boolean hasSpecialChars(String s) {
 //        final Pattern p = Pattern.compile("[()<>/;\\*%$`\"\']");
-        final Pattern p = Pattern.compile("[\\[\\]`\"\']");
+        final Pattern p = Pattern.compile("[\\[\\]`\"']");
 
         final Matcher m = p.matcher(s);
 
@@ -272,11 +274,27 @@ public class DataHelper {
     }
 
     @Nullable
+    public StudyModel getStudyById(String id) {
+
+        open();
+
+        return StudyDao.Companion.getById(id);
+    }
+
+    @Nullable
     public ObservationUnitModel getObservationUnitById(String id) {
 
         open();
 
         return ObservationUnitDao.Companion.getById(id);
+    }
+
+    @Nullable
+    public ObservationVariableModel getObservationVariableById(String id) {
+
+        open();
+
+        return ObservationVariableDao.Companion.getById(id);
     }
 
     /**
@@ -285,11 +303,11 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
+    public long insertObservation(String plotId, String traitDbId, String traitFormat, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
 
         open();
 
-        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, lastSyncedTime, rep);
+        return ObservationDao.Companion.insertObservation(plotId, traitDbId, traitFormat, value, person, location, notes, studyId, observationDbId, lastSyncedTime, rep);
 
 //        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
 //        int rep = cursor.getCount() + 1;
@@ -935,20 +953,23 @@ public class DataHelper {
     /**
      * Same as convertDatabaseToTable but filters by obs unit
      */
-    public Cursor convertDatabaseToTable(String[] col, String[] traits, String obsUnit) {
+    public Cursor convertDatabaseToTable(String[] col, ArrayList<TraitObject> traits, String obsUnit) {
 
         open();
 
         return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
                 ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                ep.getString(GeneralKeys.UNIQUE_NAME, ""), obsUnit, col, traits);
+                ep.getString(GeneralKeys.UNIQUE_NAME, ""),
+                obsUnit,
+                col,
+                traits.toArray(new TraitObject[]{}));
 
     }
 
-        /**
-         * Convert EAV database to relational
-         * TODO add where statement for repeated values
-         */
+    /**
+     * Convert EAV database to relational
+     * TODO add where statement for repeated values
+     */
     public Cursor convertDatabaseToTable(String[] col, ArrayList<TraitObject> traits) {
 
         open();
@@ -2475,7 +2496,7 @@ public class DataHelper {
      */
     public void copyFileOrDir(String fullPath, String path) {
         AssetManager assetManager = context.getAssets();
-        String assets[];
+        String[] assets;
 
         try {
             assets = assetManager.list(path);
@@ -2645,18 +2666,18 @@ public class DataHelper {
         return ObservationDao.Companion.getAll(studyId, unit);
     }
 
-    public ObservationModel[] getAllObservations(String studyId, String unit, String traitDbId) {
+    public ObservationModel[] getAllObservations(String studyId, String plotId, String traitDbId) {
 
         open();
 
-        return ObservationDao.Companion.getAll(studyId, unit, traitDbId);
+        return ObservationDao.Companion.getAll(studyId, plotId, traitDbId);
     }
 
-    public ObservationModel[] getRepeatedValues(String studyId, String unit, String traitDbId) {
+    public ObservationModel[] getRepeatedValues(String studyId, String plotId, String traitDbId) {
 
         open();
 
-        return ObservationDao.Companion.getAllRepeatedValues(studyId, unit, traitDbId);
+        return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
     }
 
     /**

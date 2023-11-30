@@ -248,11 +248,11 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun getTraitLeft(): ImageView {
-        return findViewById(R.id.traitLeft) as ImageView
+        return findViewById<ImageView>(R.id.traitLeft)
     }
 
     fun getTraitRight(): ImageView {
-        return findViewById(R.id.traitRight) as ImageView
+        return findViewById<ImageView>(R.id.traitRight)
     }
 
     fun existsNewTraits(): Boolean {
@@ -280,7 +280,7 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun existsTrait(): Boolean {
-        return newTraits!!.containsKey(currentTrait!!.trait)
+        return newTraits.containsKey(currentTrait!!.trait)
     }
 
     fun createSummaryText(plotID: String?): String {

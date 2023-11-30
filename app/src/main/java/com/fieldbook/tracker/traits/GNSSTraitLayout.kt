@@ -335,7 +335,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val newLat = latitude.toDouble()
             val newLng = longitude.toDouble()
 
-            val units = database.getAllObservationUnits(studyDbId.toInt()).filter { it.observation_unit_db_id == currentRange.plot_id }
+            val units = database.getAllObservationUnits(studyDbId.toInt())
+                .filter { it.observation_unit_db_id == currentRange.plot_id }
 
             if (units.isNotEmpty()) {
 
@@ -469,10 +470,10 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             //truncate average result based on original location fix
             avgLat = if (avgLat.toString().length > info.latLength)
                 avgLat.toString().substring(0 until info.latLength).toDouble()
-                else avgLat
+            else avgLat
             avgLng = if (avgLng.toString().length > info.lngLength)
                 avgLng.toString().substring(0 until info.lngLength).toDouble()
-                else avgLng
+            else avgLng
 
             //convert back to strings and truncate based on original quality
             avgLat to avgLng
@@ -784,7 +785,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-        val observation = ObservationDao.getObservation(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
+        val observation =
+            ObservationDao.getObservation(studyDbId, currentRange.plot_id, currentTrait.id, rep)
 
         if (observation != null) {
 

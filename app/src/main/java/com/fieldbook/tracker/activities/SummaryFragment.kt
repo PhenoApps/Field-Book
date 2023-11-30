@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.SummaryAdapter
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.google.gson.JsonParseException
@@ -80,7 +81,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
     }
 
     private fun setupToolbar(
-        attributes: Array<String>, traits: Array<String>, collector: CollectActivity
+        attributes: Array<String>, traits: ArrayList<TraitObject>, collector: CollectActivity
     ) {
 
         toolbar?.inflateMenu(R.menu.menu_fragment_summary)
@@ -119,7 +120,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                 val attributes = database.getAllObservationUnitAttributeNames(studyId.toInt())
 
-                val traits = database.visibleTrait
+                val traits = ArrayList(database.allTraitObjects.filter { it.visible })
 
                 loadData(collector, attributes, traits)
 
@@ -143,7 +144,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
     }
 
     private fun loadData(
-        collector: CollectActivity, attributes: Array<String>, traits: Array<String>
+        collector: CollectActivity, attributes: Array<String>, traits: ArrayList<TraitObject>
     ) {
 
         val filter = getPersistedFilter(collector)
@@ -160,7 +161,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
             try {
 
-                (attributes + traits).filter { if (filter == null) true else it in filter }
+                (attributes + traits.map { it.trait }).filter { if (filter == null) true else it in filter }
                     .forEach { key ->
 
                         val index = data.getColumnIndex(key)
@@ -199,7 +200,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
                             SummaryAdapter.SummaryListModel(
                                 key,
                                 value ?: "",
-                                key in traits
+                                key in traits.map { it.trait }
                             )
                         )
 
@@ -233,14 +234,14 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
     }
 
     private fun showFilterDialog(
-        collector: CollectActivity, attributes: Array<String>, traits: Array<String>
+        collector: CollectActivity, attributes: Array<String>, traits: ArrayList<TraitObject>
     ) {
 
         activity?.let { ctx ->
 
             var filter: Set<String>? = getPersistedFilter(ctx)
 
-            val keys = attributes + traits
+            val keys = attributes + traits.map { it.trait }
 
             //initialize which attributes are checked, if no filter is saved then check all
             val checked = keys.map {

@@ -21,7 +21,7 @@ import com.fieldbook.tracker.objects.TraitObject
 class TraitAdapter(private val sorter: TraitSorter):
         ListAdapter<TraitObject, TraitAdapter.ViewHolder>(DiffCallback()) {
 
-    public var infoDialogShown: Boolean = false
+    var infoDialogShown: Boolean = false
 
     interface TraitSorter {
         fun onDrag(item: TraitAdapter.ViewHolder)
@@ -84,7 +84,7 @@ class TraitAdapter(private val sorter: TraitSorter):
         }
     }
 
-    public fun getTraitItem(position: Int): TraitObject {
+    fun getTraitItem(position: Int): TraitObject {
         return currentList[position]
     }
 

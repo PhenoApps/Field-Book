@@ -711,8 +711,7 @@ public class ConfigActivity extends ThemedActivity {
             }
 
             if (allTraits.isChecked()) {
-                ArrayList<TraitObject> traits = database.getAllTraitObjects();
-                exportTrait.addAll(traits);
+                exportTrait.addAll(database.getAllTraitObjects());
             }
 
             checkDbBool = checkDB.isChecked();
@@ -1135,11 +1134,10 @@ public class ConfigActivity extends ThemedActivity {
                         exportData = database.convertDatabaseToTable(newRanges, exportTrait);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        ArrayList<String> labels = new ArrayList<>();
-                        labels.addAll(Arrays.asList(newRanges));
-                        for (TraitObject trait : exportTrait) labels.add(trait.getTrait());
+                        ArrayList<String> labels = new ArrayList<>(Arrays.asList(newRanges));
+                        for (TraitObject t : exportTrait) labels.add(t.getTrait());
 
-                        csvWriter.writeTableFormat(labels.toArray(new String[] {}), labels.size(), traits);
+                        csvWriter.writeTableFormat(labels.toArray(new String[]{}), newRanges.length, traits);
 
                     } catch (Exception e) {
                         fail = true;

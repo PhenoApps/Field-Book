@@ -293,7 +293,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     /**
      * Calls the collect activities db function to insert an observation row.
-     * @param trait the TraitObject to be updated
+     *
+     * @param trait the trait object to update
      * @param value the Text value to be saved in the row
      */
     public void updateObservation(TraitObject trait, String value) {
