@@ -371,6 +371,8 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <string name="tutorial_main_search_title">Rechercher</string>
     <string name="tutorial_main_search_description">L\'icône recherche permet d\'interroger une base de donnée</string>
     <string name="tutorial_main_resources_title">Ressources</string>
+    <string name="tutorial_fields_add_title">Ajouter un essai</string>
+    <string name="tutorial_fields_add_description">Importer un fichier d\'essai</string>
     <string name="tutorial_main_resources_description">Afficher une liste de fichiers dans le dossier ressources</string>
     <string name="tutorial_main_summary_title">Résumé</string>
     <string name="tutorial_main_summary_description">Affiche un résumé pour l\'entrée sélectionnée</string>
@@ -387,8 +389,6 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <string name="tutorial_settings_settings_description">Permet une configuration additionelle de la collecte des données</string>
     <string name="tutorial_settings_export_title">exporter</string>
     <string name="tutorial_settings_export_description">Les données peuvent être exportées en deux formats: base de données ou table</string>
-    <string name="tutorial_fields_add_title">Ajouter un essai</string>
-    <string name="tutorial_fields_add_description">Importer un fichier d\'essai</string>
     <string name="tutorial_fields_file_description">Les fichiers doivent contenir trois colonnes: un identifiant unique, un ordre primaire et un ordre secondaire. L\'ordre primaire/secondaire sont utilisés pour la navigation dans le champs/essai. </string>
     <string name="tutorial_fields_select_title">Champs actif</string>
     <string name="tutorial_fields_select_description">Un essai est selectioné pour la collecte de donnée après avoir été importé.</string>

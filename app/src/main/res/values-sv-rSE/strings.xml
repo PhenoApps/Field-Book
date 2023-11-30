@@ -283,6 +283,8 @@ Karaktärer och fält som skapats manuellt eller importerats via CSV kommer beh�
     <string name="tutorial_main_search_title">Sök</string>
     <string name="tutorial_main_search_description">Sökikonen tillåter databasfrågor</string>
     <string name="tutorial_main_resources_title">Resurser</string>
+    <string name="tutorial_fields_add_title">Lägg till fält </string>
+    <string name="tutorial_fields_add_description">Importera en fältfil</string>
     <string name="tutorial_main_resources_description">Detta visar en lista med filer i resursmappen.</string>
     <string name="tutorial_main_summary_title">Sammanfattning </string>
     <string name="tutorial_main_summary_description">Detta visar en sammanfattning av all data för den aktuella posten.</string>
@@ -299,8 +301,6 @@ Karaktärer och fält som skapats manuellt eller importerats via CSV kommer beh�
     <string name="tutorial_settings_settings_description">Tillåter ytterligare konfigurering av datainsamlingen </string>
     <string name="tutorial_settings_export_title">Export </string>
     <string name="tutorial_settings_export_description">Data kan exporteras i två format: databas och tabell.</string>
-    <string name="tutorial_fields_add_title">Lägg till fält </string>
-    <string name="tutorial_fields_add_description">Importera en fältfil</string>
     <string name="tutorial_fields_file_description">Filer måste innehålla tre kolumner: ID, första ordning och andra ordning. Första och andra ordningen används för navigering i fältet.</string>
     <string name="tutorial_fields_select_title">Aktivt fält </string>
     <string name="tutorial_fields_select_description">Ett fält väljs för datainsamling efter att ha importerats.</string>

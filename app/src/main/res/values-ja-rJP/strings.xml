@@ -381,6 +381,8 @@
     <string name="tutorial_main_search_title">検索</string>
     <string name="tutorial_main_search_description">検索アイコンでデータベース質問ができます。</string>
     <string name="tutorial_main_resources_title">資料室</string>
+    <string name="tutorial_fields_add_title">圃場の追加</string>
+    <string name="tutorial_fields_add_description">圃場ファイルのインポート</string>
     <string name="tutorial_main_resources_description">資料室フォルダーにあるファイルの一覧を表示します。</string>
     <string name="tutorial_main_summary_title">総括</string>
     <string name="tutorial_main_summary_description">現在のエントリーの全てのデータの総括を表示します。</string>
@@ -397,8 +399,6 @@
     <string name="tutorial_settings_settings_description">データ収集の追加設定をすることができます。</string>
     <string name="tutorial_settings_export_title">エクスポート</string>
     <string name="tutorial_settings_export_description">データは2種のフォーマットでエクスポートできます：データベースまたは表</string>
-    <string name="tutorial_fields_add_title">圃場の追加</string>
-    <string name="tutorial_fields_add_description">圃場ファイルのインポート</string>
     <string name="tutorial_fields_file_description">ファイルは3つのカラムを含む必要があります：ユニークID、第1オーダーおよび第2オーダー。第1/第2オーダーは圃場のナビゲーションに使用します。</string>
     <string name="tutorial_fields_select_title">選択圃場</string>
     <string name="tutorial_fields_select_description">圃場ファイルのインポート後にデータ収集を行う圃場を選択します。</string>
