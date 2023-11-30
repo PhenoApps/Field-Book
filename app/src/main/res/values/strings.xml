@@ -291,7 +291,8 @@
     <string name="trait_error_hardware_missing">Your device does not have a camera that can be used to take a photo.</string>
     <string name="trait_delete_warning_photo">Are you sure you want to delete this photo?</string>
     <string name="trait_photo_capture_button_content_description">Press to open a camera view for capturing.</string>
-
+    <string name="photo_failed_to_delete">Failed to delete file.</string>
+  
     <!-- Trait Layout: GNSS -->
     <string name="trait_gnss_geo_coord_update_dialog_title">Coordinate Update Warning</string>
     <string name="trait_gnss_geo_coord_update_dialog_message">You have a saved coordinate for this unit, are you sure you want to update it?</string>
@@ -702,16 +703,20 @@
     <string name="database_reset_warning1">All data will be deleted. Are you sure you want to reset the database?</string>
     <string name="database_reset_warning2">A database reset cannot be reversed. The app will quit after clearing the database. Are you really sure you want to continue?</string>
     <string name="database_reset_message">Database has been deleted</string>
+    <string name="share_file_title">Sending file…</string>
+  
+    <!-- Experimental -->
+    <string name="preferences_experimental_title">Experimental</string>
+    <string name="preferences_experimental_stable_title">Stable</string>
+    <string name="preferences_experimental_beta_title">Beta</string>
+    <string name="preferences_experimental_alpha_title">Alpha</string>
+    <string name="pref_experimental_repeated_values_title">Repeated Measures</string>
+    <string name="pref_experimental_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
+    <string name="pref_experimental_repeated_values_disabled_title">Repeated Measures Disabled</string>
+    <string name="pref_experimental_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable.</string>
 
-    <!-- Beta -->
-    <string name="preferences_beta_title">Beta</string>
-    <string name="pref_beta_repeated_values_title">Repeated Measures</string>
-    <string name="pref_beta_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
-    <string name="pref_beta_repeated_values_disabled_title">Repeated Measures Disabled</string>
-    <string name="pref_beta_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable.</string>
-
-    <string name="pref_beta_enable_field_audio_title">Enable Field Audio</string>
-    <string name="pref_beta_enable_field_audio_summary">Enable audio recording feature for the entire field.</string>
+    <string name="pref_experimental_enable_field_audio_title">Enable Field Audio</string>
+    <string name="pref_experimental_enable_field_audio_summary">Enable audio recording feature for the entire field.</string>
     <string name="menu_collect_start_field_audio">Start Recorder</string>
     <string name="menu_collect_stop_field_audio">Stop Recorder</string>
     <string name="field_audio_recording_start">Recording field level audio.</string>
@@ -766,7 +771,13 @@
     <string name="preferences_brapi_enable_title">Enable BrAPI</string>
     <string name="preferences_brapi_enable_summary">The Breeding API allows simple data transfer to compatible databases.</string>
     <string name="preferences_brapi_core_title">Configuration</string>
-
+    <string name="preferences_brapi_barcode_config_title">Auto-configure</string>
+    <string name="preferences_brapi_barcode_config_summary">Manage settings with QR codes</string>
+    <string name="preferences_brapi_barcode_config_scan">Import new settings</string>
+    <string name="preferences_brapi_barcode_config_share">Share current settings</string>
+    <string name="preferences_brapi_barcode_config_dialog_title">Scannable BrAPI Configuration</string>
+    <string name="qr_code_share_choose_action_title">Choose Action</string>
+  
     <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
     <string name="act_brapi_auth_http_warning_title">HTTP Warning</string>
     <string name="act_brapi_auth_http_warning_message">You have entered an http url. There is no guarantee that this connection is secure.</string>
@@ -949,7 +960,10 @@
     <string name="tutorial_main_delete_description">Data is deleted using this button.</string>
     <string name="tutorial_main_search_title">Search</string>
     <string name="tutorial_main_search_description">The search icon allows database queries.</string>
-    <string name="tutorial_main_resources_title">Resources</string>
+    <string name="tutorial_main_resou exported in two formats: database or table.</string>
+
+    <string name="tutorial_fields_add_title">Add Field</string>
+    <string name="tutorial_fields_add_description">Import a field file.</strrces_title">Resources</string>
     <string name="tutorial_main_resources_description">This displays a list of files in the Resources folder.</string>
     <string name="tutorial_main_summary_title">Summary</string>
     <string name="tutorial_main_summary_description">This displays a summary of all data for the current entry.</string>
@@ -966,10 +980,7 @@
     <string name="tutorial_settings_settings_title">Settings</string>
     <string name="tutorial_settings_settings_description">allows additional configuration for data collection.</string>
     <string name="tutorial_settings_export_title">Export</string>
-    <string name="tutorial_settings_export_description">Data can be exported in two formats: database or table.</string>
-
-    <string name="tutorial_fields_add_title">Add Field</string>
-    <string name="tutorial_fields_add_description">Import a field file.</string>
+    <string name="tutorial_settings_export_description">Data can being>
     <string name="tutorial_fields_file_description">Files must contain three columns: a unique identifier, a primary order, and a secondary order. The primary/secondary order are used for navigation in the field.</string>
     <string name="tutorial_fields_select_title">Active Field</string>
     <string name="tutorial_fields_select_description">A field is selected for data collection after being imported.</string>
@@ -982,7 +993,4 @@
     <string name="tutorial_traits_format_description">Different trait formats are indicated with different icons.</string>
     <string name="tutorial_traits_visibility_title">Trait Visibility</string>
     <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
-    <string name="share_file_title">Sending file…</string>
-    <string name="photo_failed_to_delete">Failed to delete file.</string>
-
 </resources>

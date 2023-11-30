@@ -170,7 +170,7 @@
     <string name="database_reset_warning1">Все данные будут удалены при возвращении к исходным установкам. Продолжать?</string>
     <string name="database_reset_warning2">Это действие нельзя отменить. Приложение закончит работу после удаления данных. Продолжать?</string>
     <string name="database_reset_message">База данных удалена</string>
-    <!-- Beta -->
+    <!-- Experimental -->
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">О программе</string>
