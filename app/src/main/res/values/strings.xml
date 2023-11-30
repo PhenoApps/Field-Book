@@ -702,7 +702,8 @@
     <string name="database_reset_warning1">All data will be deleted. Are you sure you want to reset the database?</string>
     <string name="database_reset_warning2">A database reset cannot be reversed. The app will quit after clearing the database. Are you really sure you want to continue?</string>
     <string name="database_reset_message">Database has been deleted</string>
-
+    <string name="share_file_title">Sending file…</string>
+  
     <!-- Experimental -->
     <string name="preferences_experimental_title">Experimental</string>
     <string name="preferences_experimental_stable_title">Stable</string>
@@ -769,7 +770,13 @@
     <string name="preferences_brapi_enable_title">Enable BrAPI</string>
     <string name="preferences_brapi_enable_summary">The Breeding API allows simple data transfer to compatible databases.</string>
     <string name="preferences_brapi_core_title">Configuration</string>
-
+    <string name="preferences_brapi_barcode_config_title">Auto-configure</string>
+    <string name="preferences_brapi_barcode_config_summary">Manage settings with QR codes</string>
+    <string name="preferences_brapi_barcode_config_scan">Import new settings</string>
+    <string name="preferences_brapi_barcode_config_share">Share current settings</string>
+    <string name="preferences_brapi_barcode_config_dialog_title">Scannable BrAPI Configuration</string>
+    <string name="qr_code_share_choose_action_title">Choose Action</string>
+  
     <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
     <string name="act_brapi_auth_http_warning_title">HTTP Warning</string>
     <string name="act_brapi_auth_http_warning_message">You have entered an http url. There is no guarantee that this connection is secure.</string>
@@ -952,7 +959,10 @@
     <string name="tutorial_main_delete_description">Data is deleted using this button.</string>
     <string name="tutorial_main_search_title">Search</string>
     <string name="tutorial_main_search_description">The search icon allows database queries.</string>
-    <string name="tutorial_main_resources_title">Resources</string>
+    <string name="tutorial_main_resou exported in two formats: database or table.</string>
+
+    <string name="tutorial_fields_add_title">Add Field</string>
+    <string name="tutorial_fields_add_description">Import a field file.</strrces_title">Resources</string>
     <string name="tutorial_main_resources_description">This displays a list of files in the Resources folder.</string>
     <string name="tutorial_main_summary_title">Summary</string>
     <string name="tutorial_main_summary_description">This displays a summary of all data for the current entry.</string>
@@ -969,10 +979,7 @@
     <string name="tutorial_settings_settings_title">Settings</string>
     <string name="tutorial_settings_settings_description">allows additional configuration for data collection.</string>
     <string name="tutorial_settings_export_title">Export</string>
-    <string name="tutorial_settings_export_description">Data can be exported in two formats: database or table.</string>
-
-    <string name="tutorial_fields_add_title">Add Field</string>
-    <string name="tutorial_fields_add_description">Import a field file.</string>
+    <string name="tutorial_settings_export_description">Data can being>
     <string name="tutorial_fields_file_description">Files must contain three columns: a unique identifier, a primary order, and a secondary order. The primary/secondary order are used for navigation in the field.</string>
     <string name="tutorial_fields_select_title">Active Field</string>
     <string name="tutorial_fields_select_description">A field is selected for data collection after being imported.</string>
@@ -985,6 +992,8 @@
     <string name="tutorial_traits_format_description">Different trait formats are indicated with different icons.</string>
     <string name="tutorial_traits_visibility_title">Trait Visibility</string>
     <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
-    <string name="share_file_title">Sending file…</string>
+    
+    
+
 
 </resources>
