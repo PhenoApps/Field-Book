@@ -32,24 +32,10 @@
         android:minHeight="48dp"
         android:src="@drawable/ic_tb_delete_sweep"
         app:layout_constraintBottom_toTopOf="@id/dialog_search_ok_btn"
-        app:layout_constraintEnd_toStartOf="@id/dialog_search_toggle_order_btn"
+        app:layout_constraintEnd_toStartOf="@id/dialog_search_add_btn"
         app:layout_constraintStart_toStartOf="parent"
         app:tint="@color/BLACK" />
 
-    <ImageButton
-        android:id="@+id/dialog_search_toggle_order_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:background="@drawable/circle_background"
-        android:contentDescription="@string/dialog_field_sort_toggle_order_content_description"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
-        android:src="@drawable/ic_tb_sort"
-        app:layout_constraintBottom_toTopOf="@id/dialog_search_ok_btn"
-        app:layout_constraintEnd_toStartOf="@id/dialog_search_add_btn"
-        app:layout_constraintStart_toEndOf="@id/dialog_search_delete_all_btn"
-        app:tint="@color/BLACK" />
 
     <ImageButton
         android:id="@+id/dialog_search_add_btn"
@@ -63,7 +49,7 @@
         android:src="@drawable/ic_add_white"
         app:layout_constraintBottom_toTopOf="@id/dialog_search_ok_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/dialog_search_toggle_order_btn"
+        app:layout_constraintStart_toEndOf="@id/dialog_search_delete_all_btn"
         app:tint="@color/BLACK" />
 
     <Button

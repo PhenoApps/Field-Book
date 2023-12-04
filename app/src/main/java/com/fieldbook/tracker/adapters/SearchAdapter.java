@@ -24,13 +24,15 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
     List<SearchDialogDataModel> dataSet;
     private static OperatorDialog.OnOperatorClickedListener onOperatorClickedListener;
     private onEditTextChangedListener onEditTextChangedListener;
+    private  onDeleteClickedListener onDeleteClickedListener;
     private static Context context;
     boolean isOnTextChanged = false;
 
-    public SearchAdapter(List<SearchDialogDataModel> dataSet, OperatorDialog.OnOperatorClickedListener onOperatorClickedListener, onEditTextChangedListener onEditTextChangedListener, Context context) {
+    public SearchAdapter(List<SearchDialogDataModel> dataSet, OperatorDialog.OnOperatorClickedListener onOperatorClickedListener, onEditTextChangedListener onEditTextChangedListener, onDeleteClickedListener onDeleteClickedListener, Context context) {
         this.dataSet = dataSet;
         SearchAdapter.onOperatorClickedListener = onOperatorClickedListener;
         this.onEditTextChangedListener = onEditTextChangedListener;
+        this.onDeleteClickedListener = onDeleteClickedListener;
         SearchAdapter.context = context;
 
     }
@@ -39,12 +41,14 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         TextView c;
         ImageView l;
         EditText e;
+        ImageView d;
 
         public SearchViewHolder(View itemView) {
             super(itemView);
             c = itemView.findViewById(R.id.list_item_search_columns);
             l = itemView.findViewById(R.id.list_item_search_like);
             e = itemView.findViewById(R.id.list_item_search_search_text);
+            d = itemView.findViewById(R.id.list_item_search_delete_btn);
 
             l.setOnClickListener(arg0 -> {
                 OperatorDialog od = new OperatorDialog(context, onOperatorClickedListener, getBindingAdapterPosition());
@@ -83,6 +87,11 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
                 }
             }
         });
+
+
+        holder.d.setOnClickListener(arg0 -> {
+            onDeleteClickedListener.onDeleteClicked(holder.getBindingAdapterPosition());
+        });
     }
 
     @Override
@@ -92,5 +101,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
 
     public interface onEditTextChangedListener {
         void onEditTextChanged(int pos, String editText);
+    }
+    public interface onDeleteClickedListener {
+        void onDeleteClicked(int pos);
     }
 }

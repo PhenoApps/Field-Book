@@ -33,23 +33,21 @@ public class OperatorDialog extends AlertDialog {
         setContentView(customView);
         setTitle("Select an operator");
 
-        String[] operatorText = new String[6];
+        String[] operatorText = new String[5];
 
         operatorText[0] = context.getString(R.string.search_dialog_query_is_equal_to);
         operatorText[1] = context.getString(R.string.search_dialog_query_is_not_equal_to);
         operatorText[2] = context.getString(R.string.search_dialog_query_contains);
-        operatorText[3] = context.getString(R.string.search_dialog_query_does_not_contain);
-        operatorText[4] = context.getString(R.string.search_dialog_query_is_more_than);
-        operatorText[5] = context.getString(R.string.search_dialog_query_is_less_than);
+        operatorText[3] = context.getString(R.string.search_dialog_query_is_more_than);
+        operatorText[4] = context.getString(R.string.search_dialog_query_is_less_than);
 
-        int[] operatorImage = new int[6];
+        int[] operatorImage = new int[5];
 
         operatorImage[0] = R.drawable.ic_tb_equal;
         operatorImage[1] = R.drawable.ic_tb_not_equal;
         operatorImage[2] = R.drawable.ic_tb_contains;
-        operatorImage[3] = R.drawable.ic_tb_does_not_contain;
-        operatorImage[4] = R.drawable.ic_tb_greater_than;
-        operatorImage[5] = R.drawable.ic_tb_less_than;
+        operatorImage[3] = R.drawable.ic_tb_greater_than;
+        operatorImage[4] = R.drawable.ic_tb_less_than;
 
         OperatorAdapter adapter = new OperatorAdapter(context, operatorText, operatorImage);
 

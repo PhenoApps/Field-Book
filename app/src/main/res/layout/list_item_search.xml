@@ -13,7 +13,7 @@
         android:singleLine="true"
         android:textSize="@dimen/text_size_medium"
         app:layout_constraintBottom_toBottomOf="@id/list_item_search_like"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/list_item_search_delete_btn"
         app:layout_constraintStart_toEndOf="@id/list_item_search_like"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Text to search for" />
@@ -44,6 +44,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Value" />
+
+    <ImageButton
+        android:padding="8dp"
+        android:background="@color/zxing_transparent"
+        android:src="@drawable/ic_tb_delete"
+        android:text="@string/fields_delete"
+        android:id="@+id/list_item_search_delete_btn"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 
     <View

@@ -36,7 +36,7 @@ import com.fieldbook.tracker.views.RangeBoxView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchDialog extends DialogFragment implements SearchAtrributeChooserDialog.OnAttributeClickedListener, OperatorDialog.OnOperatorClickedListener, SearchAdapter.onEditTextChangedListener {
+public class SearchDialog extends DialogFragment implements SearchAtrributeChooserDialog.OnAttributeClickedListener, OperatorDialog.OnOperatorClickedListener, SearchAdapter.onEditTextChangedListener, SearchAdapter.onDeleteClickedListener {
 
     private static final String TAG = "Field Book";
     public static String TICK = "\"";
@@ -45,6 +45,8 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
     private SharedPreferences ep;
     private int rangeUntil;
     private List<SearchDialogDataModel> dataSet;
+    public static List<SearchDialogDataModel> savedDataSet;
+    public static boolean isSaved;
 
     public SearchDialog(CollectActivity activity) {
         originActivity = activity;
@@ -62,15 +64,19 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
         builder.setTitle("Search");
         builder.setView(customView);
 
-        dataSet = new ArrayList<>();
-        searchAdapter = new SearchAdapter(dataSet, this, this, getContext());
+        // Loading the search query if saved
+        if (isSaved) {
+            dataSet = getSavedDataSet();
+        } else {
+            dataSet = new ArrayList<>();
+        }
+        searchAdapter = new SearchAdapter(dataSet, this, this, this, getContext());
         RecyclerView recyclerView = customView.findViewById(R.id.dialog_search_rv);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(searchAdapter);
 
         ImageButton add = customView.findViewById(R.id.dialog_search_add_btn);
         ImageButton clear = customView.findViewById(R.id.dialog_search_delete_all_btn);
-        ImageButton toggle = customView.findViewById(R.id.dialog_search_toggle_order_btn);
         Button start = customView.findViewById(R.id.dialog_search_ok_btn);
         Button close = customView.findViewById(R.id.dialog_search_close_btn);
 
@@ -125,8 +131,7 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
 
                     // We only want to escape the string, but not the encapsulating "'"
                     // For example 'plot\'s', we only want plot\'s
-                    if (trunc.length() > 3)
-                        trunc = trunc.substring(1, trunc.length() - 2);
+                    if (trunc.length() > 3) trunc = trunc.substring(1, trunc.length() - 2);
 
                     columnsList.add(c);
 
@@ -156,43 +161,28 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
                                 value = prefix + TICK + c + TICK + " and observations.value like " + DatabaseUtils.sqlEscapeString("%" + t + "%") + "";
                             break;
 
-                        // 3: Does not contain
-                        case R.drawable.ic_tb_does_not_contain:
-                            if (before)
-                                value = prefix + TICK + c + TICK + " not like " + DatabaseUtils.sqlEscapeString("%" + t + "%") + "";
-                            else
-                                value = prefix + TICK + c + TICK + " and observations.value not like " + DatabaseUtils.sqlEscapeString("%" + t + "%") + "";
-                            break;
 
-                        // 4: More than
+                        // 3: More than
                         case R.drawable.ic_tb_greater_than:
-                            if (before)
-                                value = prefix + TICK + c + TICK + " > " + trunc;
-                            else
-                                value = prefix + TICK + c + TICK + " and value > " + trunc;
+                            if (before) value = prefix + TICK + c + TICK + " > " + trunc;
+                            else value = prefix + TICK + c + TICK + " and value > " + trunc;
                             break;
 
-                        // 5: less than
+                        // 4: less than
                         case R.drawable.ic_tb_less_than:
-                            if (before)
-                                value = prefix + TICK + c + TICK + " < " + trunc;
-                            else
-                                value = prefix + TICK + c + TICK + " and value < " + trunc;
+                            if (before) value = prefix + TICK + c + TICK + " < " + trunc;
+                            else value = prefix + TICK + c + TICK + " and value < " + trunc;
                             break;
 
                     }
 
-                    if (i == dataSet.size() - 1)
-                        sql += "and " + value + " ";
-                    else
-                        sql += "and " + value + " ";
+                    if (i == dataSet.size() - 1) sql += "and " + value + " ";
+                    else sql += "and " + value + " ";
 
                 }
 
-                if (threeTables)
-                    sql = sql2 + sql;
-                else
-                    sql = sql1 + sql;
+                if (threeTables) sql = sql2 + sql;
+                else sql = sql1 + sql;
 
                 final SearchData[] data = originActivity.getDatabase().getRangeBySql(sql);
                 ObservationModel[] observations = originActivity.getDatabase().getAllObservations();
@@ -214,9 +204,7 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
                 AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity(), R.style.AppAlertDialog);
 
                 View layout = getLayoutInflater().inflate(R.layout.dialog_search_results, null);
-                builder1.setTitle(R.string.search_results_dialog_title)
-                        .setCancelable(true)
-                        .setView(layout);
+                builder1.setTitle(R.string.search_results_dialog_title).setCancelable(true).setView(layout);
 
                 final AlertDialog dialog = builder1.create();
 
@@ -248,6 +236,10 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
                 closeBtn.setTransformationMethod(null);
 
                 myList.setOnItemClickListener((arg012, arg1, position, arg3) -> {
+
+                    // Save the dataset so that it will be loaded when the search dialog is opened again
+                    setSavedDataSet(dataSet);
+
                     // When you click on an item, send the data back to the main screen
                     CollectActivity.searchUnique = data[position].unique;
                     CollectActivity.searchRange = data[position].range;
@@ -285,15 +277,21 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
             searchAdapter.notifyDataSetChanged();
         });
 
-        toggle.setOnClickListener(arg0 -> {
-            //TODO
-        });
 
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM));
         return dialog;
     }
 
+    public static List<SearchDialogDataModel> getSavedDataSet() {
+        isSaved = false;
+        return savedDataSet;
+    }
+
+    public static void setSavedDataSet(List<SearchDialogDataModel> dataSet) {
+        isSaved = true;
+        savedDataSet = dataSet;
+    }
 
     public void createSearchAttributeChooserDialog() {
         SearchAtrributeChooserDialog sacd = new SearchAtrributeChooserDialog(originActivity, this);
@@ -315,5 +313,13 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
     @Override
     public void onEditTextChanged(int pos, String editText) {
         dataSet.get(pos).setEditText(editText);
+    }
+
+    @Override
+    public void onDeleteClicked(int pos) {
+        if (pos >= 0 && pos < dataSet.size()) {
+            dataSet.remove(pos);
+            searchAdapter.notifyItemRemoved(pos);
+        }
     }
 }
