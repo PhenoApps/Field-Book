@@ -16,6 +16,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.OpenableColumns;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -269,12 +272,9 @@ public class FieldEditorActivity extends ThemedActivity
                     mode.finish();
                     return true;
                 case R.id.menu_delete:
-//                    List<Integer> selectedItemPositions = mAdapter.getSelectedItems();
-//                    for (int position : selectedItemPositions) {
-//                        mAdapter.removeItem(position);
-//                    }
-                    Toast.makeText(getApplicationContext(), "Batch delete not yet implemented", Toast.LENGTH_SHORT).show();
-                    mode.finish();
+                    createDeleteItemAlertDialog().show();
+//                    Toast.makeText(getApplicationContext(), "Batch delete not yet implemented", Toast.LENGTH_SHORT).show();
+//                    mode.finish();
                     return true;
                 default:
                     return false;
@@ -287,6 +287,66 @@ public class FieldEditorActivity extends ThemedActivity
             actionMode = null;
         }
     };
+
+    private AlertDialog createDeleteItemAlertDialog() {
+        String fieldNames = getSelectedFieldNames();
+        int itemCount = mAdapter.getSelectedItemCount();
+
+        String message = getResources().getQuantityString(R.plurals.fields_delete_confirmation, itemCount, fieldNames);
+        Spanned formattedMessage;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            formattedMessage = Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY);
+        } else {
+            formattedMessage = Html.fromHtml(message);
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+        builder.setTitle(getString(R.string.fields_delete_study));
+        builder.setMessage(formattedMessage);
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deleteSelectedItems();
+            }
+        });
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        return builder.create();
+    }
+
+    private String getSelectedFieldNames() {
+        List<Integer> selectedItemPositions = mAdapter.getSelectedItems();
+        List<String> fieldNames = new ArrayList<>();
+
+        for (int position : selectedItemPositions) {
+            FieldObject field = fieldList.get(position);
+            fieldNames.add("<b>" + field.getExp_name() + "</b>");
+        }
+
+        return TextUtils.join(", ", fieldNames);
+    }
+
+    private void deleteSelectedItems() {
+        List<Integer> selectedItemPositions = new ArrayList<>(mAdapter.getSelectedItems());
+        Collections.sort(selectedItemPositions, Collections.reverseOrder());
+
+        for (int position : selectedItemPositions) {
+            FieldObject field = fieldList.get(position);
+            database.deleteField(field.getExp_id());
+            fieldList.remove(position);
+        }
+
+        mAdapter.notifyDataSetChanged();
+        mAdapter.clearSelections();
+
+        if (actionMode != null) {
+            actionMode.finish();
+        }
+    }
 
     private void showFileDialog() {
         LayoutInflater inflater = this.getLayoutInflater();
