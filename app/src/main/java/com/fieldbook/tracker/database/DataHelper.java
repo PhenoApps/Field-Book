@@ -174,7 +174,7 @@ public class DataHelper {
      * Helper function to convert array to csv format
      */
     private static String convertToCommaDelimited(String[] list) {
-        StringBuilder ret = new StringBuilder("");
+        StringBuilder ret = new StringBuilder();
         for (int i = 0; list != null && i < list.length; i++) {
             ret.append(list[i]);
             if (i < list.length - 1) {
@@ -1532,7 +1532,7 @@ public class DataHelper {
         int count = 0;
 
         for (Integer i : result) {
-            data[count++] = (int) i;
+            data[count++] = i;
         }
 
         return data;
@@ -2071,7 +2071,7 @@ public class DataHelper {
 
         open();
 
-        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getTrait(),
+        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
                 trait.getDetails(), trait.getCategories());
     }
@@ -2647,6 +2647,13 @@ public class DataHelper {
         return ObservationDao.Companion.getAll();
     }
 
+    public ObservationModel[] getAllObservationsOfVariable(String traitDbId) {
+
+        open();
+
+        return ObservationDao.Companion.getAllOfTrait(traitDbId);
+    }
+
     public ObservationModel[] getAllObservations(SQLiteDatabase db) {
 
         return ObservationDao.Companion.getAll(db);
@@ -2766,7 +2773,7 @@ public class DataHelper {
                     if (traitName == null || format == null) continue;
 
                     o.setId(cursor.getString(0));
-                    o.setTrait(traitName);
+                    o.setName(traitName);
                     o.setFormat(format);
                     o.setDefaultValue(cursor.getString(3));
                     o.setMinimum(cursor.getString(4));

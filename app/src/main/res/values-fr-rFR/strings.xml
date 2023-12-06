@@ -102,7 +102,7 @@
     <string name="traits_format_labelprint">Imprimer l\'étiquette Zébra</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">ajouter un caractère</string>
-    <string name="traits_create_trait">caractère</string>
+    <string name="traits_create_name">caractère</string>
     <string name="traits_create_format">format</string>
     <string name="traits_create_value_default">défaut</string>
     <string name="traits_create_value_minimum">minimum</string>
