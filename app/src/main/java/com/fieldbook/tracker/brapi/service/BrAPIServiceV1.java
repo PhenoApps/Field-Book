@@ -186,7 +186,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         request.setDescription(image.getDescription());
         request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
         request.setFileName(image.getImageFileName());
-        request.setFileSize((int) image.getImageFileSize());
+        request.setFileSize(image.getImageFileSize());
         request.setHeight(image.getImageHeight());
         request.setLocation(image.getImageLocation());
         request.setImageName(image.getImageName());
@@ -897,11 +897,11 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
 
             // Get the synonyms for easier reading. Set it as the trait name.
             String synonym = var.getSynonyms().size() > 0 ? var.getSynonyms().get(0) : null;
-            trait.setTrait(getPrioritizedValue(synonym, var.getObservationVariableName() ,var.getName())); //This will default to the Observation Variable Name if available.
+            trait.setName(getPrioritizedValue(synonym, var.getObservationVariableName(), var.getName())); //This will default to the Observation Variable Name if available.
 
             //v5.1.0 bugfix branch update, getPrioritizedValue can return null, trait name should never be null
             // Skip the trait if there brapi trait field isn't present
-            if (var.getTrait() == null || trait.getTrait() == null) {
+            if (var.getTrait() == null || trait.getName() == null) {
                 variablesMissingTrait += 1;
                 continue;
             }
@@ -989,7 +989,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         for (int j = 0; j < categories.size(); ++j) {
             JSONObject valueLabel = new JSONObject();
             //in the case where there are multiple labels, accept the last one
-            String parts[] = categories.get(j).split("=");
+            String[] parts = categories.get(j).split("=");
             valueLabel.put("value", parts[0]);
             valueLabel.put("label", parts[parts.length-1]);
             cats.put(valueLabel);
@@ -1102,7 +1102,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
 
         String observationLevel = "Plot";
 
-        if(selectedObservationLevel.getObservationLevelName().toLowerCase().equals("plant")) {
+        if (selectedObservationLevel.getObservationLevelName().equalsIgnoreCase("plant")) {
             observationLevel = "Plant";
         }
 

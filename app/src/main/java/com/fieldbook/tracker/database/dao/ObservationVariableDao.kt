@@ -59,7 +59,7 @@ class ObservationVariableDao {
         private fun Map<String, Any?>.toTraitObject() = if (this.isEmpty()) {null} else { TraitObject().also {
 
             it.id = this[ObservationVariable.PK].toString()
-            it.trait = this["observation_variable_name"] as? String ?: ""
+            it.name = this["observation_variable_name"] as? String ?: ""
             it.format = this["observation_variable_field_book_format"] as? String ?: ""
             it.defaultValue = this["default_value"].toString()
             it.details = this["observation_variable_details"].toString()
@@ -188,7 +188,7 @@ class ObservationVariableDao {
                 traits.forEach { trait ->
                     cursor.addRow(requiredFields.map {
                         when (it) {
-                            "trait" -> trait.trait
+                            "trait" -> trait.name
                             "format" -> trait.format
                             "defaultValue" -> trait.defaultValue
                             "minimum" -> trait.minimum
@@ -210,7 +210,7 @@ class ObservationVariableDao {
 
                 TraitObject().apply {
 
-                    trait = (it["observation_variable_name"] as? String ?: "")
+                    name = (it["observation_variable_name"] as? String ?: "")
                     format = it["observation_variable_field_book_format"] as? String ?: ""
                     defaultValue = it["default_value"] as? String ?: ""
                     details = it["observation_variable_details"] as? String ?: ""
@@ -259,21 +259,22 @@ class ObservationVariableDao {
         //TODO missing obs. vars. for min/max/categories
         fun insertTraits(t: TraitObject) = withDatabase { db ->
 
-            if (getTraitByName(t.trait) != null) -1
+            if (getTraitByName(t.name) != null) -1
             else {
 
-                val varRowId = db.insert(ObservationVariable.tableName, null,
-                        ContentValues().apply {
+                val varRowId = db.insert(
+                    ObservationVariable.tableName, null,
+                    ContentValues().apply {
 //                            put(PK, t.id)
-                            put("external_db_id", t.externalDbId)
-                            put("trait_data_source", t.traitDataSource)
-                            put("observation_variable_name", t.trait)
-                            put("observation_variable_details", t.details)
-                            put("observation_variable_field_book_format", t.format)
-                            put("default_value", t.defaultValue)
-                            put("visible", t.visible.toString())
-                            put("position", t.realPosition)
-                            put("additional_info", t.additionalInfo)
+                        put("external_db_id", t.externalDbId)
+                        put("trait_data_source", t.traitDataSource)
+                        put("observation_variable_name", t.name)
+                        put("observation_variable_details", t.details)
+                        put("observation_variable_field_book_format", t.format)
+                        put("default_value", t.defaultValue)
+                        put("visible", t.visible.toString())
+                        put("position", t.realPosition)
+                        put("additional_info", t.additionalInfo)
                         })
 
                 ObservationVariableValueDao.insert(

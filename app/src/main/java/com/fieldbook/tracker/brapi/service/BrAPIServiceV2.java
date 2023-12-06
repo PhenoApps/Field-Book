@@ -73,7 +73,6 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -177,7 +176,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             };
 
             BrAPIImage request = mapImage(image);
-            imagesApi.imagesPostAsync(Arrays.asList(request), callback);
+            imagesApi.imagesPostAsync(Collections.singletonList(request), callback);
 
         } catch (ApiException error) {
             failFunction.apply(error.getCode());
@@ -209,7 +208,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         request.setDescription(image.getDescription());
         request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
         request.setFileName(image.getImageFileName());
-        if (image.getImageFileSize() != null) request.setFileSize((int) image.getImageFileSize());
+        if (image.getImageFileSize() != null) request.setFileSize(image.getImageFileSize());
         if (image.getImageHeight() != null) request.setHeight(image.getImageHeight());
         if (image.getImageWidth() != null) request.setWidth(image.getImageWidth());
         request.setImageName(image.getImageName());
@@ -962,11 +961,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             // Get the synonyms for easier reading. Set it as the trait name.
             String synonym = var.getSynonyms().size() > 0 ? var.getSynonyms().get(0) : null;
-            trait.setTrait(getPrioritizedValue(synonym, var.getObservationVariableName())); //This will default to the Observation Variable Name if available.
+            trait.setName(getPrioritizedValue(synonym, var.getObservationVariableName())); //This will default to the Observation Variable Name if available.
 
             //v5.1.0 bugfix branch update, getPrioritizedValue can return null, trait name should never be null
             // Skip the trait if there brapi trait field isn't present
-            if (var.getTrait() == null || trait.getTrait() == null) {
+            if (var.getTrait() == null || trait.getName() == null) {
                 variablesMissingTrait += 1;
                 continue;
             }

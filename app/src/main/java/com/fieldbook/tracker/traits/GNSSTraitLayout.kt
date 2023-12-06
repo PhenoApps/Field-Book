@@ -784,11 +784,12 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-        val observation = ObservationDao.getObservation(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
+        val observation =
+            ObservationDao.getObservation(studyDbId, currentRange.plot_id, currentTrait.name, rep)
 
         if (observation != null) {
 
-            ObservationDao.deleteTrait(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
+            ObservationDao.deleteTrait(studyDbId, currentRange.plot_id, currentTrait.name, rep)
 
             val units = controller.getDatabase().getAllObservationUnits(studyDbId.toInt())
                 .filter { it.observation_unit_db_id == currentRange.plot_id }

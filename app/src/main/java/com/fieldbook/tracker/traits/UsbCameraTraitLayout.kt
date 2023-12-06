@@ -418,7 +418,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     private fun saveBitmapToStorage() {
 
         //get current trait's trait name, use it as a plot_media directory
-        currentTrait.trait?.let { traitName ->
+        currentTrait.name?.let { traitName ->
 
             val traitDbId = currentTrait.id
 
@@ -498,7 +498,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     private fun loadAdapterItems() {
 
         //get current trait's trait name, use it as a plot_media directory
-        currentTrait?.trait?.let { traitName ->
+        currentTrait?.name?.let { traitName ->
 
             DocumentTreeUtil.getThumbnailsDir(context, traitName)?.let { thumbnailDir ->
 
@@ -506,7 +506,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 val images = DocumentTreeUtil.getPlotMedia(thumbnailDir, plot, ".png")
 
-                with (context.contentResolver) {
+                with(context.contentResolver) {
 
                     (recyclerView?.adapter as? ImageAdapter)?.submitList(images.map {
                         openInputStream(it.uri).use { input ->
@@ -523,7 +523,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
         //get current trait's trait name, use it as a plot_media directory
-        currentTrait?.trait?.let { traitName ->
+        currentTrait?.name?.let { traitName ->
 
             val traitDbId = currentTrait.id
 
@@ -533,14 +533,24 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
 
-                    highResImages.firstOrNull { it.name == (DocumentFile.fromSingleUri(context, Uri.parse(model.uri))?.name ?: String()) }?.let { image ->
+                    highResImages.firstOrNull {
+                        it.name == (DocumentFile.fromSingleUri(
+                            context,
+                            Uri.parse(model.uri)
+                        )?.name ?: String())
+                    }?.let { image ->
 
                         try {
 
                             image.delete()
                             DocumentFile.fromSingleUri(context, Uri.parse(model.uri))?.delete()
 
-                            ObservationDao.deleteTraitByValue(studyId, plot, traitDbId, image.uri.toString())
+                            ObservationDao.deleteTraitByValue(
+                                studyId,
+                                plot,
+                                traitDbId,
+                                image.uri.toString()
+                            )
 
                             loadAdapterItems()
 
@@ -560,7 +570,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         if (!isLocked) {
 
             //get current trait's trait name, use it as a plot_media directory
-            currentTrait?.trait?.let { traitName ->
+            currentTrait?.name?.let { traitName ->
 
                 DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
 
@@ -568,7 +578,12 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                     DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
 
-                        highResImages.firstOrNull { it.name == (DocumentFile.fromSingleUri(context, Uri.parse(model.uri))?.name ?: String()) }?.let { image ->
+                        highResImages.firstOrNull {
+                            it.name == (DocumentFile.fromSingleUri(
+                                context,
+                                Uri.parse(model.uri)
+                            )?.name ?: String())
+                        }?.let { image ->
 
                             activity?.startActivity(Intent(Intent.ACTION_VIEW, image.uri).also {
                                 it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

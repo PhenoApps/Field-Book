@@ -44,10 +44,25 @@ class ObservationDao {
 
         } ?: emptyArray()
 
+        fun getAllOfTrait(traitDbId: String): Array<ObservationModel> = withDatabase { db ->
+
+            db.query(
+                Observation.tableName,
+                where = "${ObservationVariable.FK} = ?",
+                whereArgs = arrayOf(traitDbId)
+            )
+                .toTable()
+                .map { ObservationModel(it) }
+                .toTypedArray()
+
+        } ?: emptyArray()
+
         fun getAll(studyId: String, obsUnit: String): Array<ObservationModel> = withDatabase { db ->
 
-            db.query(Observation.tableName, where = "${Study.FK} = ? AND ${ObservationUnit.FK} = ?",
-                whereArgs = arrayOf(studyId, obsUnit))
+            db.query(
+                Observation.tableName, where = "${Study.FK} = ? AND ${ObservationUnit.FK} = ?",
+                whereArgs = arrayOf(studyId, obsUnit)
+            )
                 .toTable()
                 .map { ObservationModel(it) }
                 .toTypedArray()
@@ -111,16 +126,21 @@ class ObservationDao {
                 
         """.trimIndent(), arrayOf(hostUrl)).toTable().mapNotNull { row ->
                 if (getStringVal(row, "observation_variable_name") != null)
-                    FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "observation_variable_name"), missingPhoto).apply {
-                    rep = getStringVal(row, "rep")
-                    unitDbId = getStringVal(row, "uniqueName")
-                    setDescriptiveOntologyTerms(listOf(getStringVal(row, "external_db_id")))
-                    setDescription(getStringVal(row, "observation_variable_details"))
-                    setTimestamp(getStringVal(row, "observation_time_stamp"))
-                    fieldBookDbId = getStringVal(row, "id")
-                    dbId = getStringVal(row, "observation_db_id")
-                    setLastSyncedTime(getStringVal(row, "last_synced_time"))
-                } else null
+                    FieldBookImage(
+                        ctx,
+                        getStringVal(row, "value"),
+                        getStringVal(row, "observation_variable_name"),
+                        missingPhoto
+                    ).apply {
+                        rep = getStringVal(row, "rep")
+                        unitDbId = getStringVal(row, "uniqueName")
+                        descriptiveOntologyTerms = listOf(getStringVal(row, "external_db_id"))
+                        description = getStringVal(row, "observation_variable_details")
+                        setTimestamp(getStringVal(row, "observation_time_stamp"))
+                        fieldBookDbId = getStringVal(row, "id")
+                        dbId = getStringVal(row, "observation_db_id")
+                        setLastSyncedTime(getStringVal(row, "last_synced_time"))
+                    } else null
             }
 
         } ?: emptyList()
@@ -275,20 +295,20 @@ class ObservationDao {
             }
 
             db.insert(Observation.tableName, null, contentValuesOf(
-                    "observation_variable_name" to traitObj?.trait,
-                    "observation_db_id" to observationDbId,
-                    "observation_variable_field_book_format" to traitObj?.format,
-                    "value" to userValue,
-                    "observation_time_stamp" to timestamp,
-                    "collector" to person,
-                    "geoCoordinates" to location,
-                    "last_synced_time" to lastSyncedTime?.format(internalTimeFormatter),
-                    "rep" to rep,
-                    "notes" to notes,
-                    Study.FK to studyId.toInt(),
-                    // "additional_info" to model.additional_info,
-                    ObservationUnit.FK to rid,
-                    ObservationVariable.FK to internalTraitId
+                "observation_variable_name" to traitObj?.name,
+                "observation_db_id" to observationDbId,
+                "observation_variable_field_book_format" to traitObj?.format,
+                "value" to userValue,
+                "observation_time_stamp" to timestamp,
+                "collector" to person,
+                "geoCoordinates" to location,
+                "last_synced_time" to lastSyncedTime?.format(internalTimeFormatter),
+                "rep" to rep,
+                "notes" to notes,
+                Study.FK to studyId.toInt(),
+                // "additional_info" to model.additional_info,
+                ObservationUnit.FK to rid,
+                ObservationVariable.FK to internalTraitId
             ))
 
         } ?: -1L
