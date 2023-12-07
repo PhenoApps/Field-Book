@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="128dp"
     android:layout_height="128dp"
+    android:layout_margin="8dp"
     android:orientation="vertical">
 
     <ImageButton
@@ -19,12 +20,12 @@
         tools:src="@drawable/ic_trait_numeric" />
 
     <TextView
+        style="@style/TextAppearance.MaterialComponents.Subtitle2"
         android:id="@+id/list_item_traits_grid_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:ellipsize="marquee"
-        android:padding="8dp"
         android:singleLine="true"
         tools:text="@string/traits_format_disease_rating" />
 
