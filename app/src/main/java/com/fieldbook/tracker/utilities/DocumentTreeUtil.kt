@@ -19,6 +19,10 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
 
         const val TAG = "DocumentTreeUtil"
 
+        const val FIELD_AUDIO_MEDIA = "field_audio"
+        const val FIELD_GNSS_LOG = "field_gnss_log"
+        const val FIELD_GNSS_LOG_FILE_NAME = "field_gnss.csv"
+
         /**
          * Gets a specific directory for the currently chosen plot.
          * @param traitName: trait name of the folder, also photos and audio

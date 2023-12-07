@@ -160,6 +160,19 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     }
 
     private val receiver = object : GNSSResponseReceiver() {
+
+        override fun onNmeaMessageReceived(nmea: String?) {
+
+            (mActivity as? CollectActivity)?.let { act ->
+
+                nmea?.let { message ->
+
+                    act.logNmeaMessage(message)
+
+                }
+            }
+        }
+
         override fun onGNSSParsed(parser: NmeaParser) {
 
             currentUtc = parser.utc

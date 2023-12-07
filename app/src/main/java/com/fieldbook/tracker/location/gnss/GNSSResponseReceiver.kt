@@ -16,18 +16,24 @@ abstract class GNSSResponseReceiver : BroadcastReceiver() {
 
         const val MESSAGE_STRING_EXTRA_KEY = "org.phenoapps.tracker.fieldbook.gnss.GNSS_OUTPUT"
 
-        const val ACTION_BROADCAST_GNSS_ROVER = "org.phenoapps.tracker.fieldbook.gnss.ACTION_BROADCAST_GNSS_ROVER"
+        const val ACTION_BROADCAST_GNSS_ROVER =
+            "org.phenoapps.tracker.fieldbook.gnss.ACTION_BROADCAST_GNSS_ROVER"
 
-        const val ACTION_BROADCAST_GNSS_TRAIT = "org.phenoapps.tracker.fieldbook.gnss.ACTION_BROADCAST_GNSS_TRAIT"
+        const val ACTION_BROADCAST_GNSS_TRAIT =
+            "org.phenoapps.tracker.fieldbook.gnss.ACTION_BROADCAST_GNSS_TRAIT"
     }
 
     abstract fun onGNSSParsed(parser: NmeaParser)
+
+    open fun onNmeaMessageReceived(nmea: String?) {}
 
     override fun onReceive(context: Context, intent: Intent) {
 
         if (intent.hasExtra(MESSAGE_STRING_EXTRA_KEY)) {
 
             val raw = intent.getStringExtra(MESSAGE_STRING_EXTRA_KEY)
+
+            onNmeaMessageReceived(raw)
 
             try {
 
