@@ -62,16 +62,15 @@ import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
-import com.fieldbook.tracker.utilities.FieldAudioHelper;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
-import com.fieldbook.tracker.utilities.JsonUtil;
-import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -1467,8 +1466,9 @@ public class CollectActivity extends ThemedActivity
 
             dialogMultiMeasureDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                     .setTitle(R.string.dialog_multi_measure_delete_title)
-                    .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {})
-                    .setPositiveButton(R.string.dialog_multi_measure_delete, (d, which) -> {
+                    .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {
+                    })
+                    .setNegativeButton(R.string.dialog_multi_measure_delete, (d, which) -> {
 
                         List<ObservationModel> deleteItems = new ArrayList<>();
                         int checkSize = checked.length;
@@ -1484,7 +1484,7 @@ public class CollectActivity extends ThemedActivity
 
                         }
                     })
-                    .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                    .setPositiveButton(android.R.string.cancel, (d, which) -> {
                         d.dismiss();
                     })
                     .setNeutralButton(R.string.dialog_multi_measure_select_all, (d, which) -> {
@@ -1495,10 +1495,11 @@ public class CollectActivity extends ThemedActivity
             dialogMultiMeasureDelete.setOnShowListener((d) -> {
                 AlertDialog ad = (AlertDialog) d;
                 ad.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener((v) -> {
-                    Arrays.fill(checked, true);
+                    boolean first = checked[0];
+                    Arrays.fill(checked, !first);
                     ListView lv = ad.getListView();
                     for (int i = 0; i < checked.length; i++) {
-                        lv.setItemChecked(i, true);
+                        lv.setItemChecked(i, checked[i]);
                     }
                 });
             });
