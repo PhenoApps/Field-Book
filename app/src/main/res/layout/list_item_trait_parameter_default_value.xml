@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         app:endIconCheckable="true"
         app:endIconMode="custom"
-        app:errorEnabled="true">
+        app:errorEnabled="false">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/list_item_trait_parameter_default_value_et"

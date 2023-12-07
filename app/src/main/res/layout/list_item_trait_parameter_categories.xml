@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             app:endIconDrawable="@android:drawable/ic_notification_clear_all"
             app:endIconMode="clear_text"
-            app:errorEnabled="true"
+            app:errorEnabled="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/list_item_trait_parameter_categories_add_btn"
             app:layout_constraintStart_toStartOf="parent"
