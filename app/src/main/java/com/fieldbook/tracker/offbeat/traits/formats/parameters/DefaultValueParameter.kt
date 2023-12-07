@@ -35,7 +35,7 @@ class DefaultValueParameter(
                 initialDefaultValue?.let { value ->
                     it.setText("$value")
                 }
-                it.setHint(R.string.traits_create_optional)
+                //it.setHint(R.string.traits_create_optional)
             }
 
         init {
