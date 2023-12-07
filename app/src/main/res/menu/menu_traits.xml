@@ -3,7 +3,6 @@
 <!-- Warning / error below for showAsAction should be ignored until Toolbar is replaced with AppCompatToolbar-->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
     <item
@@ -31,10 +30,5 @@
         android:icon="@drawable/ic_tb_import_export"
         android:showAsAction="ifRoom"
         android:title="@string/traits_toolbar_import_export" />
-    <item
-        android:id="@+id/addTrait"
-        android:icon="@drawable/ic_tb_add_circle"
-        android:showAsAction="always"
-        android:title="@string/traits_toolbar_add_trait" />
 </menu>
 

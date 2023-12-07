@@ -90,7 +90,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
         uris = arrayListOf()
 
-        currentTrait.trait?.let { traitName ->
+        currentTrait.name?.let { traitName ->
 
             try {
 
@@ -154,7 +154,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
         scope.launch {
 
-            currentTrait.trait?.let { traitName ->
+            currentTrait.name?.let { traitName ->
 
                 val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
 
@@ -339,7 +339,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                                 updateTraitAllowDuplicates(
                                     currentRange.plot_id,
                                     currentTrait.id,
-                                    currentTrait.trait,
+                                    currentTrait.name,
                                     "photo",
                                     m.uri,
                                     "NA",

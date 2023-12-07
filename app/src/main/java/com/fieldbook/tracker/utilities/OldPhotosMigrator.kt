@@ -45,11 +45,11 @@ class OldPhotosMigrator {
 
                         val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-                        val traitPhotos = database.getAllObservations(expId).filter { it.observation_variable_name == t.trait }
+                        val traitPhotos = database.getAllObservations(expId).filter { it.observation_variable_name == t.name }
 
-                        if (t.trait != "photos") { //edge case where trait name is actually photos
+                        if (t.name != "photos") { //edge case where trait name is actually photos
 
-                            val sanitizedTraitName = FileUtil.sanitizeFileName(t.trait)
+                            val sanitizedTraitName = FileUtil.sanitizeFileName(t.name)
                             val photoDir =
                                 DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)
                             val oldPhotos =
@@ -60,7 +60,7 @@ class OldPhotosMigrator {
                                 val repeatedValue =
                                     database.getRep(expId, photo.observation_unit_id, t.id)
                                 val generatedName =
-                                    photo.observation_unit_id + "_" + t.trait + "_" + repeatedValue + "_" + timeStamp.format(
+                                    photo.observation_unit_id + "_" + t.name + "_" + repeatedValue + "_" + timeStamp.format(
                                         Calendar.getInstance().time
                                     ) + ".jpg"
 

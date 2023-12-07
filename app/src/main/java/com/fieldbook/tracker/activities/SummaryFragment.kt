@@ -161,7 +161,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
             try {
 
-                (attributes + traits.map { it.trait }).filter { if (filter == null) true else it in filter }
+                (attributes + traits.map { it.name }).filter { if (filter == null) true else it in filter }
                     .forEach { key ->
 
                         val index = data.getColumnIndex(key)
@@ -200,7 +200,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
                             SummaryAdapter.SummaryListModel(
                                 key,
                                 value ?: "",
-                                key in traits.map { it.trait }
+                                key in traits.map { it.name }
                             )
                         )
 
@@ -241,7 +241,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
             var filter: Set<String>? = getPersistedFilter(ctx)
 
-            val keys = attributes + traits.map { it.trait }
+            val keys = attributes + traits.map { it.name }
 
             //initialize which attributes are checked, if no filter is saved then check all
             val checked = keys.map {

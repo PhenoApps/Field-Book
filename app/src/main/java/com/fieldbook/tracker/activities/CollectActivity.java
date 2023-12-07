@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities;
 
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -429,7 +430,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public String getTraitName() {
-        return getCurrentTrait().getTrait();
+        return getCurrentTrait().getName();
     }
 
     public String getTraitDbId() {
@@ -583,7 +584,7 @@ public class CollectActivity extends ThemedActivity
 
         if (strValue.equals("NA")) return true;
 
-        final String trait = currentTrait.getTrait();
+        final String trait = currentTrait.getName();
 
         if (traitBox.existsNewTraits()
                 && traitBox.getCurrentTrait() != null
@@ -902,7 +903,7 @@ public class CollectActivity extends ThemedActivity
 
         //save the last used trait
         if (traitBox.getCurrentTrait() != null)
-            ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getTrait()).apply();
+            ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
 
         geoNavHelper.stopAverageHandler();
 
@@ -1081,7 +1082,7 @@ public class CollectActivity extends ThemedActivity
             return;
         }
 
-        traitBox.update(trait.getTrait(), value);
+        traitBox.update(trait.getName(), value);
 
         String studyId = getStudyId();
         String obsUnit = getObservationUnit();
@@ -1109,7 +1110,7 @@ public class CollectActivity extends ThemedActivity
             boolean pass = false;
 
             if (trait.getFormat().equals("multicat")
-                    || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
+                || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
 
                 if (value.equals("[]")) {
 
@@ -1471,8 +1472,9 @@ public class CollectActivity extends ThemedActivity
 
             dialogMultiMeasureDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                     .setTitle(R.string.dialog_multi_measure_delete_title)
-                    .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {})
-                    .setPositiveButton(R.string.dialog_multi_measure_delete, (d, which) -> {
+                    .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {
+                    })
+                    .setNegativeButton(R.string.dialog_multi_measure_delete, (d, which) -> {
 
                         List<ObservationModel> deleteItems = new ArrayList<>();
                         int checkSize = checked.length;
@@ -1488,7 +1490,7 @@ public class CollectActivity extends ThemedActivity
 
                         }
                     })
-                    .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                    .setPositiveButton(android.R.string.cancel, (d, which) -> {
                         d.dismiss();
                     })
                     .setNeutralButton(R.string.dialog_multi_measure_select_all, (d, which) -> {
@@ -1499,10 +1501,11 @@ public class CollectActivity extends ThemedActivity
             dialogMultiMeasureDelete.setOnShowListener((d) -> {
                 AlertDialog ad = (AlertDialog) d;
                 ad.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener((v) -> {
-                    Arrays.fill(checked, true);
+                    boolean first = checked[0];
+                    Arrays.fill(checked, !first);
                     ListView lv = ad.getListView();
                     for (int i = 0; i < checked.length; i++) {
-                        lv.setItemChecked(i, true);
+                        lv.setItemChecked(i, checked[i]);
                     }
                 });
             });
@@ -1596,7 +1599,7 @@ public class CollectActivity extends ThemedActivity
         }
 
         TraitObject trait = getCurrentTrait();
-        if (trait != null && trait.getTrait() != null) {
+        if (trait != null && trait.getName() != null) {
             traitLayouts.refreshLock(trait.getFormat());
         }
     }
@@ -2336,7 +2339,7 @@ public class CollectActivity extends ThemedActivity
             // Map traits to their names
             List<String> traitNames = new ArrayList<>();
             for (TraitObject traitObject : visibleTraits) {
-                traitNames.add(traitObject.getTrait());
+                traitNames.add(traitObject.getName());
             }
 
             // Combine attributes and trait names
@@ -2350,7 +2353,7 @@ public class CollectActivity extends ThemedActivity
         }
         return new ArrayList<>();
     }
-
+    
     @NonNull
     @Override
     public VibrateUtil getVibrator() {

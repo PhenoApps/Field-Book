@@ -427,7 +427,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     private fun saveBitmapToStorage() {
 
         //get current trait's trait name, use it as a plot_media directory
-        currentTrait.trait?.let { traitName ->
+        currentTrait.name?.let { traitName ->
 
             val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
 
@@ -538,7 +538,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
         //get current trait's trait name, use it as a plot_media directory
-        currentTrait?.trait?.let { traitName ->
+        currentTrait?.name?.let { traitName ->
 
             val plot = currentRange.plot_id
 
@@ -562,17 +562,17 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                                     image.uri.toString()
                                 )
 
-                            loadAdapterItems()
+                                loadAdapterItems()
 
-                        } else {
+                            } else {
 
-                            collectActivity.runOnUiThread {
+                                collectActivity.runOnUiThread {
 
-                                Toast.makeText(context, R.string.photo_failed_to_delete, Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, R.string.photo_failed_to_delete, Toast.LENGTH_SHORT).show()
 
+                                }
                             }
                         }
-                    }
 
                 } catch (e: Exception) {
 

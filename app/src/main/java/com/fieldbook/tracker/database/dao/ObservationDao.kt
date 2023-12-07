@@ -44,10 +44,25 @@ class ObservationDao {
 
         } ?: emptyArray()
 
+        fun getAllOfTrait(traitDbId: String): Array<ObservationModel> = withDatabase { db ->
+
+            db.query(
+                Observation.tableName,
+                where = "${ObservationVariable.FK} = ?",
+                whereArgs = arrayOf(traitDbId)
+            )
+                .toTable()
+                .map { ObservationModel(it) }
+                .toTypedArray()
+
+        } ?: emptyArray()
+
         fun getAll(studyId: String, obsUnit: String): Array<ObservationModel> = withDatabase { db ->
 
-            db.query(Observation.tableName, where = "${Study.FK} = ? AND ${ObservationUnit.FK} = ?",
-                whereArgs = arrayOf(studyId, obsUnit))
+            db.query(
+                Observation.tableName, where = "${Study.FK} = ? AND ${ObservationUnit.FK} = ?",
+                whereArgs = arrayOf(studyId, obsUnit)
+            )
                 .toTable()
                 .map { ObservationModel(it) }
                 .toTypedArray()
@@ -325,7 +340,7 @@ class ObservationDao {
             }
 
             db.insert(Observation.tableName, null, contentValuesOf(
-                "observation_variable_name" to traitObj?.trait,
+                "observation_variable_name" to traitObj?.name,
                 "observation_db_id" to observationDbId,
                 "observation_variable_field_book_format" to traitFormat,
                 "value" to value,
