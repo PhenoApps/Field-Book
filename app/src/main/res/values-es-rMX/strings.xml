@@ -99,8 +99,6 @@
     <string name="traits_format_barcode">Codigo de barras</string>
     <string name="traits_format_labelprint">Impresión de etiqueta Zebra</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Agregar variable</string>
-    <string name="traits_create_name">Variable</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Predeterminado</string>
     <string name="traits_create_value_minimum">Mínimo</string>
