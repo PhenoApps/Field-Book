@@ -41,6 +41,7 @@ open class DefaultNumericParameter<T : Number>(
 
         init {
             numericEt.setHint(R.string.traits_create_optional)
+            super.initialize()
         }
 
         override fun merge(traitObject: TraitObject) = traitObject.apply {

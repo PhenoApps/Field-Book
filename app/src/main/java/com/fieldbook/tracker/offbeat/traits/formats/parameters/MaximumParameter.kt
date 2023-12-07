@@ -36,6 +36,10 @@ open class MaximumParameter<T : Number>(
     ) :
         DefaultNumericParameter<T>.ViewHolder(itemView, maximumValue, allowNegative, isInteger) {
 
+        init {
+            super.initialize()
+        }
+
         override fun merge(traitObject: TraitObject) = traitObject.apply {
             maximum = numericEt.text.toString()
         }
