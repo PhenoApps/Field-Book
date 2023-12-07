@@ -491,9 +491,20 @@ class NewTraitDialog(
 
         if (format == Formats.BRAPI) {
 
-            dismiss()
+            if (initialTraitObject != null) {
 
-            (activity as TraitEditorActivity).startBrapiTraitActivity()
+                Toast.makeText(
+                    context,
+                    R.string.dialog_new_trait_error_cannot_update_to_brapi_trait,
+                    Toast.LENGTH_SHORT
+                ).show()
+
+            } else {
+
+                dismiss()
+
+                (activity as TraitEditorActivity).startBrapiTraitActivity(true)
+            }
 
         } else {
 

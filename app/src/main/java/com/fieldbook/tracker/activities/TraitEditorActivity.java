@@ -7,6 +7,7 @@ import static androidx.recyclerview.widget.ItemTouchHelper.UP;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -87,7 +88,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     public static final String TAG = "TraitEditor";
     public static int REQUEST_CLOUD_FILE_CODE = 5;
     public static int REQUEST_FILE_EXPLORER_CODE = 1;
-
+    public static int REQUEST_CODE_BRAPI_TRAIT_ACTIVITY = 2;
     private RecyclerView traitList;
     public TraitAdapter traitAdapter;
     public static boolean brapiDialogShown = false;
@@ -562,10 +563,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         });
     }
 
-    public void startBrapiTraitActivity() {
+    public void startBrapiTraitActivity(boolean fromTraitCreator) {
         Intent intent = new Intent();
         intent.setClassName(this, BrapiTraitActivity.class.getName());
-        startActivityForResult(intent, 2);
+        startActivityForResult(intent, REQUEST_CODE_BRAPI_TRAIT_ACTIVITY);
     }
 
     private void showFileDialog() {
@@ -780,10 +781,15 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             }
         }
 
-        if (requestCode == 2) {
-            brapiDialogShown = traitAdapter.getInfoDialogShown();
-            if (!brapiDialogShown) {
-                brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, null, true);
+        if (requestCode == REQUEST_CODE_BRAPI_TRAIT_ACTIVITY) {
+
+            if (resultCode == Activity.RESULT_OK) {
+                brapiDialogShown = traitAdapter.getInfoDialogShown();
+                if (!brapiDialogShown) {
+                    brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, null, true);
+                }
+            } else {
+                showTraitDialog(null);
             }
         }
 
