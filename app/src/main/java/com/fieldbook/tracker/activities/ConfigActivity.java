@@ -1062,7 +1062,7 @@ public class ConfigActivity extends ThemedActivity {
             }
 
             for (TraitObject j : exportTrait) {
-                Log.i("Field Book : Traits : ", j.getTrait());
+                Log.i("Field Book : Traits : ", j.getName());
             }
 
             if (exportData.getCount() == 0) {
@@ -1135,7 +1135,7 @@ public class ConfigActivity extends ThemedActivity {
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
                         ArrayList<String> labels = new ArrayList<>(Arrays.asList(newRanges));
-                        for (TraitObject t : exportTrait) labels.add(t.getTrait());
+                        for (TraitObject t : exportTrait) labels.add(t.getName());
 
                         csvWriter.writeTableFormat(labels.toArray(new String[]{}), newRanges.length, traits);
 

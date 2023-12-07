@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities;
 
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -62,16 +63,15 @@ import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
-import com.fieldbook.tracker.utilities.FieldAudioHelper;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
-import com.fieldbook.tracker.utilities.JsonUtil;
-import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -425,7 +425,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public String getTraitName() {
-        return getCurrentTrait().getTrait();
+        return getCurrentTrait().getName();
     }
 
     public String getTraitDbId() {
@@ -579,7 +579,7 @@ public class CollectActivity extends ThemedActivity
 
         if (strValue.equals("NA")) return true;
 
-        final String trait = currentTrait.getTrait();
+        final String trait = currentTrait.getName();
 
         if (traitBox.existsNewTraits()
                 && traitBox.getCurrentTrait() != null
@@ -898,7 +898,7 @@ public class CollectActivity extends ThemedActivity
 
         //save the last used trait
         if (traitBox.getCurrentTrait() != null)
-            ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getTrait()).apply();
+            ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
 
         geoNavHelper.stopAverageHandler();
 
@@ -1077,7 +1077,7 @@ public class CollectActivity extends ThemedActivity
             return;
         }
 
-        traitBox.update(trait.getTrait(), value);
+        traitBox.update(trait.getName(), value);
 
         String studyId = getStudyId();
         String obsUnit = getObservationUnit();
@@ -1105,7 +1105,7 @@ public class CollectActivity extends ThemedActivity
             boolean pass = false;
 
             if (trait.getFormat().equals("multicat")
-                    || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
+                || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
 
                 if (value.equals("[]")) {
 
@@ -1592,7 +1592,7 @@ public class CollectActivity extends ThemedActivity
         }
 
         TraitObject trait = getCurrentTrait();
-        if (trait != null && trait.getTrait() != null) {
+        if (trait != null && trait.getName() != null) {
             traitLayouts.refreshLock(trait.getFormat());
         }
     }
@@ -2332,7 +2332,7 @@ public class CollectActivity extends ThemedActivity
             // Map traits to their names
             List<String> traitNames = new ArrayList<>();
             for (TraitObject traitObject : visibleTraits) {
-                traitNames.add(traitObject.getTrait());
+                traitNames.add(traitObject.getName());
             }
 
             // Combine attributes and trait names
@@ -2346,7 +2346,7 @@ public class CollectActivity extends ThemedActivity
         }
         return new ArrayList<>();
     }
-
+    
     @NonNull
     @Override
     public VibrateUtil getVibrator() {

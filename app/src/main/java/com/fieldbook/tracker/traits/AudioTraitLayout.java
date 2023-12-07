@@ -127,7 +127,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
     @Override
     public void deleteTraitListener() {
         deleteRecording();
-        removeTrait(getCurrentTrait().getTrait());
+        removeTrait(getCurrentTrait().getName());
         super.deleteTraitListener();
         recordingLocation = null;
         mediaPlayer = null;
@@ -254,7 +254,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         private void startRecording() {
             try {
-                removeTrait(getCurrentTrait().getTrait());
+                removeTrait(getCurrentTrait().getName());
                 audioRecordingText.setText("");
                 fieldAudioHelper.startRecording(false);
             } catch (Exception e) {
