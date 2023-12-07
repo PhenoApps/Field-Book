@@ -110,15 +110,16 @@ class NewTraitDialog(
 
     private fun showFormatLayouts() {
 
-        neutralBtn?.visibility = View.INVISIBLE
+        positiveBtn?.visibility = View.INVISIBLE
+        negativeBtn?.visibility = View.INVISIBLE
 
         dialog?.setTitle(context?.getString(R.string.trait_creator_title_layout))
 
         traitFormatsRv.visibility = View.VISIBLE
         parametersSv.visibility = View.GONE
 
-        negativeBtn?.setText(R.string.dialog_cancel)
-        negativeBtn?.setOnClickListener {
+        neutralBtn?.setText(R.string.dialog_cancel)
+        neutralBtn?.setOnClickListener {
             dismiss()
         }
 
@@ -146,7 +147,8 @@ class NewTraitDialog(
 
     private fun showFormatParameters(format: Formats) {
 
-        neutralBtn?.visibility = View.VISIBLE
+        positiveBtn?.visibility = View.VISIBLE
+        negativeBtn?.visibility = View.VISIBLE
 
         traitFormatsRv.visibility = View.GONE
         parametersSv.visibility = View.VISIBLE
@@ -163,6 +165,7 @@ class NewTraitDialog(
 
         if (initialTraitObject == null || !observationsExist) {
 
+            neutralBtn?.setText(R.string.dialog_back)
             neutralBtn?.setOnClickListener {
                 //close keyboard programmatically
                 SoftKeyboardUtil.closeKeyboard(context, traitFormatsRv, 1L)
