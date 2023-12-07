@@ -355,7 +355,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         switch (item.getItemId()) {
             case R.id.help:
                 TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(traitsTapTargetMenu(R.id.addTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description), 60)
+                        .targets(traitsTapTargetMenu(R.id.newTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description), 60)
                                 //Todo add overflow menu action
                         );
 
@@ -377,10 +377,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
             case R.id.importexport:
                 importExportDialog();
-                break;
-
-            case R.id.addTrait:
-                showTraitDialog(null);
                 break;
 
             case R.id.toggleTrait:
