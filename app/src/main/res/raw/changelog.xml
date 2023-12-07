@@ -1,6 +1,13 @@
 <changelog>
 
     <release
+        date="2023-12-08"
+        versionCode="50600"
+        versionName="v5.6">
+        <new>Updated trait creator</new>
+    </release>
+
+    <release
         date="2023-12-01"
         versionCode="50525"
         versionName="v5.5.25">

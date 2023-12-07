@@ -229,6 +229,24 @@
     <string name="list_item_category_delete_content_description">Delete the category.</string>
     <string name="dialog_new_trait_add_category_content_description">Add new category.</string>
 
+    <string name="list_item_traits_grid_content_description">Toggle selection</string>
+    <string name="dialog_trait_parameters_title">Trait Parameters</string>
+    <string name="traits_create_warning_percent_magnitude_relation">Magnitude relation error</string>
+    <string name="trait_parameter_default_value_number_format_error">Must be a number</string>
+    <string name="traits_create_unknown_error">Unknown error occurred: %s</string>
+    <string name="trait_creator_parameter_warning_infinite">Number cannot be infinite</string>
+    <string name="trait_creator_parameter_warning_nan">Number cannot be NaN</string>
+    <string name="trait_creator_parameter_warning_negative">Number must not be negative</string>
+    <string name="trait_creator_parameter_warning_too_big">Number is too big</string>
+    <string name="trait_creator_parameter_warning_too_small">Number is too small</string>
+    <string name="list_item_trait_parameter_categories_value_hint">Type a category name to add</string>
+    <string name="list_item_trait_parameter_name_hint">Enter trait name</string>
+    <string name="dialog_new_trait_observations_exist_error">Observations already exist for this trait. Only the following parameters can be edited.</string>
+    <string name="dialog_new_trait_error_must_select_a_layout">You must select a layout.</string>
+    <string name="trait_creator_parameter_warning_integer_required">Integer required.</string>
+    <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Traits cannot be updated to BrAPI traits.</string>
+    <string name="required">Required</string>
+    <string name="traits_create_warning_percent_value_required">Value required</string>
 
 
 
@@ -996,24 +1014,5 @@
     <string name="tutorial_traits_format_description">Different trait formats are indicated with different icons.</string>
     <string name="tutorial_traits_visibility_title">Trait Visibility</string>
     <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
-
-    <string name="list_item_traits_grid_content_description">Toggle selection</string>
-    <string name="dialog_trait_parameters_title">Trait Parameters</string>
-    <string name="traits_create_warning_percent_magnitude_relation">Magnitude relation error</string>
-    <string name="trait_parameter_default_value_number_format_error">Must be a number</string>
-    <string name="traits_create_unknown_error">Unknown error occurred: %s</string>
-    <string name="trait_creator_parameter_warning_infinite">Number cannot be infinite</string>
-    <string name="trait_creator_parameter_warning_nan">Number cannot be NaN</string>
-    <string name="trait_creator_parameter_warning_negative">Number must not be negative</string>
-    <string name="trait_creator_parameter_warning_too_big">Number is too big</string>
-    <string name="trait_creator_parameter_warning_too_small">Number is too small</string>
-    <string name="list_item_trait_parameter_categories_value_hint">Type a category name to add</string>
-    <string name="list_item_trait_parameter_name_hint">Enter trait name</string>
-    <string name="dialog_new_trait_observations_exist_error">Observations already exist for this trait. Only the following parameters can be edited.</string>
-    <string name="dialog_new_trait_error_must_select_a_layout">You must select a layout.</string>
-    <string name="trait_creator_parameter_warning_integer_required">Integer required.</string>
-    <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Traits cannot be updated to BrAPI traits.</string>
-    <string name="required">Required</string>
-    <string name="traits_create_warning_percent_value_required">Value required</string>
 
 </resources>
