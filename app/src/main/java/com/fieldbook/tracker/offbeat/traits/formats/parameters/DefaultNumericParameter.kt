@@ -13,7 +13,8 @@ open class DefaultNumericParameter<T : Number>(
     override val parameter: Parameters = Parameters.DEFAULT_VALUE,
     open val initialDefaultValue: T? = null,
     override val allowNegative: Boolean? = true,
-    override val isInteger: Boolean? = null
+    override val isInteger: Boolean? = null,
+    override val isRequired: Boolean? = false,
 ) :
     NumericParameter<T>(
         nameStringResourceId = nameStringResourceId,
@@ -21,26 +22,40 @@ open class DefaultNumericParameter<T : Number>(
         parameter = parameter,
         initialValue = initialDefaultValue,
         allowNegative = allowNegative,
-        isInteger = isInteger
+        isInteger = isInteger,
+        isRequired = isRequired
     ) {
 
     override fun createViewHolder(
         itemView: View,
         initialValue: T?,
         allowNegative: Boolean?,
-        isInteger: Boolean?
-    ) = ViewHolder(itemView, this.initialDefaultValue, this.allowNegative, this.isInteger)
+        isInteger: Boolean?,
+        isRequired: Boolean?,
+    ) = ViewHolder(
+        itemView,
+        this.initialDefaultValue,
+        this.allowNegative,
+        this.isInteger,
+        this.isRequired
+    )
 
     open inner class ViewHolder(
         itemView: View,
         initialValue: T?,
         allowNegative: Boolean?,
-        isInteger: Boolean?
+        isInteger: Boolean?,
+        isRequired: Boolean?,
     ) :
-        NumericParameter.ViewHolder<T>(itemView, initialValue, allowNegative, isInteger) {
+        NumericParameter.ViewHolder<T>(
+            itemView,
+            initialValue,
+            allowNegative,
+            isInteger,
+            isRequired
+        ) {
 
         init {
-            numericEt.setHint(R.string.traits_create_optional)
             super.initialize()
         }
 

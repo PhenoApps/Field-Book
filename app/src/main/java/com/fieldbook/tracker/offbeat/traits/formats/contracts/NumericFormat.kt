@@ -46,6 +46,8 @@ open class NumericFormat(
 
         try {
 
+            val valueRequired =
+                context.getString(R.string.traits_create_warning_percent_value_required)
             val magnitudeRelationError =
                 context.getString(R.string.traits_create_warning_percent_magnitude_relation)
 
@@ -86,7 +88,19 @@ open class NumericFormat(
 
             } else null
 
-            if (maxDouble != null && minDouble != null && maxDouble < minDouble) {
+            if (minParameter.isRequired == true && minDouble == null) {
+
+                result = false
+
+                minParameter.numericEt.error = valueRequired
+
+            } else if (maxParameter.isRequired == true && maxDouble == null) {
+
+                result = false
+
+                maxParameter.numericEt.error = valueRequired
+
+            } else if (maxDouble != null && minDouble != null && maxDouble < minDouble) {
 
                 result = false
 

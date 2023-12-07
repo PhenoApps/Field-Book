@@ -10,7 +10,8 @@ open class MinimumParameter<T : Number>(
     override val defaultLayoutId: Int = R.layout.list_item_trait_parameter_numeric,
     private val minimumValue: T? = null,
     override val allowNegative: Boolean? = true,
-    override val isInteger: Boolean? = null
+    override val isInteger: Boolean? = null,
+    override val isRequired: Boolean? = false,
 ) :
     DefaultNumericParameter<T>(
         nameStringResourceId = nameStringResourceId,
@@ -18,22 +19,31 @@ open class MinimumParameter<T : Number>(
         defaultLayoutId = defaultLayoutId,
         initialDefaultValue = minimumValue,
         allowNegative = allowNegative,
-        isInteger = isInteger
+        isInteger = isInteger,
+        isRequired = isRequired
     ) {
     override fun createViewHolder(
         itemView: View,
         initialValue: T?,
         allowNegative: Boolean?,
-        isInteger: Boolean?
-    ) = ViewHolder(itemView, minimumValue, this.allowNegative, this.isInteger)
+        isInteger: Boolean?,
+        isRequired: Boolean?,
+    ) = ViewHolder(itemView, minimumValue, this.allowNegative, this.isInteger, this.isRequired)
 
     open inner class ViewHolder(
         itemView: View,
         minimumValue: T?,
         allowNegative: Boolean?,
-        isInteger: Boolean?
+        isInteger: Boolean?,
+        override val isRequired: Boolean?,
     ) :
-        DefaultNumericParameter<T>.ViewHolder(itemView, minimumValue, allowNegative, isInteger) {
+        DefaultNumericParameter<T>.ViewHolder(
+            itemView,
+            minimumValue,
+            allowNegative,
+            isInteger,
+            isRequired
+        ) {
 
         init {
             super.initialize()

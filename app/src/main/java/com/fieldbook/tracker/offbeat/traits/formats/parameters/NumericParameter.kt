@@ -28,7 +28,8 @@ open class NumericParameter<T : Number>(
     override val parameter: Parameters,
     open val initialValue: T? = null,
     open val allowNegative: Boolean? = true,
-    open val isInteger: Boolean? = false
+    open val isInteger: Boolean? = false,
+    open val isRequired: Boolean? = false,
 ) : BaseFormatParameter(
     nameStringResourceId = nameStringResourceId,
     defaultLayoutId = defaultLayoutId,
@@ -40,21 +41,23 @@ open class NumericParameter<T : Number>(
     ): BaseFormatParameter.ViewHolder? {
         val v = LayoutInflater.from(parent.context)
             .inflate(R.layout.list_item_trait_parameter_numeric, parent, false)
-        return createViewHolder(v, initialValue, allowNegative, isInteger)
+        return createViewHolder(v, initialValue, allowNegative, isInteger, isRequired)
     }
 
     open fun createViewHolder(
         itemView: View,
         initialValue: T?,
         allowNegative: Boolean?,
-        isInteger: Boolean?
+        isInteger: Boolean?,
+        isRequired: Boolean?,
     ): ViewHolder<T>? = null
 
     abstract class ViewHolder<T>(
         itemView: View,
         private val initialValue: T?,
         private val allowNegative: Boolean? = true,
-        private val isInteger: Boolean? = false
+        private val isInteger: Boolean? = false,
+        open val isRequired: Boolean? = false,
     ) : BaseFormatParameter.ViewHolder(itemView) {
 
         //warning string resources
@@ -101,12 +104,22 @@ open class NumericParameter<T : Number>(
             }
         }
 
+        private fun setHint() {
+
+            textInputLayout.hint = itemView.context.getString(
+                if (isRequired == true) {
+                    R.string.required
+                } else R.string.traits_create_optional
+            )
+        }
+
         fun initialize() {
 
             setDefaultValue()
 
             setupTextWatchers()
 
+            setHint()
         }
 
         private fun validateDouble(value: BigDecimal) {

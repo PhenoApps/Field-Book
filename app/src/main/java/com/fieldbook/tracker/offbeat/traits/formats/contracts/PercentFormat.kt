@@ -20,7 +20,12 @@ class PercentFormat : NumericFormat(
     stringNameAux = null,
     NameParameter(),
     DefaultNumericParameter(initialDefaultValue = 0, allowNegative = false, isInteger = true),
-    MinimumParameter(minimumValue = 0, allowNegative = false, isInteger = true),
-    MaximumParameter(maximumValue = 100, allowNegative = false, isInteger = true),
+    MinimumParameter(minimumValue = 0, allowNegative = false, isInteger = true, isRequired = true),
+    MaximumParameter(
+        maximumValue = 100,
+        allowNegative = false,
+        isInteger = true,
+        isRequired = true
+    ),
     DetailsParameter()
 )

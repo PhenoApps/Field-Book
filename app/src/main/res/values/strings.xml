@@ -1013,5 +1013,7 @@
     <string name="dialog_new_trait_error_must_select_a_layout">You must select a layout.</string>
     <string name="trait_creator_parameter_warning_integer_required">Integer required.</string>
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Traits cannot be updated to BrAPI traits.</string>
+    <string name="required">Required</string>
+    <string name="traits_create_warning_percent_value_required">Value required</string>
 
 </resources>
