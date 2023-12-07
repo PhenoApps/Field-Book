@@ -33,6 +33,10 @@ class TraitFormatAdapter(
         val iconBtn: ImageButton = view.findViewById(R.id.list_item_traits_grid_ib)
         val nameTv: TextView = view.findViewById(R.id.list_item_traits_grid_tv)
 
+        init {
+            iconBtn.setBackgroundColor(Color.TRANSPARENT)
+        }
+
         fun setBackgroundToggle(format: Formats) {
 
             iconBtn.setBackgroundColor(if (format == selectedFormat) Color.GRAY else Color.TRANSPARENT)
@@ -58,13 +62,9 @@ class TraitFormatAdapter(
             viewHolder.iconBtn.setImageResource(getIcon())
             viewHolder.nameTv.text = getName(context)
 
-            viewHolder.setBackgroundToggle(this)
-
             viewHolder.iconBtn.setOnClickListener {
 
                 selectedFormat = if (this == selectedFormat) null else this
-
-                viewHolder.setBackgroundToggle(this)
 
                 notifyItemRangeChanged(0, currentList.size)
 

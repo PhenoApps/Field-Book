@@ -134,7 +134,7 @@ class NewTraitDialog(
 
             context?.let { ctx ->
 
-                setupTraitFormatsRv(getSelectedFormat(ctx))
+                setupTraitFormatsRv()
 
             }
         }
@@ -161,6 +161,8 @@ class NewTraitDialog(
             negativeBtn?.setOnClickListener {
                 //close keyboard programmatically
                 SoftKeyboardUtil.closeKeyboard(context, traitFormatsRv, 1L)
+
+                (traitFormatsRv.adapter as? TraitFormatAdapter)?.selectedFormat = null
 
                 if (observationsExist) {
                     onCancel()
@@ -251,13 +253,13 @@ class NewTraitDialog(
         }
     }
 
-    private fun setupTraitFormatsRv(format: Formats?) {
+    private fun setupTraitFormatsRv() {
 
         context?.let { ctx ->
 
             val formatsAdapter = TraitFormatAdapter(ctx, this)
 
-            formatsAdapter.selectedFormat = format
+            formatsAdapter.selectedFormat = null
 
             traitFormatsRv.adapter = formatsAdapter
 
