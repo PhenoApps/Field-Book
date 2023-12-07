@@ -61,6 +61,7 @@ class NewTraitDialog(
 
     private var negativeBtn: Button? = null
     private var positiveBtn: Button? = null
+    private var neutralBtn: Button? = null
 
     //holds the trait objects sent from trait editor activity
     private var initialTraitObject: TraitObject? = null
@@ -87,6 +88,7 @@ class NewTraitDialog(
 
         positiveBtn = (dialog as AlertDialog?)?.getButton(AlertDialog.BUTTON_POSITIVE)
         negativeBtn = (dialog as AlertDialog?)?.getButton(AlertDialog.BUTTON_NEGATIVE)
+        neutralBtn = (dialog as AlertDialog?)?.getButton(AlertDialog.BUTTON_NEUTRAL)
 
         /**
          * EditText's inside a dialog fragment need certain window flags to be cleared
@@ -107,6 +109,8 @@ class NewTraitDialog(
     }
 
     private fun showFormatLayouts() {
+
+        neutralBtn?.visibility = View.INVISIBLE
 
         dialog?.setTitle(context?.getString(R.string.trait_creator_title_layout))
 
@@ -142,6 +146,8 @@ class NewTraitDialog(
 
     private fun showFormatParameters(format: Formats) {
 
+        neutralBtn?.visibility = View.VISIBLE
+
         traitFormatsRv.visibility = View.GONE
         parametersSv.visibility = View.VISIBLE
 
@@ -157,8 +163,7 @@ class NewTraitDialog(
 
         if (initialTraitObject == null || !observationsExist) {
 
-            negativeBtn?.setText(R.string.dialog_back)
-            negativeBtn?.setOnClickListener {
+            neutralBtn?.setOnClickListener {
                 //close keyboard programmatically
                 SoftKeyboardUtil.closeKeyboard(context, traitFormatsRv, 1L)
 
@@ -170,14 +175,11 @@ class NewTraitDialog(
 
                 showFormatLayouts()
             }
+        }
 
-        } else {
-
-            negativeBtn?.setText(R.string.dialog_cancel)
-            negativeBtn?.setOnClickListener {
-                onCancel()
-            }
-
+        negativeBtn?.setText(R.string.dialog_cancel)
+        negativeBtn?.setOnClickListener {
+            onCancel()
         }
 
         positiveBtn?.setText(R.string.dialog_save)
@@ -212,6 +214,7 @@ class NewTraitDialog(
 
         builder.setPositiveButton(R.string.next) { _, _ -> }
         builder.setNegativeButton(R.string.dialog_cancel) { _, _ -> }
+        builder.setNeutralButton(R.string.dialog_back) { _, _ -> }
 
         traitFormatsRv = view.findViewById(R.id.dialog_new_trait_formats_rv)
         parametersSv = view.findViewById(R.id.dialog_new_trait_parameters_psv)
@@ -355,6 +358,8 @@ class NewTraitDialog(
     }
 
     private fun onCancel() {
+
+        if (initialTraitObject == null) dismiss()
 
         initialTraitObject?.let { traitObject ->
 
