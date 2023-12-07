@@ -62,16 +62,16 @@ import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
-import com.fieldbook.tracker.utilities.FieldAudioHelper;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
-import com.fieldbook.tracker.utilities.JsonUtil;
-import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -97,6 +97,8 @@ import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -131,6 +133,8 @@ public class CollectActivity extends ThemedActivity
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
+
+    private final HandlerThread gnssRawLogHandlerThread = new HandlerThread("log");
 
     private GeoNavHelper geoNavHelper;
 
@@ -2412,4 +2416,81 @@ public class CollectActivity extends ThemedActivity
 
         return gps.getLocation(0, 0);
     }
+
+    @Override
+    public synchronized void logNmeaMessage(@NonNull String nmea) {
+
+        try {
+            gnssRawLogHandlerThread.getLooper();
+            gnssRawLogHandlerThread.start();
+        } catch (Exception ignore) {
+        }
+
+        new Handler(gnssRawLogHandlerThread.getLooper()).post(() -> logNmeaMessageWork(nmea));
+
+    }
+
+    private void logNmeaMessageWork(@NonNull String nmea) {
+        try {
+
+            OutputStream output = null;
+            OutputStreamWriter writer = null;
+
+            try {
+
+                DocumentFile file = DocumentTreeUtil.Companion.getFieldDataDirectory(this, DocumentTreeUtil.FIELD_GNSS_LOG);
+
+                if (file != null) {
+
+                    DocumentFile log = file.findFile(DocumentTreeUtil.FIELD_GNSS_LOG_FILE_NAME);
+
+                    if (log == null) {
+
+                        log = file.createFile("text/csv", DocumentTreeUtil.FIELD_GNSS_LOG_FILE_NAME);
+
+                    }
+
+                    if (log != null) {
+
+                        output = getContentResolver().openOutputStream(log.getUri(), "wa");
+                        writer = new OutputStreamWriter(output);
+                        writer.write(nmea);
+                        writer.flush();
+
+                    }
+                }
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+            } finally {
+
+                try {
+
+                    if (output != null) output.close();
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+
+                }
+
+                try {
+
+                    if (writer != null) writer.close();
+
+                } catch (Exception e) {
+
+                    writer.close();
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+    }
+
 }

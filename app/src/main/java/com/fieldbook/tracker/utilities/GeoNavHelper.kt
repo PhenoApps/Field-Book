@@ -136,6 +136,16 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     }
 
     private val mGnssResponseReceiver: GNSSResponseReceiver = object : GNSSResponseReceiver() {
+
+        override fun onNmeaMessageReceived(nmea: String?) {
+
+            nmea?.let { message ->
+
+                controller.logNmeaMessage(message)
+
+            }
+        }
+
         override fun onGNSSParsed(parser: NmeaParser) {
 
             checkBeforeUpdate(parser.getSimpleFix()) {
@@ -848,7 +858,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         // because closest would always be written as null in this case
     }
 
-    public fun getAverageHandler(): Handler? {
+    fun getAverageHandler(): Handler? {
         return averageHandler
     }
 }

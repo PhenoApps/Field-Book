@@ -80,7 +80,7 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
 
         // get directory based on type of audio being recorded
         val audioDir = if (isFieldAudio) getFieldDataDirectory(
-            context, "field_audio"
+            context, DocumentTreeUtil.FIELD_AUDIO_MEDIA
         ) else getFieldMediaDirectory(
             context, sanitizedTraitName
         )
