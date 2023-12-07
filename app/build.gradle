@@ -151,7 +151,7 @@ dependencies {
     implementation("com.serenegiant:common:2.12.4")
 
     //brapi and required dependencies
-    implementation 'com.github.breeding-insight:brapi:2.0.3'
+    implementation 'org.brapi:brapi-java-client:2.1.0'
     //necessary when building phenolib locally
     implementation "com.squareup.okhttp:okhttp:2.7.5"
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
