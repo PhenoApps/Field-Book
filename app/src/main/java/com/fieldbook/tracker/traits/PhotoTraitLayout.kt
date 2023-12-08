@@ -15,6 +15,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CameraActivity
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.ImageTraitAdapter
 import com.fieldbook.tracker.database.models.ObservationModel
@@ -398,14 +399,22 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
         file.createNewFile()
 
-        val uri = GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", file)
+        val uri =
+            GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", file)
 
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        val cameraxIntent = Intent(activity, CameraActivity::class.java)
+
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(context.packageManager) != null) {
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
             (context as Activity).startActivityForResult(
                 takePictureIntent,
+                PICTURE_REQUEST_CODE
+            )
+        } else {
+            (context as CollectActivity).startActivityForResult(
+                cameraxIntent,
                 PICTURE_REQUEST_CODE
             )
         }
