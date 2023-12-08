@@ -100,7 +100,7 @@ class ScannerActivity : AppCompatActivity() {
         if (traitDbId != null) {
 
             val trait = database.allTraitObjects.first { it.id == traitDbId.toString() }
-            val traitName = FileUtil.sanitizeFileName(trait.trait)
+            val traitName = FileUtil.sanitizeFileName(trait.name)
 
             val name = plotId + "_" + traitName + "_" + rep + "_" + timestamp + ".jpg"
 

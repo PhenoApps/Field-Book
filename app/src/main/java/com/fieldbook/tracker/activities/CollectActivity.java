@@ -63,7 +63,6 @@ import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
-import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
@@ -1917,6 +1916,7 @@ public class CollectActivity extends ThemedActivity
                             String uri = data.getStringExtra(ScannerActivity.EXTRA_PHOTO_URI);
                             database.insertObservation(getObservationUnit(),
                                     getCurrentTrait().getId(),
+                                    getCurrentTrait().getFormat(),
                                     uri,
                                     getPerson(),
                                     getLocationByPreferences(),
