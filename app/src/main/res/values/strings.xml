@@ -201,10 +201,13 @@
     <string name="traits_format_go_pro_camera">GoPro</string>
 
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Add trait</string>
+    <string name="traits_toolbar_add_trait">Trait Format</string>
+    <string name="trait_creator_title_layout">Trait Layout</string>
+    <string name="trait_creator_parameters_title">%s Parameters</string>
+
     <string name="activity_traits_new_button_content_description">Create a new trait.</string>
 
-    <string name="traits_create_trait">Name</string>
+    <string name="traits_create_name">Name</string>
     <string name="traits_create_format">Format</string>
     <string name="traits_create_value_default">Default</string>
     <string name="traits_create_value_minimum">Minimum</string>
@@ -226,6 +229,24 @@
     <string name="list_item_category_delete_content_description">Delete the category.</string>
     <string name="dialog_new_trait_add_category_content_description">Add new category.</string>
 
+    <string name="list_item_traits_grid_content_description">Toggle selection</string>
+    <string name="dialog_trait_parameters_title">Trait Parameters</string>
+    <string name="traits_create_warning_percent_magnitude_relation">Magnitude relation error</string>
+    <string name="trait_parameter_default_value_number_format_error">Must be a number</string>
+    <string name="traits_create_unknown_error">Unknown error occurred: %s</string>
+    <string name="trait_creator_parameter_warning_infinite">Number cannot be infinite</string>
+    <string name="trait_creator_parameter_warning_nan">Number cannot be NaN</string>
+    <string name="trait_creator_parameter_warning_negative">Number must not be negative</string>
+    <string name="trait_creator_parameter_warning_too_big">Number is too big</string>
+    <string name="trait_creator_parameter_warning_too_small">Number is too small</string>
+    <string name="list_item_trait_parameter_categories_value_hint">Type a category name to add</string>
+    <string name="list_item_trait_parameter_name_hint">Enter trait name</string>
+    <string name="dialog_new_trait_observations_exist_error">Observations already exist for this trait. Only the following parameters can be edited.</string>
+    <string name="dialog_new_trait_error_must_select_a_layout">You must select a layout.</string>
+    <string name="trait_creator_parameter_warning_integer_required">Integer required.</string>
+    <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Traits cannot be updated to BrAPI traits.</string>
+    <string name="required">Required</string>
+    <string name="traits_create_warning_percent_value_required">Value required</string>
 
 
 
@@ -292,7 +313,7 @@
     <string name="trait_delete_warning_photo">Are you sure you want to delete this photo?</string>
     <string name="trait_photo_capture_button_content_description">Press to open a camera view for capturing.</string>
     <string name="photo_failed_to_delete">Failed to delete file.</string>
-  
+
     <!-- Trait Layout: GNSS -->
     <string name="trait_gnss_geo_coord_update_dialog_title">Coordinate Update Warning</string>
     <string name="trait_gnss_geo_coord_update_dialog_message">You have a saved coordinate for this unit, are you sure you want to update it?</string>
@@ -704,7 +725,7 @@
     <string name="database_reset_warning2">A database reset cannot be reversed. The app will quit after clearing the database. Are you really sure you want to continue?</string>
     <string name="database_reset_message">Database has been deleted</string>
     <string name="share_file_title">Sending file…</string>
-  
+
     <!-- Experimental -->
     <string name="preferences_experimental_title">Experimental</string>
     <string name="preferences_experimental_stable_title">Stable</string>
@@ -777,7 +798,7 @@
     <string name="preferences_brapi_barcode_config_share">Share current settings</string>
     <string name="preferences_brapi_barcode_config_dialog_title">Scannable BrAPI Configuration</string>
     <string name="qr_code_share_choose_action_title">Choose Action</string>
-  
+
     <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
     <string name="act_brapi_auth_http_warning_title">HTTP Warning</string>
     <string name="act_brapi_auth_http_warning_message">You have entered an http url. There is no guarantee that this connection is secure.</string>
@@ -993,4 +1014,5 @@
     <string name="tutorial_traits_format_description">Different trait formats are indicated with different icons.</string>
     <string name="tutorial_traits_visibility_title">Trait Visibility</string>
     <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
+
 </resources>

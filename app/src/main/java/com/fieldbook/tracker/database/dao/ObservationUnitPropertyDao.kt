@@ -266,8 +266,7 @@ class ObservationUnitPropertyDao {
             traits: ArrayList<TraitObject>
         ): Cursor? = withDatabase { db ->
 
-            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.trait) }
-
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
             val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }
 
             val maxStatements = arrayListOf<String>()
@@ -299,7 +298,7 @@ class ObservationUnitPropertyDao {
             traits: Array<TraitObject>
         ): Cursor? = withDatabase { db ->
 
-            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.trait) }
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
             val sanitizeFormats = traits.map { DataHelper.replaceIdentifiers(it.format) }
 
             val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }

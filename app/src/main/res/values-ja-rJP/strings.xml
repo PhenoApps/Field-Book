@@ -100,8 +100,6 @@
     <string name="traits_format_barcode">バーコード</string>
     <string name="traits_format_labelprint">ゼブララベル印刷</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">形質の追加</string>
-    <string name="traits_create_trait">形質</string>
     <string name="traits_create_format">フォーマット</string>
     <string name="traits_create_value_default">初期値</string>
     <string name="traits_create_value_minimum">最小値</string>

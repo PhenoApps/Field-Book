@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities;
 
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -62,16 +63,16 @@ import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
-import com.fieldbook.tracker.utilities.FieldAudioHelper;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
-import com.fieldbook.tracker.utilities.JsonUtil;
-import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -97,6 +98,8 @@ import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -131,6 +134,8 @@ public class CollectActivity extends ThemedActivity
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
+
+    private final HandlerThread gnssRawLogHandlerThread = new HandlerThread("log");
 
     private GeoNavHelper geoNavHelper;
 
@@ -425,7 +430,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public String getTraitName() {
-        return getCurrentTrait().getTrait();
+        return getCurrentTrait().getName();
     }
 
     public String getTraitDbId() {
@@ -579,7 +584,7 @@ public class CollectActivity extends ThemedActivity
 
         if (strValue.equals("NA")) return true;
 
-        final String trait = currentTrait.getTrait();
+        final String trait = currentTrait.getName();
 
         if (traitBox.existsNewTraits()
                 && traitBox.getCurrentTrait() != null
@@ -898,7 +903,7 @@ public class CollectActivity extends ThemedActivity
 
         //save the last used trait
         if (traitBox.getCurrentTrait() != null)
-            ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getTrait()).apply();
+            ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
 
         geoNavHelper.stopAverageHandler();
 
@@ -1077,7 +1082,7 @@ public class CollectActivity extends ThemedActivity
             return;
         }
 
-        traitBox.update(trait.getTrait(), value);
+        traitBox.update(trait.getName(), value);
 
         String studyId = getStudyId();
         String obsUnit = getObservationUnit();
@@ -1105,7 +1110,7 @@ public class CollectActivity extends ThemedActivity
             boolean pass = false;
 
             if (trait.getFormat().equals("multicat")
-                    || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
+                || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
 
                 if (value.equals("[]")) {
 
@@ -1467,8 +1472,9 @@ public class CollectActivity extends ThemedActivity
 
             dialogMultiMeasureDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                     .setTitle(R.string.dialog_multi_measure_delete_title)
-                    .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {})
-                    .setPositiveButton(R.string.dialog_multi_measure_delete, (d, which) -> {
+                    .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {
+                    })
+                    .setNegativeButton(R.string.dialog_multi_measure_delete, (d, which) -> {
 
                         List<ObservationModel> deleteItems = new ArrayList<>();
                         int checkSize = checked.length;
@@ -1484,7 +1490,7 @@ public class CollectActivity extends ThemedActivity
 
                         }
                     })
-                    .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                    .setPositiveButton(android.R.string.cancel, (d, which) -> {
                         d.dismiss();
                     })
                     .setNeutralButton(R.string.dialog_multi_measure_select_all, (d, which) -> {
@@ -1495,10 +1501,11 @@ public class CollectActivity extends ThemedActivity
             dialogMultiMeasureDelete.setOnShowListener((d) -> {
                 AlertDialog ad = (AlertDialog) d;
                 ad.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener((v) -> {
-                    Arrays.fill(checked, true);
+                    boolean first = checked[0];
+                    Arrays.fill(checked, !first);
                     ListView lv = ad.getListView();
                     for (int i = 0; i < checked.length; i++) {
-                        lv.setItemChecked(i, true);
+                        lv.setItemChecked(i, checked[i]);
                     }
                 });
             });
@@ -1592,7 +1599,7 @@ public class CollectActivity extends ThemedActivity
         }
 
         TraitObject trait = getCurrentTrait();
-        if (trait != null && trait.getTrait() != null) {
+        if (trait != null && trait.getName() != null) {
             traitLayouts.refreshLock(trait.getFormat());
         }
     }
@@ -2332,7 +2339,7 @@ public class CollectActivity extends ThemedActivity
             // Map traits to their names
             List<String> traitNames = new ArrayList<>();
             for (TraitObject traitObject : visibleTraits) {
-                traitNames.add(traitObject.getTrait());
+                traitNames.add(traitObject.getName());
             }
 
             // Combine attributes and trait names
@@ -2346,7 +2353,7 @@ public class CollectActivity extends ThemedActivity
         }
         return new ArrayList<>();
     }
-
+    
     @NonNull
     @Override
     public VibrateUtil getVibrator() {
@@ -2412,4 +2419,81 @@ public class CollectActivity extends ThemedActivity
 
         return gps.getLocation(0, 0);
     }
+
+    @Override
+    public synchronized void logNmeaMessage(@NonNull String nmea) {
+
+        try {
+            gnssRawLogHandlerThread.getLooper();
+            gnssRawLogHandlerThread.start();
+        } catch (Exception ignore) {
+        }
+
+        new Handler(gnssRawLogHandlerThread.getLooper()).post(() -> logNmeaMessageWork(nmea));
+
+    }
+
+    private void logNmeaMessageWork(@NonNull String nmea) {
+        try {
+
+            OutputStream output = null;
+            OutputStreamWriter writer = null;
+
+            try {
+
+                DocumentFile file = DocumentTreeUtil.Companion.getFieldDataDirectory(this, DocumentTreeUtil.FIELD_GNSS_LOG);
+
+                if (file != null) {
+
+                    DocumentFile log = file.findFile(DocumentTreeUtil.FIELD_GNSS_LOG_FILE_NAME);
+
+                    if (log == null) {
+
+                        log = file.createFile("text/csv", DocumentTreeUtil.FIELD_GNSS_LOG_FILE_NAME);
+
+                    }
+
+                    if (log != null) {
+
+                        output = getContentResolver().openOutputStream(log.getUri(), "wa");
+                        writer = new OutputStreamWriter(output);
+                        writer.write(nmea);
+                        writer.flush();
+
+                    }
+                }
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+            } finally {
+
+                try {
+
+                    if (output != null) output.close();
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+
+                }
+
+                try {
+
+                    if (writer != null) writer.close();
+
+                } catch (Exception e) {
+
+                    writer.close();
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+    }
+
 }

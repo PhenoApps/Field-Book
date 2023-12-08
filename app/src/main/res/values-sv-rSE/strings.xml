@@ -84,8 +84,6 @@
     <string name="traits_format_barcode">Streckkod</string>
     <string name="traits_format_labelprint">Skriv Zebra-etikett</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Lägg till karaktär</string>
-    <string name="traits_create_trait">Karaktär</string>
     <string name="traits_create_format">Formattera</string>
     <string name="traits_create_value_default">Standard</string>
     <string name="traits_create_value_minimum">Minsta</string>
