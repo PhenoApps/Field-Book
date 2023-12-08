@@ -34,6 +34,11 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
 
             true
         }
+
+        val barcode = findPreference<CheckBoxPreference>(GeneralKeys.MLKIT_PREFERENCE_KEY)
+        barcode?.setOnPreferenceChangeListener { _, newValue ->
+            true
+        }
     }
 
     private fun hideEmptyPreferenceCategories() {

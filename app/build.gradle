@@ -83,6 +83,7 @@ android {
 
     buildFeatures {
         dataBinding = true
+        viewBinding = true
     }
 
     compileOptions {
@@ -190,6 +191,8 @@ dependencies {
     //hilt dependency injection
     implementation "com.google.dagger:hilt-android:2.44"
     implementation 'androidx.test.ext:junit-ktx:1.1.4'
+
+    implementation 'com.google.mlkit:barcode-scanning:17.2.0'
 
     kapt "com.google.dagger:hilt-compiler:2.44"
     kapt 'com.android.databinding:compiler:3.1.4'
