@@ -5,13 +5,9 @@
         versionCode="50600"
         versionName="v5.6">
         <new>Updated trait creator</new>
-    </release>
-
-    <release
-        date="2023-12-01"
-        versionCode="50525"
-        versionName="v5.5.25">
+        <new>Updated Photo trait for devices without camera app (Boox Palma)</new>
         <info>Beta settings renamed to Experimental</info>
+        <bugfix>Numerous bug fixes</bugfix>
     </release>
 
     <release
