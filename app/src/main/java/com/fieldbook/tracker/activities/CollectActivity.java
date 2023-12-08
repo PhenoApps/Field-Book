@@ -63,15 +63,15 @@ import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
-import com.fieldbook.tracker.utilities.FieldAudioHelper;
-import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.JsonUtil;
+import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -1907,7 +1907,16 @@ public class CollectActivity extends ThemedActivity
                         } else if (data.hasExtra(ScannerActivity.EXTRA_PHOTO_URI)) {
 
                             String uri = data.getStringExtra(ScannerActivity.EXTRA_PHOTO_URI);
-                            database.insertObservation(getObservationUnit(), getCurrentTrait().getId(), "photo", uri, getPerson(), getLocationByPreferences(), "", getStudyId(), "", null, getRep());
+                            database.insertObservation(getObservationUnit(),
+                                    getCurrentTrait().getId(),
+                                    uri,
+                                    getPerson(),
+                                    getLocationByPreferences(),
+                                    "",
+                                    getStudyId(),
+                                    "",
+                                    null,
+                                    getRep());
                         }
 
                     } else {
