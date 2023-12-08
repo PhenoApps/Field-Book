@@ -1,186 +1,193 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingLeft="20dp"
-    android:paddingTop="5dp"
-    android:paddingRight="20dp"
-    android:paddingBottom="5dp">
-
-
-    <RelativeLayout
-        android:id="@+id/loadingPanel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:gravity="center">
-
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true" />
-    </RelativeLayout>
-
-    <TextView
-        android:id="@+id/studyNameLbl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="10dp"
-        android:text="@string/brapi_study_name" />
-
-    <TextView
-        android:id="@+id/studyNameValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15dip"
-        android:paddingLeft="10dp"
-        android:paddingBottom="10dp" />
-
-    <TextView
-        android:id="@+id/studyDescriptionLbl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingBottom="5dp"
-        android:text="@string/brapi_study_description" />
-
-    <TextView
-        android:id="@+id/studyDescriptionValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15dip"
-        android:paddingLeft="10dp"
-        android:paddingBottom="10dp" />
-
-    <TextView
-        android:id="@+id/studyLocationLbl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingBottom="5dp"
-        android:text="@string/brapi_study_location" />
-
-    <TextView
-        android:id="@+id/studyLocationValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15dip"
-        android:paddingLeft="10dp"
-        android:paddingBottom="10dp" />
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="20dp"
+        android:paddingTop="5dp"
+        android:paddingRight="20dp"
+        android:paddingBottom="5dp">
+
+
+        <RelativeLayout
+            android:id="@+id/loadingPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:gravity="center">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true" />
+        </RelativeLayout>
 
         <TextView
-            android:id="@+id/studyNumPlotsValue"
+            android:id="@+id/studyNameLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
-            android:paddingBottom="5dp"/>
+            android:paddingTop="5dp"
+            android:paddingBottom="10dp"
+            android:text="@string/brapi_study_name" />
 
         <TextView
-            android:id="@+id/studyNumPlotsLbl"
+            android:id="@+id/studyNameValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="15dip"
             android:paddingLeft="10dp"
             android:paddingBottom="10dp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0"
-        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/studyNumTraitsValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingBottom="5dp" />
-
-        <TextView
-            android:id="@+id/studyNumTraitsLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingBottom="10dp"
-            android:text="@string/brapi_study_num_traits" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/studyPrimaryKeyLbl"
+            android:id="@+id/studyDescriptionLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
             android:paddingBottom="5dp"
-            android:text="@string/import_dialog_primary" />
-
-        <Spinner
-            android:id="@+id/studyPrimaryKey"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingBottom="5dp"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0"
-        android:orientation="vertical">
+            android:text="@string/brapi_study_description" />
 
         <TextView
-            android:id="@+id/studySecondaryKeyLbl"
+            android:id="@+id/studyDescriptionValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dip"
+            android:paddingLeft="10dp"
+            android:paddingBottom="10dp" />
+
+        <TextView
+            android:id="@+id/studyLocationLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
             android:paddingBottom="5dp"
-            android:text="@string/import_dialog_secondary" />
+            android:text="@string/brapi_study_location" />
 
-        <Spinner
-            android:id="@+id/studySecondaryKey"
+        <TextView
+            android:id="@+id/studyLocationValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="15dip"
             android:paddingLeft="10dp"
-            android:paddingBottom="5dp"/>
-    </LinearLayout>
+            android:paddingBottom="10dp" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/brapi_save_btn"
+            <TextView
+                android:id="@+id/studyNumPlotsValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingBottom="5dp" />
+
+            <TextView
+                android:id="@+id/studyNumPlotsLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingBottom="10dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/studyNumTraitsValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingBottom="5dp" />
+
+            <TextView
+                android:id="@+id/studyNumTraitsLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/brapi_study_num_traits" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/studyPrimaryKeyLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingBottom="5dp"
+                android:text="@string/import_dialog_primary" />
+
+            <Spinner
+                android:id="@+id/studyPrimaryKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingBottom="5dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/studySecondaryKeyLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingBottom="5dp"
+                android:text="@string/import_dialog_secondary" />
+
+            <Spinner
+                android:id="@+id/studySecondaryKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingBottom="5dp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:minWidth="@dimen/button_default_width"
-            android:onClick="dialogButtonClicked"
-            android:text="@string/dialog_save" />
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/brapi_cancel_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:minWidth="@dimen/button_default_width"
-            android:onClick="dialogButtonClicked"
-            android:text="@string/dialog_cancel" />
+            <Button
+                android:id="@+id/brapi_save_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:minWidth="@dimen/button_default_width"
+                android:onClick="dialogButtonClicked"
+                android:text="@string/dialog_save" />
+
+            <Button
+                android:id="@+id/brapi_cancel_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:minWidth="@dimen/button_default_width"
+                android:onClick="dialogButtonClicked"
+                android:text="@string/dialog_cancel" />
+        </LinearLayout>
+
     </LinearLayout>
 
-</LinearLayout>
+</ScrollView>
