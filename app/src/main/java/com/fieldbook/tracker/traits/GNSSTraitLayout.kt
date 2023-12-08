@@ -26,8 +26,6 @@ import androidx.core.view.isVisible
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.database.dao.ObservationDao
-import com.fieldbook.tracker.database.dao.ObservationUnitDao
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
@@ -162,6 +160,19 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     }
 
     private val receiver = object : GNSSResponseReceiver() {
+
+        override fun onNmeaMessageReceived(nmea: String?) {
+
+            (mActivity as? CollectActivity)?.let { act ->
+
+                nmea?.let { message ->
+
+                    act.logNmeaMessage(message)
+
+                }
+            }
+        }
+
         override fun onGNSSParsed(parser: NmeaParser) {
 
             currentUtc = parser.utc
@@ -335,7 +346,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val newLat = latitude.toDouble()
             val newLng = longitude.toDouble()
 
-            val units = database.getAllObservationUnits(studyDbId.toInt()).filter { it.observation_unit_db_id == currentRange.plot_id }
+            val units = database.getAllObservationUnits(studyDbId.toInt())
+                .filter { it.observation_unit_db_id == currentRange.plot_id }
 
             if (units.isNotEmpty()) {
 
@@ -421,7 +433,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         val coordinates = "${json.geometry.coordinates[1]}; ${json.geometry.coordinates[0]}; ${json.properties?.get("fix")}"
 
-        ObservationUnitDao.updateObservationUnit(unit, json.toJson().toString())
+        database.updateObservationUnit(unit, json.toJson().toString())
 
         collectInputView.text = coordinates
 
@@ -469,10 +481,10 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             //truncate average result based on original location fix
             avgLat = if (avgLat.toString().length > info.latLength)
                 avgLat.toString().substring(0 until info.latLength).toDouble()
-                else avgLat
+            else avgLat
             avgLng = if (avgLng.toString().length > info.lngLength)
                 avgLng.toString().substring(0 until info.lngLength).toDouble()
-                else avgLng
+            else avgLng
 
             //convert back to strings and truncate based on original quality
             avgLat to avgLng
@@ -784,11 +796,12 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-        val observation = ObservationDao.getObservation(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
+        val observation =
+            database.getObservation(studyDbId, currentRange.plot_id, currentTrait.id, rep)
 
         if (observation != null) {
 
-            ObservationDao.deleteTrait(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
+            database.deleteTrait(studyDbId, currentRange.plot_id, currentTrait.id, rep)
 
             val units = controller.getDatabase().getAllObservationUnits(studyDbId.toInt())
                 .filter { it.observation_unit_db_id == currentRange.plot_id }

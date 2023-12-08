@@ -46,22 +46,22 @@ public class NumericTraitLayout extends BaseTraitLayout {
     public void init(Activity act) {
         //void v = inflate(getContext(), layoutId(), null);
         numberButtons = new LinkedHashMap<>();
-        numberButtons.put(R.id.k1, (Button) act.findViewById(R.id.k1));
-        numberButtons.put(R.id.k2, (Button) act.findViewById(R.id.k2));
-        numberButtons.put(R.id.k3, (Button) act.findViewById(R.id.k3));
-        numberButtons.put(R.id.k4, (Button) act.findViewById(R.id.k4));
-        numberButtons.put(R.id.k5, (Button) act.findViewById(R.id.k5));
-        numberButtons.put(R.id.k6, (Button) act.findViewById(R.id.k6));
-        numberButtons.put(R.id.k7, (Button) act.findViewById(R.id.k7));
-        numberButtons.put(R.id.k8, (Button) act.findViewById(R.id.k8));
-        numberButtons.put(R.id.k9, (Button) act.findViewById(R.id.k9));
-        numberButtons.put(R.id.k10, (Button) act.findViewById(R.id.k10));
-        numberButtons.put(R.id.k11, (Button) act.findViewById(R.id.k11));
-        numberButtons.put(R.id.k12, (Button) act.findViewById(R.id.k12));
-        numberButtons.put(R.id.k13, (Button) act.findViewById(R.id.k13));
-        numberButtons.put(R.id.k14, (Button) act.findViewById(R.id.k14));
-        numberButtons.put(R.id.k15, (Button) act.findViewById(R.id.k15));
-        numberButtons.put(R.id.k16, (Button) act.findViewById(R.id.k16));
+        numberButtons.put(R.id.k1, act.findViewById(R.id.k1));
+        numberButtons.put(R.id.k2, act.findViewById(R.id.k2));
+        numberButtons.put(R.id.k3, act.findViewById(R.id.k3));
+        numberButtons.put(R.id.k4, act.findViewById(R.id.k4));
+        numberButtons.put(R.id.k5, act.findViewById(R.id.k5));
+        numberButtons.put(R.id.k6, act.findViewById(R.id.k6));
+        numberButtons.put(R.id.k7, act.findViewById(R.id.k7));
+        numberButtons.put(R.id.k8, act.findViewById(R.id.k8));
+        numberButtons.put(R.id.k9, act.findViewById(R.id.k9));
+        numberButtons.put(R.id.k10, act.findViewById(R.id.k10));
+        numberButtons.put(R.id.k11, act.findViewById(R.id.k11));
+        numberButtons.put(R.id.k12, act.findViewById(R.id.k12));
+        numberButtons.put(R.id.k13, act.findViewById(R.id.k13));
+        numberButtons.put(R.id.k14, act.findViewById(R.id.k14));
+        numberButtons.put(R.id.k15, act.findViewById(R.id.k15));
+        numberButtons.put(R.id.k16, act.findViewById(R.id.k16));
 
         for (Button numButton : numberButtons.values()) {
             numButton.setOnClickListener(new NumberButtonOnClickListener());
@@ -71,7 +71,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
             @Override
             public boolean onLongClick(View v) {
                 getCollectInputView().setText("");
-                removeTrait(getCurrentTrait().getTrait());
+                removeTrait(getCurrentTrait().getName());
                 return false;
             }
         });

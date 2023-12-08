@@ -195,7 +195,7 @@ public class PercentTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        removeTrait(getCurrentTrait().getTrait());
+        removeTrait(getCurrentTrait().getName());
         super.deleteTraitListener();
         ObservationModel model = getCurrentObservation();
         seekBar.setOnSeekBarChangeListener(null);

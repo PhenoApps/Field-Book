@@ -41,12 +41,12 @@ public class CSVWriter {
      * Default line terminator uses platform encoding.
      */
     private static final String DEFAULT_LINE_END = "\n";
-    private PrintWriter pw;
-    private char separator;
-    private char quotechar;
-    private char escapechar;
-    private String lineEnd;
-    private Cursor curCSV;
+    private final PrintWriter pw;
+    private final char separator;
+    private final char quotechar;
+    private final char escapechar;
+    private final String lineEnd;
+    private final Cursor curCSV;
 
     /**
      * Constructs CSVWriter using a comma for the separator.
@@ -121,7 +121,7 @@ public class CSVWriter {
 
             while (curCSV.moveToNext()) {
 
-                String arrStr[] = new String[labels.length];
+                String[] arrStr = new String[labels.length];
 
                 for (int i = 0; i < arrStr.length; i++) {
                     arrStr[i] = curCSV.getString(i);
@@ -137,7 +137,7 @@ public class CSVWriter {
 
     private String searchForCategorical(ArrayList<TraitObject> traits, String name, String value) {
         for (TraitObject t : traits) {
-            if (t.getTrait().equals(name)) {
+            if (t.getName().equals(name)) {
                 if (t.getFormat().equals("categorical") || t.getFormat().equals("multicat")
                         || t.getFormat().equals("qualitative")) {
                     try {
