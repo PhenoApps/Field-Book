@@ -128,7 +128,6 @@ class TextTraitLayout : BaseTraitLayout {
         inputEditText?.removeTextChangedListener(textWatcher)
         super.loadLayout()
         inputEditText?.isEnabled = !isLocked
-        inputEditText?.selectAll()
     }
 
     override fun afterLoadExists(act: CollectActivity, value: String?) {
@@ -181,7 +180,6 @@ class TextTraitLayout : BaseTraitLayout {
         if (currentObservation != null) {
             inputEditText?.setText(currentObservation.value)
             inputEditText?.setSelection(currentObservation.value.length)
-            inputEditText?.selectAll()
         }
         selectEditText()
     }
