@@ -78,8 +78,6 @@
     <string name="traits_format_audio">শ্রবণ সংক্রান্ত</string>
     <string name="traits_format_multicategorical">বৃদ্ধি করা</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">বৈশিষ্ট্য যোগ করুন</string>
-    <string name="traits_create_name">বৈশিষ্ট্য</string>
     <string name="traits_create_format">ছক</string>
     <string name="traits_create_value_default">নির্দিষ্ট</string>
     <string name="traits_create_value_minimum">সর্বনিম্ন</string>

@@ -61,8 +61,6 @@
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_audio">Áudio</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Adicionar um caractere</string>
-    <string name="traits_create_name">Caractere</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Padrão</string>
     <string name="traits_create_value_minimum">Mínimo</string>

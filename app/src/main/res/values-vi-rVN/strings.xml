@@ -105,8 +105,6 @@
     <string name="traits_format_barcode">Mã vạch</string>
     <string name="traits_format_labelprint">Máy in nhãn Zebra</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Thêm tính trạng</string>
-    <string name="traits_create_name">Tính trạng</string>
     <string name="traits_create_format">Định dạng</string>
     <string name="traits_create_value_default">Mặc định</string>
     <string name="traits_create_value_minimum">Nhỏ nhất</string>

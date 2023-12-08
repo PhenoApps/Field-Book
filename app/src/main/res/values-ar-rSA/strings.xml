@@ -105,8 +105,6 @@
     <string name="traits_format_barcode">رمز شريطي (باركود)</string>
     <string name="traits_format_labelprint">طباعة الملصقات زيبرا Zebra</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">أضف سمة</string>
-    <string name="traits_create_name">سمة</string>
     <string name="traits_create_format">التنسيق</string>
     <string name="traits_create_value_default">افتراضي</string>
     <string name="traits_create_value_minimum">أدنى</string>
