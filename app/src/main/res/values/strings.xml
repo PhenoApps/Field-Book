@@ -746,6 +746,12 @@
     <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
     <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
 
+    <string name="pref_beta_mlkit_title">MLKit Library</string>
+    <string name="pref_beta_mlkit_summary">This option uses the MLKit library instead of the ZXing library for scanning barcodes</string>
+    <string name="pref_beta_mlkit_enabled_title">Barcode Scanning using MLKit enabled</string>
+    <string name="pref_beta_mlkit_enabled_message">Enabling this feature will switch the barcode scanning library from ZXing to MLKit.</string>
+
+
 
     <!-- ABOUT -->
     <!-- App  -->
@@ -1014,5 +1020,6 @@
     <string name="tutorial_traits_format_description">Different trait formats are indicated with different icons.</string>
     <string name="tutorial_traits_visibility_title">Trait Visibility</string>
     <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
+    <string name="shutter_capture_content_description">Shutter button for snapping a picture.</string>
 
 </resources>

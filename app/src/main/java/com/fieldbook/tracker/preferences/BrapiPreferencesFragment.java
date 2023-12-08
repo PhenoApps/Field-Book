@@ -31,6 +31,7 @@ import androidx.preference.PreferenceScreen;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
+import com.fieldbook.tracker.activities.ScannerActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.objects.BrAPIConfig;
 import com.google.gson.Gson;
@@ -81,6 +82,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     //alert dialog displays messages when oidc or brapi urls have http
     private AlertDialog mBrapiHttpWarningDialog = null;
+    private boolean mlkitEnabled;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -188,15 +190,20 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
 
         //set barcode click listener to start zxing intent
+        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
         Preference brapiServerBarcode = findPreference("brapi_server_barcode");
         if (brapiServerBarcode != null) {
             brapiServerBarcode.setOnPreferenceClickListener(preference -> {
-
-                new IntentIntegrator(getActivity())
-                        .setPrompt(getString(R.string.barcode_scanner_text))
-                        .setBeepEnabled(true)
-                        .setRequestCode(IntentIntegrator.REQUEST_CODE)
-                        .initiateScan();
+                if(mlkitEnabled) {
+                    ScannerActivity.Companion.requestCameraAndStartScanner(getContext(), IntentIntegrator.REQUEST_CODE, null, null, null);
+                }
+                else {
+                    new IntentIntegrator(getActivity())
+                            .setPrompt(getString(R.string.barcode_scanner_text))
+                            .setBeepEnabled(true)
+                            .setRequestCode(IntentIntegrator.REQUEST_CODE)
+                            .initiateScan();
+                }
                 return true;
             });
         }
@@ -424,22 +431,32 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 //neutral edit text callback
                 //change request code for brapi url vs oidc url
                 if (preference.getKey().equals(brapiURLPreference.getKey())) {
-                    new IntentIntegrator(getActivity())
-                            .setPrompt(getString(R.string.barcode_scanner_text))
-                            .setBeepEnabled(false)
-                            .setRequestCode(REQUEST_BARCODE_SCAN_BASE_URL)
-                            .initiateScan();
+                    if(mlkitEnabled) {
+                        ScannerActivity.Companion.requestCameraAndStartScanner(getContext(), REQUEST_BARCODE_SCAN_BASE_URL, null, null, null);
+                    }
+                    else {
+                        new IntentIntegrator(getActivity())
+                                .setPrompt(getString(R.string.barcode_scanner_text))
+                                .setBeepEnabled(false)
+                                .setRequestCode(REQUEST_BARCODE_SCAN_BASE_URL)
+                                .initiateScan();
+                    }
                 } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
                     text = oldBaseUrl.replaceAll("https?://(?:www\\.)?(.*?)(?:/.*)?$", "$1");
                     brapiDisplayName.setText(text);
                     onPreferenceChange(brapiDisplayName, text);
                 } else {
                     prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
-                    new IntentIntegrator(getActivity())
-                            .setPrompt(getString(R.string.barcode_scanner_text))
-                            .setBeepEnabled(false)
-                            .setRequestCode(REQUEST_BARCODE_SCAN_OIDC_URL)
-                            .initiateScan();
+                    if(mlkitEnabled) {
+                        ScannerActivity.Companion.requestCameraAndStartScanner(getContext(), REQUEST_BARCODE_SCAN_OIDC_URL, null, null, null);
+                    }
+                    else {
+                        new IntentIntegrator(getActivity())
+                                .setPrompt(getString(R.string.barcode_scanner_text))
+                                .setBeepEnabled(false)
+                                .setRequestCode(REQUEST_BARCODE_SCAN_OIDC_URL)
+                                .initiateScan();
+                    }
                 }
 
                 if (dialog != null)
@@ -491,7 +508,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     }
 
     private void setupToolbar() {
-        Activity act = (PreferencesActivity) getActivity();
+        Activity act = getActivity();
         if (act != null) {
             ActionBar bar = ((PreferencesActivity) this.getActivity()).getSupportActionBar();
             if (bar != null) {
@@ -661,9 +678,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case IntentIntegrator.REQUEST_CODE:
-                IntentResult urlDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                String barcodeResult = urlDataResult.getContents();
-
+                String barcodeResult;
+                if(mlkitEnabled) {
+                    barcodeResult = data.getStringExtra("barcode");
+                }
+                else {
+                    IntentResult urlDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    barcodeResult = urlDataResult.getContents();
+                }
                 SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
                 editor.putString(GeneralKeys.BRAPI_BASE_URL, barcodeResult);
                 editor.apply();
@@ -672,16 +694,28 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 break;
             case REQUEST_BARCODE_SCAN_OIDC_URL: //barcode scan result for oidc url
                 if(resultCode == RESULT_OK) {
-                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                    String scannedBarcode = plotDataResult.getContents();
+                    String scannedBarcode;
+                    if(mlkitEnabled) {
+                        scannedBarcode = data.getStringExtra("barcode");
+                    }
+                    else {
+                        IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                        scannedBarcode = plotDataResult.getContents();
+                    }
                     brapiOIDCURLPreference.setText(scannedBarcode);
                 }
                 break;
             case REQUEST_BARCODE_SCAN_BASE_URL: //barcode scan result for brapi url
                 if(resultCode == RESULT_OK) {
-                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    String scannedBarcode;
+                    if(mlkitEnabled) {
+                        scannedBarcode = data.getStringExtra("barcode");
+                    }
+                    else {
+                        IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                        scannedBarcode = plotDataResult.getContents();
+                    }
                     oldBaseUrl = brapiURLPreference.getText();
-                    String scannedBarcode = plotDataResult.getContents();
                     updateUrls(scannedBarcode);
                 }
                 break;
