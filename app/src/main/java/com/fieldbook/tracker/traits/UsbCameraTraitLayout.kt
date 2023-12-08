@@ -196,14 +196,19 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 context.unregisterReceiver(mUsbPermissionReceiver)
 
-            } catch (ignore: Exception) {} //might not be registered if already paired
+            } catch (ignore: Exception) {
+            } //might not be registered if already paired
 
             setup()
         }
 
         val filter = IntentFilter(UsbPermissionReceiver.ACTION_USB_PERMISSION)
 
-        context.registerReceiver(mUsbPermissionReceiver, filter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(mUsbPermissionReceiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            context.registerReceiver(mUsbPermissionReceiver, filter)
+        }
     }
 
     private fun registerDetachListener() {
@@ -230,7 +235,15 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 }
             }
 
-            context.registerReceiver(mUsbDetachReceiver, detachFilter)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.registerReceiver(
+                    mUsbDetachReceiver,
+                    detachFilter,
+                    Context.RECEIVER_EXPORTED
+                )
+            } else {
+                context.registerReceiver(mUsbDetachReceiver, detachFilter)
+            }
 
         } catch (e: Exception) {
 
@@ -257,12 +270,17 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 context.unregisterReceiver(mUsbAttachReceiver)
 
-            } catch (ignore: Exception) {} //might not be registered if already paired
+            } catch (ignore: Exception) {
+            } //might not be registered if already paired
         }
 
         val filter = IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED)
 
-        context.registerReceiver(mUsbAttachReceiver, filter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(mUsbAttachReceiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            context.registerReceiver(mUsbAttachReceiver, filter)
+        }
     }
 
     private fun setup() {
@@ -377,6 +395,13 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
             loadAdapterItems()
 
         }, 500)
+
+        try {
+
+            setup()
+
+        } catch (e: Exception) {
+        }
 
         super.loadLayout()
     }

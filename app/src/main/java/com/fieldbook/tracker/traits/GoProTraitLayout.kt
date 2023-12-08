@@ -181,12 +181,8 @@ class GoProTraitLayout :
 
     override fun init(act: Activity) {
 
-        //slight delay to make navigation a bit faster
-        Handler(Looper.getMainLooper()).postDelayed({
+        initWork(act)
 
-            initWork(act)
-
-        }, 500)
     }
 
     private fun detectActiveConnection() {
@@ -277,6 +273,7 @@ class GoProTraitLayout :
                         helper?.connectToGoProWifi(dialog, s, p, gatt.bssid) {
 
                             activity?.runOnUiThread {
+
 
                                 helper?.requestStream()
 
