@@ -224,7 +224,7 @@ public class DateTraitLayout extends BaseTraitLayout {
         getCollectInputView().setText(getMonthForInt(calendar.get(Calendar.MONTH)) + " " + dayOfMonth);
 
         // Change text color
-        if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
+        if (getNewTraits().containsKey(getCurrentTrait().getName())) {
             getCollectInputView().setTextColor(getValueAlteredColor());
         } else {
             getCollectInputView().setTextColor(getTextColor());
@@ -370,7 +370,7 @@ public class DateTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        removeTrait(getCurrentTrait().getTrait());
+        removeTrait(getCurrentTrait().getName());
 
         super.deleteTraitListener();
 

@@ -58,7 +58,6 @@ import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -802,9 +801,6 @@ public class FieldEditorActivity extends ThemedActivity
                         if (fieldFile.isOther()) {
                             Utils.makeToast(getApplicationContext(), getString(R.string.import_error_unsupported));
                         }
-
-                        //utility call creates photos, audio and thumbnails folders under a new field folder
-                        DocumentTreeUtil.Companion.createFieldDir(this, fieldFileName);
 
                         loadFile(fieldFile);
 

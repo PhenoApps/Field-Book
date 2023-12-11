@@ -114,6 +114,8 @@ public class GeneralKeys {
 
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
+    public static final String MLKIT_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.mlkit";
+
 
     public static final String ENABLE_FIELD_AUDIO = "com.tracker.fieldbook.preferences.keys.enable_field_audio";
 
@@ -125,7 +127,6 @@ public class GeneralKeys {
 
     public static final String FLIP_FLOP_ARROWS = "FLIP_FLOP_ARROWS";
 
-    public static final String CREATE_TRAIT_FINISHED = "CreateTraitFinished";
     public static final String TRAITS_EXPORTED = "TraitsExported";
     public static final String ALL_TRAITS_VISIBLE = "allTraitsVisible";
     public static final String LAST_USED_TRAIT = "com.fieldbook.tracker.LAST_USED_TRAIT";

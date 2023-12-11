@@ -207,8 +207,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             }
 
             if (isAllTraitsChecked) {
-                val traits = database.allTraitObjects
-                exportTrait.addAll(traits)
+                exportTrait.addAll(database.allTraitObjects)
             }
 
             checkDbBool = checkDB.isChecked
@@ -361,7 +360,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             }
 
             exportTrait.forEach {
-                Log.i("Field Book : Traits : ", it.trait)
+                Log.i("Field Book : Traits : ", it.name)
             }
 
             if (exportData.count == 0) {
@@ -428,7 +427,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                         val csvWriter = CSVWriter(fw, convertedExportData)
 
                         val labels = ArrayList<String>()
-                        for (trait in exportTrait) labels.add(trait.trait)
+                        for (trait in exportTrait) labels.add(trait.name)
                         csvWriter.writeTableFormat(newRanges.plus(labels), newRanges.size, traits)
 
                     } catch (e: Exception) {
@@ -446,7 +445,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                     val studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
 
                     // Study name is the same as the media directory in plot_data
-                    val fieldObject = StudyDao.getFieldObject(studyId)
+                    val fieldObject = database.getFieldObject(studyId)
 
                     fieldObject?.let {
                         val studyName = it.exp_name

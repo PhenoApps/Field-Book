@@ -10,7 +10,6 @@ import com.fieldbook.tracker.dialogs.CollectAttributeChooserDialog
 import com.fieldbook.tracker.objects.InfoBarModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.qualifiers.ActivityContext
-import java.util.*
 import javax.inject.Inject
 
 /**
@@ -53,7 +52,7 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
         val traitNames = ArrayList<String>()
         if (traits != null) {
             for (t in traits) {
-                traitNames.add(t.trait)
+                traitNames.add(t.name)
             }
         }
 

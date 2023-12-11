@@ -26,6 +26,14 @@
             android:defaultValue="false"
             android:icon="@drawable/ic_tb_field_mic_on"/>
 
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/qrcode_scan"
+            android:key="com.tracker.fieldbook.preferences.keys.mlkit"
+            android:summary="@string/pref_beta_mlkit_summary"
+            android:title="@string/pref_beta_mlkit_title" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

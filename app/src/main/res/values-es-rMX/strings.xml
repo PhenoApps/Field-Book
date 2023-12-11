@@ -99,8 +99,6 @@
     <string name="traits_format_barcode">Codigo de barras</string>
     <string name="traits_format_labelprint">Impresión de etiqueta Zebra</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Agregar variable</string>
-    <string name="traits_create_trait">Variable</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Predeterminado</string>
     <string name="traits_create_value_minimum">Mínimo</string>
@@ -385,6 +383,8 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_main_search_title">Buscar</string>
     <string name="tutorial_main_search_description">El icono de búsqueda permite realizar consultas en la base de datos.</string>
     <string name="tutorial_main_resources_title">Recursos</string>
+    <string name="tutorial_fields_add_title">Agregar Campo</string>
+    <string name="tutorial_fields_add_description">Importar archivo de campo.</string>
     <string name="tutorial_main_resources_description">Esto muestra una lista de archivos en la carpeta Recursos.</string>
     <string name="tutorial_main_summary_title">Resúmen</string>
     <string name="tutorial_main_summary_description">Esto muestra un resumen de todos los datos para la entrada actual.</string>
@@ -401,8 +401,6 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_settings_settings_description">permite configuración adicional para la captura de datos.</string>
     <string name="tutorial_settings_export_title">Exportar</string>
     <string name="tutorial_settings_export_description">Los datos se pueden exportar en dos formatos: base de datos o tabla.</string>
-    <string name="tutorial_fields_add_title">Agregar Campo</string>
-    <string name="tutorial_fields_add_description">Importar archivo de campo.</string>
     <string name="tutorial_fields_file_description">Los archivos deben contener tres columnas: un identificador único, un orden primario y un orden secundario. El orden primario/secundario se utiliza para la navegación en el campo.</string>
     <string name="tutorial_fields_select_title">Campo activo</string>
     <string name="tutorial_fields_select_description">Se selecciona un campo para la captura de datos después de ser importado.</string>
