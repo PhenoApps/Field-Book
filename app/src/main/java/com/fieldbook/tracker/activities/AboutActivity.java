@@ -26,14 +26,14 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class AboutActivity extends MaterialAboutActivity {
     //todo move to fragments so aboutactivity can extend base activity
@@ -308,7 +308,7 @@ public class AboutActivity extends MaterialAboutActivity {
 
     @Override
     protected CharSequence getActivityTitle() {
-        return getString(R.string.mal_title_about);
+        return getString(com.danielstone.materialaboutlibrary.R.string.mal_title_about);
     }
 
 
