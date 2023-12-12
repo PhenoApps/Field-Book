@@ -98,7 +98,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         }
 
         exportButton.setOnClickListener {
-            if (checkTraitsExist() >= 0) exportUtil.exportDataBasedOnPreference()
+            if (checkTraitsExist() >= 0) exportUtil.exportActiveField()
         }
 
         Log.d("onCreateView", "End")

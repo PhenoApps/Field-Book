@@ -14,6 +14,7 @@ import android.os.Looper
 import android.text.Html
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.documentfile.provider.DocumentFile
@@ -23,7 +24,6 @@ import com.fieldbook.tracker.activities.brapi.BrapiExportActivity
 import com.fieldbook.tracker.brapi.BrapiAuthDialog
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.database.dao.StudyDao
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.qualifiers.ActivityContext
@@ -48,6 +48,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         const val TAG = "ExportUtil"
     }
 
+    private var fieldIds: List<Int> = listOf()
     private var onlyUnique: RadioButton? = null
     private var allColumns: RadioButton? = null
     private var allTraits: RadioButton? = null
@@ -58,19 +59,34 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private var checkExcelBool = false
     private var exportFileString = ""
     private lateinit var fFile: String
+
+
     private val mHandler = Handler(Looper.getMainLooper())
-    val exportData = Runnable {
-        ExportDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, 0)
-    }
+//    val exportData = Runnable {
+//        ExportDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, 0)
+//    }
+
+
 
     private val ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
 
-    fun exportDataBasedOnPreference() {
+    fun exportMultipleFields(fieldIds: List<Int>) {
+        this.fieldIds = fieldIds
+        export()
+    }
+
+    fun exportActiveField() {
+        val activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
+        this.fieldIds = listOf(activeFieldId)
+        export()
+    }
+
+    fun export() {
         val exporter = ep.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "")
 
         when (exporter) {
             "local" -> exportPermission()
-            "brapi" -> exportBrAPI()
+            "brapi" -> fieldIds.forEach { fieldId -> exportBrAPI(fieldId) }
             else -> {
                 if (ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
                     showExportDialog()
@@ -86,7 +102,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val perms = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 
         if (EasyPermissions.hasPermissions(context, *perms) || Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-            showSaveDialog()
+            exportLocal(fieldIds)
         } else {
             EasyPermissions.requestPermissions(
                 context as Activity,
@@ -97,9 +113,39 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         }
     }
 
-    private fun showSaveDialog() {
+    fun showExportDialog() {
+        val inflater = LayoutInflater.from(context)
+        val layout = inflater.inflate(R.layout.dialog_list_buttonless, null)
+        val exportSourceList: ListView = layout.findViewById(R.id.myList)
+
+        val exportArray = arrayOf(
+            context.getString(R.string.export_source_local),
+            ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.preferences_brapi_server_test))
+        )
+
+        val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
+        exportSourceList.adapter = adapter
+
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle(R.string.export_dialog_title)
+            .setView(layout)
+            .setPositiveButton(context.getString(R.string.dialog_cancel)) { dialog, _ -> dialog.dismiss() }
+            .create()
+            .show()
+
+        exportSourceList.setOnItemClickListener { _, _, which, _ ->
+            when (which) {
+                0 -> exportPermission()
+                1 -> fieldIds.forEach { fieldId -> exportBrAPI(fieldId) }
+            }
+        }
+    }
+
+    private fun exportLocal(fieldIds: List<Int>) {
         val layout = LayoutInflater.from(context).inflate(R.layout.dialog_export, null)
 
+        val fileNameLabel: TextView = layout.findViewById(R.id.fileNameLabel)
+        val bundleInfoMessage: TextView = layout.findViewById(R.id.bundleInfo)
         val exportFile: EditText = layout.findViewById(R.id.fileName)
         val checkDB: CheckBox = layout.findViewById(R.id.formatDB)
         val checkExcel: CheckBox = layout.findViewById(R.id.formatExcel)
@@ -125,13 +171,27 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         activeTraits?.setChecked(isActiveTraits)
 
         val timeStamp = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault())
-        var fFile = ep.getString(GeneralKeys.FIELD_FILE, "") ?: ""
+        var fileSuffix = ""
 
-        if (fFile.length > 4 && fFile.lowercase().endsWith(".csv")) {
-            fFile = fFile.substring(0, fFile.length - 4)
+        if (fieldIds.size > 1) {
+            fileNameLabel.text = context.getString(R.string.export_zip_file_name_label)
+            fileSuffix = context.getString(R.string.export_default_multi_export_suffix)
+            checkBundle.visibility = View.GONE
+            checkOverwrite.visibility = View.GONE
+            bundleInfoMessage.visibility = View.VISIBLE
+        } else {
+            fileNameLabel.text = context.getString(R.string.export_csv_file_name_label)
+            var fieldObject = database.getFieldObject(fieldIds[0])
+            fileSuffix = fieldObject.exp_name
+            if (fileSuffix.length > 4 && fileSuffix.lowercase().endsWith(".csv")) {
+                fileSuffix =fileSuffix.substring(0, fileSuffix.length - 4)
+            }
+            checkBundle.visibility = View.VISIBLE
+            checkOverwrite.visibility = View.VISIBLE
+            bundleInfoMessage.visibility = View.GONE
         }
 
-        val exportString = "${timeStamp.format(Calendar.getInstance().time)}_$fFile"
+        val exportString = "${timeStamp.format(Calendar.getInstance().time)}_$fileSuffix"
         exportFile.setText(exportString)
 
         val builder = AlertDialog.Builder(context)
@@ -219,21 +279,71 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 exportFile.text.toString()
             }
 
-            saveDialog.dismiss()
-            mHandler.post(exportData)
+            for (int fieldId : fieldIds) {
+                tasksQueue.add(new ExportDataTask(fieldId));
+            }
 
+            saveDialog.dismiss();
+                startNextTask(); // Start the first task
+            });
+
+//            saveDialog.dismiss()
+//
+//            // Start an export task for each fieldId
+//            val exportTasks = fieldIds.map { fieldId ->
+//                ExportDataTask(fieldId).apply {
+//                    executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+//                }
+//            }
+//
+//            mHandler.post {
+//                bundleExportedFiles(exportTasks)
+//            }
         }
     }
 
-    fun exportBrAPI() {
-        val activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
-        val activeField = if (activeFieldId != -1) {
-            database.getFieldObject(activeFieldId)
-        } else {
-            Toast.makeText(context, R.string.warning_field_missing, Toast.LENGTH_LONG).show()
-            return
-        }
+    private val tasksQueue: Queue<ExportDataTask> = LinkedList()
 
+    private fun startNextTask() {
+        if (tasksQueue.isNotEmpty()) {
+            val nextTask = tasksQueue.poll()
+            nextTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+        } else {
+            // All fields are exported, bundle the files
+            bundleExportedFiles()
+        }
+    }
+
+    private fun bundleExportedFiles(exportTasks: List<ExportDataTask>) {
+        val allFiles = exportTasks.mapNotNull { it.exportedFile }.toTypedArray()
+        val zipFileName = "${exportFileString}.zip"
+        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+
+        exportDir?.let {
+            if (it.exists()) {
+                val zipFile = it.createFile("*/*", zipFileName)
+                val output = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
+                output?.let { outStream ->
+                    ZipUtil.zip(context, allFiles, outStream)
+                    zipFile?.let { nonNullZipFile ->
+                        shareFile(nonNullZipFile)
+                    } ?: run {
+                        Log.e(TAG, "Failed to create zip file")
+                    }
+                }
+            }
+        }
+    }
+
+    fun exportBrAPI(fieldId: Int) {
+//        val activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
+//        val activeField = if (activeFieldId != -1) {
+//            database.getFieldObject(activeFieldId)
+//        } else {
+//            Toast.makeText(context, R.string.warning_field_missing, Toast.LENGTH_LONG).show()
+//            return
+//        }
+        val activeField = database.getFieldObject(fieldId)
         if (activeField.getExp_source() == null ||
             activeField.getExp_source().equals("") ||
             activeField.getExp_source().equals("local")) {
@@ -255,38 +365,11 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
         if (BrAPIService.isLoggedIn(context)) {
             val exportIntent = Intent(context, BrapiExportActivity::class.java)
+            exportIntent.putExtra("FIELD_ID", fieldId)
             context.startActivity(exportIntent)
         } else {
             val brapiAuth = BrapiAuthDialog(context)
             brapiAuth.show()
-        }
-    }
-
-    fun showExportDialog() {
-        val inflater = LayoutInflater.from(context)
-        val layout = inflater.inflate(R.layout.dialog_list_buttonless, null)
-        val exportSourceList: ListView = layout.findViewById(R.id.myList)
-
-        val exportArray = arrayOf(
-            context.getString(R.string.export_source_local),
-            ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.preferences_brapi_server_test))
-        )
-
-        val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
-        exportSourceList.adapter = adapter
-
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle(R.string.export_dialog_title)
-            .setView(layout)
-            .setPositiveButton(context.getString(R.string.dialog_cancel)) { dialog, _ -> dialog.dismiss() }
-            .create()
-            .show()
-
-        exportSourceList.setOnItemClickListener { _, _, which, _ ->
-            when (which) {
-                0 -> exportPermission()
-                1 -> exportBrAPI()
-            }
         }
     }
 
@@ -316,11 +399,12 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         return filename
     }
 
-    inner class ExportDataTask : AsyncTask<Int, Int, Int>() {
+    inner class ExportDataTask(private val fieldId: Int) : AsyncTask<Void, Void, Int>() {
 
         private var fail = false
         private var noData = false
         private lateinit var dialog: ProgressDialog
+        var exportedFile: DocumentFile? = null
 
         override fun onPreExecute() {
             super.onPreExecute()
@@ -333,7 +417,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             dialog.show()
         }
 
-        override fun doInBackground(vararg params: Int?): Int {
+        override fun doInBackground(vararg params: Void?): Int {
             //flag telling if the user checked the media bundle option
             val bundleChecked = ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false)
             val isOnlyUniqueChecked = onlyUnique?.isChecked == true
@@ -353,7 +437,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             val newRanges = newRange.toTypedArray()
 
             // Retrieves the data needed for export
-            val exportData = database.getExportDBData(newRanges, exportTrait)
+            val exportData = database.getExportDBData(newRanges, exportTrait, fieldId)
 
             newRanges.forEach {
                 Log.i("Field Book : Ranges : ", it)
@@ -519,6 +603,11 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                         }
                     }
                 }
+            }
+
+            if (!fail) {
+                // Collect exported files (either dbFile or tableFile)
+                exportedFile = if (checkDbBool) dbFile else tableFile
             }
 
             return 0

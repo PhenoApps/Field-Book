@@ -58,6 +58,7 @@ import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -108,6 +109,7 @@ public class FieldEditorActivity extends ThemedActivity
     private ActionMode actionMode;
     private FieldAdapter adapter;
     private TextView customTitleView;
+    public ExportUtil exportUtil;
 
     @Inject
     DataHelper database;
@@ -190,6 +192,7 @@ public class FieldEditorActivity extends ThemedActivity
 
         toolbar = findViewById(R.id.field_toolbar);
         setSupportActionBar(toolbar);
+        exportUtil = new ExportUtil(this, database);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.settings_fields));
@@ -263,7 +266,11 @@ public class FieldEditorActivity extends ThemedActivity
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.menu_export:
-                    Toast.makeText(getApplicationContext(), "Batch export not yet implemented", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(getApplicationContext(), "Batch export not yet implemented", Toast.LENGTH_SHORT).show();
+                    List<Integer> selectedFieldIds = getSelectedFieldIds();
+                    if (!selectedFieldIds.isEmpty()) {
+                        exportUtil.exportMultipleFields(selectedFieldIds);
+                    }
                     mode.finish();
                     return true;
                 case R.id.menu_archive:
@@ -315,6 +322,16 @@ public class FieldEditorActivity extends ThemedActivity
         });
 
         return builder.create();
+    }
+
+    private List<Integer> getSelectedFieldIds() {
+        List<Integer> selectedFieldIds = new ArrayList<>();
+        for (int position : mAdapter.getSelectedItems()) {
+            FieldObject field = fieldList.get(position);
+            selectedFieldIds.add(field.getExp_id());
+        }
+        Log.d(TAG, "selectedFieldIds: " + selectedFieldIds);
+        return selectedFieldIds;
     }
 
     private String getSelectedFieldNames() {

@@ -439,11 +439,11 @@ public class DataHelper {
     /**
      * Get user created trait observations for currently selected study
      */
-    public List<Observation> getUserTraitObservations() {
+    public List<Observation> getUserTraitObservations(int fieldId) {
 
         open();
 
-        String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(fieldId);
 
         return ObservationDao.Companion.getUserTraitObservations(studyId);
 
@@ -488,11 +488,11 @@ public class DataHelper {
     /**
      * Get user created trait observations for currently selected study
      */
-    public List<FieldBookImage> getUserTraitImageObservations(Context ctx) {
+    public List<FieldBookImage> getUserTraitImageObservations(Context ctx, int fieldId) {
 
         open();
 
-        String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(fieldId);
 
         return ObservationDao.Companion.getUserTraitImageObservations(ctx, studyId, missingPhoto);
 
@@ -923,13 +923,11 @@ public class DataHelper {
     /**
      * Retrieves the columns needed for export using a join statement
      */
-    public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits) {
+    public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits, int fieldId) {
 
         open();
-
         return ObservationUnitPropertyDao.Companion.getExportDbData(
-                ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                ep.getString(GeneralKeys.UNIQUE_NAME, ""), fieldList, traits);
+                fieldId, ep.getString(GeneralKeys.UNIQUE_NAME, ""), fieldList, traits);
 
 //        String fields = arrayToString("range", fieldList);
 //        String activeTraits = arrayToLikeString(traits);

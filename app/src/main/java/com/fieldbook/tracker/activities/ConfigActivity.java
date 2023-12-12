@@ -277,7 +277,7 @@ public class ConfigActivity extends ThemedActivity {
                     break;
                 case 3:
                     if (checkTraitsExist() < 0) return;
-                    exportUtil.exportDataBasedOnPreference();
+                    exportUtil.exportActiveField();
                     break;
                 case 4:
                     intent.setClassName(ConfigActivity.this,

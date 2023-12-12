@@ -62,7 +62,7 @@ public class Utils extends Application {
 
     public static void makeToast(Context context, String message) {
         Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.TOP,0,0);
+//        toast.setGravity(Gravity.TOP,0,0);
         toast.show();
     }
 }

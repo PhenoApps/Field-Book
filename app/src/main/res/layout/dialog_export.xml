@@ -122,11 +122,20 @@
 
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/bundleInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:text="@string/export_multiple_file_message"
+                android:paddingTop="10dp"/>
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="10dp" />
 
             <TextView style="@style/TextViewStyle.Bold"
+                android:id="@+id/fileNameLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/export_file_name" />
