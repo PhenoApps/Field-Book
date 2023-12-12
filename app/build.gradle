@@ -25,6 +25,9 @@ private String makeVersionName() {
 }
 
 android {
+
+    namespace "com.fieldbook.tracker"
+
     signingConfigs {
         playStoreConfig {
             Properties keystoreProps = new Properties()
@@ -82,6 +85,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         dataBinding = true
         viewBinding = true
     }
@@ -178,7 +182,7 @@ dependencies {
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
     //google messed up some packages, this package is temporary until the issue is fixed (Feb 2021)
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
 
     implementation "androidx.fragment:fragment-ktx:1.6.2"
     implementation 'math.geom2d:javaGeom:0.11.1'
@@ -190,12 +194,13 @@ dependencies {
     implementation 'androidx.documentfile:documentfile:1.0.1'
 
     //hilt dependency injection
-    implementation "com.google.dagger:hilt-android:2.48"
+    implementation "com.google.dagger:hilt-android:2.49"
+    kapt "com.google.dagger:hilt-compiler:2.49"
+
     implementation 'androidx.test.ext:junit-ktx:1.1.5'
 
     implementation 'com.google.mlkit:barcode-scanning:17.2.0'
 
-    kapt "com.google.dagger:hilt-compiler:2.48"
     kapt 'com.android.databinding:compiler:3.1.4'
 
     testImplementation 'androidx.test:core:1.5.0'
@@ -241,12 +246,12 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
 
     // For instrumented tests.
-    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.44'
+    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.49'
     // ...with Kotlin.
-    kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.44'
+    kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.49'
 
 
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
 }
 
 kapt {

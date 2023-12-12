@@ -119,9 +119,14 @@ class ScannerActivity : AppCompatActivity() {
 
                                     contentResolver.openOutputStream(file.uri).use { outputStream ->
 
-                                        image.toBitmap()
-                                            .compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
-
+                                        if (outputStream != null) {
+                                            image.toBitmap()
+                                                .compress(
+                                                    Bitmap.CompressFormat.JPEG,
+                                                    90,
+                                                    outputStream
+                                                )
+                                        }
                                     }
 
                                     val msg = "Photo capture succeeded: ${file.uri}"

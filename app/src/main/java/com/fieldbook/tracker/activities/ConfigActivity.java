@@ -932,46 +932,44 @@ public class ConfigActivity extends ThemedActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        switch (item.getItemId()) {
-            case R.id.help:
-                TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_description)),
-                                settingsTapTargetRect(settingsListItemLocation(1), getString(R.string.tutorial_settings_traits_title), getString(R.string.tutorial_settings_traits_description)),
-                                settingsTapTargetRect(settingsListItemLocation(2), getString(R.string.tutorial_settings_collect_title), getString(R.string.tutorial_settings_collect_description)),
-                                settingsTapTargetRect(settingsListItemLocation(3), getString(R.string.tutorial_settings_export_title), getString(R.string.tutorial_settings_export_description)),
-                                settingsTapTargetRect(settingsListItemLocation(4), getString(R.string.tutorial_settings_settings_title), getString(R.string.tutorial_settings_settings_description))
-                        )
-                        .listener(new TapTargetSequence.Listener() {
-                            // This listener will tell us when interesting(tm) events happen in regards to the sequence
-                            @Override
-                            public void onSequenceFinish() {
-                                TapTargetView.showFor(ConfigActivity.this, settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_import)),
-                                        new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
-                                            @Override
-                                            public void onTargetClick(TapTargetView view) {
-                                                super.onTargetClick(view);      // This call is optional
-                                                intent.setClassName(ConfigActivity.this,
-                                                        FieldEditorActivity.class.getName());
-                                                startActivity(intent);
-                                            }
-                                        });
-                            }
+        int itemId = item.getItemId();
+        if (itemId == R.id.help) {
+            TapTargetSequence sequence = new TapTargetSequence(this)
+                    .targets(settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_description)),
+                            settingsTapTargetRect(settingsListItemLocation(1), getString(R.string.tutorial_settings_traits_title), getString(R.string.tutorial_settings_traits_description)),
+                            settingsTapTargetRect(settingsListItemLocation(2), getString(R.string.tutorial_settings_collect_title), getString(R.string.tutorial_settings_collect_description)),
+                            settingsTapTargetRect(settingsListItemLocation(3), getString(R.string.tutorial_settings_export_title), getString(R.string.tutorial_settings_export_description)),
+                            settingsTapTargetRect(settingsListItemLocation(4), getString(R.string.tutorial_settings_settings_title), getString(R.string.tutorial_settings_settings_description))
+                    )
+                    .listener(new TapTargetSequence.Listener() {
+                        // This listener will tell us when interesting(tm) events happen in regards to the sequence
+                        @Override
+                        public void onSequenceFinish() {
+                            TapTargetView.showFor(ConfigActivity.this, settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_import)),
+                                    new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
+                                        @Override
+                                        public void onTargetClick(TapTargetView view) {
+                                            super.onTargetClick(view);      // This call is optional
+                                            intent.setClassName(ConfigActivity.this,
+                                                    FieldEditorActivity.class.getName());
+                                            startActivity(intent);
+                                        }
+                                    });
+                        }
 
-                            @Override
-                            public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
-                                Log.d("TapTargetView", "Clicked on " + lastTarget.id());
-                            }
+                        @Override
+                        public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
+                            Log.d("TapTargetView", "Clicked on " + lastTarget.id());
+                        }
 
-                            @Override
-                            public void onSequenceCanceled(TapTarget lastTarget) {
+                        @Override
+                        public void onSequenceCanceled(TapTarget lastTarget) {
 
-                            }
-                        });
-                sequence.start();
-                break;
-            case R.id.changelog:
-                showChangelog(false, false);
-                break;
+                        }
+                    });
+            sequence.start();
+        } else if (itemId == R.id.changelog) {
+            showChangelog(false, false);
         }
         return super.onOptionsItemSelected(item);
     }

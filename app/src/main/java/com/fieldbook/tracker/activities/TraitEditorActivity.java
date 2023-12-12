@@ -353,41 +353,30 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()) {
-            case R.id.help:
-                TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(traitsTapTargetMenu(R.id.newTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description), 60)
-                                //Todo add overflow menu action
-                        );
+        int itemId = item.getItemId();
+        if (itemId == R.id.help) {
+            TapTargetSequence sequence = new TapTargetSequence(this)
+                    .targets(traitsTapTargetMenu(R.id.newTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description), 60)
+                            //Todo add overflow menu action
+                    );
 
-                if (database.getTraitColumnData("trait") != null) {
-                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
-                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
-                }
+            if (database.getTraitColumnData("trait") != null) {
+                sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
+                sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
+            }
 
-                sequence.start();
-                break;
-
-            case R.id.deleteTrait:
-                checkShowDeleteDialog();
-                break;
-
-            case R.id.sortTrait:
-                sortDialog();
-                break;
-
-            case R.id.importexport:
-                importExportDialog();
-                break;
-
-            case R.id.toggleTrait:
-                changeAllVisibility();
-                break;
-
-            case android.R.id.home:
-                CollectActivity.reloadData = true;
-                finish();
-                break;
+            sequence.start();
+        } else if (itemId == R.id.deleteTrait) {
+            checkShowDeleteDialog();
+        } else if (itemId == R.id.sortTrait) {
+            sortDialog();
+        } else if (itemId == R.id.importexport) {
+            importExportDialog();
+        } else if (itemId == R.id.toggleTrait) {
+            changeAllVisibility();
+        } else if (itemId == android.R.id.home) {
+            CollectActivity.reloadData = true;
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -765,6 +754,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     public void onBackPressed() {
+        super.onBackPressed();
         CollectActivity.reloadData = true;
         finish();
     }

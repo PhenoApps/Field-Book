@@ -185,7 +185,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                     public void run() {
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                         new AlertDialog.Builder(context).setTitle(R.string.dialog_save_error_title)
-                                .setPositiveButton(R.string.okButtonText, (dialogInterface, i) -> {
+                                .setPositiveButton(org.phenoapps.androidlibrary.R.string.okButtonText, (dialogInterface, i) -> {
                                     ((Activity) context).finish();
                                 }).setMessage(R.string.brapi_plot_detail_error).create().show();
                     }
@@ -372,15 +372,11 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.brapi_save_btn:
-                saveStudy();
-                break;
-            case R.id.brapi_cancel_btn:
-                dismiss();
-                break;
-            default:
-                break;
+        int id = v.getId();
+        if (id == R.id.brapi_save_btn) {
+            saveStudy();
+        } else if (id == R.id.brapi_cancel_btn) {
+            dismiss();
         }
         dismiss();
     }
@@ -471,7 +467,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 }
                 alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
-                        .setPositiveButton(R.string.okButtonText, (dialogInterface, i) -> {
+                        .setPositiveButton(org.phenoapps.androidlibrary.R.string.okButtonText, (dialogInterface, i) -> {
                             // Finish our BrAPI import activity
                             ((Activity) context).finish();
                         });
