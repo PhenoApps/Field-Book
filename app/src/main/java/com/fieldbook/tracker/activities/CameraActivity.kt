@@ -87,28 +87,36 @@ class CameraActivity : AppCompatActivity() {
 
         preview.setSurfaceProvider(previewView.surfaceProvider)
 
-        val camera = cameraProvider.bindToLifecycle(
-            this as LifecycleOwner,
-            cameraSelector,
-            preview,
-            imageCapture
-        )
+        try {
 
-        Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
+            val camera = cameraProvider.bindToLifecycle(
+                this as LifecycleOwner,
+                cameraSelector,
+                preview,
+                imageCapture
+            )
 
-        shutterButton.setOnClickListener {
+            Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
 
-            val file = File(cacheDir, "temp.jpg")
+            shutterButton.setOnClickListener {
 
-            val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
-            imageCapture.takePicture(outputFileOptions, cameraExecutor,
-                object : ImageCapture.OnImageSavedCallback {
-                    override fun onError(error: ImageCaptureException) {}
-                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                        setResult(RESULT_OK)
-                        finish()
-                    }
-                })
+                val file = File(cacheDir, "temp.jpg")
+
+                val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
+                imageCapture.takePicture(outputFileOptions, cameraExecutor,
+                    object : ImageCapture.OnImageSavedCallback {
+                        override fun onError(error: ImageCaptureException) {}
+                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                            setResult(RESULT_OK)
+                            finish()
+                        }
+                    })
+            }
+
+        } catch (i: IllegalArgumentException) {
+
+            finishActivity(RESULT_CANCELED)
+
         }
     }
 }
