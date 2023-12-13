@@ -4,14 +4,12 @@
     <!-- Widget styles -->
     <!-- used only in trait editor activity toolbar, it wasn't detecting otherwise -->
     <style name="TraitEditorToolbarPopupMenu" parent="Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">@android:color/white</item>
-        <item name="android:itemBackground">?attr/fb_color_background</item>
+        <item name="android:itemBackground">@drawable/cell</item>
     </style>
 
     <!-- This styles the field editor pop up menu (three dot menu)-->
     <style name="PopUpMenuStyle" parent="Widget.AppCompat.PopupMenu">
-        <item name="android:itemBackground">?attr/fb_color_background</item>
-        <item name="android:popupBackground">?attr/fb_color_background</item>
+        <item name="android:popupBackground">@drawable/cell</item>
     </style>
 
     <!-- styles the trait date picker dialog -->
