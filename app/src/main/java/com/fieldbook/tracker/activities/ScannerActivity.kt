@@ -16,9 +16,14 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.*
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.databinding.ActivityScannerBinding
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
@@ -256,7 +261,7 @@ class ScannerActivity : AppCompatActivity() {
         }
 
         private fun Context.cameraPermissionRequest() {
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(this, R.style.AppAlertDialog)
                 .setTitle("Camera Permission Required")
                 .setMessage("Camera permission is necessary for scanning barcodes")
                 .setPositiveButton("Allow") { _, _ ->

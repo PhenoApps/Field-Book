@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -10,7 +11,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
-import androidx.appcompat.app.AlertDialog
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,7 +22,6 @@ import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.provider.GenericFileProvider
-import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.ExifUtil
 import com.fieldbook.tracker.utilities.FileUtil
@@ -383,7 +382,6 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                 activity?.runOnUiThread {
                     val alert = builder.create()
                     alert.show()
-                    DialogUtils.styleDialogs(alert)
                 }
             }
         }

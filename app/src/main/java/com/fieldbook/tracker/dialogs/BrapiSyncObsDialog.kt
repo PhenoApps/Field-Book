@@ -274,7 +274,7 @@ internal class ImportRunnableTask(val context: Context, val studyObservations: S
     override fun onPostExecute(result: Int) {
         if (dialog!!.isShowing) dialog!!.dismiss()
         if(fail) {
-            val alertDialogBuilder = AlertDialog.Builder(context)
+            val alertDialogBuilder = AlertDialog.Builder(context, R.style.AppAlertDialog)
             alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
                 .setPositiveButton(R.string.dialog_ok) { dialogInterface, i ->
                     // Finish our BrAPI import activity

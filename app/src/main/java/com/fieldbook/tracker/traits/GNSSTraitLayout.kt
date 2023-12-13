@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
@@ -19,7 +20,6 @@ import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.isVisible

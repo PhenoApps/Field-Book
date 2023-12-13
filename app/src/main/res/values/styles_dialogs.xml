@@ -4,6 +4,7 @@
     <!-- Generic dialog theme for field creator dialog -->
 
     <style name="AlertDialogStyle" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/inset_border</item>
         <item name="android:textViewStyle">@style/TextViewStyle</item>
         <item name="buttonBarNegativeButtonStyle">@style/ButtonBarStyle</item>
         <item name="buttonBarNeutralButtonStyle">@style/ButtonBarStyle</item>
@@ -36,6 +37,8 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowSoftInputMode">stateUnchanged</item>
         <item name="android:fitsSystemWindows">true</item>
+
+        <item name="android:windowBackground">@drawable/inset_border</item>
 
         <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle</item>
         <item name="imageButtonStyle">@style/ImageButtonStyle</item>

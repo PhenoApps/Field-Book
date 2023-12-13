@@ -1,13 +1,12 @@
 package com.fieldbook.tracker.utilities
 
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import android.widget.RadioButton
 import android.widget.RadioGroup
-import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 
 interface BluetoothChooseCallback {

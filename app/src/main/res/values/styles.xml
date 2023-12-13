@@ -150,6 +150,11 @@
         <item name="colorAccent">?attr/fb_color_accent</item>
         <item name="android:colorAccent">?attr/fb_color_accent</item>
 
+        <item name="android:popupMenuStyle">@style/PopUpMenuStyle.Base</item>
+    </style>
+
+    <style name="PopUpMenuStyle.Base">
+        <item name="android:popupBackground">@drawable/cell</item>
     </style>
 
 </resources>

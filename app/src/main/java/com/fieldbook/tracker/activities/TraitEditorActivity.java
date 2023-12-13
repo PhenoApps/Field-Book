@@ -19,6 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -443,6 +444,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         });
 
         final AlertDialog importExport = builder.create();
+
         importExport.show();
 
         android.view.WindowManager.LayoutParams params = importExport.getWindow().getAttributes();
@@ -910,7 +912,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public void onMenuItemClicked(View v, TraitObject trait) {
 
-        PopupMenu popupMenu = new PopupMenu(this, v);
+        Context wrapper = new ContextThemeWrapper(this, R.style.PopUpMenuStyle_Base);
+        PopupMenu popupMenu = new PopupMenu(wrapper, v);
 
         //Inflating the Popup using xml file
         popupMenu.getMenuInflater().inflate(R.menu.menu_trait_list_item, popupMenu.getMenu());
@@ -918,9 +921,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         //registering popup with OnMenuItemClickListener
         popupMenu.setOnMenuItemClickListener((item) -> {
 
-                if (item.getTitle().equals(getString(R.string.traits_options_copy))) {
+            if (item.getTitle().equals(getString(R.string.traits_options_copy))) {
 
-                    copyTrait(trait);
+                copyTrait(trait);
 
                 } else if (item.getTitle().equals(getString(R.string.traits_options_delete))) {
 

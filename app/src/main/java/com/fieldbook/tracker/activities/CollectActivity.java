@@ -248,8 +248,8 @@ public class CollectActivity extends ThemedActivity
     /**
      * GeoNav dialog
      */
-    private androidx.appcompat.app.AlertDialog dialogGeoNav;
-    private androidx.appcompat.app.AlertDialog dialogPrecisionLoss;
+    private AlertDialog dialogGeoNav;
+    private AlertDialog dialogPrecisionLoss;
     private boolean mlkitEnabled;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -1523,15 +1523,15 @@ public class CollectActivity extends ThemedActivity
 
     private void showConfirmMultiMeasureDeleteDialog(List<ObservationModel> models) {
 
-        dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_multi_measure_confirm_delete_title)
-            .setPositiveButton(android.R.string.ok, (d, which) -> {
-                deleteMultiMeasures(models);
-            })
-            .setNegativeButton(android.R.string.cancel, (d, which) -> {
-                d.dismiss();
-            })
-            .create();
+        dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                .setTitle(R.string.dialog_multi_measure_confirm_delete_title)
+                .setPositiveButton(android.R.string.ok, (d, which) -> {
+                    deleteMultiMeasures(models);
+                })
+                .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                    d.dismiss();
+                })
+                .create();
 
         if (!dialogMultiMeasureConfirmDelete.isShowing()) {
 
@@ -2415,13 +2415,15 @@ public class CollectActivity extends ThemedActivity
                     dialogPrecisionLoss.dismiss();
                 }
 
-                dialogPrecisionLoss = new androidx.appcompat.app.AlertDialog.Builder(this)
+                dialogPrecisionLoss = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                         .setTitle(getString(R.string.dialog_geonav_precision_loss_title))
                         .setMessage(getString(R.string.dialog_geonav_precision_loss_msg))
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                             dialog.dismiss();
                         })
-                        .show();
+                        .create();
+
+                dialogPrecisionLoss.show();
 
             } catch (Exception e) {
                 e.printStackTrace();

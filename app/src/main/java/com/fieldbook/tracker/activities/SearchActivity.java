@@ -40,9 +40,9 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SearchActivity extends ThemedActivity {
+public class SearchActivity extends ActivityDialog {
     public static String TICK = "\"";
-    private static String TAG = "Field Book";
+    private static final String TAG = "Field Book";
     private SharedPreferences ep;
     private LinearLayout parent;
     private int rangeUntil;

@@ -812,7 +812,8 @@ public class FieldEditorActivity extends ThemedActivity
 
             Log.e(TAG, "Error updating sorting", e);
 
-            new AlertDialog.Builder(this).setTitle(R.string.dialog_save_error_title)
+            new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                    .setTitle(R.string.dialog_save_error_title)
                     .setPositiveButton(org.phenoapps.androidlibrary.R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
                     .setMessage(R.string.sort_dialog_error_saving)
                     .create()
