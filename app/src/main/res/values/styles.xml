@@ -53,6 +53,7 @@
         <item name="fb_seek_bar_color">@color/main_color_seekbar</item>
         <item name="fb_seek_bar_thumb_color">@color/main_color_seekbar_thumb</item>
         <item name="fb_seek_bar">@drawable/custom_seek_bar</item>
+        <item name="fb_border_color">@color/main_border</item>
 
         <!-- these are used in material design components -->
         <item name="android:textColorPrimary">?attr/fb_color_text_dark</item>
@@ -122,6 +123,7 @@
         <item name="fb_value_altered_color">#0000d5</item>
         <item name="fb_color_text_secondary">@color/blue_color_text_secondary</item>
         <item name="fb_button_color_pressed">@color/blue_button_color_pressed</item>
+        <item name="fb_border_color">@color/blue_border</item>
 
         <item name="colorPrimary">?attr/fb_color_primary</item>
         <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
@@ -171,6 +173,7 @@
         </item>
         <item name="fb_seek_bar_color">@color/high_contrast_primary_dark</item>
         <item name="fb_seek_bar_thumb_color">@color/high_contrast_primary_dark</item>
+        <item name="fb_border_color">@color/high_contrast_border</item>
 
         <item name="colorPrimary">?attr/fb_color_primary_dark</item>
         <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>

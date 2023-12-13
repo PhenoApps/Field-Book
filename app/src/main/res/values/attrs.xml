@@ -272,4 +272,5 @@
     <attr name="fb_seek_bar_color" format="color" />
     <attr name="fb_seek_bar_thumb_color" format="color" />
 
+    <attr name="fb_border_color" format="color" />
 </resources>
