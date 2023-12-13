@@ -912,7 +912,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public void onMenuItemClicked(View v, TraitObject trait) {
 
-        Context wrapper = new ContextThemeWrapper(this, R.style.PopUpMenuStyle_Base);
+        Context wrapper = new ContextThemeWrapper(this, R.style.PopupMenuStyle);
         PopupMenu popupMenu = new PopupMenu(wrapper, v);
 
         //Inflating the Popup using xml file

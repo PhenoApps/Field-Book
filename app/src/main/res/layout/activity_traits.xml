@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             android:minHeight="?attr/actionBarSize"
-            app:popupTheme="@style/TraitEditorToolbarPopupMenu"/>
+            app:popupTheme="@style/PopupMenuStyle" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"

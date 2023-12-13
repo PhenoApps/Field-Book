@@ -2,13 +2,8 @@
 <resources>
 
     <!-- Widget styles -->
-    <!-- used only in trait editor activity toolbar, it wasn't detecting otherwise -->
-    <style name="TraitEditorToolbarPopupMenu" parent="Widget.AppCompat.PopupMenu">
-        <item name="android:itemBackground">@drawable/cell</item>
-    </style>
 
-    <!-- This styles the field editor pop up menu (three dot menu)-->
-    <style name="PopUpMenuStyle" parent="Widget.AppCompat.PopupMenu">
+    <style name="PopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
         <item name="android:popupBackground">@drawable/cell</item>
     </style>
 
@@ -17,7 +12,9 @@
         <item name="android:datePickerMode">calendar</item>
         <item name="colorAccent">?attr/fb_color_accent</item>
         <item name="colorControlActivated">?attr/fb_color_primary_dark</item>
-        <item name="android:selectableItemBackgroundBorderless">?attr/fb_color_text_button_background</item>
+        <item name="android:selectableItemBackgroundBorderless">
+            ?attr/fb_color_text_button_background
+        </item>
         <item name="colorControlHighlight">?attr/fb_color_primary</item>
     </style>
 
@@ -129,7 +126,7 @@
     </style>
 
     <style name="OverFlowMenuStyle" parent="Widget.AppCompat.PopupMenu.Overflow">
-        <item name="android:backgroundTint">?attr/fb_color_background</item>
+        <item name="android:popupBackground">@drawable/cell</item>
     </style>
 
     <!-- Action bar (toolbar) style -->
