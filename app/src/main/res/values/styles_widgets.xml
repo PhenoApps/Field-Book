@@ -109,7 +109,7 @@
     </style>
 
     <!-- Preference Search bar card style, inherits android:widget style -->
-    <style name="CardViewStyle" parent="Base.CardView"/>
+    <style name="CardViewStyle" parent="Base.CardView" />
 
     <!-- generic button styling, used in many traits -->
     <style name="ButtonStyle" parent="Widget.AppCompat.Button">
@@ -117,7 +117,12 @@
         <item name="android:textColor">?attr/fb_color_text_dark</item>
         <item name="android:textSize">?attr/fb_body_text_size</item>
         <item name="android:textStyle">bold</item>
-<!--        //<item name="backgroundTint">?attr/fb_button_color_normal</item>-->
+        <!--        //<item name="backgroundTint">?attr/fb_button_color_normal</item>-->
+    </style>
+
+    <!-- generic button styling, used in many traits -->
+    <style name="ButtonStyle.HighContrast">
+        <item name="android:background">@drawable/cell_high_contrast</item>
     </style>
 
     <!-- Options menu overflow icon (three dot button on toolbars mainly) also used in trait list items -->

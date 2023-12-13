@@ -29,6 +29,8 @@
     <color name="main_button_color_pressed">#595959</color>
     <color name="main_subheading_color">#595959</color>
     <color name="main_color_text_secondary">#595959</color>
+    <color name="main_color_seekbar">#42000000</color>
+    <color name="main_color_seekbar_thumb">#90654321</color>
 
     <!-- blue theme colors -->
     <color name="blue_primary">#01A7C2</color>

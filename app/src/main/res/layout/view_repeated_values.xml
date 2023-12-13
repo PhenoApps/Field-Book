@@ -51,7 +51,7 @@
         android:layout_height="48dp"
         android:layout_margin="8dp"
         android:adjustViewBounds="false"
-        android:background="@drawable/selector_round_button_background"
+        android:background="?fb_round_button_background_with_indicator"
         android:contentDescription="@string/view_repeated_values_add_button_content_description"
         android:cropToPadding="false"
         android:elevation="5dp"

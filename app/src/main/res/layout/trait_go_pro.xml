@@ -31,7 +31,7 @@
         <ImageButton
             android:visibility="gone"
             android:contentDescription="@string/trait_go_pro_capture_content_description"
-            android:background="@drawable/circle_background"
+            android:background="?fb_round_button_background"
             android:id="@+id/go_pro_capture_btn"
             android:layout_width="64dp"
             android:layout_height="64dp"

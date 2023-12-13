@@ -38,7 +38,7 @@
                 android:layout_height="75dp"
                 android:layout_gravity="center"
                 android:layout_margin="10dp"
-                android:background="@drawable/custom_round_button"
+                android:background="?fb_round_button_background"
                 android:gravity="center"
                 android:padding="10dp"
                 android:scaleType="fitXY"

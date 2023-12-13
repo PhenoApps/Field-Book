@@ -3,7 +3,6 @@ package com.fieldbook.tracker.traits;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
@@ -297,13 +296,13 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     }
 
     private void pressOnButton(Button button) {
-        button.setTextColor(Color.parseColor(getDisplayColor()));
-        button.getBackground().setColorFilter(getButtonPressedColor(), PorterDuff.Mode.MULTIPLY);
+        //button.setTextColor(Color.parseColor(getDisplayColor()));
+        //button.getBackground().setColorFilter(getButtonPressedColor(), PorterDuff.Mode.MULTIPLY);
     }
 
     private void pressOffButton(Button button) {
-        button.setTextColor(getButtonTextColor());
-        button.getBackground().setColorFilter(getButtonBackgroundColor(), PorterDuff.Mode.MULTIPLY);
+        //button.setTextColor(getButtonTextColor());
+        //button.getBackground().setColorFilter(getButtonBackgroundColor(), PorterDuff.Mode.MULTIPLY);
     }
 
     @Override
