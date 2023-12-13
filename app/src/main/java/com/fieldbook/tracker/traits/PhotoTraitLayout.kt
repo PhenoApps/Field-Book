@@ -310,8 +310,12 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
             //if pressing the delete button bottom button, find the first visible photo to delete
             if (model == null) {
-                val position = (recyclerView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
-                model = (recyclerView.adapter as ImageTraitAdapter).currentList[position]
+                val position =
+                    (recyclerView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+                val adapter = (recyclerView.adapter as ImageTraitAdapter)
+                if (adapter.currentList.isNotEmpty()) {
+                    model = adapter.currentList[position]
+                }
             }
 
             model?.let { m ->
