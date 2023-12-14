@@ -38,6 +38,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.fragment.app.DialogFragment;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -49,6 +50,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
+import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -486,11 +488,9 @@ public class CollectActivity extends ThemedActivity
         observationInfoButton = findViewById(R.id.observationInfoButton);
 
         observationInfoButton.setOnClickListener(view -> {
-            ObservationModel observationModel = getCurrentObservation();
-            String fieldName = ((CollectActivity) getContext()).getPreferences().getString(GeneralKeys.FIELD_FILE, "");
-            Map<String, Object> message = observationModel.showNonNullAttributesDialog(getContext(), getCurrentTrait(), fieldName);
-
-            showObservationMetadata(message);
+            ObservationModel currentObservationObject = getCurrentObservation();
+            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(currentObservationObject);
+            dialogFragment.show(this.getSupportFragmentManager(), "observationMetadata");
         });
 
         initCurrentVals();
@@ -2452,23 +2452,5 @@ public class CollectActivity extends ThemedActivity
             }
         }
         return null;
-    }
-
-    private void showObservationMetadata(Map<String, Object> message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        StringBuilder formattedAttributes = new StringBuilder();
-        for (Map.Entry<String, Object> entry : message.entrySet()) {
-            formattedAttributes.append(entry.getKey()).append(": \n\t\t\t").append(entry.getValue()).append("\n");
-        }
-
-        builder.setTitle(R.string.observation_metadata_title)
-                .setCancelable(true)
-                .setMessage(formattedAttributes.toString())
-                .setPositiveButton(android.R.string.ok, (d, which) -> {
-                    d.dismiss();
-                });
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 }
