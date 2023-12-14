@@ -7,6 +7,9 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.os.Bundle
 import androidx.preference.CheckBoxPreference
 import androidx.preference.EditTextPreference
@@ -42,12 +45,13 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         // Show/hide preferences and category titles based on the ENABLE_GEONAV value
         val geonavEnabledPref: CheckBoxPreference? = findPreference("com.fieldbook.tracker.geonav.ENABLE_GEONAV")
         if (geonavEnabledPref != null) {
-            geonavEnabledPref.setOnPreferenceChangeListener(Preference.OnPreferenceChangeListener { preference, newValue ->
-                val isChecked = newValue as Boolean
-                updatePreferencesVisibility(isChecked)
-                true
-            })
-            updatePreferencesVisibility(geonavEnabledPref.isChecked())
+            geonavEnabledPref.onPreferenceChangeListener =
+                Preference.OnPreferenceChangeListener { preference, newValue ->
+                    val isChecked = newValue as Boolean
+                    updatePreferencesVisibility(isChecked)
+                    true
+                }
+            updatePreferencesVisibility(geonavEnabledPref.isChecked)
         }
 
         (this.activity as PreferencesActivity?)!!.supportActionBar!!.title = getString(R.string.preferences_geonav_title)
@@ -68,8 +72,16 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
         geoNavMethod?.setOnPreferenceChangeListener { preference, newValue ->
 
+            val value = newValue as? String ?: "0"
+
             mPrefs.edit()
                 .putString(GeneralKeys.GEONAV_SEARCH_METHOD, newValue as? String ?: "0").apply()
+
+            if (value == "1") {
+
+                checkRequiredSensors()
+
+            }
 
             updateMethodSummaryText()
             updateParametersVisibility()
@@ -131,6 +143,29 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             updateParametersSummaryText()
 
             true
+        }
+    }
+
+    private fun checkRequiredSensors() {
+
+        context?.packageManager?.let { packageManager ->
+
+            val hasAccelerometer =
+                packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)
+            val hasMagneticSensor =
+                (context?.getSystemService(Context.SENSOR_SERVICE) as SensorManager)
+                    .getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null
+
+            if (!hasAccelerometer || !hasMagneticSensor) {
+
+                AlertDialog.Builder(context, R.style.AppAlertDialog)
+                    .setTitle(R.string.dialog_geonav_prefs_sensor_missing_title)
+                    .setMessage(R.string.dialog_geonav_prefs_sensor_missing_message)
+                    .setPositiveButton(org.phenoapps.androidlibrary.R.string.ok) { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    .create().show()
+            }
         }
     }
 
