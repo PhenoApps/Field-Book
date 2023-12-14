@@ -32,9 +32,9 @@ import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
-import com.fieldbook.tracker.utilities.FileUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -58,7 +58,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 @AndroidEntryPoint
 public class DatabasePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
-    private static int REQUEST_FILE_EXPLORE_CODE = 2;
+    private static final int REQUEST_FILE_EXPLORE_CODE = 2;
 
     PreferenceManager prefMgr;
     Context context;
@@ -264,7 +264,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
         dbSaveDialog.getWindow().setAttributes(params);
     }
 
-    private Runnable exportDB = new Runnable() {
+    private final Runnable exportDB = new Runnable() {
         public void run() {
             new ExportDBTask().execute(0);
         }
