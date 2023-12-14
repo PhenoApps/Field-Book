@@ -185,8 +185,7 @@
         <item name="android:colorAccent">?attr/fb_color_accent</item>
 
         <item name="buttonStyle">@style/ButtonStyle.HighContrast</item>
-        <item name="imageButtonStyle">@style/ButtonStyle.HighContrast</item>
-        <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle.HighContrast</item>
+        <item name="imageButtonStyle">@style/ImageButtonStyle.HighContrast</item>
 
         <item name="fb_seek_bar">@drawable/high_contrast_seek_bar</item>
 

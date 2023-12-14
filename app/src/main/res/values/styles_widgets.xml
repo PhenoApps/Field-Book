@@ -111,8 +111,6 @@
         <item name="backgroundTint">?fb_icon_fill_tint</item>
     </style>
 
-    <style name="FloatingActionButtonStyle.HighContrast"></style>
-
     <!-- Preference Search bar card style, inherits android:widget style -->
     <style name="CardViewStyle" parent="Base.CardView" />
 
@@ -127,6 +125,10 @@
 
     <!-- generic button styling, used in many traits -->
     <style name="ButtonStyle.HighContrast">
+        <item name="android:background">@drawable/cell_high_contrast</item>
+    </style>
+
+    <style name="ImageButtonStyle.HighContrast">
         <item name="android:background">@drawable/cell_high_contrast</item>
     </style>
 
