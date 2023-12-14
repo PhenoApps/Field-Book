@@ -923,11 +923,11 @@ public class DataHelper {
     /**
      * Retrieves the columns needed for export using a join statement
      */
-    public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits, int fieldId) {
+    public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits, int fieldId, String uniqueId) {
 
         open();
         return ObservationUnitPropertyDao.Companion.getExportDbData(
-                fieldId, ep.getString(GeneralKeys.UNIQUE_NAME, ""), fieldList, traits);
+                fieldId, uniqueId, fieldList, traits);
 
 //        String fields = arrayToString("range", fieldList);
 //        String activeTraits = arrayToLikeString(traits);
@@ -979,13 +979,12 @@ public class DataHelper {
      * Convert EAV database to relational
      * TODO add where statement for repeated values
      */
-    public Cursor convertDatabaseToTable(String[] col, ArrayList<TraitObject> traits) {
+    public Cursor convertDatabaseToTable(String[] col, ArrayList<TraitObject> traits, int fieldId, String uniqueId) {
 
         open();
 
         return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
-                ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                ep.getString(GeneralKeys.UNIQUE_NAME, ""), col, traits);
+                fieldId, uniqueId, col, traits);
 
 //        String query;
 //        String[] rangeArgs = new String[col.length];

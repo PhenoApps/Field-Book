@@ -7,10 +7,8 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.os.AsyncTask
+import android.database.Cursor
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.text.Html
 import android.util.Log
 import android.view.LayoutInflater
@@ -34,14 +32,18 @@ import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 /**
  * Checks preconditions before collect and export.
  */
 
-class ExportUtil @Inject constructor(@ActivityContext private val context: Context, private val database: DataHelper) {
-
+class ExportUtil @Inject constructor(@ActivityContext private val context: Context, private val database: DataHelper) : CoroutineScope by MainScope() {
     companion object {
         private const val PERMISSIONS_REQUEST_EXPORT_DATA = 9990
         private const val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
@@ -53,20 +55,15 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private var allColumns: RadioButton? = null
     private var allTraits: RadioButton? = null
     private var activeTraits: RadioButton? = null
-    private var newRange: ArrayList<String> = arrayListOf()
     private var exportTrait: ArrayList<TraitObject> = arrayListOf()
     private var checkDbBool = false
-    private var checkExcelBool = false
+    private var checkTableBool = false
     private var exportFileString = ""
     private lateinit var fFile: String
-
-
-    private val mHandler = Handler(Looper.getMainLooper())
-//    val exportData = Runnable {
-//        ExportDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, 0)
-//    }
-
-
+    private var filesToExport: MutableList<DocumentFile> = mutableListOf()
+    private var processedFieldCount = 0
+    private val ioScope = CoroutineScope(Dispatchers.IO)
+    private var progressDialog: ProgressDialog? = null
 
     private val ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
 
@@ -141,6 +138,44 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         }
     }
 
+    fun exportBrAPI(fieldId: Int) {
+//        val activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
+//        val activeField = if (activeFieldId != -1) {
+//            database.getFieldObject(activeFieldId)
+//        } else {
+//            Toast.makeText(context, R.string.warning_field_missing, Toast.LENGTH_LONG).show()
+//            return
+//        }
+        val activeField = database.getFieldObject(fieldId)
+        if (activeField.getExp_source() == null ||
+            activeField.getExp_source().equals("") ||
+            activeField.getExp_source().equals("local")) {
+
+            Toast.makeText(context, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show()
+            return
+        }
+
+        if (!BrAPIService.checkMatchBrapiUrl(context, activeField.getExp_source())) {
+            val hostURL = BrAPIService.getHostUrl(context)
+            val badSourceMsg = context.resources.getString(
+                R.string.brapi_field_non_matching_sources,
+                activeField.getExp_source(),
+                hostURL
+            )
+            Toast.makeText(context, badSourceMsg, Toast.LENGTH_LONG).show()
+            return
+        }
+
+        if (BrAPIService.isLoggedIn(context)) {
+            val exportIntent = Intent(context, BrapiExportActivity::class.java)
+            exportIntent.putExtra("FIELD_ID", fieldId)
+            context.startActivity(exportIntent)
+        } else {
+            val brapiAuth = BrapiAuthDialog(context)
+            brapiAuth.show()
+        }
+    }
+
     private fun exportLocal(fieldIds: List<Int>) {
         val layout = LayoutInflater.from(context).inflate(R.layout.dialog_export, null)
 
@@ -148,7 +183,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val bundleInfoMessage: TextView = layout.findViewById(R.id.bundleInfo)
         val exportFile: EditText = layout.findViewById(R.id.fileName)
         val checkDB: CheckBox = layout.findViewById(R.id.formatDB)
-        val checkExcel: CheckBox = layout.findViewById(R.id.formatExcel)
+        val checkTable: CheckBox = layout.findViewById(R.id.formatTable)
         onlyUnique = layout.findViewById(R.id.onlyUnique)
         allColumns = layout.findViewById(R.id.allColumns)
         activeTraits = layout.findViewById(R.id.activeTraits)
@@ -159,7 +194,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         checkBundle.setChecked(ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false))
         checkOverwrite.setChecked(ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false))
         checkDB.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE, false))
-        checkExcel.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, false))
+        checkTable.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, false))
 
         val isOnlyUnique = ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, false)
         onlyUnique?.setChecked(isOnlyUnique)
@@ -219,7 +254,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             val isActiveTraitsChecked = activeTraits?.isChecked == true
             val isAllTraitsChecked = allTraits?.isChecked == true
 
-            if (!checkDB.isChecked && !checkExcel.isChecked) {
+            if (!checkDB.isChecked && !checkTable.isChecked) {
                 Toast.makeText(context, context.getString(R.string.export_error_missing_format), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -239,7 +274,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 putBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, isAllColumnsChecked)
                 putBoolean(GeneralKeys.EXPORT_TRAITS_ALL, isAllTraitsChecked)
                 putBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, isActiveTraitsChecked)
-                putBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, checkExcel.isChecked)
+                putBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, checkTable.isChecked)
                 putBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE, checkDB.isChecked)
                 putBoolean(GeneralKeys.EXPORT_OVERWRITE, checkOverwrite.isChecked)
                 putBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, checkBundle.isChecked)
@@ -248,14 +283,14 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
             BaseDocumentTreeUtil.getDirectory(context as Activity, R.string.dir_field_export)
 
-            if (isOnlyUniqueChecked) {
-                newRange.add(ep.getString(GeneralKeys.UNIQUE_NAME, "") ?: "")
-            }
-
-            if (isAllColumnsChecked) {
-                val columns = database.getRangeColumns()
-                newRange.addAll(columns)
-            }
+//            if (isOnlyUniqueChecked) {
+//                newRange.add(ep.getString(GeneralKeys.UNIQUE_NAME, "") ?: "")
+//            }
+//
+//            if (isAllColumnsChecked) {
+//                val columns = database.getRangeColumns()
+//                newRange.addAll(columns)
+//            }
 
             if (isActiveTraitsChecked) {
                 val traits = database.allTraitObjects
@@ -271,7 +306,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             }
 
             checkDbBool = checkDB.isChecked
-            checkExcelBool = checkExcel.isChecked
+            checkTableBool = checkTable.isChecked
 
             exportFileString = if (ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
                 getOverwriteFile(exportFile.text.toString())
@@ -279,97 +314,279 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 exportFile.text.toString()
             }
 
-            for (int fieldId : fieldIds) {
-                tasksQueue.add(new ExportDataTask(fieldId));
+            startExportTasks()
+            saveDialog.dismiss()
+
+        }
+    }
+
+    private fun showProgressDialog() {
+        progressDialog = ProgressDialog(context).apply {
+            isIndeterminate = true
+            setCancelable(false)
+            setMessage(Html.fromHtml(context.getString(R.string.export_progress)))
+            show()
+        }
+    }
+
+    private fun startExportTasks() {
+        showProgressDialog()
+        fieldIds.forEach { fieldId ->
+            launchExportTask(fieldId)
+        }
+    }
+
+    // Launches a new coroutine for each export task
+    private fun launchExportTask(fieldId: Int) {
+        ioScope.launch {
+            val result = exportData(fieldId)
+            withContext(Dispatchers.Main) {
+                handleExportResult(result)
             }
+        }
+    }
 
-            saveDialog.dismiss();
-                startNextTask(); // Start the first task
-            });
-
-//            saveDialog.dismiss()
+    // Function that handles the actual export logic (formerly doInBackground)
+//    private suspend fun exportData(fieldId: Int): ExportResult {
+//        return try {
+//            Log.d(TAG, "Export task started for fieldId: $fieldId")
+//            val fo = database.getFieldObject(fieldId)
+//            val bundleChecked = ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false)
 //
-//            // Start an export task for each fieldId
-//            val exportTasks = fieldIds.map { fieldId ->
-//                ExportDataTask(fieldId).apply {
-//                    executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+//            val columns = ArrayList<String>().apply {
+//                if (onlyUnique?.isChecked == true) add(fo.unique_id)
+//                if (allColumns?.isChecked == true) addAll(database.getRangeColumns())
+//            }
+//            Log.d(TAG, "Columns are: " + columns.joinToString())
+//
+//            val outputStream = context.contentResolver.openOutputStream(file.uri) ?: return
+//            val fw = OutputStreamWriter(outputStream)
+//            val csvWriter: CSVWriter
+//
+////            val exportData = database.getExportDBData(columns.toTypedArray(), exportTrait, fieldId, fo.unique_id)
+////            if (exportData.count == 0) {
+////                return ExportResult.NoData
+////            }
+//
+////            exportData.use { cursor ->
+////                // Process cursor data and create files
+//                if (checkDbBool) {
+//                    val exportData = database.getExportDBData(columns.toTypedArray(), exportTrait, fieldId, fo.unique_id)
+//                    if (exportData.count == 0) {
+//                        return ExportResult.NoData
+//                    }
+//                    val dbFile = createExportFile(fieldId, "database")
+//                    if (dbFile != null) {
+//                        csvWriter = writeToExportFile(exportData, dbFile)
+//                        csvWriter.writeDatabaseFormat(columns)
+//                        filesToExport.add(dbFile)
+//                    }
+//                }
+//                if (checkTableBool) {
+//                    val convertedExportData = database.convertDatabaseToTable(columns.toTypedArray(), exportTrait, fieldId, fo.unique_id)
+//                    if (convertedExportData.count == 0) {
+//                        return ExportResult.NoData
+//                    }
+//                    val tableFile = createExportFile(fieldId, "table")
+//                    if (tableFile != null) {
+//                        csvWriter = writeToExportFile(convertedExportData, tableFile)
+//                        val labels = ArrayList<String>()
+//                        for (trait in exportTrait) labels.add(trait.name)
+//                        csvWriter.writeTableFormat(columns.plus(labels), columns.size, exportTrait)
+//                        filesToExport.add(tableFile)
+//                    }
+//                }
+//
+////            }
+//
+//            if (bundleChecked) {
+//                val fieldObject = database.getFieldObject(fieldId)
+//                fieldObject?.let {
+//                    val studyName = it.exp_name
+//                    val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, studyName)
+//                    mediaDir?.let { dir ->
+//                        if (dir.exists() && dir.isDirectory) {
+//                            filesToExport.add(dir)
+//                        }
+//                    }
 //                }
 //            }
 //
-//            mHandler.post {
-//                bundleExportedFiles(exportTasks)
-//            }
+//            database.updateExpTable(false, false, true, fieldId)
+//            ExportResult.Success("Export successful for fieldId: $fieldId")
+//        } catch (e: Exception) {
+//            Log.e(TAG, "Export failed for fieldId $fieldId: ${e.message}", e)
+//            ExportResult.Failure(e)
+//        }
+//    }
+//
+//    private fun createExportFile(fieldId: Int, fileType: String): DocumentFile? {
+//        val fileName = "${exportFileString}_${fieldId}_$fileType.csv" // Assuming CSV format for both types
+//        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+//        return exportDir?.let {
+//            if (it.exists()) {
+//                val file = it.createFile("text/csv", fileName)
+//                file
+//            } else null
+//        }
+//    }
+//
+//    private fun writeToExportFile(fieldId: Int, cursor: Cursor, file: DocumentFile?, fileType: String) {
+//        if (file == null) return
+//
+//        val outputStream = context.contentResolver.openOutputStream(file.uri) ?: return
+//        outputStream.use { stream ->
+//            val fw = OutputStreamWriter(stream)
+//            val csvWriter: CSVWriter
+//            csvWriter = CSVWriter(fw, cursor)
+//
+////            when (fileType) {
+////                "database" -> {
+////                    csvWriter = CSVWriter(fw, cursor)
+////                    csvWriter.writeDatabaseFormat(newRange)
+////                }
+////                "table" -> {
+////                    val newRanges = newRange.toTypedArray()
+////                    val fo = database.getFieldObject(fieldId)
+////                    val convertedExportData = database.convertDatabaseToTable(newRanges, exportTrait, fieldId, fo.unique_id)
+////                    csvWriter = CSVWriter(fw, convertedExportData)
+////                    val labels = ArrayList<String>()
+////                    for (trait in exportTrait) labels.add(trait.name)
+////                    csvWriter.writeTableFormat(newRanges.plus(labels), newRanges.size, exportTrait)
+////                }
+////            }
+//            Unit // Explicitly specify the return type as Unit
+//        }
+//    }
+
+    // ... [Other class code remains unchanged]
+
+    private suspend fun exportData(fieldId: Int): ExportResult {
+        return try {
+            Log.d(TAG, "Export task started for fieldId: $fieldId")
+            val fo = database.getFieldObject(fieldId)
+            val bundleChecked = ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false)
+
+            val columns = ArrayList<String>().apply {
+                if (onlyUnique?.isChecked == true) add(fo.unique_id)
+                if (allColumns?.isChecked == true) addAll(database.getRangeColumns())
+            }
+            Log.d(TAG, "Columns are: " + columns.joinToString())
+
+            if (checkDbBool) {
+                val exportData = database.getExportDBData(columns.toTypedArray(), exportTrait, fieldId, fo.unique_id)
+                if (exportData.count > 0) {
+                    createAndWriteToExportFile(fieldId, exportData, "database", columns)
+                }
+            }
+
+            if (checkTableBool) {
+                val convertedExportData = database.convertDatabaseToTable(columns.toTypedArray(), exportTrait, fieldId, fo.unique_id)
+                if (convertedExportData.count > 0) {
+                    createAndWriteToExportFile(fieldId, convertedExportData, "table", columns)
+                }
+            }
+
+            if (bundleChecked) {
+                handleBundledFiles(fieldId)
+            }
+
+            database.updateExpTable(false, false, true, fieldId)
+            ExportResult.Success("Export successful for fieldId: $fieldId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Export failed for fieldId $fieldId: ${e.message}", e)
+            ExportResult.Failure(e)
         }
     }
 
-    private val tasksQueue: Queue<ExportDataTask> = LinkedList()
-
-    private fun startNextTask() {
-        if (tasksQueue.isNotEmpty()) {
-            val nextTask = tasksQueue.poll()
-            nextTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
-        } else {
-            // All fields are exported, bundle the files
-            bundleExportedFiles()
-        }
-    }
-
-    private fun bundleExportedFiles(exportTasks: List<ExportDataTask>) {
-        val allFiles = exportTasks.mapNotNull { it.exportedFile }.toTypedArray()
-        val zipFileName = "${exportFileString}.zip"
+    private fun createAndWriteToExportFile(fieldId: Int, cursor: Cursor, fileType: String, columns: ArrayList<String>) {
+        val fileName = "${exportFileString}_${fieldId}_$fileType.csv"
         val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
-
-        exportDir?.let {
-            if (it.exists()) {
-                val zipFile = it.createFile("*/*", zipFileName)
-                val output = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
-                output?.let { outStream ->
-                    ZipUtil.zip(context, allFiles, outStream)
-                    zipFile?.let { nonNullZipFile ->
-                        shareFile(nonNullZipFile)
-                    } ?: run {
-                        Log.e(TAG, "Failed to create zip file")
+        exportDir?.let { dir ->
+            if (dir.exists()) {
+                val file = dir.createFile("text/csv", fileName)
+                file?.let { docFile ->
+                    val outputStream = context.contentResolver.openOutputStream(docFile.uri) ?: return
+                    outputStream.use { stream ->
+                        val fw = OutputStreamWriter(stream)
+                        val csvWriter = CSVWriter(fw, cursor)
+                        when (fileType) {
+                            "database" -> csvWriter.writeDatabaseFormat(columns)
+                            "table" -> {
+                                val newColumns = columns.toTypedArray()
+                                val labels = exportTrait.map { it.name }
+                                csvWriter.writeTableFormat(newColumns.plus(labels), columns.size, exportTrait)
+                            }
+                        }
                     }
+                    filesToExport.add(docFile)
                 }
             }
         }
     }
 
-    fun exportBrAPI(fieldId: Int) {
-//        val activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
-//        val activeField = if (activeFieldId != -1) {
-//            database.getFieldObject(activeFieldId)
-//        } else {
-//            Toast.makeText(context, R.string.warning_field_missing, Toast.LENGTH_LONG).show()
-//            return
-//        }
-        val activeField = database.getFieldObject(fieldId)
-        if (activeField.getExp_source() == null ||
-            activeField.getExp_source().equals("") ||
-            activeField.getExp_source().equals("local")) {
-
-            Toast.makeText(context, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show()
-            return
+    private fun handleBundledFiles(fieldId: Int) {
+        val fieldObject = database.getFieldObject(fieldId)
+        fieldObject?.let {
+            val studyName = it.exp_name
+            val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, studyName)
+            mediaDir?.let { dir ->
+                if (dir.exists() && dir.isDirectory) {
+                    filesToExport.add(dir)
+                }
+            }
         }
+    }
 
-        if (!BrAPIService.checkMatchBrapiUrl(context, activeField.getExp_source())) {
-            val hostURL = BrAPIService.getHostUrl(context)
-            val badSourceMsg = context.resources.getString(
-                R.string.brapi_field_non_matching_sources,
-                activeField.getExp_source(),
-                hostURL
-            )
-            Toast.makeText(context, badSourceMsg, Toast.LENGTH_LONG).show()
-            return
+    private fun createZipFile(files: List<DocumentFile>, zipFileName: String): DocumentFile? {
+        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+        return exportDir?.let { dir ->
+            if (dir.exists()) {
+                val zipFile = dir.createFile("application/zip", zipFileName)
+                zipFile?.let { zf ->
+                    val outputStream = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
+                    outputStream?.let { os ->
+                        ZipUtil.zip(context, files.toTypedArray(), os)
+                        // Optionally, delete the original files after zipping
+                        files.forEach { it.delete() }
+                        zf
+                    }
+                }
+            } else null
         }
+    }
 
-        if (BrAPIService.isLoggedIn(context)) {
-            val exportIntent = Intent(context, BrapiExportActivity::class.java)
-            exportIntent.putExtra("FIELD_ID", fieldId)
-            context.startActivity(exportIntent)
-        } else {
-            val brapiAuth = BrapiAuthDialog(context)
-            brapiAuth.show()
+    sealed class ExportResult {
+        data class Success(val message: String): ExportResult()
+        data class Failure(val error: Throwable): ExportResult()
+        object NoData: ExportResult()
+    }
+
+
+    // Function to handle the result of the export (formerly onPostExecute)
+    private fun handleExportResult(result: ExportResult) {
+        when (result) {
+            is ExportResult.Success -> {
+                processedFieldCount++
+                if (processedFieldCount == fieldIds.size) {
+                    val finalFile = if (filesToExport.size > 1) {
+                        val zipFileName = "${exportFileString}_final.zip"
+                        createZipFile(filesToExport, zipFileName)
+                    } else {
+                        filesToExport.firstOrNull()
+                    }
+
+                    progressDialog?.dismiss()
+                    finalFile?.let { shareFile(it) }
+                    showCitationDialog()
+                }
+            }
+            is ExportResult.Failure -> {
+                Toast.makeText(context, context.getString(R.string.export_error_general), Toast.LENGTH_SHORT).show()
+            }
+            ExportResult.NoData -> {
+                Toast.makeText(context, context.getString(R.string.export_error_data_missing), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -389,7 +606,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                         oldDoc.renameTo(newName)
                     }
 
-                    if (checkExcelBool && fileName.contains(fFile) && fileName.contains("table")) {
+                    if (checkTableBool && fileName.contains(fFile) && fileName.contains("table")) {
                         oldDoc.renameTo(newName)
                     }
                 }
@@ -397,242 +614,6 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         }
 
         return filename
-    }
-
-    inner class ExportDataTask(private val fieldId: Int) : AsyncTask<Void, Void, Int>() {
-
-        private var fail = false
-        private var noData = false
-        private lateinit var dialog: ProgressDialog
-        var exportedFile: DocumentFile? = null
-
-        override fun onPreExecute() {
-            super.onPreExecute()
-            fail = false
-
-            dialog = ProgressDialog(context)
-            dialog.isIndeterminate = true
-            dialog.setCancelable(false)
-            dialog.setMessage(Html.fromHtml(context.getString(R.string.export_progress)))
-            dialog.show()
-        }
-
-        override fun doInBackground(vararg params: Void?): Int {
-            //flag telling if the user checked the media bundle option
-            val bundleChecked = ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false)
-            val isOnlyUniqueChecked = onlyUnique?.isChecked == true
-            val isAllColumnsChecked = allColumns?.isChecked == true
-
-            newRange.clear()
-
-            if (isOnlyUniqueChecked) {
-                newRange.add(ep.getString(GeneralKeys.UNIQUE_NAME, "") ?: "")
-            }
-
-            if (isAllColumnsChecked) {
-                val columns = database.getRangeColumns()
-                newRange.addAll(columns)
-            }
-
-            val newRanges = newRange.toTypedArray()
-
-            // Retrieves the data needed for export
-            val exportData = database.getExportDBData(newRanges, exportTrait, fieldId)
-
-            newRanges.forEach {
-                Log.i("Field Book : Ranges : ", it)
-            }
-
-            exportTrait.forEach {
-                Log.i("Field Book : Traits : ", it.name)
-            }
-
-            if (exportData.count == 0) {
-                noData = true
-                return 0
-            }
-
-            // Separate files for table and database
-            var dbFile: DocumentFile? = null
-            var tableFile: DocumentFile? = null
-
-            val traits = database.getAllTraitObjects()
-
-            // Check if export database has been selected
-            if (checkDbBool) {
-                if (exportData.count > 0) {
-                    try {
-                        val exportFileName = "${exportFileString}_database.csv"
-                        dbFile = BaseDocumentTreeUtil.getFile(context, R.string.dir_field_export, exportFileName)
-                        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
-
-                        dbFile?.let {
-                            if (it.exists()) it.delete()
-                        }
-
-                        exportDir?.let {
-                            if (it.exists()) dbFile = it.createFile("*/*", exportFileName)
-                        }
-
-                        val output = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, exportFileName)
-
-                        output?.let {
-                            val fw = OutputStreamWriter(it)
-                            val csvWriter = CSVWriter(fw, exportData)
-                            csvWriter.writeDatabaseFormat(newRange)
-                        }
-
-                    } catch (e: Exception) {
-                        fail = true
-                    }
-                }
-            }
-
-            // Check if export table has been selected
-            if (checkExcelBool) {
-                if (exportData.count > 0) {
-                    try {
-                        val tableFileName = "${exportFileString}_table.csv"
-                        tableFile = BaseDocumentTreeUtil.getFile(context, R.string.dir_field_export, tableFileName)
-                        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
-
-                        tableFile?.let {
-                            if (it.exists()) it.delete()
-                        }
-
-                        exportDir?.let {
-                            if (it.exists()) tableFile = it.createFile("*/*", tableFileName)
-                        }
-
-                        val output = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, tableFileName)
-                        val fw = OutputStreamWriter(output)
-
-                        val convertedExportData = database.convertDatabaseToTable(newRanges, exportTrait)
-                        val csvWriter = CSVWriter(fw, convertedExportData)
-
-                        val labels = ArrayList<String>()
-                        for (trait in exportTrait) labels.add(trait.name)
-                        csvWriter.writeTableFormat(newRanges.plus(labels), newRanges.size, traits)
-
-                    } catch (e: Exception) {
-                        fail = true
-                    }
-                }
-            }
-
-            // If the export did not fail, create a zip file with the exported files
-            if (!fail) {
-                val zipFileName = "${exportFileString}.zip"
-
-                // If bundle is checked, zip the files with the media dir for the given study
-                if (bundleChecked) {
-                    val studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-
-                    // Study name is the same as the media directory in plot_data
-                    val fieldObject = database.getFieldObject(studyId)
-
-                    fieldObject?.let {
-                        val studyName = it.exp_name
-
-                        // Create media dir directory from fieldBook/plot_data/studyName path
-                        val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, studyName)
-
-                        mediaDir?.let { dir ->
-                            if (dir.exists()) {
-                                val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
-
-                                exportDir?.let { expDir ->
-                                    if (expDir.exists()) {
-                                        val zipFile = expDir.createFile("*/*", zipFileName)
-
-                                        val output = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
-
-                                        output?.let { outStream ->
-                                            val paths = arrayListOf<DocumentFile>()
-                                            dbFile?.let { paths.add(it) }
-                                            tableFile?.let { paths.add(it) }
-                                            paths.add(dir)
-
-                                            ZipUtil.zip(context, paths.toTypedArray(), outStream)
-
-                                            dbFile?.delete()
-                                            tableFile?.delete()
-
-                                            zipFile?.let { nonNullZipFile ->
-                                                shareFile(nonNullZipFile)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
-
-                    exportDir?.let {
-                        if (it.exists()) {
-                            if (checkDbBool && checkExcelBool) {
-                                val zipFile = it.createFile("*/*", zipFileName)
-
-                                val output = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
-
-                                output?.let { outStream ->
-                                    val paths = arrayListOf<DocumentFile>()
-                                    dbFile?.let { paths.add(it) }
-                                    tableFile?.let { paths.add(it) }
-
-                                    ZipUtil.zip(context, paths.toTypedArray(), outStream)
-
-                                    dbFile?.delete()
-                                    tableFile?.delete()
-
-                                    zipFile?.let { nonNullZipFile ->
-                                        shareFile(nonNullZipFile)
-                                    }
-                                }
-                            } else if (checkDbBool) {
-                                dbFile?.let { nonNullDbFile ->
-                                    shareFile(nonNullDbFile)
-                                }
-                            } else if (checkExcelBool) {
-                                tableFile?.let { nonNullTableFile ->
-                                    shareFile(nonNullTableFile)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (!fail) {
-                // Collect exported files (either dbFile or tableFile)
-                exportedFile = if (checkDbBool) dbFile else tableFile
-            }
-
-            return 0
-        }
-
-        override fun onPostExecute(result: Int?) {
-            newRange.clear()
-
-            if (dialog.isShowing) {
-                dialog.dismiss()
-            }
-
-            if (!fail) {
-                showCitationDialog()
-                database.updateExpTable(false, false, true, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0))
-            }
-
-            if (fail) {
-                Toast.makeText(context, context.getString(R.string.export_error_general), Toast.LENGTH_SHORT).show()
-            }
-
-            if (noData) {
-                Toast.makeText(context, context.getString(R.string.export_error_data_missing), Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     /**
