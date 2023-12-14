@@ -105,8 +105,13 @@
 
     <!-- fab styling, used in the trait editor activity -->
     <style name="FloatingActionButtonStyle" parent="Widget.Design.FloatingActionButton">
-        <item name="backgroundTint">?attr/fb_color_primary</item>
+        <!--        <item name="backgroundTint">?attr/fb_color_primary</item>-->
+        <item name="borderWidth">2dp</item>
+        <item name="android:backgroundTint">?fb_color_primary</item>
+        <item name="backgroundTint">?fb_icon_fill_tint</item>
     </style>
+
+    <style name="FloatingActionButtonStyle.HighContrast"></style>
 
     <!-- Preference Search bar card style, inherits android:widget style -->
     <style name="CardViewStyle" parent="Base.CardView" />
