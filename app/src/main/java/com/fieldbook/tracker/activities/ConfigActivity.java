@@ -250,7 +250,20 @@ public class ConfigActivity extends ThemedActivity {
 
         Log.d(TAG, Build.MANUFACTURER);
 
+        eInkDeviceSetup();
+
+        verifyPersonHelper.updateLastOpenedTime();
+    }
+
+    private void eInkDeviceSetup() {
+
         if (ManufacturerUtil.Companion.isEInk()) {
+
+            if (ManufacturerUtil.Companion.isOnyx()) {
+
+                ManufacturerUtil.Companion.transferHighContrastIcon(getResources());
+
+            }
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             if (!prefs.getString(GeneralKeys.THEME, "0").equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
@@ -259,8 +272,6 @@ public class ConfigActivity extends ThemedActivity {
 
             }
         }
-
-        verifyPersonHelper.updateLastOpenedTime();
     }
 
     private void askUserSwitchToHighContrastTheme() {
@@ -275,6 +286,7 @@ public class ConfigActivity extends ThemedActivity {
                             .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.HIGH_CONTRAST))
                             .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
                             .apply();
+
                     onResume();
                 })
                 .setNegativeButton(R.string.dialog_no, (d, which) -> {

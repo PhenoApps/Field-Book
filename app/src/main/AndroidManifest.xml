@@ -7,6 +7,7 @@
         android:name=".application.FieldBook"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:label="@string/field_book"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
@@ -71,7 +72,9 @@
             android:name=".activities.PreferencesActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"></activity> <!-- About activity uses a library, which uses material design components, it has its own style file -->
+            android:screenOrientation="portrait" />
+
+        <!-- About activity uses a library, which uses material design components, it has its own style file -->
         <!-- shows version information and references to other apps, etc. -->
         <activity
             android:name=".activities.AboutActivity"
@@ -150,16 +153,11 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity> <!-- barcode capture activity -->
+            android:theme="@style/AppTheme" /> <!-- barcode capture activity -->
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"
-            tools:replace="android:screenOrientation" /> <!-- used to define SAF storage directory, required at start of app -->
-        <activity android:name=".activities.DefineStorageActivity" /> <!-- found in preferences, used to select a TTS language locale -->
-        <activity
-            android:name=".activities.LocaleChoiceActivity"
-            android:theme="@style/AppTheme" />
             tools:replace="android:screenOrientation" />
 
         <!-- used to define SAF storage directory, required at start of app -->
