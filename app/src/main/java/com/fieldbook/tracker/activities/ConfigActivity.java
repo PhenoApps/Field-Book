@@ -37,6 +37,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiExportActivity;
@@ -44,7 +45,6 @@ import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
@@ -71,6 +71,7 @@ import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.io.IOException;
@@ -144,6 +145,7 @@ public class ConfigActivity extends ThemedActivity {
     private Menu systemMenu;
     //barcode search fab
     private FloatingActionButton barcodeSearchFab;
+    private boolean mlkitEnabled;
 
     private void invokeDatabaseImport(DocumentFile doc) {
 
@@ -353,13 +355,20 @@ public class ConfigActivity extends ThemedActivity {
             loadSampleDataDialog();
         }
 
+        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
+
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
-            new IntentIntegrator(this)
-                    .setPrompt(getString(R.string.barcode_scanner_text))
-                    .setBeepEnabled(false)
-                    .setRequestCode(REQUEST_BARCODE)
-                    .initiateScan();
+            if(mlkitEnabled) {
+                ScannerActivity.Companion.requestCameraAndStartScanner(this, REQUEST_BARCODE, null, null, null);
+            }
+            else {
+                new IntentIntegrator(this)
+                        .setPrompt(getString(R.string.barcode_scanner_text))
+                        .setBeepEnabled(false)
+                        .setRequestCode(REQUEST_BARCODE)
+                        .initiateScan();
+            }
         });
 
         //this must happen after migrations and can't be injected in config
@@ -711,8 +720,7 @@ public class ConfigActivity extends ThemedActivity {
             }
 
             if (allTraits.isChecked()) {
-                ArrayList<TraitObject> traits = database.getAllTraitObjects();
-                exportTrait.addAll(traits);
+                exportTrait.addAll(database.getAllTraitObjects());
             }
 
             checkDbBool = checkDB.isChecked();
@@ -839,9 +847,14 @@ public class ConfigActivity extends ThemedActivity {
             if (resultCode == RESULT_OK) {
 
                 // get barcode from scan result
-                IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                String scannedBarcode = plotDataResult.getContents();
-
+                String scannedBarcode;
+                if(mlkitEnabled){
+                    scannedBarcode = data.getStringExtra("barcode");
+                }
+                else {
+                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    scannedBarcode = plotDataResult.getContents();
+                }
                 try {
 
                     fuzzyBarcodeSearch(scannedBarcode);
@@ -874,12 +887,15 @@ public class ConfigActivity extends ThemedActivity {
     @AfterPermissionGranted(PERMISSIONS_REQUEST_TRAIT_DATA)
     public void collectDataFilePermission() {
         String[] perms = {Manifest.permission.VIBRATE, Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+        String[] finePerms = {Manifest.permission.ACCESS_FINE_LOCATION};
+        String[] coarsePerms = {Manifest.permission.ACCESS_COARSE_LOCATION};
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            perms = new String[] {Manifest.permission.VIBRATE, Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
+            perms = new String[]{Manifest.permission.VIBRATE, Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA};
         }
 
-        if (EasyPermissions.hasPermissions(this, perms)) {
+        if (EasyPermissions.hasPermissions(this, perms)
+                && (EasyPermissions.hasPermissions(this, finePerms) || EasyPermissions.hasPermissions(this, coarsePerms))) {
             Intent intent = new Intent();
 
             intent.setClassName(ConfigActivity.this,
@@ -888,7 +904,7 @@ public class ConfigActivity extends ThemedActivity {
         } else {
             // Do not have permissions, request them now
             EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_trait_features),
-                    PERMISSIONS_REQUEST_TRAIT_DATA, perms);
+                    PERMISSIONS_REQUEST_TRAIT_DATA, ArrayUtils.addAll(ArrayUtils.addAll(perms, finePerms), coarsePerms));
         }
     }
 
@@ -988,7 +1004,7 @@ public class ConfigActivity extends ThemedActivity {
 
         try {
 
-            FieldObject[] fs = StudyDao.Companion.getAllFieldObjects().toArray(new FieldObject[0]);
+            FieldObject[] fs = database.getAllFieldObjects().toArray(new FieldObject[0]);
 
             if (fs.length > 0) {
 
@@ -1063,7 +1079,7 @@ public class ConfigActivity extends ThemedActivity {
             }
 
             for (TraitObject j : exportTrait) {
-                Log.i("Field Book : Traits : ", j.getTrait());
+                Log.i("Field Book : Traits : ", j.getName());
             }
 
             if (exportData.getCount() == 0) {
@@ -1135,11 +1151,10 @@ public class ConfigActivity extends ThemedActivity {
                         exportData = database.convertDatabaseToTable(newRanges, exportTrait);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        ArrayList<String> labels = new ArrayList<>();
-                        labels.addAll(Arrays.asList(newRanges));
-                        for (TraitObject trait : exportTrait) labels.add(trait.getTrait());
+                        ArrayList<String> labels = new ArrayList<>(Arrays.asList(newRanges));
+                        for (TraitObject t : exportTrait) labels.add(t.getName());
 
-                        csvWriter.writeTableFormat(labels.toArray(new String[] {}), labels.size(), traits);
+                        csvWriter.writeTableFormat(labels.toArray(new String[]{}), newRanges.length, traits);
 
                     } catch (Exception e) {
                         fail = true;
@@ -1159,7 +1174,7 @@ public class ConfigActivity extends ThemedActivity {
                     int studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
                     //study name is the same as the media directory in plot_data
-                    FieldObject fieldObject = StudyDao.Companion.getFieldObject(studyId);
+                    FieldObject fieldObject = database.getFieldObject(studyId);
 
                     if (fieldObject != null) {
 

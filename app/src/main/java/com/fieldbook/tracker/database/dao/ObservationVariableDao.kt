@@ -7,6 +7,7 @@ import android.database.MatrixCursor
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
+import com.fieldbook.tracker.database.models.ObservationVariableModel
 import com.fieldbook.tracker.objects.TraitObject
 
 class ObservationVariableDao {
@@ -59,7 +60,7 @@ class ObservationVariableDao {
         private fun Map<String, Any?>.toTraitObject() = if (this.isEmpty()) {null} else { TraitObject().also {
 
             it.id = this[ObservationVariable.PK].toString()
-            it.trait = this["observation_variable_name"] as? String ?: ""
+            it.name = this["observation_variable_name"] as? String ?: ""
             it.format = this["observation_variable_field_book_format"] as? String ?: ""
             it.defaultValue = this["default_value"].toString()
             it.details = this["observation_variable_details"].toString()
@@ -78,14 +79,17 @@ class ObservationVariableDao {
             it.externalDbId = this["external_db_id"].toString()
             it.traitDataSource = this["trait_data_source"].toString()
 
-        }}
+        }
+        }
+
         /**
          * TODO: Replace with View.
          */
         @SuppressLint("Recycle")
-        fun getTraitExists(uniqueName: String, id: Int, traitDbId: String): Boolean = withDatabase { db ->
+        fun getTraitExists(uniqueName: String, id: Int, traitDbId: String): Boolean =
+            withDatabase { db ->
 
-            val query = """
+                val query = """
                 SELECT id, value
                 FROM observations, ObservationUnitProperty
                 WHERE observations.observation_unit_id = ObservationUnitProperty.'$uniqueName' 
@@ -96,7 +100,8 @@ class ObservationVariableDao {
 //            println("$id $parent $trait")
 //            println(query)
 
-            val columnNames = db.rawQuery(query, arrayOf(id.toString(), traitDbId)).toFirst().keys
+                val columnNames =
+                    db.rawQuery(query, arrayOf(id.toString(), traitDbId)).toFirst().keys
 
             "value" in columnNames
 
@@ -188,7 +193,7 @@ class ObservationVariableDao {
                 traits.forEach { trait ->
                     cursor.addRow(requiredFields.map {
                         when (it) {
-                            "trait" -> trait.trait
+                            "trait" -> trait.name
                             "format" -> trait.format
                             "defaultValue" -> trait.defaultValue
                             "minimum" -> trait.minimum
@@ -204,13 +209,24 @@ class ObservationVariableDao {
             }
         }
 
+        fun getById(id: String): ObservationVariableModel? = withDatabase { db ->
+
+            ObservationVariableModel(
+                db.query(
+                    ObservationVariable.tableName,
+                    where = "internal_id_observation_variable = ?",
+                    whereArgs = arrayOf(id)
+                ).toFirst()
+            )
+        }
+
         fun getAllTraitObjects(): ArrayList<TraitObject> = withDatabase { db ->
 
             ArrayList(db.query(ObservationVariable.tableName, orderBy = "position").toTable().map {
 
                 TraitObject().apply {
 
-                    trait = (it["observation_variable_name"] as? String ?: "")
+                    name = (it["observation_variable_name"] as? String ?: "")
                     format = it["observation_variable_field_book_format"] as? String ?: ""
                     defaultValue = it["default_value"] as? String ?: ""
                     details = it["observation_variable_details"] as? String ?: ""
@@ -259,21 +275,22 @@ class ObservationVariableDao {
         //TODO missing obs. vars. for min/max/categories
         fun insertTraits(t: TraitObject) = withDatabase { db ->
 
-            if (getTraitByName(t.trait) != null) -1
+            if (getTraitByName(t.name) != null) -1
             else {
 
-                val varRowId = db.insert(ObservationVariable.tableName, null,
-                        ContentValues().apply {
+                val varRowId = db.insert(
+                    ObservationVariable.tableName, null,
+                    ContentValues().apply {
 //                            put(PK, t.id)
-                            put("external_db_id", t.externalDbId)
-                            put("trait_data_source", t.traitDataSource)
-                            put("observation_variable_name", t.trait)
-                            put("observation_variable_details", t.details)
-                            put("observation_variable_field_book_format", t.format)
-                            put("default_value", t.defaultValue)
-                            put("visible", t.visible.toString())
-                            put("position", t.realPosition)
-                            put("additional_info", t.additionalInfo)
+                        put("external_db_id", t.externalDbId)
+                        put("trait_data_source", t.traitDataSource)
+                        put("observation_variable_name", t.name)
+                        put("observation_variable_details", t.details)
+                        put("observation_variable_field_book_format", t.format)
+                        put("default_value", t.defaultValue)
+                        put("visible", t.visible.toString())
+                        put("position", t.realPosition)
+                        put("additional_info", t.additionalInfo)
                         })
 
                 ObservationVariableValueDao.insert(
@@ -338,10 +355,12 @@ class ObservationVariableDao {
 
         fun updateTraitVisibility(traitDbId: String, visible: String) = withDatabase { db ->
 
-            db.update(ObservationVariable.tableName,
-                    ContentValues().apply { put("visible", visible) },
-                    "internal_id_observation_variable = ?",
-                    arrayOf(traitDbId))
+            db.update(
+                ObservationVariable.tableName,
+                ContentValues().apply { put("visible", visible) },
+                "internal_id_observation_variable = ?",
+                arrayOf(traitDbId)
+            )
         }
 
         fun writeNewPosition(column: String, id: String, position: String) = withDatabase { db ->

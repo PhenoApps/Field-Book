@@ -33,9 +33,9 @@ data class StudyObservations(var fieldBookStudyDbId:Int=0, val traitList: Mutabl
     }
 }
 
-class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.OnClickListener {
+class BrapiSyncObsDialog(context: Context) : Dialog(context), View.OnClickListener {
     private var saveBtn: Button? = null
-    private var noObsLabel : TextView? = null
+    private var noObsLabel: TextView? = null
     private var brAPIService: BrAPIService? = null
 
     private var studyObservations = StudyObservations()
@@ -108,7 +108,7 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
                 val observationVariableDbIds: MutableList<String> = ArrayList()
 
                 for (obj in input.traits) {
-                    println("Trait:" + obj.trait)
+                    println("Trait:" + obj.name)
                     println("ObsIds: " + obj.externalDbId)
                     observationVariableDbIds.add(obj.externalDbId)
                 }
@@ -116,7 +116,8 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
                     StudyObservations(fieldBookStudyDbId, input.traits, mutableListOf())
                 studyObservations.merge(traitStudy)
 
-                brAPIService!!.getObservations(brapiStudyDbId,
+                brAPIService.getObservations(
+                    brapiStudyDbId,
                     observationVariableDbIds,
                     paginationManager,
                     { obsInput ->
@@ -239,7 +240,7 @@ internal class ImportRunnableTask(val context: Context, val studyObservations: S
         }
         catch (exc: Exception) {
             fail = true
-            failMessage = exc?.message?:"ERROR"
+            failMessage = exc.message ?: "ERROR"
             return null
         }
 
@@ -263,7 +264,7 @@ internal class ImportRunnableTask(val context: Context, val studyObservations: S
         }
         catch (exc: Exception) {
             fail = true
-            failMessage = exc?.message?:"ERROR"
+            failMessage = exc.message ?: "ERROR"
             return null
         }
 

@@ -41,7 +41,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     //private StaggeredGridView gridMultiCat;
     private RecyclerView gridMultiCat;
 
-    private BrAPIScaleValidValuesCategories defaultNaCategory = new BrAPIScaleValidValuesCategories().label("NA").value("NA");
+    private final BrAPIScaleValidValuesCategories defaultNaCategory = new BrAPIScaleValidValuesCategories().label("NA").value("NA");
 
     public MultiCatTraitLayout(Context context) {
         super(context);
