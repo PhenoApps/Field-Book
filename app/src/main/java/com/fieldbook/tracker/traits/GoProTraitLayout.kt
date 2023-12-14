@@ -18,7 +18,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.graphics.scale
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -42,6 +41,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelector
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -90,8 +90,8 @@ class GoProTraitLayout :
     private lateinit var imageRecyclerView: RecyclerView
 
     //buttons
-    private lateinit var connectButton: AppCompatImageButton
-    private lateinit var shutterButton: AppCompatImageButton
+    private lateinit var connectButton: FloatingActionButton
+    private lateinit var shutterButton: FloatingActionButton
 
     //exoplayer instance
     private var player: ExoPlayer? = null

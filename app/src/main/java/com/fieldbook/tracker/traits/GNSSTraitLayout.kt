@@ -37,6 +37,7 @@ import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.fieldbook.tracker.utilities.GnssThreadHelper
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -86,7 +87,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     private lateinit var hdopTextView: TextView
     private lateinit var precisionSp: Spinner
     private lateinit var connectGroup: Group
-    private lateinit var connectButton: ImageButton
+    private lateinit var connectButton: FloatingActionButton
     private lateinit var collectButton: ImageButton
     private lateinit var disconnectButton: ImageButton
     private lateinit var progressBar: ProgressBar

@@ -18,6 +18,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class AudioTraitLayout extends BaseTraitLayout {
 
@@ -26,7 +27,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
     private Uri recordingLocation;
-    private ImageButton controlButton;
+    private FloatingActionButton controlButton;
     private ButtonState buttonState;
     private TextView audioRecordingText;
 

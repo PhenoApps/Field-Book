@@ -19,7 +19,6 @@ import android.provider.DocumentsContract
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -36,6 +35,7 @@ import com.fieldbook.tracker.receivers.UsbDetachReceiver
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
 import com.fieldbook.tracker.utilities.ExifUtil
 import com.fieldbook.tracker.utilities.FileUtil
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.serenegiant.SimpleUVCCameraTextureView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -61,14 +61,15 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     private var mUsbAttachReceiver: UsbAttachReceiver? = null
     private var mUsbCameraHelper: UsbCameraHelper? = null
     private var textureView: SimpleUVCCameraTextureView? = null
-    private var connectBtn: ImageButton? = null
-    private var captureBtn: ImageButton? = null
+    private var connectBtn: FloatingActionButton? = null
+    private var captureBtn: FloatingActionButton? = null
     private var recyclerView: RecyclerView? = null
     private var previewGroup: Group? = null
     private var constraintLayout: ConstraintLayout? = null
+
     //zoom buttons
-    private var zoomInButton: ImageButton? = null
-    private var zoomOutButton: ImageButton? = null
+    private var zoomInButton: FloatingActionButton? = null
+    private var zoomOutButton: FloatingActionButton? = null
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)

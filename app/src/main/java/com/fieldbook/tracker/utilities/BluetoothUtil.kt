@@ -41,7 +41,7 @@ class BluetoothUtil {
                 map[button.id] = t
             }
 
-            val builder = AlertDialog.Builder(ctx).apply {
+            val builder = AlertDialog.Builder(ctx, R.style.AppAlertDialog).apply {
 
                 setTitle(context.getString(R.string.bluetooth_printer_choose_device_title))
 

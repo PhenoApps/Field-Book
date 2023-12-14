@@ -3,13 +3,13 @@ package com.fieldbook.tracker.traits;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.Button;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.Utils;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class CounterTraitLayout extends BaseTraitLayout {
 
@@ -42,8 +42,8 @@ public class CounterTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init(Activity act) {
-        Button addCounterBtn = act.findViewById(R.id.addBtn);
-        Button minusCounterBtn = act.findViewById(R.id.minusBtn);
+        FloatingActionButton addCounterBtn = act.findViewById(R.id.addBtn);
+        FloatingActionButton minusCounterBtn = act.findViewById(R.id.minusBtn);
 
         // Add counter
         addCounterBtn.setOnClickListener(view -> {

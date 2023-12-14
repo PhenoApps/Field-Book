@@ -14,14 +14,13 @@
         android:layout_height="wrap_content"
         android:id="@+id/usb_camera_fragment_cv">
 
-        <ImageButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:contentDescription="@string/usb_camera_frag_connect_btn_content_description"
             android:src="@drawable/ic_connection"
             android:id="@+id/usb_camera_fragment_connect_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:padding="16dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -45,42 +44,36 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/usb_camera_fragment_connect_btn" />
 
-        <ImageButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:contentDescription="@string/trait_usb_camera_capture_content_description"
-            android:background="?fb_round_button_background"
             android:id="@+id/usb_camera_fragment_capture_btn"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
             android:layout_margin="8dp"
-            android:padding="8dp"
             android:text="@string/trait_usb_camera_capture_button_text"
             app:layout_constraintBottom_toBottomOf="@id/usb_camera_fragment_tv"
             app:layout_constraintEnd_toEndOf="@id/usb_camera_fragment_tv"
             app:layout_constraintStart_toStartOf="@id/usb_camera_fragment_tv" />
 
-        <ImageButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:contentDescription="@string/trait_usb_camera_zoom_in_content_description"
             android:src="@drawable/ic_plus"
-            android:background="?fb_round_button_background"
             android:id="@+id/usb_camera_fragment_plus_btn"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:padding="8dp"
             android:text="@string/trait_usb_camera_zoom_in_button_text"
             app:layout_constraintTop_toTopOf="@id/usb_camera_fragment_capture_btn"
             app:layout_constraintBottom_toBottomOf="@id/usb_camera_fragment_tv"
             app:layout_constraintStart_toEndOf="@id/usb_camera_fragment_capture_btn" />
 
-        <ImageButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:contentDescription="@string/trait_usb_camera_zoom_out_content_description"
             android:src="@drawable/minus"
-            android:background="?fb_round_button_background"
             android:id="@+id/usb_camera_fragment_minus_btn"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:padding="8dp"
             android:text="@string/trait_usb_camera_zoom_out_button_text"
             app:layout_constraintTop_toTopOf="@id/usb_camera_fragment_capture_btn"
             app:layout_constraintBottom_toBottomOf="@id/usb_camera_fragment_tv"

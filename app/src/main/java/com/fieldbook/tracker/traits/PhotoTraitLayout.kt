@@ -10,7 +10,6 @@ import android.provider.MediaStore
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.widget.ImageButton
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,6 +25,7 @@ import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaD
 import com.fieldbook.tracker.utilities.ExifUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.Utils
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -67,7 +67,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
     override fun init(act: Activity) {
 
-        val capture = act.findViewById<ImageButton>(R.id.capture)
+        val capture = act.findViewById<FloatingActionButton>(R.id.capture)
         capture.setOnClickListener(PhotoTraitOnClickListener())
 
         activity = act

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.ImageButton;
 
 import androidx.annotation.Nullable;
@@ -17,6 +16,7 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.dialogs.DatePickerFragment;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
@@ -28,9 +28,9 @@ import java.util.Locale;
 public class DateTraitLayout extends BaseTraitLayout {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    Button addDayBtn;
-    Button minusDayBtn;
-    ImageButton saveDayBtn;
+    FloatingActionButton addDayBtn;
+    FloatingActionButton minusDayBtn;
+    FloatingActionButton saveDayBtn;
     private String date;
     private boolean isBlocked = true; //tracks when multi measures can be navigated
     private boolean isFirstLoad = true;

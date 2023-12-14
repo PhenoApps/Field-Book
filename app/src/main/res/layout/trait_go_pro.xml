@@ -28,15 +28,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <ImageButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:visibility="gone"
             android:contentDescription="@string/trait_go_pro_capture_content_description"
-            android:background="?fb_round_button_background"
             android:id="@+id/go_pro_capture_btn"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:padding="8dp"
             android:text="@string/trait_go_pro_capture_button_text"
             app:layout_constraintBottom_toBottomOf="@id/go_pro_pv"
             app:layout_constraintEnd_toEndOf="parent"
@@ -54,19 +52,20 @@
             android:id="@+id/go_pro_rv"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/go_pro_pv"/>
+            app:layout_constraintTop_toBottomOf="@id/go_pro_pv" />
 
-        <ImageButton android:visibility="visible"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:visibility="visible"
             android:contentDescription="@string/go_pro_frag_connect_btn_content_description"
             android:src="@drawable/ic_connection"
             android:id="@+id/go_pro_connect_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:padding="16dp"
             app:layout_constraintTop_toBottomOf="@id/go_pro_rv"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

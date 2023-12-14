@@ -8,7 +8,6 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import android.widget.Button
-import android.widget.ImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Group
 import androidx.viewpager.widget.ViewPager
@@ -17,6 +16,7 @@ import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.RepeatedValuesPagerAdapter
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.utilities.Utils
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlin.math.abs
 
 /**
@@ -58,7 +58,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     private var mValues = arrayListOf<ObservationModelViewHolder>()
     private val leftButton: Button
     private val rightButton: Button
-    private val addButton: ImageButton
+    private val addButton: FloatingActionButton
     private val pager: ViewPager
     private val nonEmptyGroup: Group
 

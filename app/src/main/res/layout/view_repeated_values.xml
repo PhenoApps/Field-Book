@@ -45,22 +45,17 @@
         app:layout_constraintGuide_percent="0.6"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/repeated_values_view_add_btn"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:adjustViewBounds="false"
-        android:background="?fb_round_button_background_with_indicator"
+        android:src="@drawable/ic_plus"
         android:contentDescription="@string/view_repeated_values_add_button_content_description"
-        android:cropToPadding="false"
         android:elevation="5dp"
-        android:fitsSystemWindows="true"
-        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_plus" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/repeated_values_view_right_btn"
