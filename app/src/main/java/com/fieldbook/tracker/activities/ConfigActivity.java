@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -33,7 +34,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
@@ -54,6 +54,7 @@ import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.FileUtil;
+import com.fieldbook.tracker.utilities.ManufacturerUtil;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -121,9 +122,9 @@ public class ConfigActivity extends ThemedActivity {
     public DataHelper database;
     @Inject
     public SoundHelperImpl soundHelper;
+    public FieldSwitchImpl fieldSwitcher = null;
     @Inject
     VerifyPersonHelper verifyPersonHelper;
-    public FieldSwitchImpl fieldSwitcher = null;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     ListView settingsList;
@@ -247,7 +248,39 @@ public class ConfigActivity extends ThemedActivity {
                     REQUEST_STORAGE_DEFINER);
         }
 
+        Log.d(TAG, Build.MANUFACTURER);
+
+        if (ManufacturerUtil.Companion.isEInk()) {
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            if (!prefs.getString(GeneralKeys.THEME, "0").equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
+
+                askUserSwitchToHighContrastTheme();
+
+            }
+        }
+
         verifyPersonHelper.updateLastOpenedTime();
+    }
+
+    private void askUserSwitchToHighContrastTheme() {
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                .setTitle(R.string.dialog_ask_high_contrast_title)
+                .setMessage(R.string.dialog_ask_high_contrast_message)
+                .setPositiveButton(android.R.string.ok, (d, which) -> {
+                    prefs.edit()
+                            .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.HIGH_CONTRAST))
+                            .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
+                            .apply();
+                    onResume();
+                })
+                .setNegativeButton(R.string.dialog_no, (d, which) -> {
+                    d.dismiss();
+                })
+                .create().show();
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {
@@ -359,10 +392,9 @@ public class ConfigActivity extends ThemedActivity {
 
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
-            if(mlkitEnabled) {
+            if (mlkitEnabled) {
                 ScannerActivity.Companion.requestCameraAndStartScanner(this, REQUEST_BARCODE, null, null, null);
-            }
-            else {
+            } else {
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.barcode_scanner_text))
                         .setBeepEnabled(false)
@@ -763,6 +795,7 @@ public class ConfigActivity extends ThemedActivity {
         startActivity(intent);
 
     }
+
     @Nullable
     private FieldObject searchStudiesForBarcode(String barcode) {
 
@@ -848,10 +881,9 @@ public class ConfigActivity extends ThemedActivity {
 
                 // get barcode from scan result
                 String scannedBarcode;
-                if(mlkitEnabled){
+                if (mlkitEnabled) {
                     scannedBarcode = data.getStringExtra("barcode");
-                }
-                else {
+                } else {
                     IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
                     scannedBarcode = plotDataResult.getContents();
                 }
