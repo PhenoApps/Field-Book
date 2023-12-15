@@ -21,7 +21,7 @@
     <!-- Info bar styling, trait selector -->
     <style name="SpinnerStyle" parent="Widget.AppCompat.Spinner">
         <item name="android:textViewStyle">@style/DropDownTextViewStyle</item>
-        <item name="android:popupBackground">?attr/fb_color_background</item>
+        <item name="android:popupBackground">@drawable/cell</item>
         <item name="android:backgroundTint">?attr/fb_color_primary_dark</item>
         <item name="android:fitsSystemWindows">true</item>
         <item name="android:textColor">?attr/fb_color_text_dark</item>
