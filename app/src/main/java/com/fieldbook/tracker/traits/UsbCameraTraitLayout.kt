@@ -433,7 +433,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 val imageView = ImageView(context)
                 imageView.setImageBitmap(BitmapFactory.decodeStream(input))
 
-                AlertDialog.Builder(context)
+                AlertDialog.Builder(context, R.style.AppAlertDialog)
                     .setTitle(R.string.trait_usb_camera_delete_photo)
                     .setOnCancelListener { dialog -> dialog.dismiss() }
                     .setPositiveButton(android.R.string.ok) { dialog, _ ->

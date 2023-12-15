@@ -35,11 +35,10 @@ import com.fieldbook.tracker.activities.ScannerActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.objects.BrAPIConfig;
 import com.google.gson.Gson;
-import com.google.zxing.common.BitMatrix;
+import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
-import com.google.zxing.BarcodeFormat;
-
+import com.google.zxing.common.BitMatrix;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -95,7 +94,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
-        mBrapiHttpWarningDialog = new AlertDialog.Builder(context)
+        mBrapiHttpWarningDialog = new AlertDialog.Builder(context, R.style.AppAlertDialog)
                 .setTitle(R.string.act_brapi_auth_http_warning_title)
                 .setMessage(R.string.act_brapi_auth_http_warning_message)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
@@ -213,7 +212,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if (brapiConfigBarcode != null) {
             brapiConfigBarcode.setOnPreferenceClickListener(preference -> {
                 String title = getString(R.string.qr_code_share_choose_action_title);
-                new AlertDialog.Builder(getContext())
+                new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
                         .setTitle(title)
                         .setItems(new String[]{getString(R.string.preferences_brapi_barcode_config_scan), getString(R.string.preferences_brapi_barcode_config_share)}, (dialog, which) -> {
                             switch (which) {
@@ -296,7 +295,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setAdjustViewBounds(true);
 
-            new AlertDialog.Builder(getContext())
+            new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
                     .setTitle(getString(R.string.preferences_brapi_barcode_config_dialog_title))
                     .setView(imageView)
                     .setPositiveButton(getString(R.string.dialog_close), null)
@@ -563,7 +562,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         final boolean[] checkedOptions = new boolean[options.length];
 
         final List<String> selectedItems = Arrays.asList(options);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
         builder.setTitle(R.string.brapi_choice_to_make_default_dialog_title);
         builder.setMultiChoiceItems(options, checkedOptions, (dialog, which, isChecked) -> {
             checkedOptions[which] = isChecked;

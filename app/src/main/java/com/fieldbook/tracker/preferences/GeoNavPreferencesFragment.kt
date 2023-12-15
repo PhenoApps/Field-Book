@@ -299,7 +299,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             }
             val internalGps = getString(R.string.pref_behavior_geonav_internal_gps_choice)
             names.add(internalGps)
-            val builder = AlertDialog.Builder(context)
+            val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
             builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
 
             //when a device is chosen, start a connect thread

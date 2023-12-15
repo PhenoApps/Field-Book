@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.brapi;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -19,7 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
@@ -30,7 +30,6 @@ import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.utilities.DialogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -481,10 +480,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             } else {
                 AlertDialog alertDialog = alertDialogBuilder.create();
                 alertDialog.show();
-                DialogUtils.styleDialogs(alertDialog);
             }
-
         }
     }
-
 }

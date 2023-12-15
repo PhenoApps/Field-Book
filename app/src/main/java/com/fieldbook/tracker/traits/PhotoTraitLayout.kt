@@ -322,7 +322,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
                 val studyId = (context as CollectActivity).studyId
 
-                val builder = AlertDialog.Builder(context)
+                val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
 
                 builder.setTitle(context.getString(R.string.dialog_warning))
                 builder.setMessage(context.getString(R.string.trait_delete_warning_photo))

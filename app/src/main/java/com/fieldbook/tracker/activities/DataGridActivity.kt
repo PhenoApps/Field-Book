@@ -162,7 +162,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                 if (prefixTraits.isNotEmpty()) {
 
                     //show a dialog to choose a prefix trait to be displayed
-                    AlertDialog.Builder(this)
+                    AlertDialog.Builder(this, R.style.AppAlertDialog)
                         .setTitle(R.string.dialog_data_grid_header_picker_title)
                         .setSingleChoiceItems(prefixTraits, 0) { dialog, which ->
 

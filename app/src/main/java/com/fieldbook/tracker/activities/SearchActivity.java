@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -23,8 +24,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-import androidx.appcompat.app.AlertDialog;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.SearchAdapter;

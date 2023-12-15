@@ -3,6 +3,7 @@ package com.fieldbook.tracker.preferences;
 import static android.app.Activity.RESULT_OK;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,7 +21,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -31,7 +31,6 @@ import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
@@ -257,7 +256,6 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
         dbSaveDialog = builder.create();
         dbSaveDialog.show();
-        DialogUtils.styleDialogs(dbSaveDialog);
 
         android.view.WindowManager.LayoutParams params = dbSaveDialog.getWindow().getAttributes();
         params.width = LinearLayout.LayoutParams.MATCH_PARENT;
@@ -384,7 +382,6 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     // Second confirmation
@@ -427,7 +424,6 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     @Override

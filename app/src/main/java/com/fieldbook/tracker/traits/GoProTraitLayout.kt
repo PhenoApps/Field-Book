@@ -383,7 +383,7 @@ class GoProTraitLayout :
         }
     }
 
-    private var credentialsDialog: androidx.appcompat.app.AlertDialog? = null
+    private var credentialsDialog: AlertDialog? = null
 
     private fun awaitCredentialsDialog() {
 
@@ -391,7 +391,7 @@ class GoProTraitLayout :
 
             if (credentialsDialog?.isShowing == true) credentialsDialog?.dismiss()
 
-            credentialsDialog = androidx.appcompat.app.AlertDialog.Builder(
+            credentialsDialog = AlertDialog.Builder(
                 context,
                 R.style.AlertDialogStyle
             )
@@ -548,7 +548,7 @@ class GoProTraitLayout :
 
                 imageView.setImageBitmap(scaled)
 
-                AlertDialog.Builder(context)
+                AlertDialog.Builder(context, R.style.AppAlertDialog)
                     .setTitle(R.string.trait_go_pro_camera_delete_photo_title)
                     .setOnCancelListener { dialog -> dialog.dismiss() }
                     .setPositiveButton(android.R.string.ok) { dialog, _ ->
