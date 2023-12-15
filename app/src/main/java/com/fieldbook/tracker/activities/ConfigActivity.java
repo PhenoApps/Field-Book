@@ -200,8 +200,14 @@ public class ConfigActivity extends ThemedActivity {
         invalidateOptionsMenu();
         loadScreen();
 
-        // request permissions
-        ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+        Log.d(TAG, Build.MANUFACTURER);
+
+        preferencesSetup();
+
+        verifyPersonHelper.updateLastOpenedTime();
+    }
+
+    private void versionBasedSetup() {
 
         int lastVersion = prefs.getInt(GeneralKeys.UPDATE_VERSION, -1);
         int currentVersion = Utils.getVersion(this);
@@ -222,6 +228,9 @@ public class ConfigActivity extends ThemedActivity {
                 prefs.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
             }
         }
+    }
+
+    private void firstRunSetup() {
 
         if (!prefs.contains(GeneralKeys.FIRST_RUN)) {
             // do things on the first run
@@ -240,56 +249,30 @@ public class ConfigActivity extends ThemedActivity {
             ed.putBoolean(GeneralKeys.FIRST_RUN, false);
             ed.apply();
         }
+    }
+
+    private void preferencesSetup() {
+
+        versionBasedSetup();
+
+        firstRunSetup();
 
         if (!BaseDocumentTreeUtil.Companion.isEnabled(this)) {
 
             startActivityForResult(new Intent(this, DefineStorageActivity.class),
                     REQUEST_STORAGE_DEFINER);
+        } else {
+
+            ManufacturerUtil.Companion.eInkDeviceSetup(this, prefs, getResources(), () -> {
+
+                recreate();
+
+                // request permissions
+                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+
+                return null;
+            });
         }
-
-        Log.d(TAG, Build.MANUFACTURER);
-
-        eInkDeviceSetup();
-
-        verifyPersonHelper.updateLastOpenedTime();
-    }
-
-    private void eInkDeviceSetup() {
-
-        if (ManufacturerUtil.Companion.isEInk()) {
-
-            if (ManufacturerUtil.Companion.isOnyx()) {
-
-                ManufacturerUtil.Companion.transferHighContrastIcon(getResources());
-
-            }
-
-            if (!prefs.getString(GeneralKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
-                    .equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
-
-                askUserSwitchToHighContrastTheme();
-
-            }
-        }
-    }
-
-    private void askUserSwitchToHighContrastTheme() {
-
-        new AlertDialog.Builder(this, R.style.AppAlertDialog)
-                .setTitle(R.string.dialog_ask_high_contrast_title)
-                .setMessage(R.string.dialog_ask_high_contrast_message)
-                .setPositiveButton(android.R.string.ok, (d, which) -> {
-                    prefs.edit()
-                            .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.HIGH_CONTRAST))
-                            .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
-                            .apply();
-
-                    onResume();
-                })
-                .setNegativeButton(R.string.dialog_no, (d, which) -> {
-                    d.dismiss();
-                })
-                .create().show();
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {
@@ -885,6 +868,10 @@ public class ConfigActivity extends ThemedActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_STORAGE_DEFINER) {
             if (resultCode != Activity.RESULT_OK) finish();
+            else {
+                // request permissions
+                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+            }
         } else if (requestCode == REQUEST_BARCODE) {
             if (resultCode == RESULT_OK) {
 

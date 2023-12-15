@@ -161,7 +161,9 @@
             tools:replace="android:screenOrientation" />
 
         <!-- used to define SAF storage directory, required at start of app -->
-        <activity android:name=".activities.DefineStorageActivity" />
+        <activity
+            android:name=".activities.DefineStorageActivity"
+            android:theme="@style/AppTheme" />
 
         <!-- found in preferences, used to select a TTS language locale -->
         <activity

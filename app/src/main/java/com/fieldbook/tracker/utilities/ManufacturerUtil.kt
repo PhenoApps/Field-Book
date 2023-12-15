@@ -1,11 +1,17 @@
 package com.fieldbook.tracker.utilities
 
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Environment
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.ThemedActivity
+import com.fieldbook.tracker.preferences.GeneralKeys
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -84,6 +90,41 @@ class ManufacturerUtil {
                 e.printStackTrace()
 
             }
+        }
+
+        fun eInkDeviceSetup(
+            context: Context,
+            prefs: SharedPreferences,
+            resources: Resources,
+            onPositive: () -> Unit
+        ) {
+            if (isEInk()) {
+                if (isOnyx()) {
+                    transferHighContrastIcon(resources)
+                }
+                if (!SharedPreferenceUtils.isHighContrastTheme(prefs)) {
+                    askUserSwitchToHighContrastTheme(context, prefs, onPositive)
+                }
+            }
+        }
+
+        fun askUserSwitchToHighContrastTheme(
+            context: Context,
+            prefs: SharedPreferences,
+            onPositive: () -> Unit
+        ) {
+            AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(R.string.dialog_ask_high_contrast_title)
+                .setMessage(R.string.dialog_ask_high_contrast_message)
+                .setPositiveButton(android.R.string.ok) { d: DialogInterface?, _: Int ->
+                    prefs.edit()
+                        .putString(GeneralKeys.THEME, ThemedActivity.HIGH_CONTRAST.toString())
+                        .putString(GeneralKeys.TEXT_THEME, ThemedActivity.MEDIUM.toString())
+                        .apply()
+                    onPositive.invoke()
+                }
+                .setNegativeButton(R.string.dialog_no) { d, _ -> d.dismiss() }
+                .create().show()
         }
     }
 }

@@ -1,18 +1,24 @@
 package com.fieldbook.tracker.storage
 
 import android.app.Activity
-import android.graphics.Color
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
+import android.view.ContextThemeWrapper
+import android.view.LayoutInflater
 import android.view.View
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.DefineStorageActivity
+import com.fieldbook.tracker.utilities.SharedPreferenceUtils
+import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.fragments.storage.PhenoLibStorageDefinerFragment
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
 
-    override val buttonColor = Color.parseColor("#8BC34A")
-    override val backgroundColor = Color.parseColor("#FFFFFF")
+    @Inject
+    lateinit var prefs: SharedPreferences
 
     //default root folder name if user choose an incorrect root on older devices
     override val defaultAppName: String = "fieldBook"
@@ -60,5 +66,13 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
     override fun actionNoMigrate() {
         activity?.setResult(Activity.RESULT_OK)
         activity?.finish()
+    }
+
+    //https://stackoverflow.com/questions/9469174/set-theme-for-a-fragment
+    override fun onGetLayoutInflater(savedInstanceState: Bundle?): LayoutInflater {
+        val inflater = super.onGetLayoutInflater(savedInstanceState)
+        val contextThemeWrapper =
+            ContextThemeWrapper(context, SharedPreferenceUtils.getThemeResource(prefs))
+        return inflater.cloneInContext(contextThemeWrapper)
     }
 }

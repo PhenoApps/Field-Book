@@ -190,6 +190,7 @@
         <item name="fb_seek_bar">@drawable/high_contrast_seek_bar</item>
 
         <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowDisablePreview">true</item>
         <item name="android:windowEnterAnimation">@null</item>
         <item name="android:windowExitAnimation">@null</item>
         <item name="android:windowHideAnimation">@null</item>

@@ -1,16 +1,19 @@
 package com.fieldbook.tracker.activities
 
 import android.app.Activity
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 open class ThemedActivity: AppCompatActivity() {
@@ -32,10 +35,16 @@ open class ThemedActivity: AppCompatActivity() {
 
         fun applyTheme(activity: Activity) {
 
-            //set the theme
-            val (themeIndex, textIndex) = with (PreferenceManager.getDefaultSharedPreferences(activity)) {
+            val prefs = activity.getSharedPreferences(
+                GeneralKeys.SHARED_PREF_FILE_NAME,
+                Context.MODE_PRIVATE
+            )
 
-                (getString(GeneralKeys.THEME, "0")?.toInt() ?: 0) to (getString(GeneralKeys.TEXT_THEME, "2")?.toInt() ?: 2)
+            //set the theme
+            val (themeIndex, textIndex) = with(prefs) {
+
+                (getString(GeneralKeys.THEME, "0")?.toInt()
+                    ?: 0) to (getString(GeneralKeys.TEXT_THEME, "2")?.toInt() ?: 2)
 
             }
 
@@ -183,11 +192,14 @@ open class ThemedActivity: AppCompatActivity() {
             //status bar color based on colorPrimaryDark as of Lollipop 5.0 (API 21)
             //for some reason (android bug?) this doesn't change from setTheme() automatically and keeps the old color
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                activity.window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                activity.window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                 activity.window.statusBarColor = statusBarColor
             }
         }
     }
+
+    @Inject
+    lateinit var prefs: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         applyTheme(this)
@@ -197,5 +209,31 @@ open class ThemedActivity: AppCompatActivity() {
     override fun onResume() {
         applyTheme(this)
         super.onResume()
+    }
+
+    override fun finishActivity(requestCode: Int) {
+        super.finishActivity(requestCode)
+        disableTransitionAnimations()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        disableTransitionAnimations()
+    }
+
+    override fun finish() {
+        super.finish()
+        disableTransitionAnimations()
+    }
+
+    private fun disableTransitionAnimations() {
+        if (SharedPreferenceUtils.isHighContrastTheme(prefs)) {
+            if (Build.VERSION.SDK_INT >= 34) {
+                overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
+                overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
+            } else {
+                overridePendingTransition(0, 0)
+            }
+        }
     }
 }
