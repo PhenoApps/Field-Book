@@ -15,9 +15,11 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:label">
+
         <activity
             android:name=".activities.ScannerActivity"
             android:exported="false" />
+
         <!-- The Main Page activity that lists all other activities -->
         <activity
             android:name=".activities.ConfigActivity"
@@ -27,10 +29,42 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <activity-alias
+            android:name=".activities.ConfigActivityDefault"
+            android:icon="@mipmap/ic_launcher"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:roundIcon="@mipmap/ic_launcher"
+            android:screenOrientation="portrait"
+            android:targetActivity=".activities.ConfigActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- - File Import activity (field manager, local and brapi) -->
+        </activity-alias>
+
+        <activity-alias
+            android:name=".activities.ConfigActivityHighContrast"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_monochrome"
+            android:launchMode="singleTop"
+            android:roundIcon="@mipmap/ic_launcher_monochrome"
+            android:screenOrientation="portrait"
+            android:targetActivity=".activities.ConfigActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- - File Import activity (field manager, local and brapi) -->
         <activity
             android:name=".activities.FieldEditorActivity"
             android:alwaysRetainTaskState="false"
