@@ -14,6 +14,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Location
+import android.net.Uri
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
@@ -115,6 +116,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private var mDeclination: Float? = null
     private var mAzimuth: Double? = null
     private var mNotWarnedInterference = true
+    private var mGeoNavLogWriterUri: Uri? = null
 
     private var currentFixQuality = false
 
@@ -134,6 +136,11 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         }
 
     }
+
+    fun getGeoNavLogWriterUri(): Uri? {
+        return mGeoNavLogWriterUri
+    }
+
 
     private val mGnssResponseReceiver: GNSSResponseReceiver = object : GNSSResponseReceiver() {
 
@@ -706,6 +713,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                         //open the only log file in 'write append' mode
                         val outputStream = resolver.openOutputStream(geoNavLogFile.uri, "wa")
                         Log.d(CollectActivity.TAG, "GeoNav Logger started successfully.")
+                        mGeoNavLogWriterUri = geoNavLogFile.uri
                         mGeoNavLogWriter = OutputStreamWriter(outputStream)
 
                         if (isNew) {

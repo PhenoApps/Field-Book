@@ -886,6 +886,46 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         }
     }
 
+    public Uri writeAllTraitsToCsv(String exportName, Context context) {
+        CollectActivity collectActivity = (CollectActivity) context;
+
+        try {
+
+            DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
+
+            if (traitDir != null && traitDir.exists()) {
+
+                DocumentFile exportDoc = traitDir.createFile("*/*", exportName);
+
+                if (exportDoc != null && exportDoc.exists()) {
+
+                    OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(collectActivity, R.string.dir_trait, exportName);
+
+                    if (output != null) {
+                        OutputStreamWriter osw = new OutputStreamWriter(output);
+                        CSVWriter csvWriter = new CSVWriter(osw, collectActivity.getDatabase().getAllTraitObjectsForExport());
+                        csvWriter.writeTraitFile(collectActivity.getDatabase().getAllTraitsForExport().getColumnNames());
+
+                        csvWriter.close();
+                        osw.close();
+                        output.close();
+
+                        Uri exportUri = exportDoc.getUri();
+                        Log.d(TAG, "writeAllTraitsToCsv: " + exportUri);
+                        return exportUri;
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
