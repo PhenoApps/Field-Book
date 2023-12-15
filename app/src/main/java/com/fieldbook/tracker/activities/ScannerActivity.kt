@@ -15,7 +15,6 @@ import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
@@ -42,7 +41,7 @@ import java.util.concurrent.Executors
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ScannerActivity : AppCompatActivity() {
+class ScannerActivity : ThemedActivity() {
 
     @Inject
     lateinit var database: DataHelper

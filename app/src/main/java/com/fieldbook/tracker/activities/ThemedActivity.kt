@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
@@ -235,5 +236,12 @@ open class ThemedActivity: AppCompatActivity() {
                 overridePendingTransition(0, 0)
             }
         }
+    }
+
+    override fun startActivity(intent: Intent?) {
+        if (SharedPreferenceUtils.isHighContrastTheme(prefs)) {
+            intent?.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+        }
+        super.startActivity(intent)
     }
 }

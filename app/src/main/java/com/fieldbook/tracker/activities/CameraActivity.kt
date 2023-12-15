@@ -5,7 +5,6 @@ import android.util.Log
 import android.util.Size
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -19,7 +18,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import java.io.File
 import java.util.concurrent.Executors
 
-class CameraActivity : AppCompatActivity() {
+class CameraActivity : ThemedActivity() {
 
     private lateinit var cameraSelector: CameraSelector
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
