@@ -2,8 +2,6 @@ package com.fieldbook.tracker.views
 
 import android.content.Context
 import android.graphics.Color
-import android.os.Handler
-import android.os.Looper
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
@@ -79,11 +77,6 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         pager.setPageTransformer(true, SimplePageTransformer())
 
-        //update buttons when user scrolls
-        pager.setOnScrollChangeListener { _, _, _, _, _ ->
-            updateButtonVisibility()
-        }
-
         rightButton.setOnClickListener {
 
             val act = context as CollectActivity
@@ -98,11 +91,8 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
                 updateButtonVisibility()
 
-                Handler(Looper.getMainLooper()).postDelayed({
+                act.traitLayoutRefresh()
 
-                    act.traitLayoutRefresh()
-
-                }, 100)
             }
         }
 
@@ -120,11 +110,8 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
                 updateButtonVisibility()
 
-                Handler(Looper.getMainLooper()).postDelayed({
+                act.traitLayoutRefresh()
 
-                    act.traitLayoutRefresh()
-
-                }, 100)
             }
         }
 
@@ -184,7 +171,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         val old = pager.currentItem
 
-        getSelectedModel()?.let { model ->
+        getSelectedModel()?.let {
 
             getSelectedModel()?.value = value
 
@@ -200,16 +187,18 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
      * Called during trait navigation in collect activity.
      * Used to detect if the current item is blank, it should be deleted in the database.
      */
-    fun refresh(onNew: Boolean) {
+    fun refresh() {
 
-        if (!onNew) {
-            val value = getSelectedModel()?.value ?: ""
+        deleteLastEmptyRep()
 
-            if (value.isEmpty()) {
+    }
 
-                deleteCurrentRep()
+    private fun deleteLastEmptyRep() {
 
-            }
+        mValues.lastOrNull { it.model.value.isEmpty() }?.let { deleteItem ->
+
+            (context as? CollectActivity)?.deleteRep(deleteItem.model.rep)
+
         }
     }
 
@@ -261,7 +250,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     //basic setup for linked list view's adapter
     fun initialize(values: List<ObservationModel>, initialRep: Int) {
 
-        mValues.clear()
+        clear()
 
         mValues.addAll(values.map { ObservationModelViewHolder(it, displayColor) })
 
@@ -291,28 +280,12 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
                 pager.currentItem = mValues.indexOf(entry)
             }
 
-            Handler(Looper.getMainLooper()).postDelayed({
+            submitList()
 
-                submitList()
+            //select closest rep
+            updateButtonVisibility()
 
-                //select closest rep
-                updateButtonVisibility()
-
-                (context as CollectActivity).traitLayoutRefresh()
-
-            }, 100)
-        }
-    }
-
-    //called on refresh if the value is undesirable
-    private fun deleteCurrentRep() {
-
-        val repToDelete = getRep()
-
-        mValues.firstOrNull { it.model.rep == repToDelete }?.let { deleteItem ->
-
-            (context as? CollectActivity)?.deleteRep(deleteItem.model.rep)
-
+            (context as CollectActivity).traitLayoutRefresh()
         }
     }
 
@@ -323,8 +296,10 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     }
 
     private fun getSelectedModel(): ObservationModel? {
-        return if (mValues.isNotEmpty()) mValues[pager.currentItem].model
-        else null
+        return if (mValues.isNotEmpty()) {
+            val model = mValues[pager.currentItem].model
+            model
+        } else null
     }
 
     private fun insertNewRep(rep: String): ObservationModel {
