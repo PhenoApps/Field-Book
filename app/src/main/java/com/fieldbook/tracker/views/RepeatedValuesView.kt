@@ -12,10 +12,9 @@ import androidx.constraintlayout.widget.Group
 import androidx.viewpager.widget.ViewPager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.adapters.RepeatedValuesPagerAdapter
 import com.fieldbook.tracker.database.models.ObservationModel
-import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import com.fieldbook.tracker.utilities.Utils
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
@@ -86,10 +85,9 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         pager.adapter = RepeatedValuesPagerAdapter(context)
 
-        if (!isHighContrastTheme()) {
+        if (!SharedPreferenceUtils.isHighContrastTheme(prefs)) {
             pager.setPageTransformer(true, SimplePageTransformer())
         }
-
 
         rightButton.setOnClickListener {
 
@@ -172,17 +170,11 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
         }
     }
 
-    private fun isHighContrastTheme() = prefs.getString(
-        GeneralKeys.THEME,
-        "${ThemedActivity.DEFAULT}"
-    ) == "${ThemedActivity.HIGH_CONTRAST}"
-
     private fun setCurrentItem(index: Int) {
 
-        val highContrast = isHighContrastTheme()
         pager.setCurrentItem(
             index,
-            !highContrast
+            !SharedPreferenceUtils.isHighContrastTheme(prefs)
         )
     }
 
