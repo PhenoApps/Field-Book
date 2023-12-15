@@ -189,6 +189,57 @@
 
         <item name="fb_seek_bar">@drawable/high_contrast_seek_bar</item>
 
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+        <item name="android:windowHideAnimation">@null</item>
+        <item name="android:windowShowAnimation">@null</item>
+        <item name="android:launchTaskBehindSourceAnimation">@null</item>
+        <item name="android:launchTaskBehindTargetAnimation">@null</item>
+
+        <item name="android:taskCloseEnterAnimation">@null</item>
+        <item name="android:taskOpenEnterAnimation">@null</item>
+        <item name="android:taskCloseExitAnimation">@null</item>
+        <item name="android:taskOpenExitAnimation">@null</item>
+        <item name="android:taskToBackEnterAnimation">@null</item>
+        <item name="android:taskToFrontEnterAnimation">@null</item>
+        <item name="android:taskToFrontExitAnimation">@null</item>
+        <item name="android:taskToBackExitAnimation">@null</item>
+
+        <item name="android:wallpaperOpenEnterAnimation">@null</item>
+        <item name="android:wallpaperOpenExitAnimation">@null</item>
+        <item name="android:wallpaperCloseEnterAnimation">@null</item>
+        <item name="android:wallpaperCloseExitAnimation">@null</item>
+        <item name="android:wallpaperIntraOpenEnterAnimation">@null</item>
+        <item name="android:wallpaperIntraOpenExitAnimation">@null</item>
+        <item name="android:wallpaperIntraCloseExitAnimation">@null</item>
+
+        <item name="android:popupAnimationStyle">@null</item>
+
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <item name="android:activityCloseExitAnimation">@null</item>
+        <item name="android:activityOpenEnterAnimation">@null</item>
+        <item name="android:activityOpenExitAnimation">@null</item>
+
+        <item name="android:imeExtractEnterAnimation">@null</item>
+        <item name="android:imeExtractExitAnimation">@null</item>
+
+        <item name="android:inAnimation">@null</item>
+        <item name="android:outAnimation">@null</item>
+
+        <item name="android:layoutAnimation">@null</item>
+
+        <item name="android:fragmentCloseEnterAnimation">@null</item>
+        <item name="android:fragmentCloseExitAnimation">@null</item>
+        <item name="android:fragmentFadeEnterAnimation">@null</item>
+        <item name="android:fragmentFadeExitAnimation">@null</item>
+
+        <item name="fabAnimationMode">@null</item>
+        <item name="hideAnimationBehavior">none</item>
+        <item name="android:animation">@null</item>
+        <item name="hintAnimationEnabled">false</item>
+        <item name="android:stateListAnimator">@null</item>
+
     </style>
 
 </resources>
