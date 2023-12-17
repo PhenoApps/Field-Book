@@ -722,6 +722,8 @@
 
     <string name="pref_beta_upload_files">Upload files</string>
     <string name="pref_beta_upload_files_summary">Upload files to process audio and extract info.</string>
+    <string name="upload_file_title">Upload file</string>
+
 
 
     <!-- ABOUT -->
