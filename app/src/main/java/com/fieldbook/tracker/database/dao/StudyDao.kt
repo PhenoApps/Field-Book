@@ -244,12 +244,10 @@ class StudyDao {
                 val traitCounts = mutableMapOf<String, Int>()
 
                 val cursor = db.rawQuery("""
-                    SELECT ov.observation_variable_name, COUNT(*) as count
-                    FROM observations o
-                    INNER JOIN observation_units ou ON o.observation_unit_id = ou.observation_unit_db_id
-                    INNER JOIN observation_variables ov ON o.observation_variable_db_id = ov.internal_id_observation_variable
-                    WHERE ou.study_id = ?
-                    GROUP BY ov.observation_variable_name
+                    SELECT observation_variable_name, COUNT(*) as count
+                    FROM observations
+                    WHERE study_id = ?
+                    GROUP BY observation_variable_name
                 """, arrayOf(studyId.toString())
                 )
 
