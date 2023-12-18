@@ -1,11 +1,9 @@
 package com.fieldbook.tracker.utilities
 
 import android.app.AlertDialog
-import android.content.ComponentName
 import android.content.Context
 import android.content.DialogInterface
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -103,24 +101,7 @@ class ManufacturerUtil {
             if (isEInk()) {
                 if (isOnyx()) {
 
-                    context.packageManager.setComponentEnabledSetting(
-                        ComponentName(
-                            "com.fieldbook.tracker",
-                            "com.fieldbook.tracker.activities.ConfigActivityHighContrast"
-                        ),
-                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP
-                    )
-
-                    context.packageManager.setComponentEnabledSetting(
-                        ComponentName(
-                            "com.fieldbook.tracker",
-                            "com.fieldbook.tracker.activities.ConfigActivityDefault"
-                        ),
-                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                        PackageManager.DONT_KILL_APP
-                    )
-
-                    //transferHighContrastIcon(resources)
+                    transferHighContrastIcon(resources)
                 }
                 if (!SharedPreferenceUtils.isHighContrastTheme(prefs)) {
                     askUserSwitchToHighContrastTheme(context, prefs, onPositive)
