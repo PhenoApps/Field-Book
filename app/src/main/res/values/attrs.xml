@@ -278,6 +278,8 @@
 
     <attr name="fb_categorical_button_selected_color" format="color" />
 
+    <attr name="fb_preferences_horizontal_break_color" format="color" />
+
     <!-- geonav snackbar view reference -->
     <attr name="fb_geonav_snackbar_view" format="reference" />
 
