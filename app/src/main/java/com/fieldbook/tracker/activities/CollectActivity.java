@@ -37,6 +37,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -237,7 +238,7 @@ public class CollectActivity extends ThemedActivity
     private SecureBluetoothActivityImpl secureBluetooth;
 
     //summary fragment listener
-    private boolean isSummaryOpen = false;
+    private boolean isNavigatingFromSummary = false;
 
     /**
      * Multi Measure delete dialogs
@@ -1701,38 +1702,10 @@ public class CollectActivity extends ThemedActivity
         SummaryFragment fragment = new SummaryFragment();
         fragment.setListener(this);
 
-        isSummaryOpen = true;
-
         getSupportFragmentManager().beginTransaction()
                 .add(android.R.id.content, fragment)
                 .addToBackStack(null)
                 .commit();
-
-//        LayoutInflater inflater = this.getLayoutInflater();
-//        inflater.inflate(R.layout.fragment_summary, null);
-//        View layout = inflater.inflate(R.layout.dialog_summary, null);
-//        TextView summaryText = layout.findViewById(R.id.field_name);
-//        summaryText.setText(traitBox.createSummaryText(rangeBox.getPlotID()));
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-//        builder.setTitle(R.string.preferences_appearance_toolbar_customize_summary)
-//                .setCancelable(true)
-//                .setView(layout);
-//
-//        builder.setNegativeButton(getString(R.string.dialog_close), new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int i) {
-//                dialog.dismiss();
-//            }
-//        });
-//
-//        final AlertDialog summaryDialog = builder.create();
-//        summaryDialog.show();
-//        DialogUtils.styleDialogs(summaryDialog);
-//
-//        android.view.WindowManager.LayoutParams params2 = summaryDialog.getWindow().getAttributes();
-//        params2.width = LayoutParams.MATCH_PARENT;
-//        summaryDialog.getWindow().setAttributes(params2);
     }
 
     @Override
@@ -2030,14 +2003,26 @@ public class CollectActivity extends ThemedActivity
     public void onBackPressed() {
 
         super.onBackPressed();
+        FragmentManager m = getSupportFragmentManager();
         int count = getSupportFragmentManager().getBackStackEntryCount();
 
         if (count == 0) {
 
-            finish();
+            if (isNavigatingFromSummary) {
+
+                isNavigatingFromSummary = false;
+
+            } else {
+
+                finish();
+
+            }
+
 
         } else {
+
             getSupportFragmentManager().popBackStack();
+
         }
     }
 
@@ -2191,11 +2176,7 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void onSummaryDestroy() {
-        isSummaryOpen = false;
-    }
-
-    public boolean isSummaryFragmentOpen() {
-        return isSummaryOpen;
+        isNavigatingFromSummary = true;
     }
 
     @NonNull
