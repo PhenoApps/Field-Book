@@ -137,7 +137,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 if (viewHolder != null) {
                     if (!SharedPreferenceUtils.Companion.isHighContrastTheme(prefs)) {
                         viewHolder.itemView.setAlpha(0.5f);
-                        viewHolder.itemView.setScaleY(1.618f);
                     }
                 }
             }
@@ -147,7 +146,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
             viewHolder.itemView.setAlpha(1f);
-            viewHolder.itemView.setScaleY(1f);
         }
     });
 
