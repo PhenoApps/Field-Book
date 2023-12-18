@@ -55,6 +55,7 @@
         <item name="fb_seek_bar">@drawable/custom_seek_bar</item>
         <item name="fb_border_color">@color/main_border</item>
         <item name="fb_geonav_snackbar_view">@drawable/cell_geonav_snackbar</item>
+        <item name="fb_trait_creator_button_color">@color/light_gray</item>
 
         <!-- these are used in material design components -->
         <item name="android:textColorPrimary">?attr/fb_color_text_dark</item>
@@ -177,6 +178,7 @@
         <item name="fb_border_color">@color/high_contrast_border</item>
 
         <item name="fb_geonav_snackbar_view">@drawable/cell_geonav_snackbar_high_contrast</item>
+        <item name="fb_trait_creator_button_color">@color/high_contrast_button_color_pressed</item>
 
         <item name="colorPrimary">?attr/fb_color_primary_dark</item>
         <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>

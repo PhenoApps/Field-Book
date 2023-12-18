@@ -274,6 +274,8 @@
 
     <attr name="fb_border_color" format="color" />
 
+    <attr name="fb_trait_creator_button_color" format="color" />
+
     <!-- geonav snackbar view reference -->
     <attr name="fb_geonav_snackbar_view" format="reference" />
 

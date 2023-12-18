@@ -32,6 +32,7 @@
     <color name="main_color_text_secondary">#595959</color>
     <color name="main_color_seekbar">#42000000</color>
     <color name="main_color_seekbar_thumb">#90654321</color>
+    <color name="light_gray">#d3d3d3</color>
 
     <!-- blue theme colors -->
     <color name="blue_border">@color/BLACK</color>
