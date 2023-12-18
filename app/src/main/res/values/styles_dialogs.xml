@@ -23,6 +23,8 @@
 
     <style name="AppAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
 
+        <item name="android:background">@color/TRANSPARENT</item>
+
         <item name="checkedTextViewStyle">@style/AlertCheckedView</item>
 
         <item name="colorAccent">?attr/fb_color_accent</item>
@@ -30,15 +32,12 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
-        <item name="android:background">?attr/fb_color_background</item>
         <item name="android:windowTitleStyle">@style/DialogTitleStyle</item>
 
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowSoftInputMode">stateUnchanged</item>
         <item name="android:fitsSystemWindows">true</item>
-
-        <item name="android:windowBackground">@drawable/inset_border</item>
 
         <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle</item>
         <item name="imageButtonStyle">@style/ImageButtonStyle</item>

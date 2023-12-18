@@ -105,6 +105,7 @@
         <item name="android:colorAccent">?attr/fb_color_accent</item>
 
         <item name="iconTint">?attr/fb_icon_tint</item>
+
     </style>
 
     <!-- Blue Theme -->
