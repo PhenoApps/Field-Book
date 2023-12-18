@@ -296,13 +296,11 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     }
 
     private void pressOnButton(Button button) {
-        //button.setTextColor(Color.parseColor(getDisplayColor()));
-        //button.getBackground().setColorFilter(getButtonPressedColor(), PorterDuff.Mode.MULTIPLY);
+        button.setBackgroundResource(R.drawable.categorical_button_selected);
     }
 
     private void pressOffButton(Button button) {
-        //button.setTextColor(getButtonTextColor());
-        //button.getBackground().setColorFilter(getButtonBackgroundColor(), PorterDuff.Mode.MULTIPLY);
+        button.setBackgroundResource(R.drawable.categorical_button_unselected);
     }
 
     @Override

@@ -8,4 +8,5 @@
     android:id="@+id/multicatButton"
     android:gravity="center"
     android:singleLine="true"
+    android:background="@drawable/categorical_button_selected"
     android:text="@string/traits_format_multicategorical" />
