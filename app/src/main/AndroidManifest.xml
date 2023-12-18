@@ -33,22 +33,6 @@
         </activity>
 
         <activity-alias
-            android:name=".activities.ConfigActivityDefault"
-            android:icon="@mipmap/ic_launcher"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:roundIcon="@mipmap/ic_launcher"
-            android:screenOrientation="portrait"
-            android:targetActivity=".activities.ConfigActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <activity-alias
             android:name=".activities.ConfigActivityHighContrast"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:exported="true"
@@ -59,7 +43,21 @@
             android:targetActivity=".activities.ConfigActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
+        <activity-alias
+            android:name=".activities.ConfigActivityDefault"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:launchMode="singleTop"
+            android:roundIcon="@mipmap/ic_launcher"
+            android:screenOrientation="portrait"
+            android:targetActivity=".activities.ConfigActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>

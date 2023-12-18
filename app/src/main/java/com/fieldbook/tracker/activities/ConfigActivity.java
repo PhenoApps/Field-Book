@@ -4,11 +4,13 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.AsyncTask;
@@ -252,6 +254,14 @@ public class ConfigActivity extends ThemedActivity {
     }
 
     private void preferencesSetup() {
+
+        getPackageManager().setComponentEnabledSetting(
+                new ComponentName(
+                        "com.fieldbook.tracker",
+                        "com.fieldbook.tracker.activities.ConfigActivityHighContrast"
+                ),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP
+        );
 
         versionBasedSetup();
 

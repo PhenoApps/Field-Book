@@ -102,6 +102,7 @@ class ManufacturerUtil {
         ) {
             if (isEInk()) {
                 if (isOnyx()) {
+
                     context.packageManager.setComponentEnabledSetting(
                         ComponentName(
                             "com.fieldbook.tracker",
@@ -109,6 +110,16 @@ class ManufacturerUtil {
                         ),
                         PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP
                     )
+
+                    context.packageManager.setComponentEnabledSetting(
+                        ComponentName(
+                            "com.fieldbook.tracker",
+                            "com.fieldbook.tracker.activities.ConfigActivityDefault"
+                        ),
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                        PackageManager.DONT_KILL_APP
+                    )
+
                     //transferHighContrastIcon(resources)
                 }
                 if (!SharedPreferenceUtils.isHighContrastTheme(prefs)) {
