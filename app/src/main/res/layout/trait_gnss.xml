@@ -14,9 +14,10 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
             android:id="@+id/gnss_connect_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
             android:layout_margin="16dp"
             android:src="@drawable/ic_satellite_variant"
             app:layout_constraintEnd_toEndOf="parent"

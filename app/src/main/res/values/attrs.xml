@@ -274,7 +274,7 @@
 
     <attr name="fb_border_color" format="color" />
 
-    <attr name="fb_trait_creator_button_color" format="color" />
+    <attr name="fb_trait_button_background_tint" format="color" />
 
     <attr name="fb_categorical_button_selected_color" format="color" />
 

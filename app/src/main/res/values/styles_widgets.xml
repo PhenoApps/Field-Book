@@ -111,16 +111,13 @@
         <item name="backgroundTint">?fb_icon_fill_tint</item>
         <item name="android:elevation">0dp</item>
         <item name="elevation">0dp</item>
+        <item name="fabSize">normal</item>
     </style>
 
-    <!-- fab styling, used in the trait editor activity -->
-    <style name="FloatingActionButtonStyle.TraitCreatorButton">
-        <!--        <item name="backgroundTint">?attr/fb_color_primary</item>-->
-        <item name="borderWidth">2dp</item>
-        <item name="android:backgroundTint">?fb_trait_creator_button_color</item>
-        <item name="backgroundTint">?fb_icon_fill_tint</item>
-        <item name="android:elevation">0dp</item>
-        <item name="elevation">0dp</item>
+    <style name="FloatingActionButtonStyle.TraitButtons">
+        <item name="fabCustomSize">@dimen/fb_trait_fab_size</item>
+        <item name="maxImageSize">@dimen/fb_trait_fab_image_size</item>
+        <item name="android:backgroundTint">?fb_trait_button_background_tint</item>
     </style>
 
     <!-- Preference Search bar card style, inherits android:widget style -->

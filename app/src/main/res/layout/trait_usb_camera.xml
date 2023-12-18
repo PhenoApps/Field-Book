@@ -15,11 +15,12 @@
         android:id="@+id/usb_camera_fragment_cv">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
             android:contentDescription="@string/usb_camera_frag_connect_btn_content_description"
             android:src="@drawable/ic_connection"
             android:id="@+id/usb_camera_fragment_connect_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
             android:layout_margin="8dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

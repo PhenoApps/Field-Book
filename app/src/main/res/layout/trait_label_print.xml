@@ -15,9 +15,10 @@
         android:orientation="horizontal">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
             android:id="@+id/connectPrinterButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
             android:layout_gravity="center"
             android:layout_margin="8dp"
             android:src="@drawable/connection"
@@ -35,9 +36,10 @@
             android:contentDescription="@string/trait_labelprint_preview_description" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
             android:id="@+id/printLabelButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
             android:layout_gravity="center"
             android:layout_margin="8dp"
             android:src="@drawable/ic_trait_labelprint"

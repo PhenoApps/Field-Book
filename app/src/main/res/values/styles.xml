@@ -55,8 +55,8 @@
         <item name="fb_seek_bar">@drawable/custom_seek_bar</item>
         <item name="fb_border_color">@color/main_border</item>
         <item name="fb_geonav_snackbar_view">@drawable/cell_geonav_snackbar</item>
-        <item name="fb_trait_creator_button_color">@color/light_gray</item>
         <item name="fb_preferences_horizontal_break_color">@color/TRANSPARENT</item>
+        <item name="fb_trait_button_background_tint">@color/light_gray</item>
 
         <item name="fb_categorical_button_selected_color">?attr/fb_color_primary</item>
 
@@ -130,6 +130,7 @@
         <item name="fb_color_text_secondary">@color/blue_color_text_secondary</item>
         <item name="fb_button_color_pressed">@color/blue_button_color_pressed</item>
         <item name="fb_border_color">@color/blue_border</item>
+        <item name="fb_trait_button_background_tint">@color/light_gray</item>
 
         <item name="colorPrimary">?attr/fb_color_primary</item>
         <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
@@ -182,9 +183,9 @@
         <item name="fb_border_color">@color/high_contrast_border</item>
 
         <item name="fb_geonav_snackbar_view">@drawable/cell_geonav_snackbar_high_contrast</item>
-        <item name="fb_trait_creator_button_color">@color/high_contrast_button_color_pressed</item>
 
         <item name="fb_categorical_button_selected_color">@color/GRAY</item>
+        <item name="fb_trait_button_background_tint">@color/high_contrast_primary</item>
 
         <item name="fb_preferences_horizontal_break_color">?fb_color_primary_dark</item>
         <item name="colorPrimary">?attr/fb_color_primary_dark</item>

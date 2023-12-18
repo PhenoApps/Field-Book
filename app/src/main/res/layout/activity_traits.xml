@@ -34,15 +34,12 @@
     </RelativeLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        style="@style/FloatingActionButtonStyle.TraitCreatorButton"
         android:id="@+id/newTrait"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_margin="32dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         android:src="@drawable/ic_add_white"
         android:contentDescription="@string/activity_traits_new_button_content_description"
-        android:scaleX="2"
-        android:scaleY="2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

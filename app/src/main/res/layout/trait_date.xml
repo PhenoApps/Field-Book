@@ -23,27 +23,30 @@
             android:orientation="horizontal">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
+                style="@style/FloatingActionButtonStyle.TraitButtons"
                 android:id="@+id/minusDateBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/fb_trait_fab_size"
+                android:layout_height="@dimen/fb_trait_fab_size"
                 android:layout_margin="8dp"
                 android:gravity="center|center_vertical"
                 android:contentDescription="@string/trait_date_minus_content_description"
                 android:src="@drawable/minus" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
+                style="@style/FloatingActionButtonStyle.TraitButtons"
                 android:id="@+id/enterBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/fb_trait_fab_size"
+                android:layout_height="@dimen/fb_trait_fab_size"
                 android:layout_gravity="center"
                 android:layout_margin="8dp"
                 android:src="@drawable/trait_date_save"
                 android:contentDescription="@string/trait_date_save_button_content_description" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
+                style="@style/FloatingActionButtonStyle.TraitButtons"
                 android:id="@+id/addDateBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/fb_trait_fab_size"
+                android:layout_height="@dimen/fb_trait_fab_size"
                 android:layout_margin="8dp"
                 android:gravity="center"
                 android:contentDescription="@string/trait_date_add_content_description"
@@ -52,9 +55,10 @@
         </LinearLayout>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
             android:id="@+id/trait_date_calendar_visibility_btn"
-            android:layout_width="110dp"
-            android:layout_height="55dp"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
             android:layout_gravity="center"
             android:layout_marginTop="15dp"
             android:contentDescription="@string/trait_date_calendar_picker_content_description"
