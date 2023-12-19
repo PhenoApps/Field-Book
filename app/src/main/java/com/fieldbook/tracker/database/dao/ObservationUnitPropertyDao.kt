@@ -196,6 +196,136 @@ class ObservationUnitPropertyDao {
          * "plot_id","column","plot","tray_row","tray_id","seed_id","seed_name","pedigree","trait","value","timestamp","person","location","number"
          * "13RPN00001","1","1","1","13RPN_TRAY001","12GHT00001B","Kharkof","Kharkof","height","3","2021-08-05 11:52:45.379-05:00"," ","","2"
          */
+//        @Synchronized
+//        fun getExportDbData(
+//            studyId: Int,
+//            uniqueName: String,
+//            fieldList: Array<String?>,
+//            traits: ArrayList<TraitObject>
+//        ): Cursor? = withDatabase { db ->
+//
+//            val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
+//            val requiredFields = fieldList + traitRequiredFields
+//            MatrixCursor(requiredFields).also { cursor ->
+//                val varSelectFields = arrayOf("observation_variable_name", "observation_variable_field_book_format")
+//                val obsSelectFields = arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
+//                val query = """
+//            SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }} ${if (fieldList.isNotEmpty()) "," else ""}
+//                ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }} ${if (varSelectFields.isNotEmpty()) "," else ""}
+//                ${obsSelectFields.joinToString { "obs.`$it` AS `$it`" }}
+//            FROM ${Observation.tableName} AS obs,
+//                 $sObservationUnitPropertyViewName AS props,
+//                 ${ObservationVariable.tableName} AS vars
+//            WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
+//                AND obs.${Study.FK} = $studyId
+//                AND obs.value IS NOT NULL
+//                AND vars.observation_variable_name = obs.observation_variable_name
+//                AND vars.internal_id_observation_variable in ${traits.map { "?" }.joinToString(",", "(", ")")}
+//        """.trimIndent()
+//
+//                val TAG = "ObservationUnitPropDao"
+//                val params = traits.map { it.id }
+//
+//                // Log the query and parameters
+//                Log.d(TAG, "Executing query for studyId $studyId: $query")
+//                Log.d(TAG, "With parameters: ${params.joinToString()}")
+//
+//                try {
+//                    val table = db.rawQuery(query, traits.map { it.id }.toTypedArray()).toTable()
+//
+//                    // Log if the table has data
+//                    if (table.isEmpty()) {
+//                        Log.d(TAG, "No data returned from the query for studyId $studyId")
+//                    } else {
+//                        Log.d(TAG, "Data returned for studyId $studyId, number of rows: ${table.size}")
+//                    }
+//
+//                    table.forEach { row ->
+//                        cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
+//                            when (it) {
+//                                "trait" -> row["observation_variable_name"]
+//                                "userValue" -> CategoryJsonUtil.processValue(row)
+//                                "timeTaken" -> row["observation_time_stamp"]
+//                                "person" -> row["collector"]
+//                                "location" -> row["geoCoordinates"]
+//                                "rep" -> row["rep"]
+//                                else -> String()
+//                            }
+//                        })
+//                    }
+//                } catch (e: Exception) {
+//                    // Log the exception if query execution fails
+//                    Log.e(TAG, "Error executing the database query: ${e.message}", e)
+//                }
+//            }
+//        }
+
+//        /**
+//         * Modified function with additional logging, parameter validation, and resource management.
+//         */
+//        @Synchronized
+//        fun getExportDbData(
+//            studyId: Int,
+//            uniqueName: String,
+//            fieldList: Array<String?>,
+//            traits: ArrayList<TraitObject>
+//        ): Cursor? = withDatabase { db ->
+//            val TAG = "ObservationUnitPropDao"
+//
+//            val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
+//            val requiredFields = fieldList + traitRequiredFields
+//            MatrixCursor(requiredFields).also { cursor ->
+//
+//                // Build and log the query
+//                val varSelectFields = arrayOf("observation_variable_name", "observation_variable_field_book_format")
+//                val obsSelectFields = arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
+//                val query = """
+//            SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }},
+//                   ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }},
+//                   ${obsSelectFields.joinToString { "obs.`$it` AS `$it`" }}
+//            FROM ${Observation.tableName} AS obs,
+//                 $sObservationUnitPropertyViewName AS props,
+//                 ${ObservationVariable.tableName} AS vars
+//            WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
+//                AND obs.${Study.FK} = $studyId
+//                AND obs.value IS NOT NULL
+//                AND vars.observation_variable_name = obs.observation_variable_name
+//                AND vars.internal_id_observation_variable in ${traits.map { "?" }.joinToString(",", "(", ")")}
+//        """.trimIndent()
+//
+//                val params = traits.map { it.id }
+//                Log.d(TAG, "Executing query for studyId $studyId with parameters: ${params.joinToString()}")
+//
+//                try {
+//                    // Run the query and process results
+//                    db.rawQuery(query, params.toTypedArray()).use { table ->
+//                        if (table.count == 0) {
+//                            Log.d(TAG, "No data returned from the query for studyId $studyId")
+//                            return@withDatabase null
+//                        } else {
+//                            Log.d(TAG, "Data returned for studyId $studyId, number of rows: ${table.count}")
+//                            table.forEach { row ->
+//                                cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
+//                                    when (it) {
+//                                        "trait" -> row["observation_variable_name"]
+//                                        "userValue" -> CategoryJsonUtil.processValue(row)
+//                                        "timeTaken" -> row["observation_time_stamp"]
+//                                        "person" -> row["collector"]
+//                                        "location" -> row["geoCoordinates"]
+//                                        "rep" -> row["rep"]
+//                                        else -> String()
+//                                    }
+//                                })
+//                            }
+//                        }
+//                    }
+//                } catch (e: Exception) {
+//                    Log.e(TAG, "Error executing the database query: ${e.message}", e)
+//                    null
+//                }
+//            }
+//        }
+
         @Synchronized
         fun getExportDbData(
             studyId: Int,
@@ -203,16 +333,19 @@ class ObservationUnitPropertyDao {
             fieldList: Array<String?>,
             traits: ArrayList<TraitObject>
         ): Cursor? = withDatabase { db ->
+            val TAG = "ObservationUnitPropDao"
 
             val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
+
+                // Build and log the query
                 val varSelectFields = arrayOf("observation_variable_name", "observation_variable_field_book_format")
                 val obsSelectFields = arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
                 val query = """
-            SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }} ${if (fieldList.isNotEmpty()) "," else ""} 
-                ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }} ${if (varSelectFields.isNotEmpty()) "," else ""}
-                ${obsSelectFields.joinToString { "obs.`$it` AS `$it`" }}
+            SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }}, 
+                   ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }},
+                   ${obsSelectFields.joinToString { "obs.`$it` AS `$it`" }}
             FROM ${Observation.tableName} AS obs, 
                  $sObservationUnitPropertyViewName AS props, 
                  ${ObservationVariable.tableName} AS vars
@@ -223,13 +356,9 @@ class ObservationUnitPropertyDao {
                 AND vars.internal_id_observation_variable in ${traits.map { "?" }.joinToString(",", "(", ")")}
         """.trimIndent()
 
-                val TAG = "ObservationUnitPropDao"
-                val params = traits.map { it.id }
-
-                // Log the query and parameters
-                Log.d(TAG, "Executing query for studyId $studyId: $query")
-                Log.d(TAG, "With parameters: ${params.joinToString()}")
-
+                Log.d(TAG, "Executing SQL query: $query")
+                Log.d(TAG, "Query Parameters: " + traits.map { it.name }.joinToString(", "))
+//                val table = db.rawQuery(query, traits.map { it.id }.toTypedArray()).toTable()
                 try {
                     val table = db.rawQuery(query, traits.map { it.id }.toTypedArray()).toTable()
 
@@ -237,7 +366,10 @@ class ObservationUnitPropertyDao {
                     if (table.isEmpty()) {
                         Log.d(TAG, "No data returned from the query for studyId $studyId")
                     } else {
-                        Log.d(TAG, "Data returned for studyId $studyId, number of rows: ${table.size}")
+                        Log.d(
+                            TAG,
+                            "Data returned for studyId $studyId, number of rows: ${table.size}"
+                        )
                     }
 
                     table.forEach { row ->
@@ -253,9 +385,13 @@ class ObservationUnitPropertyDao {
                             }
                         })
                     }
+                } catch (e: SQLiteException) {
+                    Log.e("DatabaseError", "SQL error occurred", e)
                 } catch (e: Exception) {
                     // Log the exception if query execution fails
                     Log.e(TAG, "Error executing the database query: ${e.message}", e)
+                } finally {
+                    cursor.close()
                 }
             }
         }
@@ -335,7 +471,19 @@ class ObservationUnitPropertyDao {
             Log.d(TAG, "convertDatabaseToTable - SQL Query: $query")
 
             try {
-                db.rawQuery(query, null)
+                val cursor = db.rawQuery(query, null)
+
+                // Log if the cursor has data
+                if (cursor.count < 1) {
+                    Log.d(TAG, "No data returned from the query for studyId $expId")
+                } else {
+                    Log.d(
+                        TAG,
+                        "Data returned for studyId $expId, number of rows: ${cursor.count}"
+                    )
+                }
+                cursor
+
             } catch (e: SQLiteException) {
                 Log.e(TAG, "SQLiteException in convertDatabaseToTable: ", e)
                 null
