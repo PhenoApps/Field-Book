@@ -53,7 +53,8 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
             val trait = ctx.getString(R.string.dir_trait)
             val updates = ctx.getString(R.string.dir_updates)
             directories = arrayOf(archive, db, fieldExport, fieldImport,
-                geonav, plotData, resources, trait, updates)
+                geonav, plotData, resources, trait, updates
+            )
         }
     }
 
@@ -61,6 +62,10 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
         (activity as DefineStorageActivity).enableBackButton(false)
         super.onTreeDefined(treeUri)
         (activity as DefineStorageActivity).enableBackButton(true)
+    }
+
+    override fun actionAfterDefine() {
+        actionNoMigrate()
     }
 
     override fun actionNoMigrate() {
