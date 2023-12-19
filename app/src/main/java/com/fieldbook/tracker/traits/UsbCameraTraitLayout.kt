@@ -111,6 +111,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 val manager = ctx.getSystemService(Context.USB_SERVICE) as UsbManager
 
+                Log.d(TAG, "manager: $manager")
+
                 val permissionIntent = PendingIntent.getBroadcast(
                     ctx,
                     0,
@@ -119,8 +121,11 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 )
 
                 val devices = manager.deviceList.map { it.value }
+                Log.d(TAG, "devices: $devices ${devices.size}")
 
                 devices.forEach {
+                    Log.d(TAG, "${it.vendorId} ${it.productId}")
+                    Log.d(TAG, it.deviceName)
                     manager.requestPermission(it, permissionIntent)
                 }
             }
@@ -206,7 +211,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         val filter = IntentFilter(UsbPermissionReceiver.ACTION_USB_PERMISSION)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.registerReceiver(mUsbPermissionReceiver, filter, Context.RECEIVER_EXPORTED)
+            context.registerReceiver(mUsbPermissionReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
             context.registerReceiver(mUsbPermissionReceiver, filter)
         }
@@ -226,6 +231,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
             mUsbDetachReceiver = UsbDetachReceiver {
 
+                (context as CollectActivity).usbCameraConnected = false
+
                 Log.d(TAG, "Detaching")
 
                 activity?.runOnUiThread {
@@ -240,7 +247,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 context.registerReceiver(
                     mUsbDetachReceiver,
                     detachFilter,
-                    Context.RECEIVER_EXPORTED
+                    Context.RECEIVER_NOT_EXPORTED
                 )
             } else {
                 context.registerReceiver(mUsbDetachReceiver, detachFilter)
@@ -278,7 +285,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         val filter = IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.registerReceiver(mUsbAttachReceiver, filter, Context.RECEIVER_EXPORTED)
+            context.registerReceiver(mUsbAttachReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
             context.registerReceiver(mUsbAttachReceiver, filter)
         }
@@ -303,6 +310,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 Log.d(TAG, "Surface available..")
 
                 initPreview()
+
+                (context as CollectActivity).usbCameraConnected = true
 
             }
 
@@ -397,11 +406,17 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
         }, 500)
 
-        try {
+        if ((context as CollectActivity).usbCameraConnected) {
 
-            setup()
+            try {
 
-        } catch (e: Exception) {
+                setup()
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+            }
         }
 
         super.loadLayout()

@@ -234,6 +234,7 @@ public class CollectActivity extends ThemedActivity
      * Usb Camera Helper
      */
     private UsbCameraHelper mUsbCameraHelper = null;
+    private boolean usbCameraConnected = false;
 
     private SecureBluetoothActivityImpl secureBluetooth;
 
@@ -2516,6 +2517,14 @@ public class CollectActivity extends ThemedActivity
             e.printStackTrace();
 
         }
+    }
+
+    public boolean getUsbCameraConnected() {
+        return usbCameraConnected;
+    }
+
+    public void setUsbCameraConnected(boolean connected) {
+        usbCameraConnected = connected;
     }
 
 }

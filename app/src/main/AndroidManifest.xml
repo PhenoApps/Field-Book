@@ -62,7 +62,10 @@
             android:configChanges="keyboardHidden|orientation|screenSize|locale|keyboard"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden" /> <!-- Data grid is available through the collect activity, once the setting is set -->
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan|stateHidden" />
+
+        <!-- Data grid is available through the collect activity, once the setting is set -->
         <activity
             android:name=".activities.DataGridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
