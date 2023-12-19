@@ -336,6 +336,12 @@ class TraitBoxView : ConstraintLayout {
         }
     }
 
+    fun moveToTrait(index: Int) {
+        traitType.setSelection(index)
+        controller.refreshLock()
+        controller.getCollectInputView().resetInitialIndex()
+    }
+
     fun moveTrait(direction: String) {
         var pos = 0
         if (!controller.validateData()) {
@@ -366,9 +372,8 @@ class TraitBoxView : ConstraintLayout {
                 }
             }
         }
-        traitType.setSelection(pos)
-        controller.refreshLock()
-        controller.getCollectInputView().resetInitialIndex()
+
+        moveToTrait(pos)
     }
 
     fun returnFirst() {

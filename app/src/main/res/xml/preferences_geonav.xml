@@ -10,6 +10,14 @@
         android:summary="@string/pref_geonav_enable_summary"
         android:title="@string/pref_geonav_enable_title" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/move_fill0_wght400_grad0_opsz24"
+        android:key="com.fieldbook.tracker.geonav.MOVE_TO_FIRST_TRAIT"
+        android:persistent="true"
+        android:summary="@string/pref_geonav_move_to_first_trait_summary"
+        android:title="@string/pref_geonav_move_to_first_trait_title" />
+
     <ListPreference
         android:defaultValue="0"
         android:entries="@array/pref_geonav_search_methods"

@@ -527,8 +527,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                             lastPlotIdNav = id
                             runOnUiThread {
                                 if (ep.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
-                                    lastPlotIdNav = null
-                                    moveToSearch("id", getRangeBox().getRangeID(), null, null, id, -1)
+                                    onGeoNavigate(id)
                                     Toast.makeText(
                                         this,
                                         R.string.activity_collect_found_plot,
@@ -589,11 +588,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                         snackView.findViewById<ImageButton>(R.id.geonav_snackbar_btn)
                                     btn?.setOnClickListener { v: View? ->
                                         mGeoNavSnackbar?.dismiss()
-                                        lastPlotIdNav = null
-
-                                        println(snackView.height)
-                                        //when navigate button is pressed use rangeBox to go to the plot id
-                                        moveToSearch("id", getRangeBox().getRangeID(), null, null, id, -1)
+                                        onGeoNavigate(id)
                                     }
                                     mGeoNavSnackbar?.setAnchorView(R.id.toolbarBottom)
                                     mGeoNavSnackbar?.setBackgroundTint(Color.TRANSPARENT)
@@ -607,8 +602,34 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         }
     }
 
+    private fun onGeoNavigate(id: String) {
+
+        lastPlotIdNav = null
+
+        (controller.getContext() as CollectActivity).also { collect ->
+
+            //when navigate button is pressed use rangeBox to go to the plot id
+            collect.moveToSearch("id", collect.getRangeBox().getRangeID(), null, null, id, -1)
+
+            if (PreferenceManager.getDefaultSharedPreferences(controller.getContext())
+                    .getBoolean(GeneralKeys.GEONAV_MOVE_TO_FIRST_TRAIT, false)
+            ) {
+
+                try {
+
+                    collect.getTraitBox().moveToTrait(0)
+
+                } catch (e: Exception) {
+
+                    e.printStackTrace()
+
+                }
+            }
+        }
+    }
+
     private fun getPopupInfo(id: String, popupHeader: String): String {
-        
+
         var newPopupHeader = popupHeader
 
         // handle the case where trait has been disabled by the user

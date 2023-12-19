@@ -75,42 +75,34 @@ public class GeneralKeys {
     public static final String BRAPI_TIMEOUT                        = "BRAPI_TIMEOUT";
     public static final String BRAPI_CHUNK_SIZE                     = "BRAPI_CHUNK_SIZE";
 
-    public static final String BRAPI_DISPLAY_NAME                   = "BRAPI_DISPLAY_NAME";
-
-    //GeoNav
-    private static final String GEONAV_PREFIX                       = "com.fieldbook.tracker.geonav.";
-    public static final String ENABLE_GEONAV                        = GEONAV_PREFIX + "ENABLE_GEONAV";
-    public static final String SEARCH_ANGLE                         = GEONAV_PREFIX + "SEARCH_ANGLE";
-    public static final String UPDATE_INTERVAL                      = GEONAV_PREFIX + "UPDATE_INTERVAL";
-    public static final String PAIR_BLUETOOTH                       = GEONAV_PREFIX + "PAIR_BLUETOOTH";
-    public static final String PAIRED_DEVICE_ADDRESS                = GEONAV_PREFIX + "PAIRED_DEVICE_ADDRESS";
-    public static final String GEONAV_AUTO                          = GEONAV_PREFIX + "GEONAV_AUTO";
-    public static final String GEONAV_COMPASS                       = GEONAV_PREFIX + "GEONAV_COMPASS";
-    public static final String GEONAV_AVERAGING                     = GEONAV_PREFIX + "GEONAV_AVERAGING";
-    public static final String GEONAV_AVERAGING_INTERVAL            = GEONAV_PREFIX + "GEONAV_AVERAGIN_INTERVAL";
-    public static final String GEONAV_PARAMETERS_CATEGORY           = GEONAV_PREFIX + "parameters.CATEGORY_KEY";
-    public static final String GEONAV_PARAMETER_D1                  = GEONAV_PREFIX + "parameters.trapezoid.D1";
-    public static final String GEONAV_PARAMETER_D2                  = GEONAV_PREFIX + "parameters.trapezoid.D2";
-    public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
-
-    public static final String GEONAV_LOGGING_MODE                 = GEONAV_PREFIX + "GEONAV_LOGGING_MODE";
-
-    // GeoNav Configuration Preferences
-    public static final String GEONAV_CONFIG_AUDIO_ON_DROP          = GEONAV_PREFIX + "AUDIO_ON_DROP";
-
-    public static final String GEONAV_CONFIG_DEGREE_PRECISION       = GEONAV_PREFIX + "DEGREE_PRECISION";
-  
-    public static final String GEONAV_POPUP_DISPLAY       = GEONAV_PREFIX + "POPUP_DISPLAY";
-    // @formatter:on
-
+    public static final String BRAPI_DISPLAY_NAME = "BRAPI_DISPLAY_NAME";
     // GNSS
-    public static final String GNSS_LAST_PAIRED_DEVICE_NAME      = "GNSS_LAST_PAIRED_DEVICE_NAME";
-
-    public static final String GNSS_LAST_CHOSEN_PRECISION        = "GNSS_LAST_CHOSEN_PRECISION";
-
-    public static final String GNSS_WARNED_PRECISION             = "GNSS_WARNED_PRECISION";
-
-    public static final String GNSS_PRECISION_OK_SOUND           = "GNSS_PRECISION_OK_SOUND";
+    public static final String GNSS_LAST_PAIRED_DEVICE_NAME = "GNSS_LAST_PAIRED_DEVICE_NAME";
+    public static final String GNSS_LAST_CHOSEN_PRECISION = "GNSS_LAST_CHOSEN_PRECISION";
+    public static final String GNSS_WARNED_PRECISION = "GNSS_WARNED_PRECISION";
+    public static final String GNSS_PRECISION_OK_SOUND = "GNSS_PRECISION_OK_SOUND";
+    //GeoNav
+    private static final String GEONAV_PREFIX = "com.fieldbook.tracker.geonav.";
+    public static final String ENABLE_GEONAV = GEONAV_PREFIX + "ENABLE_GEONAV";
+    public static final String SEARCH_ANGLE = GEONAV_PREFIX + "SEARCH_ANGLE";
+    public static final String UPDATE_INTERVAL = GEONAV_PREFIX + "UPDATE_INTERVAL";
+    public static final String PAIR_BLUETOOTH = GEONAV_PREFIX + "PAIR_BLUETOOTH";
+    public static final String PAIRED_DEVICE_ADDRESS = GEONAV_PREFIX + "PAIRED_DEVICE_ADDRESS";
+    public static final String GEONAV_AUTO = GEONAV_PREFIX + "GEONAV_AUTO";
+    public static final String GEONAV_COMPASS = GEONAV_PREFIX + "GEONAV_COMPASS";
+    public static final String GEONAV_AVERAGING = GEONAV_PREFIX + "GEONAV_AVERAGING";
+    public static final String GEONAV_AVERAGING_INTERVAL = GEONAV_PREFIX + "GEONAV_AVERAGIN_INTERVAL";
+    public static final String GEONAV_PARAMETERS_CATEGORY = GEONAV_PREFIX + "parameters.CATEGORY_KEY";
+    public static final String GEONAV_PARAMETER_D1 = GEONAV_PREFIX + "parameters.trapezoid.D1";
+    public static final String GEONAV_PARAMETER_D2 = GEONAV_PREFIX + "parameters.trapezoid.D2";
+    public static final String GEONAV_SEARCH_METHOD = GEONAV_PREFIX + "SEARCH_METHOD";
+    public static final String GEONAV_LOGGING_MODE = GEONAV_PREFIX + "GEONAV_LOGGING_MODE";
+    // @formatter:on
+    public static final String GEONAV_MOVE_TO_FIRST_TRAIT = GEONAV_PREFIX + "MOVE_TO_FIRST_TRAIT";
+    // GeoNav Configuration Preferences
+    public static final String GEONAV_CONFIG_AUDIO_ON_DROP = GEONAV_PREFIX + "AUDIO_ON_DROP";
+    public static final String GEONAV_CONFIG_DEGREE_PRECISION = GEONAV_PREFIX + "DEGREE_PRECISION";
+    public static final String GEONAV_POPUP_DISPLAY = GEONAV_PREFIX + "POPUP_DISPLAY";
 
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
