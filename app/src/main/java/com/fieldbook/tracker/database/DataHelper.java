@@ -113,11 +113,6 @@ public class DataHelper {
         }
     }
 
-
-
-
-
-
     /**
      * V9 special character delete function.
      * TODO: If we want to accept headers with special characters we need to rethink the dynamic range table.
@@ -888,9 +883,7 @@ public class DataHelper {
      */
     public void close() {
         try {
-            if (db != null && db.isOpen()) {
-                db.close();
-            }
+            db.close();
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -902,9 +895,7 @@ public class DataHelper {
     public void open() {
 
         try {
-            if (db == null || !db.isOpen()) {
-                db = openHelper.getWritableDatabase();
-            }
+            db = openHelper.getWritableDatabase();
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -932,15 +923,11 @@ public class DataHelper {
     /**
      * Retrieves the columns needed for export using a join statement
      */
-    public synchronized Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits, int fieldId, String uniqueId) {
+    public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits, int fieldId, String uniqueId) {
 
-        try {
-            open();
-            return ObservationUnitPropertyDao.Companion.getExportDbData(
-                    fieldId, uniqueId, fieldList, traits);
-        } finally {
-            close();
-        }
+        open();
+        return ObservationUnitPropertyDao.Companion.getExportDbData(
+                fieldId, uniqueId, fieldList, traits);
 
 //        String fields = arrayToString("range", fieldList);
 //        String activeTraits = arrayToLikeString(traits);
@@ -976,17 +963,15 @@ public class DataHelper {
      * Same as convertDatabaseToTable but filters by obs unit
      */
     public Cursor convertDatabaseToTable(String[] col, ArrayList<TraitObject> traits, String obsUnit) {
-        try {
-            open();
-            return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
-                    ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                    ep.getString(GeneralKeys.UNIQUE_NAME, ""),
-                    obsUnit,
-                    col,
-                    traits.toArray(new TraitObject[]{}));
-        } finally {
-            close();
-        }
+
+        open();
+
+        return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
+                ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
+                ep.getString(GeneralKeys.UNIQUE_NAME, ""),
+                obsUnit,
+                col,
+                traits.toArray(new TraitObject[]{}));
 
     }
 
@@ -1269,12 +1254,9 @@ public class DataHelper {
 
     public FieldObject getFieldObject(Integer studyId) {
 
-        try {
-            open(); // Open the database connection
-            return StudyDao.Companion.getFieldObject(studyId); // Perform the operation
-        } finally {
-            close(); // Ensure the database is closed
-        }
+        open();
+
+        return StudyDao.Companion.getFieldObject(studyId);
 
 //        Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
 //                        "secondary_id", "date_import", "date_edit", "date_export", "count", "exp_source"},
@@ -1308,12 +1290,9 @@ public class DataHelper {
      */
     public ArrayList<TraitObject> getAllTraitObjects() {
 
-        try {
-            open();
-            return ObservationVariableDao.Companion.getAllTraitObjects();
-        } finally {
-            close();
-        }
+        open();
+
+        return ObservationVariableDao.Companion.getAllTraitObjects();
 
 //        ArrayList<TraitObject> list = new ArrayList<>();
 //
@@ -1959,12 +1938,9 @@ public class DataHelper {
      */
     public String[] getRangeColumns() {
 
-        try {
-            open();
-            return ObservationUnitPropertyDao.Companion.getRangeColumns();
-        } finally {
-            close();
-        }
+        open();
+
+        return ObservationUnitPropertyDao.Companion.getRangeColumns();
 
 //        Cursor cursor = db.rawQuery("SELECT * from range limit 1", null);
 //
@@ -2131,12 +2107,9 @@ public class DataHelper {
 
     public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int studyId) {
 
-        try {
-            open();
-            StudyDao.Companion.updateStudyTable(imp, ed, ex, studyId);
-        } finally {
-            close();
-        }
+        open();
+
+        StudyDao.Companion.updateStudyTable(imp, ed, ex, studyId);
 
 //        ConfigActivity.dt.open();
 //        Cursor cursor = db.rawQuery("SELECT * from " + EXP_INDEX, null);
