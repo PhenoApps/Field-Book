@@ -128,6 +128,11 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                     Log.d(TAG, it.deviceName)
                     manager.requestPermission(it, permissionIntent)
                 }
+
+                if (devices.isNotEmpty()) {
+
+                    setup()
+                }
             }
         }
 
