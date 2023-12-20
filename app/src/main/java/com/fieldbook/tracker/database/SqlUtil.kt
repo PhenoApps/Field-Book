@@ -163,22 +163,7 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
  * Previously this function would try to capture all errors,
  * now we expect exceptions to be handled whenever using this function s.a activity code or BrapiService
  */
-fun <T> withDatabase(function: (SQLiteDatabase) -> T): T? {
-    DataHelper.db?.let { database ->
-        try {
-            database.beginTransaction()
-            val result = function(database)
-            database.setTransactionSuccessful()
-            return result
-        } catch (exception: Exception) {
-            throw exception
-        } finally {
-            database.endTransaction()
-        }
-    }
-    return null
-}
-
+fun <T> withDatabase(function: (SQLiteDatabase) -> T): T? = if (DataHelper.db != null) function(DataHelper.db) else null
 
 var internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ")
 
