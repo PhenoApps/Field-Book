@@ -9,6 +9,8 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
 import com.fieldbook.tracker.database.Migrator.Observation
 import com.fieldbook.tracker.database.Migrator.ObservationUnit
+import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
+import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.query
@@ -185,7 +187,6 @@ class ObservationUnitPropertyDao {
 
         } ?: emptyArray<String?>()
 
-
         /**
          * This function is used when database is checked on export.
          * The traits array is used to determine which traits are exported.
@@ -245,49 +246,72 @@ class ObservationUnitPropertyDao {
         }
 
         /**
-         * Called in ConfigActivity
          * This will print all observation data (if a trait is not observed it is null/empty string) for all observation units.
-         * The user decides whether to print all plot-related fields s.a unique id, primary/secondary name or just the unique name.
-         * The select variable dynamically builds what the user chooses from the col parameter.
          * The maxStatements parameter builds aggregate case statements for each variable, this way the output has column names that are one-to-one with variable names.
-         *  Where the column observation_variable_name value will be the observation value.
-         * Left join is used to capture all observation_units, even if they did not make an observation.
-         * Finally group by props.id to output the aggregation for all observation units, otherwise only a single column would aggregate.
+         * Where the column observation_variable_name value will be the observation value.
+         * All observation_units are captured, even if they did not make an observation.
          * Inputs:
-         * @param uniqueName the preference string that user chooses on field selection for unique plot names
-         * @param col the plot descriptors, this will be either the unique name or all plot descriptors
+         * @param expId the field/study id
          * @param traits the list of traits to print, either all traits or just the active ones
          * @return a cursor that is used in CSVWriter and closed elsewhere
          */
-        fun convertDatabaseToTable(
+
+        fun getExportTableDataShort(
             expId: Int,
             uniqueName: String,
-            col: Array<String?>,
             traits: ArrayList<TraitObject>
         ): Cursor? = withDatabase { db ->
 
-            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
-            val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }
+            val selectAttribute = "units.observation_unit_db_id AS \"$uniqueName\""
 
-            val maxStatements = arrayListOf<String>()
-            sanitizeTraits.forEachIndexed { index, traitName ->
-                maxStatements.add(
-                    "MAX (CASE WHEN o.observation_variable_name='$traitName' THEN o.value ELSE NULL END) AS '${traitName}'"
-                )
-            }
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
+            val selectObservations = sanitizeTraits.map { traitName ->
+                "MAX(CASE WHEN o.observation_variable_name='$traitName' THEN o.value ELSE NULL END) AS \"$traitName\""
+            }.joinToString(", ")
 
             val query = """
-                SELECT $select,
-                ${maxStatements.joinToString(",\n")}
-                FROM ObservationUnitProperty as props
-                LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $expId
-                GROUP BY props.id
+                SELECT $selectAttribute, $selectObservations
+                FROM observation_units AS units
+                LEFT JOIN observations o ON units.observation_unit_db_id = o.observation_unit_id
+                WHERE units.study_id = $expId
+                GROUP BY units.internal_id_observation_unit
             """.trimIndent()
 
+            Log.d("getExportTableDataShort", "Final Query: $query")
             db.rawQuery(query, null)
         }
 
-        /**
+        fun getExportTableDataLong(
+                expId: Int,
+                traits: ArrayList<TraitObject>
+        ): Cursor? = withDatabase { db ->
+
+            val headers = ObservationUnitAttributeDao.getAllNames(expId)
+            val selectAttributes = headers.map { attributeName ->
+                "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+            }.joinToString(", ")
+
+
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
+            val selectObservations = sanitizeTraits.map { traitName ->
+                "MAX(CASE WHEN o.observation_variable_name='$traitName' THEN o.value ELSE NULL END) AS \"$traitName\""
+            }.joinToString(", ")
+
+            val query = """
+                SELECT $selectAttributes, $selectObservations
+                FROM observation_units AS units
+                LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
+                LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
+                LEFT JOIN observations o ON units.observation_unit_db_id = o.observation_unit_id
+                WHERE units.study_id = $expId
+                GROUP BY units.internal_id_observation_unit
+            """.trimIndent()
+
+            Log.d("getExportTableDataLong", "Final Query: $query")
+            db.rawQuery(query, null)
+        }
+
+            /**
          * Same as above but filters by obs unit and trait format
          */
         fun convertDatabaseToTable(

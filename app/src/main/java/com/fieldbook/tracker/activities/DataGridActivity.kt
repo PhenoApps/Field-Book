@@ -223,11 +223,10 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
                 val cursor =
-                    database.convertDatabaseToTable(
-                        arrayOf(uniqueHeader, rowHeader),
-                        mTraits,
+                    database.getExportTableDataShort(
                         ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                        ep.getString(GeneralKeys.UNIQUE_NAME, "")
+                        ep.getString(GeneralKeys.UNIQUE_NAME, ""),
+                        mTraits
                     )
 
                 if (cursor.moveToFirst()) {

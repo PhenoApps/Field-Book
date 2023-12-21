@@ -979,34 +979,18 @@ public class DataHelper {
      * Convert EAV database to relational
      * TODO add where statement for repeated values
      */
-    public Cursor convertDatabaseToTable(String[] col, ArrayList<TraitObject> traits, int fieldId, String uniqueId) {
+    public Cursor getExportTableDataShort(int fieldId,  String uniqueId, ArrayList<TraitObject> traits) {
 
         open();
+        return ObservationUnitPropertyDao.Companion.getExportTableDataShort(fieldId, uniqueId, traits);
 
-        return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
-                fieldId, uniqueId, col, traits);
+    }
 
-//        String query;
-//        String[] rangeArgs = new String[col.length];
-//        String[] traitArgs = new String[traits.length];
-//        String joinArgs = "";
-//
-//        for (int i = 0; i < col.length; i++) {
-//            rangeArgs[i] = "range." + TICK + col[i] + TICK;
-//        }
-//
-//        for (int i = 0; i < traits.length; i++) {
-//            traitArgs[i] = "m" + i + ".userValue as '" + traits[i] + "'";
-//            joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + TICK + ep.getString("ImportUniqueName", "")
-//                    + TICK + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
-//        }
-//
-//        query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
-//                " FROM range range " + joinArgs + "GROUP BY range." + TICK + ep.getString("ImportUniqueName", "") + TICK + "ORDER BY range.id";
-//
-//        Log.i("DH", query);
-//
-//        return db.rawQuery(query, null);
+    public Cursor getExportTableDataLong(int fieldId, ArrayList<TraitObject> traits) {
+
+        open();
+        return ObservationUnitPropertyDao.Companion.getExportTableDataLong(fieldId, traits);
+
     }
 
     /**

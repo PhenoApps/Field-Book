@@ -361,7 +361,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             if (checkDbBool) {
                 val columns = ArrayList<String>().apply {
                     if (onlyUnique?.isChecked == true) add(fo.unique_id)
-                    if (allColumns?.isChecked == true) addAll(database.getRangeColumns())
+                    if (allColumns?.isChecked == true) addAll(database.getAllObservationUnitAttributeNames(fieldId))
                 }
                 Log.d(TAG, "Columns are: " + columns.joinToString())
                 database.getExportDBData(columns.toTypedArray(), exportTrait, fieldId, fo.unique_id).use { cursor ->
@@ -380,10 +380,21 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             if (checkTableBool) {
                 val columns = ArrayList<String>().apply {
                     if (onlyUnique?.isChecked == true) add(fo.unique_id)
-                    if (allColumns?.isChecked == true) addAll(database.getRangeColumns())
+                    if (allColumns?.isChecked == true) addAll(database.getAllObservationUnitAttributeNames(fieldId))
                 }
                 Log.d(TAG, "Columns are: " + columns.joinToString())
-                database.convertDatabaseToTable(columns.toTypedArray(), exportTrait, fieldId, fo.unique_id).use { cursor ->
+
+                val exportDataMethod: () -> Cursor = when {
+                    onlyUnique?.isChecked == true -> {
+                        { database.getExportTableDataShort(fieldId, fo.unique_id, exportTrait) }
+                    }
+                    allColumns?.isChecked == true -> {
+                        { database.getExportTableDataLong(fieldId, exportTrait) }
+                    }
+                    else -> throw IllegalStateException("Neither onlyUnique nor allColumns checkboxes are checked.")
+                }
+
+                exportDataMethod().use { cursor ->
                     try {
                         if (cursor.count > 0) {
                             createExportFile(cursor, "table", columns)
@@ -428,6 +439,13 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                                 "table" -> {
                                     val newColumns = columns.toTypedArray()
                                     val labels = exportTrait.map { it.name }
+
+                                    // Log the arguments
+                                    val newColumnsStr = newColumns.joinToString(", ")
+                                    val labelsStr = labels.joinToString(", ")
+                                    val columnsSizeStr = columns.size.toString()
+                                    Log.d(TAG, "Calling writeTableFormat with arguments: newColumns=[$newColumnsStr], columnsSize=[$columnsSizeStr], labels=[$labelsStr]")
+
                                     csvWriter.writeTableFormat(
                                         newColumns.plus(labels),
                                         columns.size,
