@@ -5,13 +5,12 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
@@ -22,17 +21,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
-    PreferenceManager prefMgr;
+    @Inject
+    SharedPreferences preferences;
+
     Context context;
 
     private Preference mPairDevicePref;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_behavior, rootKey);
 
@@ -44,7 +48,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
             skipEntriesPref.setOnPreferenceChangeListener(this);
 
             //also initialize the summary whenever the fragment is opened, or else it defaults to "disabled"
-            String skipMode = prefMgr.getSharedPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1");
+            String skipMode = preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1");
 
             switchSkipPreferenceMode(skipMode, skipEntriesPref);
 
@@ -58,7 +62,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
             switchVolumePref.setOnPreferenceChangeListener(this);
 
             //also initialize the summary whenever the fragment is opened, or else it defaults to "disabled"
-            String switchMode = prefMgr.getSharedPreferences().getString(GeneralKeys.VOLUME_NAVIGATION, "0");
+            String switchMode = preferences.getString(GeneralKeys.VOLUME_NAVIGATION, "0");
 
             switchVolumePreferenceMode(switchMode, switchVolumePref);
 
@@ -92,8 +96,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
      */
     private void updateDeviceAddressSummary() {
         if (mPairDevicePref != null) {
-            String address = prefMgr.getSharedPreferences()
-                    .getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "");
+            String address = preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "");
             mPairDevicePref.setSummary(address);
         }
     }
@@ -216,7 +219,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
             builder.setTitle(R.string.choose_paired_bluetooth_devices_title);
 
             //when a device is chosen, start a connect thread
-            builder.setSingleChoiceItems(names.toArray(new String[] {}), -1, (dialog, which) -> {
+            builder.setSingleChoiceItems(names.toArray(new String[]{}), -1, (dialog, which) -> {
 
                 String deviceName = names.get(which);
                 String address = internalGps;
@@ -230,8 +233,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
                     }
 
-                    prefMgr.getSharedPreferences()
-                            .edit().putString(GeneralKeys.PAIRED_DEVICE_ADDRESS, address)
+                    preferences.edit().putString(GeneralKeys.PAIRED_DEVICE_ADDRESS, address)
                             .apply();
 
                     updateDeviceAddressSummary();

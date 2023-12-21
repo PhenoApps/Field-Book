@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
@@ -95,13 +96,19 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
     @Inject
     lateinit var database: DataHelper
 
+    @Inject
+    lateinit var preferences: SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
 
         //this activity uses databinding to inflate the content layout
         //this creates a 'binding' variable that has all the views as fields, an alternative to findViewById
-        val binding = DataBindingUtil.setContentView<ActivityDataGridBinding>(this, R.layout.activity_data_grid)
+        val binding = DataBindingUtil.setContentView<ActivityDataGridBinding>(
+            this,
+            R.layout.activity_data_grid
+        )
 
         setSupportActionBar(binding.toolbar)
 
@@ -186,23 +193,23 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                              plotId: Int? = null,
                              trait: Int? = null) {
 
-        val ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
+        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-        val studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+        val showLabel = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") == "value"
 
-        val showLabel = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") == "value"
-
-        val uniqueHeader = ep.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+        val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
         //if row header was not chosen, then use the preference unique name
-        var rowHeader = prefixTrait ?: ep.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
+        var rowHeader =
+            prefixTrait ?: preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader)
+            ?: ""
 
         if (rowHeader !in database.rangeColumnNames) {
             rowHeader = uniqueHeader
         }
 
         //if rowHeader was updated, update the preference
-        ep.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, rowHeader).apply()
+        preferences.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, rowHeader).apply()
 
         if (rowHeader.isNotBlank()) {
 
@@ -363,9 +370,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
     override fun onCellClicked(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {
 
-        val ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
-
-        val studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
         //populate plotId clicked from parameters and global store
         val plotId = mPlotIds[row]
@@ -406,9 +411,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
     private fun decodeValue(value: String): String {
 
-        val ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
-
-        val labelValPref: String = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") ?: "value"
+        val labelValPref: String =
+            preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") ?: "value"
         val scale = decode(
             value
         )

@@ -140,6 +140,9 @@ public class CollectActivity extends ThemedActivity
     private GeoNavHelper geoNavHelper;
 
     @Inject
+    SharedPreferences preferences;
+
+    @Inject
     KeyboardListenerHelper keyboardListenerHelper;
 
     @Inject
@@ -189,7 +192,6 @@ public class CollectActivity extends ThemedActivity
      * Trait layouts
      */
     LayoutCollections traitLayouts;
-    private SharedPreferences ep;
     private String inputPlotId = "";
     private AlertDialog goToId;
     private final Object lock = new Object();
@@ -286,7 +288,6 @@ public class CollectActivity extends ThemedActivity
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         geoNavHelper = new GeoNavHelper(this);
-        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         ttsHelper = new TextToSpeechHelper(this, () -> {
             String lang = mPrefs.getString(GeneralKeys.TTS_LANGUAGE, "-1");
@@ -316,7 +317,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public void triggerTts(String text) {
-        if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
+        if (preferences.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
             ttsHelper.speak(text);
         }
     }
@@ -421,7 +422,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public String getStudyId() {
-        return Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        return Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
     }
 
     public String getObservationUnit() {
@@ -429,7 +430,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public String getPerson() {
-        return ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, "");
+        return preferences.getString(GeneralKeys.FIRST_NAME, "") + " " + preferences.getString(GeneralKeys.LAST_NAME, "");
     }
 
     public String getTraitName() {
@@ -914,11 +915,11 @@ public class CollectActivity extends ThemedActivity
 
         //save the last used trait
         if (traitBox.getCurrentTrait() != null)
-            ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
+            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
 
         geoNavHelper.stopAverageHandler();
 
-        ep.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
+        preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
 
         super.onPause();
     }
@@ -929,7 +930,7 @@ public class CollectActivity extends ThemedActivity
         guiThread.quit();
 
         //save last plot id
-        if (ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)) {
+        if (preferences.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)) {
             rangeBox.saveLastPlot();
         }
 
@@ -967,10 +968,10 @@ public class CollectActivity extends ThemedActivity
 
         // Update menu item visibility
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
-            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1").equals("1"));
-            systemMenu.findItem(R.id.jumpToPlot).setVisible(!ep.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "1").equals("1"));
-            systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1").equals("1"));
+            systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "1").equals("1"));
+            systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
         }
 
         // If reload data is true, it means there was an import operation, and
@@ -990,10 +991,10 @@ public class CollectActivity extends ThemedActivity
             traitBox.setSelection(0);
 
             // try to go to last saved plot
-            if (ep.getString(GeneralKeys.LAST_PLOT, null) != null) {
+            if (preferences.getString(GeneralKeys.LAST_PLOT, null) != null) {
                 rangeBox.setAllRangeID();
                 int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id", rangeID, null, null, ep.getString(GeneralKeys.LAST_PLOT, null), -1);
+                moveToSearch("id", rangeID, null, null, preferences.getString(GeneralKeys.LAST_PLOT, null), -1);
             }
 
         } else if (partialReload) {
@@ -1031,7 +1032,7 @@ public class CollectActivity extends ThemedActivity
 
         }
 
-        dataLocked = ep.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
+        dataLocked = preferences.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
 
         refreshLock();
     }
@@ -1055,7 +1056,7 @@ public class CollectActivity extends ThemedActivity
     private void navigateToLastOpenedTrait() {
 
         //navigate to the last used trait using preferences
-        String trait = ep.getString(GeneralKeys.LAST_USED_TRAIT, null);
+        String trait = preferences.getString(GeneralKeys.LAST_USED_TRAIT, null);
 
         navigateToTrait(trait);
     }
@@ -1097,7 +1098,7 @@ public class CollectActivity extends ThemedActivity
 
         String studyId = getStudyId();
         String obsUnit = getObservationUnit();
-        String person = ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, "");
+        String person = preferences.getString(GeneralKeys.FIRST_NAME, "") + " " + preferences.getString(GeneralKeys.LAST_NAME, "");
 
         String rep = nullableRep;
 
@@ -1163,11 +1164,11 @@ public class CollectActivity extends ThemedActivity
 
     public String getLocationByPreferences() {
 
-        String expId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String expId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         String obsUnit = rangeBox.getPlotID();
 
         return LocationCollectorUtil.Companion
-                .getLocationByCollectMode(this, ep, expId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
+                .getLocationByCollectMode(this, preferences, expId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
     }
 
     private void brapiDelete(String parent, Boolean hint) {
@@ -1187,7 +1188,7 @@ public class CollectActivity extends ThemedActivity
             return;
         }
 
-        String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String exp_id = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         TraitObject trait = traitBox.getCurrentTrait();
         if (database.isBrapiSynced(exp_id, getObservationUnit(), trait.getId(), getRep())) {
             brapiDelete(parent, true);
@@ -1205,7 +1206,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     private void customizeToolbarIcons() {
-        Set<String> entries = ep.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
+        Set<String> entries = preferences.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
 
         if (systemMenu != null) {
             systemMenu.findItem(R.id.search).setVisible(entries.contains("search"));
@@ -1221,10 +1222,10 @@ public class CollectActivity extends ThemedActivity
 
         systemMenu = menu;
 
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
-        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1").equals("1"));
-        systemMenu.findItem(R.id.jumpToPlot).setVisible(!ep.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "1").equals("1"));
-        systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1").equals("1"));
+        systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "1").equals("1"));
+        systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
 
         //toggle repeated values indicator
         systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator).setVisible(collectInputView.isRepeatEnabled());
@@ -1315,7 +1316,7 @@ public class CollectActivity extends ThemedActivity
             rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, false, true));
             refreshMain();
         } else if (itemId == jumpToPlotId) {
-            String moveToUniqueIdValue = ep.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "");
+            String moveToUniqueIdValue = preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "");
             if (moveToUniqueIdValue.equals("2")) {
                 moveToPlotID();
             } else if (moveToUniqueIdValue.equals("3")) {
@@ -1342,7 +1343,7 @@ public class CollectActivity extends ThemedActivity
             if (dataLocked == UNLOCKED) dataLocked = LOCKED;
             else if (dataLocked == LOCKED) dataLocked = FROZEN;
             else dataLocked = UNLOCKED;
-            ep.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
+            preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
             lockData();
         } else if (itemId == android.R.id.home) {
             finish();
@@ -1430,7 +1431,7 @@ public class CollectActivity extends ThemedActivity
 
     private void showMultiMeasureDeleteDialog() {
 
-        String labelValPref = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value");
+        String labelValPref = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value");
 
         ObservationModel[] values = database.getRepeatedValues(
                 getStudyId(), getObservationUnit(), getTraitDbId());
@@ -1583,7 +1584,7 @@ public class CollectActivity extends ThemedActivity
      */
     void lockData() {
 
-        int state = ep.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
+        int state = preferences.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
 
         if (state == LOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
@@ -1739,7 +1740,7 @@ public class CollectActivity extends ThemedActivity
     public boolean dispatchKeyEvent(KeyEvent event) {
         int action = event.getAction();
         int keyCode = event.getKeyCode();
-        String volumeNavigation = ep.getString(GeneralKeys.VOLUME_NAVIGATION, "0");
+        String volumeNavigation = preferences.getString(GeneralKeys.VOLUME_NAVIGATION, "0");
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if (volumeNavigation.equals("1")) {
@@ -2153,16 +2154,16 @@ public class CollectActivity extends ThemedActivity
     }
 
     public SharedPreferences getPreference() {
-        return ep;
+        return preferences;
     }
 
     @Override
     public boolean isCyclingTraitsAdvances() {
-        return ep.getBoolean(GeneralKeys.CYCLING_TRAITS_ADVANCES, false);
+        return preferences.getBoolean(GeneralKeys.CYCLING_TRAITS_ADVANCES, false);
     }
 
     public boolean isReturnFirstTrait() {
-        return ep.getBoolean(GeneralKeys.RETURN_FIRST_TRAIT, false);
+        return preferences.getBoolean(GeneralKeys.RETURN_FIRST_TRAIT, false);
     }
 
     /**
@@ -2174,7 +2175,7 @@ public class CollectActivity extends ThemedActivity
 
         TraitObject trait = getCurrentTrait();
 
-        String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         database.insertObservation(rangeBox.getPlotID(), trait.getId(), trait.getFormat(), size,
                 getPerson(),
@@ -2223,7 +2224,7 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public SharedPreferences getPreferences() {
-        return ep;
+        return preferences;
     }
 
     @NonNull

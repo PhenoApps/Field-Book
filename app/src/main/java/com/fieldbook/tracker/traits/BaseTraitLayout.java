@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
@@ -216,7 +217,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public SharedPreferences getPrefs() {
-        return getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
+        return PreferenceManager.getDefaultSharedPreferences(getContext());
     }
 
     public CollectActivity getCollectActivity() {
@@ -232,7 +233,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public String getDisplayColor() {
-        return String.format("#%06X", (0xFFFFFF & getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+        return String.format("#%06X", (0xFFFFFF & PreferenceManager.getDefaultSharedPreferences(getContext())
                 .getInt(GeneralKeys.SAVED_DATA_COLOR, resolveThemeColor(R.attr.fb_value_saved_color))));
     }
 

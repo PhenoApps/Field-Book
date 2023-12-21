@@ -84,6 +84,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -123,11 +124,12 @@ public class ConfigActivity extends ThemedActivity {
     public SoundHelperImpl soundHelper;
     @Inject
     VerifyPersonHelper verifyPersonHelper;
+    @Inject
+    SharedPreferences preferences;
     public FieldSwitchImpl fieldSwitcher = null;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     ListView settingsList;
-    private SharedPreferences ep;
     private AlertDialog saveDialog;
     private EditText exportFile;
     private String exportFileString = "";
@@ -159,7 +161,7 @@ public class ConfigActivity extends ThemedActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
         }
 
         invalidateOptionsMenu();
@@ -168,7 +170,7 @@ public class ConfigActivity extends ThemedActivity {
 
     private void setCrashlyticsUserId() {
 
-        String id = ep.getString(GeneralKeys.CRASHLYTICS_ID, "");
+        String id = preferences.getString(GeneralKeys.CRASHLYTICS_ID, "");
         FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
         instance.setUserId(id);
         instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, id);
@@ -178,9 +180,9 @@ public class ConfigActivity extends ThemedActivity {
      *
      */
     private void checkBrapiToken() {
-        String token = ep.getString(GeneralKeys.BRAPI_TOKEN, "");
+        String token = preferences.getString(GeneralKeys.BRAPI_TOKEN, "");
         if (!token.isEmpty()) {
-            ep.edit().putBoolean(GeneralKeys.BRAPI_ENABLED, true).apply();
+            preferences.edit().putBoolean(GeneralKeys.BRAPI_ENABLED, true).apply();
         }
     }
 
@@ -192,8 +194,6 @@ public class ConfigActivity extends ThemedActivity {
 
         super.onCreate(savedInstanceState);
 
-        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
-
         checkBrapiToken();
 
         setCrashlyticsUserId();
@@ -203,10 +203,10 @@ public class ConfigActivity extends ThemedActivity {
         // request permissions
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
 
-        int lastVersion = ep.getInt(GeneralKeys.UPDATE_VERSION, -1);
+        int lastVersion = preferences.getInt(GeneralKeys.UPDATE_VERSION, -1);
         int currentVersion = Utils.getVersion(this);
         if (lastVersion < currentVersion) {
-            ep.edit().putInt(GeneralKeys.UPDATE_VERSION, Utils.getVersion(this)).apply();
+            preferences.edit().putInt(GeneralKeys.UPDATE_VERSION, Utils.getVersion(this)).apply();
             showChangelog(true, false);
 
             if (currentVersion >= 530 && lastVersion < 530) {
@@ -214,23 +214,23 @@ public class ConfigActivity extends ThemedActivity {
                 OldPhotosMigrator.Companion.migrateOldPhotosDir(this, database);
 
                 //clear field selection after updates
-                ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
-                ep.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
-                ep.edit().putString(GeneralKeys.FIELD_OBS_LEVEL, null).apply();
-                ep.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
-                ep.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
-                ep.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
+                preferences.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
+                preferences.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
+                preferences.edit().putString(GeneralKeys.FIELD_OBS_LEVEL, null).apply();
+                preferences.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
+                preferences.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
+                preferences.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
             }
         }
 
-        if (!ep.contains(GeneralKeys.FIRST_RUN)) {
+        if (!preferences.contains(GeneralKeys.FIRST_RUN)) {
             // do things on the first run
             //this will grant FB access to the chosen folder
             //preference and activity is handled through this utility call
 
-            SharedPreferences.Editor ed = ep.edit();
+            SharedPreferences.Editor ed = preferences.edit();
 
-            Set<String> entries = ep.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
+            Set<String> entries = preferences.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
             entries.add("search");
             entries.add("resources");
             entries.add("summary");
@@ -247,7 +247,40 @@ public class ConfigActivity extends ThemedActivity {
                     REQUEST_STORAGE_DEFINER);
         }
 
+        migratePreferencesToDefault();
+
         verifyPersonHelper.updateLastOpenedTime();
+    }
+
+    /**
+     * Transfer "Settings" preference file map values to default preferences map
+     */
+    private void migratePreferencesToDefault() {
+
+        SharedPreferences oldPreferences = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
+        Set<? extends Map.Entry<String, ?>> entries = oldPreferences.getAll().entrySet();
+
+        SharedPreferences.Editor edit = preferences.edit();
+        for (Map.Entry<String, ?> entry : entries) {
+            Object value = entry.getValue();
+            String key = entry.getKey();
+
+            if (value instanceof Boolean) {
+                edit.putBoolean(key, ((Boolean) value));
+            } else if (value instanceof String) {
+                edit.putString(key, ((String) value));
+            } else if (value instanceof Float) {
+                edit.putFloat(key, ((Float) value));
+            } else if (value instanceof Integer) {
+                edit.putInt(key, ((Integer) value));
+            } else if (value instanceof Long) {
+                edit.putLong(key, ((Long) value));
+            } else if (value instanceof HashSet) {
+                edit.putStringSet(key, ((HashSet<String>) value));
+            }
+        }
+        
+        edit.apply();
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {
@@ -310,7 +343,7 @@ public class ConfigActivity extends ThemedActivity {
 
                     if (checkTraitsExist() < 0) return;
 
-                    String exporter = ep.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "");
+                    String exporter = preferences.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "");
 
                     switch (exporter) {
                         case "local":
@@ -321,7 +354,7 @@ public class ConfigActivity extends ThemedActivity {
                             break;
                         default:
                             // Skip dialog if BrAPI is disabled
-                            if (ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+                            if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
                                 showExportDialog();
                             } else {
                                 exportPermission();
@@ -346,9 +379,9 @@ public class ConfigActivity extends ThemedActivity {
         ImageListAdapter adapterImg = new ImageListAdapter(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
 
-        SharedPreferences.Editor ed = ep.edit();
+        SharedPreferences.Editor ed = preferences.edit();
 
-        if (!ep.getBoolean(GeneralKeys.TIPS_CONFIGURED, false)) {
+        if (!preferences.getBoolean(GeneralKeys.TIPS_CONFIGURED, false)) {
             ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
             ed.apply();
             showTipsDialog();
@@ -386,8 +419,8 @@ public class ConfigActivity extends ThemedActivity {
 
         String[] traits = database.getVisibleTrait();
 
-        if (!ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
-                || ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
+        if (!preferences.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
+                || preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_field_missing));
             return -1;
         } else if (traits.length == 0) {
@@ -476,7 +509,7 @@ public class ConfigActivity extends ThemedActivity {
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                Editor ed = ep.edit();
+                Editor ed = preferences.edit();
                 ed.putBoolean(GeneralKeys.TIPS, true);
                 ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
                 ed.apply();
@@ -494,7 +527,7 @@ public class ConfigActivity extends ThemedActivity {
 
         builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                Editor ed = ep.edit();
+                Editor ed = preferences.edit();
                 ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
                 ed.apply();
 
@@ -543,7 +576,7 @@ public class ConfigActivity extends ThemedActivity {
 
         String[] exportArray = new String[2];
         exportArray[0] = getString(R.string.export_source_local);
-        exportArray[1] = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
+        exportArray[1] = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, exportArray);
         exportSourceList.setAdapter(adapter);
@@ -574,7 +607,7 @@ public class ConfigActivity extends ThemedActivity {
 
     private void exportBrAPI() {
         // Get our active field
-        int activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+        int activeFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
         FieldObject activeField;
         if (activeFieldId != -1) {
             activeField = database.getFieldObject(activeFieldId);
@@ -627,19 +660,19 @@ public class ConfigActivity extends ThemedActivity {
         CheckBox checkOverwrite = layout.findViewById(R.id.overwrite);
         CheckBox checkBundle = layout.findViewById(R.id.dialog_export_bundle_data_cb);
 
-        checkBundle.setChecked(ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false));
-        checkOverwrite.setChecked(ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false));
-        checkDB.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABSE, false));
-        checkExcel.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, false));
-        onlyUnique.setChecked(ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, false));
-        allColumns.setChecked(ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, false));
-        allTraits.setChecked(ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ALL, false));
-        activeTraits.setChecked(ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, false));
+        checkBundle.setChecked(preferences.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false));
+        checkOverwrite.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false));
+        checkDB.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABSE, false));
+        checkExcel.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, false));
+        onlyUnique.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, false));
+        allColumns.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, false));
+        allTraits.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_TRAITS_ALL, false));
+        activeTraits.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, false));
 
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
-        fFile = ep.getString(GeneralKeys.FIELD_FILE, "");
+        fFile = preferences.getString(GeneralKeys.FIELD_FILE, "");
 
         if (fFile.length() > 4 & fFile.toLowerCase().endsWith(".csv")) {
             fFile = fFile.substring(0, fFile.length() - 4);
@@ -684,7 +717,7 @@ public class ConfigActivity extends ThemedActivity {
                 return;
             }
 
-            Editor ed = ep.edit();
+            Editor ed = preferences.edit();
             ed.putBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, onlyUnique.isChecked());
             ed.putBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, allColumns.isChecked());
             ed.putBoolean(GeneralKeys.EXPORT_TRAITS_ALL, allTraits.isChecked());
@@ -700,7 +733,7 @@ public class ConfigActivity extends ThemedActivity {
             newRange = new ArrayList<>();
 
             if (onlyUnique.isChecked()) {
-                newRange.add(ep.getString(GeneralKeys.UNIQUE_NAME, ""));
+                newRange.add(preferences.getString(GeneralKeys.UNIQUE_NAME, ""));
             }
 
             if (allColumns.isChecked()) {
@@ -726,7 +759,7 @@ public class ConfigActivity extends ThemedActivity {
             checkDbBool = checkDB.isChecked();
             checkExcelBool = checkExcel.isChecked();
 
-            if (ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
+            if (preferences.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
                 exportFileString = getOverwriteFile(exportFile.getText().toString());
             } else {
                 exportFileString = exportFile.getText().toString();
@@ -741,7 +774,7 @@ public class ConfigActivity extends ThemedActivity {
 
         soundHelper.playCelebrate();
 
-        int studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+        int studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
         int newStudyId = f.getExp_id();
 
@@ -756,7 +789,7 @@ public class ConfigActivity extends ThemedActivity {
 
         if (plotId != null) {
 
-            ep.edit().putString(GeneralKeys.LAST_PLOT, plotId).apply();
+            preferences.edit().putString(GeneralKeys.LAST_PLOT, plotId).apply();
 
         }
 
@@ -912,7 +945,7 @@ public class ConfigActivity extends ThemedActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
         return true;
     }
 
@@ -1054,12 +1087,12 @@ public class ConfigActivity extends ThemedActivity {
         protected Integer doInBackground(Integer... params) {
 
             //flag telling if the user checked the media bundle option
-            boolean bundleChecked = ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false);
+            boolean bundleChecked = preferences.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false);
 
             newRange.clear();
 
             if (onlyUnique.isChecked()) {
-                newRange.add(ep.getString(GeneralKeys.UNIQUE_NAME, ""));
+                newRange.add(preferences.getString(GeneralKeys.UNIQUE_NAME, ""));
             }
 
             if (allColumns.isChecked()) {
@@ -1169,7 +1202,7 @@ public class ConfigActivity extends ThemedActivity {
                 if (bundleChecked) {
 
                     //query selected study to get the study name
-                    int studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+                    int studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
                     //study name is the same as the media directory in plot_data
                     FieldObject fieldObject = database.getFieldObject(studyId);
@@ -1210,7 +1243,7 @@ public class ConfigActivity extends ThemedActivity {
                                     if (tableFile != null && tableFile.exists()) tableFile.delete();
 
                                     //share the zip file
-                                    FileUtil.shareFile(ConfigActivity.this, ep, zipFile);
+                                    FileUtil.shareFile(ConfigActivity.this, preferences, zipFile);
                                 }
                             }
                         }
@@ -1240,15 +1273,15 @@ public class ConfigActivity extends ThemedActivity {
                             if (dbFile != null) dbFile.delete();
                             if (tableFile != null) tableFile.delete();
 
-                            FileUtil.shareFile(ConfigActivity.this, ep, zipFile);
+                            FileUtil.shareFile(ConfigActivity.this, preferences, zipFile);
 
                         } else if (checkDbBool) {
 
-                            FileUtil.shareFile(ConfigActivity.this, ep, dbFile);
+                            FileUtil.shareFile(ConfigActivity.this, preferences, dbFile);
 
                         } else if (checkExcelBool) {
 
-                            FileUtil.shareFile(ConfigActivity.this, ep, tableFile);
+                            FileUtil.shareFile(ConfigActivity.this, preferences, tableFile);
                         }
                     }
                 }
@@ -1281,7 +1314,7 @@ public class ConfigActivity extends ThemedActivity {
 
             if (!fail) {
                 showCitationDialog();
-                database.updateExpTable(false, false, true, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+                database.updateExpTable(false, false, true, preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
             }
 
             if (fail) {
@@ -1339,8 +1372,7 @@ public class ConfigActivity extends ThemedActivity {
                 Utils.makeToast(getApplicationContext(), getString(R.string.import_error_general));
             }
 
-            SharedPreferences prefs = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
-            SharedPreferences.Editor editor = prefs.edit();
+            SharedPreferences.Editor editor = preferences.edit();
             editor.apply();
 
             //if sample db is imported, automatically select the first study

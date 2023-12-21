@@ -18,6 +18,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
@@ -39,7 +40,6 @@ public class FieldAdapter extends BaseAdapter {
     private final LayoutInflater mLayoutInflater;
     private final ArrayList<FieldObject> list;
     private final Context context;
-    private SharedPreferences ep;
     private final FieldSwitcher fieldSwitcher;
     public FieldAdapter(Context context, ArrayList<FieldObject> list, FieldSwitcher switcher) {
         this.context = context;
@@ -65,8 +65,14 @@ public class FieldAdapter extends BaseAdapter {
         return position;
     }
 
-    private void setEditorItem(SharedPreferences ep, FieldObject item) {
-        SharedPreferences.Editor ed = ep.edit();
+    private SharedPreferences getPreferences() {
+
+        return ((FieldEditorActivity) context).getPreferences();
+
+    }
+
+    private void setEditorItem(SharedPreferences preferences, FieldObject item) {
+        SharedPreferences.Editor ed = preferences.edit();
         boolean has_contents = item != null;
         if (has_contents) {
             ed.putString(GeneralKeys.FIELD_FILE, item.getExp_name());
@@ -90,8 +96,6 @@ public class FieldAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
-
-        ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         ViewHolder holder;
         if (convertView == null) {
@@ -151,17 +155,17 @@ public class FieldAdapter extends BaseAdapter {
         holder.active.setOnClickListener(v -> fieldClick(getItem(position)));
 
         //Check both file name and observation level
-        if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) != -1) {
+        if (getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, -1) != -1) {
             FieldObject field = getItem(position);
 
             if (field.getExp_source() == null) {
-                holder.active.setChecked((ep.getString(GeneralKeys.FIELD_FILE, "")
+                holder.active.setChecked((getPreferences().getString(GeneralKeys.FIELD_FILE, "")
                         .contentEquals(holder.fieldName.getText())) &&
-                        (ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "")
+                        (getPreferences().getString(GeneralKeys.FIELD_OBS_LEVEL, "")
                                 .contentEquals(holder.observationLevel.getText())));
             } else if (field.getExp_alias() != null) {
-                String alias = ep.getString(GeneralKeys.FIELD_ALIAS, "");
-                String level = ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "");
+                String alias = getPreferences().getString(GeneralKeys.FIELD_ALIAS, "");
+                String level = getPreferences().getString(GeneralKeys.FIELD_OBS_LEVEL, "");
                 holder.active.setChecked(alias.contentEquals(field.getExp_alias())
                         && level.contentEquals(holder.observationLevel.getText()));
             }
@@ -220,8 +224,8 @@ public class FieldAdapter extends BaseAdapter {
 
                 ((FieldAdapterController) context).getDatabase().deleteField(getItem(position).getExp_id());
 
-                if (getItem(position).getExp_id() == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
-                    setEditorItem(ep, null);
+                if (getItem(position).getExp_id() == getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
+                    setEditorItem(getPreferences(), null);
                 }
 
                 ((FieldAdapterController) context).queryAndLoadFields();
@@ -257,7 +261,7 @@ public class FieldAdapter extends BaseAdapter {
 
     private void fieldClick(FieldObject selectedField) {
 
-        setEditorItem(ep, selectedField);
+        setEditorItem(getPreferences(), selectedField);
 
         fieldSwitcher.switchField(selectedField);
 

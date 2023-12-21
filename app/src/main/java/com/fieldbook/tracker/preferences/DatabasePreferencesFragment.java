@@ -32,9 +32,9 @@ import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
-import com.fieldbook.tracker.utilities.FileUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -58,7 +58,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 @AndroidEntryPoint
 public class DatabasePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
-    private static int REQUEST_FILE_EXPLORE_CODE = 2;
+    private static final int REQUEST_FILE_EXPLORE_CODE = 2;
 
     PreferenceManager prefMgr;
     Context context;
@@ -68,16 +68,17 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
     public static Handler mHandler = new Handler();
     private final int PERMISSIONS_REQUEST_DATABASE_IMPORT = 9980;
     private final int PERMISSIONS_REQUEST_DATABASE_EXPORT = 9970;
-    private SharedPreferences ep;
 
     @Inject
     DataHelper database;
+    private final Runnable exportDB = new Runnable() {
+        public void run() {
+            new ExportDBTask().execute(0);
+        }
+    };
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
-        ep = getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setPreferencesFromResource(R.xml.preferences_database, rootKey);
 
@@ -121,11 +122,118 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
             startActivityForResult(intent, REQUEST_FILE_EXPLORE_CODE);
         }
     }
+    @Inject
+    SharedPreferences preferences;
 
     private void invokeImportDatabase(DocumentFile docFile) {
         mHandler.post(() -> {
-           new ImportDBTask(docFile).execute(0);
+            new ImportDBTask(docFile).execute(0);
         });
+    }
+
+    // Second confirmation
+    private void showDatabaseResetDialog2() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
+
+        builder.setTitle(getString(R.string.dialog_warning));
+        builder.setMessage(getString(R.string.database_reset_warning2));
+
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                // Delete database
+                database.deleteDatabase();
+
+                // Clear all existing settings
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.clear();
+                ed.apply();
+
+                dialog.dismiss();
+                Utils.makeToast(getContext(), getString(R.string.database_reset_message));
+
+                try {
+                    getActivity().finishAffinity();
+                } catch (Exception e) {
+                    Log.e("Field Book", "" + e.getMessage());
+                }
+            }
+
+        });
+
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+        DialogUtils.styleDialogs(alert);
+    }
+
+    private void showDatabaseExportDialog() {
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.dialog_save_database, null);
+
+        exportFile = layout.findViewById(R.id.fileName);
+        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
+        String autoFillName = timeStamp.format(Calendar.getInstance().getTime()) + "_" + "systemdb" + DataHelper.DATABASE_VERSION;
+        exportFile.setText(autoFillName);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
+        builder.setTitle(R.string.database_dialog_title)
+                .setCancelable(true)
+                .setView(layout);
+
+        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dbSaveDialog.dismiss();
+                exportFileString = exportFile.getText().toString();
+                mHandler.post(exportDB);
+            }
+        });
+
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        dbSaveDialog = builder.create();
+        dbSaveDialog.show();
+        DialogUtils.styleDialogs(dbSaveDialog);
+
+        android.view.WindowManager.LayoutParams params = dbSaveDialog.getWindow().getAttributes();
+        params.width = LinearLayout.LayoutParams.MATCH_PARENT;
+        dbSaveDialog.getWindow().setAttributes(params);
+    }
+
+    // First confirmation
+    private void showDatabaseResetDialog1() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
+
+        builder.setTitle(getString(R.string.dialog_warning));
+        builder.setMessage(getString(R.string.database_reset_warning1));
+
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                showDatabaseResetDialog2();
+            }
+        });
+
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+        DialogUtils.styleDialogs(alert);
     }
 
     public class ImportDBTask extends AsyncTask<Integer, Integer, Integer> {
@@ -183,7 +291,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                             ZipUtil.Companion.unzip(context, input, output);
 
-                            SharedPreferences.Editor edit = ep.edit();
+                            SharedPreferences.Editor edit = preferences.edit();
 
                             edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
                             edit.putString(GeneralKeys.UNIQUE_NAME, "");
@@ -226,49 +334,6 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
             CollectActivity.reloadData = true;
         }
     }
-
-    private void showDatabaseExportDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_save_database, null);
-
-        exportFile = layout.findViewById(R.id.fileName);
-        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
-        String autoFillName = timeStamp.format(Calendar.getInstance().getTime()) + "_" + "systemdb" + DataHelper.DATABASE_VERSION;
-        exportFile.setText(autoFillName);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
-        builder.setTitle(R.string.database_dialog_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dbSaveDialog.dismiss();
-                exportFileString = exportFile.getText().toString();
-                mHandler.post(exportDB);
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        dbSaveDialog = builder.create();
-        dbSaveDialog.show();
-        DialogUtils.styleDialogs(dbSaveDialog);
-
-        android.view.WindowManager.LayoutParams params = dbSaveDialog.getWindow().getAttributes();
-        params.width = LinearLayout.LayoutParams.MATCH_PARENT;
-        dbSaveDialog.getWindow().setAttributes(params);
-    }
-
-    private Runnable exportDB = new Runnable() {
-        public void run() {
-            new ExportDBTask().execute(0);
-        }
-    };
 
     private class ExportDBTask extends AsyncTask<Integer, Integer, Integer> {
         boolean fail;
@@ -314,9 +379,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                         OutputStream zipOutput = context.getContentResolver().openOutputStream(zipFile.getUri());
 
-                        SharedPreferences prefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
-
-                        objectStream.writeObject(prefs.getAll());
+                        objectStream.writeObject(preferences.getAll());
 
                         objectStream.close();
 
@@ -329,7 +392,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
                                 zipOutput);
 
                         // share the zip file
-                        new FileUtil().shareFile(context, ep, zipFile);
+                        new FileUtil().shareFile(context, preferences, zipFile);
 
                         if (tempOutput != null && !tempOutput.delete()) {
 
@@ -359,75 +422,6 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
                 Utils.makeToast(getContext(), getString(R.string.export_complete));
             }
         }
-    }
-
-
-    // First confirmation
-    private void showDatabaseResetDialog1() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
-
-        builder.setTitle(getString(R.string.dialog_warning));
-        builder.setMessage(getString(R.string.database_reset_warning1));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                showDatabaseResetDialog2();
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-        DialogUtils.styleDialogs(alert);
-    }
-
-    // Second confirmation
-    private void showDatabaseResetDialog2() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
-
-        builder.setTitle(getString(R.string.dialog_warning));
-        builder.setMessage(getString(R.string.database_reset_warning2));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                // Delete database
-                database.deleteDatabase();
-
-                // Clear all existing settings
-                SharedPreferences.Editor ed = ep.edit();
-                ed.clear();
-                ed.apply();
-
-                dialog.dismiss();
-                Utils.makeToast(getContext(), getString(R.string.database_reset_message));
-
-                try {
-                    getActivity().finishAffinity();
-                } catch (Exception e) {
-                    Log.e("Field Book", "" + e.getMessage());
-                }
-            }
-
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     @Override
