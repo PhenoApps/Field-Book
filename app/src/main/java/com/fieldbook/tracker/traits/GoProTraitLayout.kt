@@ -243,7 +243,7 @@ class GoProTraitLayout :
 
                         val dialog = androidx.appcompat.app.AlertDialog.Builder(
                             context,
-                            R.style.AlertDialogStyle
+                            R.style.AppAlertDialog
                         )
                             .setTitle(context.getString(R.string.trait_go_pro_await_ap_title))
                             .setMessage(context.getString(R.string.trait_go_pro_await_ap_message, s, p))
@@ -393,7 +393,7 @@ class GoProTraitLayout :
 
             credentialsDialog = AlertDialog.Builder(
                 context,
-                R.style.AlertDialogStyle
+                R.style.AppAlertDialog
             )
                 .setTitle(context.getString(R.string.trait_go_pro_await_ble_title))
                 .setMessage(context.getString(R.string.trait_go_pro_await_ble_message))
@@ -455,7 +455,7 @@ class GoProTraitLayout :
 
                     val dialog = androidx.appcompat.app.AlertDialog.Builder(
                         context,
-                        R.style.AlertDialogStyle
+                        R.style.AppAlertDialog
                     )
                         .setTitle(context.getString(R.string.trait_go_pro_await_device_title))
                         .setCancelable(true)
