@@ -36,7 +36,7 @@
             @style/AppTextAppearance.Preference.Summary
         </item>
 
-        <item name="alertDialogTheme">@style/AppAlertDialog</item>
+        <item name="alertDialogTheme">@style/AppAlertDialog.Preference</item>
     </style>
 
     <style name="AppTextAppearance.Preference.Title" parent="TextAppearance.AppCompat.Headline">

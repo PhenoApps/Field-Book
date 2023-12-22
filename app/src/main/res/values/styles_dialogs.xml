@@ -54,6 +54,10 @@
         <item name="android:checkedTextViewStyle">@style/AlertCheckedView</item>
     </style>
 
+    <style name="AppAlertDialog.Preference">
+        <item name="android:windowBackground">@drawable/inset_border</item>
+    </style>
+
     <style name="DialogTitleStyle">
         <item name="android:textColor">?attr/fb_color_text_dark</item>
         <item name="android:background">?attr/fb_color_background</item>
