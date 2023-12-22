@@ -212,7 +212,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if (brapiConfigBarcode != null) {
             brapiConfigBarcode.setOnPreferenceClickListener(preference -> {
                 String title = getString(R.string.qr_code_share_choose_action_title);
-                new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+                new AlertDialog.Builder(getContext())
                         .setTitle(title)
                         .setItems(new String[]{getString(R.string.preferences_brapi_barcode_config_scan), getString(R.string.preferences_brapi_barcode_config_share)}, (dialog, which) -> {
                             switch (which) {
