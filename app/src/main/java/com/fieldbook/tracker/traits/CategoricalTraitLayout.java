@@ -296,11 +296,11 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     }
 
     private void pressOnButton(Button button) {
-        button.setBackgroundResource(R.drawable.categorical_button_selected);
+        button.setBackgroundResource(R.drawable.button_selected);
     }
 
     private void pressOffButton(Button button) {
-        button.setBackgroundResource(R.drawable.categorical_button_unselected);
+        button.setBackgroundResource(R.drawable.button_unselected);
     }
 
     @Override

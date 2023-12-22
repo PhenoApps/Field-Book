@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:focusable="false"
-    android:focusableInTouchMode="false"
     android:id="@+id/multicatButton"
     android:gravity="center"
     android:singleLine="true"
-    android:background="@drawable/categorical_button_selected"
-    android:text="@string/traits_format_multicategorical" />
+    android:layout_margin="2dp"
+    android:background="@drawable/button_unselected"
+    android:padding="8dp"
+    tools:text="@string/traits_format_multicategorical" />

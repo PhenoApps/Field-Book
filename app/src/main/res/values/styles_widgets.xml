@@ -125,6 +125,7 @@
 
     <!-- generic button styling, used in many traits -->
     <style name="ButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/button_unselected</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">?attr/fb_color_text_dark</item>
         <item name="android:textSize">?attr/fb_body_text_size</item>
