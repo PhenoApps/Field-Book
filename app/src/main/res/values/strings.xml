@@ -1030,5 +1030,6 @@
     <string name="trait_counter_plus_content_description">Add to total count by one</string>
     <string name="trait_date_minus_content_description">Subtracts one day from the current date</string>
     <string name="trait_date_add_content_description">Adds one day to the current date</string>
+    <string name="trait_percent_ui_min_max_error">Something went wrong showing the min/max of this trait format</string>
 
 </resources>
