@@ -7,6 +7,7 @@
         android:name=".application.FieldBook"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:label="@string/field_book"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
@@ -14,22 +15,28 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:label">
+
         <activity
             android:name=".activities.ScannerActivity"
             android:exported="false" />
+
         <!-- The Main Page activity that lists all other activities -->
         <activity
             android:name=".activities.ConfigActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:exported="true"
+            android:icon="@mipmap/ic_launcher"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait">
+            android:roundIcon="@mipmap/ic_launcher"
+            android:screenOrientation="portrait"
+            android:targetActivity=".activities.ConfigActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- - File Import activity (field manager, local and brapi) -->
+        </activity>
+
+        <!-- - File Import activity (field manager, local and brapi) -->
         <activity
             android:name=".activities.FieldEditorActivity"
             android:alwaysRetainTaskState="false"
@@ -55,7 +62,10 @@
             android:configChanges="keyboardHidden|orientation|screenSize|locale|keyboard"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden" /> <!-- Data grid is available through the collect activity, once the setting is set -->
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan|stateHidden" />
+
+        <!-- Data grid is available through the collect activity, once the setting is set -->
         <activity
             android:name=".activities.DataGridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -71,7 +81,9 @@
             android:name=".activities.PreferencesActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"></activity> <!-- About activity uses a library, which uses material design components, it has its own style file -->
+            android:screenOrientation="portrait" />
+
+        <!-- About activity uses a library, which uses material design components, it has its own style file -->
         <!-- shows version information and references to other apps, etc. -->
         <activity
             android:name=".activities.AboutActivity"
@@ -150,20 +162,17 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity> <!-- barcode capture activity -->
+            android:theme="@style/AppTheme" /> <!-- barcode capture activity -->
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"
-            tools:replace="android:screenOrientation" /> <!-- used to define SAF storage directory, required at start of app -->
-        <activity android:name=".activities.DefineStorageActivity" /> <!-- found in preferences, used to select a TTS language locale -->
-        <activity
-            android:name=".activities.LocaleChoiceActivity"
-            android:theme="@style/AppTheme" />
             tools:replace="android:screenOrientation" />
 
         <!-- used to define SAF storage directory, required at start of app -->
-        <activity android:name=".activities.DefineStorageActivity" />
+        <activity
+            android:name=".activities.DefineStorageActivity"
+            android:theme="@style/AppTheme" />
 
         <!-- found in preferences, used to select a TTS language locale -->
         <activity

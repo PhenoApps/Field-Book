@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -9,8 +10,6 @@ import android.provider.MediaStore
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.widget.ImageButton
-import androidx.appcompat.app.AlertDialog
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,11 +21,11 @@ import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.provider.GenericFileProvider
-import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.ExifUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.Utils
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -68,7 +67,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
     override fun init(act: Activity) {
 
-        val capture = act.findViewById<ImageButton>(R.id.capture)
+        val capture = act.findViewById<FloatingActionButton>(R.id.capture)
         capture.setOnClickListener(PhotoTraitOnClickListener())
 
         activity = act
@@ -311,15 +310,19 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
             //if pressing the delete button bottom button, find the first visible photo to delete
             if (model == null) {
-                val position = (recyclerView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
-                model = (recyclerView.adapter as ImageTraitAdapter).currentList[position]
+                val position =
+                    (recyclerView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+                val adapter = (recyclerView.adapter as ImageTraitAdapter)
+                if (adapter.currentList.isNotEmpty()) {
+                    model = adapter.currentList[position]
+                }
             }
 
             model?.let { m ->
 
                 val studyId = (context as CollectActivity).studyId
 
-                val builder = AlertDialog.Builder(context)
+                val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
 
                 builder.setTitle(context.getString(R.string.dialog_warning))
                 builder.setMessage(context.getString(R.string.trait_delete_warning_photo))
@@ -383,7 +386,6 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
                 activity?.runOnUiThread {
                     val alert = builder.create()
                     alert.show()
-                    DialogUtils.styleDialogs(alert)
                 }
             }
         }

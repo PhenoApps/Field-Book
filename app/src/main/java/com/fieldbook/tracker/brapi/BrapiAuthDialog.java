@@ -16,7 +16,7 @@ import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 
 public class BrapiAuthDialog extends Dialog implements android.view.View.OnClickListener {
 
-    private Context context;
+    private final Context context;
 
     public BrapiAuthDialog(@NonNull Context context) {
         super(context);
@@ -40,19 +40,14 @@ public class BrapiAuthDialog extends Dialog implements android.view.View.OnClick
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.brapi_auth_cancel_btn:
-                // Cancel
-                dismiss();
-                break;
-
-            case R.id.brapi_auth_btn:
-                Intent intent = new Intent();
-                intent.setClassName(context, BrapiAuthActivity.class.getName());
-                context.startActivity(intent);
-                dismiss();
-                break;
-
+        int id = view.getId();
+        if (id == R.id.brapi_auth_cancel_btn) {// Cancel
+            dismiss();
+        } else if (id == R.id.brapi_auth_btn) {
+            Intent intent = new Intent();
+            intent.setClassName(context, BrapiAuthActivity.class.getName());
+            context.startActivity(intent);
+            dismiss();
         }
     }
 }

@@ -79,7 +79,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
      */
     public void refreshLayout(Boolean onNew) {
 
-        getCollectInputView().getRepeatView().refresh(onNew);
+        getCollectInputView().getRepeatView().refresh();
 
     }
 
@@ -134,10 +134,10 @@ public abstract class BaseTraitLayout extends LinearLayout {
                 }
 
                 act.getInputView().setTextColor(Color.parseColor(getDisplayColor()));
-
-                act.getInputView().prepareObservationsExistMode(Arrays.asList(observations));
-
             }
+
+            act.getInputView().prepareObservationsExistMode(Arrays.asList(observations));
+
 
             afterLoadExists(act, value);
 

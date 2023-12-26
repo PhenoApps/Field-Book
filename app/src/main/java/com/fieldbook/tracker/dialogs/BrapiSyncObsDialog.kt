@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.dialogs
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.Context
@@ -13,7 +14,6 @@ import android.view.View
 import android.view.Window
 import android.widget.Button
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.brapi.model.Observation
 import com.fieldbook.tracker.brapi.service.BrAPIService
@@ -23,7 +23,6 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.utilities.DialogUtils
 
 data class StudyObservations(var fieldBookStudyDbId:Int=0, val traitList: MutableList<TraitObject> = mutableListOf(), val observationList: MutableList<Observation> = mutableListOf()) {
     fun merge(newStudy: StudyObservations) {
@@ -274,7 +273,7 @@ internal class ImportRunnableTask(val context: Context, val studyObservations: S
     override fun onPostExecute(result: Int) {
         if (dialog!!.isShowing) dialog!!.dismiss()
         if(fail) {
-            val alertDialogBuilder = AlertDialog.Builder(context)
+            val alertDialogBuilder = AlertDialog.Builder(context, R.style.AppAlertDialog)
             alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
                 .setPositiveButton(R.string.dialog_ok) { dialogInterface, i ->
                     // Finish our BrAPI import activity
@@ -283,7 +282,6 @@ internal class ImportRunnableTask(val context: Context, val studyObservations: S
             alertDialogBuilder.setMessage(failMessage)
             val alertDialog = alertDialogBuilder.create()
             alertDialog.show()
-            DialogUtils.styleDialogs(alertDialog)
         }
     }
 }

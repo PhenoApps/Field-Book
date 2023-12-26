@@ -215,28 +215,20 @@ public class BrapiTraitActivity extends ThemedActivity {
 
     // Button event for load and save traits
     public void buttonClicked(View view) {
-        switch (view.getId()) {
-            case R.id.loadTraits:
-                // Start from beginning
-                paginationManager.reset();
-                loadTraitsList();
-                break;
+        int id = view.getId();
+        if (id == R.id.loadTraits) {// Start from beginning
+            paginationManager.reset();
+            loadTraitsList();
+        } else if (id == R.id.save) {// Save the selected traits
+            String saveMessage = saveTraits();
 
-            case R.id.save:
-                // Save the selected traits
-                String saveMessage = saveTraits();
-
-                setResult(RESULT_OK);
-                // navigate back to our traits list page
-                finish();
-                Toast.makeText(this, saveMessage, Toast.LENGTH_LONG).show();
-                break;
-            case R.id.prev:
-            case R.id.next:
-                // Update current page (if allowed) and start brapi call.
-                paginationManager.setNewPage(view.getId());
-                loadTraitsList();
-                break;
+            setResult(RESULT_OK);
+            // navigate back to our traits list page
+            finish();
+            Toast.makeText(this, saveMessage, Toast.LENGTH_LONG).show();
+        } else if (id == R.id.prev || id == R.id.next) {// Update current page (if allowed) and start brapi call.
+            paginationManager.setNewPage(view.getId());
+            loadTraitsList();
         }
     }
 

@@ -33,16 +33,13 @@
 
         </LinearLayout>
 
-        <ImageButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
             android:id="@+id/capture"
-            android:layout_width="65dp"
-            android:layout_height="65dp"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
             android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:background="@drawable/custom_round_button"
-            android:gravity="center"
-            android:padding="10dp"
-            android:scaleType="fitXY"
+            android:layout_margin="8dp"
             android:src="@drawable/ic_trait_camera"
             android:contentDescription="@string/trait_photo_capture_button_content_description" />
 
