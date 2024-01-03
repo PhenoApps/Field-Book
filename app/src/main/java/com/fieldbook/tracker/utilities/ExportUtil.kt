@@ -555,16 +555,6 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         builder.setPositiveButton(context.getString(R.string.dialog_ok),
             DialogInterface.OnClickListener { dialog, which ->
                 dialog.dismiss()
-                if (context is Activity) {
-                    context.invalidateOptionsMenu()
-                }
-
-                val intent = Intent()
-                intent.setClassName(
-                    context,
-                    ConfigActivity::class.java.name
-                )
-                context.startActivity(intent)
             })
         val alert = builder.create()
         alert.show()
