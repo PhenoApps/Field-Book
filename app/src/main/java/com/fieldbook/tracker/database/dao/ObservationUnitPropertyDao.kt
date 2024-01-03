@@ -196,9 +196,9 @@ class ObservationUnitPropertyDao {
          * "plot_id","column","plot","tray_row","tray_id","seed_id","seed_name","pedigree","trait","value","timestamp","person","location","number"
          * "13RPN00001","1","1","1","13RPN_TRAY001","12GHT00001B","Kharkof","Kharkof","height","3","2021-08-05 11:52:45.379-05:00"," ","","2"
          */
+
         fun getExportDbData(
             studyId: Int,
-            uniqueName: String,
             fieldList: Array<String?>,
             traits: ArrayList<TraitObject>
         ): Cursor? = withDatabase { db ->
@@ -207,27 +207,29 @@ class ObservationUnitPropertyDao {
                 arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
-                val varSelectFields =
-                    arrayOf("observation_variable_name", "observation_variable_field_book_format")
-                val obsSelectFields =
-                    arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
-                //val outputFields = fieldList + varSelectFields + obsSelectFields
+                val placeholders = traits.joinToString(", ") { "?" }
+                val traitNames = traits.map { DataHelper.replaceIdentifiers(it.name) }.toTypedArray()
+
+                val unitSelectAttributes = fieldList.map { attributeName ->
+                    "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+                }.joinToString(", ")
+
+                val obsSelectAttributes =
+                    arrayOf("observation_variable_name", "observation_variable_field_book_format", "value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
+
                 val query = """
-                    SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }} ${if (fieldList.isNotEmpty()) "," else " "} 
-                        ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }} ${if (varSelectFields.isNotEmpty()) "," else " "}
-                        ${obsSelectFields.joinToString { "obs.`$it` AS `$it`" }}
-                    FROM ${Observation.tableName} AS obs, 
-                         $sObservationUnitPropertyViewName AS props, 
-                         ${ObservationVariable.tableName} AS vars
-                    WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
-                        AND obs.${Study.FK} = $studyId
-                        AND obs.value IS NOT NULL
-                        AND vars.observation_variable_name = obs.observation_variable_name
-                        AND vars.internal_id_observation_variable in ${traits.map { "?" }.joinToString(",", "(", ")")}
-                    
+                    SELECT $unitSelectAttributes, ${obsSelectAttributes.joinToString { "obs.`$it` AS `$it`" }}
+                    FROM observations AS obs
+                    LEFT JOIN observation_units AS units ON units.observation_unit_db_id = obs.observation_unit_id
+                    LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
+                    LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
+                    WHERE units.study_id = ?
+                      AND obs.observation_variable_name IN ($placeholders)
+                    GROUP BY obs.internal_id_observation
                 """.trimIndent()
 
-                val table = db.rawQuery(query, traits.map { it.id }.toTypedArray()).toTable()
+                Log.d("getExportDbData", "Final Query: $query")
+                val table = db.rawQuery(query, arrayOf(studyId.toString()) + traitNames).toTable()
 
                 table.forEach { row ->
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
@@ -252,6 +254,7 @@ class ObservationUnitPropertyDao {
          * All observation_units are captured, even if they did not make an observation.
          * Inputs:
          * @param expId the field/study id
+         * @param uniqueName the field/study id
          * @param traits the list of traits to print, either all traits or just the active ones
          * @return a cursor that is used in CSVWriter and closed elsewhere
          */
@@ -266,13 +269,13 @@ class ObservationUnitPropertyDao {
 
             val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
             val selectObservations = sanitizeTraits.map { traitName ->
-                "MAX(CASE WHEN o.observation_variable_name='$traitName' THEN o.value ELSE NULL END) AS \"$traitName\""
+                "MAX(CASE WHEN obs.observation_variable_name='$traitName' THEN obs.value ELSE NULL END) AS \"$traitName\""
             }.joinToString(", ")
 
             val query = """
                 SELECT $selectAttribute, $selectObservations
                 FROM observation_units AS units
-                LEFT JOIN observations o ON units.observation_unit_db_id = o.observation_unit_id
+                LEFT JOIN observations obs ON units.observation_unit_db_id = obs.observation_unit_id
                 WHERE units.study_id = $expId
                 GROUP BY units.internal_id_observation_unit
             """.trimIndent()
@@ -294,7 +297,7 @@ class ObservationUnitPropertyDao {
 
             val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
             val selectObservations = sanitizeTraits.map { traitName ->
-                "MAX(CASE WHEN o.observation_variable_name='$traitName' THEN o.value ELSE NULL END) AS \"$traitName\""
+                "MAX(CASE WHEN obs.observation_variable_name='$traitName' THEN obs.value ELSE NULL END) AS \"$traitName\""
             }.joinToString(", ")
 
             val query = """
@@ -302,7 +305,7 @@ class ObservationUnitPropertyDao {
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
-                LEFT JOIN observations o ON units.observation_unit_db_id = o.observation_unit_id
+                LEFT JOIN observations obs ON units.observation_unit_db_id = obs.observation_unit_id
                 WHERE units.study_id = $expId
                 GROUP BY units.internal_id_observation_unit
             """.trimIndent()

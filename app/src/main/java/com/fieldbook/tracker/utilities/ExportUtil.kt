@@ -343,7 +343,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                     if (allColumns?.isChecked == true) addAll(database.getAllObservationUnitAttributeNames(fieldId))
                 }
                 Log.d(TAG, "Columns are: " + columns.joinToString())
-                database.getExportDBData(columns.toTypedArray(), exportTrait, fieldId, fo.unique_id).use { cursor ->
+                database.getExportDBData(columns.toTypedArray(), exportTrait, fieldId).use { cursor ->
                     try {
                         if (cursor.count > 0) {
                             createExportFile(cursor, "database", fieldFileString, columns)

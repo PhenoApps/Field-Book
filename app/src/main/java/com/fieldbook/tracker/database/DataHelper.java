@@ -923,11 +923,11 @@ public class DataHelper {
     /**
      * Retrieves the columns needed for export using a join statement
      */
-    public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits, int fieldId, String uniqueId) {
+    public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits, int fieldId) {
 
         open();
         return ObservationUnitPropertyDao.Companion.getExportDbData(
-                fieldId, uniqueId, fieldList, traits);
+                fieldId, fieldList, traits);
 
 //        String fields = arrayToString("range", fieldList);
 //        String activeTraits = arrayToLikeString(traits);
