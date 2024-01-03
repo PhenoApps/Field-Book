@@ -318,6 +318,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
     // Launches a new coroutine for each export task
     private fun startExportTasks() {
+        processedFieldCount = 0
         showProgressDialog()
         ioScope.launch {
             for (fieldId in fieldIds) {
