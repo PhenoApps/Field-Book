@@ -1175,6 +1175,7 @@ public class CollectActivity extends ThemedActivity
         String traitDbId = getTraitDbId();
 
         database.deleteTrait(expId, obsUnit, traitDbId, rep);
+        updateObservationInfoButton();
     }
 
     public String getLocationByPreferences() {
