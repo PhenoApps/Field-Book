@@ -461,8 +461,6 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                     val outputStream = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
                     outputStream?.let { os ->
                         ZipUtil.zip(context, files.toTypedArray(), os)
-                        // Optionally, delete the original files after zipping
-                        files.forEach { it.delete() }
                         zf
                     }
                 }
