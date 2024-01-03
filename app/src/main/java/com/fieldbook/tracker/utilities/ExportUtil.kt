@@ -206,23 +206,23 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val isActiveTraits = ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, false)
         activeTraits?.setChecked(isActiveTraits)
 
-        var fileString = ""
+        var defaultFileString = ""
         if (multipleFields) {
-            fileString = context.getString(R.string.export_multiple_fields_name)
+            defaultFileString = context.getString(R.string.export_multiple_fields_name)
             checkOverwrite.visibility = View.GONE
             bundleInfoMessage.visibility = View.VISIBLE
         } else {
             var fo = database.getFieldObject(fieldIds[0])
-            fileString = fo.exp_name
-            if (fileString.length > 4 && fileString.lowercase().endsWith(".csv")) {
-                fileString =fileString.substring(0, fileString.length - 4)
+            defaultFileString = fo.exp_name
+            if (defaultFileString.length > 4 && defaultFileString.lowercase().endsWith(".csv")) {
+                defaultFileString =defaultFileString.substring(0, defaultFileString.length - 4)
             }
             checkOverwrite.visibility = View.VISIBLE
             bundleInfoMessage.visibility = View.GONE
         }
 
-        fileString = "${timeStamp.format(Calendar.getInstance().time)}_$fileString"
-        fileName.setText(fileString)
+        defaultFileString = "${timeStamp.format(Calendar.getInstance().time)}_$defaultFileString"
+        fileName.setText(defaultFileString)
 
         val builder = AlertDialog.Builder(context)
         builder.setTitle(R.string.settings_export)
@@ -316,6 +316,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         }
     }
 
+    // Launches a new coroutine for each export task
     private fun startExportTasks() {
         showProgressDialog()
         ioScope.launch {
@@ -328,35 +329,13 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         }
     }
 
-//    private fun startExportTasks() {
-//        showProgressDialog()
-//        ioScope.launch {
-//            fieldIds.forEach { fieldId ->
-//                val result = async { exportData(fieldId) }.await()
-//                withContext(Dispatchers.Main) {
-//                    handleExportResult(result)
-//                }
-//            }
-//        }
-//    }
-
-
-//    // Launches a new coroutine for each export task
-//    private fun launchExportTask(fieldId: Int) {
-//        ioScope.launch {
-//            val result = exportData(fieldId)
-//            withContext(Dispatchers.Main) {
-//                handleExportResult(result)
-//            }
-//        }
-//    }
-
     private suspend fun exportData(fieldId: Int): ExportResult {
         return try {
             Log.d(TAG, "Export task started for fieldId: $fieldId")
             val bundleChecked = ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false)
             val fo = database.getFieldObject(fieldId)
-            if (multipleFields) { exportFileString = "${timeStamp.format(Calendar.getInstance().time)}_${fo.exp_name}" }
+            var fieldFileString = exportFileString
+            if (multipleFields) { fieldFileString = "${timeStamp.format(Calendar.getInstance().time)}_${fo.exp_name}" }
 
             if (checkDbBool) {
                 val columns = ArrayList<String>().apply {
@@ -367,7 +346,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 database.getExportDBData(columns.toTypedArray(), exportTrait, fieldId, fo.unique_id).use { cursor ->
                     try {
                         if (cursor.count > 0) {
-                            createExportFile(cursor, "database", columns)
+                            createExportFile(cursor, "database", fieldFileString, columns)
                         } else {
                             ExportResult.NoData
                         }
@@ -397,7 +376,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 exportDataMethod().use { cursor ->
                     try {
                         if (cursor.count > 0) {
-                            createExportFile(cursor, "table", columns)
+                            createExportFile(cursor, "table", fieldFileString, columns)
                         } else {
                             ExportResult.NoData
                         }
@@ -421,44 +400,42 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         }
     }
 
-    private fun createExportFile(cursor: Cursor, fileType: String, columns: ArrayList<String>) {
-//        cursor.use { cur ->
-            val fileName = "${exportFileString}_$fileType.csv"
-            val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
-            exportDir?.let { dir ->
-                if (dir.exists()) {
-                    val file = dir.createFile("text/csv", fileName)
-                    file?.let { docFile ->
-                        val outputStream =
-                            context.contentResolver.openOutputStream(docFile.uri) ?: return
-                        outputStream.use { stream ->
-                            val fw = OutputStreamWriter(stream)
-                            val csvWriter = CSVWriter(fw, cursor)
-                            when (fileType) {
-                                "database" -> csvWriter.writeDatabaseFormat(columns)
-                                "table" -> {
-                                    val newColumns = columns.toTypedArray()
-                                    val labels = exportTrait.map { it.name }
+    private fun createExportFile(cursor: Cursor, fileType: String, fileString: String, columns: ArrayList<String>) {
+        val fileName = "${fileString}_$fileType.csv"
+        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+        exportDir?.let { dir ->
+            if (dir.exists()) {
+                val file = dir.createFile("text/csv", fileName)
+                file?.let { docFile ->
+                    val outputStream =
+                        context.contentResolver.openOutputStream(docFile.uri) ?: return
+                    outputStream.use { stream ->
+                        val fw = OutputStreamWriter(stream)
+                        val csvWriter = CSVWriter(fw, cursor)
+                        when (fileType) {
+                            "database" -> csvWriter.writeDatabaseFormat(columns)
+                            "table" -> {
+                                val newColumns = columns.toTypedArray()
+                                val labels = exportTrait.map { it.name }
 
-                                    // Log the arguments
-                                    val newColumnsStr = newColumns.joinToString(", ")
-                                    val labelsStr = labels.joinToString(", ")
-                                    val columnsSizeStr = columns.size.toString()
-                                    Log.d(TAG, "Calling writeTableFormat with arguments: newColumns=[$newColumnsStr], columnsSize=[$columnsSizeStr], labels=[$labelsStr]")
+                                // Log the arguments
+                                val newColumnsStr = newColumns.joinToString(", ")
+                                val labelsStr = labels.joinToString(", ")
+                                val columnsSizeStr = columns.size.toString()
+                                Log.d(TAG, "Calling writeTableFormat with arguments: newColumns=[$newColumnsStr], columnsSize=[$columnsSizeStr], labels=[$labelsStr]")
 
-                                    csvWriter.writeTableFormat(
-                                        newColumns.plus(labels),
-                                        columns.size,
-                                        exportTrait
-                                    )
-                                }
+                                csvWriter.writeTableFormat(
+                                    newColumns.plus(labels),
+                                    columns.size,
+                                    exportTrait
+                                )
                             }
                         }
-                        filesToExport.add(docFile)
                     }
+                    filesToExport.add(docFile)
                 }
             }
-//        }
+        }
     }
 
     private fun handleBundledFiles(fieldId: Int) {
