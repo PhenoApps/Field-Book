@@ -39,6 +39,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -239,11 +240,12 @@ public class CollectActivity extends ThemedActivity
      * Usb Camera Helper
      */
     private UsbCameraHelper mUsbCameraHelper = null;
+    private boolean usbCameraConnected = false;
 
     private SecureBluetoothActivityImpl secureBluetooth;
 
     //summary fragment listener
-    private boolean isSummaryOpen = false;
+    private boolean isNavigatingFromSummary = false;
 
     /**
      * Multi Measure delete dialogs
@@ -254,8 +256,8 @@ public class CollectActivity extends ThemedActivity
     /**
      * GeoNav dialog
      */
-    private androidx.appcompat.app.AlertDialog dialogGeoNav;
-    private androidx.appcompat.app.AlertDialog dialogPrecisionLoss;
+    private AlertDialog dialogGeoNav;
+    private AlertDialog dialogPrecisionLoss;
     private boolean mlkitEnabled;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -1289,174 +1291,158 @@ public class CollectActivity extends ThemedActivity
         final int summaryId = R.id.summary;
         final int geonavId = R.id.action_act_collect_geonav_sw;
         final int fieldAudioMicId = R.id.field_audio_mic;
-        switch (item.getItemId()) {
-            case helpId:
-                TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(collectDataTapTargetView(R.id.act_collect_infobar_rv, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description),200),
-                                collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description),60),
-                                collectDataTapTargetView(R.id.traitType, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description),80),
-                                collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description),60),
-                                collectDataTapTargetView(R.id.valuesPlotRangeHolder, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description),60),
-                                collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description),200),
-                                collectDataTapTargetView(R.id.missingValue, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description),60),
-                                collectDataTapTargetView(R.id.deleteValue, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description),60)
-                        );
-                if (systemMenu.findItem(R.id.search).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.search, getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description),60));
-                }
-                if (systemMenu.findItem(R.id.resources).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.resources, getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description),60));
-                }
-                if (systemMenu.findItem(R.id.summary).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.summary, getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description),60));
-                }
-                if (systemMenu.findItem(R.id.lockData).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.lockData, getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description),60));
-                }
+        int itemId = item.getItemId();
+        if (itemId == helpId) {
+            TapTargetSequence sequence = new TapTargetSequence(this)
+                    .targets(collectDataTapTargetView(R.id.act_collect_infobar_rv, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), 200),
+                            collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), 60),
+                            collectDataTapTargetView(R.id.traitType, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), 80),
+                            collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), 60),
+                            collectDataTapTargetView(R.id.valuesPlotRangeHolder, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), 60),
+                            collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), 200),
+                            collectDataTapTargetView(R.id.missingValue, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description), 60),
+                            collectDataTapTargetView(R.id.deleteValue, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description), 60)
+                    );
+            if (systemMenu.findItem(R.id.search).isVisible()) {
+                sequence.target(collectDataTapTargetView(R.id.search, getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description), 60));
+            }
+            if (systemMenu.findItem(R.id.resources).isVisible()) {
+                sequence.target(collectDataTapTargetView(R.id.resources, getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description), 60));
+            }
+            if (systemMenu.findItem(R.id.summary).isVisible()) {
+                sequence.target(collectDataTapTargetView(R.id.summary, getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description), 60));
+            }
+            if (systemMenu.findItem(R.id.lockData).isVisible()) {
+                sequence.target(collectDataTapTargetView(R.id.lockData, getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), 60));
+            }
 
-                sequence.start();
-                break;
-            case searchId:
-                intent.setClassName(CollectActivity.this,
-                        SearchActivity.class.getName());
-                startActivity(intent);
-                break;
-
-            case resourcesId:
-                DocumentFile dir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
-                if (dir != null && dir.exists()) {
-                    intent.setClassName(CollectActivity.this, FileExploreActivity.class.getName());
-                    intent.putExtra("path", dir.getUri().toString());
-                    intent.putExtra("exclude", new String[]{"fieldbook"});
-                    intent.putExtra("title", getString(R.string.main_toolbar_resources));
-                    startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
+            sequence.start();
+        } else if (itemId == searchId) {
+            intent.setClassName(CollectActivity.this,
+                    SearchActivity.class.getName());
+            startActivity(intent);
+        } else if (itemId == resourcesId) {
+            DocumentFile dir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
+            if (dir != null && dir.exists()) {
+                intent.setClassName(CollectActivity.this, FileExploreActivity.class.getName());
+                intent.putExtra("path", dir.getUri().toString());
+                intent.putExtra("exclude", new String[]{"fieldbook"});
+                intent.putExtra("title", getString(R.string.main_toolbar_resources));
+                startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
+            }
+        } else if (itemId == nextEmptyPlotId) {
+            rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, false, true));
+            refreshMain();
+        } else if (itemId == jumpToPlotId) {
+            String moveToUniqueIdValue = ep.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "");
+            if (moveToUniqueIdValue.equals("2")) {
+                moveToPlotID();
+            } else if (moveToUniqueIdValue.equals("3")) {
+                if (mlkitEnabled) {
+                    ScannerActivity.Companion.requestCameraAndStartScanner(this, BARCODE_SEARCH_CODE, null, null, null);
+                } else {
+                    new IntentIntegrator(this)
+                            .setPrompt(getString(R.string.barcode_scanner_text))
+                            .setBeepEnabled(false)
+                            .setRequestCode(BARCODE_SEARCH_CODE)
+                            .initiateScan();
                 }
-                break;
-            case nextEmptyPlotId:
-                rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, false, true));
-                refreshMain();
-
-                break;
-            case jumpToPlotId:
-                String moveToUniqueIdValue = ep.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "");
-                if (moveToUniqueIdValue.equals("2")) {
-                    moveToPlotID();
-                } else if (moveToUniqueIdValue.equals("3")) {
-                    if(mlkitEnabled) {
-                        ScannerActivity.Companion.requestCameraAndStartScanner(this, BARCODE_SEARCH_CODE, null, null, null);
-                    }
-                    else {
-                        new IntentIntegrator(this)
-                                .setPrompt(getString(R.string.barcode_scanner_text))
-                                .setBeepEnabled(false)
-                                .setRequestCode(BARCODE_SEARCH_CODE)
-                                .initiateScan();
-                    }
-                }
-                break;
-            case summaryId:
-                showSummary();
-                break;
-            case dataGridId:
-                Intent i = new Intent();
-                i.setClassName(CollectActivity.this,
-                        DataGridActivity.class.getName());
-                i.putExtra("plot_id", rangeBox.getPaging());
-                i.putExtra("trait", traitBox.getCurrentTrait().getRealPosition());
-                startActivityForResult(i, 2);
-                break;
-            case lockDataId:
-                if (dataLocked == UNLOCKED) dataLocked = LOCKED;
-                else if (dataLocked == LOCKED) dataLocked = FROZEN;
-                else dataLocked = UNLOCKED;
-                ep.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
-                lockData();
-                break;
-            case android.R.id.home:
-                finish();
-                break;
+            }
+        } else if (itemId == summaryId) {
+            showSummary();
+        } else if (itemId == dataGridId) {
+            Intent i = new Intent();
+            i.setClassName(CollectActivity.this,
+                    DataGridActivity.class.getName());
+            i.putExtra("plot_id", rangeBox.getPaging());
+            i.putExtra("trait", traitBox.getCurrentTrait().getRealPosition());
+            startActivityForResult(i, 2);
+        } else if (itemId == lockDataId) {
+            if (dataLocked == UNLOCKED) dataLocked = LOCKED;
+            else if (dataLocked == LOCKED) dataLocked = FROZEN;
+            else dataLocked = UNLOCKED;
+            ep.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
+            lockData();
+        } else if (itemId == android.R.id.home) {
+            finish();
             /*
              * Toggling the geo nav icon turns the automatic plot navigation on/off.
              * If geonav is enabled, collect activity will auto move to the plot in user's vicinity
              */
-            case geonavId:
+        } else if (itemId == geonavId) {
+            Log.d(GEOTAG, "Menu item clicked.");
 
-                Log.d(GEOTAG, "Menu item clicked.");
+            dialogGeoNav = new GeoNavCollectDialog(this).create();
 
-                dialogGeoNav = new GeoNavCollectDialog(this).create();
+            if (!dialogGeoNav.isShowing()) {
 
-                if (!dialogGeoNav.isShowing()) {
+                if (getWindow().isActive()) {
 
-                    if (getWindow().isActive()) {
-
-                        try {
-                            dialogGeoNav.show();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                    try {
+                        dialogGeoNav.show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
+            }
 
-                return true;
+            return true;
+        } else if (itemId == R.id.field_audio_mic) {
+            MenuItem micItem = systemMenu.findItem(R.id.field_audio_mic);
 
-            case R.id.field_audio_mic:
-                MenuItem micItem = systemMenu.findItem(R.id.field_audio_mic);
+            // get status from AudioTraitLayout
+            TraitObject currentTrait = traitBox.getCurrentTrait();
+            BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
 
-                // get status from AudioTraitLayout
-                TraitObject currentTrait = traitBox.getCurrentTrait();
-                BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
+            boolean isTraitAudioLayout = currentTraitLayout.isTraitType(AudioTraitLayout.type);
+            boolean isTraitAudioRecording = false;
+            boolean isTraitAudioPlaying = false;
+            if (isTraitAudioLayout) {
+                AudioTraitLayout audioTraitLayout = (AudioTraitLayout) currentTraitLayout;
+                isTraitAudioRecording = audioTraitLayout.isAudioRecording();
+                isTraitAudioPlaying = audioTraitLayout.isAudioPlaybackPlaying();
+            }
 
-                boolean isTraitAudioLayout = currentTraitLayout.isTraitType(AudioTraitLayout.type);
-                boolean isTraitAudioRecording = false;
-                boolean isTraitAudioPlaying = false;
-                if(isTraitAudioLayout){
-                    AudioTraitLayout audioTraitLayout = (AudioTraitLayout) currentTraitLayout;
-                    isTraitAudioRecording = audioTraitLayout.isAudioRecording();
-                    isTraitAudioPlaying = audioTraitLayout.isAudioPlaybackPlaying();
-                }
-
-                // if trait audio is recording, give a warning
-                if(isTraitAudioRecording){
-                    Toast.makeText(
-                            this, R.string.trait_audio_recording_warning,
-                            Toast.LENGTH_SHORT
-                    ).show();
-                }
-                // if trait audio is playing, give a warning
-                else if(isTraitAudioPlaying){
-                    Toast.makeText(
-                            this, R.string.trait_audio_playing_warning,
-                            Toast.LENGTH_SHORT
-                    ).show();
-                }
-                // if trait audio isn't recording or playing
-                // record or stop the field audio depending on its state
-                else if(!fieldAudioHelper.isRecording()){
-                    // TODO: add trait audio playback stopping logic
-                    fieldAudioHelper.startRecording(true);
-                    Toast.makeText(
+            // if trait audio is recording, give a warning
+            if (isTraitAudioRecording) {
+                Toast.makeText(
+                        this, R.string.trait_audio_recording_warning,
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+            // if trait audio is playing, give a warning
+            else if (isTraitAudioPlaying) {
+                Toast.makeText(
+                        this, R.string.trait_audio_playing_warning,
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+            // if trait audio isn't recording or playing
+            // record or stop the field audio depending on its state
+            else if (!fieldAudioHelper.isRecording()) {
+                // TODO: add trait audio playback stopping logic
+                fieldAudioHelper.startRecording(true);
+                Toast.makeText(
                         this, R.string.field_audio_recording_start,
                         Toast.LENGTH_SHORT
-                    ).show();
-                    micItem.setIcon(R.drawable.ic_tb_field_mic_on);
-                    micItem.setTitle(R.string.menu_collect_stop_field_audio);
-                }else{
-                    fieldAudioHelper.stopRecording();
-                    Toast.makeText(
+                ).show();
+                micItem.setIcon(R.drawable.ic_tb_field_mic_on);
+                micItem.setTitle(R.string.menu_collect_stop_field_audio);
+            } else {
+                fieldAudioHelper.stopRecording();
+                Toast.makeText(
                         this, R.string.field_audio_recording_stop,
                         Toast.LENGTH_SHORT
-                    ).show();
-                    micItem.setIcon(R.drawable.ic_tb_field_mic_off);
-                    micItem.setTitle(R.string.menu_collect_start_field_audio);
-                }
+                ).show();
+                micItem.setIcon(R.drawable.ic_tb_field_mic_off);
+                micItem.setTitle(R.string.menu_collect_start_field_audio);
+            }
 
-                return true;
+            return true;
+        } else if (itemId == R.id.action_act_collect_repeated_values_indicator) {
+            showMultiMeasureDeleteDialog();
 
-            case R.id.action_act_collect_repeated_values_indicator:
-
-                showMultiMeasureDeleteDialog();
-
-                return true;
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1556,15 +1542,15 @@ public class CollectActivity extends ThemedActivity
 
     private void showConfirmMultiMeasureDeleteDialog(List<ObservationModel> models) {
 
-        dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_multi_measure_confirm_delete_title)
-            .setPositiveButton(android.R.string.ok, (d, which) -> {
-                deleteMultiMeasures(models);
-            })
-            .setNegativeButton(android.R.string.cancel, (d, which) -> {
-                d.dismiss();
-            })
-            .create();
+        dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                .setTitle(R.string.dialog_multi_measure_confirm_delete_title)
+                .setPositiveButton(android.R.string.ok, (d, which) -> {
+                    deleteMultiMeasures(models);
+                })
+                .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                    d.dismiss();
+                })
+                .create();
 
         if (!dialogMultiMeasureConfirmDelete.isShowing()) {
 
@@ -1734,38 +1720,10 @@ public class CollectActivity extends ThemedActivity
         SummaryFragment fragment = new SummaryFragment();
         fragment.setListener(this);
 
-        isSummaryOpen = true;
-
         getSupportFragmentManager().beginTransaction()
                 .add(android.R.id.content, fragment)
                 .addToBackStack(null)
                 .commit();
-
-//        LayoutInflater inflater = this.getLayoutInflater();
-//        inflater.inflate(R.layout.fragment_summary, null);
-//        View layout = inflater.inflate(R.layout.dialog_summary, null);
-//        TextView summaryText = layout.findViewById(R.id.field_name);
-//        summaryText.setText(traitBox.createSummaryText(rangeBox.getPlotID()));
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-//        builder.setTitle(R.string.preferences_appearance_toolbar_customize_summary)
-//                .setCancelable(true)
-//                .setView(layout);
-//
-//        builder.setNegativeButton(getString(R.string.dialog_close), new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int i) {
-//                dialog.dismiss();
-//            }
-//        });
-//
-//        final AlertDialog summaryDialog = builder.create();
-//        summaryDialog.show();
-//        DialogUtils.styleDialogs(summaryDialog);
-//
-//        android.view.WindowManager.LayoutParams params2 = summaryDialog.getWindow().getAttributes();
-//        params2.width = LayoutParams.MATCH_PARENT;
-//        summaryDialog.getWindow().setAttributes(params2);
     }
 
     @Override
@@ -2062,14 +2020,27 @@ public class CollectActivity extends ThemedActivity
     @Override
     public void onBackPressed() {
 
+        super.onBackPressed();
+        FragmentManager m = getSupportFragmentManager();
         int count = getSupportFragmentManager().getBackStackEntryCount();
 
         if (count == 0) {
 
-            finish();
+            if (isNavigatingFromSummary) {
+
+                isNavigatingFromSummary = false;
+
+            } else {
+
+                finish();
+
+            }
+
 
         } else {
+
             getSupportFragmentManager().popBackStack();
+
         }
     }
 
@@ -2223,11 +2194,7 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void onSummaryDestroy() {
-        isSummaryOpen = false;
-    }
-
-    public boolean isSummaryFragmentOpen() {
-        return isSummaryOpen;
+        isNavigatingFromSummary = true;
     }
 
     @NonNull
@@ -2450,13 +2417,15 @@ public class CollectActivity extends ThemedActivity
                     dialogPrecisionLoss.dismiss();
                 }
 
-                dialogPrecisionLoss = new androidx.appcompat.app.AlertDialog.Builder(this)
+                dialogPrecisionLoss = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                         .setTitle(getString(R.string.dialog_geonav_precision_loss_title))
                         .setMessage(getString(R.string.dialog_geonav_precision_loss_msg))
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                             dialog.dismiss();
                         })
-                        .show();
+                        .create();
+
+                dialogPrecisionLoss.show();
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -2590,6 +2559,14 @@ public class CollectActivity extends ThemedActivity
             e.printStackTrace();
 
         }
+    }
+
+    public boolean getUsbCameraConnected() {
+        return usbCameraConnected;
+    }
+
+    public void setUsbCameraConnected(boolean connected) {
+        usbCameraConnected = connected;
     }
 
 }

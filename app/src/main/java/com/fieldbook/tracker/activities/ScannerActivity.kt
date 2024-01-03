@@ -15,10 +15,14 @@ import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.*
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.databinding.ActivityScannerBinding
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
@@ -37,7 +41,7 @@ import java.util.concurrent.Executors
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ScannerActivity : AppCompatActivity() {
+class ScannerActivity : ThemedActivity() {
 
     @Inject
     lateinit var database: DataHelper
@@ -119,9 +123,14 @@ class ScannerActivity : AppCompatActivity() {
 
                                     contentResolver.openOutputStream(file.uri).use { outputStream ->
 
-                                        image.toBitmap()
-                                            .compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
-
+                                        if (outputStream != null) {
+                                            image.toBitmap()
+                                                .compress(
+                                                    Bitmap.CompressFormat.JPEG,
+                                                    90,
+                                                    outputStream
+                                                )
+                                        }
                                     }
 
                                     val msg = "Photo capture succeeded: ${file.uri}"
@@ -251,7 +260,7 @@ class ScannerActivity : AppCompatActivity() {
         }
 
         private fun Context.cameraPermissionRequest() {
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(this, R.style.AppAlertDialog)
                 .setTitle("Camera Permission Required")
                 .setMessage("Camera permission is necessary for scanning barcodes")
                 .setPositiveButton("Allow") { _, _ ->

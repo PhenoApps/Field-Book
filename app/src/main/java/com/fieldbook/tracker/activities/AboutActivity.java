@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -26,14 +27,14 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class AboutActivity extends MaterialAboutActivity {
     //todo move to fragments so aboutactivity can extend base activity
@@ -59,10 +60,19 @@ public class AboutActivity extends MaterialAboutActivity {
     public MaterialAboutList getMaterialAboutList(@NonNull Context c) {
 
         MaterialAboutCard.Builder appCardBuilder = new MaterialAboutCard.Builder();
-        appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
-                .text(getString(R.string.field_book))
-                .icon(R.mipmap.ic_launcher)
-                .build());
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (prefs.getString(GeneralKeys.THEME, "0").equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
+            appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
+                    .text(getString(R.string.field_book))
+                    .icon(R.mipmap.ic_launcher_monochrome)
+                    .build());
+        } else {
+            appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
+                    .text(getString(R.string.field_book))
+                    .icon(R.mipmap.ic_launcher)
+                    .build());
+        }
 
         appCardBuilder.addItem(ConvenienceBuilder.createVersionActionItem(c,
                 getResources().getDrawable(R.drawable.ic_about_info),
@@ -308,7 +318,7 @@ public class AboutActivity extends MaterialAboutActivity {
 
     @Override
     protected CharSequence getActivityTitle() {
-        return getString(R.string.mal_title_about);
+        return getString(com.danielstone.materialaboutlibrary.R.string.mal_title_about);
     }
 
 

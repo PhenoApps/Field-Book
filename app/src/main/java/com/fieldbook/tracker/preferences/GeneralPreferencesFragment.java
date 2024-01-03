@@ -192,7 +192,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
                     if (value == LOCATION_COLLECTION_OBS) {
 
-                        new AlertDialog.Builder(context)
+                        new AlertDialog.Builder(context, R.style.AppAlertDialog)
                             .setTitle(obsModeDialogTitle)
                             .setPositiveButton(android.R.string.ok, (dialog, which) -> {
 
