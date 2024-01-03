@@ -886,69 +886,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         }
     }
 
-    public Uri writeAllTraitsToCsv(String exportName, Context context) {
-        CollectActivity collectActivity = (CollectActivity) context;
-
-        try {
-
-            DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
-
-            if (traitDir != null && traitDir.exists()) {
-
-                DocumentFile exportDoc = traitDir.createFile("*/*", exportName);
-
-                if (exportDoc != null && exportDoc.exists()) {
-
-                    OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(collectActivity, R.string.dir_trait, exportName);
-
-                    if (output != null) {
-                        OutputStreamWriter osw = null;
-                        CSVWriter csvWriter = null;
-
-                        try {
-                            osw = new OutputStreamWriter(output);
-                            csvWriter = new CSVWriter(osw, collectActivity.getDatabase().getAllTraitObjectsForExport());
-                            csvWriter.writeTraitFile(collectActivity.getDatabase().getAllTraitsForExport().getColumnNames());
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }finally {
-                            try {
-                                if (csvWriter != null) {
-                                    csvWriter.close();
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
-                            try {
-                                if (osw != null) {
-                                    osw.close();
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
-                            try {
-                                output.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        return exportDoc.getUri();
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
-        return null;
-    }
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

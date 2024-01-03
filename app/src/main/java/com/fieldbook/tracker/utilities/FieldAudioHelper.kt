@@ -5,11 +5,12 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaRecorder
 import android.net.Uri
+import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.TraitEditorActivity
+import com.fieldbook.tracker.interfaces.TraitCsvWriter
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldDataDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
@@ -20,6 +21,7 @@ import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getFileOutputStream
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.OutputStream
+import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -41,7 +43,8 @@ import javax.inject.Inject
  *
  * Zips field audio, all traits and geonav log files in /field_audio_log_traits_zip/
  */
-class FieldAudioHelper @Inject constructor(@ActivityContext private val context: Context) {
+
+class FieldAudioHelper @Inject constructor(@ActivityContext private val context: Context) : TraitCsvWriter {
 
     private var mediaRecorder: MediaRecorder? = null
 
@@ -96,14 +99,14 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
             }
 
             // create a all traits csv file in /traits/
-            val traitsDocument = TraitEditorActivity().writeAllTraitsToCsv(traitFileName, (context as CollectActivity))
+            val traitsDocument = writeAllTraitsToCsv(traitFileName, (context as CollectActivity))
             val traitsDocumentFile = traitsDocument?.let {
                 DocumentFile.fromSingleUri(context,
                     it
                 )
             }
 
-            val geoNavLogWriter = (context).getGeoNavHelper().getGeoNavLogWriterUri()
+            val geoNavLogWriter = context.getGeoNavHelper().getGeoNavLogWriterUri()
             val geoNavFile = geoNavLogWriter?.let {
                 DocumentFile.fromSingleUri(context,
                     it
@@ -232,5 +235,59 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
 
     private enum class ButtonState(private val imageId: Int) {
         WAITING_FOR_RECORDING(R.drawable.ic_tb_field_mic_off), RECORDING(R.drawable.ic_tb_field_mic_on);
+    }
+
+    override fun writeAllTraitsToCsv(traitFileName: String, context: Context): Uri? {
+        val collectActivityContext = context as CollectActivity
+
+        try {
+            val traitDir = getDirectory(context, R.string.dir_trait)
+            if (traitDir != null && traitDir.exists()) {
+                val exportDoc = traitDir.createFile("*/*", traitFileName)
+                if (exportDoc != null && exportDoc.exists()) {
+                    val output =
+                        getFileOutputStream(context, R.string.dir_trait, traitFileName)
+                    if (output != null) {
+                        var osw: OutputStreamWriter? = null
+                        var csvWriter: CSVWriter? = null
+                        try {
+                            osw = OutputStreamWriter(output)
+                            csvWriter = CSVWriter(
+                                osw,
+                                collectActivityContext.getDatabase().allTraitObjectsForExport
+                            )
+                            csvWriter.writeTraitFile(collectActivityContext.getDatabase().allTraitsForExport?.columnNames)
+                        } catch (e: java.lang.Exception) {
+                            e.printStackTrace()
+                        } finally {
+                            try {
+                                csvWriter?.close()
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
+                            try {
+                                osw?.close()
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
+                            try {
+                                output.close()
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
+                        }
+                        return exportDoc.uri
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(
+                collectActivityContext,
+                R.string.field_audio_zip_error,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        return null
     }
 }
