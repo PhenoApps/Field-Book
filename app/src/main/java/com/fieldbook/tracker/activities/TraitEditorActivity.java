@@ -902,17 +902,40 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                     OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(collectActivity, R.string.dir_trait, exportName);
 
                     if (output != null) {
-                        OutputStreamWriter osw = new OutputStreamWriter(output);
-                        CSVWriter csvWriter = new CSVWriter(osw, collectActivity.getDatabase().getAllTraitObjectsForExport());
-                        csvWriter.writeTraitFile(collectActivity.getDatabase().getAllTraitsForExport().getColumnNames());
+                        OutputStreamWriter osw = null;
+                        CSVWriter csvWriter = null;
 
-                        csvWriter.close();
-                        osw.close();
-                        output.close();
+                        try {
+                            osw = new OutputStreamWriter(output);
+                            csvWriter = new CSVWriter(osw, collectActivity.getDatabase().getAllTraitObjectsForExport());
+                            csvWriter.writeTraitFile(collectActivity.getDatabase().getAllTraitsForExport().getColumnNames());
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }finally {
+                            try {
+                                if (csvWriter != null) {
+                                    csvWriter.close();
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
 
-                        Uri exportUri = exportDoc.getUri();
-                        Log.d(TAG, "writeAllTraitsToCsv: " + exportUri);
-                        return exportUri;
+                            try {
+                                if (osw != null) {
+                                    osw.close();
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                            try {
+                                output.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        return exportDoc.getUri();
                     }
                 }
             }
