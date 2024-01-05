@@ -17,7 +17,6 @@ import android.view.WindowManager
 import android.widget.*
 import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.activities.brapi.BrapiExportActivity
 import com.fieldbook.tracker.brapi.BrapiAuthDialog
 import com.fieldbook.tracker.brapi.service.BrAPIService
@@ -58,6 +57,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private var exportTrait: ArrayList<TraitObject> = arrayListOf()
     private var checkDbBool = false
     private var checkTableBool = false
+    private var defaultFieldString = ""
     private var exportFileString = ""
     private var filesToExport: MutableList<DocumentFile> = mutableListOf()
     private var processedFieldCount = 0
@@ -70,7 +70,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
     fun exportMultipleFields(fieldIds: List<Int>) {
         this.fieldIds = fieldIds
-        this.multipleFields = true
+        this.multipleFields = fieldIds.size > 1
         export()
     }
 
@@ -208,20 +208,20 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
         var defaultFileString = ""
         if (multipleFields) {
-            defaultFileString = context.getString(R.string.export_multiple_fields_name)
+            defaultFieldString = context.getString(R.string.export_multiple_fields_name)
             checkOverwrite.visibility = View.GONE
             bundleInfoMessage.visibility = View.VISIBLE
         } else {
             var fo = database.getFieldObject(fieldIds[0])
-            defaultFileString = fo.exp_name
-            if (defaultFileString.length > 4 && defaultFileString.lowercase().endsWith(".csv")) {
-                defaultFileString =defaultFileString.substring(0, defaultFileString.length - 4)
+            defaultFieldString = fo.exp_name
+            if (defaultFieldString.length > 4 && defaultFieldString.lowercase().endsWith(".csv")) {
+                defaultFieldString = defaultFieldString.substring(0, defaultFieldString.length - 4)
             }
             checkOverwrite.visibility = View.VISIBLE
             bundleInfoMessage.visibility = View.GONE
         }
 
-        defaultFileString = "${timeStamp.format(Calendar.getInstance().time)}_$defaultFileString"
+        defaultFileString = "${timeStamp.format(Calendar.getInstance().time)}_$defaultFieldString"
         fileName.setText(defaultFileString)
 
         val builder = AlertDialog.Builder(context)
@@ -278,6 +278,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
             BaseDocumentTreeUtil.getDirectory(context as Activity, R.string.dir_field_export)
 
+            exportTrait.clear()
             if (isActiveTraitsChecked) {
                 val traits = database.allTraitObjects
                 for (t in traits) {
@@ -294,8 +295,10 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             checkDbBool = checkDB.isChecked
             checkTableBool = checkTable.isChecked
 
-            exportFileString = if (ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
-//                getOverwriteFile(fileName.text.toString())
+
+            Log.d(TAG, "The value of EXPORT_OVERWRITE is: " + ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false))
+            exportFileString = if (!multipleFields && ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
+                getOverwriteFile(fileName.text.toString())
                 fileName.text.toString()
             } else {
                 fileName.text.toString()
@@ -319,6 +322,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     // Launches a new coroutine for each export task
     private fun startExportTasks() {
         processedFieldCount = 0
+        filesToExport.clear()
         showProgressDialog()
         ioScope.launch {
             for (fieldId in fieldIds) {
@@ -408,32 +412,37 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             if (dir.exists()) {
                 val file = dir.createFile("text/csv", fileName)
                 file?.let { docFile ->
-                    val outputStream =
-                        context.contentResolver.openOutputStream(docFile.uri) ?: return
-                    outputStream.use { stream ->
-                        val fw = OutputStreamWriter(stream)
-                        val csvWriter = CSVWriter(fw, cursor)
-                        when (fileType) {
-                            "database" -> csvWriter.writeDatabaseFormat(columns)
-                            "table" -> {
-                                val newColumns = columns.toTypedArray()
-                                val labels = exportTrait.map { it.name }
+                    context.contentResolver.openOutputStream(docFile.uri)?.use { stream ->
+                        val outputStream =
+                            context.contentResolver.openOutputStream(docFile.uri) ?: return
+                        outputStream.use { stream ->
+                            val fw = OutputStreamWriter(stream)
+                            val csvWriter = CSVWriter(fw, cursor)
+                            when (fileType) {
+                                "database" -> csvWriter.writeDatabaseFormat(columns)
+                                "table" -> {
+                                    val newColumns = columns.toTypedArray()
+                                    val labels = exportTrait.map { it.name }
 
-                                // Log the arguments
-                                val newColumnsStr = newColumns.joinToString(", ")
-                                val labelsStr = labels.joinToString(", ")
-                                val columnsSizeStr = columns.size.toString()
-                                Log.d(TAG, "Calling writeTableFormat with arguments: newColumns=[$newColumnsStr], columnsSize=[$columnsSizeStr], labels=[$labelsStr]")
+                                    // Log the arguments
+                                    val newColumnsStr = newColumns.joinToString(", ")
+                                    val labelsStr = labels.joinToString(", ")
+                                    val columnsSizeStr = columns.size.toString()
+                                    Log.d(TAG, "Calling writeTableFormat with arguments: newColumns=[$newColumnsStr], columnsSize=[$columnsSizeStr], labels=[$labelsStr]")
 
-                                csvWriter.writeTableFormat(
-                                    newColumns.plus(labels),
-                                    columns.size,
-                                    exportTrait
-                                )
+                                    csvWriter.writeTableFormat(
+                                        newColumns.plus(labels),
+                                        columns.size,
+                                        exportTrait
+                                    )
+                                }
                             }
                         }
+                        filesToExport.add(docFile)
                     }
-                    filesToExport.add(docFile)
+                    Log.d(TAG, "Export file created: ${docFile.uri}")
+                } ?: run {
+                    Log.e(TAG, "Failed to create export file: $fileName")
                 }
             }
         }
@@ -447,6 +456,8 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             mediaDir?.let { dir ->
                 if (dir.exists() && dir.isDirectory) {
                     filesToExport.add(dir)
+                } else {
+                    Log.e(TAG, "Media directory is invalid or does not exist: ${mediaDir?.uri}")
                 }
             }
         }
@@ -504,31 +515,56 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         }
     }
 
-//    private fun getOverwriteFile(filename: String): String {
-//        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
-//
-//        exportDir?.takeIf { it.exists() }?.listFiles()?.forEach { file ->
-//            val fileName = file.name ?: return@forEach
-//
-//            if (filename.contains(exportFileString)) {
-//                val oldDoc = BaseDocumentTreeUtil.getFile(context, R.string.dir_field_export, fileName)
-//                val newDoc = BaseDocumentTreeUtil.getFile(context, R.string.dir_archive, fileName)
-//                val newName = newDoc?.name ?: fileName
-//
-//                if (oldDoc != null && newDoc != null && newName != null) {
-//                    if (checkDbBool && fileName.contains(exportFileString) && fileName.contains("database")) {
-//                        oldDoc.renameTo(newName)
-//                    }
-//
-//                    if (checkTableBool && fileName.contains(exportFileString) && fileName.contains("table")) {
-//                        oldDoc.renameTo(newName)
-//                    }
-//                }
-//            }
-//        }
-//
-//        return filename
-//    }
+    private fun getOverwriteFile(filename: String): String {
+        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+        val archiveDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_archive)
+
+        exportDir?.takeIf { it.exists() }?.listFiles()?.forEach { file ->
+            val fileName = file.name ?: return@forEach
+
+            if (fileName.contains(defaultFieldString) &&
+                ((checkDbBool && fileName.contains("database")) || (checkTableBool && fileName.contains("table")))) {
+                val oldDoc = BaseDocumentTreeUtil.getFile(context, R.string.dir_field_export, fileName)
+
+                if (oldDoc != null && archiveDir != null) {
+                    // Copy to the archive directory
+                    val newDoc = copyFileToDirectory(oldDoc, archiveDir, fileName)
+
+                    if (newDoc != null) {
+                        Log.d(TAG, "File moved to archive: ${newDoc.uri}")
+                        // Delete the original
+                        val deleteSuccess = oldDoc.delete()
+                    } else {
+                        Log.e(TAG, "Failed to move file to archive: $fileName")
+                    }
+                } else {
+                    Log.e(TAG, "Failed to retrieve DocumentFiles for overwriting/archiving: $fileName")
+                }
+            }
+        }
+
+        return filename
+    }
+
+    private fun copyFileToDirectory(file: DocumentFile, directory: DocumentFile, newFileName: String): DocumentFile? {
+        try {
+            val mimeType = file.type ?: "application/octet-stream"
+            val newFile = directory.createFile(mimeType, newFileName)
+            newFile?.let {
+                context.contentResolver.openInputStream(file.uri)?.use { inputStream ->
+                    context.contentResolver.openOutputStream(newFile.uri)?.use { outputStream ->
+                        inputStream.copyTo(outputStream)
+                    }
+                }
+                return newFile
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error copying file: ${e.message}")
+        }
+        return null
+    }
+
+
 
     /**
      * Scan file to update file list and share exported file

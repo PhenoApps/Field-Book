@@ -275,7 +275,7 @@ class ObservationUnitPropertyDao {
             val query = """
                 SELECT $selectAttribute, $selectObservations
                 FROM observation_units AS units
-                LEFT JOIN observations obs ON units.observation_unit_db_id = obs.observation_unit_id
+                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id
                 WHERE units.study_id = $expId
                 GROUP BY units.internal_id_observation_unit
             """.trimIndent()
@@ -305,7 +305,7 @@ class ObservationUnitPropertyDao {
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
-                LEFT JOIN observations obs ON units.observation_unit_db_id = obs.observation_unit_id
+                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id
                 WHERE units.study_id = $expId
                 GROUP BY units.internal_id_observation_unit
             """.trimIndent()
