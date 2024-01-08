@@ -217,6 +217,10 @@ public class GeneralKeys {
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
 
+    //Canon
+    public static final String CANON_IP = "CANON_IP";
+    public static final String CANON_PORT = "CANON_PORT";
+
     private GeneralKeys() {
 
     }

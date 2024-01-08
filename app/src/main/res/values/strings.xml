@@ -362,9 +362,10 @@
     <string name="trait_usb_camera_zoom_out_button_text">Zoom out</string>
     <string name="trait_usb_camera_zoom_out_content_description">Zoom out</string>
     <string name="trait_usb_camera_zoom_in_content_description">Zoom in</string>
-    <string name="trait_usb_camera_delete_photo">Delete USB Photo</string>
     <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>
     <string name="trait_usb_camera_capture_button_text">Capture</string>
+
+    <string name="delete_local_photo">Delete Photo</string>
 
     <!--- Trait Layout: Zebra label print -->
     <string name="trait_layout_data_stored">Saved</string>
@@ -1031,5 +1032,9 @@
     <string name="trait_date_minus_content_description">Subtracts one day from the current date</string>
     <string name="trait_date_add_content_description">Adds one day to the current date</string>
     <string name="trait_percent_ui_min_max_error">Something went wrong showing the min/max of this trait format</string>
+    <string name="canon_frag_connect_btn_content_description">shutter button</string>
+    <string name="traits_format_canon">Canon</string>
+    <string name="pref_canon_ip_title">Canon IP Address</string>
+    <string name="pref_canon_port_title">Canon Port</string>
 
 </resources>

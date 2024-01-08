@@ -454,7 +454,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 imageView.setImageBitmap(BitmapFactory.decodeStream(input))
 
                 AlertDialog.Builder(context, R.style.AppAlertDialog)
-                    .setTitle(R.string.trait_usb_camera_delete_photo)
+                    .setTitle(R.string.delete_local_photo)
                     .setOnCancelListener { dialog -> dialog.dismiss() }
                     .setPositiveButton(android.R.string.ok) { dialog, _ ->
 

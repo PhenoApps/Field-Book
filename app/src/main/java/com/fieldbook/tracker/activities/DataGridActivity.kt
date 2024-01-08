@@ -48,6 +48,10 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITableViewListener {
 
+    companion object {
+        val TAG = DataGridActivity::class.simpleName
+    }
+
     /***
      * Polymorphism class structure to serve different cell types to the grid.
      */

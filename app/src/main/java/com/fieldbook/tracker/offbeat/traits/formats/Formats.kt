@@ -4,6 +4,7 @@ import android.content.Context
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.AudioFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.BooleanFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.BrapiFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.CanonFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.CategoricalFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.CounterFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.DateFormat
@@ -25,7 +26,7 @@ enum class Formats(val type: Types = Types.SYSTEM) {
     AUDIO, BOOLEAN, CAMERA, CATEGORICAL, MULTI_CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT,
 
     //CUSTOM formats
-    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM), USB_CAMERA(Types.CUSTOM), GO_PRO(Types.CUSTOM),
+    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM), USB_CAMERA(Types.CUSTOM), GO_PRO(Types.CUSTOM), CANON(Types.CUSTOM),
     LABEL_PRINT(Types.CUSTOM), BRAPI(Types.CUSTOM);
 
     fun getTraitFormatDefinition() = when (this) {
@@ -33,6 +34,7 @@ enum class Formats(val type: Types = Types.SYSTEM) {
         BOOLEAN -> BooleanFormat()
         CAMERA -> PhotoFormat()
         USB_CAMERA -> UsbCameraFormat()
+        CANON -> CanonFormat()
         GO_PRO -> GoProFormat()
         CATEGORICAL -> CategoricalFormat()
         MULTI_CATEGORICAL -> MultiCategoricalFormat()
