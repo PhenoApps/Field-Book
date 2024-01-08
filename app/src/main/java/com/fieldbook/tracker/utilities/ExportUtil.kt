@@ -24,6 +24,11 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.qualifiers.ActivityContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
@@ -31,11 +36,6 @@ import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 /**
@@ -87,13 +87,24 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             "local" -> exportPermission()
             "brapi" -> fieldIds.forEach { fieldId -> exportBrAPI(fieldId) }
             else -> {
-                if (ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+                if (allFieldsBrAPI() && ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
                     showExportDialog()
                 } else {
                     exportPermission()
                 }
             }
         }
+    }
+
+    fun allFieldsBrAPI(): Boolean {
+        fieldIds.forEach { fieldId ->
+            val field = database.getFieldObject(fieldId)
+            val expSource = field?.getExp_source()
+            if (expSource == null || expSource == "csv" || expSource == "excel") {
+                return false
+            }
+        }
+        return true
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_EXPORT_DATA)
