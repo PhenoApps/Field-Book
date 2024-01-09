@@ -2,6 +2,7 @@ package com.fieldbook.tracker.adapters;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -246,11 +247,20 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
         holder.itemView.setActivated(selectedItems.get(position, false));
         String name = field.getExp_name();
         holder.name.setText(name);
-        holder.count.setText(field.getCount());
+        String level = field.getObservation_level();
+        String count = field.getCount();
+//        Log.d("FieldAdapter", "Count for field " + name + ": " + field.getCount());
+//        Log.d("FieldAdapter", "Observation level for field " + name + ": " + field.getObservation_level());
+        if (level == null || level.isEmpty()) {
+            level = "entries";
+        } else {
+            level = level + "s"; // Making the string plural
+        }
+        holder.count.setText(count + " " + level);
 
         // Set source icon
         String source = field.getExp_source();
-//        Log.d("FieldAdapter", "Source for field " + name + ": " + source);
+        Log.d("FieldAdapter", "Source for field " + name + ": " + source);
         if (source == null || "csv".equals(source)) {
             holder.sourceIcon.setImageResource(R.drawable.ic_file_csv);
         } else if ("excel".equals(source)) {

@@ -1151,8 +1151,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         DataHelper dataHelper = new DataHelper(context);
 
         String observationLevel;
-        if (selectedObservationLevel == null) observationLevel = "Plot";
-        else observationLevel = selectedObservationLevel.getObservationLevelName().substring(0, 1).toUpperCase() + selectedObservationLevel.getObservationLevelName().substring(1);
+        if (selectedObservationLevel == null) observationLevel = "plot";
+        else observationLevel = selectedObservationLevel.getObservationLevelName();
         try {
             FieldObject field = new FieldObject();
             field.setExp_name(studyDetails.getStudyName());
