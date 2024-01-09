@@ -2,7 +2,7 @@ package com.fieldbook.tracker.dialogs
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.Dialog
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -18,9 +19,22 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
+import androidx.preference.PreferenceManager
+import androidx.work.Constraints
+import androidx.work.CoroutineWorker
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.Worker
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.serenegiant.utils.UIThreadHelper
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.DataOutputStream
@@ -28,24 +42,36 @@ import java.io.File
 import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.io.InputStreamReader
+import java.lang.NullPointerException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.math.log
 
 class UploadFileDialog : DialogFragment() {
     private var selectedAudioFileSrc: String? = null
     private var selectedAudioFileUri: Uri? = null
 
     private var uploadLayout: View? = null
+    private var pickAudioButton: Button? = null
+    private var uploadFileButton: Button? = null
+    private var uploadStatusMessage: TextView? = null
+
     private lateinit var audioPickerLauncher: ActivityResultLauncher<Intent>
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    private lateinit var workManager: WorkManager
+    private lateinit var firstCallWork: OneTimeWorkRequest
+    private lateinit var secondCallWork: OneTimeWorkRequest
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? {
         val context = requireContext()
-        val inflater = this.layoutInflater
-        uploadLayout = inflater.inflate(R.layout.dialog_upload_files, null) as ViewGroup
-        val pickAudioButton = uploadLayout?.findViewById<Button>(R.id.pickAudioButton)
+        val layoutInflater = this.layoutInflater
+        uploadLayout = layoutInflater.inflate(R.layout.dialog_upload_files, null)
+        pickAudioButton = uploadLayout?.findViewById(R.id.pickAudioButton)
 
         // when the dialog is opened, clear the variables
         selectedAudioFileSrc = null
@@ -56,7 +82,7 @@ class UploadFileDialog : DialogFragment() {
         pickAudioButton?.setOnClickListener {
             // Launch the file picker
             val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "*/*" // You can specify a MIME type here, e.g., "audio/*"
+            intent.type = "*/*"
             audioPickerLauncher.launch(intent)
         }
 
@@ -66,25 +92,92 @@ class UploadFileDialog : DialogFragment() {
             ?.setView(uploadLayout)
 
 
-        val uploadFileButton = uploadLayout?.findViewById<Button>(R.id.uploadFileButton)
-        val uploadStatusMessage = uploadLayout?.findViewById<TextView>(R.id.uploadStatusMessage)
+        uploadFileButton = uploadLayout?.findViewById(R.id.uploadFileButton)
+        uploadStatusMessage = uploadLayout?.findViewById(R.id.uploadStatusMessage)
+
+        workManager = WorkManager.getInstance(context)
 
         uploadFileButton?.setOnClickListener {
             if (selectedAudioFileUri != null) {
-                Log.d(CollectActivity.TAG, "uploadDialog: not empty")
+                val fieldId = PreferenceManager.getDefaultSharedPreferences(context)
+                    .getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-                firstCall().start()
+                // initialize workers
+                firstCallWork = OneTimeWorkRequestBuilder<FirstCallWorker>()
+                    .setInputData(
+                        workDataOf(
+                            "selectedAudioFileUri" to selectedAudioFileUri.toString(),
+                            "fieldId" to fieldId
+                        )
+                    ).build()
+                secondCallWork = OneTimeWorkRequestBuilder<SecondCallWorker>()
+                    .setInputData(
+                        workDataOf(
+                            "selectedAudioFileUri" to selectedAudioFileUri.toString()
+                        )
+                    ).build()
 
+                // enqueue workers
+                workManager.beginWith(firstCallWork).then(secondCallWork).enqueue()
+
+                // observe state of the workers and update the UI
+                workManager.getWorkInfoByIdLiveData(firstCallWork.id)
+                    .observe(viewLifecycleOwner) { workInfo ->
+                        when (workInfo.state) {
+                            WorkInfo.State.FAILED -> {
+                                pickAudioButton?.visibility = View.VISIBLE
+                                uploadFileButton?.visibility = View.VISIBLE
+                                val error =
+                                    workInfo.outputData.getString("error") ?: "Unknown error"
+                                updateUI(error)
+                            }
+//                            WorkInfo.State.SUCCEEDED -> {
+//                                pickAudioButton?.visibility = View.GONE
+//                                uploadFileButton?.visibility = View.GONE
+//                                updateUI("Success")
+//                            }
+                            WorkInfo.State.RUNNING -> {
+                                pickAudioButton?.visibility = View.GONE
+                                uploadFileButton?.visibility = View.GONE
+                                updateUI("Uploading file")
+                            }
+
+                            else -> {}
+                        }
+                    }
+                workManager.getWorkInfoByIdLiveData(secondCallWork.id)
+                    .observe(viewLifecycleOwner) { workInfo ->
+                        when (workInfo.state) {
+                            WorkInfo.State.FAILED -> {
+                                pickAudioButton?.visibility = View.VISIBLE
+                                uploadFileButton?.visibility = View.VISIBLE
+                                val error =
+                                    workInfo.outputData.getString("error") ?: "Unknown error"
+                                updateUI(error)
+                            }
+
+                            WorkInfo.State.SUCCEEDED -> {
+                                pickAudioButton?.visibility = View.GONE
+                                uploadFileButton?.visibility = View.GONE
+                                updateUI("Success")
+                            }
+
+                            WorkInfo.State.RUNNING -> {
+                                pickAudioButton?.visibility = View.GONE
+                                uploadFileButton?.visibility = View.GONE
+                                updateUI("Uploading file")
+                            }
+
+                            else -> {}
+                        }
+                    }
             } else {
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(context, "Attach a file", Toast.LENGTH_LONG).show()
-                }
                 updateUI("Attach a file")
             }
         }
 
 //        builder.show()
-        return builder.create()
+        return uploadLayout
     }
 
     override fun onDismiss(dialog: DialogInterface) {
@@ -93,50 +186,54 @@ class UploadFileDialog : DialogFragment() {
         selectedAudioFileUri = null
     }
 
-    private fun setOnActivityResult(){
-        audioPickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.data?.let { uri ->
-                    val src = uri.path
-                    selectedAudioFileSrc = src
-                    selectedAudioFileUri = uri
+    private fun setOnActivityResult() {
+        audioPickerLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    result.data?.data?.let { uri ->
+                        val src = uri.path
+                        selectedAudioFileSrc = src
+                        selectedAudioFileUri = uri
 
-                    val selectedFile = File(uri.path!!)
-                    val fileName = selectedFile.name
+                        val selectedFile = uri.path?.let { File(it) }
+                        val fileName = selectedFile?.name
 
-                    // Update the TextView with the selected file's name
-                    val audioFileName = uploadLayout?.findViewById<TextView>(R.id.audioFileName)
-                    audioFileName?.text = fileName
+                        // Update the TextView with the selected file's name
+                        val audioFileName = uploadLayout?.findViewById<TextView>(R.id.audioFileName)
+                        audioFileName?.text = fileName
+                    }
                 }
             }
-        }
     }
 
     private fun updateUI(statusMessage: String) {
         UIThreadHelper.runOnUiThread {
             kotlin.run {
-                val uploadStatusMessage =
-                    uploadLayout?.findViewById<TextView>(R.id.uploadStatusMessage)
                 uploadStatusMessage?.text = statusMessage
+                Toast.makeText(context, statusMessage, Toast.LENGTH_LONG).show()
             }
         }
     }
+}
 
-    private fun firstCall(): Thread {
-        return Thread {
-            Log.d(CollectActivity.TAG, "doInBackground: Making First CALL")
-            val apiUrl = "http://192.168.151.120:3000/brapi/v2/images"
+// FirstCallWorker.kt
+class FirstCallWorker(context: Context, workerParams: WorkerParameters) :
+    Worker(context, workerParams) {
+    override fun doWork(): Result {
+        val selectedAudioFileUriString = inputData.getString("selectedAudioFileUri")
+        val selectedAudioFileUri = Uri.parse(selectedAudioFileUriString)
+        val fieldId = inputData.getString("fieldId")
 
-            val timeStamp = SimpleDateFormat(
-                "yyyy-MM-dd hh:mm:ss", Locale.getDefault()
-            ).format(Calendar.getInstance().time)
-            Log.d(CollectActivity.TAG, "firstCall: $timeStamp")
+        val apiUrl = "http://192.168.229.119:3000/brapi/v2/images"
 
+        val timeStamp = SimpleDateFormat(
+            "yyyy-MM-dd hh:mm:ss", Locale.getDefault()
+        ).format(Calendar.getInstance().time)
 
-            val selectedFile = selectedAudioFileUri?.path?.let { File(it) }
-            val fileName = selectedFile?.name
-            // Create the JSON request body
-            val requestBody = """
+        val selectedFile = selectedAudioFileUri?.path?.let { File(it) }
+        val fileName = selectedFile?.name
+        // Create the JSON request body
+        val requestBody = """
                 {
                     "additionalInfo": {"media": "audio", "fieldId": "167"},
                     "imageFileName": "$fileName",
@@ -144,135 +241,109 @@ class UploadFileDialog : DialogFragment() {
                 }
             """.trimIndent()
 
-            try {
-                val url = URL(apiUrl)
+        try {
+            val url = URL(apiUrl)
 
-                val connection = url.openConnection() as HttpURLConnection
-                connection.requestMethod = "POST"
-                connection.setRequestProperty("Content-Type", "application/json")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "POST"
+            connection.setRequestProperty("Content-Type", "application/json")
 
-                connection.connectTimeout = 10000
-                connection.readTimeout = 10000
+            connection.connectTimeout = 10000
+            connection.readTimeout = 10000
 
-                connection.doInput = true
-                connection.doOutput = true
+            connection.doInput = true
+            connection.doOutput = true
 
-                // Write the request body to the output stream
-                val outputStream = DataOutputStream(connection.outputStream)
-                outputStream.writeBytes(requestBody)
-                outputStream.flush()
-                outputStream.close()
+            // Write the request body to the output stream
+            val outputStream = DataOutputStream(connection.outputStream)
+            outputStream.writeBytes(requestBody)
+            outputStream.flush()
+            outputStream.close()
 
-                // Get the HTTP response code
-                val responseCode = connection.responseCode
+            // Get the HTTP response code
+            val responseCode = connection.responseCode
+            Log.d("TAG", "doWork: HOGAYA ek $responseCode")
 
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    // The request was successful, so read and return the response
-                    val inputStream = BufferedReader(InputStreamReader(connection.inputStream))
-                    val response = StringBuilder()
-                    var line: String?
-                    while (inputStream.readLine().also { line = it } != null) {
-                        response.append(line)
-                    }
-                    inputStream.close()
-                    Log.d(CollectActivity.TAG, "doInBackground: Success")
+            connection.disconnect()
 
-                    val jsonResponse = JSONObject(response.toString())
-                    val imageDbId =
-                        jsonResponse.getJSONObject("result").getJSONArray("data").getJSONObject(0)
-                            .getInt("imageDbId")
-
-                    Log.d(CollectActivity.TAG, "onPostExecute: $imageDbId")
-
-                    secondCall(imageDbId.toString()).start()
-                } else {
-                    // Handle the error response (e.g., non-200 status code)
-                    Log.d(CollectActivity.TAG, "ERROR: Response code $responseCode")
-                    Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(context, "Uploaded Unsuccessful", Toast.LENGTH_LONG).show()
-                    }
-                    updateUI("First Call Error: $responseCode")
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                val inputStream = BufferedReader(InputStreamReader(connection.inputStream))
+                val response = StringBuilder()
+                var line: String?
+                while (inputStream.readLine().also { line = it } != null) {
+                    response.append(line)
                 }
-                connection.disconnect()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(
-                        context, "Uploaded Unsuccessful: ${e.message}", Toast.LENGTH_LONG
-                    ).show()
-                }
-                updateUI("First Call Error: ${e.message}")
+                inputStream.close()
+
+                val jsonResponse = JSONObject(response.toString())
+                val imageDbId =
+                    jsonResponse.getJSONObject("result").getJSONArray("data").getJSONObject(0)
+                        .getInt("imageDbId")
+
+                return Result.success(workDataOf("imageDbId" to imageDbId))
+            } else {
+                // Handle the error response (e.g., non-200 status code)
+                val error = "Status code $responseCode"
+                return Result.failure(workDataOf("error" to error))
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return Result.failure(workDataOf("error" to e.message))
         }
     }
+}
 
-    private fun secondCall(imageId: String): Thread {
-        return Thread {
-            Log.d(CollectActivity.TAG, "doInBackground: Making Second Call")
-//         Define the API endpoint URL
-            val apiUrl =
-                "http://192.168.151.120:3000/brapi/v2/images/$imageId/imageContent" // Replace with your PC's IP address or hostname
+// SecondCallWorker.kt
+class SecondCallWorker(context: Context, workerParams: WorkerParameters) :
+    Worker(context, workerParams) {
+    override fun doWork(): Result {
+        val imageDbId = inputData.getInt("imageDbId", -1)
+        val selectedAudioFileUriString = inputData.getString("selectedAudioFileUri")
+        val selectedAudioFileUri = Uri.parse(selectedAudioFileUriString)
 
-            try {
-                val url = URL(apiUrl)/*
-                 * Get the content resolver instance for this context, and use it
-                 * to get a ParcelFileDescriptor for the file.
-                 */
-                val mInputPFD = selectedAudioFileUri?.let {
-                    context?.contentResolver?.openFileDescriptor(
-                        it, "r"
-                    )
-                }
-                // Get a regular file descriptor for the file
-                val fd: FileDescriptor? = mInputPFD?.fileDescriptor
-                val inputStream = FileInputStream(fd)
-                val buffer = ByteArray(1024) // Define a buffer for reading data
-                var bytesRead: Int
+        val apiUrl = "http://192.168.229.119:3000/brapi/v2/images/$imageDbId/imageContent"
 
-                val connection = url.openConnection() as HttpURLConnection
-                connection.requestMethod = "PUT"
-                connection.doOutput = true
-                connection.setRequestProperty("Content-Type", "application/octet-stream")
+        try {
+            val url = URL(apiUrl)
 
-                // Write the byte array to the output stream
-                val outputStream1 = connection.outputStream
-                while ((inputStream.read(buffer).also { bytesRead = it }) != -1) {
-                    outputStream1.write(buffer, 0, bytesRead)
-                }
-                outputStream1.close()
-
-                val responseCode = connection.responseCode
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    // The request was successful, so read and return the response
-                    val inputStream = BufferedReader(InputStreamReader(connection.inputStream))
-                    val response = StringBuilder()
-                    var line: String?
-                    while (inputStream.readLine().also { line = it } != null) {
-                        response.append(line)
-                    }
-                    inputStream.close()
-
-                    Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(context, "Uploaded Successfully", Toast.LENGTH_LONG).show()
-                    }
-//
-//                response.toString()
-                    updateUI("Uploaded successfully")
-                } else {
-                    Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(context, "Uploaded Unsuccessful", Toast.LENGTH_LONG).show()
-                    }
-                    updateUI("Error: $responseCode")
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(
-                        context, "Uploaded Unsuccessful: ${e.message}", Toast.LENGTH_LONG
-                    ).show()
-                }
-                updateUI("Second Call Error: ${e.message}")
+            val mInputPFD = selectedAudioFileUri?.let {
+                applicationContext.contentResolver?.openFileDescriptor(
+                    it, "r"
+                )
             }
+            val fd: FileDescriptor? = mInputPFD?.fileDescriptor
+            val inputStream = FileInputStream(fd)
+            val buffer = ByteArray(1024) // Define a buffer for reading data
+            var bytesRead: Int
+
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "PUT"
+            connection.doOutput = true
+            connection.connectTimeout = 30000
+            connection.readTimeout = 30000
+            connection.setRequestProperty("Content-Type", "application/octet-stream")
+
+            // write the byte array to the output stream
+            connection.outputStream.use { outputStream ->
+                while ((inputStream.read(buffer).also { bytesRead = it }) != -1) {
+                    outputStream.write(buffer, 0, bytesRead)
+                }
+            }
+            val responseCode = connection.responseCode
+
+            mInputPFD?.close()
+            inputStream.close()
+            connection.disconnect()
+
+            return if (responseCode == HttpURLConnection.HTTP_OK) {
+                Result.success()
+            } else {
+                val error = "Status code $responseCode"
+                Result.failure(workDataOf("error" to error))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return Result.failure(workDataOf("error" to e.message))
         }
     }
 }
