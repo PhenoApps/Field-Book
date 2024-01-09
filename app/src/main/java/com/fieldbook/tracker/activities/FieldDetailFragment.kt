@@ -9,7 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -17,12 +17,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.adapters.FieldDetailAdapter
+import com.fieldbook.tracker.adapters.FieldDetailItem
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
 import com.fieldbook.tracker.interfaces.FieldAdapterController
-import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
@@ -41,14 +44,17 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
     private lateinit var exportUtil: ExportUtil
     private lateinit var rootView: View
-    private lateinit var importDateTextView: TextView
     private lateinit var editDateTextView: TextView
     private lateinit var exportDateTextView: TextView
-    private lateinit var countTextView: TextView
-
-    private lateinit var brapiDetailsTextView: TextView
-    private lateinit var brapiDetailsRelativeLayout: RelativeLayout
-    private lateinit var observationLevelTextView: TextView
+    private lateinit var importIconImageView: ImageView
+    private lateinit var importDateTextView: TextView
+    private lateinit var importSourceTextView: TextView
+    private lateinit var entryCountTextView: TextView
+    private lateinit var entryOrderTextView: TextView
+    private lateinit var traitCountTextView: TextView
+    private lateinit var observationCountTextView: TextView
+    private lateinit var syncLinearLayout: LinearLayout
+    private lateinit var syncDateTextView: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -58,65 +64,94 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         toolbar = rootView.findViewById(R.id.toolbar)
         setupToolbar()
 
-        importDateTextView = rootView.findViewById(R.id.importDateTextView)
         editDateTextView = rootView.findViewById(R.id.editDateTextView)
         exportDateTextView = rootView.findViewById(R.id.exportDateTextView)
-        countTextView = rootView.findViewById(R.id.countTextView)
-        observationLevelTextView = rootView.findViewById(R.id.observationLevelTextView)
-        exportUtil = ExportUtil(requireActivity(), database)
-        updateFieldData()
-        displayTraitCounts(rootView)
+        importIconImageView = rootView.findViewById(R.id.importIcon)
+        importDateTextView = rootView.findViewById(R.id.importDateTextView)
+        importSourceTextView = rootView.findViewById(R.id.importSourceTextView)
+        entryCountTextView = rootView.findViewById(R.id.entryCountTextView)
 
-        // Only display BrAPI section if field was imported via BrAPI
-        brapiDetailsTextView = rootView.findViewById(R.id.brapiDetailsTextView)
-        brapiDetailsRelativeLayout = rootView.findViewById(R.id.brapiDetailsRelativeLayout)
+        entryOrderTextView = rootView.findViewById(R.id.entryOrderTextView)
+        traitCountTextView = rootView.findViewById(R.id.traitCountTextView)
+        observationCountTextView = rootView.findViewById(R.id.observationCountTextView)
 
-        // Only display BrAPI section if field was imported via BrAPI
+        syncLinearLayout = rootView.findViewById(R.id.syncLinearLayout)
+        syncDateTextView = rootView.findViewById(R.id.syncDateTextView)
+
+        editDateTextView.text = " ${field.getDate_edit().split(" ")[0]}"
+        exportDateTextView.text = " ${field.getDate_export().split(" ")[0]}"
+        importDateTextView.text = " ${field.getDate_import().split(" ")[0]}"
+
+
+        // Set sync, import, and entry values based on source
         val source: String? = field.getExp_source()
-        if (source != null && source != "csv" && source != "excel") {
-            brapiDetailsTextView.visibility = View.VISIBLE
-            brapiDetailsRelativeLayout.visibility = View.VISIBLE
-            observationLevelTextView.text = field.getObservation_level()
+        if (source != null && source != "csv" && source != "excel") { // BrAPI source
+            syncLinearLayout.visibility = View.VISIBLE
+            syncDateTextView.text = ""
+            importIconImageView.setImageResource(R.drawable.ic_adv_brapi)
+            importSourceTextView.text = "from " + source
+            entryCountTextView.text = " ${field.getCount()} ${field.observation_level}s"
 
-        } else {
-            brapiDetailsTextView.visibility = View.GONE
-            brapiDetailsRelativeLayout.visibility = View.GONE
+        } else if (source != "excel") { // csv source
+            importIconImageView.setImageResource(R.drawable.ic_file_csv)
+            syncLinearLayout.visibility = View.GONE
+            importSourceTextView.visibility = View.GONE
+            entryCountTextView.text = " ${field.getCount()} entries"
+        } else { // xls source
+            importIconImageView.setImageResource(R.drawable.ic_file_xls)
+            syncLinearLayout.visibility = View.GONE
+            importSourceTextView.visibility = View.GONE
+            entryCountTextView.text = " ${field.getCount()} entries"
         }
 
-        val collectButton: Button = rootView.findViewById(R.id.collectButton)
-        val exportButton: Button = rootView.findViewById(R.id.exportButton)
-        val syncObsButton: Button = rootView.findViewById(R.id.brapiSync)
-
-        syncObsButton.setOnClickListener {
-            val alert = BrapiSyncObsDialog(requireContext())
-            alert.setFieldObject(field)
-            alert.show()
-        }
-
-        collectButton.setOnClickListener {
-            if (checkTraitsExist() >= 0) collectDataFilePermission()
-        }
-
-        exportButton.setOnClickListener {
-            if (checkTraitsExist() >= 0) exportUtil.exportActiveField()
-        }
+        setupRecyclerView()
 
         Log.d("onCreateView", "End")
         return rootView
     }
 
-    override fun onResume() {
-        super.onResume()
-        updateFieldData()
-        displayTraitCounts(rootView)
+    private fun setupRecyclerView() {
+        val recyclerView: RecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        val items = createTraitDetailItems() // Create items for RecyclerView
+        recyclerView.adapter = FieldDetailAdapter(items)
     }
 
-    private fun updateFieldData() {
-        importDateTextView.text = " ${field.getDate_import().split(" ")[0]}"
-        editDateTextView.text = " ${field.getDate_edit().split(" ")[0]}"
-        exportDateTextView.text = " ${field.getDate_export().split(" ")[0]}"
-        countTextView.text = " ${field.getCount()}"
+    private fun createTraitDetailItems(): List<FieldDetailItem> {
+        val dataHelper = DataHelper(requireContext())
+        val traitCounts = dataHelper.getTraitCountsForStudy()
+
+        // Check if there are any traits to display
+        if (traitCounts.isNullOrEmpty()) {
+            return emptyList()
+        }
+
+        return traitCounts.mapNotNull { (traitName, count) ->
+            if (traitName != null) {
+                FieldDetailItem(
+                    traitName,
+                    "$count observations",
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_trait_categorical)
+                )
+            } else {
+                null
+            }
+        }
     }
+
+
+    override fun onResume() {
+        super.onResume()
+//        updateFieldData()
+//        displayTraitCounts(rootView)
+    }
+
+//    private fun updateFieldData() {
+//        importDateTextView.text = " ${field.getDate_import().split(" ")[0]}"
+//        editDateTextView.text = " ${field.getDate_edit().split(" ")[0]}"
+//        exportDateTextView.text = " ${field.getDate_export().split(" ")[0]}"
+//        countTextView.text = " ${field.getCount()}"
+//    }
 
     private fun setupToolbar() {
 
@@ -139,9 +174,9 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
                 }
                 R.id.rename -> {
                 }
-                R.id.sort -> {
-                    (activity as? FieldSortController)?.showSortDialog(field)
-                }
+//                R.id.sort -> {
+//                    (activity as? FieldSortController)?.showSortDialog(field)
+//                }
                 R.id.delete -> {
                     createDeleteItemAlertDialog(field)?.show()
                 }
@@ -238,34 +273,34 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         }
     }
 
-    private fun displayTraitCounts(view: View) {
-
-        val layout: LinearLayout = view.findViewById(R.id.traitCountsLayout) ?: return
-        layout.removeAllViews()
-
-        val dataHelper = DataHelper(requireContext())
-        val traitCounts = dataHelper.getTraitCountsForStudy()
-        Log.d("TraitCounts", "TraitCounts: $traitCounts")
-
-        // Check if there are any traits to display
-        if (traitCounts.isNullOrEmpty()) {
-            return
-        }
-
-        val inflater = LayoutInflater.from(context)
-        traitCounts.forEach { (traitName, count) ->
-            if(traitName != null) {
-                Log.d("TraitLoop", "TraitName: $traitName, Count: $count")
-                val view = inflater.inflate(R.layout.list_item_field_trait, layout, false) as View
-                val nameTextView: TextView = view.findViewById(R.id.traitNameTextView)
-                val countTextView: TextView = view.findViewById(R.id.traitCountTextView)
-                nameTextView.text = traitName
-                countTextView.text = count.toString() + " observations"
-                view.id = View.generateViewId()
-                layout.addView(view)
-            } else {
-                Log.d("TraitCountDetail", "TraitName is null.")
-            }
-        }
-    }
+//    private fun displayTraitCounts(view: View) {
+//
+//        val layout: LinearLayout = view.findViewById(R.id.traitCountsLayout) ?: return
+//        layout.removeAllViews()
+//
+//        val dataHelper = DataHelper(requireContext())
+//        val traitCounts = dataHelper.getTraitCountsForStudy()
+//        Log.d("TraitCounts", "TraitCounts: $traitCounts")
+//
+//        // Check if there are any traits to display
+//        if (traitCounts.isNullOrEmpty()) {
+//            return
+//        }
+//
+//        val inflater = LayoutInflater.from(context)
+//        traitCounts.forEach { (traitName, count) ->
+//            if(traitName != null) {
+//                Log.d("TraitLoop", "TraitName: $traitName, Count: $count")
+//                val view = inflater.inflate(R.layout.list_item_field_trait, layout, false) as View
+//                val nameTextView: TextView = view.findViewById(R.id.traitNameTextView)
+//                val countTextView: TextView = view.findViewById(R.id.traitCountTextView)
+//                nameTextView.text = traitName
+//                countTextView.text = count.toString() + " observations"
+//                view.id = View.generateViewId()
+//                layout.addView(view)
+//            } else {
+//                Log.d("TraitCountDetail", "TraitName is null.")
+//            }
+//        }
+//    }
 }
