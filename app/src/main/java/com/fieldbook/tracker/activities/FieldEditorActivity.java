@@ -41,6 +41,7 @@ import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
@@ -151,6 +152,8 @@ public class FieldEditorActivity extends ThemedActivity
         try {
             database.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
             recyclerView = findViewById(R.id.fieldRecyclerView);
+            DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
+            recyclerView.addItemDecoration(dividerItemDecoration);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             fieldList = database.getAllFieldObjects();
             mAdapter = new FieldAdapter(this, fieldList, fieldSwitcher, this);
