@@ -256,6 +256,7 @@
     <string name="main_toolbar_search">Search</string>
     <string name="search_dialog_add">Add</string>
     <string name="search_dialog_clear">Clear</string>
+    <string name="search_dialog_operator_dialog_title">Select an operator</string>
     <string name="search_dialog_query_is_equal_to">is equal to</string>
     <string name="search_dialog_query_is_not_equal_to">is not equal to</string>
     <string name="search_dialog_query_contains">contains</string>

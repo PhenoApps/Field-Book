@@ -3,11 +3,11 @@ package com.fieldbook.tracker.dialogs;
 
 import com.fieldbook.tracker.activities.CollectActivity;
 
-public class SearchAtrributeChooserDialog extends CollectAttributeChooserDialog {
+public class SearchAttributeChooserDialog extends CollectAttributeChooserDialog {
     private final OnAttributeClickedListener onAttributeClickedListener;
 
 
-    public SearchAtrributeChooserDialog(CollectActivity activity, OnAttributeClickedListener listener) {
+    public SearchAttributeChooserDialog(CollectActivity activity, OnAttributeClickedListener listener) {
         super(activity);
         this.onAttributeClickedListener = listener;
     }

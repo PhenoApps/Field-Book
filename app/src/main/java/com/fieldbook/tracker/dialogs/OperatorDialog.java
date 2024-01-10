@@ -31,7 +31,7 @@ public class OperatorDialog extends AlertDialog {
 
         View customView = getLayoutInflater().inflate(R.layout.dialog_operator, null);
         setContentView(customView);
-        setTitle("Select an operator");
+        setTitle(context.getString(R.string.search_dialog_operator_dialog_title));
 
         String[] operatorText = new String[5];
 

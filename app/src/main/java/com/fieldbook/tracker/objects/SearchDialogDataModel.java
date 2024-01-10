@@ -4,12 +4,12 @@ public class SearchDialogDataModel {
 
     private String attribute;
     private int imageResourceId;
-    private String editText;
+    private String text;
 
-    public SearchDialogDataModel(String attribute, int imageResourceId, String editText) {
+    public SearchDialogDataModel(String attribute, int imageResourceId, String text) {
         this.attribute = attribute;
         this.imageResourceId = imageResourceId;
-        this.editText = editText;
+        this.text = text;
     }
 
     public String getAttribute() {
@@ -28,11 +28,11 @@ public class SearchDialogDataModel {
         this.imageResourceId = imageResourceId;
     }
 
-    public String getEditText() {
-        return editText;
+    public String getText() {
+        return text;
     }
 
-    public void setEditText(String editText) {
-        this.editText = editText;
+    public void setText(String text) {
+        this.text = text;
     }
 }

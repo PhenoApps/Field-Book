@@ -29,16 +29,20 @@ import com.fieldbook.tracker.adapters.SearchResultsAdapter;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.objects.SearchDialogDataModel;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.views.RangeBoxView;
+
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchDialog extends DialogFragment implements SearchAtrributeChooserDialog.OnAttributeClickedListener, OperatorDialog.OnOperatorClickedListener, SearchAdapter.onEditTextChangedListener, SearchAdapter.onDeleteClickedListener {
+public class SearchDialog extends DialogFragment implements SearchAttributeChooserDialog.OnAttributeClickedListener, OperatorDialog.OnOperatorClickedListener, SearchAdapter.onEditTextChangedListener, SearchAdapter.onDeleteClickedListener {
 
-    private static final String TAG = "Field Book";
+    private static final String TAG = "SearchDialog";
     public static String TICK = "\"";
     private static CollectActivity originActivity;
     SearchAdapter searchAdapter;
@@ -57,11 +61,12 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
         ep = requireContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+//        rangeUntil = originActivity.getDatabase().getRangeColumns().length;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
 
         View customView = getLayoutInflater().inflate(R.layout.dialog_search, null);
-        builder.setTitle("Search");
+        builder.setTitle(originActivity.getString(R.string.main_toolbar_search));
         builder.setView(customView);
 
         // Loading the search query if saved
@@ -105,11 +110,13 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
                 boolean threeTables = false;
 
                 ArrayList<String> columnsList = new ArrayList<>();
+                columnsList.add(ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)));
+                columnsList.add(ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_plot)));
                 for (int i = 0; i < dataSet.size(); i++) {
 
                     String c = dataSet.get(i).getAttribute();
                     int s = dataSet.get(i).getImageResourceId();
-                    String t = dataSet.get(i).getEditText();
+                    String t = dataSet.get(i).getText();
 
 
                     String value = "";
@@ -183,80 +190,110 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
 
                 if (threeTables) sql = sql2 + sql;
                 else sql = sql1 + sql;
-
+                Log.d("MyApp", sql);
                 final SearchData[] data = originActivity.getDatabase().getRangeBySql(sql);
                 ObservationModel[] observations = originActivity.getDatabase().getAllObservations();
 
-                ArrayList<ArrayList<String>> traitData = new ArrayList<>();
+                if (data != null) {
 
-                for (SearchData searchdata : data) {
-                    ArrayList<String> temp = new ArrayList<>();
-                    for (String column : columnsList) {
-                        for (ObservationModel observation : observations) {
-                            if (observation.getObservation_variable_name().equals(column) && observation.getObservation_unit_id().equals(searchdata.unique)) {
-                                temp.add(observation.getValue());
+                    // Loop over each item in the search result and find the trait info for the selected traits
+                    ArrayList<ArrayList<String>> traitData = new ArrayList<>();
+                    TraitObject[] traits = originActivity.getDatabase().getAllTraitObjects().toArray(new TraitObject[0]);
+
+                    for (SearchData searchdata : data) {
+                        ArrayList<String> temp = new ArrayList<>();
+
+                        // Checking if the trait is categorical (or multi-cat)
+                        for (String column : columnsList) {
+                            String format = "";
+                            for (TraitObject traitObject : traits) {
+                                if (traitObject.getTrait().equals(column) && (traitObject.getFormat().equals("categorical") || traitObject.getFormat().equals("multicat") || traitObject.getFormat().equals("qualitative"))) {
+                                    format = "categorical";
+                                    break;
+                                }
+                            }
+
+                            for (ObservationModel observation : observations) {
+                                if (observation.getObservation_variable_name().equals(column) && observation.getObservation_unit_id().equals(searchdata.unique)) {
+                                    // If trait is categorical, it formats the data before adding it to the array
+                                    if (format.equals("categorical")) {
+                                        String v;
+                                        ArrayList<BrAPIScaleValidValuesCategories> cats = CategoryJsonUtil.Companion.decodeCategories(observation.getValue());
+                                        v = cats.get(0).getValue();
+                                        if (cats.size() > 1) {
+                                            for (int i = 1; i < cats.size(); i++)
+                                                v += (", " + cats.get(i).getValue());
+                                        }
+                                        temp.add(v);
+                                    } else temp.add(observation.getValue());
+                                }
                             }
                         }
+                        traitData.add(temp);
                     }
-                    traitData.add(temp);
-                }
 
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity(), R.style.AppAlertDialog);
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity(), R.style.AppAlertDialog);
 
-                View layout = getLayoutInflater().inflate(R.layout.dialog_search_results, null);
-                builder1.setTitle(R.string.search_results_dialog_title).setCancelable(true).setView(layout);
+                    View layout = getLayoutInflater().inflate(R.layout.dialog_search_results, null);
+                    builder1.setTitle(R.string.search_results_dialog_title).setCancelable(true).setView(layout);
 
-                final AlertDialog dialog = builder1.create();
+                    final AlertDialog dialog = builder1.create();
 
-                WindowManager.LayoutParams params2 = dialog.getWindow().getAttributes();
-                params2.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                params2.width = WindowManager.LayoutParams.MATCH_PARENT;
-                dialog.getWindow().setAttributes(params2);
+                    WindowManager.LayoutParams params2 = dialog.getWindow().getAttributes();
+                    params2.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    params2.width = WindowManager.LayoutParams.MATCH_PARENT;
+                    dialog.getWindow().setAttributes(params2);
 
-                TextView primaryTitle = layout.findViewById(R.id.range);
-                TextView secondaryTitle = layout.findViewById(R.id.plot);
+                    LinearLayout results_parent = layout.findViewById(R.id.search_results_parent);
+                    for (String column : columnsList) {
+                        View v = getLayoutInflater().inflate(R.layout.dialog_search_results_trait_headers, null);
+                        TextView textView = v.findViewById(R.id.trait_header);
+                        textView.setText(column);
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(0, // width
+                                LinearLayout.LayoutParams.WRAP_CONTENT, // height
+                                1f // weight
+                        );
+                        textView.setLayoutParams(layoutParams);
+                        results_parent.addView(textView);
+                    }
+                    Button closeBtn = layout.findViewById(R.id.closeBtn);
+                    Button backBtn = layout.findViewById(R.id.backBtn);
+                    ListView myList = layout.findViewById(R.id.myList);
 
-                primaryTitle.setText(ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)));
-                secondaryTitle.setText(ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_plot)));
+                    myList.setDivider(new ColorDrawable(Color.BLACK));
+                    myList.setDividerHeight(5);
 
-                LinearLayout results_parent = layout.findViewById(R.id.search_results_parent);
-                for (String column : columnsList) {
-                    View v = getLayoutInflater().inflate(R.layout.dialog_search_results_trait_headers, null);
-                    TextView textView = v.findViewById(R.id.trait_header);
-                    textView.setText(column);
-                    results_parent.addView(textView);
-                }
+                    closeBtn.setTransformationMethod(null);
 
-                Button closeBtn = layout.findViewById(R.id.closeBtn);
-                ListView myList = layout.findViewById(R.id.myList);
+                    myList.setOnItemClickListener((arg012, arg1, position, arg3) -> {
 
-                myList.setDivider(new ColorDrawable(Color.BLACK));
-                myList.setDividerHeight(5);
+                        // Save the dataset so that it will be loaded when the search dialog is opened again
+                        setSavedDataSet(dataSet);
 
-                closeBtn.setTransformationMethod(null);
+                        // When you click on an item, send the data back to the main screen
+                        CollectActivity.searchUnique = data[position].unique;
+                        CollectActivity.searchRange = data[position].range;
+                        CollectActivity.searchPlot = data[position].plot;
+                        CollectActivity.searchReload = true;
+                        dialog.dismiss();
 
-                myList.setOnItemClickListener((arg012, arg1, position, arg3) -> {
+                        //Reloading collect activity screen to move to the selected plot
+                        RangeBoxView rangeBox = originActivity.findViewById(R.id.act_collect_range_box);
+                        int[] rangeID = rangeBox.getRangeID();
+                        originActivity.moveToSearch("search", rangeID, CollectActivity.searchRange, CollectActivity.searchPlot, null, -1);
+                    });
 
-                    // Save the dataset so that it will be loaded when the search dialog is opened again
-                    setSavedDataSet(dataSet);
+                    closeBtn.setOnClickListener(arg01 -> dialog.dismiss());
 
-                    // When you click on an item, send the data back to the main screen
-                    CollectActivity.searchUnique = data[position].unique;
-                    CollectActivity.searchRange = data[position].range;
-                    CollectActivity.searchPlot = data[position].plot;
-                    CollectActivity.searchReload = true;
-                    dialog.dismiss();
+                    backBtn.setOnClickListener(arg02 -> {
+                        setSavedDataSet(dataSet);
+                        dialog.dismiss();
+                        SearchDialog searchdialog = new SearchDialog(originActivity);
+                        searchdialog.show(originActivity.getSupportFragmentManager(), "DialogTag");
+                    });
 
-                    //Reloading collect activity screen to move to the selected plot
-                    RangeBoxView rangeBox = originActivity.findViewById(R.id.act_collect_range_box);
-                    int[] rangeID = rangeBox.getRangeID();
-                    originActivity.moveToSearch("search", rangeID, CollectActivity.searchRange, CollectActivity.searchPlot, null, -1);
-                });
+                    // If search has results, show them, otherwise display error message
 
-                closeBtn.setOnClickListener(arg01 -> dialog.dismiss());
-
-                // If search has results, show them, otherwise display error message
-                if (data != null) {
                     myList.setAdapter(new SearchResultsAdapter(getActivity(), data, traitData));
                     //Dismiss the search dialog
                     dismiss();
@@ -294,7 +331,7 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
     }
 
     public void createSearchAttributeChooserDialog() {
-        SearchAtrributeChooserDialog sacd = new SearchAtrributeChooserDialog(originActivity, this);
+        SearchAttributeChooserDialog sacd = new SearchAttributeChooserDialog(originActivity, this);
         sacd.show();
     }
 
@@ -312,7 +349,7 @@ public class SearchDialog extends DialogFragment implements SearchAtrributeChoos
 
     @Override
     public void onEditTextChanged(int pos, String editText) {
-        dataSet.get(pos).setEditText(editText);
+        dataSet.get(pos).setText(editText);
     }
 
     @Override

@@ -9,29 +9,12 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:id="@+id/search_results_parent">
-
-        <TextView style="@style/TextViewStyle.Bold.Title"
-            android:id="@+id/range"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/search_results_dialog_range" />
-
-        <TextView style="@style/TextViewStyle.Bold.Title"
-            android:id="@+id/plot"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/search_results_dialog_plot" />
-
     </LinearLayout>
 
     <ListView
         android:id="@+id/myList"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:choiceMode="singleChoice"
         android:fastScrollEnabled="true" />
@@ -43,7 +26,17 @@
         android:orientation="horizontal"
         android:paddingTop="10dp">
 
-        <Button style="@style/Widget.AppCompat.Button.Borderless"
+        <Button
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:id="@+id/backBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:minWidth="@dimen/button_default_width"
+            android:text="@string/dialog_back" />
+
+        <Button
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:id="@+id/closeBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
