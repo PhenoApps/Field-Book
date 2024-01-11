@@ -44,17 +44,15 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
     private lateinit var exportUtil: ExportUtil
     private lateinit var rootView: View
-    private lateinit var editDateTextView: TextView
-    private lateinit var exportDateTextView: TextView
-    private lateinit var importIconImageView: ImageView
-    private lateinit var importDateTextView: TextView
-    private lateinit var importSourceTextView: TextView
-    private lateinit var entryCountTextView: TextView
-    private lateinit var entryOrderTextView: TextView
+    private lateinit var fieldNameTextView: TextView
+    private lateinit var importTextView: TextView
+    private lateinit var entryTextView: TextView
+    private lateinit var lastEditTextView: TextView
+    private lateinit var lastExportTextView: TextView
     private lateinit var traitCountTextView: TextView
     private lateinit var observationCountTextView: TextView
     private lateinit var syncLinearLayout: LinearLayout
-    private lateinit var syncDateTextView: TextView
+    private lateinit var lastSyncTextView: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -64,44 +62,41 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         toolbar = rootView.findViewById(R.id.toolbar)
         setupToolbar()
 
-        editDateTextView = rootView.findViewById(R.id.editDateTextView)
-        exportDateTextView = rootView.findViewById(R.id.exportDateTextView)
-        importIconImageView = rootView.findViewById(R.id.importIcon)
-        importDateTextView = rootView.findViewById(R.id.importDateTextView)
-        importSourceTextView = rootView.findViewById(R.id.importSourceTextView)
-        entryCountTextView = rootView.findViewById(R.id.entryCountTextView)
-
-        entryOrderTextView = rootView.findViewById(R.id.entryOrderTextView)
+        fieldNameTextView = rootView.findViewById(R.id.fieldName)
+        fieldNameTextView.text = field.getExp_name()
+        importTextView = rootView.findViewById(R.id.importTextView)
+        entryTextView = rootView.findViewById(R.id.entryTextView)
+        lastEditTextView = rootView.findViewById(R.id.lastEditTextView)
+        lastExportTextView = rootView.findViewById(R.id.lastExportTextView)
         traitCountTextView = rootView.findViewById(R.id.traitCountTextView)
         observationCountTextView = rootView.findViewById(R.id.observationCountTextView)
 
         syncLinearLayout = rootView.findViewById(R.id.syncLinearLayout)
-        syncDateTextView = rootView.findViewById(R.id.syncDateTextView)
+        lastSyncTextView = rootView.findViewById(R.id.lastSyncTextView)
 
-        editDateTextView.text = " ${field.getDate_edit().split(" ")[0]}"
-        exportDateTextView.text = " ${field.getDate_export().split(" ")[0]}"
-        importDateTextView.text = " ${field.getDate_import().split(" ")[0]}"
-
-
-        // Set sync, import, and entry values based on source
-        val source: String? = field.getExp_source()
+        syncLinearLayout.visibility = View.GONE
+        var source: String? = field.getExp_source()
+        var observationLevel = "entries"
         if (source != null && source != "csv" && source != "excel") { // BrAPI source
             syncLinearLayout.visibility = View.VISIBLE
-            syncDateTextView.text = ""
-            importIconImageView.setImageResource(R.drawable.ic_adv_brapi)
-            importSourceTextView.text = "from " + source
-            entryCountTextView.text = " ${field.getCount()} ${field.observation_level}s"
+            observationLevel = "${field.observation_level}s"
+        } else if (source == null) { // Sample file import
+            source = "sample file"
+        }
+        importTextView.text = "Imported ${field.getDate_import().split(" ")[0]} from " + source
+        entryTextView.text = "${field.getCount()} ${observationLevel} with "+"8"+" attributes"
 
-        } else if (source != "excel") { // csv source
-            importIconImageView.setImageResource(R.drawable.ic_file_csv)
-            syncLinearLayout.visibility = View.GONE
-            importSourceTextView.visibility = View.GONE
-            entryCountTextView.text = " ${field.getCount()} entries"
-        } else { // xls source
-            importIconImageView.setImageResource(R.drawable.ic_file_xls)
-            syncLinearLayout.visibility = View.GONE
-            importSourceTextView.visibility = View.GONE
-            entryCountTextView.text = " ${field.getCount()} entries"
+        val lastEdit = field.getDate_edit()
+        if (!lastEdit.isNullOrEmpty()) {
+            lastEditTextView.text = lastEdit.split(" ")[0] // append operator name to last edit if available
+        }
+        val lastExport = field.getDate_export()
+        if (!lastExport.isNullOrEmpty()) {
+            lastExportTextView.text = lastExport.split(" ")[0]
+        }
+        val lastSync = ""
+        if (!lastSync.isNullOrEmpty()) {
+            // TODO: add last sync date to FieldObject and retrieve it
         }
 
         setupRecyclerView()
@@ -157,7 +152,8 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
         toolbar?.inflateMenu(R.menu.menu_field_details)
 
-        toolbar?.setTitle(field.getExp_name())
+//        toolbar?.setTitle(field.getExp_name())
+        toolbar?.setTitle("Field Detail")
 
         toolbar?.setNavigationIcon(R.drawable.arrow_left)
 

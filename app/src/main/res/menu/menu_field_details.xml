@@ -8,11 +8,11 @@
         app:showAsAction="always"
         android:title="@string/fields_rename_study" />
 
-<!--    <item-->
-<!--        android:id="@+id/sort"-->
-<!--        android:icon="@drawable/ic_field_sort"-->
-<!--        app:showAsAction="always"-->
-<!--        android:title="@string/fields_sort_update" />-->
+    <item
+        android:id="@+id/sort"
+        android:icon="@drawable/ic_field_sort"
+        app:showAsAction="always"
+        android:title="@string/fields_sort_update" />
 
     <item
         android:id="@+id/delete"
