@@ -41,32 +41,29 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Name Item -->
+                <!-- Header for collapsible area -->
                 <LinearLayout
+                    android:id="@+id/collapsible_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:clickable="true"
+                    android:focusable="true">
 
-                    <TextView
-                        style="@style/TextViewStyle.Bold.Title"
-                        android:id="@+id/fieldName"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:ellipsize="end"
-                        android:gravity="start"
-                        android:singleLine="true"/>
-                </LinearLayout>
+                        android:orientation="vertical"
+                        android:layout_marginEnd="16dp">
 
-                <!-- Import Item -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                        <TextView
+                            style="@style/TextViewStyle.Bold.Title"
+                            android:id="@+id/fieldName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"/>
 
                         <TextView
                             style="@style/TextViewStyle.Sub"
@@ -74,109 +71,125 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Imported 2024-01-01" />
-
-                </LinearLayout>
-
-                <!-- Entries Item -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
-
-                    <TextView
-                        style="@style/TextViewStyle.Sub"
-                        android:id="@+id/entryTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="500 entries"/>
-                </LinearLayout>
-
-                <!-- Sort Item -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
-
-                    <TextView
-                        style="@style/TextViewStyle.Sub"
-                        android:id="@+id/sortTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Sorted by import order"/>
-                </LinearLayout>
-
-                <!-- Additional Info: Unique, Primary & Secondary Identifiers -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <!-- Unique ID -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center_horizontal">
-                        <TextView
-                            style="@style/TextViewStyle.Sub"
-                            android:textStyle="bold"
-                            android:text="Unique ID"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-                        <TextView
-                            style="@style/TextViewStyle.Sub"
-                            android:id="@+id/uniqueIdTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="plot_id"/>
                     </LinearLayout>
 
-                    <!-- Primary ID -->
+                    <!-- Collapse/Expand Icon -->
+                    <ImageView
+                        android:id="@+id/expand_collapse_icon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_chevron_down" />
+                </LinearLayout>
+
+                <!-- Collapsible Content -->
+                <LinearLayout
+                    android:id="@+id/collapsible_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <!-- Entries Item -->
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center_horizontal">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
                         <TextView
                             style="@style/TextViewStyle.Sub"
-                            android:textStyle="bold"
-                            android:text="Primary ID"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-                        <TextView
-                            style="@style/TextViewStyle.Sub"
-                            android:id="@+id/primaryIdTextView"
+                            android:id="@+id/entryTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="row"/>
+                            android:text="500 entries"/>
                     </LinearLayout>
 
-                    <!-- Secondary ID -->
+                    <!-- Sort Item -->
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center_horizontal">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
                         <TextView
                             style="@style/TextViewStyle.Sub"
-                            android:textStyle="bold"
-                            android:text="Secondary ID"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-                        <TextView
-                            style="@style/TextViewStyle.Sub"
-                            android:id="@+id/secondaryIdTextView"
+                            android:id="@+id/sortTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="plot"/>
+                            android:text="Sorted by import order"/>
+                    </LinearLayout>
+
+                    <!-- Additional Info: Unique, Primary & Secondary Identifiers -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <!-- Unique ID -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center_horizontal">
+                            <TextView
+                                style="@style/TextViewStyle.Sub"
+                                android:textStyle="bold"
+                                android:text="Unique ID"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                            <TextView
+                                style="@style/TextViewStyle.Sub"
+                                android:id="@+id/uniqueIdTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="plot_id"/>
+                        </LinearLayout>
+
+                        <!-- Primary ID -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center_horizontal">
+                            <TextView
+                                style="@style/TextViewStyle.Sub"
+                                android:textStyle="bold"
+                                android:text="Primary ID"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                            <TextView
+                                style="@style/TextViewStyle.Sub"
+                                android:id="@+id/primaryIdTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="row"/>
+                        </LinearLayout>
+
+                        <!-- Secondary ID -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center_horizontal">
+                            <TextView
+                                style="@style/TextViewStyle.Sub"
+                                android:textStyle="bold"
+                                android:text="Secondary ID"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                            <TextView
+                                style="@style/TextViewStyle.Sub"
+                                android:id="@+id/secondaryIdTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="plot"/>
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -214,8 +227,7 @@
                             style="@style/TextViewStyle.Bold.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Collect"
-                            android:textStyle="bold"/>
+                            android:text="Collect"/>
 
                         <TextView
                             style="@style/TextViewStyle.Sub"
@@ -265,8 +277,7 @@
                             style="@style/TextViewStyle.Bold.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Export"
-                            android:textStyle="bold"/>
+                            android:text="Export"/>
 
                         <TextView
                             style="@style/TextViewStyle.Sub"
@@ -317,8 +328,7 @@
                             style="@style/TextViewStyle.Bold.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Sync"
-                            android:textStyle="bold"/>
+                            android:text="Sync"/>
 
                         <TextView
                             style="@style/TextViewStyle.Sub"
@@ -356,7 +366,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Data"
-                    android:textStyle="bold"
                     android:layout_marginBottom="8dp"/>
 
                 <!-- Traits Item -->

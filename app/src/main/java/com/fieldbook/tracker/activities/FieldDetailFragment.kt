@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities
 
 import android.Manifest
+//import android.R
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
@@ -11,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -97,6 +97,20 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         val lastSync = ""
         if (!lastSync.isNullOrEmpty()) {
             // TODO: add last sync date to FieldObject and retrieve it
+        }
+
+        val expandCollapseIcon: ImageView = rootView.findViewById(R.id.expand_collapse_icon)
+        val collapsibleContent: LinearLayout = rootView.findViewById(R.id.collapsible_content)
+        val collapsibleHeader: LinearLayout = rootView.findViewById(R.id.collapsible_header)
+
+        collapsibleHeader.setOnClickListener { v: View? ->
+            if (collapsibleContent.visibility == View.GONE) {
+                collapsibleContent.visibility = View.VISIBLE
+                expandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
+            } else {
+                collapsibleContent.visibility = View.GONE
+                expandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
+            }
         }
 
         setupRecyclerView()
