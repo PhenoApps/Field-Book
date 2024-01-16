@@ -47,7 +47,8 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private lateinit var exportUtil: ExportUtil
     private lateinit var rootView: View
     private lateinit var fieldNameTextView: TextView
-    private lateinit var importTextView: TextView
+    private lateinit var importDateTextView: TextView
+    private lateinit var importSourceTextView: TextView
     private lateinit var entryTextView: TextView
     private lateinit var lastEditTextView: TextView
     private lateinit var lastExportTextView: TextView
@@ -73,7 +74,8 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         exportUtil = ExportUtil(requireActivity(), database)
         fieldNameTextView = rootView.findViewById(R.id.fieldName)
         fieldNameTextView.text = field.getExp_name()
-        importTextView = rootView.findViewById(R.id.importTextView)
+        importDateTextView = rootView.findViewById(R.id.importDateTextView)
+        importSourceTextView = rootView.findViewById(R.id.importSourceTextView)
         entryTextView = rootView.findViewById(R.id.entryTextView)
         lastEditTextView = rootView.findViewById(R.id.lastEditTextView)
         lastExportTextView = rootView.findViewById(R.id.lastExportTextView)
@@ -141,6 +143,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
     private fun updateFieldData() {
         syncLinearLayout.visibility = View.GONE
+        importDateTextView.text = field.getDate_import().split(" ")[0]
         var source: String? = field.getExp_source()
         var observationLevel = "entries"
         if (source != null && source != "csv" && source != "excel") { // BrAPI source
@@ -149,7 +152,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         } else if (source == null) { // Sample file import
             source = "sample file"
         }
-        importTextView.text = "Imported ${field.getDate_import().split(" ")[0]} from " + source
+        importSourceTextView.text = "Imported from " + source
         entryTextView.text = "${field.getCount()} ${observationLevel} with "+"8"+" attributes"
 
         val lastEdit = field.getDate_edit()
