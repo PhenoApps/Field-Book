@@ -198,6 +198,7 @@
 
         <!-- Collect Card -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewCollect"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp">
@@ -248,6 +249,7 @@
 
         <!-- Export Card -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewExport"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp">
@@ -298,6 +300,7 @@
 
         <!-- Sync Card -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewSync"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp">

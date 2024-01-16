@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import android.graphics.drawable.Drawable
 
-class FieldDetailAdapter(private val items: List<FieldDetailItem>) : RecyclerView.Adapter<FieldDetailAdapter.ViewHolder>() {
+class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : RecyclerView.Adapter<FieldDetailAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val traitNameTextView: TextView = view.findViewById(R.id.traitNameTextView)
@@ -31,6 +31,12 @@ class FieldDetailAdapter(private val items: List<FieldDetailItem>) : RecyclerVie
     }
 
     override fun getItemCount() = items.size
+
+    fun updateItems(newItems: List<FieldDetailItem>) {
+        items.clear()
+        items.addAll(newItems)
+        notifyDataSetChanged()
+    }
 }
 
 data class FieldDetailItem(val title: String, val subtitle: String, val icon: Drawable?)

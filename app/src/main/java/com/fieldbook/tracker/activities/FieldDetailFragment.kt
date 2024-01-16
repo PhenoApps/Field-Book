@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.activities
 
 import android.Manifest
-//import android.R
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
@@ -17,6 +16,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,7 +25,9 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.FieldDetailAdapter
 import com.fieldbook.tracker.adapters.FieldDetailItem
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
 import com.fieldbook.tracker.interfaces.FieldAdapterController
+import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
@@ -53,6 +55,12 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private lateinit var observationCountTextView: TextView
     private lateinit var syncLinearLayout: LinearLayout
     private lateinit var lastSyncTextView: TextView
+    private lateinit var cardViewCollect: CardView
+    private lateinit var cardViewExport: CardView
+    private lateinit var cardViewSync: CardView
+    private lateinit var recyclerView: RecyclerView
+    private var adapter: FieldDetailAdapter? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -62,6 +70,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         toolbar = rootView.findViewById(R.id.toolbar)
         setupToolbar()
 
+        exportUtil = ExportUtil(requireActivity(), database)
         fieldNameTextView = rootView.findViewById(R.id.fieldName)
         fieldNameTextView.text = field.getExp_name()
         importTextView = rootView.findViewById(R.id.importTextView)
@@ -74,6 +83,63 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         syncLinearLayout = rootView.findViewById(R.id.syncLinearLayout)
         lastSyncTextView = rootView.findViewById(R.id.lastSyncTextView)
 
+        updateFieldData()
+
+        val expandCollapseIcon: ImageView = rootView.findViewById(R.id.expand_collapse_icon)
+        val collapsibleContent: LinearLayout = rootView.findViewById(R.id.collapsible_content)
+        val collapsibleHeader: LinearLayout = rootView.findViewById(R.id.collapsible_header)
+
+        collapsibleHeader.setOnClickListener { v: View? ->
+            if (collapsibleContent.visibility == View.GONE) {
+                collapsibleContent.visibility = View.VISIBLE
+                expandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
+            } else {
+                collapsibleContent.visibility = View.GONE
+                expandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
+            }
+        }
+
+        setupRecyclerView()
+
+        cardViewCollect = rootView.findViewById(R.id.cardViewCollect)
+        cardViewExport = rootView.findViewById(R.id.cardViewExport)
+        cardViewSync = rootView.findViewById(R.id.cardViewSync)
+
+        cardViewCollect.setOnClickListener {
+            if (checkTraitsExist() >= 0) collectDataFilePermission()
+        }
+
+        cardViewExport.setOnClickListener {
+            if (checkTraitsExist() >= 0) exportUtil.exportActiveField()
+        }
+
+        cardViewSync.setOnClickListener {
+            val alert = BrapiSyncObsDialog(requireActivity())
+            alert.setFieldObject(field)
+            alert.show()
+        }
+
+
+        Log.d("onCreateView", "End")
+        return rootView
+    }
+
+    private fun setupRecyclerView() {
+        val recyclerView: RecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        val initialItems = createTraitDetailItems().toMutableList()
+        adapter = FieldDetailAdapter(initialItems)
+        recyclerView.adapter = adapter
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateFieldData()
+        val newItems = createTraitDetailItems()
+        adapter?.updateItems(newItems)
+    }
+
+    private fun updateFieldData() {
         syncLinearLayout.visibility = View.GONE
         var source: String? = field.getExp_source()
         var observationLevel = "entries"
@@ -98,32 +164,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         if (!lastSync.isNullOrEmpty()) {
             // TODO: add last sync date to FieldObject and retrieve it
         }
-
-        val expandCollapseIcon: ImageView = rootView.findViewById(R.id.expand_collapse_icon)
-        val collapsibleContent: LinearLayout = rootView.findViewById(R.id.collapsible_content)
-        val collapsibleHeader: LinearLayout = rootView.findViewById(R.id.collapsible_header)
-
-        collapsibleHeader.setOnClickListener { v: View? ->
-            if (collapsibleContent.visibility == View.GONE) {
-                collapsibleContent.visibility = View.VISIBLE
-                expandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
-            } else {
-                collapsibleContent.visibility = View.GONE
-                expandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
-            }
-        }
-
-        setupRecyclerView()
-
-        Log.d("onCreateView", "End")
-        return rootView
-    }
-
-    private fun setupRecyclerView() {
-        val recyclerView: RecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        val items = createTraitDetailItems() // Create items for RecyclerView
-        recyclerView.adapter = FieldDetailAdapter(items)
     }
 
     private fun createTraitDetailItems(): List<FieldDetailItem> {
@@ -149,24 +189,10 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     }
 
 
-    override fun onResume() {
-        super.onResume()
-//        updateFieldData()
-//        displayTraitCounts(rootView)
-    }
-
-//    private fun updateFieldData() {
-//        importDateTextView.text = " ${field.getDate_import().split(" ")[0]}"
-//        editDateTextView.text = " ${field.getDate_edit().split(" ")[0]}"
-//        exportDateTextView.text = " ${field.getDate_export().split(" ")[0]}"
-//        countTextView.text = " ${field.getCount()}"
-//    }
-
     private fun setupToolbar() {
 
         toolbar?.inflateMenu(R.menu.menu_field_details)
 
-//        toolbar?.setTitle(field.getExp_name())
         toolbar?.setTitle("Field Detail")
 
         toolbar?.setNavigationIcon(R.drawable.arrow_left)
@@ -184,9 +210,9 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
                 }
                 R.id.rename -> {
                 }
-//                R.id.sort -> {
-//                    (activity as? FieldSortController)?.showSortDialog(field)
-//                }
+                R.id.sort -> {
+                    (activity as? FieldSortController)?.showSortDialog(field)
+                }
                 R.id.delete -> {
                     createDeleteItemAlertDialog(field)?.show()
                 }
@@ -283,34 +309,4 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         }
     }
 
-//    private fun displayTraitCounts(view: View) {
-//
-//        val layout: LinearLayout = view.findViewById(R.id.traitCountsLayout) ?: return
-//        layout.removeAllViews()
-//
-//        val dataHelper = DataHelper(requireContext())
-//        val traitCounts = dataHelper.getTraitCountsForStudy()
-//        Log.d("TraitCounts", "TraitCounts: $traitCounts")
-//
-//        // Check if there are any traits to display
-//        if (traitCounts.isNullOrEmpty()) {
-//            return
-//        }
-//
-//        val inflater = LayoutInflater.from(context)
-//        traitCounts.forEach { (traitName, count) ->
-//            if(traitName != null) {
-//                Log.d("TraitLoop", "TraitName: $traitName, Count: $count")
-//                val view = inflater.inflate(R.layout.list_item_field_trait, layout, false) as View
-//                val nameTextView: TextView = view.findViewById(R.id.traitNameTextView)
-//                val countTextView: TextView = view.findViewById(R.id.traitCountTextView)
-//                nameTextView.text = traitName
-//                countTextView.text = count.toString() + " observations"
-//                view.id = View.generateViewId()
-//                layout.addView(view)
-//            } else {
-//                Log.d("TraitCountDetail", "TraitName is null.")
-//            }
-//        }
-//    }
 }
