@@ -239,30 +239,32 @@ class StudyDao {
                     orderBy = Study.PK).toFirst().toFieldObject()
         }
 
-        fun getTraitCountsForStudy(studyId: Int): Map<String, Int> {
+
+        fun getTraitDetailsForStudy(studyId: Int): List<FieldObject.TraitDetail> {
             return withDatabase { db ->
-                val traitCounts = mutableMapOf<String, Int>()
+                val traitDetails = mutableListOf<FieldObject.TraitDetail>()
 
                 val cursor = db.rawQuery("""
-                    SELECT observation_variable_name, COUNT(*) as count
-                    FROM observations
-                    WHERE study_id = ?
-                    GROUP BY observation_variable_name
-                """, arrayOf(studyId.toString())
-                )
+            SELECT observation_variable_name, observation_variable_field_book_format, COUNT(*) as count
+            FROM observations
+            WHERE study_id = ?
+            GROUP BY observation_variable_name
+        """, arrayOf(studyId.toString()))
 
                 if (cursor.moveToFirst()) {
                     do {
                         val traitName = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name"))
+                        val format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format"))
                         val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
-                        traitCounts[traitName] = count
+                        traitDetails.add(FieldObject.TraitDetail(traitName, format, count))
                     } while (cursor.moveToNext())
                 }
 
                 cursor.close()
-                traitCounts
-            } ?: emptyMap()
+                traitDetails
+            } ?: emptyList()
         }
+
 
         /**
          * This function uses a field object to create a exp/study row in the database.

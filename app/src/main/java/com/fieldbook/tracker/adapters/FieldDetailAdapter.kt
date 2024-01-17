@@ -27,7 +27,8 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         val item = items[position]
         holder.traitNameTextView.text = item.title
         holder.traitCountTextView.text = item.subtitle
-        // Set icon for holder.iconImageView as needed
+        holder.traitIconImageView.setImageDrawable(item.icon)
+
     }
 
     override fun getItemCount() = items.size

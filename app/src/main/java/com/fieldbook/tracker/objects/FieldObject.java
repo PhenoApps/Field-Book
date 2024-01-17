@@ -1,5 +1,8 @@
 package com.fieldbook.tracker.objects;
 
+import java.util.List;
+
+
 /**
  * Simple wrapper class for field data
  */
@@ -19,6 +22,32 @@ public class FieldObject {
     private String count;
     private String exp_source;
     private String observation_level;
+
+    public static class TraitDetail {
+        private final String traitName;
+        private final String format;
+        private final int count;
+
+        public TraitDetail(String traitName, String format, int count) {
+            this.traitName = traitName;
+            this.format = format;
+            this.count = count;
+        }
+
+        // Getters
+        public String getTraitName() { return traitName; }
+        public String getFormat() { return format; }
+        public int getCount() { return count; }
+    }
+
+    private List<TraitDetail> traitDetails;
+    public List<TraitDetail> getTraitDetails() {
+        return traitDetails;
+    }
+
+    public void setTraitDetails(List<TraitDetail> traitDetails) {
+        this.traitDetails = traitDetails;
+    }
 
     public FieldObject() {
     }

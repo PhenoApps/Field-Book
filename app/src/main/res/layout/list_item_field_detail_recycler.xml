@@ -4,7 +4,7 @@
     android:background="@drawable/statelist_item_background"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
+    android:gravity="start"
     android:orientation="horizontal"
     android:paddingTop="12dp"
     android:paddingBottom="12dp">
@@ -13,7 +13,9 @@
         android:id="@+id/traitIconImageView"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:layout_margin="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
         android:src="@drawable/ic_trait_categorical"/>
 
     <LinearLayout xmlns:tools="http://schemas.android.com/tools"

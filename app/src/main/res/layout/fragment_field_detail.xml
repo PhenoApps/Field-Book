@@ -427,8 +427,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/fieldDetailRecyclerView"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"/>
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

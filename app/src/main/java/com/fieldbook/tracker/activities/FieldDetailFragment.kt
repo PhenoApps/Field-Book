@@ -29,6 +29,7 @@ import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
 import com.fieldbook.tracker.interfaces.FieldAdapterController
 import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.objects.FieldObject
+import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -62,6 +63,11 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
 
+    data class TraitDetail(
+        val traitName: String,
+        val format: String,
+        val count: Int
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -85,7 +91,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         syncLinearLayout = rootView.findViewById(R.id.syncLinearLayout)
         lastSyncTextView = rootView.findViewById(R.id.lastSyncTextView)
 
-        updateFieldData()
+        updateFieldData(field)
 
         val expandCollapseIcon: ImageView = rootView.findViewById(R.id.expand_collapse_icon)
         val collapsibleContent: LinearLayout = rootView.findViewById(R.id.collapsible_content)
@@ -136,12 +142,12 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        updateFieldData()
+        updateFieldData(field)
         val newItems = createTraitDetailItems()
         adapter?.updateItems(newItems)
     }
 
-    private fun updateFieldData() {
+    private fun updateFieldData(field: FieldObject) {
         syncLinearLayout.visibility = View.GONE
         importDateTextView.text = field.getDate_import().split(" ")[0]
         var source: String? = field.getExp_source()
@@ -170,27 +176,22 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     }
 
     private fun createTraitDetailItems(): List<FieldDetailItem> {
-        val dataHelper = DataHelper(requireContext())
-        val traitCounts = dataHelper.getTraitCountsForStudy()
+        val dataHelper = DataHelper(requireActivity())
+        val fieldObject = dataHelper.getCompleteFieldDetails()
+        fieldObject.getTraitDetails()?.let { traitDetails ->
+            return traitDetails.map { traitDetail ->
+                val iconRes = Formats.values()
+                    .find { it.getDatabaseName(requireActivity()) == traitDetail.getFormat() }?.getIcon()
 
-        // Check if there are any traits to display
-        if (traitCounts.isNullOrEmpty()) {
-            return emptyList()
-        }
-
-        return traitCounts.mapNotNull { (traitName, count) ->
-            if (traitName != null) {
                 FieldDetailItem(
-                    traitName,
-                    "$count observations",
-                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_trait_categorical)
+                    traitDetail.getTraitName(),
+                    "${traitDetail.getCount()} observations",
+                    ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical)
                 )
-            } else {
-                null
             }
         }
+        return emptyList()  // Return an empty list if traitDetails is null
     }
-
 
     private fun setupToolbar() {
 
