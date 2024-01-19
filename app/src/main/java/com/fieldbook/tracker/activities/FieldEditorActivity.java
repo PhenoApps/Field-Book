@@ -274,16 +274,17 @@ public class FieldEditorActivity extends ThemedActivity
                     if (!selectedFieldIds.isEmpty()) {
                         exportUtil.exportMultipleFields(selectedFieldIds);
                     }
+                    mAdapter.exitSelectionMode();
                     mode.finish();
                     return true;
                 case R.id.menu_archive:
                     Toast.makeText(getApplicationContext(), "Archive not yet implemented", Toast.LENGTH_SHORT).show();
+                    mAdapter.exitSelectionMode();
                     mode.finish();
                     return true;
                 case R.id.menu_delete:
                     createDeleteItemAlertDialog().show();
 //                    Toast.makeText(getApplicationContext(), "Batch delete not yet implemented", Toast.LENGTH_SHORT).show();
-//                    mode.finish();
                     return true;
                 default:
                     return false;
@@ -292,7 +293,7 @@ public class FieldEditorActivity extends ThemedActivity
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            mAdapter.clearSelections();
+            mAdapter.exitSelectionMode();
             actionMode = null;
         }
     };
@@ -360,7 +361,7 @@ public class FieldEditorActivity extends ThemedActivity
         }
 
         mAdapter.notifyDataSetChanged();
-        mAdapter.clearSelections();
+        mAdapter.exitSelectionMode();
 
         if (actionMode != null) {
             actionMode.finish();

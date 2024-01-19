@@ -94,8 +94,9 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
         return items;
     }
 
-    public void clearSelections() {
+    public void exitSelectionMode() {
         selectedItems.clear();
+        isInSelectionMode = false;
         notifyDataSetChanged();
         if (callback != null) {
             callback.onItemClear();
