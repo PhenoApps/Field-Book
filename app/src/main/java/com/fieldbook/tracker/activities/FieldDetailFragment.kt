@@ -55,7 +55,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private lateinit var lastExportTextView: TextView
     private lateinit var traitCountTextView: TextView
     private lateinit var observationCountTextView: TextView
-    private lateinit var syncLinearLayout: LinearLayout
     private lateinit var lastSyncTextView: TextView
     private lateinit var cardViewCollect: CardView
     private lateinit var cardViewExport: CardView
@@ -87,8 +86,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         lastExportTextView = rootView.findViewById(R.id.lastExportTextView)
         traitCountTextView = rootView.findViewById(R.id.traitCountTextView)
         observationCountTextView = rootView.findViewById(R.id.observationCountTextView)
-
-        syncLinearLayout = rootView.findViewById(R.id.syncLinearLayout)
+        cardViewSync = rootView.findViewById(R.id.cardViewSync)
         lastSyncTextView = rootView.findViewById(R.id.lastSyncTextView)
 
         updateFieldData(field)
@@ -111,7 +109,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
         cardViewCollect = rootView.findViewById(R.id.cardViewCollect)
         cardViewExport = rootView.findViewById(R.id.cardViewExport)
-        cardViewSync = rootView.findViewById(R.id.cardViewSync)
 
         cardViewCollect.setOnClickListener {
             if (checkTraitsExist() >= 0) collectDataFilePermission()
@@ -120,13 +117,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         cardViewExport.setOnClickListener {
             if (checkTraitsExist() >= 0) exportUtil.exportActiveField()
         }
-
-        cardViewSync.setOnClickListener {
-            val alert = BrapiSyncObsDialog(requireActivity())
-            alert.setFieldObject(field)
-            alert.show()
-        }
-
 
         Log.d("onCreateView", "End")
         return rootView
@@ -148,12 +138,18 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     }
 
     private fun updateFieldData(field: FieldObject) {
-        syncLinearLayout.visibility = View.GONE
+        cardViewSync.visibility = View.GONE
+        cardViewSync.setOnClickListener(null)
         importDateTextView.text = field.getDate_import().split(" ")[0]
         var source: String? = field.getExp_source()
         var observationLevel = "entries"
         if (source != null && source != "csv" && source != "excel") { // BrAPI source
-            syncLinearLayout.visibility = View.VISIBLE
+            cardViewSync.visibility = View.VISIBLE
+            cardViewSync.setOnClickListener {
+                val alert = BrapiSyncObsDialog(requireActivity())
+                alert.setFieldObject(field)
+                alert.show()
+            }
             observationLevel = "${field.observation_level}s"
         } else if (source == null) { // Sample file import
             source = "sample file"
