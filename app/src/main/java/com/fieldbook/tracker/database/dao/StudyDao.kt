@@ -454,6 +454,13 @@ class StudyDao {
             }, "${Study.PK} = ?", arrayOf("$studyId"))
         }
 
+        fun updateStudyName(exp_id: Int, newName: String) = withDatabase { db ->
+            val contentValues = ContentValues()
+            contentValues.put("study_name", newName)
+            db.update(Study.tableName, contentValues, "${Study.PK} = ?", arrayOf(exp_id.toString()))
+        }
+
+
         /**
          * Updates the date_import field and count column of the study table.
          * imp: boolean flag to get import date of observation units and count

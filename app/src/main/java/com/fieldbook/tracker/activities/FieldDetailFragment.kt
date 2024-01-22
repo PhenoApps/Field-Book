@@ -5,10 +5,12 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -32,6 +34,7 @@ import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
+import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
@@ -209,6 +212,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
                     parentFragmentManager.popBackStack()
                 }
                 R.id.rename -> {
+                    showEditNameDialog()
                 }
                 R.id.sort -> {
                     (activity as? FieldSortController)?.showSortDialog(field)
@@ -220,6 +224,36 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
             true
         }
+    }
+
+    private fun showEditNameDialog() {
+        val editText = EditText(context).apply {
+            inputType = InputType.TYPE_CLASS_TEXT
+            setText(field.getExp_name())
+        }
+
+        val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+        builder.setTitle(getString(R.string.edit_field_name))
+        builder.setView(editText)
+        builder.setPositiveButton(getString(R.string.dialog_save)) { dialog, _ ->
+            val newName = editText.text.toString()
+            if (newName.isNotBlank()) {
+                updateStudyNameInDatabase(newName)
+            }
+            dialog.dismiss()
+        }
+        builder.setNegativeButton(getString(R.string.dialog_cancel)) { dialog, _ ->
+            dialog.cancel()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun updateStudyNameInDatabase(newName: String) {
+        database.updateStudyName(field.getExp_id(), newName)
+        fieldNameTextView.text = newName
+        field.setExp_name(newName)
     }
 
     private fun makeConfirmDeleteListener(field: FieldObject): DialogInterface.OnClickListener? {

@@ -2144,6 +2144,12 @@ public class DataHelper {
 //        cursor.close();
     }
 
+    public void updateStudyName(int studyId, String newName) {
+        open();
+        StudyDao.Companion.updateStudyName(studyId, newName);
+        close();
+    }
+
     public void deleteField(int studyId) {
 
         open();

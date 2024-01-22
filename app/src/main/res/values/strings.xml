@@ -161,6 +161,7 @@
     <string name="fields_brapi_details">BrAPI</string>
     <string name="fields_trait_statistics">Trait Statistics</string>
     <string name="fields_options">Options</string>
+    <string name="edit_field_name">Edit Field Name</string>
 
     <!-- TRAITS -->
     <!-- Sort -->
