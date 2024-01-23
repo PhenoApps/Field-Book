@@ -160,11 +160,13 @@
     <string name="field_attribute_total">with "%s" attributes</string>
     <string name="field_default_sort_order">import order</string>
     <string name="field_sort_message">Sorted by "%s"</string>
-
     <string name="field_unique_id">Unique ID</string>
     <string name="field_primary_id">Primary ID</string>
     <string name="field_secondary_id">Secondary ID</string>
-
+    <string name="field_no_activity">No activity</string>
+    <string name="field_data_title">Data</string>
+    <string name="field_trait_total">"%s" traits</string>
+    <string name="field_observation_total">"%s" observations</string>
     <string name="field_trait_observation_total">"%d" observations</string>
 
 

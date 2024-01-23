@@ -240,14 +240,14 @@
                             style="@style/TextViewStyle.Bold.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Collect"/>
+                            android:text="@string/settings_collect" />
 
                         <TextView
                             style="@style/TextViewStyle.Sub"
                             android:id="@+id/lastEditTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="No activity" />
+                            android:text="@string/field_no_activity" />
                     </LinearLayout>
 
                     <ImageView
@@ -291,14 +291,14 @@
                             style="@style/TextViewStyle.Bold.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Export"/>
+                            android:text="@string/settings_export"/>
 
                         <TextView
                             style="@style/TextViewStyle.Sub"
                             android:id="@+id/lastExportTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="No activity" />
+                            android:text="@string/field_no_activity"  />
                     </LinearLayout>
 
                     <ImageView
@@ -342,14 +342,14 @@
                             style="@style/TextViewStyle.Bold.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Sync"/>
+                            android:text="@string/brapi_obs_sync_menu_name"/>
 
                         <TextView
                             style="@style/TextViewStyle.Sub"
                             android:id="@+id/lastSyncTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="No activity" />
+                            android:text="@string/field_no_activity" />
                     </LinearLayout>
 
                     <ImageView
@@ -379,7 +379,7 @@
                     style="@style/TextViewStyle.Bold.Title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Data"
+                    android:text="@string/field_data_title"
                     android:layout_marginBottom="8dp"/>
 
                 <!-- Traits Item -->

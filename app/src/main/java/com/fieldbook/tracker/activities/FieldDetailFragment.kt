@@ -186,6 +186,9 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         if (!lastSync.isNullOrEmpty()) {
             // TODO: add last sync date to FieldObject and retrieve it
         }
+
+        traitCountTextView.text = getString(R.string.field_trait_total, field.trait_count)
+        observationCountTextView.text = getString(R.string.field_observation_total, field.observation_count)
     }
 
     private fun createTraitDetailItems(): List<FieldDetailItem> {

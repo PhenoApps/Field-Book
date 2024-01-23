@@ -176,6 +176,8 @@ class StudyDao {
                 else -> observationLevel
             }
             it.attribute_count = this["attribute_count"]?.toString()
+            it.trait_count = this["trait_count"]?.toString()
+            it.observation_count = this["observation_count"]?.toString()
         }
 
         fun getAllFieldObjects(): ArrayList<FieldObject> = withDatabase { db ->
@@ -191,7 +193,9 @@ class StudyDao {
             val query = """
                 SELECT 
                     Studies.*,
-                    (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count
+                    (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
+                    (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK}) AS trait_count,
+                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK}) AS observation_count
                 FROM ${Study.tableName} AS Studies
             """
             db.rawQuery(query, null).use { cursor ->
@@ -246,11 +250,13 @@ class StudyDao {
             date_export,
             study_source,
             study_sort_name,
-            (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count
+            (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
+            (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK}) AS trait_count,
+            (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK}) AS observation_count
         FROM ${Study.tableName} AS Studies
         WHERE ${Study.PK} = ?
     """
-//            Log.d("StudyDao", "Query is "+query)
+            Log.d("StudyDao", "Query is "+query)
             val fieldData = db.rawQuery(query, arrayOf(exp_id.toString())).use { cursor ->
                 if (cursor.moveToFirst()) {
                     val map = cursor.columnNames.associateWith { columnName ->

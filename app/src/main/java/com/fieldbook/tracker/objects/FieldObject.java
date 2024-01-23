@@ -23,8 +23,9 @@ public class FieldObject {
     private String count;
     private String exp_source;
     private String observation_level;
-
     private String attribute_count;
+    private String trait_count;
+    private String observation_count;
 
     public static class TraitDetail {
         private final String traitName;
@@ -180,5 +181,19 @@ public class FieldObject {
 
     public void setAttribute_count(String attribute_count) {
         this.attribute_count = attribute_count;
+    }
+    public String getTrait_count() {
+        return trait_count;
+    }
+
+    public void setTrait_count(String trait_count) {
+        this.trait_count = trait_count;
+    }
+    public String getObservation_count() {
+        return observation_count;
+    }
+
+    public void setObservation_count(String observation_count) {
+        this.observation_count = observation_count;
     }
 }
