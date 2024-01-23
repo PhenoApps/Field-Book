@@ -34,7 +34,6 @@ import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
-import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
@@ -54,6 +53,10 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private lateinit var importDateTextView: TextView
     private lateinit var importSourceTextView: TextView
     private lateinit var entryTextView: TextView
+    private lateinit var sortTextView: TextView
+    private lateinit var uniqueIdTextView: TextView
+    private lateinit var primaryIdTextView: TextView
+    private lateinit var secondaryIdTextView: TextView
     private lateinit var lastEditTextView: TextView
     private lateinit var lastExportTextView: TextView
     private lateinit var traitCountTextView: TextView
@@ -62,7 +65,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private lateinit var cardViewCollect: CardView
     private lateinit var cardViewExport: CardView
     private lateinit var cardViewSync: CardView
-    private lateinit var recyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
 
     data class TraitDetail(
@@ -81,10 +83,16 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
         exportUtil = ExportUtil(requireActivity(), database)
         fieldNameTextView = rootView.findViewById(R.id.fieldName)
-        fieldNameTextView.text = field.getExp_name()
+        fieldNameTextView.text = field.exp_name
         importDateTextView = rootView.findViewById(R.id.importDateTextView)
         importSourceTextView = rootView.findViewById(R.id.importSourceTextView)
         entryTextView = rootView.findViewById(R.id.entryTextView)
+        sortTextView = rootView.findViewById(R.id.sortTextView)
+        uniqueIdTextView = rootView.findViewById(R.id.uniqueIdTextView)
+        primaryIdTextView = rootView.findViewById(R.id.primaryIdTextView)
+        secondaryIdTextView = rootView.findViewById(R.id.secondaryIdTextView)
+        sortTextView = rootView.findViewById(R.id.sortTextView)
+        sortTextView = rootView.findViewById(R.id.sortTextView)
         lastEditTextView = rootView.findViewById(R.id.lastEditTextView)
         lastExportTextView = rootView.findViewById(R.id.lastExportTextView)
         traitCountTextView = rootView.findViewById(R.id.traitCountTextView)
@@ -143,9 +151,9 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private fun updateFieldData(field: FieldObject) {
         cardViewSync.visibility = View.GONE
         cardViewSync.setOnClickListener(null)
-        importDateTextView.text = field.getDate_import().split(" ")[0]
-        var source: String? = field.getExp_source()
-        var observationLevel = "entries"
+        importDateTextView.text = field.date_import.split(" ")[0]
+        var source: String? = field.exp_source
+        var observationLevel = getString(R.string.field_default_observation_level)
         if (source != null && source != "csv" && source != "excel") { // BrAPI source
             cardViewSync.visibility = View.VISIBLE
             cardViewSync.setOnClickListener {
@@ -155,16 +163,22 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
             }
             observationLevel = "${field.observation_level}s"
         } else if (source == null) { // Sample file import
-            source = "sample file"
+            source = getString(R.string.field_default_import_source)
         }
-        importSourceTextView.text = "Imported from " + source
-        entryTextView.text = "${field.getCount()} ${observationLevel} with "+"8"+" attributes"
+        importSourceTextView.text = getString(R.string.field_import_source_message, source)
+        entryTextView.text = "${field.count} ${observationLevel} " + getString(R.string.field_attribute_total, field.attribute_count)
+        val sortOrder = if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
+        sortTextView.text = getString(R.string.field_sort_message, sortOrder)
 
-        val lastEdit = field.getDate_edit()
+        uniqueIdTextView.text = field.unique_id
+        primaryIdTextView.text = field.primary_id
+        secondaryIdTextView.text = field.secondary_id
+
+        val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {
             lastEditTextView.text = lastEdit.split(" ")[0] // append operator name to last edit if available
         }
-        val lastExport = field.getDate_export()
+        val lastExport = field.date_export
         if (!lastExport.isNullOrEmpty()) {
             lastExportTextView.text = lastExport.split(" ")[0]
         }
@@ -184,7 +198,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
                 FieldDetailItem(
                     traitDetail.getTraitName(),
-                    "${traitDetail.getCount()} observations",
+                    getString(R.string.field_trait_observation_total, traitDetail.getCount()),
                     ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical)
                 )
             }
@@ -196,7 +210,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
         toolbar?.inflateMenu(R.menu.menu_field_details)
 
-        toolbar?.setTitle("Field Detail")
+        toolbar?.setTitle(R.string.field_detail_title)
 
         toolbar?.setNavigationIcon(R.drawable.arrow_left)
 
@@ -229,11 +243,11 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private fun showEditNameDialog() {
         val editText = EditText(context).apply {
             inputType = InputType.TYPE_CLASS_TEXT
-            setText(field.getExp_name())
+            setText(field.exp_name)
         }
 
         val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-        builder.setTitle(getString(R.string.edit_field_name))
+        builder.setTitle(getString(R.string.field_edit_name))
         builder.setView(editText)
         builder.setPositiveButton(getString(R.string.dialog_save)) { dialog, _ ->
             val newName = editText.text.toString()
@@ -251,7 +265,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     }
 
     private fun updateStudyNameInDatabase(newName: String) {
-        database.updateStudyName(field.getExp_id(), newName)
+        database.updateStudyName(field.exp_id, newName)
         fieldNameTextView.text = newName
         field.setExp_name(newName)
     }
@@ -263,8 +277,8 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
             dialog.dismiss()
 
             val ep = activity?.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, AppCompatActivity.MODE_PRIVATE)
-            (activity as? FieldAdapterController)?.getDatabase()?.deleteField(field.getExp_id())
-            if (field.getExp_id() == ep!!.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
+            (activity as? FieldAdapterController)?.getDatabase()?.deleteField(field.exp_id)
+            if (field.exp_id == ep!!.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
                 val ed = ep.edit()
                 ed.putString(GeneralKeys.FIELD_FILE, null)
                 ed.putString(GeneralKeys.FIELD_OBS_LEVEL, null)

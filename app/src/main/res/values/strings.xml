@@ -152,16 +152,23 @@
     <string name="activity_field_editor_switch_field_same">Closest field already selected.</string>
 
     <!-- Field details -->
-    <string name="fields_summary">Summary</string>
-    <string name="fields_import_date">Import Date:</string>
-    <string name="fields_last_edit">Last Edited:</string>
-    <string name="fields_last_export">Last Export:</string>
-    <string name="fields_entry_count">Entry Count:</string>
-    <string name="fields_entry_type">Entry Type:</string>
-    <string name="fields_brapi_details">BrAPI</string>
-    <string name="fields_trait_statistics">Trait Statistics</string>
-    <string name="fields_options">Options</string>
-    <string name="edit_field_name">Edit Field Name</string>
+    <string name="field_detail_title">Field Detail</string>
+    <string name="field_edit_name">Edit Field Name</string>
+    <string name="field_default_observation_level">entries</string>
+    <string name="field_default_import_source">sample file</string>
+    <string name="field_import_source_message">Imported from "%s"</string>
+    <string name="field_attribute_total">with "%s" attributes</string>
+    <string name="field_default_sort_order">import order</string>
+    <string name="field_sort_message">Sorted by "%s"</string>
+
+    <string name="field_unique_id">Unique ID</string>
+    <string name="field_primary_id">Primary ID</string>
+    <string name="field_secondary_id">Secondary ID</string>
+
+    <string name="field_trait_observation_total">"%d" observations</string>
+
+
+
 
     <!-- TRAITS -->
     <!-- Sort -->

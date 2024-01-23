@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.objects;
 
 import java.util.List;
+import android.util.Log;
 
 
 /**
@@ -22,6 +23,8 @@ public class FieldObject {
     private String count;
     private String exp_source;
     private String observation_level;
+
+    private String attribute_count;
 
     public static class TraitDetail {
         private final String traitName;
@@ -170,5 +173,12 @@ public class FieldObject {
 
     public void setObservation_level(String observation_level) {
         this.observation_level = observation_level;
+    }
+    public String getAttribute_count() {
+        return attribute_count;
+    }
+
+    public void setAttribute_count(String attribute_count) {
+        this.attribute_count = attribute_count;
     }
 }

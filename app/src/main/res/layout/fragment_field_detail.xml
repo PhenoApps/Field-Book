@@ -69,8 +69,7 @@
                             style="@style/TextViewStyle.Sub"
                             android:id="@+id/importDateTextView"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2024-01-01" />
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
 
                     <!-- Collapse/Expand Icon -->
@@ -101,8 +100,7 @@
                             style="@style/TextViewStyle.Sub"
                             android:id="@+id/importSourceTextView"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Imported from sample file"/>
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
 
                     <!-- Entries Item -->
@@ -117,8 +115,7 @@
                             style="@style/TextViewStyle.Sub"
                             android:id="@+id/entryTextView"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="500 entries"/>
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
 
                     <!-- Sort Item -->
@@ -133,8 +130,7 @@
                             style="@style/TextViewStyle.Sub"
                             android:id="@+id/sortTextView"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Sorted by import order"/>
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
 
                     <!-- Additional Info: Unique, Primary & Secondary Identifiers -->
@@ -154,7 +150,7 @@
                             <TextView
                                 style="@style/TextViewStyle.Sub"
                                 android:textStyle="bold"
-                                android:text="Unique ID"
+                                android:text="@string/field_unique_id"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"/>
                             <TextView
@@ -175,7 +171,7 @@
                             <TextView
                                 style="@style/TextViewStyle.Sub"
                                 android:textStyle="bold"
-                                android:text="Primary ID"
+                                android:text="@string/field_primary_id"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"/>
                             <TextView
@@ -196,7 +192,7 @@
                             <TextView
                                 style="@style/TextViewStyle.Sub"
                                 android:textStyle="bold"
-                                android:text="Secondary ID"
+                                android:text="@string/field_secondary_id"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"/>
                             <TextView

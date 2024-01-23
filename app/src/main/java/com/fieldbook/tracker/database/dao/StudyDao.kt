@@ -18,11 +18,10 @@ import com.fieldbook.tracker.database.toFirst
 import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
-import java.text.SimpleDateFormat
 import java.text.ParseException
+import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
 
 
 class StudyDao {
@@ -152,7 +151,7 @@ class StudyDao {
 
         private fun Map<String, Any?>.toFieldObject() = FieldObject().also {
 
-            it.exp_id = this[Study.PK] as Int
+            it.exp_id = this[Study.PK].toString().toInt()
             it.exp_name = this["study_name"].toString()
             it.exp_alias = this["study_alias"].toString()
             it.unique_id = this["study_unique_id_name"].toString()
@@ -176,17 +175,34 @@ class StudyDao {
                 null, "null" -> ""
                 else -> observationLevel
             }
+            it.attribute_count = this["attribute_count"]?.toString()
         }
 
         fun getAllFieldObjects(): ArrayList<FieldObject> = withDatabase { db ->
 
             val studies = ArrayList<FieldObject>()
 
-            db.query(Study.tableName)
-                    .toTable()
-                    .forEach { model ->
-                        studies.add(model.toFieldObject())
+//            db.query(Study.tableName)
+//                    .toTable()
+//                    .forEach { model ->
+//                        studies.add(model.toFieldObject())
+//                    }
+
+            val query = """
+                SELECT 
+                    Studies.*,
+                    (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count
+                FROM ${Study.tableName} AS Studies
+            """
+            db.rawQuery(query, null).use { cursor ->
+                while (cursor.moveToNext()) {
+                    val model = cursor.columnNames.associateWith { columnName ->
+                        val columnIndex = cursor.getColumnIndex(columnName)
+                        if (columnIndex != -1) cursor.getString(columnIndex) else null
                     }
+                    studies.add(model.toFieldObject())
+                }
+            }
 
             // Sort fields by most recent import/edit activity
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -209,10 +225,6 @@ class StudyDao {
                 ).maxOrNull() ?: Date(0)
             })
 
-//            sortedStudies.forEach { fieldObject ->
-//                Log.d("StudyDao", "FieldObject: ${fieldObject.exp_id}, Import Date: ${fieldObject.date_import}, Edit Date: ${fieldObject.date_edit}")
-//            }
-
             ArrayList(sortedStudies)
 
         } ?: ArrayList()
@@ -220,23 +232,37 @@ class StudyDao {
 
         //TODO query missing count/date_edit
         fun getFieldObject(exp_id: Int): FieldObject? = withDatabase { db ->
-
-            db.query(Study.tableName,
-                    select = arrayOf(Study.PK,
-                            "study_name",
-                            "study_alias",
-                            "study_unique_id_name",
-                            "study_primary_id_name",
-                            "study_secondary_id_name",
-                            "observation_levels",
-                            "date_import",
-                            "date_edit",
-                            "date_export",
-                            "study_source",
-                            "study_sort_name"),
-                    where = "${Study.PK} = ?",
-                    whereArgs = arrayOf(exp_id.toString()),
-                    orderBy = Study.PK).toFirst().toFieldObject()
+            val query = """
+        SELECT 
+            ${Study.PK},
+            study_name,
+            study_alias,
+            study_unique_id_name,
+            study_primary_id_name,
+            study_secondary_id_name,
+            observation_levels,
+            date_import,
+            date_edit,
+            date_export,
+            study_source,
+            study_sort_name,
+            (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count
+        FROM ${Study.tableName} AS Studies
+        WHERE ${Study.PK} = ?
+    """
+//            Log.d("StudyDao", "Query is "+query)
+            val fieldData = db.rawQuery(query, arrayOf(exp_id.toString())).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val map = cursor.columnNames.associateWith { columnName ->
+                        val columnIndex = cursor.getColumnIndex(columnName)
+                        if (columnIndex != -1) cursor.getString(columnIndex) else null
+                    }
+                    map.toFieldObject()
+                } else {
+                    null
+                }
+            }
+            fieldData
         }
 
 
