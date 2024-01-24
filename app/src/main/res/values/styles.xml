@@ -30,18 +30,37 @@
         <item name="fb_color_indeterminate_progress_bar">@color/main_primary_dark</item>
         <item name="fb_spinner_focused">@color/main_color_accent</item>
         <item name="fb_spinner_selected">@color/main_primary_transparent</item>
-        <item name="fb_trait_percent_background_center_color">@color/main_trait_percent_background_center_color</item>
-        <item name="fb_trait_percent_background_start_end_color">@color/main_trait_percent_background_start_end_color</item>
+        <item name="fb_trait_percent_background_center_color">
+            @color/main_trait_percent_background_center_color
+        </item>
+        <item name="fb_trait_percent_background_start_end_color">
+            @color/main_trait_percent_background_start_end_color
+        </item>
         <item name="fb_trait_percent_start_color">@color/main_trait_percent_start_color</item>
         <item name="fb_trait_percent_stroke_color">@color/main_trait_percent_stroke_color</item>
         <item name="fb_value_saved_color">@color/main_value_saved_color</item>
         <item name="fb_value_altered_color">@color/main_value_altered_color</item>
-        <item name="fb_trait_categorical_button_press_color">@color/main_trait_categorical_button_press_color</item>
+        <item name="fb_trait_categorical_button_press_color">
+            @color/main_trait_categorical_button_press_color
+        </item>
         <item name="fb_button_text_color">@color/main_button_text_color</item>
         <item name="fb_button_color_normal">@color/main_button_color_normal</item>
         <item name="fb_button_color_pressed">@color/main_button_color_pressed</item>
         <item name="fb_subheading_color">@color/main_subheading_color</item>
         <item name="fb_color_text_secondary">@color/main_color_text_secondary</item>
+        <item name="fb_round_button_background">@drawable/custom_round_button</item>
+        <item name="fb_round_button_background_with_indicator">
+            @drawable/selector_round_button_background
+        </item>
+        <item name="fb_seek_bar_color">@color/main_color_seekbar</item>
+        <item name="fb_seek_bar_thumb_color">@color/main_color_seekbar_thumb</item>
+        <item name="fb_seek_bar">@drawable/custom_seek_bar</item>
+        <item name="fb_border_color">@color/main_border</item>
+        <item name="fb_geonav_snackbar_view">@drawable/cell_geonav_snackbar</item>
+        <item name="fb_preferences_horizontal_break_color">@color/TRANSPARENT</item>
+        <item name="fb_trait_button_background_tint">@color/light_gray</item>
+
+        <item name="fb_categorical_button_selected_color">?attr/fb_color_primary</item>
 
         <!-- these are used in material design components -->
         <item name="android:textColorPrimary">?attr/fb_color_text_dark</item>
@@ -55,7 +74,7 @@
         <item name="toolbarStyle">@style/AppToolbar</item>
         <item name="actionBarTheme">@style/AppToolbar</item>
         <item name="checkboxStyle">@style/CheckBoxStyle</item>
-        <item name="alertDialogTheme">@style/AlertDialogStyle</item>
+        <item name="alertDialogTheme">@style/AppAlertDialog</item>
         <item name="actionOverflowButtonStyle">@style/OverFlowStyle</item>
         <item name="actionOverflowMenuStyle">@style/OverFlowMenuStyle</item>
         <item name="progressBarStyle">@style/ProgressBarStyle</item>
@@ -64,7 +83,7 @@
         <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle</item>
         <item name="spinnerStyle">@style/SpinnerStyle</item>
         <item name="dropDownListViewStyle">@style/DropDownListViewStyle</item>
-        <item name="android:popupMenuStyle">@style/PopUpMenuStyle</item>
+        <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
         <item name="android:spinnerItemStyle">@style/SpinnerItemStyle</item>
         <item name="android:dropDownSpinnerStyle">@style/DropDownSpinnerStyle</item>
         <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle</item>
@@ -88,6 +107,7 @@
         <item name="android:colorAccent">?attr/fb_color_accent</item>
 
         <item name="iconTint">?attr/fb_icon_tint</item>
+
     </style>
 
     <!-- Blue Theme -->
@@ -111,6 +131,8 @@
         <item name="fb_value_altered_color">#0000d5</item>
         <item name="fb_color_text_secondary">@color/blue_color_text_secondary</item>
         <item name="fb_button_color_pressed">@color/blue_button_color_pressed</item>
+        <item name="fb_border_color">@color/blue_border</item>
+        <item name="fb_trait_button_background_tint">@color/light_gray</item>
 
         <item name="colorPrimary">?attr/fb_color_primary</item>
         <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
@@ -133,24 +155,103 @@
         <item name="fb_color_indeterminate_progress_bar">?attr/fb_color_primary_dark</item>
         <item name="fb_spinner_focused">@color/high_contrast_color_accent</item>
         <item name="fb_spinner_selected">@color/high_contrast_primary_transparent</item>
-        <item name="fb_trait_percent_background_center_color">@color/high_contrast_trait_percent_background_center_color</item>
-        <item name="fb_trait_percent_background_start_end_color">@color/high_contrast_trait_percent_background_start_end_color</item>
-        <item name="fb_trait_percent_start_color">@color/high_contrast_trait_percent_start_color</item>
-        <item name="fb_trait_percent_stroke_color">@color/high_contrast_trait_percent_stroke_color</item>
+        <item name="fb_trait_percent_background_center_color">
+            @color/high_contrast_trait_percent_background_center_color
+        </item>
+        <item name="fb_trait_percent_background_start_end_color">
+            @color/high_contrast_trait_percent_background_start_end_color
+        </item>
+        <item name="fb_trait_percent_start_color">@color/high_contrast_trait_percent_start_color
+        </item>
+        <item name="fb_trait_percent_stroke_color">@color/high_contrast_trait_percent_stroke_color
+        </item>
         <item name="fb_trait_boolean_false_color">@color/high_contrast_primary_dark</item>
         <item name="fb_trait_boolean_true_color">@color/high_contrast_primary_dark</item>
-        <item name="fb_trait_categorical_button_press_color">@color/high_contrast_trait_categorical_button_press_color</item>
+        <item name="fb_trait_categorical_button_press_color">
+            @color/high_contrast_trait_categorical_button_press_color
+        </item>
         <item name="fb_value_saved_color">@color/high_contrast_value_saved_color</item>
         <item name="fb_value_altered_color">@color/high_contrast_value_altered_color</item>
         <item name="fb_color_text_secondary">@color/high_contrast_color_text_secondary</item>
         <item name="fb_button_color_pressed">@color/high_contrast_button_color_pressed</item>
+        <item name="fb_button_color_normal">@color/TRANSPARENT</item>
         <item name="fb_icon_fill_tint">@color/high_contrast_primary_dark</item>
+        <item name="fb_round_button_background">@drawable/high_contrast_round_button</item>
+        <item name="fb_round_button_background_with_indicator">
+            @drawable/high_contrast_round_button
+        </item>
+        <item name="fb_seek_bar_color">@color/high_contrast_primary_dark</item>
+        <item name="fb_seek_bar_thumb_color">@color/high_contrast_primary_dark</item>
+        <item name="fb_border_color">@color/high_contrast_border</item>
 
+        <item name="fb_geonav_snackbar_view">@drawable/cell_geonav_snackbar_high_contrast</item>
+
+        <item name="fb_categorical_button_selected_color">@color/GRAY</item>
+        <item name="fb_trait_button_background_tint">@color/high_contrast_primary</item>
+
+        <item name="fb_preferences_horizontal_break_color">?fb_color_primary_dark</item>
         <item name="colorPrimary">?attr/fb_color_primary_dark</item>
         <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
         <item name="colorPrimaryVariant">?attr/fb_color_primary</item>
         <item name="colorAccent">?attr/fb_color_accent</item>
         <item name="android:colorAccent">?attr/fb_color_accent</item>
+
+        <item name="buttonStyle">@style/ButtonStyle.HighContrast</item>
+        <item name="imageButtonStyle">@style/ImageButtonStyle.HighContrast</item>
+
+        <item name="fb_seek_bar">@drawable/high_contrast_seek_bar</item>
+
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+        <item name="android:windowHideAnimation">@null</item>
+        <item name="android:windowShowAnimation">@null</item>
+        <item name="android:launchTaskBehindSourceAnimation">@null</item>
+        <item name="android:launchTaskBehindTargetAnimation">@null</item>
+
+        <item name="android:taskCloseEnterAnimation">@null</item>
+        <item name="android:taskOpenEnterAnimation">@null</item>
+        <item name="android:taskCloseExitAnimation">@null</item>
+        <item name="android:taskOpenExitAnimation">@null</item>
+        <item name="android:taskToBackEnterAnimation">@null</item>
+        <item name="android:taskToFrontEnterAnimation">@null</item>
+        <item name="android:taskToFrontExitAnimation">@null</item>
+        <item name="android:taskToBackExitAnimation">@null</item>
+
+        <item name="android:wallpaperOpenEnterAnimation">@null</item>
+        <item name="android:wallpaperOpenExitAnimation">@null</item>
+        <item name="android:wallpaperCloseEnterAnimation">@null</item>
+        <item name="android:wallpaperCloseExitAnimation">@null</item>
+        <item name="android:wallpaperIntraOpenEnterAnimation">@null</item>
+        <item name="android:wallpaperIntraOpenExitAnimation">@null</item>
+        <item name="android:wallpaperIntraCloseExitAnimation">@null</item>
+
+        <item name="android:popupAnimationStyle">@null</item>
+
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <item name="android:activityCloseExitAnimation">@null</item>
+        <item name="android:activityOpenEnterAnimation">@null</item>
+        <item name="android:activityOpenExitAnimation">@null</item>
+
+        <item name="android:imeExtractEnterAnimation">@null</item>
+        <item name="android:imeExtractExitAnimation">@null</item>
+
+        <item name="android:inAnimation">@null</item>
+        <item name="android:outAnimation">@null</item>
+
+        <item name="android:layoutAnimation">@null</item>
+
+        <item name="android:fragmentCloseEnterAnimation">@null</item>
+        <item name="android:fragmentCloseExitAnimation">@null</item>
+        <item name="android:fragmentFadeEnterAnimation">@null</item>
+        <item name="android:fragmentFadeExitAnimation">@null</item>
+
+        <item name="fabAnimationMode">@null</item>
+        <item name="hideAnimationBehavior">none</item>
+        <item name="android:animation">@null</item>
+        <item name="hintAnimationEnabled">false</item>
+        <item name="android:stateListAnimator">@null</item>
 
     </style>
 

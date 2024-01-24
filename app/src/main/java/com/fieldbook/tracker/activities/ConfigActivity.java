@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,7 +25,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
@@ -40,6 +40,8 @@ import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
+import com.fieldbook.tracker.utilities.FileUtil;
+import com.fieldbook.tracker.utilities.ManufacturerUtil;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -96,11 +98,11 @@ public class ConfigActivity extends ThemedActivity {
     public DataHelper database;
     @Inject
     public SoundHelperImpl soundHelper;
+    public FieldSwitchImpl fieldSwitcher = null;
     @Inject
     VerifyPersonHelper verifyPersonHelper;
     @Inject
     public ExportUtil exportUtil;
-    public FieldSwitchImpl fieldSwitcher = null;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     ListView settingsList;
@@ -122,7 +124,7 @@ public class ConfigActivity extends ThemedActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(prefs.getBoolean(GeneralKeys.TIPS, false));
         }
 
         invalidateOptionsMenu();
@@ -131,7 +133,7 @@ public class ConfigActivity extends ThemedActivity {
 
     private void setCrashlyticsUserId() {
 
-        String id = ep.getString(GeneralKeys.CRASHLYTICS_ID, "");
+        String id = prefs.getString(GeneralKeys.CRASHLYTICS_ID, "");
         FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
         instance.setUserId(id);
         instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, id);
@@ -141,9 +143,9 @@ public class ConfigActivity extends ThemedActivity {
      *
      */
     private void checkBrapiToken() {
-        String token = ep.getString(GeneralKeys.BRAPI_TOKEN, "");
+        String token = prefs.getString(GeneralKeys.BRAPI_TOKEN, "");
         if (!token.isEmpty()) {
-            ep.edit().putBoolean(GeneralKeys.BRAPI_ENABLED, true).apply();
+            prefs.edit().putBoolean(GeneralKeys.BRAPI_ENABLED, true).apply();
         }
     }
 
@@ -155,21 +157,25 @@ public class ConfigActivity extends ThemedActivity {
 
         super.onCreate(savedInstanceState);
 
-        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
-
         checkBrapiToken();
 
         setCrashlyticsUserId();
         invalidateOptionsMenu();
         loadScreen();
 
-        // request permissions
-        ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+        Log.d(TAG, Build.MANUFACTURER);
 
-        int lastVersion = ep.getInt(GeneralKeys.UPDATE_VERSION, -1);
+        preferencesSetup();
+
+        verifyPersonHelper.updateLastOpenedTime();
+    }
+
+    private void versionBasedSetup() {
+
+        int lastVersion = prefs.getInt(GeneralKeys.UPDATE_VERSION, -1);
         int currentVersion = Utils.getVersion(this);
         if (lastVersion < currentVersion) {
-            ep.edit().putInt(GeneralKeys.UPDATE_VERSION, Utils.getVersion(this)).apply();
+            prefs.edit().putInt(GeneralKeys.UPDATE_VERSION, Utils.getVersion(this)).apply();
             showChangelog(true, false);
 
             if (currentVersion >= 530 && lastVersion < 530) {
@@ -177,23 +183,26 @@ public class ConfigActivity extends ThemedActivity {
                 OldPhotosMigrator.Companion.migrateOldPhotosDir(this, database);
 
                 //clear field selection after updates
-                ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
-                ep.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
-                ep.edit().putString(GeneralKeys.FIELD_OBS_LEVEL, null).apply();
-                ep.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
-                ep.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
-                ep.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
+                prefs.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
+                prefs.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
+                prefs.edit().putString(GeneralKeys.FIELD_OBS_LEVEL, null).apply();
+                prefs.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
+                prefs.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
+                prefs.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
             }
         }
+    }
 
-        if (!ep.contains(GeneralKeys.FIRST_RUN)) {
+    private void firstRunSetup() {
+
+        if (!prefs.contains(GeneralKeys.FIRST_RUN)) {
             // do things on the first run
             //this will grant FB access to the chosen folder
             //preference and activity is handled through this utility call
 
-            SharedPreferences.Editor ed = ep.edit();
+            SharedPreferences.Editor ed = prefs.edit();
 
-            Set<String> entries = ep.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
+            Set<String> entries = prefs.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
             entries.add("search");
             entries.add("resources");
             entries.add("summary");
@@ -203,15 +212,32 @@ public class ConfigActivity extends ThemedActivity {
             ed.putBoolean(GeneralKeys.FIRST_RUN, false);
             ed.apply();
         }
+    }
+
+    private void preferencesSetup() {
+
+        versionBasedSetup();
+
+        firstRunSetup();
 
         if (!BaseDocumentTreeUtil.Companion.isEnabled(this)) {
 
             startActivityForResult(new Intent(this, DefineStorageActivity.class),
                     REQUEST_STORAGE_DEFINER);
-        }
+        } else {
 
         exportUtil = new ExportUtil(this, database);
         verifyPersonHelper.updateLastOpenedTime();
+            ManufacturerUtil.Companion.eInkDeviceSetup(this, prefs, getResources(), () -> {
+
+                recreate();
+
+                // request permissions
+                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+
+                return null;
+            });
+        }
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {
@@ -295,9 +321,9 @@ public class ConfigActivity extends ThemedActivity {
         ImageListAdapter adapterImg = new ImageListAdapter(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
 
-        SharedPreferences.Editor ed = ep.edit();
+        SharedPreferences.Editor ed = prefs.edit();
 
-        if (!ep.getBoolean(GeneralKeys.TIPS_CONFIGURED, false)) {
+        if (!prefs.getBoolean(GeneralKeys.TIPS_CONFIGURED, false)) {
             ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
             ed.apply();
             showTipsDialog();
@@ -308,10 +334,9 @@ public class ConfigActivity extends ThemedActivity {
 
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
-            if(mlkitEnabled) {
+            if (mlkitEnabled) {
                 ScannerActivity.Companion.requestCameraAndStartScanner(this, REQUEST_BARCODE, null, null, null);
-            }
-            else {
+            } else {
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.barcode_scanner_text))
                         .setBeepEnabled(false)
@@ -335,8 +360,8 @@ public class ConfigActivity extends ThemedActivity {
 
         String[] traits = database.getVisibleTrait();
 
-        if (!ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
-                || ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
+        if (!prefs.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
+                || prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_field_missing));
             return -1;
         } else if (traits.length == 0) {
@@ -355,7 +380,7 @@ public class ConfigActivity extends ThemedActivity {
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                Editor ed = ep.edit();
+                Editor ed = prefs.edit();
                 ed.putBoolean(GeneralKeys.TIPS, true);
                 ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
                 ed.apply();
@@ -373,7 +398,7 @@ public class ConfigActivity extends ThemedActivity {
 
         builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                Editor ed = ep.edit();
+                Editor ed = prefs.edit();
                 ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
                 ed.apply();
 
@@ -419,7 +444,7 @@ public class ConfigActivity extends ThemedActivity {
 
         soundHelper.playCelebrate();
 
-        int studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+        int studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
         int newStudyId = f.getExp_id();
 
@@ -434,13 +459,14 @@ public class ConfigActivity extends ThemedActivity {
 
         if (plotId != null) {
 
-            ep.edit().putString(GeneralKeys.LAST_PLOT, plotId).apply();
+            prefs.edit().putString(GeneralKeys.LAST_PLOT, plotId).apply();
 
         }
 
         startActivity(intent);
 
     }
+
     @Nullable
     private FieldObject searchStudiesForBarcode(String barcode) {
 
@@ -521,15 +547,18 @@ public class ConfigActivity extends ThemedActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_STORAGE_DEFINER) {
             if (resultCode != Activity.RESULT_OK) finish();
+            else {
+                // request permissions
+                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+            }
         } else if (requestCode == REQUEST_BARCODE) {
             if (resultCode == RESULT_OK) {
 
                 // get barcode from scan result
                 String scannedBarcode;
-                if(mlkitEnabled){
+                if (mlkitEnabled) {
                     scannedBarcode = data.getStringExtra("barcode");
-                }
-                else {
+                } else {
                     IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
                     scannedBarcode = plotDataResult.getContents();
                 }
@@ -577,7 +606,7 @@ public class ConfigActivity extends ThemedActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(prefs.getBoolean(GeneralKeys.TIPS, false));
         return true;
     }
 
@@ -597,46 +626,44 @@ public class ConfigActivity extends ThemedActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        switch (item.getItemId()) {
-            case R.id.help:
-                TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_description)),
-                                settingsTapTargetRect(settingsListItemLocation(1), getString(R.string.tutorial_settings_traits_title), getString(R.string.tutorial_settings_traits_description)),
-                                settingsTapTargetRect(settingsListItemLocation(2), getString(R.string.tutorial_settings_collect_title), getString(R.string.tutorial_settings_collect_description)),
-                                settingsTapTargetRect(settingsListItemLocation(3), getString(R.string.tutorial_settings_export_title), getString(R.string.tutorial_settings_export_description)),
-                                settingsTapTargetRect(settingsListItemLocation(4), getString(R.string.tutorial_settings_settings_title), getString(R.string.tutorial_settings_settings_description))
-                        )
-                        .listener(new TapTargetSequence.Listener() {
-                            // This listener will tell us when interesting(tm) events happen in regards to the sequence
-                            @Override
-                            public void onSequenceFinish() {
-                                TapTargetView.showFor(ConfigActivity.this, settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_import)),
-                                        new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
-                                            @Override
-                                            public void onTargetClick(TapTargetView view) {
-                                                super.onTargetClick(view);      // This call is optional
-                                                intent.setClassName(ConfigActivity.this,
-                                                        FieldEditorActivity.class.getName());
-                                                startActivity(intent);
-                                            }
-                                        });
-                            }
+        int itemId = item.getItemId();
+        if (itemId == R.id.help) {
+            TapTargetSequence sequence = new TapTargetSequence(this)
+                    .targets(settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_description)),
+                            settingsTapTargetRect(settingsListItemLocation(1), getString(R.string.tutorial_settings_traits_title), getString(R.string.tutorial_settings_traits_description)),
+                            settingsTapTargetRect(settingsListItemLocation(2), getString(R.string.tutorial_settings_collect_title), getString(R.string.tutorial_settings_collect_description)),
+                            settingsTapTargetRect(settingsListItemLocation(3), getString(R.string.tutorial_settings_export_title), getString(R.string.tutorial_settings_export_description)),
+                            settingsTapTargetRect(settingsListItemLocation(4), getString(R.string.tutorial_settings_settings_title), getString(R.string.tutorial_settings_settings_description))
+                    )
+                    .listener(new TapTargetSequence.Listener() {
+                        // This listener will tell us when interesting(tm) events happen in regards to the sequence
+                        @Override
+                        public void onSequenceFinish() {
+                            TapTargetView.showFor(ConfigActivity.this, settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_import)),
+                                    new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
+                                        @Override
+                                        public void onTargetClick(TapTargetView view) {
+                                            super.onTargetClick(view);      // This call is optional
+                                            intent.setClassName(ConfigActivity.this,
+                                                    FieldEditorActivity.class.getName());
+                                            startActivity(intent);
+                                        }
+                                    });
+                        }
 
-                            @Override
-                            public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
-                                Log.d("TapTargetView", "Clicked on " + lastTarget.id());
-                            }
+                        @Override
+                        public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
+                            Log.d("TapTargetView", "Clicked on " + lastTarget.id());
+                        }
 
-                            @Override
-                            public void onSequenceCanceled(TapTarget lastTarget) {
+                        @Override
+                        public void onSequenceCanceled(TapTarget lastTarget) {
 
-                            }
-                        });
-                sequence.start();
-                break;
-            case R.id.changelog:
-                showChangelog(false, false);
-                break;
+                        }
+                    });
+            sequence.start();
+        } else if (itemId == R.id.changelog) {
+            showChangelog(false, false);
         }
         return super.onOptionsItemSelected(item);
     }

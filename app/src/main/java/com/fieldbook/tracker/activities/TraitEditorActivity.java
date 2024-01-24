@@ -8,6 +8,7 @@ import static androidx.recyclerview.widget.ItemTouchHelper.UP;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,7 +35,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -53,8 +54,8 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.ArrayIndexComparator;
 import com.fieldbook.tracker.utilities.CSVWriter;
-import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.FileUtil;
+import com.fieldbook.tracker.utilities.SharedPreferenceUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -93,11 +94,13 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     public TraitAdapter traitAdapter;
     public static boolean brapiDialogShown = false;
     private static final Handler mHandler = new Handler();
-    private static SharedPreferences ep;
 
     private final int PERMISSIONS_REQUEST_STORAGE_IMPORT = 999;
     private final int PERMISSIONS_REQUEST_STORAGE_EXPORT = 998;
     private Menu systemMenu;
+
+    @Inject
+    SharedPreferences prefs;
 
     @Inject
     DataHelper database;
@@ -132,8 +135,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             super.onSelectedChanged(viewHolder, actionState);
             if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
                 if (viewHolder != null) {
-                    viewHolder.itemView.setAlpha(0.5f);
-                    viewHolder.itemView.setScaleY(1.618f);
+                    if (!SharedPreferenceUtils.Companion.isHighContrastTheme(prefs)) {
+                        viewHolder.itemView.setAlpha(0.5f);
+                    }
                 }
             }
         }
@@ -142,7 +146,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
             viewHolder.itemView.setAlpha(1f);
-            viewHolder.itemView.setScaleY(1f);
         }
     });
 
@@ -245,7 +248,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     public SharedPreferences getPreferences() {
-        return ep;
+        return prefs;
     }
 
     public boolean getBrAPIDialogShown() {
@@ -280,7 +283,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(prefs.getBoolean(GeneralKeys.TIPS, false));
         }
 
         queryAndLoadTraits();
@@ -290,8 +293,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setContentView(R.layout.activity_traits);
 
@@ -330,7 +331,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         new MenuInflater(TraitEditorActivity.this).inflate(R.menu.menu_traits, menu);
 
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(prefs.getBoolean(GeneralKeys.TIPS, false));
 
         return true;
     }
@@ -353,41 +354,30 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()) {
-            case R.id.help:
-                TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(traitsTapTargetMenu(R.id.newTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description), 60)
-                                //Todo add overflow menu action
-                        );
+        int itemId = item.getItemId();
+        if (itemId == R.id.help) {
+            TapTargetSequence sequence = new TapTargetSequence(this)
+                    .targets(traitsTapTargetMenu(R.id.newTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description), 60)
+                            //Todo add overflow menu action
+                    );
 
-                if (database.getTraitColumnData("trait") != null) {
-                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
-                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
-                }
+            if (database.getTraitColumnData("trait") != null) {
+                sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
+                sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
+            }
 
-                sequence.start();
-                break;
-
-            case R.id.deleteTrait:
-                checkShowDeleteDialog();
-                break;
-
-            case R.id.sortTrait:
-                sortDialog();
-                break;
-
-            case R.id.importexport:
-                importExportDialog();
-                break;
-
-            case R.id.toggleTrait:
-                changeAllVisibility();
-                break;
-
-            case android.R.id.home:
-                CollectActivity.reloadData = true;
-                finish();
-                break;
+            sequence.start();
+        } else if (itemId == R.id.deleteTrait) {
+            checkShowDeleteDialog();
+        } else if (itemId == R.id.sortTrait) {
+            sortDialog();
+        } else if (itemId == R.id.importexport) {
+            importExportDialog();
+        } else if (itemId == R.id.toggleTrait) {
+            changeAllVisibility();
+        } else if (itemId == android.R.id.home) {
+            CollectActivity.reloadData = true;
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -407,7 +397,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     private void changeAllVisibility() {
-        boolean globalVis = ep.getBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, false);
+        boolean globalVis = prefs.getBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, false);
         List<TraitObject> allTraits = database.getAllTraitObjects();
 
         if (allTraits.isEmpty()) {
@@ -425,7 +415,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         globalVis = !globalVis;
 
-        Editor ed = ep.edit();
+        Editor ed = prefs.edit();
         ed.putBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, globalVis);
         ed.apply();
         queryAndLoadTraits();
@@ -454,6 +444,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         });
 
         final AlertDialog importExport = builder.create();
+
         importExport.show();
 
         android.view.WindowManager.LayoutParams params = importExport.getWindow().getAttributes();
@@ -481,7 +472,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
             if (EasyPermissions.hasPermissions(this, perms)) {
-                if (ep.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)) {
+                if (prefs.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)) {
                     showFileDialog();
                 } else {
                     checkTraitExportDialog();
@@ -491,7 +482,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
                         PERMISSIONS_REQUEST_STORAGE_IMPORT, perms);
             }
-        } else if (ep.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)) {
+        } else if (prefs.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)) {
             showFileDialog();
         } else {
             checkTraitExportDialog();
@@ -721,7 +712,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 exportTable(exportFile.getText().toString());
-                Editor ed = ep.edit();
+                Editor ed = prefs.edit();
                 ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, true);
                 ed.apply();
             }
@@ -765,6 +756,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     public void onBackPressed() {
+        super.onBackPressed();
         CollectActivity.reloadData = true;
         finish();
     }
@@ -874,7 +866,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                         osw.close();
                         output.close();
 
-                        FileUtil.shareFile(this, ep, exportDoc);
+                        FileUtil.shareFile(this, prefs, exportDoc);
                     }
                 }
             }
@@ -920,7 +912,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public void onMenuItemClicked(View v, TraitObject trait) {
 
-        PopupMenu popupMenu = new PopupMenu(this, v);
+        Context wrapper = new ContextThemeWrapper(this, R.style.PopupMenuStyle);
+        PopupMenu popupMenu = new PopupMenu(wrapper, v);
 
         //Inflating the Popup using xml file
         popupMenu.getMenuInflater().inflate(R.menu.menu_trait_list_item, popupMenu.getMenu());
@@ -928,9 +921,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         //registering popup with OnMenuItemClickListener
         popupMenu.setOnMenuItemClickListener((item) -> {
 
-                if (item.getTitle().equals(getString(R.string.traits_options_copy))) {
+            if (item.getTitle().equals(getString(R.string.traits_options_copy))) {
 
-                    copyTrait(trait);
+                copyTrait(trait);
 
                 } else if (item.getTitle().equals(getString(R.string.traits_options_delete))) {
 
@@ -982,7 +975,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     // Copy trait name

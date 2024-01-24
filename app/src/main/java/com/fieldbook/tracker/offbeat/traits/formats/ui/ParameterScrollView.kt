@@ -32,7 +32,7 @@ class ParameterScrollView constructor(
     constructor(context: Context, attr: AttributeSet?) : this(
         context,
         attr,
-        R.attr.recyclerViewStyle
+        androidx.core.R.attr.nestedScrollViewStyle
     )
 
     constructor(context: Context) : this(context, null)

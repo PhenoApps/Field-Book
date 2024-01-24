@@ -10,7 +10,7 @@ import androidx.fragment.app.DialogFragment
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
 
 /**
  * Creates a date picker dialog.
@@ -31,8 +31,12 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
+        val calendar = Calendar.getInstance()
+
+        val defaultFirstDate = format?.format(calendar.time)
+
         val date = context?.getSharedPreferences("Settings", Context.MODE_PRIVATE)
-            ?.getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, "2000-01-01") ?: "2000-01-01"
+            ?.getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, defaultFirstDate) ?: defaultFirstDate
 
         // Use the current date as the default date in the picker
         val c = Calendar.getInstance()

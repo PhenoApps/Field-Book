@@ -267,29 +267,28 @@ public class FieldEditorActivity extends ThemedActivity
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.menu_export:
-//                    Toast.makeText(getApplicationContext(), "Batch export not yet implemented", Toast.LENGTH_SHORT).show();
-                    List<Integer> selectedFieldIds = getSelectedFieldIds();
-                    if (!selectedFieldIds.isEmpty()) {
-                        exportUtil.exportMultipleFields(selectedFieldIds);
-                    }
-                    mAdapter.exitSelectionMode();
-                    mode.finish();
-                    return true;
-                case R.id.menu_archive:
-                    Toast.makeText(getApplicationContext(), "Archive not yet implemented", Toast.LENGTH_SHORT).show();
-                    mAdapter.exitSelectionMode();
-                    mode.finish();
-                    return true;
-                case R.id.menu_delete:
-                    createDeleteItemAlertDialog().show();
-//                    Toast.makeText(getApplicationContext(), "Batch delete not yet implemented", Toast.LENGTH_SHORT).show();
-                    return true;
-                default:
-                    return false;
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_export) {
+                List<Integer> selectedFieldIds = getSelectedFieldIds();
+                if (!selectedFieldIds.isEmpty()) {
+                    exportUtil.exportMultipleFields(selectedFieldIds);
+                }
+                mAdapter.exitSelectionMode();
+                mode.finish();
+                return true;
+            } else if (itemId == R.id.menu_archive) {
+                Toast.makeText(getApplicationContext(), "Archive not yet implemented", Toast.LENGTH_SHORT).show();
+                mAdapter.exitSelectionMode();
+                mode.finish();
+                return true;
+            } else if (itemId == R.id.menu_delete) {
+                createDeleteItemAlertDialog().show();
+                return true;
+            } else {
+                return false;
             }
         }
+
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
@@ -508,49 +507,61 @@ public class FieldEditorActivity extends ThemedActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.help:
-                TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
-                                fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
-                        );
+        int itemId = item.getItemId();
+        if (itemId == R.id.help) {
+            TapTargetSequence sequence = new TapTargetSequence(this)
+                    .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
+                            fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
+                    );
 
-                if (fieldExists()) {
-                    sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_select_title), getString(R.string.tutorial_fields_select_description)));
-                    sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_delete_title), getString(R.string.tutorial_fields_delete_description)));
-                }
+            if (fieldExists()) {
+                sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_select_title), getString(R.string.tutorial_fields_select_description)));
+                sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_delete_title), getString(R.string.tutorial_fields_delete_description)));
+            }
 
-                sequence.start();
+            sequence.start();
+        } else if (itemId == R.id.importField) {
+            String importer = ep.getString("IMPORT_SOURCE_DEFAULT", "ask");
 
-                break;
+            switch (importer) {
+                case "ask":
+                    showFileDialog();
+                    break;
+                case "local":
+                    loadLocal();
+                    break;
+                case "brapi":
+                    loadBrAPI();
+                    break;
+                case "cloud":
+                    loadCloud();
+                    break;
+                default:
+                    showFileDialog();
+            }
+        } else if (itemId == R.id.menu_field_editor_item_creator) {
+            FieldCreatorDialog dialog = new FieldCreatorDialog(this);
 
-            case R.id.importField:
-                String importer = ep.getString("IMPORT_SOURCE_DEFAULT", "ask");
+            //when the dialog is dismissed, the field data is created or failed
+            dialog.setOnDismissListener((dismiss -> {
 
-                switch (importer) {
-                    case "ask":
-                        showFileDialog();
-                        break;
-                    case "local":
-                        loadLocal();
-                        break;
-                    case "brapi":
-                        loadBrAPI();
-                        break;
-                    case "cloud":
-                        loadCloud();
-                        break;
-                    default:
-                        showFileDialog();
-                }
-                break;
+                recyclerView = findViewById(R.id.fieldRecyclerView);
+                recyclerView.setLayoutManager(new LinearLayoutManager(this));
+                fieldList = database.getAllFieldObjects();
+                mAdapter = new FieldAdapter(this, fieldList, fieldSwitcher, this);
+                mAdapter.setOnFieldSelectedListener(this);
+                recyclerView.setAdapter(mAdapter);
 
-            case R.id.menu_field_editor_item_creator:
+            }));
 
-                FieldCreatorDialog dialog = new FieldCreatorDialog(this);
+            dialog.show();
+        } else if (itemId == android.R.id.home) {
+            CollectActivity.reloadData = true;
+            finish();
+        } else if (itemId == R.id.action_select_plot_by_distance) {
+            if (mGpsTracker != null && mGpsTracker.canGetLocation()) {
 
-                //when the dialog is dismissed, the field data is created or failed
-                dialog.setOnDismissListener((dismiss -> {
+                selectPlotByDistance();
 
                     recyclerView = findViewById(R.id.fieldRecyclerView);
                     recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -559,30 +570,9 @@ public class FieldEditorActivity extends ThemedActivity
                     mAdapter.setOnFieldSelectedListener(this);
                     recyclerView.setAdapter(mAdapter);
 
-                }));
+                Toast.makeText(this, R.string.activity_field_editor_no_location_yet, Toast.LENGTH_SHORT).show();
 
-                dialog.show();
-
-                break;
-
-            case android.R.id.home:
-                CollectActivity.reloadData = true;
-                finish();
-                break;
-
-            case R.id.action_select_plot_by_distance:
-
-                if (mGpsTracker != null && mGpsTracker.canGetLocation()) {
-
-                    selectPlotByDistance();
-
-                } else {
-
-                    Toast.makeText(this, R.string.activity_field_editor_no_location_yet, Toast.LENGTH_SHORT).show();
-
-                }
-
-                break;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1021,8 +1011,9 @@ public class FieldEditorActivity extends ThemedActivity
 
             Log.e(TAG, "Error updating sorting", e);
 
-            new AlertDialog.Builder(this).setTitle(R.string.dialog_save_error_title)
-                    .setPositiveButton(R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
+            new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                    .setTitle(R.string.dialog_save_error_title)
+                    .setPositiveButton(org.phenoapps.androidlibrary.R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
                     .setMessage(R.string.sort_dialog_error_saving)
                     .create()
                     .show();

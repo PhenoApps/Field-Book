@@ -136,22 +136,28 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private fun setupRecyclerView() {
         val recyclerView: RecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        val initialItems = createTraitDetailItems().toMutableList()
+        val initialItems = createTraitDetailItems(field).toMutableList()
         adapter = FieldDetailAdapter(initialItems)
         recyclerView.adapter = adapter
     }
 
     override fun onResume() {
+        Log.d("FieldDetailFragment", "onResume triggered")
         super.onResume()
-        updateFieldData(field)
-        val newItems = createTraitDetailItems()
+        val dataHelper = DataHelper(requireActivity())
+        val fieldObject = dataHelper.getCompleteFieldDetails()
+        updateFieldData(fieldObject)
+        val newItems = createTraitDetailItems(fieldObject)
         adapter?.updateItems(newItems)
     }
 
     private fun updateFieldData(field: FieldObject) {
         cardViewSync.visibility = View.GONE
         cardViewSync.setOnClickListener(null)
-        importDateTextView.text = field.date_import.split(" ")[0]
+        val importDate = field.date_import
+        if (!importDate.isNullOrEmpty()) {
+            importDateTextView.text = importDate.split(" ")[0]
+        }
         var source: String? = field.exp_source
         var observationLevel = getString(R.string.field_default_observation_level)
         if (source != null && source != "csv" && source != "excel") { // BrAPI source
@@ -191,10 +197,10 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         observationCountTextView.text = getString(R.string.field_observation_total, field.observation_count)
     }
 
-    private fun createTraitDetailItems(): List<FieldDetailItem> {
-        val dataHelper = DataHelper(requireActivity())
-        val fieldObject = dataHelper.getCompleteFieldDetails()
-        fieldObject.getTraitDetails()?.let { traitDetails ->
+    private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
+//        val dataHelper = DataHelper(requireActivity())
+//        val fieldObject = dataHelper.getCompleteFieldDetails()
+        field.getTraitDetails()?.let { traitDetails ->
             return traitDetails.map { traitDetail ->
                 val iconRes = Formats.values()
                     .find { it.getDatabaseName(requireActivity()) == traitDetail.getFormat() }?.getIcon()

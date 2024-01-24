@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.dialogs
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
@@ -12,7 +13,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -26,7 +26,6 @@ import com.fieldbook.tracker.offbeat.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.offbeat.traits.formats.ValidationResult
 import com.fieldbook.tracker.offbeat.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -396,8 +395,6 @@ class NewTraitDialog(
         val alert = builder.create()
 
         alert.show()
-
-        DialogUtils.styleDialogs(alert)
     }
 
     /**

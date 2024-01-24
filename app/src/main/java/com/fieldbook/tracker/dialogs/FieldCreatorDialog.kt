@@ -1,21 +1,26 @@
 package com.fieldbook.tracker.dialogs
 
-import android.app.Dialog
 import android.database.sqlite.SQLiteAbortException
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.RadioButton
+import android.widget.TextView
+import android.widget.Toast
 import androidx.constraintlayout.widget.Group
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.FieldEditorActivity
+import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 
 /**
  * Extended Dialog class. Wizard for creating basic study/field details.
@@ -28,8 +33,8 @@ import java.util.*
  *
  *                 FieldCreatorDialog dialog = new FieldCreatorDialog(this);
  */
-class FieldCreatorDialog(private val activity: FieldEditorActivity) :
-    Dialog(activity, R.style.AppAlertDialog), CoroutineScope by MainScope() {
+class FieldCreatorDialog(private val activity: ThemedActivity) :
+    BorderedDialog(activity, R.style.AppAlertDialog), CoroutineScope by MainScope() {
 
     private val helper by lazy { DataHelper(context) }
 

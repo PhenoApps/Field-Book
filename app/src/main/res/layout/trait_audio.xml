@@ -28,16 +28,14 @@
             android:hint=""
             android:text="Tap To Start" />
 
-        <ImageButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
             android:id="@+id/record"
-            android:layout_width="75dp"
-            android:layout_height="75dp"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
             android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:background="@drawable/custom_round_button"
-            android:gravity="center"
-            android:padding="10dp"
-            android:scaleType="fitXY"
+            android:layout_margin="8dp"
+            android:contentDescription="@string/trait_audio_button_content_description"
             android:src="@drawable/trait_audio" />
     </LinearLayout>
 </com.fieldbook.tracker.traits.AudioTraitLayout>

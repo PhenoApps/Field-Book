@@ -183,21 +183,17 @@ public class BrapiExportActivity extends ThemedActivity {
     }
 
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.brapi_export_btn:
-                if (numNewObservations == 0 && numEditedObservations == 0 &&
-                        numNewImages == 0 && numEditedImages == 0 && numIncompleteImages == 0) {
-                    Toast.makeText(this, "Error: Nothing to sync", Toast.LENGTH_SHORT).show();
-                } else {
-                    showSaving();
-                    sendData();
-                }
-                break;
-            case R.id.brapi_cancel_btn:
-                finish();
-                break;
-            default:
-                break;
+        int id = v.getId();
+        if (id == R.id.brapi_export_btn) {
+            if (numNewObservations == 0 && numEditedObservations == 0 &&
+                    numNewImages == 0 && numEditedImages == 0 && numIncompleteImages == 0) {
+                Toast.makeText(this, "Error: Nothing to sync", Toast.LENGTH_SHORT).show();
+            } else {
+                showSaving();
+                sendData();
+            }
+        } else if (id == R.id.brapi_cancel_btn) {
+            finish();
         }
     }
 

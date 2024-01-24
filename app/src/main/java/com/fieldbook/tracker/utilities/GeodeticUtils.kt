@@ -2,10 +2,7 @@ package com.fieldbook.tracker.utilities
 
 import android.content.SharedPreferences
 import android.location.Location
-import androidx.browser.trusted.sharing.ShareData
-import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.models.ObservationUnitModel
-import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.gson.Gson
 import math.geom2d.Point2D
@@ -139,18 +136,20 @@ class GeodeticUtils {
          * @param theta: the field of view angle
          * @return a object representing the returned location and it's distance
          **/
-        fun impactZoneSearch(log: OutputStreamWriter?,
-                             prefs: SharedPreferences,
-                             geoNavPrefs: SharedPreferences,
-                             currentLoggingMode: String,
-                             start: Location,
-                             coordinates: Array<ObservationUnitModel>,
-                             azimuth: Double,
-                             theta: Double,
-                             teslas: Double,
-                             geoNavMethod: String,
-                             d1: Double,
-                             d2: Double): Pair<ObservationUnitModel?, Double> {
+        fun impactZoneSearch(
+            log: OutputStreamWriter?,
+            prefs: SharedPreferences,
+            geoNavPrefs: SharedPreferences,
+            currentLoggingMode: String,
+            start: Location,
+            coordinates: Array<ObservationUnitModel>,
+            azimuth: Double?,
+            theta: Double,
+            teslas: Double,
+            geoNavMethod: String,
+            d1: Double,
+            d2: Double
+        ): Pair<ObservationUnitModel?, Double> {
 
             //greedy algorithm to find closest point, first point is set to inf
             var closestDistance = Double.MAX_VALUE
@@ -191,14 +190,17 @@ class GeodeticUtils {
 
                     } else { //trapezoidal method
 
-                        if (isInZone(start, location, azimuth, theta, d1, d2)) {
+                        azimuth?.let { nonNullAzimuth ->
 
-                            if (closestDistance > distance) {
+                            if (isInZone(start, location, nonNullAzimuth, theta, d1, d2)) {
 
-                                loggedString.closest = CLOSEST_UPDATE.toString()
-                                closestDistance = distance
-                                closestPoint = coordinate
+                                if (closestDistance > distance) {
 
+                                    loggedString.closest = CLOSEST_UPDATE.toString()
+                                    closestDistance = distance
+                                    closestPoint = coordinate
+
+                                }
                             }
                         }
                     }

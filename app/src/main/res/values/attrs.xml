@@ -244,24 +244,43 @@
 
     <!-- specific to certain features/traits -->
     <!-- round button normal/pressed colors (counter, gps, ...)-->
-    <attr format="color" name="fb_button_color_normal"/>
-    <attr format="color" name="fb_button_color_pressed"/>
+    <attr name="fb_button_color_normal" format="color" />
+    <attr name="fb_button_color_pressed" format="color" />
 
     <!-- default red/blue when a value is saved or a saved value is changed -->
-    <attr format="color" name="fb_value_saved_color"/>
-    <attr format="color" name="fb_value_altered_color"/>
+    <attr name="fb_value_saved_color" format="color" />
+    <attr name="fb_value_altered_color" format="color" />
 
     <!-- button press color (for categorical traits) -->
-    <attr format="color" name="fb_trait_categorical_button_press_color"/>
+    <attr name="fb_trait_categorical_button_press_color" format="color" />
 
-    <attr format="color" name="fb_bluetooth_connected_color"/>
-    <attr format="color" name="fb_trait_boolean_true_color"/>
-    <attr format="color" name="fb_trait_boolean_false_color"/>
+    <attr name="fb_bluetooth_connected_color" format="color" />
+    <attr name="fb_trait_boolean_true_color" format="color" />
+    <attr name="fb_trait_boolean_false_color" format="color" />
 
     <!-- percent trait colors -->
-    <attr format="color" name="fb_trait_percent_background_center_color"/>
-    <attr format="color" name="fb_trait_percent_background_start_end_color"/>
-    <attr format="color" name="fb_trait_percent_stroke_color"/>
-    <attr format="color" name="fb_trait_percent_start_color"/>
+    <attr name="fb_seek_bar" format="reference" />
+    <attr name="fb_trait_percent_background_center_color" format="color" />
+    <attr name="fb_trait_percent_background_start_end_color" format="color" />
+    <attr name="fb_trait_percent_stroke_color" format="color" />
+    <attr name="fb_trait_percent_start_color" format="color" />
+
+    <!-- counter trait plus/minus buttons -->
+    <attr name="fb_round_button_background" format="reference" />
+    <attr name="fb_round_button_background_with_indicator" format="reference" />
+
+    <attr name="fb_seek_bar_color" format="color" />
+    <attr name="fb_seek_bar_thumb_color" format="color" />
+
+    <attr name="fb_border_color" format="color" />
+
+    <attr name="fb_trait_button_background_tint" format="color" />
+
+    <attr name="fb_categorical_button_selected_color" format="color" />
+
+    <attr name="fb_preferences_horizontal_break_color" format="color" />
+
+    <!-- geonav snackbar view reference -->
+    <attr name="fb_geonav_snackbar_view" format="reference" />
 
 </resources>
