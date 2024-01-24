@@ -67,12 +67,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private lateinit var cardViewSync: CardView
     private var adapter: FieldDetailAdapter? = null
 
-    data class TraitDetail(
-        val traitName: String,
-        val format: String,
-        val count: Int
-    )
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -145,7 +139,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         Log.d("FieldDetailFragment", "onResume triggered")
         super.onResume()
         val dataHelper = DataHelper(requireActivity())
-        val fieldObject = dataHelper.getCompleteFieldDetails()
+        val fieldObject = dataHelper.getFieldObject(field.exp_id)
         updateFieldData(fieldObject)
         val newItems = createTraitDetailItems(fieldObject)
         adapter?.updateItems(newItems)
@@ -198,8 +192,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     }
 
     private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
-//        val dataHelper = DataHelper(requireActivity())
-//        val fieldObject = dataHelper.getCompleteFieldDetails()
         field.getTraitDetails()?.let { traitDetails ->
             return traitDetails.map { traitDetail ->
                 val iconRes = Formats.values()

@@ -426,19 +426,6 @@ public class DataHelper {
         ObservationDao.Companion.insertObservation(studyId, observation);
     }
 
-    public FieldObject getCompleteFieldDetails() {
-
-        int exp_id = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
-        FieldObject fieldObject = new FieldObject();
-
-        // ...populate other FieldObject properties...
-
-        List<FieldObject.TraitDetail> traitDetails = StudyDao.Companion.getTraitDetailsForStudy(exp_id);
-        fieldObject.setTraitDetails(traitDetails);
-
-        return fieldObject;
-    }
-
     /**
      * Get user created trait observations for currently selected study
      */

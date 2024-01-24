@@ -234,28 +234,28 @@ class StudyDao {
         } ?: ArrayList()
 
 
-        //TODO query missing count/date_edit
         fun getFieldObject(exp_id: Int): FieldObject? = withDatabase { db ->
             val query = """
-        SELECT 
-            ${Study.PK},
-            study_name,
-            study_alias,
-            study_unique_id_name,
-            study_primary_id_name,
-            study_secondary_id_name,
-            observation_levels,
-            date_import,
-            date_edit,
-            date_export,
-            study_source,
-            study_sort_name,
-            (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
-            (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK}) AS trait_count,
-            (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK}) AS observation_count
-        FROM ${Study.tableName} AS Studies
-        WHERE ${Study.PK} = ?
-    """
+                SELECT 
+                    ${Study.PK},
+                    study_name,
+                    study_alias,
+                    study_unique_id_name,
+                    study_primary_id_name,
+                    study_secondary_id_name,
+                    observation_levels,
+                    date_import,
+                    date_edit,
+                    date_export,
+                    study_source,
+                    study_sort_name,
+                    count,
+                    (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
+                    (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK}) AS trait_count,
+                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK}) AS observation_count
+                FROM ${Study.tableName} AS Studies
+                WHERE ${Study.PK} = ?
+                """
             Log.d("StudyDao", "Query is "+query)
             val fieldData = db.rawQuery(query, arrayOf(exp_id.toString())).use { cursor ->
                 if (cursor.moveToFirst()) {
@@ -263,7 +263,10 @@ class StudyDao {
                         val columnIndex = cursor.getColumnIndex(columnName)
                         if (columnIndex != -1) cursor.getString(columnIndex) else null
                     }
-                    map.toFieldObject()
+                    map.toFieldObject().apply {
+                        // Set the trait details
+                        this.setTraitDetails(getTraitDetailsForStudy(exp_id))
+                    }
                 } else {
                     null
                 }
@@ -272,6 +275,14 @@ class StudyDao {
         }
 
 
+        /**
+         * This function returns trait details for a given study in the form
+         * data class TraitDetail(
+         *         val traitName: String,
+         *         val format: String,
+         *         val count: Int
+         * )
+         */
         fun getTraitDetailsForStudy(studyId: Int): List<FieldObject.TraitDetail> {
             return withDatabase { db ->
                 val traitDetails = mutableListOf<FieldObject.TraitDetail>()
