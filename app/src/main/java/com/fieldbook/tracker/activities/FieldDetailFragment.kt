@@ -54,9 +54,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private lateinit var importSourceTextView: TextView
     private lateinit var entryTextView: TextView
     private lateinit var sortTextView: TextView
-    private lateinit var uniqueIdTextView: TextView
-    private lateinit var primaryIdTextView: TextView
-    private lateinit var secondaryIdTextView: TextView
     private lateinit var lastEditTextView: TextView
     private lateinit var lastExportTextView: TextView
     private lateinit var traitCountTextView: TextView
@@ -82,9 +79,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         importSourceTextView = rootView.findViewById(R.id.importSourceTextView)
         entryTextView = rootView.findViewById(R.id.entryTextView)
         sortTextView = rootView.findViewById(R.id.sortTextView)
-        uniqueIdTextView = rootView.findViewById(R.id.uniqueIdTextView)
-        primaryIdTextView = rootView.findViewById(R.id.primaryIdTextView)
-        secondaryIdTextView = rootView.findViewById(R.id.secondaryIdTextView)
         sortTextView = rootView.findViewById(R.id.sortTextView)
         sortTextView = rootView.findViewById(R.id.sortTextView)
         lastEditTextView = rootView.findViewById(R.id.lastEditTextView)
@@ -169,10 +163,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         entryTextView.text = "${field.count} ${observationLevel} " + getString(R.string.field_attribute_total, field.attribute_count)
         val sortOrder = if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
         sortTextView.text = getString(R.string.field_sort_message, sortOrder)
-
-        uniqueIdTextView.text = field.unique_id
-        primaryIdTextView.text = field.primary_id
-        secondaryIdTextView.text = field.secondary_id
 
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {

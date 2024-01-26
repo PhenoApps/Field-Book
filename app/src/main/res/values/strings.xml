@@ -154,15 +154,15 @@
     <!-- Field details -->
     <string name="field_detail_title">Field Detail</string>
     <string name="field_edit_name">Edit Field Name</string>
+
+
     <string name="field_default_observation_level">entries</string>
     <string name="field_default_import_source">sample file</string>
     <string name="field_import_source_message">Imported from "%s"</string>
     <string name="field_attribute_total">with "%s" attributes</string>
     <string name="field_default_sort_order">import order</string>
     <string name="field_sort_message">Sorted by "%s"</string>
-    <string name="field_unique_id">Unique ID</string>
-    <string name="field_primary_id">Primary ID</string>
-    <string name="field_secondary_id">Secondary ID</string>
+
     <string name="field_no_activity">No activity</string>
     <string name="field_data_title">Data</string>
     <string name="field_trait_total">"%s" traits</string>
