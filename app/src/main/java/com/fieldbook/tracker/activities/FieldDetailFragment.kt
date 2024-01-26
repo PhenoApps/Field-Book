@@ -51,9 +51,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private lateinit var rootView: View
     private lateinit var fieldNameTextView: TextView
     private lateinit var importDateTextView: TextView
-    private lateinit var importSourceTextView: TextView
-    private lateinit var entryTextView: TextView
-    private lateinit var sortTextView: TextView
+    private lateinit var fieldNarrativeTextView: TextView
     private lateinit var lastEditTextView: TextView
     private lateinit var lastExportTextView: TextView
     private lateinit var traitCountTextView: TextView
@@ -76,11 +74,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         fieldNameTextView = rootView.findViewById(R.id.fieldName)
         fieldNameTextView.text = field.exp_name
         importDateTextView = rootView.findViewById(R.id.importDateTextView)
-        importSourceTextView = rootView.findViewById(R.id.importSourceTextView)
-        entryTextView = rootView.findViewById(R.id.entryTextView)
-        sortTextView = rootView.findViewById(R.id.sortTextView)
-        sortTextView = rootView.findViewById(R.id.sortTextView)
-        sortTextView = rootView.findViewById(R.id.sortTextView)
+        fieldNarrativeTextView = rootView.findViewById(R.id.fieldNarrativeTextView)
         lastEditTextView = rootView.findViewById(R.id.lastEditTextView)
         lastExportTextView = rootView.findViewById(R.id.lastExportTextView)
         traitCountTextView = rootView.findViewById(R.id.traitCountTextView)
@@ -146,6 +140,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         if (!importDate.isNullOrEmpty()) {
             importDateTextView.text = importDate.split(" ")[0]
         }
+
         var source: String? = field.exp_source
         var observationLevel = getString(R.string.field_default_observation_level)
         if (source != null && source != "csv" && source != "excel") { // BrAPI source
@@ -159,10 +154,9 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         } else if (source == null) { // Sample file import
             source = getString(R.string.field_default_import_source)
         }
-        importSourceTextView.text = getString(R.string.field_import_source_message, source)
-        entryTextView.text = "${field.count} ${observationLevel} " + getString(R.string.field_attribute_total, field.attribute_count)
         val sortOrder = if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
-        sortTextView.text = getString(R.string.field_sort_message, sortOrder)
+
+        fieldNarrativeTextView.text = getString(R.string.field_detail_narrative, source, field.count, observationLevel, field.attribute_count, sortOrder)
 
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {
