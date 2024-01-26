@@ -155,19 +155,16 @@
     <string name="field_detail_title">Field Detail</string>
     <string name="field_edit_name">Edit Field Name</string>
 
-    <string name="field_detail_narrative">Imported from "%s" with "%s" "%s" and "%s" attributes. Sorted by "%s"</string>
+    <string name="field_detail_narrative">Imported from "&lt;b>%1$s&lt;/b>" with "&lt;b>%2$s&lt;/b>" "&lt;b>%3$s&lt;/b>" and "&lt;b>%4$s&lt;/b>" attributes. Sorted by "&lt;b>%5$s&lt;/b>"</string>
     <string name="field_default_observation_level">entries</string>
     <string name="field_default_import_source">sample file</string>
     <string name="field_default_sort_order">import order</string>
 
     <string name="field_no_activity">No activity</string>
     <string name="field_data_title">Data</string>
-    <string name="field_trait_total">"%s" traits</string>
-    <string name="field_observation_total">"%s" observations</string>
+    <string name="field_trait_total">"&lt;b>%1$s&lt;/b>" traits</string>
+    <string name="field_observation_total">"&lt;b>%1$s&lt;/b>" observations</string>
     <string name="field_trait_observation_total">"%d" observations</string>
-
-
-
 
     <!-- TRAITS -->
     <!-- Sort -->

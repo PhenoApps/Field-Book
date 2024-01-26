@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -156,7 +157,8 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         }
         val sortOrder = if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
 
-        fieldNarrativeTextView.text = getString(R.string.field_detail_narrative, source, field.count, observationLevel, field.attribute_count, sortOrder)
+        val narrativeString = getString(R.string.field_detail_narrative, source, field.count, observationLevel, field.attribute_count, sortOrder)
+        fieldNarrativeTextView.text = HtmlCompat.fromHtml(narrativeString, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {
@@ -171,8 +173,10 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
             // TODO: add last sync date to FieldObject and retrieve it
         }
 
-        traitCountTextView.text = getString(R.string.field_trait_total, field.trait_count)
-        observationCountTextView.text = getString(R.string.field_observation_total, field.observation_count)
+        val traitString = getString(R.string.field_trait_total, field.trait_count)
+        val observationString = getString(R.string.field_observation_total, field.observation_count)
+        traitCountTextView.text = HtmlCompat.fromHtml(traitString, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        observationCountTextView.text = HtmlCompat.fromHtml(observationString, HtmlCompat.FROM_HTML_MODE_LEGACY)
     }
 
     private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
