@@ -153,7 +153,7 @@ public class FieldAdapterOld extends BaseAdapter {
         if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) != -1) {
             FieldObject field = getItem(position);
 
-            if (field.getExp_source() == null) {
+            if (field.getImport_format() == null) {
                 holder.active.setChecked((ep.getString(GeneralKeys.FIELD_FILE, "")
                         .contentEquals(holder.fieldName.getText())) &&
                         (ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "")
@@ -264,9 +264,7 @@ public class FieldAdapterOld extends BaseAdapter {
         notifyDataSetChanged();
 
         // Check if this is a BrAPI field and show BrAPI info dialog if so
-        if (selectedField.getExp_source() != null &&
-                !selectedField.getExp_source().equals("") &&
-                !selectedField.getExp_source().equals("local")) {
+        if (selectedField.getImport_format().equals("brapi")) {
 
             BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context,
                     context.getResources().getString(R.string.brapi_info_message));

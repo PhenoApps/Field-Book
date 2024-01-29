@@ -258,13 +258,13 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
         holder.count.setText(count + " " + level);
 
         // Set source icon
-        String source = field.getExp_source();
-        Log.d("FieldAdapter", "Source for field " + name + ": " + source);
-        if (source == null || "csv".equals(source)) {
+        String import_format = field.getImport_format();
+        Log.d("FieldAdapter", "Import format for field " + name + ": " + import_format);
+        if (import_format == null || "csv".equals(import_format)) {
             holder.sourceIcon.setImageResource(R.drawable.ic_file_csv);
-        } else if ("excel".equals(source)) {
+        } else if ("excel".equals(import_format)) {
             holder.sourceIcon.setImageResource(R.drawable.ic_file_xls);
-        } else { // brapi import
+        } else if ("brapi".equals(import_format)) {
             holder.sourceIcon.setImageResource(R.drawable.ic_adv_brapi);
         }
 

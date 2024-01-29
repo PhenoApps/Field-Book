@@ -142,9 +142,14 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
             importDateTextView.text = importDate.split(" ")[0]
         }
 
-        var source: String? = field.exp_source
+        var exp_source: String? = field.exp_source
+        if (exp_source.isNullOrEmpty()) { // Sample file import
+            exp_source = field.exp_name + ".csv"
+        }
+
+        var import_format: String? = field.import_format
         var observationLevel = getString(R.string.field_default_observation_level)
-        if (source != null && source != "csv" && source != "excel") { // BrAPI source
+        if (import_format == "brapi") {
             cardViewSync.visibility = View.VISIBLE
             cardViewSync.setOnClickListener {
                 val alert = BrapiSyncObsDialog(requireActivity())
@@ -152,12 +157,10 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
                 alert.show()
             }
             observationLevel = "${field.observation_level}s"
-        } else if (source == null) { // Sample file import
-            source = getString(R.string.field_default_import_source)
         }
         val sortOrder = if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
 
-        val narrativeString = getString(R.string.field_detail_narrative, source, field.count, observationLevel, field.attribute_count, sortOrder)
+        val narrativeString = getString(R.string.field_detail_narrative, exp_source, field.count, observationLevel, field.attribute_count, sortOrder)
         fieldNarrativeTextView.text = HtmlCompat.fromHtml(narrativeString, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
         val lastEdit = field.date_edit

@@ -94,27 +94,6 @@ public class FieldFileObject {
 
             String stem = getFileStem();
 
-            if (path_.getScheme().equals("content")) {
-
-                try (Cursor c = ctx.getContentResolver().query(path_, null, null, null, null)) {
-
-                    if (c != null && c.moveToFirst()) {
-
-                        int index = c.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-
-                        if (index > 0) {
-
-                            stem = c.getString(index);
-
-                        }
-                    }
-                } catch (Exception e) {
-
-                    e.printStackTrace();
-                }
-
-            }
-
             if (stem.contains(".")) {
 
                 int dotIndex = stem.lastIndexOf(".");
@@ -134,7 +113,28 @@ public class FieldFileObject {
                 final int tokenSize = token.length();
                 final int first = path.lastIndexOf(token) + tokenSize;
                 final int last = path.lastIndexOf(".");
-                return path.substring(first, last);
+                String fileStem = path.substring(first, last);
+                if (path_.getScheme().equals("content")) {
+
+                    try (Cursor c = ctx.getContentResolver().query(path_, null, null, null, null)) {
+
+                        if (c != null && c.moveToFirst()) {
+
+                            int index = c.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+
+                            if (index > 0) {
+
+                                fileStem = c.getString(index);
+
+                            }
+                        }
+                    } catch (Exception e) {
+
+                        e.printStackTrace();
+                    }
+
+                }
+                return fileStem;
             } catch (Exception e) {
                 e.printStackTrace();
                 return UUID.randomUUID().toString();
@@ -149,11 +149,7 @@ public class FieldFileObject {
             FieldObject f = new FieldObject();
             f.setExp_name(this.getStem());
             f.setExp_alias(this.getStem());
-            if (this.isCSV()) {
-                f.setExp_source("csv");
-            } else if (this.isExcel()) {
-                f.setExp_source("excel");
-            }
+            f.setExp_source(this.getFileStem());
             return f;
         }
 

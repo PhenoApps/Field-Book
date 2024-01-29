@@ -99,8 +99,8 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     fun allFieldsBrAPI(): Boolean {
         fieldIds.forEach { fieldId ->
             val field = database.getFieldObject(fieldId)
-            val expSource = field?.getExp_source()
-            if (expSource == null || expSource == "csv" || expSource == "excel") {
+            val import_format = field?.import_format
+            if (import_format != "brapi") {
                 return false
             }
         }
@@ -160,10 +160,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 //            return
 //        }
         val activeField = database.getFieldObject(fieldId)
-        if (activeField.getExp_source() == null ||
-            activeField.getExp_source().equals("") ||
-            activeField.getExp_source().equals("local")) {
-
+        if (activeField.getImport_format() != "brapi") {
             Toast.makeText(context, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show()
             return
         }

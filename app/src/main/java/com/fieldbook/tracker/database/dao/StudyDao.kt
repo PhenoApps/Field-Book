@@ -169,6 +169,15 @@ class StudyDao {
             }
             this["study_source"]?.let { source ->
                 it.exp_source = source.toString()
+                // Determine the import format based on the file extension
+                it.import_format = when {
+                    source.toString().endsWith(".csv") -> "csv"
+                    source.toString().endsWith(".xls") || source.toString().endsWith(".xlsx") -> "excel"
+                    source.toString() == "null" -> "csv"
+                    else -> "brapi"
+                }
+            } ?: run {
+                it.import_format = "csv"
             }
             it.count = this["count"].toString()
             it.observation_level = when (val observationLevel = this["observation_levels"]?.toString()) {
