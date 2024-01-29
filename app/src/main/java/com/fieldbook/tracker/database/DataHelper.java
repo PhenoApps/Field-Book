@@ -2659,6 +2659,13 @@ public class DataHelper {
         return ObservationDao.Companion.getAllRepeatedValues(studyId, unit, traitDbId);
     }
 
+    public String getObservationUnitPropertyByPlotId(String column, String plot_id) {
+
+        open();
+
+        return ObservationUnitPropertyDao.Companion.getObservationUnitPropertyByPlotId(column, plot_id);
+    }
+
     /**
      * When the version number changes, this class will recreate the entire
      * database

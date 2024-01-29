@@ -47,7 +47,6 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
     private static CollectActivity originActivity;
     SearchAdapter searchAdapter;
     private SharedPreferences ep;
-    private int rangeUntil;
     private List<SearchDialogDataModel> dataSet;
     public static List<SearchDialogDataModel> savedDataSet;
     public static boolean isSaved;
@@ -61,7 +60,6 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
         ep = requireContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
-//        rangeUntil = originActivity.getDatabase().getRangeColumns().length;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
 
@@ -102,137 +100,133 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
 
             try {
                 // Create the sql query based on user selection
-                String sql1 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from ObservationUnitProperty where ObservationUnitProperty.id is not null ";
-                String sql2 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from observation_variables, ObservationUnitProperty, observations where observations.observation_unit_id = ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " and observations.observation_variable_name = observation_variables.observation_variable_name and observations.observation_variable_field_book_format = observation_variables.observation_variable_field_book_format ";
-
                 String sql = "";
+                String sql1 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from ObservationUnitProperty where ObservationUnitProperty.id is not null";
+                String sql2 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from observation_variables, ObservationUnitProperty, observations where observations.observation_unit_id = ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " and observations.observation_variable_name = observation_variables.observation_variable_name and observations.observation_variable_field_book_format = observation_variables.observation_variable_field_book_format";
 
-                boolean threeTables = false;
-
+                //Array to store all the columns to be displayed in the search results dialog
                 ArrayList<String> columnsList = new ArrayList<>();
                 columnsList.add(ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)));
                 columnsList.add(ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_plot)));
+
                 for (int i = 0; i < dataSet.size(); i++) {
 
                     String c = dataSet.get(i).getAttribute();
                     int s = dataSet.get(i).getImageResourceId();
                     String t = dataSet.get(i).getText();
 
+                    TraitObject traitObject = originActivity.getDatabase().getTraitByName(c);
+                    columnsList.add(c);
 
-                    String value = "";
                     String prefix;
+                    boolean isAttribute; //Checks if 'c' is an attribute or a trait
+                    boolean isCategorical = false; //Checks if 'c' is a categorical trait
 
-                    boolean before;
-
-                    if (i < rangeUntil) {
-                        before = true;
-                        prefix = "ObservationUnitProperty.";
+                    if (traitObject == null) {
+                        isAttribute = true;
+                        prefix = "ObservationUnitProperty." + TICK + c + TICK;
                     } else {
-                        before = false;
-                        threeTables = true;
-                        prefix = "observation_variables.observation_variable_name=";
+                        isAttribute = false;
+                        prefix = "observation_variables.observation_variable_name = " + TICK + c + TICK;
+
+                        if (traitObject.getFormat().equals("categorical") || traitObject.getFormat().equals("multicat") || traitObject.getFormat().equals("qualitative")) {
+                            isCategorical = true;
+                            t = encodeCategorical(t);
+                        }
                     }
 
                     // This is to prevent crashes when the user uses special characters
                     String trunc = DatabaseUtils.sqlEscapeString(t);
 
-                    // We only want to escape the string, but not the encapsulating "'"
-                    // For example 'plot\'s', we only want plot\'s
-                    if (trunc.length() > 3) trunc = trunc.substring(1, trunc.length() - 2);
-
-                    columnsList.add(c);
-
                     switch (s) {
 
                         // 0: Equals to
                         case R.drawable.ic_tb_equal:
-                            if (before)
-                                value = prefix + TICK + c + TICK + " = " + DatabaseUtils.sqlEscapeString(t) + "";
-                            else
-                                value = prefix + TICK + c + TICK + " and value = " + DatabaseUtils.sqlEscapeString(t) + "";
+                            if (isAttribute) prefix = prefix + " = " + trunc;
+                            else prefix = prefix + " and value = " + trunc;
                             break;
 
                         // 1: Not equals to
                         case R.drawable.ic_tb_not_equal:
-                            if (before)
-                                value = prefix + TICK + c + TICK + " != " + DatabaseUtils.sqlEscapeString(t) + "";
-                            else
-                                value = prefix + TICK + c + TICK + " and value != " + DatabaseUtils.sqlEscapeString(t) + "";
+                            if (isAttribute) prefix = prefix + " != " + trunc;
+                            else prefix = prefix + " and value != " + trunc;
                             break;
 
                         // 2: Contains
                         case R.drawable.ic_tb_contains:
-                            if (before)
-                                value = prefix + TICK + c + TICK + " like " + DatabaseUtils.sqlEscapeString("%" + t + "%") + "";
-                            else
-                                value = prefix + TICK + c + TICK + " and observations.value like " + DatabaseUtils.sqlEscapeString("%" + t + "%") + "";
+                            if (isAttribute)
+                                prefix = prefix + " like " + DatabaseUtils.sqlEscapeString("%" + t + "%");
+                            else {
+                                if (!isCategorical)
+                                    prefix = prefix + " and observations.value like " + DatabaseUtils.sqlEscapeString("%" + t + "%");
+                                else {
+                                    String decodedT = CategoryJsonUtil.Companion.decode(t).get(0).getValue();
+                                    prefix = prefix + " and observations.value like " + DatabaseUtils.sqlEscapeString("%[{\"label\":\"%" + decodedT + "%\",\"value\":\"%" + decodedT + "%\"}]%");
+                                }
+                            }
                             break;
-
 
                         // 3: More than
                         case R.drawable.ic_tb_greater_than:
-                            if (before) value = prefix + TICK + c + TICK + " > " + trunc;
-                            else value = prefix + TICK + c + TICK + " and value > " + trunc;
+                            if (isAttribute) prefix = prefix + " > " + trunc;
+                            else prefix = prefix + " and CAST(value AS INTEGER) > " + trunc;
                             break;
 
                         // 4: less than
                         case R.drawable.ic_tb_less_than:
-                            if (before) value = prefix + TICK + c + TICK + " < " + trunc;
-                            else value = prefix + TICK + c + TICK + " and value < " + trunc;
+                            if (isAttribute) prefix = prefix + " < " + trunc;
+                            else prefix = prefix + " and CAST(value AS INTEGER) < " + trunc;
                             break;
 
                     }
 
-                    if (i == dataSet.size() - 1) sql += "and " + value + " ";
-                    else sql += "and " + value + " ";
+                    if (isAttribute) sql += sql1 + " and " + prefix;
+                    else sql += sql2 + " and " + prefix;
+
+                    if (i != (dataSet.size() - 1)) sql += " INTERSECT ";
 
                 }
 
-                if (threeTables) sql = sql2 + sql;
-                else sql = sql1 + sql;
-                Log.d("MyApp", sql);
                 final SearchData[] data = originActivity.getDatabase().getRangeBySql(sql);
                 ObservationModel[] observations = originActivity.getDatabase().getAllObservations();
 
                 if (data != null) {
 
-                    // Loop over each item in the search result and find the trait info for the selected traits
+                    // For each item in the search result and find the values for the selected traits/attributes
                     ArrayList<ArrayList<String>> traitData = new ArrayList<>();
-                    TraitObject[] traits = originActivity.getDatabase().getAllTraitObjects().toArray(new TraitObject[0]);
 
                     for (SearchData searchdata : data) {
                         ArrayList<String> temp = new ArrayList<>();
 
-                        // Checking if the trait is categorical (or multi-cat)
-                        for (String column : columnsList) {
-                            String format = "";
-                            for (TraitObject traitObject : traits) {
-                                if (traitObject.getTrait().equals(column) && (traitObject.getFormat().equals("categorical") || traitObject.getFormat().equals("multicat") || traitObject.getFormat().equals("qualitative"))) {
-                                    format = "categorical";
-                                    break;
+                        // Skipping the first two columns (row and plot)
+                        for (int j = 2; j < columnsList.size(); j++) {
+
+                            String column = columnsList.get(j);
+                            TraitObject traitObject = originActivity.getDatabase().getTraitByName(column);
+
+                            // If column is a trait
+                            if (traitObject != null) {
+                                for (ObservationModel observation : observations) {
+                                    if (observation.getObservation_variable_name().equals(column) && observation.getObservation_unit_id().equals(searchdata.unique)) {
+                                        // If trait is categorical, format the data before adding it to the array
+                                        if (traitObject.getFormat().equals("categorical") || traitObject.getFormat().equals("multicat") || traitObject.getFormat().equals("qualitative")) {
+                                            temp.add(decodeCategorical(observation.getValue()));
+                                        } else {
+                                            temp.add(observation.getValue());
+                                        }
+                                        break;
+                                    }
                                 }
                             }
-
-                            for (ObservationModel observation : observations) {
-                                if (observation.getObservation_variable_name().equals(column) && observation.getObservation_unit_id().equals(searchdata.unique)) {
-                                    // If trait is categorical, it formats the data before adding it to the array
-                                    if (format.equals("categorical")) {
-                                        String v;
-                                        ArrayList<BrAPIScaleValidValuesCategories> cats = CategoryJsonUtil.Companion.decodeCategories(observation.getValue());
-                                        v = cats.get(0).getValue();
-                                        if (cats.size() > 1) {
-                                            for (int i = 1; i < cats.size(); i++)
-                                                v += (", " + cats.get(i).getValue());
-                                        }
-                                        temp.add(v);
-                                    } else temp.add(observation.getValue());
-                                }
+                            // If column is an attribute
+                            else {
+                                temp.add(originActivity.getDatabase().getObservationUnitPropertyByPlotId(column, searchdata.unique));
                             }
                         }
                         traitData.add(temp);
                     }
 
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity(), R.style.AppAlertDialog);
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
 
                     View layout = getLayoutInflater().inflate(R.layout.dialog_search_results, null);
                     builder1.setTitle(R.string.search_results_dialog_title).setCancelable(true).setView(layout);
@@ -320,6 +314,16 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
         return dialog;
     }
 
+    private static String decodeCategorical(String value) {
+        ArrayList<BrAPIScaleValidValuesCategories> cats = CategoryJsonUtil.Companion.decode(value);
+        String v = cats.get(0).getValue();
+        if (cats.size() > 1) {
+            for (int i = 1; i < cats.size(); i++)
+                v += (", " + cats.get(i).getValue());
+        }
+        return v;
+    }
+
     public static List<SearchDialogDataModel> getSavedDataSet() {
         isSaved = false;
         return savedDataSet;
@@ -358,5 +362,11 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
             dataSet.remove(pos);
             searchAdapter.notifyItemRemoved(pos);
         }
+    }
+
+    public String encodeCategorical(String t) {
+        return CategoryJsonUtil.Companion.encode(new ArrayList<BrAPIScaleValidValuesCategories>() {{
+            add(new BrAPIScaleValidValuesCategories().label(t).value(t));
+        }});
     }
 }
