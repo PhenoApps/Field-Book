@@ -79,7 +79,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
      */
     public void refreshLayout(Boolean onNew) {
 
-        getCollectInputView().getRepeatView().refresh(onNew);
+        getCollectInputView().getRepeatView().refresh();
 
     }
 
@@ -134,10 +134,10 @@ public abstract class BaseTraitLayout extends LinearLayout {
                 }
 
                 act.getInputView().setTextColor(Color.parseColor(getDisplayColor()));
-
-                act.getInputView().prepareObservationsExistMode(Arrays.asList(observations));
-
             }
+
+            act.getInputView().prepareObservationsExistMode(Arrays.asList(observations));
+
 
             afterLoadExists(act, value);
 
@@ -293,7 +293,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     /**
      * Calls the collect activities db function to insert an observation row.
-     * @param trait the TraitObject to be updated
+     *
+     * @param trait the trait object to update
      * @param value the Text value to be saved in the row
      */
     public void updateObservation(TraitObject trait, String value) {

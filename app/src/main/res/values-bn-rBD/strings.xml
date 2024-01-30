@@ -78,8 +78,6 @@
     <string name="traits_format_audio">শ্রবণ সংক্রান্ত</string>
     <string name="traits_format_multicategorical">বৃদ্ধি করা</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">বৈশিষ্ট্য যোগ করুন</string>
-    <string name="traits_create_trait">বৈশিষ্ট্য</string>
     <string name="traits_create_format">ছক</string>
     <string name="traits_create_value_default">নির্দিষ্ট</string>
     <string name="traits_create_value_minimum">সর্বনিম্ন</string>
@@ -210,7 +208,7 @@
     <string name="database_reset_warning1">পুনস্থাপনের সময় সমস্ত উপাত্ত মুছে যাবে। আপনি কি ডাটাবেজ পুনস্থাপন করতে চান?</string>
     <string name="database_reset_warning2">কোন ডাটাবেজ পুনস্থাপন করলে তা পুনরায় ফিরে পাওয়া যায় না। ডাটাবেজ পরিষ্কারের পর অ্যাপ বন্ধ হবে। আপনি কি প্রকৃতপক্ষেই নিশ্চিত যে আপনি অগ্রসর হতে চান?</string>
     <string name="database_reset_message">ডাটাবেজ মুছে ফেলা হয়েছে</string>
-    <!-- Beta -->
+    <!-- Experimental -->
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">সম্বন্ধে</string>

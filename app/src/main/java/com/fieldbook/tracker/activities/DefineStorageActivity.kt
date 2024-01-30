@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities
 import android.app.Activity
 import android.os.Bundle
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.utilities.ManufacturerUtil
 import org.phenoapps.utils.BaseDocumentTreeUtil
 
 class DefineStorageActivity: ThemedActivity() {
@@ -12,6 +13,9 @@ class DefineStorageActivity: ThemedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_define_storage)
+        ManufacturerUtil.eInkDeviceSetup(this, prefs, resources) {
+            recreate()
+        }
     }
 
     override fun onBackPressed() {

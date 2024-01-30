@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -7,7 +8,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
-import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.Group
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -162,7 +162,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                 if (prefixTraits.isNotEmpty()) {
 
                     //show a dialog to choose a prefix trait to be displayed
-                    AlertDialog.Builder(this)
+                    AlertDialog.Builder(this, R.style.AppAlertDialog)
                         .setTitle(R.string.dialog_data_grid_header_picker_title)
                         .setSingleChoiceItems(prefixTraits, 0) { dialog, which ->
 
@@ -219,10 +219,11 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                     }
                 }
 
-                val traits = database.allTraitObjects;
+                val traits = database.allTraitObjects
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
-                val cursor = database.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
+                val cursor =
+                    database.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
 
                 if (cursor.moveToFirst()) {
 
@@ -255,7 +256,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                                 mTraits.forEachIndexed { _, variable ->
 
-                                    val index = cursor.getColumnIndex(variable.trait)
+                                    val index = cursor.getColumnIndex(variable.name)
 
                                     if (index > -1) {
 
@@ -263,7 +264,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                                         val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
 
-                                        val repeatedValues = database.getRepeatedValues(studyId, id, variable.id)
+                                        val repeatedValues =
+                                            database.getRepeatedValues(studyId, id, variable.id)
                                         if (repeatedValues.size > 1) {
                                             println("$studyId $id $variable has repeated values...!")
                                         }
@@ -275,7 +277,10 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                                             try {
 
                                                 cellValue = CategoryJsonUtil
-                                                    .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel)
+                                                    .flattenMultiCategoryValue(
+                                                        decode(value),
+                                                        showLabel
+                                                    )
 
                                             } catch (e: Exception) {
 
@@ -327,9 +332,10 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                         mTableView.setAdapter(mAdapter)
 
-                        mAdapter.setAllItems(mTraits.map { HeaderData(it.trait, it.trait) },
+                        mAdapter.setAllItems(mTraits.map { HeaderData(it.name, it.name) },
                             mRowHeaders.map { HeaderData(it, it) },
-                            dataMap.toList())
+                            dataMap.toList()
+                        )
 
                         //scroll to the position of the current trait/plot id
                         if (plotId != null && trait != null) {
@@ -426,7 +432,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
         val choices = repeatedValues.map { it.value }.filter { it.isNotBlank() }.toTypedArray()
 
         //show a dialog to choose which value to navigate to
-        AlertDialog.Builder(this)
+        AlertDialog.Builder(this, R.style.AppAlertDialog)
             .setTitle(R.string.dialog_data_grid_repeated_measures_title)
             .setSingleChoiceItems(choices, 0) { dialog, which ->
 
@@ -434,7 +440,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                 val plotId = value.observation_unit_id
 
-                val traitIndex = mTraits.indexOfFirst { it.id == value.observation_variable_db_id.toString() }
+                val traitIndex =
+                    mTraits.indexOfFirst { it.id == value.observation_variable_db_id.toString() }
 
                 navigateFromValueClicked(plotId, traitIndex, which + 1)
 

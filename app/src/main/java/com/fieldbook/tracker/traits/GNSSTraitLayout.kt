@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
@@ -19,15 +20,12 @@ import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.isVisible
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.database.dao.ObservationDao
-import com.fieldbook.tracker.database.dao.ObservationUnitDao
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
@@ -39,6 +37,7 @@ import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.fieldbook.tracker.utilities.GnssThreadHelper
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -88,7 +87,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     private lateinit var hdopTextView: TextView
     private lateinit var precisionSp: Spinner
     private lateinit var connectGroup: Group
-    private lateinit var connectButton: ImageButton
+    private lateinit var connectButton: FloatingActionButton
     private lateinit var collectButton: ImageButton
     private lateinit var disconnectButton: ImageButton
     private lateinit var progressBar: ProgressBar
@@ -162,6 +161,19 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     }
 
     private val receiver = object : GNSSResponseReceiver() {
+
+        override fun onNmeaMessageReceived(nmea: String?) {
+
+            (mActivity as? CollectActivity)?.let { act ->
+
+                nmea?.let { message ->
+
+                    act.logNmeaMessage(message)
+
+                }
+            }
+        }
+
         override fun onGNSSParsed(parser: NmeaParser) {
 
             currentUtc = parser.utc
@@ -197,7 +209,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private fun initialize() {
 
-        mProgressDialog = AlertDialog.Builder(context)
+        mProgressDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(R.string.gnss_trait_averaging_dialog_title)
             .setMessage(R.string.gnss_trait_averaging_dialog_message)
             .setView(R.layout.dialog_gnss_trait_averaging)
@@ -335,7 +347,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val newLat = latitude.toDouble()
             val newLng = longitude.toDouble()
 
-            val units = database.getAllObservationUnits(studyDbId.toInt()).filter { it.observation_unit_db_id == currentRange.plot_id }
+            val units = database.getAllObservationUnits(studyDbId.toInt())
+                .filter { it.observation_unit_db_id == currentRange.plot_id }
 
             if (units.isNotEmpty()) {
 
@@ -421,7 +434,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         val coordinates = "${json.geometry.coordinates[1]}; ${json.geometry.coordinates[0]}; ${json.properties?.get("fix")}"
 
-        ObservationUnitDao.updateObservationUnit(unit, json.toJson().toString())
+        database.updateObservationUnit(unit, json.toJson().toString())
 
         collectInputView.text = coordinates
 
@@ -469,10 +482,10 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             //truncate average result based on original location fix
             avgLat = if (avgLat.toString().length > info.latLength)
                 avgLat.toString().substring(0 until info.latLength).toDouble()
-                else avgLat
+            else avgLat
             avgLng = if (avgLng.toString().length > info.lngLength)
                 avgLng.toString().substring(0 until info.lngLength).toDouble()
-                else avgLng
+            else avgLng
 
             //convert back to strings and truncate based on original quality
             avgLat to avgLng
@@ -494,7 +507,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private fun alertLocationUpdate(f: () -> Unit) {
 
-        AlertDialog.Builder(context)
+        AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(R.string.trait_gnss_geo_coord_update_dialog_title)
             .setMessage(R.string.trait_gnss_geo_coord_update_dialog_message)
             .setNegativeButton(android.R.string.cancel) { dialog, _ ->
@@ -527,7 +540,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                     bluetoothMap[bd.name] = bd
                 }
 
-                val builder = AlertDialog.Builder(context)
+                val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
                 builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
 
                 val internalGpsString = context.getString(R.string.pref_behavior_geonav_internal_gps_choice)
@@ -784,11 +797,12 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-        val observation = ObservationDao.getObservation(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
+        val observation =
+            database.getObservation(studyDbId, currentRange.plot_id, currentTrait.id, rep)
 
         if (observation != null) {
 
-            ObservationDao.deleteTrait(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
+            database.deleteTrait(studyDbId, currentRange.plot_id, currentTrait.id, rep)
 
             val units = controller.getDatabase().getAllObservationUnits(studyDbId.toInt())
                 .filter { it.observation_unit_db_id == currentRange.plot_id }

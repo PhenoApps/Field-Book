@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-public class FileExploreActivity extends ThemedActivity {
+public class FileExploreActivity extends ActivityDialog {
 
     public static final String EXTRA_RESULT_KEY = "com.fieldbook.tracker.activities.FieldEditorActivity.extras.RESULT";
 
@@ -57,6 +57,7 @@ public class FileExploreActivity extends ThemedActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         if (getIntent() != null && getIntent().getExtras() != null) {
 
@@ -66,8 +67,6 @@ public class FileExploreActivity extends ThemedActivity {
             final String title = getIntent().getExtras().getString("title");
 
             path = DocumentFile.fromTreeUri(this, Uri.parse(data));
-
-            super.onCreate(savedInstanceState);
 
             if (path != null) {
 

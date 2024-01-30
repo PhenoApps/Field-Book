@@ -61,8 +61,6 @@
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_audio">Áudio</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Adicionar um caractere</string>
-    <string name="traits_create_trait">Caractere</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Padrão</string>
     <string name="traits_create_value_minimum">Mínimo</string>
@@ -170,7 +168,7 @@
     <string name="database_reset_warning1">Todos os dados serão excluídos em Redefinir. Você tem certeza disso?</string>
     <string name="database_reset_warning2">Essa ação não pode ser revertida. O aplicativo vai fechar depois de limpar o banco de dados. Você ainda deseja continuar?</string>
     <string name="database_reset_message">O banco de dados foi excluído</string>
-    <!-- Beta -->
+    <!-- Experimental -->
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Sobre</string>

@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -28,6 +27,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.BluetoothChooseCallback;
 import com.fieldbook.tracker.utilities.BluetoothUtil;
 import com.fieldbook.tracker.utilities.Constants;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,9 +61,9 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     private Spinner barcodefield;
     private Spinner labelcopies;
 
-    private ImageButton connectPrinter;
-    private  ImageView label;
-    private ImageButton printLabel;
+    private FloatingActionButton connectPrinter;
+    private ImageView label;
+    private FloatingActionButton printLabel;
 
     private BluetoothUtil mBluetoothUtil;
 
@@ -88,7 +88,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
     @Override
     public int layoutId() {
-        return R.layout.trait_labelprint;
+        return R.layout.trait_label_print;
     }
 
     private boolean checkPermissions(Activity act) {

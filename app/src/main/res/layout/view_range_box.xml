@@ -59,7 +59,7 @@
             android:gravity="right"
             android:paddingRight="10dp"
             android:text="@string/search_results_dialog_range"
-            android:textSize="@dimen/text_size_xlarge"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
 
         <TextView
@@ -69,7 +69,7 @@
             android:gravity="right"
             android:paddingRight="10dp"
             android:text="@string/search_results_dialog_plot"
-            android:textSize="@dimen/text_size_xlarge"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -95,8 +95,7 @@
             android:inputType="textVisiblePassword"
             android:singleLine="true"
             android:text=""
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
 
         <TextView
@@ -107,8 +106,7 @@
             android:padding="0dp"
             android:singleLine="true"
             android:text=""
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_xlarge"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold"
             android:visibility="gone" />
 
@@ -121,8 +119,7 @@
             android:inputType="textVisiblePassword"
             android:singleLine="true"
             android:text=""
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
 
         <TextView
@@ -132,8 +129,7 @@
             android:gravity="center"
             android:singleLine="true"
             android:text=""
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_xlarge"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold"
             android:visibility="gone" />
     </LinearLayout>

@@ -59,8 +59,6 @@
     <string name="traits_format_boolean">Boolesch</string>
     <string name="traits_format_photo">Foto</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Merkmal hinzufügen</string>
-    <string name="traits_create_trait">Merkmal</string>
     <string name="traits_create_value_default">Vorgegeben</string>
     <string name="traits_create_categories_title">Kategorien</string>
     <string name="traits_create_photo_maximum">Maximale Anzahl an Fotos</string>
@@ -162,7 +160,7 @@
     <string name="database_reset_warning1">Alle Daten werden gelöscht beim Zurücksetzen der Datenbank. Sind Sie sicher?</string>
     <string name="database_reset_warning2">Dieser Vorgang kann nicht rückgängig gemacht werden. Die Applikation wird gestoppt nach dem die Datenbank gelöscht wurde. Wollen Sie den Vorgang trotzdem fortsetzen?</string>
     <string name="database_reset_message">Datenbank wurde gelöscht</string>
-    <!-- Beta -->
+    <!-- Experimental -->
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Information</string>

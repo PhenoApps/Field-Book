@@ -58,8 +58,6 @@
     <string name="traits_format_photo">Footoo</string>
     <string name="traits_format_audio">Sagalee</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Amala dabali</string>
-    <string name="traits_create_trait">Amala</string>
     <string name="traits_create_format">Haala itti baasuu barbaaddu</string>
     <string name="traits_create_value_default">Akkuma jirutti</string>
     <string name="traits_create_value_minimum">Hundarra xiqqaa</string>
@@ -166,7 +164,7 @@
     <string name="database_reset_warning1">Ragaan hindinuu ni bada. Dhugaa keetii?</string>
     <string name="database_reset_warning2">Wanti dalagame duubatti hin deeb\'u. Meeshan erga kuusaa qul\'qullessen booda hojii ni dhaaba. Akkanumatti itti fufuu ni barbaaddaa?</string>
     <string name="database_reset_message">Kuusan badee jira</string>
-    <!-- Beta -->
+    <!-- Experimental -->
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Waa\'ee</string>

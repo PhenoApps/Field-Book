@@ -15,7 +15,7 @@
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:src="@drawable/trait_chevron_left"
-        app:layout_constraintBottom_toTopOf="@id/traitsProgressBar"
+        app:layout_constraintBottom_toTopOf="@id/traitDetails"
         app:layout_constraintTop_toTopOf="@+id/traitTypeTv"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -32,7 +32,7 @@
         android:src="@drawable/trait_chevron_right"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/traitTypeTv"
-        app:layout_constraintBottom_toTopOf="@id/traitsProgressBar" />
+        app:layout_constraintBottom_toTopOf="@id/traitDetails" />
 
 
     <TextView

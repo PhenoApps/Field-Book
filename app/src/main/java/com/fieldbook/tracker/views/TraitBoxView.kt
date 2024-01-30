@@ -87,8 +87,8 @@ class TraitBoxView : ConstraintLayout {
         val flipFlopArrows: Boolean =
             controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
         if (flipFlopArrows) {
-            traitLeft = rangeBoxView.getRangeLeft()!!
-            traitRight = rangeBoxView.getRangeRight()!!
+            traitLeft = rangeBoxView.getRangeLeft()
+            traitRight = rangeBoxView.getRangeRight()
         } else {
             traitLeft = findViewById(R.id.traitLeft)
             traitRight = findViewById(R.id.traitRight)
@@ -257,12 +257,12 @@ class TraitBoxView : ConstraintLayout {
         val visibleTraits = ArrayList<String>()
         for (traitObject in traits) {
             if (traitObject.visible) {
-                visibleTraits.add(traitObject.trait)
+                visibleTraits.add(traitObject.name)
             }
         }
 
         traitsProgressBar.max = visibleTraits.size
-        traitsProgressBar.progress = visibleTraits.indexOf(currentTrait?.trait) + 1
+        traitsProgressBar.progress = visibleTraits.indexOf(currentTrait?.name) + 1
     }
 
     fun getNewTraits(): Map<String, String> {
@@ -286,11 +286,11 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun getTraitLeft(): ImageView {
-        return findViewById(R.id.traitLeft) as ImageView
+        return findViewById<ImageView>(R.id.traitLeft)
     }
 
     fun getTraitRight(): ImageView {
-        return findViewById(R.id.traitRight) as ImageView
+        return findViewById<ImageView>(R.id.traitRight)
     }
 
     fun existsNewTraits(): Boolean {
@@ -321,7 +321,7 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun existsTrait(): Boolean {
-        return newTraits!!.containsKey(currentTrait!!.trait)
+        return newTraits.containsKey(currentTrait!!.name)
     }
 
     fun createSummaryText(plotID: String?): String {
@@ -357,7 +357,7 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun remove(trait: TraitObject, plotID: String, rep: String) {
-        remove(trait.trait, plotID, rep)
+        remove(trait.name, plotID, rep)
     }
 
     private fun createTraitOnTouchListener(
