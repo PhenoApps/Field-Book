@@ -153,7 +153,7 @@
                             android:id="@+id/lastEditTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/field_no_activity" />
+                            android:text="@string/no_activity" />
                     </LinearLayout>
 
                     <ImageView
@@ -212,7 +212,7 @@
                             android:id="@+id/lastExportTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/field_no_activity"  />
+                            android:text="@string/no_activity"  />
                     </LinearLayout>
 
                     <ImageView
@@ -264,7 +264,7 @@
                             android:id="@+id/lastSyncTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/field_no_activity" />
+                            android:text="@string/no_activity" />
                     </LinearLayout>
 
                     <ImageView

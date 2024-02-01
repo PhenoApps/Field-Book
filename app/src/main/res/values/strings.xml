@@ -160,11 +160,21 @@
     <string name="field_default_observation_level">entries</string>
     <string name="field_default_sort_order">import order</string>
 
-    <string name="field_no_activity">No activity</string>
     <string name="field_data_title">Data</string>
     <string name="field_trait_total">"&lt;b>%1$s&lt;/b>" traits</string>
     <string name="field_observation_total">"&lt;b>%1$s&lt;/b>" observations</string>
     <string name="field_trait_observation_total">"%d" observations</string>
+
+    <!-- Semantic dates -->
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <plurals name="years_ago">
+        <item quantity="one">%d year ago</item>
+        <item quantity="other">%d years ago</item>
+    </plurals>
+    <string name="no_activity">No activity</string>
+    <string name="invalid_date">Invalid date</string>
+
 
     <!-- TRAITS -->
     <!-- Sort -->

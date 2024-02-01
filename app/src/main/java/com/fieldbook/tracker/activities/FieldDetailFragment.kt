@@ -35,9 +35,13 @@ import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
+import com.fieldbook.tracker.utilities.SemanticDateUtil
+import com.fieldbook.tracker.utilities.DateResult
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 
 @AndroidEntryPoint
@@ -139,7 +143,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         cardViewSync.setOnClickListener(null)
         val importDate = field.date_import
         if (!importDate.isNullOrEmpty()) {
-            importDateTextView.text = importDate.split(" ")[0]
+            importDateTextView.text = formatSemanticDateForDisplay(importDate)
         }
 
         var exp_source: String? = field.exp_source
@@ -165,12 +169,18 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {
-            lastEditTextView.text = lastEdit.split(" ")[0] // append operator name to last edit if available
+            lastEditTextView.text = formatSemanticDateForDisplay(lastEdit)
+        } else {
+            getString(R.string.no_activity)
         }
+
         val lastExport = field.date_export
         if (!lastExport.isNullOrEmpty()) {
-            lastExportTextView.text = lastExport.split(" ")[0]
+            lastExportTextView.text = formatSemanticDateForDisplay(lastExport)
+        } else {
+            getString(R.string.no_activity)
         }
+
         val lastSync = ""
         if (!lastSync.isNullOrEmpty()) {
             // TODO: add last sync date to FieldObject and retrieve it
@@ -180,6 +190,26 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         val observationString = getString(R.string.field_observation_total, field.observation_count)
         traitCountTextView.text = HtmlCompat.fromHtml(traitString, HtmlCompat.FROM_HTML_MODE_LEGACY)
         observationCountTextView.text = HtmlCompat.fromHtml(observationString, HtmlCompat.FROM_HTML_MODE_LEGACY)
+    }
+
+    fun formatSemanticDateForDisplay(dateStr: String?): String {
+        val context = requireContext() // Ensure you have context
+        val result = SemanticDateUtil.getSemanticDate(dateStr)
+
+        return when (result.result) {
+            DateResult.TODAY -> context.getString(R.string.today)
+            DateResult.YESTERDAY -> context.getString(R.string.yesterday)
+            DateResult.THIS_YEAR -> {
+                val formattedDate = dateStr?.split(" ")?.get(0)?.let { datePart ->
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val date = dateFormat.parse(datePart)
+                    SimpleDateFormat("MMM dd", Locale.getDefault()).format(date)
+                }
+                formattedDate ?: "Invalid Date"
+            }
+            DateResult.YEARS_AGO -> resources.getQuantityString(R.plurals.years_ago, result.yearsAgo, result.yearsAgo)
+            DateResult.INVALID_DATE -> context.getString(R.string.invalid_date)
+        }
     }
 
     private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
