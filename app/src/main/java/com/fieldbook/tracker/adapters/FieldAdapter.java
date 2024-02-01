@@ -80,6 +80,18 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
         }
     }
 
+    public void selectAll() {
+        for (int i = 0; i < list.size(); i++) {
+            selectedItems.put(i, true);
+        }
+        notifyDataSetChanged();
+        isInSelectionMode = true;
+
+        if (callback != null) {
+            callback.onItemSelected(selectedItems.size());
+        }
+    }
+
     public int getSelectedItemCount() {
         return selectedItems.size();
     }

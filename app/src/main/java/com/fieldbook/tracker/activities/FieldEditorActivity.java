@@ -268,7 +268,14 @@ public class FieldEditorActivity extends ThemedActivity
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             int itemId = item.getItemId();
-            if (itemId == R.id.menu_export) {
+            if (itemId == R.id.menu_select_all) {
+                mAdapter.selectAll();
+                int selectedCount = mAdapter.getSelectedItemCount();
+                if (actionMode != null && customTitleView != null) {
+                    customTitleView.setText(getString(R.string.selected_count, selectedCount));
+                }
+                return true;
+            } else if (itemId == R.id.menu_export) {
                 List<Integer> selectedFieldIds = getSelectedFieldIds();
                 if (!selectedFieldIds.isEmpty()) {
                     exportUtil.exportMultipleFields(selectedFieldIds);
@@ -276,11 +283,11 @@ public class FieldEditorActivity extends ThemedActivity
                 mAdapter.exitSelectionMode();
                 mode.finish();
                 return true;
-            } else if (itemId == R.id.menu_archive) {
-                Toast.makeText(getApplicationContext(), "Archive not yet implemented", Toast.LENGTH_SHORT).show();
-                mAdapter.exitSelectionMode();
-                mode.finish();
-                return true;
+//            } else if (itemId == R.id.menu_archive) {
+//                Toast.makeText(getApplicationContext(), "Archive not yet implemented", Toast.LENGTH_SHORT).show();
+//                mAdapter.exitSelectionMode();
+//                mode.finish();
+//                return true;
             } else if (itemId == R.id.menu_delete) {
                 createDeleteItemAlertDialog().show();
                 return true;
