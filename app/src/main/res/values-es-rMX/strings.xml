@@ -510,10 +510,22 @@
     <string name="pref_geonav_update_interval_summary">El tiempo entre actualizaciones de ubicación es %ss.</string>
     <string name="pref_geonav_pair">Vincular Dispositivo</string>
     <string name="pref_behavior_geonav_internal_gps_choice">GPS interno</string>
+    <string name="choose_paired_bluetooth_devices_title">Elige tu dispositivo Bluetooth vinculado.</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Sonido</string>
     <string name="preferences_sound_primary_order_sound">Sonido de orden primario</string>
     <string name="preferences_sound_primary_order_sound_description">Sonido de notificación cuando cambia el orden primario</string>
+    <string name="preferences_sound_entry_title">Sonido de navegación de entrada</string>
+    <string name="preferences_sound_entry_description">Sonido de notificación al moverse entre entradas</string>
+    <string name="preferences_sound_cycle_traits_title">Sonido del ciclo de variables</string>
+    <string name="preferences_sound_cycle_traits_description">Sonido de notificación cuando el ciclo de las variables de la entrada fue finalizada</string>
+    <string name="preferences_sound_delete_obs_title">Sonido de Eliminar Observación</string>
+    <string name="preferences_sound_delete_obs_description">Sonido de notificación cuando la observación se elimina en la actividad de Captura.</string>
+    <string name="preferences_category_audio_tts_title">Texto a Voz</string>
+    <string name="preferences_general_tts_title">Texto a Voz</string>
+    <string name="preferences_general_tts_description">Activar Texto a Voz cuando los datos son introducidos en la actividad de Captura.</string>
+    <string name="preferences_general_tts_language_title">Elegir idioma</string>
+    <string name="preferences_general_tts_language_description">Elige un idioma de Texto a Voz compatible.</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
     <!-- Database -->
     <string name="database_dialog_title">Base de datos</string>
@@ -523,7 +535,16 @@
     <string name="database_reset_warning1">Todos los datos serán eliminados. ¿Estás seguro(a) de que quieres restablecer la base de datos?</string>
     <string name="database_reset_warning2">Un restablecimiento de la base de datos no se puede revertir. La aplicación se cerrará después de borrar la base de datos. ¿Estás realmente seguro(a) de que quieres continuar?</string>
     <string name="database_reset_message">Base de datos ha sido eliminada</string>
+    <string name="share_file_title">Enviando archivo…</string>
     <!-- Experimental -->
+    <string name="preferences_experimental_title">Experimental</string>
+    <string name="preferences_experimental_stable_title">Estable</string>
+    <string name="preferences_experimental_beta_title">Beta</string>
+    <string name="preferences_experimental_alpha_title">Alpha</string>
+    <string name="pref_experimental_repeated_values_title">Medidas Repetidas</string>
+    <string name="pref_experimental_repeated_values_summary">Permite capturar varios valores para cada entrada/variable</string>
+    <string name="pref_experimental_repeated_values_disabled_title">Medidas Repetidas Desactivadas</string>
+    <string name="pref_experimental_repeated_values_disabled_message">Desactivando esta función hará que algunos valores repetidos no estén disponibles.</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Acerca de</string>
