@@ -258,12 +258,13 @@
     <!--- Datagrid -->
     <string name="act_data_grid_cursor_failed">La grilla de datos no pudo cargar sus datos.</string>
     <string name="dialog_data_grid_header_picker_title">Elegir Fila de Encabezados</string>
-    <string name="dialog_data_grid_repeated_measures_title">Seleccionar Observación</string>
+    <string name="dialog_data_grid_repeated_measures_title">Elegir Observación</string>
     <string name="menu_action_header_view_data_grid_title">Actualizar Fila de Encabezados</string>
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">El dispositivo no contiene el hardware necesario para esta opción</string>
     <string name="trait_delete_warning_photo">¿Estás seguro(a) de que quieres eliminar esta imagen?</string>
     <string name="trait_photo_capture_button_content_description">Presione para abrir una vista de la cámara para capturar.</string>
+    <string name="photo_failed_to_delete">Error al eliminar el archivo.</string>
     <!-- Trait Layout: GNSS -->
     <string name="trait_gnss_geo_coord_update_dialog_title">Advertencia de Actualización de Coordenadas</string>
     <string name="trait_gnss_geo_coord_update_dialog_message">Tiene una coordenada guardada para esta unidad, ¿está seguro que desea actualizarla?</string>
@@ -328,13 +329,27 @@
     <string name="printer_empty">Impresora vacía</string>
     <string name="printer_not_connected">Impresora no conectada</string>
     <string name="no_device_paired">Ningún dispositivo vinculado</string>
+    <string name="trait_labelprint_connect_button_description">Botón que conecta una impresora.</string>
+    <string name="trait_labelprint_preview_description">Vista previa de etiquetas.</string>
+    <string name="trait_labelprint_print_button_description">Botón que imprime etiquetas configuradas en este diálogo.</string>
+    <string name="printer_success">Impresión exitosa</string>
     <!--- Trait Layout: Counter -->
     <!--- Trait Layout: Location -->
     <!--- Text to Speech Strings -->
+    <string name="act_collect_barcode_btn_tts">Abriendo escáner de código de barras</string>
+    <string name="trait_location_saved_tts">Ubicación guardada.</string>
     <!--- Summary -->
+    <string name="fragment_summary_toolbar_title">Resúmen</string>
+    <string name="menu_fragment_summary_filter_title">Filtro</string>
+    <string name="dialog_fragment_summary_neutral_button">Alternar Todos</string>
+    <string name="fragment_summary_prev_button_text">Anterior</string>
+    <string name="fragment_summary_next_button_text">Siguiente</string>
     <!--- Repeated measures -->
     <string name="dialog_multi_measure_delete">Eliminar</string>
     <!--- GeoNav -->
+    <string name="dialog_geonav_collect_neutral_reconnect">Reconectar</string>
+    <string name="dialog_geonav_collect_title">Ajustes de GeoNav</string>
+    <string name="dialog_geonav_collect_reconnect">Reconectar</string>
     <string name="dialog_geonav_collect_reset_end_toast_message">Reiniciar conexión</string>
     <string name="dialog_geonav_precision_loss_title">Pérdida de Precisión de Ubicación</string>
     <string name="dialog_geonav_precision_loss_msg">Su precisión preferida se ha perdido.</string>
@@ -403,6 +418,7 @@
     <string name="move_to_unique_id_text_or_scan">Entrada de Texto con Escaneo por Cámara Ppcional</string>
     <string name="move_to_unique_id_text_or_scan_description">El botón de barra de herramientas abre un diálogo con entrada de texto para un id. único y un botón opcional para escaneo</string>
     <string name="move_to_unique_id_direct_camera_scan">Escaneo Directo con Cámara</string>
+    <string name="move_to_unique_id_direct_camera_scan_description">El botón de barra de herramientas abre la cámara del dispositivo para escanear un codigo de barras con id. único</string>
     <string name="preferences_general_feature_datagrid">Cuadrícula de datos</string>
     <string name="preferences_general_feature_datagrid_description">Muestra datos capturados en una tabla con parcelas y variables</string>
     <!-- Profile -->
@@ -411,13 +427,30 @@
     <string name="profile_name_first">Nombre</string>
     <string name="profile_name_last">Apellido</string>
     <string name="profile_reset">Borrar ajustes</string>
+    <string name="preferences_profile_settings">Ajustes del Perfil</string>
+    <string name="pref_profile_title">Persona Requerida</string>
+    <string name="pref_profile_require_interval_title">Tiempo entre verificaciones</string>
+    <string name="pref_profile_crashlytics_user_id_enabled">ID Único</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">Esta configuración opcional registrará un ID único y anónimo que ayudará al equipo de desarrollo a rastrear y resolver fallos.</string>
+    <string name="pref_profile_crashlytics_refresh_title">Refrescar ID</string>
+    <string name="pref_profile_crashlytics_refresh_summary">Esto asignará un nuevo ID único.</string>
     <!-- Appearance -->
     <string name="preferences_appearance_title">Apariencia</string>
     <string name="preferences_appearance_system_category_title">Aplicación</string>
     <string name="preferences_appearance_theme_title">Tema</string>
+    <string name="preferences_appearance_theme_summary">Modificar colores específicos o todo el tema de Fieldbook</string>
+    <string name="preferences_theme_theme_title">Tema de la App</string>
     <string name="theme_default">Predeterminado</string>
+    <string name="theme_high_contrast">Contraste Alto</string>
+    <string name="theme_blue">Azul</string>
+    <string name="preferences_theme_text_size_title">Tamaño del Texto</string>
+    <string name="text_size_s">Pequeño</string>
+    <string name="text_size_m">Medio (Predeterminado)</string>
+    <string name="text_size_xl">Extra Grande</string>
+    <string name="preferences_theme_data_saved_title">Color de datos guardados</string>
     <string name="preferences_appearance_language">Idioma</string>
     <string name="preferences_appearance_language_description">Idioma establecido por el sistema</string>
+    <string name="preference_language_default">Idioma del Sistema</string>
     <string name="preferences_appearance_tutorial_description">Agrega un icono de tutorial a las pantallas de captura, ajustes, campos y variables.</string>
     <string name="preferences_appearance_collection_category_title">Pantalla de captura</string>
     <string name="preferences_appearance_toolbar_customize">Personalizar iconos en barra de herramientas</string>
@@ -449,8 +482,34 @@
     <string name="preferences_general_use_day_number_description">Usar número de día del año para capturar datos en lugar de la fecha</string>
     <string name="preferences_general_skip_entries_with_data">Omitir entradas con datos</string>
     <string name="preferences_general_skip_entries_with_data_description">Omite entradas que tienen datos para la variable actual</string>
+    <string name="preferences_general_flip_flop_arrows">Invertir Flechas</string>
+    <string name="preferences_general_flip_flop_arrows_description">Intercambia las funciones de las flechas de parcela y variable</string>
     <!-- GeoNav -->
+    <string name="preferences_geonav_title">GeoNav</string>
+    <string name="pref_geonav_enable_title">Habilitar GeoNav</string>
+    <string name="pref_geonav_enable_summary">Habilita el uso de la ubicación del dispositivo para navegar por los Campos.</string>
+    <string name="pref_geonav_search_method_title">Método de Búsqueda</string>
+    <string name="pref_geonav_search_method_summary">El método %s utilizado para buscar parcelas en GeoNav.</string>
+    <string name="pref_geonav_method_distance">Distancia</string>
+    <string name="pref_geonav_method_trapezoid">Trapezoidal</string>
+    <string name="pref_behavior_geonav_parameters_category_title">Parámetros</string>
+    <string name="pref_geonav_search_trapezoid_d1_title">Base del Trapezoide (km)</string>
+    <string name="pref_geonav_search_trapezoid_d1_summary">La base más corta del trapezoide es de %s km.</string>
+    <string name="pref_geonav_search_trapezoid_d2_title">Distancia del Trapezoide (km)</string>
+    <string name="pref_geonav_search_trapezoid_d2_summary">La distancia desde el usuario al extremo opuesto del trapezoide es %s km.</string>
+    <string name="pref_geonav_search_angle_summary">GeoNav crea un trapezoide delante del usuario, el ángulo más cercano al usuario se define como %s°.</string>
+    <string name="pref_geonav_search_angle_title">Ángulo de Búsqueda GeoNav (grados)</string>
+    <string name="pref_geonav_log">Registro de GeoNav</string>
     <string name="pref_geonav_log_off">Apagado</string>
+    <string name="pref_geonav_log_off_description">Desactivado: No hay registros que se estén grabando</string>
+    <string name="pref_geonav_log_limited">Limitado</string>
+    <string name="pref_geonav_log_limited_description">Limitado: Registro de entrada más cercana en almacenamiento/geonav/limited_log.txt</string>
+    <string name="pref_geonav_log_full">Completo</string>
+    <string name="pref_geonav_log_full_description">Completo: Registrando todas las actualizaciones de ubicación y los pasos del algoritmo en almacenamiento/geonav/log.txt</string>
+    <string name="pref_geonav_update_interval_title">Intervalo de Actualización (s)</string>
+    <string name="pref_geonav_update_interval_summary">El tiempo entre actualizaciones de ubicación es %ss.</string>
+    <string name="pref_geonav_pair">Vincular Dispositivo</string>
+    <string name="pref_behavior_geonav_internal_gps_choice">GPS interno</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Sonido</string>
     <string name="preferences_sound_primary_order_sound">Sonido de orden primario</string>
