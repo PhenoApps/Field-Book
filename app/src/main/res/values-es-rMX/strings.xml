@@ -170,6 +170,9 @@
     <string name="traits_format_go_pro_camera">GoPro</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Variable</string>
+    <string name="trait_creator_title_layout">Diseño de Variable</string>
+    <string name="trait_creator_parameters_title">Parámetros %s</string>
+    <string name="activity_traits_new_button_content_description">Crear una nueva variable.</string>
     <string name="traits_create_name">Nombre</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Predeterminado</string>
@@ -185,23 +188,53 @@
     <string name="traits_create_warning_name_blank">Nombre de la variable no puede estar vacío</string>
     <string name="traits_create_warning_duplicate">Variable ya existe</string>
     <string name="traits_create_warning_numeric_required">Los valores predeterminado, mínimo y máximo deben ser numéricos</string>
+    <string name="dialog_new_trait_add_cat_button_text">Agregar</string>
+    <string name="traits_create_categories_value_text">Ingrese aquí el valor de la categoría</string>
+    <string name="list_item_category_delete_content_description">Eliminar categoría.</string>
+    <string name="dialog_new_trait_add_category_content_description">Agregar nueva categoría.</string>
+    <string name="list_item_traits_grid_content_description">Alternar selección</string>
+    <string name="dialog_trait_parameters_title">Parámetros de Variable</string>
+    <string name="traits_create_warning_percent_magnitude_relation">Magnitud del Error de relación</string>
+    <string name="trait_parameter_default_value_number_format_error">Debe ser un número</string>
+    <string name="traits_create_unknown_error">Ocurrió un error desconocido: %s</string>
+    <string name="trait_creator_parameter_warning_infinite">Número no puede ser infinito</string>
+    <string name="trait_creator_parameter_warning_nan">Número no puede ser NaN</string>
+    <string name="trait_creator_parameter_warning_negative">Número no debe ser negativo</string>
+    <string name="trait_creator_parameter_warning_too_big">Número demasiado grande</string>
+    <string name="trait_creator_parameter_warning_too_small">Número demasiado pequeño</string>
+    <string name="list_item_trait_parameter_categories_value_hint">Escriba un nombre de categoría a agregar</string>
+    <string name="list_item_trait_parameter_name_hint">Ingrese nombre de variable</string>
+    <string name="dialog_new_trait_observations_exist_error">Ya existen observaciones para esta variable. Sólo se pueden editar los siguientes parámetros.</string>
+    <string name="dialog_new_trait_error_must_select_a_layout">Debe seleccionar un diseño.</string>
+    <string name="trait_creator_parameter_warning_integer_required">Entero requerido.</string>
+    <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Las variables no se pueden actualizar a las variables BrAPI.</string>
+    <string name="required">Requerido</string>
+    <string name="traits_create_warning_percent_value_required">Valor requerido</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Valor menor al mínimo permitido</string>
     <string name="trait_error_maximum_value">Valor mayor al máximo permitido</string>
     <string name="trait_error_disease_severity">Severidad ya almacenada</string>
+    <string name="act_collect_study_names_empty">El estudio seleccionado tiene vacíos los nombres únicos, primarios, o secundarios.</string>
     <!-- Toolbar -->
     <string name="main_toolbar_resources">Recursos</string>
     <string name="main_trait_details">Detalles de la variable</string>
     <string name="main_infobar_data_missing">No hay datos</string>
     <string name="main_toolbar_next_entry_no_data">Siguiente entrada vacía</string>
     <!-- InfoBars -->
+    <string name="dialog_att_chooser_attributes">Atributos</string>
     <string name="dialog_att_chooser_traits">Variables</string>
+    <string name="dialog_att_chooser_other">Otro</string>
+    <string name="dialog_collect_att_chooser_title">Elegir atributo</string>
+    <string name="infobars_attribute_placeholder">Seleccionar</string>
+    <string name="field_name_attribute">campo_nombre</string>
     <!-- ID/Barcode Search -->
+    <string name="act_collect_barcode_search_exists_in_other_field">Este ID está en %s</string>
     <string name="main_toolbar_moveto_no_match">Sin valor coincidente</string>
     <string name="main_toolbar_moveto">Ir a ID</string>
     <string name="main_toolbar_barcode_scan">Escanear codigo de barras</string>
     <string name="main_toolbar_moveto_scan">Escanear</string>
+    <string name="act_collect_plot_with_code_not_found">Código de barras no encontrado.\n</string>
     <!-- Search  -->
     <string name="main_toolbar_search">Buscar</string>
     <string name="search_dialog_add">Agregar</string>
@@ -217,9 +250,16 @@
     <string name="search_results_dialog_plot">Parcela</string>
     <string name="search_results_missing">Sin resultados</string>
     <!--- Profile -->
+    <string name="activity_collect_dialog_verify_collector">Es esto aún</string>
     <string name="activity_collect_dialog_verify_no_button">No</string>
     <string name="activity_collect_dialog_verify_yes_button">Sí</string>
+    <string name="activity_collect_dialog_neutral_button">Modificar ajustes</string>
+    <string name="activity_collect_dialog_new_collector">¿Desea guardar el nombre de la persona capturando datos?</string>
     <!--- Datagrid -->
+    <string name="act_data_grid_cursor_failed">La grilla de datos no pudo cargar sus datos.</string>
+    <string name="dialog_data_grid_header_picker_title">Elegir Fila de Encabezados</string>
+    <string name="dialog_data_grid_repeated_measures_title">Seleccionar Observación</string>
+    <string name="menu_action_header_view_data_grid_title">Actualizar Fila de Encabezados</string>
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">El dispositivo no contiene el hardware necesario para esta opción</string>
     <string name="trait_delete_warning_photo">¿Estás seguro(a) de que quieres eliminar esta imagen?</string>
