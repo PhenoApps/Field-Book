@@ -51,26 +51,80 @@
     <string name="changelog_title">Registro de Cambios</string>
     <!-- FIELDS -->
     <!-- General -->
+    <string name="list_item_field_popup_menu_content_description">Abre un menú para el campo seleccionado.</string>
     <!-- Sort -->
+    <string name="fields_sort_update">Ordenar</string>
+    <string name="sort_dialog_saved">Orden actualizado</string>
+    <string name="sort_dialog_error_saving">Error al actualizar el orden</string>
+    <string name="list_item_field_sort_delete_content_description">Eliminar el atributo de ordenación.</string>
+    <string name="dialog_field_sort_title">Ordenar Entradas</string>
+    <string name="list_item_field_sort_drag_content_description">Arrastre para mover elemento.</string>
+    <string name="dialog_field_sort_no_attributes_found">No se encontraron atributos.</string>
+    <string name="dialog_field_sort_no_more_attributes_found">Se han utilizado todos los atributos.</string>
+    <string name="dialog_field_sort_delete_all_content_description">Elimina todas las entradas ordenadas.</string>
+    <string name="dialog_field_sort_toggle_order_content_description">Invierte el orden.</string>
+    <string name="dialog_field_sort_add_content_description">Abre un diálogo para agregar un nuevo atributo para ordenar.</string>
     <!-- Delete -->
     <string name="fields_delete">Eliminar</string>
     <string name="fields_delete_study">Eliminar campo</string>
     <string name="fields_delete_study_confirmation">¿Estás seguro(a) de que quieres eliminar este campo? Esto eliminará todos los datos de este campo.</string>
     <!-- Import -->
+    <string name="fields_toolbar_add_field">Importar Campo</string>
     <string name="import_dialog_title_fields">Importar campo</string>
     <string name="import_dialog_unique">Identificador único</string>
     <string name="import_dialog_primary">Orden primario</string>
     <string name="import_dialog_secondary">Orden secundario</string>
     <string name="import_error_unsupported">Este tipo de archivo no es compatible actualmente</string>
+    <string name="import_error_columns_replaced">Los nombres de columnas contienen caracteres no válidos que se reemplazarán durante la importación.</string>
     <string name="import_error_column_name">El nombre de la columna en el archivo importado no puede ser:</string>
     <string name="import_error_unique_characters_illegal">La columna seleccionada contiene caracteres que no se pueden usar en el identificador único</string>
     <string name="import_error_column_choice">Las columnas no se pueden usar para la misma asignación</string>
     <string name="import_error_unique">La columna de identificador único contiene duplicados o ya se ha utilizado en un archivo diferente</string>
     <string name="import_error_format_field">Solo los archivos CSV y XLS se pueden importar como campo</string>
+    <string name="act_field_editor_no_suitable_columns_error">El archivo a importar no tiene columnas adecuadas entre las que elegir.</string>
+    <string name="import_runnable_db_failed_to_switch">La base de datos no pudo cambiar los Campos.</string>
+    <string name="import_runnable_create_field_data_failed">Error al crear datos del Campo para la línea %d en el archivo.</string>
+    <string name="import_runnable_duplicates_skipped">Se han encontrado columnas duplicadas, solo se utilizará la primera instancia.</string>
     <string name="fields_study_exists_message">Esta campo ya existe</string>
+    <string name="fields_study_and_obs_exists_message">Este Campo ya está importado en este nivel de observación.</string>
+    <string name="act_field_editor_failed_to_read_columns">Fieldbook no pudo cargar el archivo.</string>
+    <string name="act_field_editor_load_file_failed">Ocurrió un error durante la carga del archivo.</string>
+    <string name="act_field_editor_file_open_failed">Error al abrir el archivo.</string>
     <!-- Field Creator  -->
+    <string name="dialog_field_creator_ask_size">Por favor, elige un nombre y tamaño de Campo.</string>
+    <string name="dialog_field_creator_ask_start_point">Por favor, elige un punto de partida del Campo.</string>
+    <string name="dialog_field_creator_ask_pattern">Por favor, elige un patrón de Campo.</string>
+    <string name="dialog_field_creator_ask_name_hint">Nombre</string>
+    <string name="dialog_field_creator_ask_row_hint">Filas</string>
+    <string name="dialog_field_creator_ask_columns_hint">Columnas</string>
+    <string name="dialog_field_creator_top_left">Arriba a la izquierda</string>
+    <string name="dialog_field_creator_bottom_left">Abajo a la izquierda</string>
+    <string name="dialog_field_creator_top_right">Arriba a la derecha</string>
+    <string name="dialog_field_creator_bottom_right">Abajo a la derecha</string>
+    <string name="dialog_field_creator_insert_field">Creando filas de Campo: %1$s por columnas: %2$s</string>
+    <string name="dialog_field_creator_insert_field_complete">Creando filas de Campo: %1$s por columnas: %2$s …completo.</string>
+    <string name="dialog_field_creator_insert_plot">Insertando parcela %1$s en la fila %2$s columna %3$s</string>
+    <string name="dialog_field_creator_review_title">Revisión</string>
+    <string name="dialog_field_creator_size_group_error">Por favor, ingrese un nombre y formato válidos.</string>
+    <string name="dialog_field_creator_field_name_not_unique">El nombre del Campo ya está en uso.</string>
+    <string name="dialog_field_creator_large_field">Se detecta un Campo grande, la transacción puede tardar mucho.</string>
+    <string name="dialog_field_creator_linear_button_content_desc">Botón para elegir el patrón de parcelas lineal.</string>
+    <string name="dialog_field_creator_zig_button_content_desc">Botón para elegir el patrón de parcelas en zig-zag.</string>
+    <string name="dialog_field_creator_review_image_content_desc">Imagen mostrando la orientación y el patrón de las parcelas.</string>
     <!-- Geo-Navigate to Field -->
+    <string name="menu_fields_plot_by_distance_title">Seleccionar Campo más cercano</string>
+    <string name="activity_field_editor_no_field_found">No se encontraron coordenadas.</string>
+    <string name="activity_field_editor_switch_field">"Cambiar al Campo %s"</string>
+    <string name="activity_field_editor_switch_field_action">Cambiar</string>
+    <string name="activity_field_editor_no_location_yet">No se ha encontrado ninguna ubicación.</string>
+    <string name="activity_field_editor_switch_field_same">El Campo más cercano ya ha sido seleccionado.</string>
     <!-- Unimplemented -->
+    <string name="fields_study_statistics">Estadísticas</string>
+    <string name="fields_date_imported">Fecha de importación</string>
+    <string name="fields_date_edited">Editar fecha</string>
+    <string name="fields_date_exported">Fecha de exportación</string>
+    <string name="fields_summary">Resumen del Campo</string>
+    <string name="fields_options">Opciones</string>
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Ordenar</string>
@@ -108,6 +162,7 @@
     <string name="traits_format_barcode">Codigo de barras</string>
     <string name="traits_format_labelprint">Impresión de etiqueta Zebra</string>
     <!-- Trait Creation Dialog -->
+    <string name="traits_create_name">Nombre</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Predeterminado</string>
     <string name="traits_create_value_minimum">Mínimo</string>
@@ -161,10 +216,51 @@
     <string name="trait_error_hardware_missing">El dispositivo no contiene el hardware necesario para esta opción</string>
     <string name="trait_delete_warning_photo">¿Estás seguro(a) de que quieres eliminar esta imagen?</string>
     <!-- Trait Layout: GNSS -->
+    <string name="trait_gnss_geo_coord_update_dialog_title">Advertencia de Actualización de Coordenadas</string>
+    <string name="trait_gnss_geo_coord_update_dialog_message">Tiene una coordenada guardada para esta unidad, ¿está seguro que desea actualizarla?</string>
+    <string name="trait_gnss_chip_manual_text">Manual</string>
+    <string name="trait_gnss_chip_10s_text">10s</string>
+    <string name="trait_gnss_chip_5s_text">5s</string>
+    <string name="gnss_trait_averaging_dialog_title">Capturando coordenadas</string>
+    <string name="gnss_trait_averaging_dialog_message">Por favor, espere mientras se promedian las ubicaciones entrantes…</string>
+    <string name="trait_gnss_collect_button_content_description">Captura la ubicación actual.</string>
+    <string name="trait_gnss_disconnect_button_content_description">Desconecta el dispositivo GPS actual.</string>
+    <string name="trait_gnss_connect_button_content_description">Abre un diálogo con posibles dispositivos GPS para conectar.</string>
+    <string name="gnss_trait_averaging_switch_text">Promedio</string>
+    <string name="trait_gnss_precision_header">Arreglo Necesario:</string>
+    <string name="trait_gnss_accuracy_header">Acc.:</string>
+    <string name="trait_gnss_hdop_header">HDOP:</string>
+    <string name="trait_gnss_latitude_header">Lat.:</string>
+    <string name="trait_gnss_longitude_header">Long.:</string>
+    <string name="trait_gnss_altitude_header">Alt.:</string>
+    <string name="trait_gnss_time_header">UTC:</string>
     <!-- Trait Layout: Date -->
+    <string name="trait_date_calendar_picker_content_description">Botón que abre un selector de calendario.</string>
+    <string name="trait_date_save_button_content_description">Esto guardará la fecha seleccionada actual.</string>
+    <string name="dialog_date_picker_neutral_button">Hoy</string>
     <!-- Trait Layout: Boolean -->
+    <string name="trait_boolean_on">Activado</string>
+    <string name="trait_boolean_off">Apagado</string>
     <!-- Trait Layout: GoPro -->
+    <string name="trait_go_pro_capture_button_text">Capturar\n</string>
+    <string name="trait_go_pro_await_device_title">Buscando GoPros</string>
+    <string name="trait_go_pro_await_ble_title">Esperando Conexión GoPro BLE</string>
+    <string name="trait_go_pro_await_ble_message">Comunicando con GoPro BLE, esto puede tardar un minuto.</string>
+    <string name="trait_go_pro_await_ap_title">Esperando GoPro AP</string>
+    <string name="trait_go_pro_await_ap_message">Conectando a la red, esto puede tardar un minuto. \n SSID: %s \n Pass: %s</string>
+    <string name="trait_go_pro_await_ap_neutral">Conexión Manual</string>
+    <string name="trait_go_pro_camera_delete_photo_title">Eliminar Imagen</string>
+    <string name="go_pro_layout_black_11_not_detected">Esta Variable fue creada para una GoPro Black 11, por favor contacte con los desarrolladores para implementar su modelo GoPro.\n</string>
+    <string name="go_pro_frag_connect_btn_content_description">Conectar a una cámara GoPro.\n</string>
+    <string name="trait_go_pro_capture_content_description">Capturar una imagen desde un dispositivo GoPro conectado.\n</string>
     <!-- Trait Layout: USB Camera -->
+    <string name="trait_usb_camera_zoom_in_button_text">Acercar</string>
+    <string name="trait_usb_camera_zoom_out_button_text">Alejar</string>
+    <string name="trait_usb_camera_zoom_out_content_description">Alejar</string>
+    <string name="trait_usb_camera_zoom_in_content_description">Acercar</string>
+    <string name="trait_usb_camera_delete_photo">Eliminar Imagen USB</string>
+    <string name="trait_usb_camera_capture_content_description">Capturar una foto.</string>
+    <string name="trait_usb_camera_capture_button_text">Capturar</string>
     <!--- Trait Layout: Zebra label print -->
     <string name="trait_layout_data_stored">Salvado</string>
     <string name="trait_layout_print_label_size_title">Tamaño:</string>
@@ -174,6 +270,15 @@
     <string name="trait_layout_print_text_field_title_4">Texto4:</string>
     <string name="trait_layout_print_barcode_field_title">Codigo de barras</string>
     <string name="trait_layout_print_label_copies_title">Copias:</string>
+    <string name="trait_layout_print_label_simple_text">simple</string>
+    <string name="trait_layout_print_label_detailed_text">detallada</string>
+    <string name="trait_layout_print_label_date_option">fecha</string>
+    <string name="trait_layout_print_label_blank_option">en blanco</string>
+    <string name="printer_open">Impresora abierta</string>
+    <string name="printer_paused">Impresora pausada</string>
+    <string name="printer_empty">Impresora vacía</string>
+    <string name="printer_not_connected">Impresora no conectada</string>
+    <string name="no_device_paired">Ningún dispositivo vinculado</string>
     <!--- Trait Layout: Counter -->
     <!--- Trait Layout: Location -->
     <!--- Text to Speech Strings -->
@@ -181,9 +286,21 @@
     <!--- Repeated measures -->
     <string name="dialog_multi_measure_delete">Eliminar</string>
     <!--- GeoNav -->
+    <string name="dialog_geonav_collect_reset_end_toast_message">Reiniciar conexión</string>
+    <string name="dialog_geonav_precision_loss_title">Pérdida de Precisión de Ubicación</string>
+    <string name="dialog_geonav_precision_loss_msg">Su precisión preferida se ha perdido.</string>
     <!--- Content Descriptions -->
+    <string name="view_trait_box_right_content_description">Ir a la siguiente variable.</string>
+    <string name="view_trait_box_left_content_description">Ir a la variable anterior.</string>
+    <string name="view_range_box_left_button_content_description">Navega a la entrada anterior.</string>
+    <string name="view_range_box_right_button_content_description">Navega a la entrada anterior.</string>
+    <string name="act_collect_delete_value_button_content_description">Elimina el valor actual.</string>
+    <string name="act_collect_barcode_button_content_description">Iniciar escáner de código de barras.</string>
+    <string name="act_collect_na_value_button_content_description">Rellenar el valor con no disponible.</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
+    <string name="export_source_local">Local</string>
+    <string name="export_source_brapi">BrAPI</string>
     <string name="export_dialog_title">Exportar Datos</string>
     <string name="export_format_database">Base de datos</string>
     <string name="export_format_table">Tabla</string>
@@ -201,14 +318,25 @@
     <string name="export_error_missing_column">Se debe seleccionar el tipo de columna de campo</string>
     <string name="export_error_missing_trait">Se debe seleccionar el tipo de variable</string>
     <string name="export_overwrite">Sobrescribir exportación anterior</string>
+    <string name="dialog_export_bundle_data_cb_text">Empaquetar datos multimedia con archivo de exportación.</string>
     <!-- Citation -->
     <string name="citation_title">Cita</string>
     <string name="citation_string">Si utiliza Field Book para la investigación, cite la siguiente publicación:</string>
     <!-- SETTINGS -->
     <!-- General -->
+    <string name="preferences_general_title">General</string>
     <string name="preferences_general_system_title">Dato predeterminado</string>
+    <string name="preferences_general_files_base_directory_title">Definir lugar de almacenamiento</string>
+    <string name="preferences_general_files_base_directory_description">Migrar o definir una nueva estructura de directorio raíz. Los archivos de exportación se guardarán aquí automáticamente.</string>
     <string name="preferences_source_default_import">Origen de importación predeterminado</string>
     <string name="preferences_source_default_export">Origen de exportación predeterminado</string>
+    <string name="pref_general_location_collection_title">Ubicación capturada</string>
+    <string name="pref_general_location_collection_summary">Seleccione un método para capturar la ubicación mientras se utiliza Fieldbook.</string>
+    <string name="location_level_off">Apagado</string>
+    <string name="pref_general_location_collection_off_summary">No se capturarán datos de ubicación para ningún fenotipo.</string>
+    <string name="location_level_study">Campo / Estudio</string>
+    <string name="pref_general_location_collection_study_summary">Se capturará la ubicación para el primer fenotipo dentro de un Campo.</string>
+    <string name="location_level_observation_unit">Parcela / Unidad de Observación</string>
     <string name="preferences_general_feature_next_missing">Siguiente entrada sin datos</string>
     <string name="preferences_general_feature_next_missing_description">Agrega un botón a la barra de herramientas que salta a la siguiente entrada sin datos para el la variable actual</string>
     <string name="preferences_general_skip_entries_default">Predeterminado</string>
@@ -259,6 +387,7 @@
     <string name="preferences_general_skip_entries_with_data">Omitir entradas con datos</string>
     <string name="preferences_general_skip_entries_with_data_description">Omite entradas que tienen datos para la variable actual</string>
     <!-- GeoNav -->
+    <string name="pref_geonav_log_off">Apagado</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Sonido</string>
     <string name="preferences_sound_primary_order_sound">Sonido de orden primario</string>
@@ -277,6 +406,7 @@
     <!-- App  -->
     <string name="about_title">Acerca de</string>
     <string name="about_version_title">Versión</string>
+    <string name="about_manual_title">Manual</string>
     <string name="about_rate">Califica esta app</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Líder del Projecto</string>
