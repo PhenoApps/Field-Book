@@ -171,8 +171,8 @@ class StudyDao {
                 it.exp_source = source.toString()
                 // Determine the import format based on the file extension
                 it.import_format = when {
-                    source.toString().endsWith(".csv") -> "csv"
-                    source.toString().endsWith(".xls") || source.toString().endsWith(".xlsx") -> "excel"
+                    source.toString().equals("csv") || source.toString().endsWith(".csv") -> "csv"
+                    source.toString().equals("excel") || source.toString().endsWith(".xls") || source.toString().endsWith(".xlsx") -> "excel"
                     source.toString() == "null" -> "csv"
                     else -> "brapi"
                 }
