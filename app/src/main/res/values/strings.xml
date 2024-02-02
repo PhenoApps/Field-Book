@@ -249,6 +249,7 @@
     <string name="traits_create_warning_percent_value_required">Value required</string>
 
     <string name="select_trait">Select Trait</string>
+    <string name="modify_traits">Modify</string>
 
 
     <!-- COLLECT -->

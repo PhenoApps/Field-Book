@@ -4,17 +4,18 @@ import android.app.AlertDialog
 import android.app.Service
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.View
 import android.view.View.OnTouchListener
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat.startActivity
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.interfaces.CollectTraitController
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -183,7 +184,7 @@ class TraitBoxView : ConstraintLayout {
                 .toString()
         )
 
-        traitTypeTv.text = currentTrait?.trait
+        traitTypeTv.text = currentTrait?.name
 
 
         val imm =
@@ -242,6 +243,13 @@ class TraitBoxView : ConstraintLayout {
                 android.R.string.ok
             ) {
                     d: DialogInterface, _: Int -> d.dismiss()
+            }
+            .setNeutralButton(
+                R.string.modify_traits
+            ) {
+                    _: DialogInterface, _: Int ->
+                    val intent = Intent(context, TraitEditorActivity::class.java)
+                    startActivity(context, intent, null)
             }
         val dialog = builder.create()
         dialog.show()
