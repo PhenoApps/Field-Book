@@ -263,6 +263,7 @@
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">El dispositivo no contiene el hardware necesario para esta opción</string>
     <string name="trait_delete_warning_photo">¿Estás seguro(a) de que quieres eliminar esta imagen?</string>
+    <string name="trait_photo_capture_button_content_description">Presione para abrir una vista de la cámara para capturar.</string>
     <!-- Trait Layout: GNSS -->
     <string name="trait_gnss_geo_coord_update_dialog_title">Advertencia de Actualización de Coordenadas</string>
     <string name="trait_gnss_geo_coord_update_dialog_message">Tiene una coordenada guardada para esta unidad, ¿está seguro que desea actualizarla?</string>
