@@ -545,6 +545,9 @@
     <string name="pref_experimental_repeated_values_summary">Permite capturar varios valores para cada entrada/variable</string>
     <string name="pref_experimental_repeated_values_disabled_title">Medidas Repetidas Desactivadas</string>
     <string name="pref_experimental_repeated_values_disabled_message">Desactivando esta función hará que algunos valores repetidos no estén disponibles.</string>
+    <string name="pref_experimental_enable_field_audio_title">Activar Audio en Campo</string>
+    <string name="pref_experimental_enable_field_audio_summary">Activar función de grabación de audio para todo el campo.</string>
+    <string name="menu_collect_start_field_audio">Iniciar Grabadora</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Acerca de</string>
@@ -568,8 +571,10 @@
     <string name="brapi_base_url_desc">La URL base para el servidor conectado por BrAPI</string>
     <string name="brapi_choice_to_make_default_negative">Cancelar</string>
     <string name="brapi_choice_to_make_default_positive">Guardar</string>
+    <string name="preferences_brapi_server_add">Enviar un servidor</string>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Salvar y Autorizar</string>
+    <string name="brapi_display_name">Mostrar Nombre</string>
     <string name="brapi_revoke_auth">Cerrar sesión</string>
     <string name="brapi_auth_btn">Iniciar sesión en el Sitio</string>
     <string name="brapi_auth_success">Autorización por BrAPI exitosa</string>
@@ -582,12 +587,14 @@ para sincronizar tus datos.
 
 ¿Desea autenticarse ahora?</string>
     <!-- BrAPI Import -->
+    <string name="import_dialog_title_brapi_fields">Importar Campo con BrAPI</string>
     <string name="brapi_load_data_button">Cargar Campos</string>
     <string name="brapi_load_traits_button">Cargar Variables</string>
     <string name="brapi_save_data_button">Salvar Campo</string>
     <string name="brapi_study_name">Nombre</string>
     <string name="brapi_study_description">Descripción</string>
     <string name="brapi_study_location">Ubicación</string>
+    <string name="brapi_observation_level">Nivel de Observación</string>
     <string name="brapi_study_num_traits">Variables</string>
     <string name="brapi_not_found">ERROR: El sistema de destino no admite esta operación vía BrAPI.</string>
     <string name="brapi_studies_error">Error al cargar los estudios.</string>
@@ -601,10 +608,15 @@ para sincronizar tus datos.
     <string name="brapi_fields_filter_by_trial">Filtrar por trial</string>
     <string name="brapi_programs_load">Cargar programas</string>
     <string name="brapi_programs_select">Seleccionar programa</string>
+    <string name="brapi_programs_error">Error al cargar los programas.</string>
     <string name="brapi_trials_load">Cargar trials</string>
     <string name="brapi_trials_select">Seleccionar trial</string>
+    <string name="brapi_trials_error">Error al cargar los ensayos.</string>
     <string name="brapi_save_trait">Guardar variables</string>
     <string name="brapi_must_configure_url">Debe configurar una URL de BrAPI válida en Ajustes antes de continuar</string>
+    <string name="brapi_warning_select_program">Por favor, seleccione un programa</string>
+    <string name="brapi_warning_select_trial">Por favor, seleccione un ensayo</string>
+    <string name="brapi_warning_select_study">Por favor, seleccione un campo</string>
     <string name="brapi_export_failed">Exportación por BrAPI fallida</string>
     <string name="brapi_export_permission_deny">ERROR: no tiene los permisos para enviar datos al sistema especificado.</string>
     <string name="brapi_export_not_supported">ERROR: El sistema de destino no admite el envío de observaciones vía BrAPI.</string>
@@ -619,7 +631,16 @@ para sincronizar tus datos.
     <string name="brapi_error_saving_all_traits">Error al guardar las variables. No se guardaron variables.</string>
     <string name="brapi_error_saving_some_traits">Error al guardar algunas variables. Algunas variables no se guardaron</string>
     <string name="brapi_traits_saved_success">Variables seleccionadas guardadas con éxito.</string>
+    <string name="brapi_obs_sync_menu_name">Sincronizar</string>
+    <string name="brapi_obs_header_name">Descargando Observaciones para Estudio:</string>
+    <string name="number_traits_label">Número de Variables:</string>
+    <string name="number_observation_label">Número de Observaciones:</string>
+    <string name="no_observations_warning">No Se Encontraron Observaciones Para El Estudio. Por favor, Presione Cancelar.</string>
+    <string name="brapi_skipped_traits">Variables obtenidas con éxito. Variables %1$d ignoradas debido a la falta de \"Variable\" BrAPI</string>
+    <string name="brapi_study_incompatible">Este estudio BrAPI es actualmente incompatible con Fieldbook. Los estudios deben incluir fila y columna en el encabezado.</string>
+    <string name="act_collect_no_plots">Este estudio no tiene parcelas guardadas.</string>
     <!-- BrAPI Export -->
+    <string name="act_brapi_export_title">Exportación BrAPI</string>
     <string name="brapi_export_button">Exportar</string>
     <string name="brapi_export_title">Estadísticas de exportación de BrAPI</string>
     <string name="brapi_export_observations">Observaciones</string>
@@ -637,6 +658,7 @@ para sincronizar tus datos.
     <string name="brapi_export_skipped_user_created_images">Imágenes de variables creadas por el usuario</string>
     <string name="brapi_export_images">Imágenes</string>
     <string name="brapi_delete_message">No se puede eliminar la observación BrAPI sincronizada, utilizando NA en su lugar</string>
+    <string name="act_brapi_export_image_load_failed">Error al cargar la imagen.</string>
     <!-- Pagination -->
     <string name="next">Siguiente</string>
     <string name="prev">Anterior</string>
@@ -645,8 +667,11 @@ para sincronizar tus datos.
     <string name="device_offline_warning">Dispositivo sin conexión: conéctese a una red e intente nuevamente</string>
     <string name="brapi_info_message">Las variables y los campos importados vía BrAPI podrán exportar sus observaciones a través de la exportación BrAPI.
 Las variables y los campos creados manualmente o importados a través de CSV deberán exportarse a través de formato CSV.</string>
+    <string name="brapi_na">NA</string>
     <!-- TUTORIAL -->
+    <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">¿Desea habilitar el tutorial? Esta configuración se puede cambiar en Ajustes.</string>
+    <string name="tutorial_main_infobars_title">InfoBars</string>
     <string name="tutorial_main_infobars_description">Los InfoBars muestran datos adicionales para cada entrada y se pueden cambiar usando los menús desplegables.</string>
     <string name="tutorial_main_traits_title">Variables</string>
     <string name="tutorial_main_traits_description">Las flechas pequeñas verdes mueven entre las variables.</string>
@@ -694,4 +719,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_traits_format_description">Los diferentes formatos de variables se indican con diferentes iconos.</string>
     <string name="tutorial_traits_visibility_title">Visibilidad de variable</string>
     <string name="tutorial_traits_visibility_description">Las variables se pueden habilitar/deshabilitar usando casilla de verificación.</string>
+    <string name="shutter_capture_content_description">Botón obturador para tomar una imagen.</string>
+    <string name="dialog_ask_high_contrast_title">¿Cambiar al Tema de Contraste Alto?</string>
+    <string name="dialog_ask_high_contrast_message">Se ha detectado el dispositivo eInk, sugerimos cambiar al tema de contraste alto para una experiencia óptima</string>
 </resources>
