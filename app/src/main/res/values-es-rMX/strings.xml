@@ -25,6 +25,7 @@
     <string name="permission_rationale_storage_import">La importación de archivos requiere acceso a los archivos del dispositivo.</string>
     <string name="permission_rationale_storage_export">La exportación de datos requiere acceso a los archivos del dispositivo.</string>
     <string name="permission_rationale_trait_features">La captura de datos requiere acceso a los archivos, el micrófono y la cámara del dispositivo.</string>
+    <string name="permission_ask_bluetooth">Por favor, acepte los permisos de bluetooth.</string>
     <!-- Config Activity  -->
     <string name="settings_fields">Campos</string>
     <string name="settings_traits">Variables</string>
@@ -33,12 +34,16 @@
     <string name="settings_advanced">Ajustes</string>
     <string name="settings_profile">Perfil</string>
     <!-- Config Activity Fuzzy Search  -->
+    <string name="act_config_fuzzy_search_failed">La base de datos no pudo recuperar un campo o parcela con el código: %s</string>
+    <string name="act_config_fuzzy_search_error">Algo salió mal al buscar %s</string>
+    <string name="act_config_search_fab_content_description">Busca en todas las parcelas y campos para cargar/navegar al elemento codificado en barras.</string>
     <!-- File manager  -->
     <string name="import_source_local">Almacenamiento local</string>
     <string name="import_source_cloud">Almacenamiento en la nube</string>
     <string name="import_source_ask">Preguntar siempre</string>
     <string name="import_dialog_importing">Espere...</string>
     <string name="import_error_general">Error en importación</string>
+    <string name="act_file_explorer_no_file_error">No se han encontrado directorios de Fieldbook.</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">El campo no ha sido cargado. Por favor cargue un campo antes de capturar datos.</string>
     <string name="warning_traits_missing">No existen variables. Cree variables antes de capturar datos.</string>
