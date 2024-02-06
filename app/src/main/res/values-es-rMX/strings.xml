@@ -61,9 +61,9 @@
     <string name="list_item_field_sort_drag_content_description">Arrastre para mover elemento.</string>
     <string name="dialog_field_sort_no_attributes_found">No se encontraron atributos.</string>
     <string name="dialog_field_sort_no_more_attributes_found">Se han utilizado todos los atributos.</string>
-    <string name="dialog_field_sort_delete_all_content_description">Elimina todas las entradas ordenadas.</string>
+    <string name="dialog_field_sort_delete_all_content_description">Elimina todas las entradas de ordenación.</string>
     <string name="dialog_field_sort_toggle_order_content_description">Invierte el orden.</string>
-    <string name="dialog_field_sort_add_content_description">Abre un diálogo para agregar un nuevo atributo para ordenar.</string>
+    <string name="dialog_field_sort_add_content_description">Abre un diálogo para agregar un nuevo atributo para ordenar por.</string>
     <!-- Delete -->
     <string name="fields_delete">Eliminar</string>
     <string name="fields_delete_study">Eliminar campo</string>
@@ -91,9 +91,9 @@
     <string name="act_field_editor_load_file_failed">Ocurrió un error durante la carga del archivo.</string>
     <string name="act_field_editor_file_open_failed">Error al abrir el archivo.</string>
     <!-- Field Creator  -->
-    <string name="dialog_field_creator_ask_size">Por favor, elige un nombre y tamaño de Campo.</string>
-    <string name="dialog_field_creator_ask_start_point">Por favor, elige un punto de partida del Campo.</string>
-    <string name="dialog_field_creator_ask_pattern">Por favor, elige un patrón de Campo.</string>
+    <string name="dialog_field_creator_ask_size">Por favor, eligir un nombre y tamaño de Campo.</string>
+    <string name="dialog_field_creator_ask_start_point">Por favor, eligir un punto de partida del Campo.</string>
+    <string name="dialog_field_creator_ask_pattern">Por favor, eligir un patrón de Campo.</string>
     <string name="dialog_field_creator_ask_name_hint">Nombre</string>
     <string name="dialog_field_creator_ask_row_hint">Filas</string>
     <string name="dialog_field_creator_ask_columns_hint">Columnas</string>
@@ -333,7 +333,7 @@
     <string name="trait_labelprint_preview_description">Vista previa de etiquetas.</string>
     <string name="trait_labelprint_print_button_description">Botón que imprime etiquetas configuradas en este diálogo.</string>
     <string name="printer_success">Impresión exitosa</string>
-    <string name="bluetooth_printer_choose_device_title">Elige el dispositivo bluetooth desde el que imprimir.</string>
+    <string name="bluetooth_printer_choose_device_title">Eligir el dispositivo Bluetooth desde el que imprimir.</string>
     <!--- Trait Layout: Counter -->
     <string name="trait_counter_layout_failed">Error al guardar el contador, por favor vuelva a crear esta variable.</string>
     <!--- Trait Layout: Location -->
@@ -560,7 +560,7 @@
     <string name="pref_geonav_update_interval_summary">El tiempo entre actualizaciones de ubicación es %ss.</string>
     <string name="pref_geonav_pair">Vincular Dispositivo</string>
     <string name="pref_behavior_geonav_internal_gps_choice">GPS interno</string>
-    <string name="choose_paired_bluetooth_devices_title">Elige tu dispositivo Bluetooth vinculado.</string>
+    <string name="choose_paired_bluetooth_devices_title">Eligir tu dispositivo Bluetooth vinculado.</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Sonido</string>
     <string name="preferences_sound_primary_order_sound">Sonido de orden primario</string>
@@ -647,8 +647,8 @@
     <string name="brapi_base_url">URL base</string>
     <string name="brapi_base_url_desc">La URL base para el servidor conectado por BrAPI</string>
     <string name="brapi_choice_to_make_default_dialog_title">Hacer de este servidor BrAPI como predeterminado:</string>
-    <string name="brapi_choice_to_make_default_import">Fuente de Importación</string>
-    <string name="brapi_choice_to_make_default_export">Fuente de Exportación</string>
+    <string name="brapi_choice_to_make_default_import">Origen de Importación</string>
+    <string name="brapi_choice_to_make_default_export">Origen de Exportación</string>
     <string name="brapi_choice_to_make_default_negative">Cancelar</string>
     <string name="brapi_choice_to_make_default_positive">Guardar</string>
     <string name="brapi_edit_display_name">Editar Nombre a Mostrar</string>
