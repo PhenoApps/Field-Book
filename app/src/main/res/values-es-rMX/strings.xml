@@ -333,7 +333,9 @@
     <string name="trait_labelprint_preview_description">Vista previa de etiquetas.</string>
     <string name="trait_labelprint_print_button_description">Botón que imprime etiquetas configuradas en este diálogo.</string>
     <string name="printer_success">Impresión exitosa</string>
+    <string name="bluetooth_printer_choose_device_title">Elige el dispositivo bluetooth desde el que imprimir.</string>
     <!--- Trait Layout: Counter -->
+    <string name="trait_counter_layout_failed">Error al guardar el contador, por favor vuelva a crear esta variable.</string>
     <!--- Trait Layout: Location -->
     <!--- Text to Speech Strings -->
     <string name="act_collect_barcode_btn_tts">Abriendo escáner de código de barras</string>
