@@ -9,6 +9,7 @@ import android.util.Log;
  */
 public class FieldObject {
     private int exp_id;
+    private String study_db_id;
     private String exp_name;
     private String exp_alias;
     private String unique_id;
@@ -63,6 +64,14 @@ public class FieldObject {
 
     public void setExp_id(int exp_id) {
         this.exp_id = exp_id;
+    }
+
+    public String getStudy_db_id() {
+        return study_db_id;
+    }
+
+    public void setStudy_db_id(String study_db_id) {
+        this.study_db_id = study_db_id;
     }
 
     public String getExp_name() {

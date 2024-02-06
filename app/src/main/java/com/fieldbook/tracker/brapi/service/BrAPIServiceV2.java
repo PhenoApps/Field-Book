@@ -1155,8 +1155,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         else observationLevel = selectedObservationLevel.getObservationLevelName();
         try {
             FieldObject field = new FieldObject();
+            field.setStudy_db_id(studyDetails.getStudyDbId());
             field.setExp_name(studyDetails.getStudyName());
-            field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
+            field.setExp_alias(studyDetails.getStudyName());
             field.setExp_species(studyDetails.getCommonCropName());
             field.setCount(studyDetails.getNumberOfPlots().toString());
             field.setObservation_level(observationLevel);

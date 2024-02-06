@@ -168,7 +168,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         }
         val sortOrder = if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
 
-        val narrativeString = getString(R.string.field_detail_narrative, exp_source, field.count, observationLevel, field.attribute_count, sortOrder)
+        val narrativeString = getString(R.string.field_detail_narrative, exp_source, field.exp_name, field.count, observationLevel, field.attribute_count, sortOrder)
         fieldNarrativeTextView.text = HtmlCompat.fromHtml(narrativeString, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
         val lastEdit = field.date_edit

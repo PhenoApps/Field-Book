@@ -156,7 +156,7 @@
     <string name="field_detail_title">Field Detail</string>
     <string name="field_edit_name">Edit Field</string>
 
-    <string name="field_detail_narrative">Imported from "&lt;b>%1$s&lt;/b>" with "&lt;b>%2$s&lt;/b>" "&lt;b>%3$s&lt;/b>" and "&lt;b>%4$s&lt;/b>" attributes. Sorted by "&lt;b>%5$s&lt;/b>"</string>
+    <string name="field_detail_narrative">Imported from "&lt;b>%1$s&lt;/b>" with name "&lt;b>%2$s&lt;/b>". Contains "&lt;b>%3$s&lt;/b>" "&lt;b>%4$s&lt;/b>" and "&lt;b>%5$s&lt;/b>" attributes. Sorted by "&lt;b>%6$s&lt;/b>"</string>
     <string name="field_default_observation_level">entries</string>
     <string name="field_default_sort_order">import order</string>
 

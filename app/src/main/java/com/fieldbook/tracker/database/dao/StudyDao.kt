@@ -332,7 +332,7 @@ class StudyDao {
 
                     //insert new study row into table
                     val rowid = db.insert(Study.tableName, null, ContentValues().apply {
-
+                        put("study_db_id", e.study_db_id)
                         put("study_name", e.exp_name)
                         put("study_alias", e.exp_alias)
                         put("study_unique_id_name", e.unique_id)

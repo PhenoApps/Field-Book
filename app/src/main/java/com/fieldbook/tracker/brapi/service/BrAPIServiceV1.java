@@ -1108,8 +1108,9 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
 
         try {
             FieldObject field = new FieldObject();
+            field.setStudy_db_id(studyDetails.getStudyDbId());
             field.setExp_name(studyDetails.getStudyName());
-            field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
+            field.setExp_alias(studyDetails.getStudyName());
             field.setExp_species(studyDetails.getCommonCropName());
             field.setCount(studyDetails.getNumberOfPlots().toString());
 

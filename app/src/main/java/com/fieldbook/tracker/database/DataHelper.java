@@ -70,7 +70,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
 public class DataHelper {
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 10;
+    public static final int DATABASE_VERSION = 11;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -231,6 +231,55 @@ public class DataHelper {
             db.endTransaction();
         }
     }
+
+    /**
+     * Populates import format based on study_source values
+     */
+    public void populateImportFormat(SQLiteDatabase db) {
+        db.beginTransaction();
+        try {
+            String updateImportFormatSQL =
+                    "UPDATE studies " +
+                            "SET import_format = CASE " +
+                            "WHEN study_source IS NULL OR study_source = 'csv' OR study_source LIKE '%.csv' THEN 'csv' " +
+                            "WHEN study_source = 'excel' OR study_source LIKE '%.xls' OR study_source LIKE '%.xlsx' THEN 'excel' " +
+                            "ELSE 'brapi' " +
+                            "END";
+
+            db.execSQL(updateImportFormatSQL);
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+
+    /**
+     * Fixes issue where BrAPI study_db_ids are saved in study_alias
+     */
+    public void fixStudyAliases(SQLiteDatabase db) {
+        db.beginTransaction();
+        try {
+            // Update `study_db_id` and `study_alias` for studies imported via 'brapi'
+            String updateAliasesSQL =
+                    "UPDATE studies " +
+                            "SET study_db_id = study_alias, " +
+                            "study_alias = study_name " +
+                            "WHERE import_format = 'brapi'";
+
+            db.execSQL(updateAliasesSQL);
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
 
     /**
      * Helper function to change visibility of a trait. Used in the ratings
@@ -2922,6 +2971,16 @@ public class DataHelper {
                 helper.fixGeoCoordinates(db);
 
                 ep2.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
+
+            }
+
+            if (oldVersion <= 10 & newVersion >= 11) {
+
+                // modify studies table for better handling of brapi study attributes
+                db.execSQL("ALTER TABLE studies ADD COLUMN import_format TEXT");
+                db.execSQL("ALTER TABLE studies ADD COLUMN date_sync TEXT");
+                helper.populateImportFormat(db);
+                helper.fixStudyAliases(db);
 
             }
         }
