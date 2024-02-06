@@ -35,7 +35,7 @@
     <string name="settings_profile">Perfil</string>
     <!-- Config Activity Fuzzy Search  -->
     <string name="act_config_fuzzy_search_failed">La base de datos no pudo recuperar un campo o parcela con el código: %s</string>
-    <string name="act_config_fuzzy_search_error">Algo salió mal al buscar %s</string>
+    <string name="act_config_fuzzy_search_error">Algo salió mal buscando %s</string>
     <string name="act_config_search_fab_content_description">Busca en todas las parcelas y campos para cargar/navegar al elemento codificado en barras.</string>
     <!-- File manager  -->
     <string name="import_source_local">Almacenamiento local</string>
@@ -570,12 +570,12 @@
     <string name="preferences_sound_cycle_traits_title">Sonido del ciclo de variables</string>
     <string name="preferences_sound_cycle_traits_description">Sonido de notificación cuando el ciclo de las variables de la entrada fue finalizada</string>
     <string name="preferences_sound_delete_obs_title">Sonido de Eliminar Observación</string>
-    <string name="preferences_sound_delete_obs_description">Sonido de notificación cuando la observación se elimina en la actividad de Captura.</string>
+    <string name="preferences_sound_delete_obs_description">Sonido de notificación cuando la observación es eliminada en la actividad de Captura.</string>
     <string name="preferences_category_audio_tts_title">Texto a Voz</string>
     <string name="preferences_general_tts_title">Texto a Voz</string>
     <string name="preferences_general_tts_description">Activar Texto a Voz cuando los datos son introducidos en la actividad de Captura.</string>
     <string name="preferences_general_tts_language_title">Elegir idioma</string>
-    <string name="preferences_general_tts_language_description">Elige un idioma de Texto a Voz compatible.</string>
+    <string name="preferences_general_tts_language_description">Eligir un idioma de Texto a Voz compatible.</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
     <!-- Database -->
     <string name="database_dialog_title">Base de datos</string>
