@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -138,7 +139,7 @@ public class FieldEditorActivity extends ThemedActivity
         FieldDetailFragment fragment = new FieldDetailFragment(field);
 
         getSupportFragmentManager().beginTransaction()
-                .replace(android.R.id.content, fragment)
+                .replace(android.R.id.content, fragment,"FieldDetailFragmentTag")
                 .addToBackStack(null)
                 .commit();
 
@@ -1013,6 +1014,12 @@ public class FieldEditorActivity extends ThemedActivity
             Toast toast = Toast.makeText(this, R.string.sort_dialog_saved, Toast.LENGTH_LONG);
             toast.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL, 0, 0);
             toast.show();
+
+            // Refresh the fragment's data
+            FieldDetailFragment fragment = (FieldDetailFragment) getSupportFragmentManager().findFragmentByTag("FieldDetailFragmentTag");
+            if (fragment != null) {
+                fragment.refreshData(); // Ensure this public method exists in your FieldDetailFragment
+            }
 
         } catch (Exception e) {
 

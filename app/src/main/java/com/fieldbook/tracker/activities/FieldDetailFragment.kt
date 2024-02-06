@@ -129,12 +129,16 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     }
 
     override fun onResume() {
-        Log.d("FieldDetailFragment", "onResume triggered")
         super.onResume()
+        refreshData()
+    }
+
+    fun refreshData() {
+        Log.d("FieldDetailFragment", "Data refresh triggered")
         val dataHelper = DataHelper(requireActivity())
-        val fieldObject = dataHelper.getFieldObject(field.exp_id)
-        updateFieldData(fieldObject)
-        val newItems = createTraitDetailItems(fieldObject)
+        val updatedFieldObject = dataHelper.getFieldObject(field.exp_id)
+        updateFieldData(updatedFieldObject)
+        val newItems = createTraitDetailItems(updatedFieldObject)
         adapter?.updateItems(newItems)
     }
 
