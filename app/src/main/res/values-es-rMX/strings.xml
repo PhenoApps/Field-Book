@@ -441,7 +441,7 @@
     <string name="location_level_observation">Fenotipo / Observación</string>
     <string name="pref_general_location_collection_summary_obs">Se capturará la ubicación para cada fenotipo que se capture.</string>
     <string name="pref_general_location_collection_obs_dialog_title">Este ajuste puede aumentar considerablemente el consumo de batería.</string>
-    <string name="preferences_general_collect_tools">Barra de Herramientas de Captura</string>
+    <string name="preferences_general_collect_tools">Barra de Herramientas en Captura</string>
     <string name="preferences_general_feature_next_missing">Siguiente entrada sin datos</string>
     <string name="preferences_general_feature_next_missing_description">Agrega un botón a la barra de herramientas que salta a la siguiente entrada sin datos para el la variable actual</string>
     <string name="preferences_general_skip_entries_disabled">Desactivado</string>
@@ -635,7 +635,7 @@
     <string name="preferences_brapi_enable_title">Activar BrAPI</string>
     <string name="preferences_brapi_enable_summary">Las BrAPI permiten una simple transferencia de datos a bases de datos compatibles.</string>
     <string name="preferences_brapi_core_title">Configuración</string>
-    <string name="preferences_brapi_barcode_config_title">Configuración automática</string>
+    <string name="preferences_brapi_barcode_config_title">Auto-Configuración</string>
     <string name="preferences_brapi_barcode_config_summary">Administrar ajustes con códigos QR</string>
     <string name="preferences_brapi_barcode_config_scan">Importar nuevos ajustes</string>
     <string name="preferences_brapi_barcode_config_share">Compartir ajustes actuales</string>
