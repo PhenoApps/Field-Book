@@ -245,7 +245,7 @@ class TraitBoxView : ConstraintLayout {
                     d: DialogInterface, _: Int -> d.dismiss()
             }
             .setNeutralButton(
-                R.string.modify_traits
+                R.string.edit_traits
             ) {
                     _: DialogInterface, _: Int ->
                     val intent = Intent(context, TraitEditorActivity::class.java)
