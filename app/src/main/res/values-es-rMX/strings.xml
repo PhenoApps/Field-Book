@@ -337,18 +337,42 @@
     <!--- Trait Layout: Counter -->
     <string name="trait_counter_layout_failed">Error al guardar el contador, por favor vuelva a crear esta variable.</string>
     <!--- Trait Layout: Location -->
+    <string name="trait_location_save_content_description">Guardar la ubicación actual.</string>
     <!--- Text to Speech Strings -->
+    <string name="trait_photo_tts_success">Imagen tomada exitosamente.</string>
+    <string name="trait_photo_tts_fail">Error en la variable de imagen.</string>
+    <string name="trait_print_label_success">Imprimiendo etiqueta.</string>
+    <string name="trait_gnss_internal_tts">GPS interno</string>
+    <string name="trait_gnss_external_device_tts">Dispositivo externo %s elegido.</string>
+    <string name="act_collect_na_btn_tts">No aplica</string>
     <string name="act_collect_barcode_btn_tts">Abriendo escáner de código de barras</string>
+    <string name="act_collect_delete_btn_tts">El valor ha sido eliminado.</string>
+    <string name="trait_numeric_backspace_tts">Retroceso</string>
+    <string name="trait_date_minus_day_tts">Un día atras</string>
+    <string name="trait_date_next_day_tts">Día siguiente</string>
+    <string name="trait_date_open_calendar_tts">Abriendo calendario.</string>
     <string name="trait_location_saved_tts">Ubicación guardada.</string>
     <!--- Summary -->
     <string name="fragment_summary_toolbar_title">Resúmen</string>
     <string name="menu_fragment_summary_filter_title">Filtro</string>
+    <string name="fragment_summary_filter_title">Seleccionar etiquetas de resumen</string>
     <string name="dialog_fragment_summary_neutral_button">Alternar Todos</string>
     <string name="fragment_summary_prev_button_text">Anterior</string>
     <string name="fragment_summary_next_button_text">Siguiente</string>
+    <string name="fragment_summary_prev_button_content_description">Navega a la entrada anterior.</string>
+    <string name="fragment_summary_next_button_content_description">Navega a la siguiente entrada.</string>
+    <string name="list_item_summary_nav_button_content_description">Navega a la entrada seleccionada.</string>
     <!--- Repeated measures -->
+    <string name="view_repeated_values_add_button_content_description">Agrega una nueva observación.</string>
+    <string name="view_repeated_values_add_button_fail">Debe introducir un valor antes de crear una nueva observación.</string>
+    <string name="menu_collect_repeated_values_indicator">Muestra el número de valores repetidos.</string>
+    <string name="dialog_multi_measure_delete_no_observations">No existen observaciones.</string>
+    <string name="dialog_multi_measure_delete_title">Observaciones</string>
+    <string name="dialog_multi_measure_confirm_delete_title">Estas observaciones se eliminarán permanentemente.</string>
     <string name="dialog_multi_measure_delete">Eliminar</string>
+    <string name="dialog_multi_measure_select_all">Seleccionar todo</string>
     <!--- GeoNav -->
+    <string name="menu_collect_start_geo_nav_title">Iniciar GeoNav</string>
     <string name="dialog_geonav_collect_neutral_reconnect">Reconectar</string>
     <string name="dialog_geonav_collect_title">Ajustes de GeoNav</string>
     <string name="dialog_geonav_collect_reconnect">Reconectar</string>
