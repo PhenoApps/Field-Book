@@ -43,7 +43,7 @@
     <string name="import_source_ask">Preguntar siempre</string>
     <string name="import_dialog_importing">Espere...</string>
     <string name="import_error_general">Error en importación</string>
-    <string name="act_file_explorer_no_file_error">No se han encontrado directorios de Fieldbook.</string>
+    <string name="act_file_explorer_no_file_error">No se han encontrado directorios de Field Book.</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">El campo no ha sido cargado. Por favor cargue un campo antes de capturar datos.</string>
     <string name="warning_traits_missing">No existen variables. Cree variables antes de capturar datos.</string>
@@ -82,12 +82,12 @@
     <string name="import_error_unique">La columna de identificador único contiene duplicados o ya se ha utilizado en un archivo diferente</string>
     <string name="import_error_format_field">Solo los archivos CSV y XLS se pueden importar como campo</string>
     <string name="act_field_editor_no_suitable_columns_error">El archivo a importar no tiene columnas adecuadas entre las que elegir.</string>
-    <string name="import_runnable_db_failed_to_switch">La base de datos no pudo cambiar los Campos.</string>
-    <string name="import_runnable_create_field_data_failed">Error al crear datos del Campo para la línea %d en el archivo.</string>
+    <string name="import_runnable_db_failed_to_switch">La base de datos no pudo cambiar los campos.</string>
+    <string name="import_runnable_create_field_data_failed">Error al crear datos del campo para la línea %d en el archivo.</string>
     <string name="import_runnable_duplicates_skipped">Se han encontrado columnas duplicadas, solo se utilizará la primera instancia.</string>
     <string name="fields_study_exists_message">Esta campo ya existe</string>
     <string name="fields_study_and_obs_exists_message">Este Campo ya está importado en este nivel de observación.</string>
-    <string name="act_field_editor_failed_to_read_columns">Fieldbook no pudo cargar el archivo.</string>
+    <string name="act_field_editor_failed_to_read_columns">Field Book no pudo cargar el archivo.</string>
     <string name="act_field_editor_load_file_failed">Ocurrió un error durante la carga del archivo.</string>
     <string name="act_field_editor_file_open_failed">Error al abrir el archivo.</string>
     <!-- Field Creator  -->
@@ -277,7 +277,7 @@
     <string name="trait_gnss_disconnect_button_content_description">Desconecta el dispositivo GPS actual.</string>
     <string name="trait_gnss_connect_button_content_description">Abre un diálogo con posibles dispositivos GPS para conectar.</string>
     <string name="gnss_trait_averaging_switch_text">Promedio</string>
-    <string name="trait_gnss_precision_header">Arreglo Necesario:</string>
+    <string name="trait_gnss_precision_header">Corrección Requerida:</string>
     <string name="trait_gnss_accuracy_header">Acc.:</string>
     <string name="trait_gnss_hdop_header">HDOP:</string>
     <string name="trait_gnss_latitude_header">Lat.:</string>
@@ -309,7 +309,7 @@
     <string name="trait_usb_camera_zoom_out_content_description">Alejar</string>
     <string name="trait_usb_camera_zoom_in_content_description">Acercar</string>
     <string name="trait_usb_camera_delete_photo">Eliminar Imagen USB</string>
-    <string name="trait_usb_camera_capture_content_description">Capturar una foto.</string>
+    <string name="trait_usb_camera_capture_content_description">Capturar una imagen.</string>
     <string name="trait_usb_camera_capture_button_text">Capturar</string>
     <!--- Trait Layout: Zebra label print -->
     <string name="trait_layout_data_stored">Salvado</string>
@@ -373,9 +373,19 @@
     <string name="dialog_multi_measure_select_all">Seleccionar todo</string>
     <!--- GeoNav -->
     <string name="menu_collect_start_geo_nav_title">Iniciar GeoNav</string>
+    <string name="activity_collect_found_plot">Navegado a parcela en proximidad</string>
+    <string name="act_collect_geonav_first_location_found">Comunicaciones Rover establecidas.</string>
+    <string name="act_collect_geonav_snack_nav_button_content_description">Esto le llevará a la parcela más cercana.</string>
+    <string name="activity_collect_sensor_manager_failed">Error al iniciar el administrador de sensores</string>
+    <string name="activity_collect_geomagnetic_noise_detected">Interferencia detectada, la brújula podría no ser precisa</string>
     <string name="dialog_geonav_collect_neutral_reconnect">Reconectar</string>
-    <string name="dialog_geonav_collect_title">Ajustes de GeoNav</string>
+    <string name="dialog_geonav_collect_title">Configuración de GeoNav</string>
+    <string name="dialog_geonav_collect_auto_navigate">Auto Navegar</string>
+    <string name="dialog_geonav_collect_notify_on_precision_loss">Audio al caer precisión</string>
+    <string name="dialog_geonav_collect_precision_threshold_title">Grado de precisión</string>
+    <string name="dialog_geonav_collect_geonav_popup_type">Tipo de GeoNav Popup</string>
     <string name="dialog_geonav_collect_reconnect">Reconectar</string>
+    <string name="dialog_geonav_collect_reset_start_toast_message">Restableciendo conexión…</string>
     <string name="dialog_geonav_collect_reset_end_toast_message">Reiniciar conexión</string>
     <string name="dialog_geonav_precision_loss_title">Pérdida de Precisión de Ubicación</string>
     <string name="dialog_geonav_precision_loss_msg">Su precisión preferida se ha perdido.</string>
@@ -421,7 +431,7 @@
     <string name="preferences_source_default_import">Origen de importación predeterminado</string>
     <string name="preferences_source_default_export">Origen de exportación predeterminado</string>
     <string name="pref_general_location_collection_title">Ubicación capturada</string>
-    <string name="pref_general_location_collection_summary">Seleccione un método para capturar la ubicación mientras se utiliza Fieldbook.</string>
+    <string name="pref_general_location_collection_summary">Seleccione un método para capturar la ubicación mientras se utiliza Field Book.</string>
     <string name="location_level_off">Apagado</string>
     <string name="pref_general_location_collection_off_summary">No se capturarán datos de ubicación para ningún fenotipo.</string>
     <string name="location_level_study">Campo / Estudio</string>
@@ -444,7 +454,7 @@
     <string name="move_to_unique_id_text_or_scan">Entrada de Texto con Escaneo por Cámara Ppcional</string>
     <string name="move_to_unique_id_text_or_scan_description">El botón de barra de herramientas abre un diálogo con entrada de texto para un id. único y un botón opcional para escaneo</string>
     <string name="move_to_unique_id_direct_camera_scan">Escaneo Directo con Cámara</string>
-    <string name="move_to_unique_id_direct_camera_scan_description">El botón de barra de herramientas abre la cámara del dispositivo para escanear un codigo de barras con id. único</string>
+    <string name="move_to_unique_id_direct_camera_scan_description">El botón de barra de herramientas abre la cámara del dispositivo para escanear un código de barras con id. único</string>
     <string name="preferences_general_feature_datagrid">Cuadrícula de datos</string>
     <string name="preferences_general_feature_datagrid_description">Muestra datos capturados en una tabla con parcelas y variables</string>
     <!-- Profile -->
@@ -464,7 +474,7 @@
     <string name="preferences_appearance_title">Apariencia</string>
     <string name="preferences_appearance_system_category_title">Aplicación</string>
     <string name="preferences_appearance_theme_title">Tema</string>
-    <string name="preferences_appearance_theme_summary">Modificar colores específicos o todo el tema de Fieldbook</string>
+    <string name="preferences_appearance_theme_summary">Modificar colores específicos o todo el tema de Field Book</string>
     <string name="preferences_theme_theme_title">Tema de la App</string>
     <string name="theme_default">Predeterminado</string>
     <string name="theme_high_contrast">Contraste Alto</string>
@@ -472,8 +482,12 @@
     <string name="preferences_theme_text_size_title">Tamaño del Texto</string>
     <string name="text_size_s">Pequeño</string>
     <string name="text_size_m">Medio (Predeterminado)</string>
+    <string name="text_size_l">Grande</string>
     <string name="text_size_xl">Extra Grande</string>
     <string name="preferences_theme_data_saved_title">Color de datos guardados</string>
+    <string name="preferences_theme_data_saved_description">Cambiar cómo se muestran los datos guardados</string>
+    <string name="preferences_theme_reset_title">Restaurar tema predeterminado</string>
+    <string name="preferences_theme_reset_description">Restablecer todos los ajustes a los valores predeterminados del sistema</string>
     <string name="preferences_appearance_language">Idioma</string>
     <string name="preferences_appearance_language_description">Idioma establecido por el sistema</string>
     <string name="preference_language_default">Idioma del Sistema</string>
@@ -493,12 +507,21 @@
     <string name="preferences_behavior_title">Comportamiento</string>
     <string name="preferences_behavior_cycle_traits">Al finalizar variables avanzar a la siguiente entrada</string>
     <string name="preferences_behavior_cycle_traits_description">Después de pasar por todas los variables, Field Book pasa a la siguiente entrada</string>
+    <string name="preferences_behavior_volume_buttons_navigate">Mapea las teclas de volumen a las flechas de entrada o variable</string>
+    <string name="preferences_behavior_volume_buttons_navigate_description">Teclas de volumen replican el tipo de navegación seleccionado</string>
+    <string name="preferences_behavior_volume_buttons_navigate_traits_description">Teclas de volumen replican flechas de navegación de variable</string>
+    <string name="preferences_behavior_volume_buttons_navigate_entries_description">Teclas de volumen replican las flechas de navegación de entrada</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Desactivado</string>
+    <string name="preferences_behavior_volume_buttons_navigate_traits">Navegar variables</string>
+    <string name="preferences_behavior_volume_buttons_navigate_entries">Navegar entradas</string>
+    <string name="preferences_behavior_return_to_first_trait">Avanzando la entrada regresa a la primer variable</string>
+    <string name="preferences_behavior_return_to_first_trait_description">Movindo a la siguiente entrada, el Field Book también regresa a la primera variable</string>
     <string name="preferences_behavior_return_character">Señal de tecla de retorno</string>
     <string name="preferences_behavior_return_character_next_plot">Siguiente parcela</string>
     <string name="preferences_behavior_return_character_next_trait">Siguiente variable</string>
     <string name="preferences_behavior_return_character_do_nothing">Hacer nada</string>
     <string name="preferences_behavior_disable_entry_arrow">Desactivar flecha de entrada</string>
+    <string name="preferences_behavior_disable_entry_arrow_neither">Ninguno</string>
     <string name="preferences_behavior_disable_entry_arrow_left">Izquierda</string>
     <string name="preferences_behavior_disable_entry_arrow_right">Derecha</string>
     <string name="preferences_behavior_disable_entry_arrow_both">Ambos</string>
@@ -508,12 +531,13 @@
     <string name="preferences_general_use_day_number_description">Usar número de día del año para capturar datos en lugar de la fecha</string>
     <string name="preferences_general_skip_entries_with_data">Omitir entradas con datos</string>
     <string name="preferences_general_skip_entries_with_data_description">Omite entradas que tienen datos para la variable actual</string>
+    <string name="preferences_general_skip_entries_across_all_traits">Omitir entradas a través de todas las variables</string>
     <string name="preferences_general_flip_flop_arrows">Invertir Flechas</string>
     <string name="preferences_general_flip_flop_arrows_description">Intercambia las funciones de las flechas de parcela y variable</string>
     <!-- GeoNav -->
     <string name="preferences_geonav_title">GeoNav</string>
-    <string name="pref_geonav_enable_title">Habilitar GeoNav</string>
-    <string name="pref_geonav_enable_summary">Habilita el uso de la ubicación del dispositivo para navegar por los Campos.</string>
+    <string name="pref_geonav_enable_title">Activar GeoNav</string>
+    <string name="pref_geonav_enable_summary">Activa el uso de la ubicación del dispositivo para navegar por los campos.</string>
     <string name="pref_geonav_search_method_title">Método de Búsqueda</string>
     <string name="pref_geonav_search_method_summary">El método %s utilizado para buscar parcelas en GeoNav.</string>
     <string name="pref_geonav_method_distance">Distancia</string>
@@ -568,12 +592,22 @@
     <string name="preferences_experimental_beta_title">Beta</string>
     <string name="preferences_experimental_alpha_title">Alpha</string>
     <string name="pref_experimental_repeated_values_title">Medidas Repetidas</string>
-    <string name="pref_experimental_repeated_values_summary">Permite capturar varios valores para cada entrada/variable</string>
+    <string name="pref_experimental_repeated_values_summary">Activa captura de multiples valores para cada entrada/variable</string>
     <string name="pref_experimental_repeated_values_disabled_title">Medidas Repetidas Desactivadas</string>
     <string name="pref_experimental_repeated_values_disabled_message">Desactivando esta función hará que algunos valores repetidos no estén disponibles.</string>
     <string name="pref_experimental_enable_field_audio_title">Activar Audio en Campo</string>
     <string name="pref_experimental_enable_field_audio_summary">Activar función de grabación de audio para todo el campo.</string>
     <string name="menu_collect_start_field_audio">Iniciar Grabadora</string>
+    <string name="menu_collect_stop_field_audio">Detener Grabadora</string>
+    <string name="field_audio_recording_start">Grabando audio a nivel de el campo.</string>
+    <string name="field_audio_recording_stop">Un nuevo archivo de audio a nivel de campo fue guardado.</string>
+    <string name="field_audio_recording_warning">El audio a nivel de campo ya se está grabando. Deténgalo primero.</string>
+    <string name="trait_audio_recording_warning">El audio a nivel de variable ya se está grabando. Deténgalo primero.</string>
+    <string name="trait_audio_playing_warning">El audio a nivel de variable se está reproduciendo. Deténgalo primero.</string>
+    <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
+    <string name="pref_beta_mlkit_summary">Esta opción utiliza la biblioteca MLKit en lugar de la biblioteca ZXing para escanear códigos de barras</string>
+    <string name="pref_beta_mlkit_enabled_title">Escaneo de código de barras usando MLKit activado</string>
+    <string name="pref_beta_mlkit_enabled_message">Activando esta función cambiará la biblioteca de escaneo de códigos de barras de ZXing a MLKit.</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Acerca de</string>
@@ -582,7 +616,9 @@
     <string name="about_rate">Califica esta app</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Líder del Projecto</string>
+    <string name="about_email_title">Email</string>
     <!-- Support  -->
+    <string name="about_support_title">Soporte</string>
     <string name="about_contributors_title">Colaboradores</string>
     <string name="about_contributors_funding_title">Fuente de financiamiento</string>
     <!-- PhenoApps  -->
@@ -590,13 +626,51 @@
     <string name="about_technical_title">Detalles Tecnicos</string>
     <string name="about_libraries_title">Bibliotecas</string>
     <!-- Update -->
+    <string name="check_updates_title">Buscando actualizaciones…</string>
+    <string name="found_updates_title">Descargar última versión</string>
+    <string name="no_updates_title">Ejecutando la última versión</string>
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
     <string name="brapi_info_title">Información de sincronización de BrAPI</string>
+    <string name="preferences_brapi_enable_title">Activar BrAPI</string>
+    <string name="preferences_brapi_enable_summary">Las BrAPI permiten una simple transferencia de datos a bases de datos compatibles.</string>
+    <string name="preferences_brapi_core_title">Configuración</string>
+    <string name="preferences_brapi_barcode_config_title">Configuración automática</string>
+    <string name="preferences_brapi_barcode_config_summary">Administrar ajustes con códigos QR</string>
+    <string name="preferences_brapi_barcode_config_scan">Importar nuevos ajustes</string>
+    <string name="preferences_brapi_barcode_config_share">Compartir ajustes actuales</string>
+    <string name="preferences_brapi_barcode_config_dialog_title">Configuración de BrAPI Escaneable</string>
+    <string name="qr_code_share_choose_action_title">Elegir Acción</string>
+    <string name="menu_action_brapi_pref_title">Autorizar BrAPI</string>
+    <string name="act_brapi_auth_http_warning_title">Advertencia HTTP</string>
+    <string name="act_brapi_auth_http_warning_message">Ha introducido una url de http. No hay garantía de que esta conexión sea segura.</string>
     <string name="brapi_base_url">URL base</string>
     <string name="brapi_base_url_desc">La URL base para el servidor conectado por BrAPI</string>
+    <string name="brapi_choice_to_make_default_dialog_title">Hacer de este servidor BrAPI como predeterminado:</string>
+    <string name="brapi_choice_to_make_default_import">Fuente de Importación</string>
+    <string name="brapi_choice_to_make_default_export">Fuente de Exportación</string>
     <string name="brapi_choice_to_make_default_negative">Cancelar</string>
     <string name="brapi_choice_to_make_default_positive">Guardar</string>
+    <string name="brapi_edit_display_name">Editar Nombre a Mostrar</string>
+    <string name="brapi_edit_display_name_server">Nombre del Servidor</string>
+    <string name="preferences_brapi_version">Versión BrAPI</string>
+    <string name="brapi_pagination">Tamaño de la página</string>
+    <string name="brapi_timeout">Tiempo de Espera del Servidor</string>
+    <string name="brapi_chunk_size">Tamaño del Chunk</string>
+    <string name="preferences_brapi_advanced_title">Ajustes de Autenticación</string>
+    <string name="preferences_brapi_oidc_flow_oauth_code">Código de Autorización OAuth2</string>
+    <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Concesión Implícita</string>
+    <string name="preferences_brapi_oidc_flow_old_custom">Field Book Original Personalizado</string>
+    <string name="brapi_oidc_url">URL de Descubrimiento OIDC</string>
+    <string name="brapi_oidc_url_desc">La ubicación del documento JSON de Descubrimiento OIDC</string>
+    <string name="preferences_brapi_traits_title">Variables BrAPI</string>
+    <string name="preferences_appearance_collect_labelval_customize">Mostrar Categoria Valor vs Etiqueta</string>
+    <string name="preferences_appearance_collect_labelval_customize_description">Mostrar valores o etiquetas de categorias en la pantalla de captura</string>
+    <string name="preferences_appearance_collect_labelval_customize_value">Valor</string>
+    <string name="preferences_appearance_collect_labelval_customize_label">Etiqueta</string>
+    <string name="preferences_brapi_servers_title">Servidores Comunitarios</string>
+    <string name="preferences_brapi_server_barcode">Escanear código de barras del servidor</string>
+    <string name="preferences_brapi_server_test">Servidor de Pruebas BrAPI</string>
     <string name="preferences_brapi_server_add">Enviar un servidor</string>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Salvar y Autorizar</string>
@@ -663,7 +737,7 @@ para sincronizar tus datos.
     <string name="number_observation_label">Número de Observaciones:</string>
     <string name="no_observations_warning">No Se Encontraron Observaciones Para El Estudio. Por favor, Presione Cancelar.</string>
     <string name="brapi_skipped_traits">Variables obtenidas con éxito. Variables %1$d ignoradas debido a la falta de \"Variable\" BrAPI</string>
-    <string name="brapi_study_incompatible">Este estudio BrAPI es actualmente incompatible con Fieldbook. Los estudios deben incluir fila y columna en el encabezado.</string>
+    <string name="brapi_study_incompatible">Este estudio BrAPI es actualmente incompatible con Field Book. Los estudios deben incluir fila y columna en el encabezado.</string>
     <string name="act_collect_no_plots">Este estudio no tiene parcelas guardadas.</string>
     <!-- BrAPI Export -->
     <string name="act_brapi_export_title">Exportación BrAPI</string>
@@ -748,4 +822,12 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="shutter_capture_content_description">Botón obturador para tomar una imagen.</string>
     <string name="dialog_ask_high_contrast_title">¿Cambiar al Tema de Contraste Alto?</string>
     <string name="dialog_ask_high_contrast_message">Se ha detectado el dispositivo eInk, sugerimos cambiar al tema de contraste alto para una experiencia óptima</string>
+    <string name="dialog_geonav_prefs_sensor_missing_title">Sensor requerido no encontrado</string>
+    <string name="dialog_geonav_prefs_sensor_missing_message">El método trapezoidal requiere un acelerómetro y giroscopio para usar la entrada de la brújula.</string>
+    <string name="trait_audio_button_content_description">Controla la grabación de audio.</string>
+    <string name="trait_counter_minus_content_description">Restar uno a la cuenta</string>
+    <string name="trait_counter_plus_content_description">Agregar uno al recuento total</string>
+    <string name="trait_date_minus_content_description">Resta un día de la fecha actual</string>
+    <string name="trait_date_add_content_description">Agrega un día a la fecha actual</string>
+    <string name="trait_percent_ui_min_max_error">Algo salió mal al mostrar mín/max del formato de variable</string>
 </resources>
