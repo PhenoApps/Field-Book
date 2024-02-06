@@ -13,6 +13,7 @@
     <string name="dialog_import">Importar</string>
     <string name="dialog_warning">Aviso</string>
     <string name="dialog_save">Salvar</string>
+    <string name="dialog_go">Ir</string>
     <!-- Startup  -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
