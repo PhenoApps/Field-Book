@@ -16,7 +16,11 @@
     <string name="dialog_go">Ir</string>
     <string name="dialog_save_error_title">Erro ao Salvar</string>
     <string name="dialog_back">Voltar</string>
+    <string name="dialog_scan">Escanear</string>
+    <string name="barcode_scanner_text">Escanear código de barras</string>
     <!-- Startup  -->
+    <string name="startup_sample_data_title">Dados de amostra</string>
+    <string name="startup_sample_data_message">Carregar dados de amostra?</string>
     <!-- Permissions  -->
     <!-- Config Activity  -->
     <string name="settings_fields">Campos</string>
@@ -92,6 +96,7 @@
     <!-- ID/Barcode Search -->
     <string name="main_toolbar_moveto_no_match">Nenhum valor correspondente</string>
     <string name="main_toolbar_moveto">Ir para ID</string>
+    <string name="main_toolbar_moveto_scan">Escanear</string>
     <!-- Search  -->
     <string name="main_toolbar_search">Buscar</string>
     <string name="search_dialog_add">Adicionar</string>
