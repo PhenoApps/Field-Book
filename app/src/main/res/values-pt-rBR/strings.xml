@@ -22,6 +22,7 @@
     <string name="startup_sample_data_title">Dados de amostra</string>
     <string name="startup_sample_data_message">Carregar dados de amostra?</string>
     <!-- Permissions  -->
+    <string name="permission_rationale_storage_import">A importação de arquivos requer acesso aos arquivos do dispositivo.</string>
     <!-- Config Activity  -->
     <string name="settings_fields">Campos</string>
     <string name="settings_traits">Caracteres</string>
