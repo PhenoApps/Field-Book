@@ -14,6 +14,8 @@
     <string name="dialog_warning">Aviso</string>
     <string name="dialog_save">Salvar</string>
     <string name="dialog_go">Ir</string>
+    <string name="dialog_save_error_title">Erro ao Salvar</string>
+    <string name="dialog_back">Voltar</string>
     <!-- Startup  -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
