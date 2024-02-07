@@ -428,7 +428,7 @@ public class FieldEditorActivityOld extends ThemedActivity
 
                     FieldObject study = database.getFieldObject(studyId);
 
-                    String studyName = study.getExp_name();
+                    String studyName = study.getExp_alias();
 
                     if (studyId == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
 

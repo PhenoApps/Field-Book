@@ -18,6 +18,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
@@ -2181,9 +2182,10 @@ public class DataHelper {
 //        cursor.close();
     }
 
-    public void updateStudyName(int studyId, String newName) {
+    public void updateStudyAlias(int studyId, String newName) {
         open();
-        StudyDao.Companion.updateStudyName(studyId, newName);
+        StudyDao.Companion.updateStudyAlias(studyId, newName);
+        ep.edit().putString(GeneralKeys.FIELD_ALIAS, newName).apply();
         close();
     }
 

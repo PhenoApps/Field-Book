@@ -351,7 +351,7 @@ public class FieldEditorActivity extends ThemedActivity
 
         for (int position : selectedItemPositions) {
             FieldObject field = fieldList.get(position);
-            fieldNames.add("<b>" + field.getExp_name() + "</b>");
+            fieldNames.add("<b>" + field.getExp_alias() + "</b>");
         }
 
         return TextUtils.join(", ", fieldNames);
@@ -626,7 +626,7 @@ public class FieldEditorActivity extends ThemedActivity
 
                     FieldObject study = database.getFieldObject(studyId);
 
-                    String studyName = study.getExp_name();
+                    String studyName = study.getExp_alias();
 
                     if (studyId == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
 
@@ -806,6 +806,7 @@ public class FieldEditorActivity extends ThemedActivity
 
                         Editor e = ep.edit();
                         e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
+                        e.putString(GeneralKeys.FIELD_ALIAS, fieldFileName);
                         e.apply();
 
                         if (database.checkFieldName(fieldFileName) >= 0) {
@@ -1066,6 +1067,7 @@ public class FieldEditorActivity extends ThemedActivity
         boolean field_selected = field != null;
         if (field_selected) {
             ed.putString(GeneralKeys.FIELD_FILE, field.getExp_name());
+            ed.putString(GeneralKeys.FIELD_ALIAS, field.getExp_alias());
             ed.putString(GeneralKeys.FIELD_OBS_LEVEL, field.getObservation_level());
             ed.putInt(GeneralKeys.SELECTED_FIELD_ID, field.getExp_id());
             ed.putString(GeneralKeys.UNIQUE_NAME, field.getUnique_id());
@@ -1073,6 +1075,7 @@ public class FieldEditorActivity extends ThemedActivity
             ed.putString(GeneralKeys.SECONDARY_NAME, field.getSecondary_id());
         } else { // clear when field is deleted
             ed.putString(GeneralKeys.FIELD_FILE, null);
+            ed.putString(GeneralKeys.FIELD_ALIAS, null);
             ed.putString(GeneralKeys.FIELD_OBS_LEVEL, null);
             ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
             ed.putString(GeneralKeys.UNIQUE_NAME, null);

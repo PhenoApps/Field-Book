@@ -60,7 +60,7 @@
 
                         <TextView
                             style="@style/TextViewStyle.Bold.Title"
-                            android:id="@+id/fieldName"
+                            android:id="@+id/fieldDisplayName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:ellipsize="end"/>

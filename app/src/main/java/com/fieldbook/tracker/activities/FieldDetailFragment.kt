@@ -34,14 +34,14 @@ import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.DateResult
 import com.fieldbook.tracker.utilities.ExportUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
-import com.fieldbook.tracker.utilities.DateResult
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
-import javax.inject.Inject
 import java.text.SimpleDateFormat
 import java.util.Locale
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -54,7 +54,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
     private lateinit var exportUtil: ExportUtil
     private lateinit var rootView: View
-    private lateinit var fieldNameTextView: TextView
+    private lateinit var fieldDisplayNameTextView: TextView
     private lateinit var importDateTextView: TextView
     private lateinit var fieldNarrativeTextView: TextView
     private lateinit var lastEditTextView: TextView
@@ -76,8 +76,8 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         setupToolbar()
 
         exportUtil = ExportUtil(requireActivity(), database)
-        fieldNameTextView = rootView.findViewById(R.id.fieldName)
-        fieldNameTextView.text = field.exp_name
+        fieldDisplayNameTextView = rootView.findViewById(R.id.fieldDisplayName)
+        fieldDisplayNameTextView.text = field.exp_alias
         importDateTextView = rootView.findViewById(R.id.importDateTextView)
         fieldNarrativeTextView = rootView.findViewById(R.id.fieldNarrativeTextView)
         lastEditTextView = rootView.findViewById(R.id.lastEditTextView)
@@ -252,7 +252,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
                     parentFragmentManager.popBackStack()
                 }
                 R.id.rename -> {
-                    showEditNameDialog()
+                    showEditDisplayNameDialog()
                 }
                 R.id.sort -> {
                     (activity as? FieldSortController)?.showSortDialog(field)
@@ -266,19 +266,19 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         }
     }
 
-    private fun showEditNameDialog() {
+    private fun showEditDisplayNameDialog() {
         val editText = EditText(context).apply {
             inputType = InputType.TYPE_CLASS_TEXT
-            setText(field.exp_name)
+            setText(field.exp_alias)
         }
 
         val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-        builder.setTitle(getString(R.string.field_edit_name))
+        builder.setTitle(getString(R.string.field_edit_display_name))
         builder.setView(editText)
         builder.setPositiveButton(getString(R.string.dialog_save)) { dialog, _ ->
             val newName = editText.text.toString()
             if (newName.isNotBlank()) {
-                updateStudyNameInDatabase(newName)
+                updateStudyAliasInDatabase(newName)
             }
             dialog.dismiss()
         }
@@ -290,10 +290,12 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         dialog.show()
     }
 
-    private fun updateStudyNameInDatabase(newName: String) {
-        database.updateStudyName(field.exp_id, newName)
-        fieldNameTextView.text = newName
-        field.setExp_name(newName)
+    private fun updateStudyAliasInDatabase(newName: String) {
+
+        database.updateStudyAlias(field.exp_id, newName)
+        fieldDisplayNameTextView.text = newName
+        field.setExp_alias(newName)
+        (activity as? FieldAdapterController)?.queryAndLoadFields()
     }
 
     private fun makeConfirmDeleteListener(field: FieldObject): DialogInterface.OnClickListener? {
@@ -307,6 +309,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
             if (field.exp_id == ep!!.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
                 val ed = ep.edit()
                 ed.putString(GeneralKeys.FIELD_FILE, null)
+                ed.putString(GeneralKeys.FIELD_ALIAS, null)
                 ed.putString(GeneralKeys.FIELD_OBS_LEVEL, null)
                 ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1)
                 ed.putString(GeneralKeys.UNIQUE_NAME, null)

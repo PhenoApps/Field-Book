@@ -470,10 +470,9 @@ public class ConfigActivity extends ThemedActivity {
     @Nullable
     private FieldObject searchStudiesForBarcode(String barcode) {
 
-        // first, search to try and match study alias (brapi stores study_db_id here)
         ArrayList<FieldObject> fields = database.getAllFieldObjects();
 
-        // start by searching for alias
+        // first, search to try and match study alias
         for (FieldObject f : fields) {
 
             if (f != null && f.getExp_alias() != null && f.getExp_alias().equals(barcode)) {

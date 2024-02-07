@@ -501,9 +501,9 @@ class StudyDao {
             }, "${Study.PK} = ?", arrayOf("$studyId"))
         }
 
-        fun updateStudyName(exp_id: Int, newName: String) = withDatabase { db ->
+        fun updateStudyAlias(exp_id: Int, newName: String) = withDatabase { db ->
             val contentValues = ContentValues()
-            contentValues.put("study_name", newName)
+            contentValues.put("study_alias", newName)
             db.update(Study.tableName, contentValues, "${Study.PK} = ?", arrayOf(exp_id.toString()))
         }
 

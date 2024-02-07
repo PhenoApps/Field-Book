@@ -69,6 +69,7 @@ public class FieldAdapterOld extends BaseAdapter {
         boolean has_contents = item != null;
         if (has_contents) {
             ed.putString(GeneralKeys.FIELD_FILE, item.getExp_name());
+            ed.putString(GeneralKeys.FIELD_ALIAS, item.getExp_alias());
             ed.putString(GeneralKeys.FIELD_OBS_LEVEL, item.getObservation_level());
             ed.putInt(GeneralKeys.SELECTED_FIELD_ID, item.getExp_id());
             ed.putString(GeneralKeys.UNIQUE_NAME, item.getUnique_id());
@@ -76,6 +77,7 @@ public class FieldAdapterOld extends BaseAdapter {
             ed.putString(GeneralKeys.SECONDARY_NAME, item.getSecondary_id());
         } else {
             ed.putString(GeneralKeys.FIELD_FILE, null);
+            ed.putString(GeneralKeys.FIELD_ALIAS, null);
             ed.putString(GeneralKeys.FIELD_OBS_LEVEL, null);
             ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
             ed.putString(GeneralKeys.UNIQUE_NAME, null);
@@ -140,7 +142,7 @@ public class FieldAdapterOld extends BaseAdapter {
             holder.observationLevel.setVisibility(View.VISIBLE);
         }
 
-        holder.fieldName.setText(getItem(position).getExp_name());
+        holder.fieldName.setText(getItem(position).getExp_alias());
         holder.count.setText(getItem(position).getCount());
         holder.importDate.setText(importDate);
         holder.editDate.setText(editDate);

@@ -256,7 +256,7 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, int position) {
         FieldObject field = list.get(position);
         holder.itemView.setActivated(selectedItems.get(position, false));
-        String name = field.getExp_name();
+        String name = field.getExp_alias();
         holder.name.setText(name);
         String level = field.getObservation_level();
         String count = field.getCount();
