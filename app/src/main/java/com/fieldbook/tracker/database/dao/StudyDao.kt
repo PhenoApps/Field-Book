@@ -167,18 +167,11 @@ class StudyDao {
                 null, "null" -> ""
                 else -> date
             }
-            this["study_source"]?.let { source ->
-                it.exp_source = source.toString()
-                // Determine the import format based on the file extension
-                it.import_format = when {
-                    source.toString().equals("csv") || source.toString().endsWith(".csv") -> "csv"
-                    source.toString().equals("excel") || source.toString().endsWith(".xls") || source.toString().endsWith(".xlsx") -> "excel"
-                    source.toString() == "null" -> "csv"
-                    else -> "brapi"
-                }
-            } ?: run {
-                it.import_format = "csv"
+            it.import_format = when (val format = this["import_format"]?.toString()) {
+                null, "null" -> "csv"
+                else -> format
             }
+            it.exp_source = this["study_source"]?.toString()
             it.count = this["count"].toString()
             it.observation_level = when (val observationLevel = this["observation_levels"]?.toString()) {
                 null, "null" -> ""
@@ -256,6 +249,7 @@ class StudyDao {
                     date_import,
                     date_edit,
                     date_export,
+                    import_format,
                     study_source,
                     study_sort_name,
                     count,
@@ -344,6 +338,7 @@ class StudyDao {
                         put("date_import", timestamp)
                         put("date_export", e.date_export)
                         put("date_edit", e.date_edit)
+                        put("import_format", e.import_format)
                         put("study_source", e.exp_source)
                         put("count", e.count)
                         put("observation_levels", e.observation_level)

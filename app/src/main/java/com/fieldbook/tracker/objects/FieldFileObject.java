@@ -150,6 +150,7 @@ public class FieldFileObject {
             f.setExp_name(this.getStem());
             f.setExp_alias(this.getStem());
             f.setExp_source(this.getFileStem());
+            f.setImport_format(getExtension(this.getFileStem()));
             return f;
         }
 

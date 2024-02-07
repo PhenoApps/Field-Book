@@ -1161,6 +1161,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setExp_species(studyDetails.getCommonCropName());
             field.setCount(studyDetails.getNumberOfPlots().toString());
             field.setObservation_level(observationLevel);
+            field.setImport_format("brapi");
 
             // Get our host url
             if (BrAPIService.getHostUrl(context) != null) {

@@ -242,7 +242,8 @@ public class DataHelper {
                     "UPDATE studies " +
                             "SET import_format = CASE " +
                             "WHEN study_source IS NULL OR study_source = 'csv' OR study_source LIKE '%.csv' THEN 'csv' " +
-                            "WHEN study_source = 'excel' OR study_source LIKE '%.xls' OR study_source LIKE '%.xlsx' THEN 'excel' " +
+                            "WHEN study_source = 'excel' OR study_source LIKE '%.xls' THEN 'xls'" +
+                            "WHEN study_source LIKE '%.xlsx' THEN 'xlsx'" +
                             "ELSE 'brapi' " +
                             "END";
 

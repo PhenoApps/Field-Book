@@ -272,14 +272,13 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
         // Set source icon
         String import_format = field.getImport_format();
         Log.d("FieldAdapter", "Import format for field " + name + ": " + import_format);
-        if (import_format == null || "csv".equals(import_format)) {
+        if (import_format.equals("csv")) {
             holder.sourceIcon.setImageResource(R.drawable.ic_file_csv);
-        } else if ("excel".equals(import_format)) {
-            holder.sourceIcon.setImageResource(R.drawable.ic_file_xls);
-        } else if ("brapi".equals(import_format)) {
+        } else if (import_format.equals("brapi")) {
             holder.sourceIcon.setImageResource(R.drawable.ic_adv_brapi);
+        } else if (import_format.contains("xls")) {
+            holder.sourceIcon.setImageResource(R.drawable.ic_file_xls);
         }
-
     }
 
     @Override
