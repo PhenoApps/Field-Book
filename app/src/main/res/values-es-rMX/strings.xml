@@ -14,7 +14,7 @@
     <string name="dialog_warning">Advertencia</string>
     <string name="dialog_save">Guardar</string>
     <string name="dialog_go">Ir</string>
-    <string name="dialog_save_error_title">Guardar Error</string>
+    <string name="dialog_save_error_title">Error al Guardar</string>
     <string name="dialog_back">Atrás</string>
     <string name="dialog_scan">Escanear</string>
     <string name="barcode_scanner_text">Escanear código de barras</string>
