@@ -5,7 +5,6 @@ import android.util.Log
 import android.util.Size
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -19,7 +18,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import java.io.File
 import java.util.concurrent.Executors
 
-class CameraActivity : AppCompatActivity() {
+class CameraActivity : ThemedActivity() {
 
     private lateinit var cameraSelector: CameraSelector
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
@@ -87,28 +86,36 @@ class CameraActivity : AppCompatActivity() {
 
         preview.setSurfaceProvider(previewView.surfaceProvider)
 
-        val camera = cameraProvider.bindToLifecycle(
-            this as LifecycleOwner,
-            cameraSelector,
-            preview,
-            imageCapture
-        )
+        try {
 
-        Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
+            val camera = cameraProvider.bindToLifecycle(
+                this as LifecycleOwner,
+                cameraSelector,
+                preview,
+                imageCapture
+            )
 
-        shutterButton.setOnClickListener {
+            Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
 
-            val file = File(cacheDir, "temp.jpg")
+            shutterButton.setOnClickListener {
 
-            val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
-            imageCapture.takePicture(outputFileOptions, cameraExecutor,
-                object : ImageCapture.OnImageSavedCallback {
-                    override fun onError(error: ImageCaptureException) {}
-                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                        setResult(RESULT_OK)
-                        finish()
-                    }
-                })
+                val file = File(cacheDir, "temp.jpg")
+
+                val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
+                imageCapture.takePicture(outputFileOptions, cameraExecutor,
+                    object : ImageCapture.OnImageSavedCallback {
+                        override fun onError(error: ImageCaptureException) {}
+                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                            setResult(RESULT_OK)
+                            finish()
+                        }
+                    })
+            }
+
+        } catch (i: IllegalArgumentException) {
+
+            finishActivity(RESULT_CANCELED)
+
         }
     }
 }

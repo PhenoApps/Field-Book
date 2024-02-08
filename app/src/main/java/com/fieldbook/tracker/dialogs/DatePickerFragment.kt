@@ -36,8 +36,12 @@ class DatePickerFragment(private val context: Context) : DialogFragment(),
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
+        val calendar = Calendar.getInstance()
+
+        val defaultFirstDate = format?.format(calendar.time)
+
         val date = PreferenceManager.getDefaultSharedPreferences(context)
-            ?.getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, "2000-01-01") ?: "2000-01-01"
+            ?.getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, defaultFirstDate) ?: defaultFirstDate
 
         // Use the current date as the default date in the picker
         val c = Calendar.getInstance()

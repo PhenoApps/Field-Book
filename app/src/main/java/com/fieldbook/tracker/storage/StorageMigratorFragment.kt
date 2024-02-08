@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.storage
 
 import android.app.Activity
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -14,10 +13,6 @@ import com.fieldbook.tracker.database.models.ObservationModel
 import org.phenoapps.fragments.storage.PhenoLibMigratorFragment
 
 class StorageMigratorFragment: PhenoLibMigratorFragment() {
-
-    override val backgroundColor = Color.parseColor("#FFFFFF")
-    override val migrateButtonColor = Color.parseColor("#8BC34A")
-    override val skipButtonColor = Color.parseColor("#8BC34A")
 
     override fun onUpdateUri(from: DocumentFile, to: DocumentFile) {
         from.updateUri(to)

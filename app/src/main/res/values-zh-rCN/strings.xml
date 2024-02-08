@@ -13,6 +13,8 @@
     <string name="dialog_import">导入</string>
     <string name="dialog_warning">警告</string>
     <string name="dialog_save">保存</string>
+    <string name="dialog_save_error_title">保存时出错</string>
+    <string name="dialog_scan">扫描</string>
     <string name="barcode_scanner_text">扫描条形码</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">示例数据</string>
@@ -59,6 +61,7 @@
     <string name="import_error_unique">唯一标识包含重复项或被另一个文件使用了</string>
     <string name="import_error_format_field">只有CSV或XLS文件可作为地块导入</string>
     <string name="fields_study_exists_message">地块已经存在。</string>
+    <string name="act_field_editor_file_open_failed">打开文件失败。</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
     <!-- Unimplemented -->
@@ -100,6 +103,7 @@
     <string name="traits_format_barcode">条形码</string>
     <string name="traits_format_labelprint">斑马标签打印</string>
     <!-- Trait Creation Dialog -->
+    <string name="activity_traits_new_button_content_description">创建一个新的性状。</string>
     <string name="traits_create_format">格式</string>
     <string name="traits_create_value_default">默认值</string>
     <string name="traits_create_value_minimum">最小值</string>

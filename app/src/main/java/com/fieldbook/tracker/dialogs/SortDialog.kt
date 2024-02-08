@@ -259,7 +259,7 @@ open class SortDialog(
 
     private fun askDialogForAttribute(unused: List<String>) {
 
-        val dialog = AlertDialog.Builder(context)
+        val dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
 
         dialog.setTitle(R.string.dialog_field_sort_title)
 

@@ -26,6 +26,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
     @Inject
     SharedPreferences preferences;
+
     private static final int REQUEST_STORAGE_DEFINER_CODE = 999;
 
     public static final int LOCATION_COLLECTION_OFF = 0;
@@ -33,6 +34,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
     public static final int LOCATION_COLLECTION_OBS = 2;
     public static final int LOCATION_COLLECTION_STUDY = 3;
 
+    PreferenceManager prefMgr;
     Context context;
     private Preference defaultStorageLocation;
 
@@ -196,7 +198,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
                     if (value == LOCATION_COLLECTION_OBS) {
 
-                        new AlertDialog.Builder(context)
+                        new AlertDialog.Builder(context, R.style.AppAlertDialog)
                                 .setTitle(obsModeDialogTitle)
                                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
 

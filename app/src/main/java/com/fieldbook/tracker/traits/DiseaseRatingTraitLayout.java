@@ -87,7 +87,6 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
         List<String> temps = getRustCodes();
         List<Button> rustBtnArray = new ArrayList<>(rustButtons.values());
         for (int i = 0; i < temps.size(); i++) {
-            rustBtnArray.get(i).setVisibility(View.VISIBLE);
             rustBtnArray.get(i).setText(temps.get(i));
             rustBtnArray.get(i).setOnClickListener(new RustButtonOnClickListener());
         }

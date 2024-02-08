@@ -153,7 +153,7 @@ class GeodeticUtils {
             currentLoggingMode: String,
             start: Location,
             coordinates: Array<ObservationUnitModel>,
-            azimuth: Double,
+            azimuth: Double?,
             theta: Double,
             teslas: Double,
             geoNavMethod: String,
@@ -200,14 +200,17 @@ class GeodeticUtils {
 
                     } else { //trapezoidal method
 
-                        if (isInZone(start, location, azimuth, theta, d1, d2)) {
+                        azimuth?.let { nonNullAzimuth ->
 
-                            if (closestDistance > distance) {
+                            if (isInZone(start, location, nonNullAzimuth, theta, d1, d2)) {
 
-                                loggedString.closest = CLOSEST_UPDATE.toString()
-                                closestDistance = distance
-                                closestPoint = coordinate
+                                if (closestDistance > distance) {
 
+                                    loggedString.closest = CLOSEST_UPDATE.toString()
+                                    closestDistance = distance
+                                    closestPoint = coordinate
+
+                                }
                             }
                         }
                     }

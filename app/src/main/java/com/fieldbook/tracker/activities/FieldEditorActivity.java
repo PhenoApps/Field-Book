@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,7 +31,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
@@ -812,7 +812,8 @@ public class FieldEditorActivity extends ThemedActivity
 
             Log.e(TAG, "Error updating sorting", e);
 
-            new AlertDialog.Builder(this).setTitle(R.string.dialog_save_error_title)
+            new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                    .setTitle(R.string.dialog_save_error_title)
                     .setPositiveButton(org.phenoapps.androidlibrary.R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
                     .setMessage(R.string.sort_dialog_error_saving)
                     .create()

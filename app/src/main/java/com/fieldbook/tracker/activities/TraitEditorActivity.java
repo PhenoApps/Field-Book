@@ -8,6 +8,7 @@ import static androidx.recyclerview.widget.ItemTouchHelper.UP;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,7 +35,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -53,7 +54,6 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.ArrayIndexComparator;
 import com.fieldbook.tracker.utilities.CSVWriter;
-import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -93,6 +93,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     public TraitAdapter traitAdapter;
     public static boolean brapiDialogShown = false;
     private static final Handler mHandler = new Handler();
+
     private final int PERMISSIONS_REQUEST_STORAGE_IMPORT = 999;
     private final int PERMISSIONS_REQUEST_STORAGE_EXPORT = 998;
     private Menu systemMenu;
@@ -133,8 +134,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             super.onSelectedChanged(viewHolder, actionState);
             if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
                 if (viewHolder != null) {
-                    viewHolder.itemView.setAlpha(0.5f);
-                    viewHolder.itemView.setScaleY(1.618f);
+                    if (!SharedPreferenceUtils.Companion.isHighContrastTheme(prefs)) {
+                        viewHolder.itemView.setAlpha(0.5f);
+                    }
                 }
             }
         }
@@ -143,7 +145,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
             viewHolder.itemView.setAlpha(1f);
-            viewHolder.itemView.setScaleY(1f);
         }
     });
 
@@ -909,7 +910,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public void onMenuItemClicked(View v, TraitObject trait) {
 
-        PopupMenu popupMenu = new PopupMenu(this, v);
+        Context wrapper = new ContextThemeWrapper(this, R.style.PopupMenuStyle);
+        PopupMenu popupMenu = new PopupMenu(wrapper, v);
 
         //Inflating the Popup using xml file
         popupMenu.getMenuInflater().inflate(R.menu.menu_trait_list_item, popupMenu.getMenu());
@@ -971,7 +973,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     // Copy trait name

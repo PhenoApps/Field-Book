@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.preferences;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -11,14 +12,12 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
-import com.fieldbook.tracker.utilities.DialogUtils;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.UUID;
@@ -117,7 +116,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     private void showPersonDialog() {
@@ -158,7 +156,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         personDialog = builder.create();
         personDialog.show();
-        DialogUtils.styleDialogs(personDialog);
 
         android.view.WindowManager.LayoutParams langParams = personDialog.getWindow().getAttributes();
         langParams.width = LinearLayout.LayoutParams.MATCH_PARENT;

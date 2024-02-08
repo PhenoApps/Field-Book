@@ -215,7 +215,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
             String internalGps = getString(R.string.pref_behavior_geonav_internal_gps_choice);
             names.add(internalGps);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
             builder.setTitle(R.string.choose_paired_bluetooth_devices_title);
 
             //when a device is chosen, start a connect thread

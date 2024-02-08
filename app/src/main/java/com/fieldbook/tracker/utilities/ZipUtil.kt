@@ -180,6 +180,13 @@ class ZipUtil {
                                                     is Boolean -> putBoolean(key, x)
 
                                                     is String -> putString(key, x)
+
+                                                    is Set<*> -> {
+
+                                                        val newStringSet = hashSetOf<String>()
+                                                        newStringSet.addAll(x.map { value -> value.toString() })
+                                                        putStringSet(key, newStringSet)
+                                                    }
                                                 }
                                             }
 

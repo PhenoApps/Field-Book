@@ -32,7 +32,11 @@
         <item name="titleTextColor">?attr/fb_color_text_dark</item>
 
         <item name="android:textAppearanceListItem">@style/AppTextAppearance.Preference.Title</item>
-        <item name="android:textAppearanceListItemSecondary">@style/AppTextAppearance.Preference.Summary</item>
+        <item name="android:textAppearanceListItemSecondary">
+            @style/AppTextAppearance.Preference.Summary
+        </item>
+
+        <item name="alertDialogTheme">@style/AppAlertDialog.Preference</item>
     </style>
 
     <style name="AppTextAppearance.Preference.Title" parent="TextAppearance.AppCompat.Headline">

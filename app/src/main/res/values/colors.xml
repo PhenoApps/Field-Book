@@ -2,6 +2,7 @@
 <resources>
 
     <!-- default theme colors -->
+    <color name="main_border">@color/BLACK</color>
     <color name="main_primary">#8BC34A</color>
     <color name="main_primary_dark">#689F38</color>
     <color name="main_color_accent">#795548</color>
@@ -29,8 +30,12 @@
     <color name="main_button_color_pressed">#595959</color>
     <color name="main_subheading_color">#595959</color>
     <color name="main_color_text_secondary">#595959</color>
+    <color name="main_color_seekbar">#42000000</color>
+    <color name="main_color_seekbar_thumb">#90654321</color>
+    <color name="light_gray">#d3d3d3</color>
 
     <!-- blue theme colors -->
+    <color name="blue_border">@color/BLACK</color>
     <color name="blue_primary">#01A7C2</color>
     <color name="blue_primary_dark">#007090</color>
     <color name="blue_color_accent">#795548</color>
@@ -60,6 +65,7 @@
     <color name="blue_color_text_secondary">#595959</color>
 
     <!-- high contrast theme colors -->
+    <color name="high_contrast_border">@color/BLACK</color>
     <color name="high_contrast_primary">@color/WHITE</color>
     <color name="high_contrast_primary_dark">@color/BLACK</color>
     <color name="high_contrast_color_accent">@color/BLACK</color>

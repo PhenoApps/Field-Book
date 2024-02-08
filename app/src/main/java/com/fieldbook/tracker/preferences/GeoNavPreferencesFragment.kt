@@ -3,10 +3,13 @@ package com.fieldbook.tracker.preferences
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
+import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.os.Bundle
 import androidx.preference.CheckBoxPreference
 import androidx.preference.EditTextPreference
@@ -31,9 +34,10 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
     private val advisor by Security().secureBluetooth()
 
-    private val listener = OnSharedPreferenceChangeListener { sharedPreferences, key ->
-        updateUi()
-    }
+    private val listener =
+        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            updateUi()
+        }
 
     private fun updateUi() {
         updateMethodSummaryText()
@@ -76,6 +80,106 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
                     }
                     true
                 }
+        }
+
+        val geoNavMethod = findPreference<ListPreference>(GeneralKeys.GEONAV_SEARCH_METHOD)
+
+        geoNavMethod?.setOnPreferenceChangeListener { preference, newValue ->
+
+            val value = newValue as? String ?: "0"
+
+            preferences.edit()
+                .putString(GeneralKeys.GEONAV_SEARCH_METHOD, newValue as? String ?: "0").apply()
+
+            if (value == "1") {
+
+                checkRequiredSensors()
+
+            }
+
+            updateMethodSummaryText()
+            updateParametersVisibility()
+
+            true
+        }
+
+        val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
+        changeGeoNavLoggingModeView()
+        geoNavLoggingMode?.setOnPreferenceChangeListener { _, newValue ->
+            preferences.edit()
+                .putString(GeneralKeys.GEONAV_LOGGING_MODE, newValue as? String ?: "0").apply()
+
+            changeGeoNavLoggingModeView()
+
+            true
+        }
+
+        val trapBase = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D1)
+        val trapDst = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D2)
+        val trapAngle = findPreference<ListPreference>(GeneralKeys.SEARCH_ANGLE)
+        val updateInterval = findPreference<ListPreference>(GeneralKeys.UPDATE_INTERVAL)
+
+        updateInterval?.setOnPreferenceChangeListener { _, newValue ->
+
+            preferences.edit()
+                .putString(GeneralKeys.UPDATE_INTERVAL, newValue as? String ?: "0").apply()
+
+            updateParametersSummaryText()
+
+            true
+        }
+
+        trapBase?.setOnPreferenceChangeListener { _, newValue ->
+
+            preferences.edit()
+                .putString(GeneralKeys.GEONAV_PARAMETER_D1, newValue as? String ?: "0.001").apply()
+
+            updateParametersSummaryText()
+
+            true
+        }
+
+        trapDst?.setOnPreferenceChangeListener { _, newValue ->
+
+            preferences.edit()
+                .putString(GeneralKeys.GEONAV_PARAMETER_D2, newValue as? String ?: "0.01").apply()
+
+            updateParametersSummaryText()
+
+            true
+        }
+
+        trapAngle?.setOnPreferenceChangeListener { _, newValue ->
+
+            preferences.edit()
+                .putString(GeneralKeys.SEARCH_ANGLE, newValue as? String ?: "22.5").apply()
+
+            updateParametersSummaryText()
+
+            true
+        }
+    }
+
+    private fun checkRequiredSensors() {
+
+        context?.packageManager?.let { packageManager ->
+
+            val hasAccelerometer =
+                packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)
+            val hasMagneticSensor =
+                (context?.getSystemService(Context.SENSOR_SERVICE) as SensorManager)
+                    .getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null
+
+            if (!hasAccelerometer || !hasMagneticSensor) {
+
+                AlertDialog.Builder(context, R.style.AppAlertDialog)
+                    .setTitle(R.string.dialog_geonav_prefs_sensor_missing_title)
+                    .setMessage(R.string.dialog_geonav_prefs_sensor_missing_message)
+                    .setPositiveButton(org.phenoapps.androidlibrary.R.string.ok) { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    .create().show()
+            }
         }
     }
 
@@ -215,7 +319,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             }
             val internalGps = getString(R.string.pref_behavior_geonav_internal_gps_choice)
             names.add(internalGps)
-            val builder = AlertDialog.Builder(context)
+            val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
             builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
 
             //when a device is chosen, start a connect thread

@@ -256,7 +256,8 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
             }
 
             filterDialog =
-                AlertDialog.Builder(activity, R.style.AppAlertDialog).setTitle(R.string.fragment_summary_filter_title)
+                AlertDialog.Builder(activity, R.style.AppAlertDialog)
+                    .setTitle(R.string.fragment_summary_filter_title)
                     .setMultiChoiceItems(keys, checked) { _, which, isChecked ->
                         val item = keys[which]
                         filter = if (isChecked) {

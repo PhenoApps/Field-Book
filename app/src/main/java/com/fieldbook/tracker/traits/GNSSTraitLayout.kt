@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
@@ -19,7 +20,6 @@ import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.isVisible
@@ -37,6 +37,7 @@ import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.fieldbook.tracker.utilities.GnssThreadHelper
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -86,7 +87,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     private lateinit var hdopTextView: TextView
     private lateinit var precisionSp: Spinner
     private lateinit var connectGroup: Group
-    private lateinit var connectButton: ImageButton
+    private lateinit var connectButton: FloatingActionButton
     private lateinit var collectButton: ImageButton
     private lateinit var disconnectButton: ImageButton
     private lateinit var progressBar: ProgressBar
@@ -208,7 +209,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private fun initialize() {
 
-        mProgressDialog = AlertDialog.Builder(context)
+        mProgressDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(R.string.gnss_trait_averaging_dialog_title)
             .setMessage(R.string.gnss_trait_averaging_dialog_message)
             .setView(R.layout.dialog_gnss_trait_averaging)
@@ -506,7 +507,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private fun alertLocationUpdate(f: () -> Unit) {
 
-        AlertDialog.Builder(context)
+        AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(R.string.trait_gnss_geo_coord_update_dialog_title)
             .setMessage(R.string.trait_gnss_geo_coord_update_dialog_message)
             .setNegativeButton(android.R.string.cancel) { dialog, _ ->
@@ -539,7 +540,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                     bluetoothMap[bd.name] = bd
                 }
 
-                val builder = AlertDialog.Builder(context)
+                val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
                 builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
 
                 val internalGpsString = context.getString(R.string.pref_behavior_geonav_internal_gps_choice)

@@ -329,7 +329,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                 "5" -> {
                     period = 5000L
                 }
-
                 "10" -> {
                     period = 10000L
                 }
@@ -459,15 +458,12 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             "22.5" -> {
                 theta = 22.5
             }
-
             "45" -> {
                 theta = 45.0
             }
-
             "67.5" -> {
                 theta = 67.5
             }
-
             "90" -> {
                 theta = 90.0
             }
@@ -505,27 +501,101 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         //run the algorithm and time how long it takes
         if (start != null && currentFixQuality) {
 
-            mAzimuth?.let { azimuth ->
+            //long toc = System.currentTimeMillis();
+            val (first) = impactZoneSearch(
+                mGeoNavLogWriter, preferences, currentLoggingMode(),
+                start, coordinates.toTypedArray(),
+                mAzimuth, theta, mTeslas, geoNavMethod, d1, d2
+            )
+            //long tic = System.currentTimeMillis();
 
-                val geoNavPrefs = PreferenceManager.getDefaultSharedPreferences(controller.getContext())
+            //if we received a result then show it to the user, create a button to navigate to the plot
+            if (first != null) {
+                val id = first.observation_unit_db_id
+                with((controller.getContext() as CollectActivity)) {
+                    if (id != getRangeBox().cRange.plot_id && id != lastPlotIdNav) {
+                        lastPlotIdNav = id
+                        runOnUiThread {
+                            if (preferences.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
+                                lastPlotIdNav = null
+                                moveToSearch("id", getRangeBox().getRangeID(), null, null, id, -1)
+                                Toast.makeText(
+                                    this,
+                                    R.string.activity_collect_found_plot,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                mGeoNavSnackbar = Snackbar.make(
+                                    findViewById(R.id.toolbarBottom),
+                                    id, Snackbar.LENGTH_INDEFINITE
+                                )
+                                val snackLayout = mGeoNavSnackbar?.view as SnackbarLayout
+                                val snackView: View =
+                                    layoutInflater.inflate(
+                                        R.layout.geonav_snackbar_layout,
+                                        null
+                                    )
+                                val params =
+                                    ConstraintLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.MATCH_PARENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT
+                                    )
 
-                //long toc = System.currentTimeMillis();
-                val (first) = impactZoneSearch(
-                    mGeoNavLogWriter, preferences, currentLoggingMode(),
-                    start, coordinates.toTypedArray(),
-                    azimuth, theta, mTeslas, geoNavMethod, d1, d2
-                )
-                //long tic = System.currentTimeMillis();
+                                //adjust position based on softkeyboard, so it displays above it
+                                if (snackBarBottomMargin != 0) { //0 if keyboard is not displayed
 
-                //if we received a result then show it to the user, create a button to navigate to the plot
-                if (first != null) {
-                    val id = first.observation_unit_db_id
-                    with ((controller.getContext() as CollectActivity)) {
-                        if (id != getRangeBox().cRange.plot_id && id != lastPlotIdNav) {
-                            lastPlotIdNav = id
-                            runOnUiThread {
-                                if (preferences.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
+                                    //read the minimum action bar size based on theme
+                                    val typedValue = TypedValue()
+                                    if (controller.getContext().theme.resolveAttribute(
+                                            android.R.attr.actionBarSize,
+                                            typedValue,
+                                            true
+                                        )
+                                    ) {
+                                        val actionBarHeight =
+                                            TypedValue.complexToDimensionPixelSize(
+                                                typedValue.data,
+                                                resources.displayMetrics
+                                            )
+
+                                        //adjust bottom margin based on keyboard height, action bar height, and slight padding to mimic how it looks normally
+                                        params.bottomMargin =
+                                            snackBarBottomMargin - actionBarHeight + snackView.paddingBottom / 2
+                                    }
+                                }
+
+                                params.bottomToTop = R.id.toolbarBottom
+                                snackView.layoutParams = params
+                                snackLayout.addView(snackView)
+                                snackLayout.setPadding(0, 0, 0, 0)
+                                val tv =
+                                    snackView.findViewById<TextView>(R.id.geonav_snackbar_tv)
+
+                                var popupHeader =
+                                    preferences.getString(GeneralKeys.GEONAV_POPUP_DISPLAY, "plot_id")
+                                tv.text = getPopupInfo(id, popupHeader ?: "plot_id")
+
+                                // if the value saved in GEONAV_POPUP_DISPLAY was disabled in traits
+                                // GEONAV_POPUP_DISPLAY will default back to plot_id
+                                // now set a change listener
+                                // if the user changes the popup type from the geonav config dialog
+                                // then dismiss the snack-bar
+                                preferences.registerOnSharedPreferenceChangeListener(
+                                    preferenceChangeListener
+                                )
+
+//                                    if (tv != null) {
+//                                        tv.text = id
+//                                    }
+
+                                val btn =
+                                    snackView.findViewById<ImageButton>(R.id.geonav_snackbar_btn)
+                                btn?.setOnClickListener { v: View? ->
+                                    mGeoNavSnackbar?.dismiss()
                                     lastPlotIdNav = null
+
+                                    println(snackView.height)
+                                    //when navigate button is pressed use rangeBox to go to the plot id
                                     moveToSearch(
                                         "id",
                                         getRangeBox().getRangeID(),
@@ -534,81 +604,10 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                         id,
                                         -1
                                     )
-                                    Toast.makeText(
-                                        this,
-                                        R.string.activity_collect_found_plot,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                } else {
-                                    mGeoNavSnackbar = Snackbar.make(
-                                        findViewById(R.id.toolbarBottom),
-                                        id, Snackbar.LENGTH_INDEFINITE
-                                    )
-                                    val snackLayout = mGeoNavSnackbar?.view as SnackbarLayout
-                                    val snackView: View =
-                                        layoutInflater.inflate(
-                                            R.layout.geonav_snackbar_layout,
-                                            null
-                                        )
-                                    val params =
-                                        ConstraintLayout.LayoutParams(
-                                            LinearLayout.LayoutParams.MATCH_PARENT,
-                                            LinearLayout.LayoutParams.WRAP_CONTENT
-                                        )
-
-                                    //adjust position based on softkeyboard, so it displays above it
-                                    if (snackBarBottomMargin != 0) { //0 if keyboard is not displayed
-
-                                        //read the minimum action bar size based on theme
-                                        val typedValue = TypedValue()
-                                        if (controller.getContext().theme.resolveAttribute(android.R.attr.actionBarSize, typedValue, true)) {
-                                            val actionBarHeight = TypedValue.complexToDimensionPixelSize(typedValue.data, resources.displayMetrics)
-
-                                            //adjust bottom margin based on keyboard height, action bar height, and slight padding to mimic how it looks normally
-                                            params.bottomMargin = snackBarBottomMargin - actionBarHeight + snackView.paddingBottom / 2
-                                        }
-                                    }
-
-                                    params.bottomToTop = R.id.toolbarBottom
-                                    snackView.layoutParams = params
-                                    snackLayout.addView(snackView)
-                                    snackLayout.setPadding(0, 0, 0, 0)
-                                    val tv =
-                                        snackView.findViewById<TextView>(R.id.geonav_snackbar_tv)
-
-                                    var popupHeader = preferences.getString(
-                                        GeneralKeys.GEONAV_POPUP_DISPLAY,
-                                        "plot_id"
-                                    )
-                                    tv.text = getPopupInfo(id, "${popupHeader ?: "plot_id"}")
-
-                                    // if the value saved in GEONAV_POPUP_DISPLAY was disabled in traits
-                                    // GEONAV_POPUP_DISPLAY will default back to plot_id
-                                    // now set a change listener
-                                    // if the user changes the popup type from the geonav config dialog
-                                    // then dismiss the snack-bar
-                                    preferences.registerOnSharedPreferenceChangeListener(
-                                        preferenceChangeListener
-                                    )
-
-//                                    if (tv != null) {
-//                                        tv.text = id
-//                                    }
-
-                                    val btn =
-                                        snackView.findViewById<ImageButton>(R.id.geonav_snackbar_btn)
-                                    btn?.setOnClickListener { v: View? ->
-                                        mGeoNavSnackbar?.dismiss()
-                                        lastPlotIdNav = null
-
-                                        println(snackView.height)
-                                        //when navigate button is pressed use rangeBox to go to the plot id
-                                        moveToSearch("id", getRangeBox().getRangeID(), null, null, id, -1)
-                                    }
-                                    mGeoNavSnackbar?.setAnchorView(R.id.toolbarBottom)
-                                    mGeoNavSnackbar?.setBackgroundTint(Color.TRANSPARENT)
-                                    mGeoNavSnackbar?.show()
                                 }
+                                mGeoNavSnackbar?.setAnchorView(R.id.toolbarBottom)
+                                mGeoNavSnackbar?.setBackgroundTint(Color.TRANSPARENT)
+                                mGeoNavSnackbar?.show()
                             }
                         }
                     }

@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -33,7 +34,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
@@ -54,6 +54,7 @@ import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.FileUtil;
+import com.fieldbook.tracker.utilities.ManufacturerUtil;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -122,6 +123,7 @@ public class ConfigActivity extends ThemedActivity {
     public DataHelper database;
     @Inject
     public SoundHelperImpl soundHelper;
+    public FieldSwitchImpl fieldSwitcher = null;
     @Inject
     VerifyPersonHelper verifyPersonHelper;
     @Inject
@@ -200,8 +202,14 @@ public class ConfigActivity extends ThemedActivity {
         invalidateOptionsMenu();
         loadScreen();
 
-        // request permissions
-        ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+        Log.d(TAG, Build.MANUFACTURER);
+
+        preferencesSetup();
+
+        verifyPersonHelper.updateLastOpenedTime();
+    }
+
+    private void versionBasedSetup() {
 
         int lastVersion = preferences.getInt(GeneralKeys.UPDATE_VERSION, -1);
         int currentVersion = Utils.getVersion(this);
@@ -222,6 +230,9 @@ public class ConfigActivity extends ThemedActivity {
                 preferences.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
             }
         }
+    }
+
+    private void firstRunSetup() {
 
         if (!preferences.contains(GeneralKeys.FIRST_RUN)) {
             // do things on the first run
@@ -240,11 +251,29 @@ public class ConfigActivity extends ThemedActivity {
             ed.putBoolean(GeneralKeys.FIRST_RUN, false);
             ed.apply();
         }
+    }
+
+    private void preferencesSetup() {
+
+        versionBasedSetup();
+
+        firstRunSetup();
 
         if (!BaseDocumentTreeUtil.Companion.isEnabled(this)) {
 
             startActivityForResult(new Intent(this, DefineStorageActivity.class),
                     REQUEST_STORAGE_DEFINER);
+        } else {
+
+            ManufacturerUtil.Companion.eInkDeviceSetup(this, prefs, getResources(), () -> {
+
+                recreate();
+
+                // request permissions
+                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+
+                return null;
+            });
         }
 
         migratePreferencesToDefault();
@@ -279,7 +308,7 @@ public class ConfigActivity extends ThemedActivity {
                 edit.putStringSet(key, ((HashSet<String>) value));
             }
         }
-        
+
         edit.apply();
     }
 
@@ -392,10 +421,9 @@ public class ConfigActivity extends ThemedActivity {
 
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
-            if(mlkitEnabled) {
+            if (mlkitEnabled) {
                 ScannerActivity.Companion.requestCameraAndStartScanner(this, REQUEST_BARCODE, null, null, null);
-            }
-            else {
+            } else {
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.barcode_scanner_text))
                         .setBeepEnabled(false)
@@ -796,6 +824,7 @@ public class ConfigActivity extends ThemedActivity {
         startActivity(intent);
 
     }
+
     @Nullable
     private FieldObject searchStudiesForBarcode(String barcode) {
 
@@ -876,15 +905,18 @@ public class ConfigActivity extends ThemedActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_STORAGE_DEFINER) {
             if (resultCode != Activity.RESULT_OK) finish();
+            else {
+                // request permissions
+                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+            }
         } else if (requestCode == REQUEST_BARCODE) {
             if (resultCode == RESULT_OK) {
 
                 // get barcode from scan result
                 String scannedBarcode;
-                if(mlkitEnabled){
+                if (mlkitEnabled) {
                     scannedBarcode = data.getStringExtra("barcode");
-                }
-                else {
+                } else {
                     IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
                     scannedBarcode = plotDataResult.getContents();
                 }

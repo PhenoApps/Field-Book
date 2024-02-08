@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -24,8 +25,6 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
-
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.SearchAdapter;
 import com.fieldbook.tracker.database.DataHelper;
@@ -40,7 +39,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SearchActivity extends ThemedActivity {
+public class SearchActivity extends ActivityDialog {
     public static String TICK = "\"";
     private static final String TAG = "Field Book";
     private LinearLayout parent;
