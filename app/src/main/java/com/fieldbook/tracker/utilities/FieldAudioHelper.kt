@@ -41,7 +41,7 @@ import javax.inject.Inject
  *
  * AudioTraitLayout also uses methods from this helper
  *
- * Zips field audio, all traits and geonav log files in /field_audio_log_traits_zip/
+ * Zips field audio, all traits and geonav log files in /field_export/
  */
 
 class FieldAudioHelper @Inject constructor(@ActivityContext private val context: Context) : TraitCsvWriter {
@@ -120,11 +120,11 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
 
             val mGeneratedName = "field_audio_log" + context.cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(c.time)    + ".zip"
 
-            val exportDir = getDirectory(context, R.string.dir_field_audio_log_traits_zip)
+            val exportDir = getDirectory(context, R.string.dir_field_export)
             val zipFile = exportDir?.createFile("*/*", mGeneratedName)
 
             val output = getFileOutputStream(
-                context, R.string.dir_field_audio_log_traits_zip, mGeneratedName
+                context, R.string.dir_field_export, mGeneratedName
             )
 
             if(output != null){
