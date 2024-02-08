@@ -386,6 +386,11 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun moveTrait(direction: String) {
+        // if visibleTraitsList is null
+        // don't move the trait
+        // as we won't get the length of the list
+        if (visibleTraitsList == null) return
+
         var pos = 0
         if (!controller.validateData()) {
             return
