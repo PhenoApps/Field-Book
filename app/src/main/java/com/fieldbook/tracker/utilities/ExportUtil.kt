@@ -178,7 +178,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
         if (BrAPIService.isLoggedIn(context)) {
             val exportIntent = Intent(context, BrapiExportActivity::class.java)
-            exportIntent.putExtra("FIELD_ID", fieldId)
+            exportIntent.putExtra(BrapiExportActivity.FIELD_ID, fieldId);
             context.startActivity(exportIntent)
         } else {
             val brapiAuth = BrapiAuthDialog(context)

@@ -36,6 +36,7 @@ import java.util.Locale;
 
 public class BrapiExportActivity extends ThemedActivity {
     private static final String TAG = BrapiExportActivity.class.getName();
+    public static final String FIELD_ID = "FIELD_ID";
 
     private BrAPIService brAPIService;
     private DataHelper dataHelper;
@@ -89,8 +90,8 @@ public class BrapiExportActivity extends ThemedActivity {
 
                 // Extract the fieldId from the intent
                 Intent intent = getIntent();
-                if (intent != null && intent.hasExtra("FIELD_ID")) {
-                    fieldId = intent.getIntExtra("FIELD_ID", -1);
+                if (intent != null && intent.hasExtra(FIELD_ID)) {
+                    fieldId = intent.getIntExtra(FIELD_ID, -1);
                 }
 
                 brAPIService = BrAPIServiceFactory.getBrAPIService(this);
