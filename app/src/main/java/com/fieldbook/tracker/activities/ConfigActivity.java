@@ -128,7 +128,6 @@ public class ConfigActivity extends ThemedActivity {
     VerifyPersonHelper verifyPersonHelper;
     @Inject
     SharedPreferences preferences;
-    public FieldSwitchImpl fieldSwitcher = null;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     ListView settingsList;

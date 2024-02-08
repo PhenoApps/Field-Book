@@ -33,8 +33,6 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
     public static final int LOCATION_COLLECTION_OBS_UNIT = 1;
     public static final int LOCATION_COLLECTION_OBS = 2;
     public static final int LOCATION_COLLECTION_STUDY = 3;
-
-    PreferenceManager prefMgr;
     Context context;
     private Preference defaultStorageLocation;
 
