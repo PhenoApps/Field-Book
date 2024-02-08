@@ -259,7 +259,7 @@ class StudyDao {
                 FROM ${Study.tableName} AS Studies
                 WHERE ${Study.PK} = ?
                 """
-            Log.d("StudyDao", "Query is "+query)
+//            Log.d("StudyDao", "Query is "+query)
             val fieldData = db.rawQuery(query, arrayOf(exp_id.toString())).use { cursor ->
                 if (cursor.moveToFirst()) {
                     val map = cursor.columnNames.associateWith { columnName ->

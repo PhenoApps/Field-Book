@@ -94,7 +94,7 @@ public class FieldEditorActivity extends ThemedActivity
     private static final int DIALOG_LOAD_FIELDFILECSV = 1000;
     private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
     private ArrayList<FieldObject> fieldList;
-    public static FieldAdapter mAdapter;
+    public FieldAdapter mAdapter;
     public static AppCompatActivity thisActivity;
     public static EditText trait;
     private static final Handler mHandler = new Handler();
@@ -136,7 +136,7 @@ public class FieldEditorActivity extends ThemedActivity
         if (actionMode != null) {
             actionMode.finish();  // Finish the action mode if it's active
         }
-        FieldDetailFragment fragment = new FieldDetailFragment(field);
+        FieldDetailFragment fragment = new FieldDetailFragment();
 
         getSupportFragmentManager().beginTransaction()
                 .replace(android.R.id.content, fragment,"FieldDetailFragmentTag")
@@ -712,7 +712,7 @@ public class FieldEditorActivity extends ThemedActivity
             getSupportFragmentManager().popBackStack();
         } else {
             CollectActivity.reloadData = true;
-            finish();
+            super.onBackPressed();
         }
     }
 
@@ -1019,7 +1019,7 @@ public class FieldEditorActivity extends ThemedActivity
             // Refresh the fragment's data
             FieldDetailFragment fragment = (FieldDetailFragment) getSupportFragmentManager().findFragmentByTag("FieldDetailFragmentTag");
             if (fragment != null) {
-                fragment.refreshData(); // Ensure this public method exists in your FieldDetailFragment
+                fragment.loadData();
             }
 
         } catch (Exception e) {
@@ -1047,6 +1047,10 @@ public class FieldEditorActivity extends ThemedActivity
     @Override
     public DataHelper getDatabase() {
         return database;
+    }
+
+    public Integer getStudyId() {
+        return ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
     }
 
     @NonNull

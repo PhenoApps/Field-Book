@@ -45,7 +45,7 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
+class FieldDetailFragment : Fragment() {
 
     @Inject
     lateinit var database: DataHelper
@@ -65,6 +65,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
     private lateinit var cardViewCollect: CardView
     private lateinit var cardViewExport: CardView
     private lateinit var cardViewSync: CardView
+    private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
 
     override fun onCreateView(
@@ -73,11 +74,8 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         Log.d("onCreateView", "Start")
         rootView = inflater.inflate(R.layout.fragment_field_detail, container, false)
         toolbar = rootView.findViewById(R.id.toolbar)
-        setupToolbar()
-
         exportUtil = ExportUtil(requireActivity(), database)
         fieldDisplayNameTextView = rootView.findViewById(R.id.fieldDisplayName)
-        fieldDisplayNameTextView.text = field.exp_alias
         importDateTextView = rootView.findViewById(R.id.importDateTextView)
         fieldNarrativeTextView = rootView.findViewById(R.id.fieldNarrativeTextView)
         lastEditTextView = rootView.findViewById(R.id.lastEditTextView)
@@ -86,8 +84,9 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         observationCountTextView = rootView.findViewById(R.id.observationCountTextView)
         cardViewSync = rootView.findViewById(R.id.cardViewSync)
         lastSyncTextView = rootView.findViewById(R.id.lastSyncTextView)
+        detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
 
-        updateFieldData(field)
+        loadData()
 
         val expandCollapseIcon: ImageView = rootView.findViewById(R.id.expand_collapse_icon)
         val collapsibleContent: LinearLayout = rootView.findViewById(R.id.collapsible_content)
@@ -102,8 +101,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
                 expandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
             }
         }
-
-        setupRecyclerView()
 
         cardViewCollect = rootView.findViewById(R.id.cardViewCollect)
         cardViewExport = rootView.findViewById(R.id.cardViewExport)
@@ -120,31 +117,38 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         return rootView
     }
 
-    private fun setupRecyclerView() {
-        val recyclerView: RecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        val initialItems = createTraitDetailItems(field).toMutableList()
-        adapter = FieldDetailAdapter(initialItems)
-        recyclerView.adapter = adapter
-    }
-
     override fun onResume() {
         super.onResume()
-        refreshData()
+        loadData()
     }
 
-    fun refreshData() {
-        Log.d("FieldDetailFragment", "Data refresh triggered")
-        val dataHelper = DataHelper(requireActivity())
-        val updatedFieldObject = dataHelper.getFieldObject(field.exp_id)
-        updateFieldData(updatedFieldObject)
-        val newItems = createTraitDetailItems(updatedFieldObject)
-        adapter?.updateItems(newItems)
+    fun loadData() {
+        with(activity as? FieldEditorActivity) {
+            this?.let { fieldeditor ->
+                val studyId = fieldeditor.studyId
+                val dataHelper = DataHelper(requireActivity())
+                val field = dataHelper.getFieldObject(studyId)
+                updateFieldData(field)
+                if (detailRecyclerView.adapter == null) { // initial load
+                    detailRecyclerView.layoutManager = LinearLayoutManager(context)
+                    val initialItems = createTraitDetailItems(field).toMutableList()
+                    adapter = FieldDetailAdapter(initialItems)
+                    detailRecyclerView.adapter = adapter
+                    setupToolbar(field)
+                } else { // reload after data change
+                    val newItems = createTraitDetailItems(field)
+                    adapter?.updateItems(newItems)
+                }
+            }
+        }
     }
 
     private fun updateFieldData(field: FieldObject) {
+
         cardViewSync.visibility = View.GONE
         cardViewSync.setOnClickListener(null)
+
+        fieldDisplayNameTextView.text = field.exp_alias
         val importDate = field.date_import
         if (!importDate.isNullOrEmpty()) {
             importDateTextView.text = formatSemanticDateForDisplay(importDate)
@@ -166,10 +170,20 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
             }
             observationLevel = "${field.observation_level}s"
         }
-        val sortOrder = if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
+        val sortOrder =
+            if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
 
-        val narrativeString = getString(R.string.field_detail_narrative, exp_source, field.exp_name, field.count, observationLevel, field.attribute_count, sortOrder)
-        fieldNarrativeTextView.text = HtmlCompat.fromHtml(narrativeString, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        val narrativeString = getString(
+            R.string.field_detail_narrative,
+            exp_source,
+            field.exp_name,
+            field.count,
+            observationLevel,
+            field.attribute_count,
+            sortOrder
+        )
+        fieldNarrativeTextView.text =
+            HtmlCompat.fromHtml(narrativeString, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {
@@ -191,9 +205,12 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         }
 
         val traitString = getString(R.string.field_trait_total, field.trait_count)
-        val observationString = getString(R.string.field_observation_total, field.observation_count)
-        traitCountTextView.text = HtmlCompat.fromHtml(traitString, HtmlCompat.FROM_HTML_MODE_LEGACY)
-        observationCountTextView.text = HtmlCompat.fromHtml(observationString, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        val observationString =
+            getString(R.string.field_observation_total, field.observation_count)
+        traitCountTextView.text =
+            HtmlCompat.fromHtml(traitString, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        observationCountTextView.text =
+            HtmlCompat.fromHtml(observationString, HtmlCompat.FROM_HTML_MODE_LEGACY)
     }
 
     fun formatSemanticDateForDisplay(dateStr: String?): String {
@@ -232,7 +249,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         return emptyList()  // Return an empty list if traitDetails is null
     }
 
-    private fun setupToolbar() {
+    private fun setupToolbar(field: FieldObject) {
 
         toolbar?.inflateMenu(R.menu.menu_field_details)
 
@@ -252,7 +269,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
                     parentFragmentManager.popBackStack()
                 }
                 R.id.rename -> {
-                    showEditDisplayNameDialog()
+                    showEditDisplayNameDialog(field)
                 }
                 R.id.sort -> {
                     (activity as? FieldSortController)?.showSortDialog(field)
@@ -266,7 +283,7 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         }
     }
 
-    private fun showEditDisplayNameDialog() {
+    private fun showEditDisplayNameDialog(field: FieldObject) {
         val editText = EditText(context).apply {
             inputType = InputType.TYPE_CLASS_TEXT
             setText(field.exp_alias)
@@ -278,7 +295,10 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
         builder.setPositiveButton(getString(R.string.dialog_save)) { dialog, _ ->
             val newName = editText.text.toString()
             if (newName.isNotBlank()) {
-                updateStudyAliasInDatabase(newName)
+                database.updateStudyAlias(field.exp_id, newName)
+                fieldDisplayNameTextView.text = newName
+                field.setExp_alias(newName)
+                (activity as? FieldAdapterController)?.queryAndLoadFields()
             }
             dialog.dismiss()
         }
@@ -288,14 +308,6 @@ class FieldDetailFragment( private val field: FieldObject ) : Fragment() {
 
         val dialog = builder.create()
         dialog.show()
-    }
-
-    private fun updateStudyAliasInDatabase(newName: String) {
-
-        database.updateStudyAlias(field.exp_id, newName)
-        fieldDisplayNameTextView.text = newName
-        field.setExp_alias(newName)
-        (activity as? FieldAdapterController)?.queryAndLoadFields()
     }
 
     private fun makeConfirmDeleteListener(field: FieldObject): DialogInterface.OnClickListener? {

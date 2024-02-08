@@ -225,7 +225,7 @@ public class ConfigActivity extends ThemedActivity {
             startActivityForResult(new Intent(this, DefineStorageActivity.class),
                     REQUEST_STORAGE_DEFINER);
         } else {
-            
+
         verifyPersonHelper.updateLastOpenedTime();
             ManufacturerUtil.Companion.eInkDeviceSetup(this, prefs, getResources(), () -> {
 
