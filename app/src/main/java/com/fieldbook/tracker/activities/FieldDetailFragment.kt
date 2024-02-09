@@ -2,8 +2,8 @@ package com.fieldbook.tracker.activities
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
@@ -16,7 +16,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -34,7 +33,6 @@ import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
-import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DateResult
 import com.fieldbook.tracker.utilities.ExportUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
@@ -50,6 +48,10 @@ class FieldDetailFragment : Fragment() {
 
     @Inject
     lateinit var database: DataHelper
+
+    @Inject
+    lateinit var preferences: SharedPreferences
+
     private var toolbar: Toolbar? = null
     private val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
 
@@ -87,7 +89,7 @@ class FieldDetailFragment : Fragment() {
         lastSyncTextView = rootView.findViewById(R.id.lastSyncTextView)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
 
-        loadData()
+        loadFieldDetails()
 
         val expandCollapseIcon: ImageView = rootView.findViewById(R.id.expand_collapse_icon)
         val collapsibleContent: LinearLayout = rootView.findViewById(R.id.collapsible_content)
@@ -120,15 +122,14 @@ class FieldDetailFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        loadData()
+        loadFieldDetails()
     }
 
-    fun loadData() {
+    fun loadFieldDetails() {
         with(activity as? FieldEditorActivity) {
             this?.let { fieldeditor ->
                 val studyId = fieldeditor.studyId
-                val dataHelper = DataHelper(requireActivity())
-                val field = dataHelper.getFieldObject(studyId)
+                val field = database.getFieldObject(studyId)
                 updateFieldData(field)
                 if (detailRecyclerView.adapter == null) { // initial load
                     detailRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -277,7 +278,7 @@ class FieldDetailFragment : Fragment() {
                     (activity as? FieldSortController)?.showSortDialog(field)
                 }
                 R.id.delete -> {
-                    createDeleteItemAlertDialog(field)?.show()
+                    (activity as? FieldEditorActivity)?.showDeleteConfirmationDialog(listOf(field.exp_id), true)
                 }
             }
 
@@ -310,50 +311,6 @@ class FieldDetailFragment : Fragment() {
 
         val dialog = builder.create()
         dialog.show()
-    }
-
-    private fun makeConfirmDeleteListener(field: FieldObject): DialogInterface.OnClickListener? {
-        return DialogInterface.OnClickListener { dialog, which ->
-
-            // Do it when clicking Yes or No
-            dialog.dismiss()
-
-            val ep = activity?.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, AppCompatActivity.MODE_PRIVATE)
-            (activity as? FieldAdapterController)?.getDatabase()?.deleteField(field.exp_id)
-            if (field.exp_id == ep!!.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
-                val ed = ep.edit()
-                ed.putString(GeneralKeys.FIELD_FILE, null)
-                ed.putString(GeneralKeys.FIELD_ALIAS, null)
-                ed.putString(GeneralKeys.FIELD_OBS_LEVEL, null)
-                ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1)
-                ed.putString(GeneralKeys.UNIQUE_NAME, null)
-                ed.putString(GeneralKeys.PRIMARY_NAME, null)
-                ed.putString(GeneralKeys.SECONDARY_NAME, null)
-                ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
-                ed.putString(GeneralKeys.LAST_PLOT, null)
-                ed.apply()
-            }
-            (activity as? FieldAdapterController)?.queryAndLoadFields()
-            CollectActivity.reloadData = true
-            parentFragmentManager.popBackStack()
-        }
-    }
-
-    private fun createDeleteItemAlertDialog(field: FieldObject): AlertDialog? {
-        val builder =
-            AlertDialog.Builder(
-                requireContext(), R.style.AppAlertDialog
-            )
-        builder.setTitle(requireContext().getString(R.string.fields_delete_study))
-        builder.setMessage(requireContext().getString(R.string.fields_delete_study_confirmation))
-        builder.setPositiveButton(
-            requireContext().getString(R.string.dialog_yes),
-            makeConfirmDeleteListener(field)
-        )
-        builder.setNegativeButton(
-            requireContext().getString(R.string.dialog_no)
-        ) { dialog, which -> dialog.dismiss() }
-        return builder.create()
     }
 
     fun checkTraitsExist(): Int {

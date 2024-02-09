@@ -78,6 +78,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.StringJoiner;
 import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -148,8 +149,7 @@ public class FieldEditorActivity extends ThemedActivity
         CollectActivity.reloadData = true;
     }
 
-    // Helper function to load data
-    public void loadData() {
+    public void loadFieldsList() {
         try {
             database.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
             recyclerView = findViewById(R.id.fieldRecyclerView);
@@ -182,7 +182,7 @@ public class FieldEditorActivity extends ThemedActivity
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
 
-        loadData();
+        loadFieldsList();
         mGpsTracker = new GPSTracker(this);
     }
 
@@ -206,7 +206,7 @@ public class FieldEditorActivity extends ThemedActivity
         }
 
         thisActivity = this;
-        loadData();
+        loadFieldsList();
     }
 
     // Implementations of methods from FieldAdapter.AdapterCallback
@@ -290,7 +290,8 @@ public class FieldEditorActivity extends ThemedActivity
 //                mode.finish();
 //                return true;
             } else if (itemId == R.id.menu_delete) {
-                createDeleteItemAlertDialog().show();
+                List<Integer> selectedFieldIds = getSelectedFieldIds();
+                showDeleteConfirmationDialog(selectedFieldIds, false);
                 return true;
             } else {
                 return false;
@@ -305,11 +306,9 @@ public class FieldEditorActivity extends ThemedActivity
         }
     };
 
-    private AlertDialog createDeleteItemAlertDialog() {
-        String fieldNames = getSelectedFieldNames();
-        int itemCount = mAdapter.getSelectedItemCount();
-
-        String message = getResources().getQuantityString(R.plurals.fields_delete_confirmation, itemCount, fieldNames);
+    public void showDeleteConfirmationDialog(final List<Integer> fieldIds, boolean isFromDetailFragment) {
+        String fieldNames = getFieldNames(fieldIds);
+        String message = getResources().getQuantityString(R.plurals.fields_delete_confirmation, fieldIds.size(), fieldNames);
         Spanned formattedMessage;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             formattedMessage = Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY);
@@ -317,23 +316,24 @@ public class FieldEditorActivity extends ThemedActivity
             formattedMessage = Html.fromHtml(message);
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(getString(R.string.fields_delete_study));
-        builder.setMessage(formattedMessage);
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                deleteSelectedItems();
-            }
-        });
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        return builder.create();
+        new AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(getString(R.string.fields_delete_study))
+            .setMessage(formattedMessage)
+            .setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    deleteFields(fieldIds);
+                    if (isFromDetailFragment) { getSupportFragmentManager().popBackStack(); }
+                }
+            })
+            .setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            })
+            .show();
     }
+
 
     private List<Integer> getSelectedFieldIds() {
         List<Integer> selectedFieldIds = new ArrayList<>();
@@ -345,34 +345,44 @@ public class FieldEditorActivity extends ThemedActivity
         return selectedFieldIds;
     }
 
-    private String getSelectedFieldNames() {
-        List<Integer> selectedItemPositions = mAdapter.getSelectedItems();
-        List<String> fieldNames = new ArrayList<>();
+    private String getFieldNames(final List<Integer> fieldIds) {
 
-        for (int position : selectedItemPositions) {
-            FieldObject field = fieldList.get(position);
-            fieldNames.add("<b>" + field.getExp_alias() + "</b>");
-        }
+        List<String> fieldNames = fieldIds.stream()
+                .flatMap(id -> fieldList.stream()
+                        .filter(field -> field.getExp_id() == id)
+                        .map(field -> "<b>" + field.getExp_alias() + "</b>"))
+                .collect(Collectors.toList());
 
         return TextUtils.join(", ", fieldNames);
     }
 
-    private void deleteSelectedItems() {
-        List<Integer> selectedItemPositions = new ArrayList<>(mAdapter.getSelectedItems());
-        Collections.sort(selectedItemPositions, Collections.reverseOrder());
+    private void deleteFields(List<Integer> fieldIds) {
 
-        for (int position : selectedItemPositions) {
-            FieldObject field = fieldList.get(position);
-            database.deleteField(field.getExp_id());
-            fieldList.remove(position);
+        for (Integer fieldId : fieldIds) {
+            database.deleteField(fieldId);
         }
 
-        mAdapter.notifyDataSetChanged();
-        mAdapter.exitSelectionMode();
+        // Check if the active field is among those deleted in order to reset related shared preferences
+        if (fieldIds.contains(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1))) {
+            SharedPreferences.Editor editor = ep.edit();
+            editor.remove(GeneralKeys.FIELD_FILE);
+            editor.remove(GeneralKeys.FIELD_ALIAS);
+            editor.remove(GeneralKeys.FIELD_OBS_LEVEL);
+            editor.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+            editor.remove(GeneralKeys.UNIQUE_NAME);
+            editor.remove(GeneralKeys.PRIMARY_NAME);
+            editor.remove(GeneralKeys.SECONDARY_NAME);
+            editor.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+            editor.remove(GeneralKeys.LAST_PLOT);
+            editor.apply();
+            CollectActivity.reloadData = true;
+        }
 
+        loadFieldsList();
         if (actionMode != null) {
             actionMode.finish();
         }
+
     }
 
     private void showFileDialog() {
@@ -1019,7 +1029,7 @@ public class FieldEditorActivity extends ThemedActivity
             // Refresh the fragment's data
             FieldDetailFragment fragment = (FieldDetailFragment) getSupportFragmentManager().findFragmentByTag("FieldDetailFragmentTag");
             if (fragment != null) {
-                fragment.loadData();
+                fragment.loadFieldDetails();
             }
 
         } catch (Exception e) {
@@ -1034,13 +1044,13 @@ public class FieldEditorActivity extends ThemedActivity
                     .show();
         }
 
-        loadData();
+        loadFieldsList();
 
     }
 
     @Override
     public void queryAndLoadFields() {
-        loadData();
+        loadFieldsList();
     }
 
     @NonNull
