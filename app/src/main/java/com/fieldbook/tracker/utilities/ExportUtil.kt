@@ -21,6 +21,7 @@ import com.fieldbook.tracker.activities.brapi.BrapiExportActivity
 import com.fieldbook.tracker.brapi.BrapiAuthDialog
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.qualifiers.ActivityContext
@@ -99,13 +100,14 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     fun allFieldsBrAPI(): Boolean {
         fieldIds.forEach { fieldId ->
             val field = database.getFieldObject(fieldId)
-            val import_format = field?.import_format
-            if (import_format != "brapi") {
+            val importFormat = field?.import_format
+            if (importFormat != ImportFormat.BRAPI) {
                 return false
             }
         }
         return true
     }
+
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_EXPORT_DATA)
     fun exportPermission() {
@@ -160,7 +162,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 //            return
 //        }
         val activeField = database.getFieldObject(fieldId)
-        if (activeField.getImport_format() != "brapi") {
+        if (activeField.getImport_format() != ImportFormat.BRAPI) {
             Toast.makeText(context, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show()
             return
         }

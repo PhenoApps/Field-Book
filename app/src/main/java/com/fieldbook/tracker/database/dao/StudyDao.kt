@@ -18,6 +18,7 @@ import com.fieldbook.tracker.database.toFirst
 import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
+import com.fieldbook.tracker.objects.ImportFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -167,10 +168,7 @@ class StudyDao {
                 null, "null" -> ""
                 else -> date
             }
-            it.import_format = when (val format = this["import_format"]?.toString()) {
-                null, "null" -> "csv"
-                else -> format
-            }
+            it.import_format = ImportFormat.fromString(this["import_format"]?.toString()) ?: ImportFormat.CSV
             it.exp_source = this["study_source"]?.toString()
             it.count = this["count"].toString()
             it.observation_level = when (val observationLevel = this["observation_levels"]?.toString()) {
@@ -338,7 +336,7 @@ class StudyDao {
                         put("date_import", timestamp)
                         put("date_export", e.date_export)
                         put("date_edit", e.date_edit)
-                        put("import_format", e.import_format)
+                        put("import_format", e.import_format.toString())
                         put("study_source", e.exp_source)
                         put("count", e.count)
                         put("observation_levels", e.observation_level)

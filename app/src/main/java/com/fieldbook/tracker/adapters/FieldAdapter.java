@@ -8,9 +8,7 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -18,12 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
-import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.ImportFormat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -270,14 +268,21 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.ViewHolder> 
         holder.count.setText(count + " " + level);
 
         // Set source icon
-        String import_format = field.getImport_format();
-        Log.d("FieldAdapter", "Import format for field " + name + ": " + import_format);
-        if (import_format.equals("csv")) {
-            holder.sourceIcon.setImageResource(R.drawable.ic_file_csv);
-        } else if (import_format.equals("brapi")) {
-            holder.sourceIcon.setImageResource(R.drawable.ic_adv_brapi);
-        } else if (import_format.contains("xls")) {
-            holder.sourceIcon.setImageResource(R.drawable.ic_file_xls);
+        ImportFormat importFormat = field.getImport_format();
+        Log.d("FieldAdapter", "Import format for field " + name + ": " + importFormat);
+        switch (importFormat) {
+            case CSV:
+                holder.sourceIcon.setImageResource(R.drawable.ic_file_csv);
+                break;
+            case BRAPI:
+                holder.sourceIcon.setImageResource(R.drawable.ic_adv_brapi);
+                break;
+            case XLS:
+            case XLSX:
+                holder.sourceIcon.setImageResource(R.drawable.ic_file_xls);
+                break;
+            default:
+                break;
         }
     }
 

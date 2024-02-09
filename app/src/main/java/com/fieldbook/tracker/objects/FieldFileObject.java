@@ -8,7 +8,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -150,7 +149,7 @@ public class FieldFileObject {
             f.setExp_name(this.getStem());
             f.setExp_alias(this.getStem());
             f.setExp_source(this.getFileStem());
-            f.setImport_format(getExtension(this.getFileStem()));
+            f.setImport_format(ImportFormat.fromString(getExtension(this.getFileStem())));
             return f;
         }
 

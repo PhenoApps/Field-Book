@@ -32,6 +32,7 @@ import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
 import com.fieldbook.tracker.interfaces.FieldAdapterController
 import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.objects.FieldObject
+import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DateResult
@@ -159,9 +160,10 @@ class FieldDetailFragment : Fragment() {
             exp_source = field.exp_name + ".csv"
         }
 
-        var import_format: String? = field.import_format
+        var importFormat: ImportFormat? = field.import_format
         var observationLevel = getString(R.string.field_default_observation_level)
-        if (import_format == "brapi") {
+
+        if (importFormat == ImportFormat.BRAPI) {
             cardViewSync.visibility = View.VISIBLE
             cardViewSync.setOnClickListener {
                 val alert = BrapiSyncObsDialog(requireActivity())

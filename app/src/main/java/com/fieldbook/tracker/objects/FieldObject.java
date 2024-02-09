@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.objects;
 
 import java.util.List;
-import android.util.Log;
 
 
 /**
@@ -23,7 +22,7 @@ public class FieldObject {
     private String date_export;
     private String count;
     private String exp_source;
-    private String import_format;
+    private ImportFormat import_format;
     private String observation_level;
     private String attribute_count;
     private String trait_count;
@@ -178,11 +177,13 @@ public class FieldObject {
         this.exp_source = exp_source;
     }
 
-    public String getImport_format() {
+    public ImportFormat getImport_format() {
         return import_format;
     }
 
-    public void setImport_format(String import_format) { this.import_format = import_format; }
+    public void setImport_format(ImportFormat import_format) {
+        this.import_format = import_format;
+    }
 
     public String getObservation_level() {
         return observation_level;

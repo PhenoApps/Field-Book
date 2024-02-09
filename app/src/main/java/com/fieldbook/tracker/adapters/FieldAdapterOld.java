@@ -23,6 +23,7 @@ import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.util.ArrayList;
@@ -266,12 +267,12 @@ public class FieldAdapterOld extends BaseAdapter {
         notifyDataSetChanged();
 
         // Check if this is a BrAPI field and show BrAPI info dialog if so
-        if (selectedField.getImport_format().equals("brapi")) {
-
+        if (selectedField.getImport_format() == ImportFormat.BRAPI) {
             BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context,
                     context.getResources().getString(R.string.brapi_info_message));
             brapiInfo.show();
         }
+
     }
 
     private class ViewHolder {
