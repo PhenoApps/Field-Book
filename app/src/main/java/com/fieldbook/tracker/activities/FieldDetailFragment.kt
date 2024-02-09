@@ -153,7 +153,7 @@ class FieldDetailFragment : Fragment() {
         fieldDisplayNameTextView.text = field.exp_alias
         val importDate = field.date_import
         if (!importDate.isNullOrEmpty()) {
-            importDateTextView.text = formatSemanticDateForDisplay(importDate)
+            importDateTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), importDate)
         }
 
         var exp_source: String? = field.exp_source
@@ -190,14 +190,14 @@ class FieldDetailFragment : Fragment() {
 
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {
-            lastEditTextView.text = formatSemanticDateForDisplay(lastEdit)
+            lastEditTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastEdit)
         } else {
             getString(R.string.no_activity)
         }
 
         val lastExport = field.date_export
         if (!lastExport.isNullOrEmpty()) {
-            lastExportTextView.text = formatSemanticDateForDisplay(lastExport)
+            lastExportTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastExport)
         } else {
             getString(R.string.no_activity)
         }
@@ -214,26 +214,6 @@ class FieldDetailFragment : Fragment() {
             HtmlCompat.fromHtml(traitString, HtmlCompat.FROM_HTML_MODE_LEGACY)
         observationCountTextView.text =
             HtmlCompat.fromHtml(observationString, HtmlCompat.FROM_HTML_MODE_LEGACY)
-    }
-
-    fun formatSemanticDateForDisplay(dateStr: String?): String {
-        val context = requireContext() // Ensure you have context
-        val result = SemanticDateUtil.getSemanticDate(dateStr)
-
-        return when (result.result) {
-            DateResult.TODAY -> context.getString(R.string.today)
-            DateResult.YESTERDAY -> context.getString(R.string.yesterday)
-            DateResult.THIS_YEAR -> {
-                val formattedDate = dateStr?.split(" ")?.get(0)?.let { datePart ->
-                    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    val date = dateFormat.parse(datePart)
-                    SimpleDateFormat("MMM dd", Locale.getDefault()).format(date)
-                }
-                formattedDate ?: "Invalid Date"
-            }
-            DateResult.YEARS_AGO -> resources.getQuantityString(R.plurals.years_ago, result.yearsAgo, result.yearsAgo)
-            DateResult.INVALID_DATE -> context.getString(R.string.invalid_date)
-        }
     }
 
     private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
