@@ -2,7 +2,6 @@ package com.fieldbook.tracker.activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,7 +11,6 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.location.Location;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,7 +35,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
@@ -68,7 +65,7 @@ import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
-import java.io.File;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -87,22 +84,17 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
 public class FieldEditorActivity extends ThemedActivity
-        implements FieldSortController, FieldAdapterController, FieldAdapter.OnFieldSelectedListener, FieldAdapter.AdapterCallback {
+        implements FieldSortController, FieldAdapterController, FieldAdapter.AdapterCallback {
 
     private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
     private static final int REQUEST_CLOUD_FILE_CODE = 5;
-    private static final int DIALOG_LOAD_FIELDFILECSV = 1000;
-    private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
     private ArrayList<FieldObject> fieldList;
     public FieldAdapter mAdapter;
-    public static AppCompatActivity thisActivity;
-    public static EditText trait;
+    public EditText trait;
     private static final Handler mHandler = new Handler();
-    private static FieldFileObject.FieldFileBase fieldFile;
-    public FieldObject fieldObject;
+    private FieldFileObject.FieldFileBase fieldFile;
     private static SharedPreferences ep;
-    private Toolbar toolbar;
     private final int PERMISSIONS_REQUEST_STORAGE = 998;
     Spinner unique;
     Spinner primary;
@@ -110,7 +102,6 @@ public class FieldEditorActivity extends ThemedActivity
     private Menu systemMenu;
     private GPSTracker mGpsTracker;
     private ActionMode actionMode;
-    private FieldAdapter adapter;
     private TextView customTitleView;
     public ExportUtil exportUtil;
 
@@ -124,7 +115,7 @@ public class FieldEditorActivity extends ThemedActivity
     // Creates a new thread to do importing
     private final Runnable importRunnable = new Runnable() {
         public void run() {
-            new ImportRunnableTask(thisActivity,
+            new ImportRunnableTask(FieldEditorActivity.this,
                     fieldFile,
                     unique.getSelectedItemPosition(),
                     unique.getSelectedItem().toString(),
@@ -133,68 +124,13 @@ public class FieldEditorActivity extends ThemedActivity
         }
     };
 
-    public void onFieldSelected(FieldObject field) {
-        if (actionMode != null) {
-            actionMode.finish();  // Finish the action mode if it's active
-        }
-        FieldDetailFragment fragment = new FieldDetailFragment();
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(android.R.id.content, fragment,"FieldDetailFragmentTag")
-                .addToBackStack(null)
-                .commit();
-
-        updateCurrentFieldSettings(field);
-        fieldSwitcher.switchField(field);
-        CollectActivity.reloadData = true;
-    }
-
-    public void loadFieldsList() {
-        try {
-            database.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-            recyclerView = findViewById(R.id.fieldRecyclerView);
-            DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
-            recyclerView.addItemDecoration(dividerItemDecoration);
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            fieldList = database.getAllFieldObjects();
-            mAdapter = new FieldAdapter(this, fieldList, fieldSwitcher, this);
-            mAdapter.setOnFieldSelectedListener(this);
-            recyclerView.setAdapter(mAdapter);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void scanFile(File filePath) {
-        MediaScannerConnection.scanFile(thisActivity, new String[]{filePath.getAbsolutePath()}, null, null);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
-        }
-
-        loadFieldsList();
-        mGpsTracker = new GPSTracker(this);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
-
         setContentView(R.layout.activity_fields);
 
-        toolbar = findViewById(R.id.field_toolbar);
+        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+        Toolbar toolbar = findViewById(R.id.field_toolbar);
         setSupportActionBar(toolbar);
         exportUtil = new ExportUtil(this, database);
 
@@ -205,36 +141,77 @@ public class FieldEditorActivity extends ThemedActivity
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        thisActivity = this;
-        loadFieldsList();
+        recyclerView = findViewById(R.id.fieldRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
+        // Initialize adapter
+        mAdapter = new FieldAdapter(this, fieldSwitcher, this);
+        mAdapter.setOnFieldSelectedListener(new FieldAdapter.OnFieldSelectedListener() {
+            @Override
+            public void onFieldSelected(int fieldId) {
+                FieldDetailFragment fragment = new FieldDetailFragment();
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(android.R.id.content, fragment,"FieldDetailFragmentTag")
+                        .addToBackStack(null)
+                        .commit();
+
+                FieldObject field = database.getFieldObject(fieldId);
+                updateCurrentFieldSettings(field);
+                fieldSwitcher.switchField(fieldId);
+                CollectActivity.reloadData = true;
+            }
+        });
+        recyclerView.setAdapter(mAdapter);
+
+        updateFieldsList();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (systemMenu != null) {
+            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
+        }
+
+        updateFieldsList();
+        mGpsTracker = new GPSTracker(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    public void updateFieldsList() {
+        try {
+            fieldList = database.getAllFieldObjects(); // Fetch data from the database
+            mAdapter.submitList(new ArrayList<>(fieldList)); // Update the adapter's dataset
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating fields list", e);
+        }
     }
 
     // Implementations of methods from FieldAdapter.AdapterCallback
     @Override
-    public void onItemSelected(int count) {
-        // Handle item selection update
-    }
-
-    @Override
-    public void onItemClear() {
-        // Handle clearing of selections
-    }
-
-    public void toggleSelection(int idx) {
-        mAdapter.toggleSelection(idx);
-        int selectedCount = mAdapter.getSelectedItemCount();
-
+    public void onItemSelected(int selectedCount) {
         if (selectedCount == 0 && actionMode != null) {
             actionMode.finish();
         } else if (selectedCount > 0 && actionMode == null) {
             actionMode = startSupportActionMode(actionModeCallback);
         }
-
-//        if (actionMode != null) {
-//            actionMode.setTitle(getString(R.string.selected_count, selectedCount));
-//        }
         if (actionMode != null && customTitleView != null) {
             customTitleView.setText(getString(R.string.selected_count, selectedCount));
+        }
+    }
+
+    @Override
+    public void onItemClear() {
+        if (actionMode != null) {
+            actionMode.finish();
         }
     }
 
@@ -277,10 +254,7 @@ public class FieldEditorActivity extends ThemedActivity
                 }
                 return true;
             } else if (itemId == R.id.menu_export) {
-                List<Integer> selectedFieldIds = getSelectedFieldIds();
-                if (!selectedFieldIds.isEmpty()) {
-                    exportUtil.exportMultipleFields(selectedFieldIds);
-                }
+                exportUtil.exportMultipleFields(mAdapter.getSelectedItems());
                 mAdapter.exitSelectionMode();
                 mode.finish();
                 return true;
@@ -290,8 +264,7 @@ public class FieldEditorActivity extends ThemedActivity
 //                mode.finish();
 //                return true;
             } else if (itemId == R.id.menu_delete) {
-                List<Integer> selectedFieldIds = getSelectedFieldIds();
-                showDeleteConfirmationDialog(selectedFieldIds, false);
+                showDeleteConfirmationDialog(mAdapter.getSelectedItems(), false);
                 return true;
             } else {
                 return false;
@@ -334,17 +307,6 @@ public class FieldEditorActivity extends ThemedActivity
             .show();
     }
 
-
-    private List<Integer> getSelectedFieldIds() {
-        List<Integer> selectedFieldIds = new ArrayList<>();
-        for (int position : mAdapter.getSelectedItems()) {
-            FieldObject field = fieldList.get(position);
-            selectedFieldIds.add(field.getExp_id());
-        }
-        Log.d(TAG, "selectedFieldIds: " + selectedFieldIds);
-        return selectedFieldIds;
-    }
-
     private String getFieldNames(final List<Integer> fieldIds) {
 
         List<String> fieldNames = fieldIds.stream()
@@ -378,9 +340,11 @@ public class FieldEditorActivity extends ThemedActivity
             CollectActivity.reloadData = true;
         }
 
-        loadFieldsList();
+        updateFieldsList();
+        mAdapter.exitSelectionMode();
         if (actionMode != null) {
             actionMode.finish();
+            actionMode = null;
         }
 
     }
@@ -528,10 +492,9 @@ public class FieldEditorActivity extends ThemedActivity
         int itemId = item.getItemId();
         if (itemId == R.id.help) {
             TapTargetSequence sequence = new TapTargetSequence(this)
-                    .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
-                            fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
-                    );
-
+                .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
+                        fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
+                );
             if (fieldExists()) {
                 sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_select_title), getString(R.string.tutorial_fields_select_description)));
                 sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_delete_title), getString(R.string.tutorial_fields_delete_description)));
@@ -539,60 +502,47 @@ public class FieldEditorActivity extends ThemedActivity
 
             sequence.start();
         } else if (itemId == R.id.importField) {
-            String importer = ep.getString("IMPORT_SOURCE_DEFAULT", "ask");
-
-            switch (importer) {
-                case "ask":
-                    showFileDialog();
-                    break;
-                case "local":
-                    loadLocal();
-                    break;
-                case "brapi":
-                    loadBrAPI();
-                    break;
-                case "cloud":
-                    loadCloud();
-                    break;
-                default:
-                    showFileDialog();
-            }
+            handleImportAction();
         } else if (itemId == R.id.menu_field_editor_item_creator) {
             FieldCreatorDialog dialog = new FieldCreatorDialog(this);
-
-            //when the dialog is dismissed, the field data is created or failed
-            dialog.setOnDismissListener((dismiss -> {
-
-                recyclerView = findViewById(R.id.fieldRecyclerView);
-                recyclerView.setLayoutManager(new LinearLayoutManager(this));
-                fieldList = database.getAllFieldObjects();
-                mAdapter = new FieldAdapter(this, fieldList, fieldSwitcher, this);
-                mAdapter.setOnFieldSelectedListener(this);
-                recyclerView.setAdapter(mAdapter);
-
-            }));
-
+            dialog.setOnDismissListener(dismiss -> refreshFieldList());
             dialog.show();
         } else if (itemId == android.R.id.home) {
             CollectActivity.reloadData = true;
             finish();
         } else if (itemId == R.id.action_select_plot_by_distance) {
             if (mGpsTracker != null && mGpsTracker.canGetLocation()) {
-
                 selectPlotByDistance();
-
-                    recyclerView = findViewById(R.id.fieldRecyclerView);
-                    recyclerView.setLayoutManager(new LinearLayoutManager(this));
-                    fieldList = database.getAllFieldObjects();
-                    mAdapter = new FieldAdapter(this, fieldList, fieldSwitcher, this);
-                    mAdapter.setOnFieldSelectedListener(this);
-                    recyclerView.setAdapter(mAdapter);
-
+            } else {
                 Toast.makeText(this, R.string.activity_field_editor_no_location_yet, Toast.LENGTH_SHORT).show();
-
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void refreshFieldList() {
+        fieldList = database.getAllFieldObjects();
+        mAdapter.submitList(new ArrayList<>(fieldList));
+    }
+
+    private void handleImportAction() {
+        String importer = ep.getString("IMPORT_SOURCE_DEFAULT", "ask");
+        switch (importer) {
+            case "ask":
+                showFileDialog();
+                break;
+            case "local":
+                loadLocal();
+                break;
+            case "brapi":
+                loadBrAPI();
+                break;
+            case "cloud":
+                loadCloud();
+                break;
+            default:
+                showFileDialog();
+        }
     }
 
     /**
@@ -655,7 +605,7 @@ public class FieldEditorActivity extends ThemedActivity
                                 getString(R.string.activity_field_editor_switch_field, studyName),
                                 null,
                                 8000,
-                                null, (v) -> selectClosestField(studyId)
+                                null, (v) -> mAdapter.selectItem(studyId)
                         );
                     }
                 }
@@ -674,23 +624,6 @@ public class FieldEditorActivity extends ThemedActivity
     private double distanceTo(Location thisLocation, Location targetLocation) {
         if (targetLocation == null) return Double.MAX_VALUE;
         else return thisLocation.distanceTo(targetLocation);
-    }
-
-    private void selectClosestField(int studyId) {
-        int position = findPositionByStudyId(studyId);
-        if (position != -1) {
-            mAdapter.selectItem(position);
-        }
-    }
-
-    private int findPositionByStudyId(int studyId) {
-        for (int i = 0; i < fieldList.size(); i++) {
-            FieldObject field = fieldList.get(i);
-            if (field.getExp_id() == studyId) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     public String getFileName(Uri uri) {
@@ -781,7 +714,7 @@ public class FieldEditorActivity extends ThemedActivity
                 String extension = FieldFileObject.getExtension(chosenFile);
 
                 if (!extension.equals("csv") && !extension.equals("xls") && !extension.equals("xlsx")) {
-                    Toast.makeText(FieldEditorActivity.thisActivity, getString(R.string.import_error_format_field), Toast.LENGTH_LONG).show();
+                    Toast.makeText(FieldEditorActivity.this, getString(R.string.import_error_format_field), Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -1044,13 +977,13 @@ public class FieldEditorActivity extends ThemedActivity
                     .show();
         }
 
-        loadFieldsList();
+        updateFieldsList();
 
     }
 
     @Override
     public void queryAndLoadFields() {
-        loadFieldsList();
+        updateFieldsList();
     }
 
     @NonNull

@@ -556,7 +556,7 @@ public class FieldEditorActivityOld extends ThemedActivity
                 String extension = FieldFileObject.getExtension(chosenFile);
 
                 if (!extension.equals("csv") && !extension.equals("xls") && !extension.equals("xlsx")) {
-                    Toast.makeText(FieldEditorActivity.thisActivity, getString(R.string.import_error_format_field), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.import_error_format_field), Toast.LENGTH_LONG).show();
                     return;
                 }
 
