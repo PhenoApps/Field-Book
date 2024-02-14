@@ -63,6 +63,7 @@ import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -102,11 +103,12 @@ public class ConfigActivity extends ThemedActivity {
     @Inject
     VerifyPersonHelper verifyPersonHelper;
     @Inject
+    SharedPreferences preferences;
+    @Inject
     public ExportUtil exportUtil;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     ListView settingsList;
-    private SharedPreferences ep;
     private Menu systemMenu;
     //barcode search fab
     private FloatingActionButton barcodeSearchFab;
@@ -124,7 +126,7 @@ public class ConfigActivity extends ThemedActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(prefs.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
         }
 
         invalidateOptionsMenu();
@@ -133,7 +135,7 @@ public class ConfigActivity extends ThemedActivity {
 
     private void setCrashlyticsUserId() {
 
-        String id = prefs.getString(GeneralKeys.CRASHLYTICS_ID, "");
+        String id = preferences.getString(GeneralKeys.CRASHLYTICS_ID, "");
         FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
         instance.setUserId(id);
         instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, id);
@@ -143,9 +145,9 @@ public class ConfigActivity extends ThemedActivity {
      *
      */
     private void checkBrapiToken() {
-        String token = prefs.getString(GeneralKeys.BRAPI_TOKEN, "");
+        String token = preferences.getString(GeneralKeys.BRAPI_TOKEN, "");
         if (!token.isEmpty()) {
-            prefs.edit().putBoolean(GeneralKeys.BRAPI_ENABLED, true).apply();
+            preferences.edit().putBoolean(GeneralKeys.BRAPI_ENABLED, true).apply();
         }
     }
 
@@ -172,10 +174,10 @@ public class ConfigActivity extends ThemedActivity {
 
     private void versionBasedSetup() {
 
-        int lastVersion = prefs.getInt(GeneralKeys.UPDATE_VERSION, -1);
+        int lastVersion = preferences.getInt(GeneralKeys.UPDATE_VERSION, -1);
         int currentVersion = Utils.getVersion(this);
         if (lastVersion < currentVersion) {
-            prefs.edit().putInt(GeneralKeys.UPDATE_VERSION, Utils.getVersion(this)).apply();
+            preferences.edit().putInt(GeneralKeys.UPDATE_VERSION, Utils.getVersion(this)).apply();
             showChangelog(true, false);
 
             if (currentVersion >= 530 && lastVersion < 530) {
@@ -183,26 +185,26 @@ public class ConfigActivity extends ThemedActivity {
                 OldPhotosMigrator.Companion.migrateOldPhotosDir(this, database);
 
                 //clear field selection after updates
-                prefs.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
-                prefs.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
-                prefs.edit().putString(GeneralKeys.FIELD_OBS_LEVEL, null).apply();
-                prefs.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
-                prefs.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
-                prefs.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
+                preferences.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
+                preferences.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
+                preferences.edit().putString(GeneralKeys.FIELD_OBS_LEVEL, null).apply();
+                preferences.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
+                preferences.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
+                preferences.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
             }
         }
     }
 
     private void firstRunSetup() {
 
-        if (!prefs.contains(GeneralKeys.FIRST_RUN)) {
+        if (!preferences.contains(GeneralKeys.FIRST_RUN)) {
             // do things on the first run
             //this will grant FB access to the chosen folder
             //preference and activity is handled through this utility call
 
-            SharedPreferences.Editor ed = prefs.edit();
+            SharedPreferences.Editor ed = preferences.edit();
 
-            Set<String> entries = prefs.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
+            Set<String> entries = preferences.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
             entries.add("search");
             entries.add("resources");
             entries.add("summary");
@@ -237,6 +239,41 @@ public class ConfigActivity extends ThemedActivity {
                 return null;
             });
         }
+
+        migratePreferencesToDefault();
+
+        verifyPersonHelper.updateLastOpenedTime();
+    }
+
+    /**
+     * Transfer "Settings" preference file map values to default preferences map
+     */
+    private void migratePreferencesToDefault() {
+
+        SharedPreferences oldPreferences = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
+        Set<? extends Map.Entry<String, ?>> entries = oldPreferences.getAll().entrySet();
+
+        SharedPreferences.Editor edit = preferences.edit();
+        for (Map.Entry<String, ?> entry : entries) {
+            Object value = entry.getValue();
+            String key = entry.getKey();
+
+            if (value instanceof Boolean) {
+                edit.putBoolean(key, ((Boolean) value));
+            } else if (value instanceof String) {
+                edit.putString(key, ((String) value));
+            } else if (value instanceof Float) {
+                edit.putFloat(key, ((Float) value));
+            } else if (value instanceof Integer) {
+                edit.putInt(key, ((Integer) value));
+            } else if (value instanceof Long) {
+                edit.putLong(key, ((Long) value));
+            } else if (value instanceof HashSet) {
+                edit.putStringSet(key, ((HashSet<String>) value));
+            }
+        }
+
+        edit.apply();
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {
@@ -278,8 +315,7 @@ public class ConfigActivity extends ThemedActivity {
             Intent intent = new Intent();
             switch (position) {
                 case 0:
-                    ep = PreferenceManager.getDefaultSharedPreferences(this);
-                    if (ep.getBoolean(GeneralKeys.INDIVIDUAL_FIELD_PAGE_ENABLED, false)) {
+                    if (preferences.getBoolean(GeneralKeys.INDIVIDUAL_FIELD_PAGE_ENABLED, false)) {
                         Log.d("Config", "individual field enabled");
                         intent.setClassName(ConfigActivity.this,
                                 FieldEditorActivity.class.getName());
@@ -320,9 +356,9 @@ public class ConfigActivity extends ThemedActivity {
         ImageListAdapter adapterImg = new ImageListAdapter(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
 
-        SharedPreferences.Editor ed = prefs.edit();
+        SharedPreferences.Editor ed = preferences.edit();
 
-        if (!prefs.getBoolean(GeneralKeys.TIPS_CONFIGURED, false)) {
+        if (!preferences.getBoolean(GeneralKeys.TIPS_CONFIGURED, false)) {
             ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
             ed.apply();
             showTipsDialog();
@@ -359,8 +395,8 @@ public class ConfigActivity extends ThemedActivity {
 
         String[] traits = database.getVisibleTrait();
 
-        if (!prefs.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
-                || prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
+        if (!preferences.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
+                || preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_field_missing));
             return -1;
         } else if (traits.length == 0) {
@@ -379,7 +415,7 @@ public class ConfigActivity extends ThemedActivity {
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                Editor ed = prefs.edit();
+                Editor ed = preferences.edit();
                 ed.putBoolean(GeneralKeys.TIPS, true);
                 ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
                 ed.apply();
@@ -397,7 +433,7 @@ public class ConfigActivity extends ThemedActivity {
 
         builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                Editor ed = prefs.edit();
+                Editor ed = preferences.edit();
                 ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
                 ed.apply();
 
@@ -443,7 +479,7 @@ public class ConfigActivity extends ThemedActivity {
 
         soundHelper.playCelebrate();
 
-        int studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+        int studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
         int newStudyId = f.getExp_id();
 
@@ -458,7 +494,7 @@ public class ConfigActivity extends ThemedActivity {
 
         if (plotId != null) {
 
-            prefs.edit().putString(GeneralKeys.LAST_PLOT, plotId).apply();
+            preferences.edit().putString(GeneralKeys.LAST_PLOT, plotId).apply();
 
         }
 
@@ -604,7 +640,7 @@ public class ConfigActivity extends ThemedActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(prefs.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
         return true;
     }
 
@@ -768,8 +804,7 @@ public class ConfigActivity extends ThemedActivity {
                 Utils.makeToast(getApplicationContext(), getString(R.string.import_error_general));
             }
 
-            SharedPreferences prefs = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
-            SharedPreferences.Editor editor = prefs.edit();
+            SharedPreferences.Editor editor = preferences.edit();
             editor.apply();
 
             //if sample db is imported, automatically select the first study

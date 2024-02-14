@@ -2,12 +2,12 @@ package com.fieldbook.tracker.brapi.service;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
@@ -132,8 +132,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     }
 
     private String getBrapiToken() {
-        SharedPreferences preferences = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
-        return "Bearer " + preferences.getString(GeneralKeys.BRAPI_TOKEN, "");
+        return "Bearer " + PreferenceManager.getDefaultSharedPreferences(context).getString(GeneralKeys.BRAPI_TOKEN, "");
     }
 
     public void postImageMetaData(FieldBookImage image,
@@ -460,8 +459,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             final String level = levelName;
 
             final AtomicInteger currentPage = new AtomicInteger(0);
-            final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
-                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
+            final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setValues(new ArrayList<>());
 

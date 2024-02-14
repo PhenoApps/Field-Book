@@ -110,6 +110,9 @@ public class FieldEditorActivity extends ThemedActivity
 
     @Inject
     FieldSwitchImpl fieldSwitcher;
+
+    @Inject
+    SharedPreferences preferences;
     RecyclerView recyclerView;
 
     // Creates a new thread to do importing
@@ -174,7 +177,7 @@ public class FieldEditorActivity extends ThemedActivity
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
         }
 
         updateFieldsList();
@@ -357,8 +360,8 @@ public class FieldEditorActivity extends ThemedActivity
         String[] importArray = new String[2];
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_cloud);
-        if (ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
-            String displayName = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
+        if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+            String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
             importArray = Arrays.copyOf(importArray, importArray.length + 1);
             importArray[2] = displayName;
         }
@@ -460,7 +463,7 @@ public class FieldEditorActivity extends ThemedActivity
         new MenuInflater(FieldEditorActivity.this).inflate(R.menu.menu_fields, menu);
 
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
 
         return true;
     }
@@ -588,7 +591,7 @@ public class FieldEditorActivity extends ThemedActivity
 
                     String studyName = study.getExp_alias();
 
-                    if (studyId == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
+                    if (studyId == preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
 
                         SnackbarUtils.showNavigateSnack(getLayoutInflater(),
                                 findViewById(R.id.main_content),
@@ -747,14 +750,14 @@ public class FieldEditorActivity extends ThemedActivity
 
                         String fieldFileName = fieldFile.getStem();
 
-                        Editor e = ep.edit();
+                        Editor e = preferences.edit();
                         e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
                         e.putString(GeneralKeys.FIELD_ALIAS, fieldFileName);
                         e.apply();
 
                         if (database.checkFieldName(fieldFileName) >= 0) {
                             Utils.makeToast(getApplicationContext(), getString(R.string.fields_study_exists_message));
-                            SharedPreferences.Editor ed = ep.edit();
+                            SharedPreferences.Editor ed = preferences.edit();
                             ed.putString(GeneralKeys.FIELD_FILE, null);
                             ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
                             ed.apply();
@@ -885,7 +888,7 @@ public class FieldEditorActivity extends ThemedActivity
     private void setSpinner(Spinner spinner, String[] data, String pref) {
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_layout, data);
         spinner.setAdapter(itemsAdapter);
-        int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(0)));
+        int spinnerPosition = itemsAdapter.getPosition(preferences.getString(pref, itemsAdapter.getItem(0)));
         spinner.setSelection(spinnerPosition);
     }
 
@@ -949,7 +952,7 @@ public class FieldEditorActivity extends ThemedActivity
 
             database.updateStudySort(joiner.toString(), field.getExp_id());
 
-            if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.getExp_id()) {
+            if (preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.getExp_id()) {
 
                 fieldSwitcher.switchField(field);
                 CollectActivity.reloadData = true;

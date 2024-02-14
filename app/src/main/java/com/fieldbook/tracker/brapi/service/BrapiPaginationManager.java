@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.preference.PreferenceManager;
+
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
@@ -19,7 +21,7 @@ public class BrapiPaginationManager {
     private Button nextBtn;
     private Button prevBtn;
     private TextView pageIndicator;
-    private Context context;
+    private final Context context;
 
     public BrapiPaginationManager(Context context){
         this.context = context;
@@ -50,7 +52,7 @@ public class BrapiPaginationManager {
     }
 
     public Integer getDefaultPageSize(){
-        String pageSizeStr = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+        String pageSizeStr = PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50");
 
         Integer pageSize = 1000;

@@ -2,13 +2,15 @@ package com.fieldbook.tracker.brapi.service;
 
 import android.content.Context;
 
+import androidx.preference.PreferenceManager;
+
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 public class BrAPIServiceFactory {
 
     public static BrAPIService getBrAPIService(Context context){
 
-        String version = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+        String version = PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(GeneralKeys.BRAPI_VERSION, "V1");
         BrAPIService brAPIService;
         if(version.equals("V2"))

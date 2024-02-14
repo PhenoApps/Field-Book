@@ -6,6 +6,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import androidx.arch.core.util.Function;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
@@ -115,7 +116,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     @Override
     public void authorizeClient(){
         try {
-            apiClient.authenticate(t -> context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+            apiClient.authenticate(t -> PreferenceManager.getDefaultSharedPreferences(context)
                     .getString(GeneralKeys.BRAPI_TOKEN, null));
         } catch (ApiException error) {
             Log.e("BrAPIServiceV2", "API Exception", error);
@@ -454,7 +455,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
-            final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+            final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
                     .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
