@@ -131,8 +131,6 @@ public class FieldEditorActivity extends ThemedActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fields);
-
-        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         Toolbar toolbar = findViewById(R.id.field_toolbar);
         setSupportActionBar(toolbar);
         exportUtil = new ExportUtil(this, database);
@@ -154,16 +152,14 @@ public class FieldEditorActivity extends ThemedActivity
             @Override
             public void onFieldSelected(int fieldId) {
                 FieldDetailFragment fragment = new FieldDetailFragment();
+                Bundle args = new Bundle();
+                args.putInt("fieldId", fieldId);
+                fragment.setArguments(args);
 
                 getSupportFragmentManager().beginTransaction()
                         .replace(android.R.id.content, fragment,"FieldDetailFragmentTag")
                         .addToBackStack(null)
                         .commit();
-
-                FieldObject field = database.getFieldObject(fieldId);
-                updateCurrentFieldSettings(field);
-                fieldSwitcher.switchField(fieldId);
-                CollectActivity.reloadData = true;
             }
         });
         recyclerView.setAdapter(mAdapter);
@@ -282,6 +278,15 @@ public class FieldEditorActivity extends ThemedActivity
         }
     };
 
+    public void setActiveField(int studyId) {
+        fieldSwitcher.switchField(studyId);
+        CollectActivity.reloadData = true;
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged(); // Refresh adapter to update active icon indication
+        }
+    }
+
+
     public void showDeleteConfirmationDialog(final List<Integer> fieldIds, boolean isFromDetailFragment) {
         String fieldNames = getFieldNames(fieldIds);
         String message = getResources().getQuantityString(R.plurals.fields_delete_confirmation, fieldIds.size(), fieldNames);
@@ -328,8 +333,8 @@ public class FieldEditorActivity extends ThemedActivity
         }
 
         // Check if the active field is among those deleted in order to reset related shared preferences
-        if (fieldIds.contains(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1))) {
-            SharedPreferences.Editor editor = ep.edit();
+        if (fieldIds.contains(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1))) {
+            SharedPreferences.Editor editor = preferences.edit();
             editor.remove(GeneralKeys.FIELD_FILE);
             editor.remove(GeneralKeys.FIELD_ALIAS);
             editor.remove(GeneralKeys.FIELD_OBS_LEVEL);
@@ -529,7 +534,7 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     private void handleImportAction() {
-        String importer = ep.getString("IMPORT_SOURCE_DEFAULT", "ask");
+        String importer = preferences.getString("IMPORT_SOURCE_DEFAULT", "ask");
         switch (importer) {
             case "ask":
                 showFileDialog();
@@ -655,6 +660,9 @@ public class FieldEditorActivity extends ThemedActivity
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             // Return to Fields screen if pressed in detail fragment
+            if (mAdapter != null) {
+                mAdapter.notifyDataSetChanged();
+            }
             getSupportFragmentManager().popBackStack();
         } else {
             CollectActivity.reloadData = true;
@@ -995,10 +1003,6 @@ public class FieldEditorActivity extends ThemedActivity
         return database;
     }
 
-    public Integer getStudyId() {
-        return ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
-    }
-
     @NonNull
     @Override
     public SharedPreferences getPreferences() {
@@ -1011,29 +1015,4 @@ public class FieldEditorActivity extends ThemedActivity
         return fieldSwitcher;
     }
 
-    public void updateCurrentFieldSettings(FieldObject field) {
-        SharedPreferences ep = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor ed = ep.edit();
-        boolean field_selected = field != null;
-        if (field_selected) {
-            ed.putString(GeneralKeys.FIELD_FILE, field.getExp_name());
-            ed.putString(GeneralKeys.FIELD_ALIAS, field.getExp_alias());
-            ed.putString(GeneralKeys.FIELD_OBS_LEVEL, field.getObservation_level());
-            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, field.getExp_id());
-            ed.putString(GeneralKeys.UNIQUE_NAME, field.getUnique_id());
-            ed.putString(GeneralKeys.PRIMARY_NAME, field.getPrimary_id());
-            ed.putString(GeneralKeys.SECONDARY_NAME, field.getSecondary_id());
-        } else { // clear when field is deleted
-            ed.putString(GeneralKeys.FIELD_FILE, null);
-            ed.putString(GeneralKeys.FIELD_ALIAS, null);
-            ed.putString(GeneralKeys.FIELD_OBS_LEVEL, null);
-            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-            ed.putString(GeneralKeys.UNIQUE_NAME, null);
-            ed.putString(GeneralKeys.PRIMARY_NAME, null);
-            ed.putString(GeneralKeys.SECONDARY_NAME, null);
-        }
-        ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, field_selected);
-        ed.putString(GeneralKeys.LAST_PLOT, null);
-        ed.apply();
-    }
 }

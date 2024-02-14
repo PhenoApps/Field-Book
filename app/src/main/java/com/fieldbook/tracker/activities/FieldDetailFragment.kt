@@ -33,13 +33,10 @@ import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
-import com.fieldbook.tracker.utilities.DateResult
 import com.fieldbook.tracker.utilities.ExportUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
-import java.text.SimpleDateFormat
-import java.util.Locale
 import javax.inject.Inject
 
 
@@ -53,6 +50,7 @@ class FieldDetailFragment : Fragment() {
     lateinit var preferences: SharedPreferences
 
     private var toolbar: Toolbar? = null
+    private var fieldId: Int? = null
     private val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
 
     private lateinit var exportUtil: ExportUtil
@@ -89,6 +87,7 @@ class FieldDetailFragment : Fragment() {
         lastSyncTextView = rootView.findViewById(R.id.lastSyncTextView)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
 
+        fieldId = arguments?.getInt("fieldId")
         loadFieldDetails()
 
         val expandCollapseIcon: ImageView = rootView.findViewById(R.id.expand_collapse_icon)
@@ -109,11 +108,21 @@ class FieldDetailFragment : Fragment() {
         cardViewExport = rootView.findViewById(R.id.cardViewExport)
 
         cardViewCollect.setOnClickListener {
-            if (checkTraitsExist() >= 0) collectDataFilePermission()
+            fieldId?.let { id ->
+                if (checkTraitsExist() >= 0) {
+                    (activity as? FieldEditorActivity)?.setActiveField(id)
+                    collectDataFilePermission()
+                }
+            } ?: Log.d("FieldDetailFragment", "Field ID is null, cannot collect data")
         }
 
         cardViewExport.setOnClickListener {
-            if (checkTraitsExist() >= 0) exportUtil.exportActiveField()
+            fieldId?.let { id ->
+                if (checkTraitsExist() >= 0) {
+                    (activity as? FieldEditorActivity)?.setActiveField(id)
+                    exportUtil.exportActiveField()
+                }
+            } ?: Log.d("FieldDetailFragment", "Field ID is null, cannot export data")
         }
 
         Log.d("onCreateView", "End")
@@ -126,23 +135,20 @@ class FieldDetailFragment : Fragment() {
     }
 
     fun loadFieldDetails() {
-        with(activity as? FieldEditorActivity) {
-            this?.let { fieldeditor ->
-                val studyId = fieldeditor.studyId
-                val field = database.getFieldObject(studyId)
-                updateFieldData(field)
-                if (detailRecyclerView.adapter == null) { // initial load
-                    detailRecyclerView.layoutManager = LinearLayoutManager(context)
-                    val initialItems = createTraitDetailItems(field).toMutableList()
-                    adapter = FieldDetailAdapter(initialItems)
-                    detailRecyclerView.adapter = adapter
-                    setupToolbar(field)
-                } else { // reload after data change
-                    val newItems = createTraitDetailItems(field)
-                    adapter?.updateItems(newItems)
-                }
+        fieldId?.let { id ->
+            val field = database.getFieldObject(id)
+            updateFieldData(field)
+            if (detailRecyclerView.adapter == null) { // initial load
+                detailRecyclerView.layoutManager = LinearLayoutManager(context)
+                val initialItems = createTraitDetailItems(field).toMutableList()
+                adapter = FieldDetailAdapter(initialItems)
+                detailRecyclerView.adapter = adapter
+                setupToolbar(field)
+            } else { // reload after data change
+                val newItems = createTraitDetailItems(field)
+                adapter?.updateItems(newItems)
             }
-        }
+        } ?: Log.d("FieldDetailFragment", "Field ID is null")
     }
 
     private fun updateFieldData(field: FieldObject) {

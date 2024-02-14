@@ -16,6 +16,7 @@ import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -115,8 +116,7 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
 
     class ViewHolder extends RecyclerView.ViewHolder {
         ImageView sourceIcon;
-        TextView name;
-        TextView count;
+        TextView name, count;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -124,6 +124,30 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
             name = itemView.findViewById(R.id.fieldName);
             count = itemView.findViewById(R.id.fieldCount);
 
+            // Short click on source icon sets active field (unless in selectionMode)
+            sourceIcon.setOnClickListener(v -> {
+                int position = getBindingAdapterPosition();
+                FieldObject field = getItem(position);
+                if (field != null && isInSelectionMode) {
+                    toggleSelection(field.getExp_id());
+                } else if (field != null && context instanceof FieldEditorActivity) {
+                    ((FieldEditorActivity) context).setActiveField(field.getExp_id());
+                }
+            });
+
+            // Short click elsewhere opens detail fragment (unless in selectionMode)
+            itemView.setOnClickListener(v -> {
+                if (v != sourceIcon) { // Check if the click is not on the icon
+                    FieldObject field = getItem(getBindingAdapterPosition());
+                    if (field != null && isInSelectionMode) {
+                        toggleSelection(field.getExp_id());
+                    } else if (field != null && listener != null) {
+                        listener.onFieldSelected(field.getExp_id());
+                    }
+                }
+            });
+
+            // Long click enters and toggles selections in selection mode
             itemView.setOnLongClickListener(v -> {
                 FieldObject field = getItem(getBindingAdapterPosition());
                 if (field != null) {
@@ -132,17 +156,6 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
                     return true;
                 }
                 return false;
-            });
-
-            itemView.setOnClickListener(v -> {
-                FieldObject field = getItem(getBindingAdapterPosition());
-                if (field != null) {
-                    if (isInSelectionMode) {
-                        toggleSelection(field.getExp_id());
-                    } else if (listener != null) {
-                        listener.onFieldSelected(field.getExp_id());
-                    }
-                }
             });
         }
     }
@@ -161,8 +174,7 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
         holder.name.setText(name);
         String level = field.getObservation_level();
         String count = field.getCount();
-//        Log.d("FieldAdapter", "Count for field " + name + ": " + field.getCount());
-//        Log.d("FieldAdapter", "Observation level for field " + name + ": " + field.getObservation_level());
+
         if (level == null || level.isEmpty()) {
             level = "entries";
         } else {
@@ -186,6 +198,18 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
                 break;
             default:
                 break;
+        }
+
+        // Determine if this field is active
+        int activeStudyId = ((FieldEditorActivity) context).getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+        Log.d("FieldAdapter", "Field is is " + field.getExp_id() + " and active field is is "+activeStudyId);
+        if (field.getExp_id() == activeStudyId) {
+            // Indicate active state
+            Log.d("FieldAdapter", "Setting icon background for active field " + name);
+            holder.sourceIcon.setBackgroundResource(R.drawable.custom_round_button);
+        } else {
+            // Clear any modifications for non-active fields
+            holder.sourceIcon.setBackground(null);
         }
     }
 }
