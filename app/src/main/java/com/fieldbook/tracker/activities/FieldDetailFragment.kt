@@ -33,6 +33,7 @@ import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -94,13 +95,20 @@ class FieldDetailFragment : Fragment() {
         val collapsibleContent: LinearLayout = rootView.findViewById(R.id.collapsible_content)
         val collapsibleHeader: LinearLayout = rootView.findViewById(R.id.collapsible_header)
 
+        // Set collapse state based on saved pref
+        val isCollapsed = preferences.getBoolean(GeneralKeys.FIELD_DETAIL_COLLAPSED, false)
+        collapsibleContent.visibility = if (isCollapsed) View.GONE else View.VISIBLE
+        expandCollapseIcon.setImageResource(if (isCollapsed) R.drawable.ic_chevron_down else R.drawable.ic_chevron_up)
+
         collapsibleHeader.setOnClickListener { v: View? ->
             if (collapsibleContent.visibility == View.GONE) {
                 collapsibleContent.visibility = View.VISIBLE
                 expandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
+                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_COLLAPSED, false).apply()
             } else {
                 collapsibleContent.visibility = View.GONE
                 expandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
+                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_COLLAPSED, true).apply()
             }
         }
 
