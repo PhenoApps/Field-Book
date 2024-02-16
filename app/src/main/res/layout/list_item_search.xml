@@ -12,6 +12,7 @@
         android:inputType="text"
         android:singleLine="true"
         android:textSize="@dimen/text_size_medium"
+        android:gravity="end"
         app:layout_constraintBottom_toBottomOf="@id/list_item_search_like"
         app:layout_constraintEnd_toStartOf="@id/list_item_search_delete_btn"
         app:layout_constraintStart_toEndOf="@id/list_item_search_like"

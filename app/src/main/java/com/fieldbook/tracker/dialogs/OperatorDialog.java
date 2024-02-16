@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.dialogs;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -27,11 +28,11 @@ public class OperatorDialog extends AlertDialog {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
         View customView = getLayoutInflater().inflate(R.layout.dialog_operator, null);
-        setContentView(customView);
+        setView(customView);
         setTitle(context.getString(R.string.search_dialog_operator_dialog_title));
+        setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dialog_cancel), (dialogInterface, i) -> dialogInterface.dismiss());
 
         String[] operatorText = new String[5];
 
@@ -58,9 +59,10 @@ public class OperatorDialog extends AlertDialog {
             listener.onOperatorSelected(adapter_position, operatorImage[position]);
             dismiss();
         });
+        super.onCreate(savedInstanceState);
 
-        Button cancelButton = customView.findViewById(R.id.dialog_operator_cancel_btn);
-        cancelButton.setOnClickListener(arg0 -> dismiss());
+//        Button cancelButton = customView.findViewById(R.id.dialog_operator_cancel_btn);
+//        cancelButton.setOnClickListener(arg0 -> dismiss());
 
     }
 

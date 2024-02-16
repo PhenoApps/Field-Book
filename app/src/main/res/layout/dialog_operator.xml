@@ -12,21 +12,21 @@
         android:layout_margin="4dp"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toTopOf="@id/dialog_operator_cancel_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:itemCount="6"
         tools:listitem="@layout/list_item_operator" />
+    <!--        app:layout_constraintBottom_toTopOf="@id/dialog_operator_cancel_btn"-->
 
-    <Button
-        android:id="@+id/dialog_operator_cancel_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@android:string/cancel"
-        app:layout_constraintTop_toBottomOf="@id/dialog_operator_rv"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+<!--    <Button-->
+<!--        android:id="@+id/dialog_operator_cancel_btn"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="@android:string/cancel"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/dialog_operator_rv"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

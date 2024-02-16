@@ -22,7 +22,7 @@ import java.util.List;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewHolder> {
     List<SearchDialogDataModel> dataSet;
-    private static OperatorDialog.OnOperatorClickedListener onOperatorClickedListener;
+    private OperatorDialog.OnOperatorClickedListener onOperatorClickedListener;
     private onEditTextChangedListener onEditTextChangedListener;
     private  onDeleteClickedListener onDeleteClickedListener;
     private static Context context;
@@ -30,14 +30,14 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
 
     public SearchAdapter(List<SearchDialogDataModel> dataSet, OperatorDialog.OnOperatorClickedListener onOperatorClickedListener, onEditTextChangedListener onEditTextChangedListener, onDeleteClickedListener onDeleteClickedListener, Context context) {
         this.dataSet = dataSet;
-        SearchAdapter.onOperatorClickedListener = onOperatorClickedListener;
+        this.onOperatorClickedListener = onOperatorClickedListener;
         this.onEditTextChangedListener = onEditTextChangedListener;
         this.onDeleteClickedListener = onDeleteClickedListener;
         SearchAdapter.context = context;
 
     }
 
-    public static class SearchViewHolder extends RecyclerView.ViewHolder {
+    public class SearchViewHolder extends RecyclerView.ViewHolder {
         TextView c;
         ImageView l;
         EditText e;

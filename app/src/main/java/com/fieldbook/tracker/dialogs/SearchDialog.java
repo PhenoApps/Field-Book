@@ -80,17 +80,17 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
 
         ImageButton add = customView.findViewById(R.id.dialog_search_add_btn);
         ImageButton clear = customView.findViewById(R.id.dialog_search_delete_all_btn);
-        Button start = customView.findViewById(R.id.dialog_search_ok_btn);
-        Button close = customView.findViewById(R.id.dialog_search_close_btn);
-
-        start.setTransformationMethod(null);
-        close.setTransformationMethod(null);
+//        Button start = customView.findViewById(R.id.dialog_search_ok_btn);
+//        Button close = customView.findViewById(R.id.dialog_search_close_btn);
+//
+//        start.setTransformationMethod(null);
+//        close.setTransformationMethod(null);
 
         add.setOnClickListener(arg0 -> {
             createSearchAttributeChooserDialog();
         });
 
-        start.setOnClickListener(arg0 -> {
+        builder.setPositiveButton(R.string.dialog_ok, (dialogInterface, id) -> {
 //            Spinner c = parent.getChildAt(0).findViewById(R.id.columns);
 //            Spinner s = parent.getChildAt(0).findViewById(R.id.like);
 //            SharedPreferences.Editor ed = ep.edit();
@@ -116,7 +116,9 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
                     String t = dataSet.get(i).getText();
 
                     TraitObject traitObject = originActivity.getDatabase().getTraitByName(c);
-                    columnsList.add(c);
+                    if (!columnsList.contains(c)) {
+                        columnsList.add(c);
+                    }
 
                     String prefix;
                     boolean isAttribute; //Checks if 'c' is an attribute or a trait
@@ -231,12 +233,24 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
                     View layout = getLayoutInflater().inflate(R.layout.dialog_search_results, null);
                     builder1.setTitle(R.string.search_results_dialog_title).setCancelable(true).setView(layout);
 
+                    builder1.setNegativeButton(R.string.dialog_back, (dialogInterface1, id1) -> {
+                        setSavedDataSet(dataSet);
+                        dialogInterface1.dismiss();
+                        SearchDialog searchdialog = new SearchDialog(originActivity);
+                        searchdialog.show(originActivity.getSupportFragmentManager(), TAG);
+                    });
+
+                    builder1.setPositiveButton(R.string.dialog_close, (dialogInterface1, id1) -> {
+                        dialogInterface1.dismiss();
+                    });
+
                     final AlertDialog dialog = builder1.create();
 
                     WindowManager.LayoutParams params2 = dialog.getWindow().getAttributes();
                     params2.height = WindowManager.LayoutParams.WRAP_CONTENT;
                     params2.width = WindowManager.LayoutParams.MATCH_PARENT;
                     dialog.getWindow().setAttributes(params2);
+                    Log.d("MyApp", String.valueOf(layout.getHeight()));
 
                     LinearLayout results_parent = layout.findViewById(R.id.search_results_parent);
                     for (String column : columnsList) {
@@ -250,14 +264,14 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
                         textView.setLayoutParams(layoutParams);
                         results_parent.addView(textView);
                     }
-                    Button closeBtn = layout.findViewById(R.id.closeBtn);
-                    Button backBtn = layout.findViewById(R.id.backBtn);
+//                    Button closeBtn = layout.findViewById(R.id.closeBtn);
+//                    Button backBtn = layout.findViewById(R.id.backBtn);
                     ListView myList = layout.findViewById(R.id.myList);
 
                     myList.setDivider(new ColorDrawable(Color.BLACK));
                     myList.setDividerHeight(5);
 
-                    closeBtn.setTransformationMethod(null);
+//                    closeBtn.setTransformationMethod(null);
 
                     myList.setOnItemClickListener((arg012, arg1, position, arg3) -> {
 
@@ -277,14 +291,14 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
                         originActivity.moveToSearch("search", rangeID, CollectActivity.searchRange, CollectActivity.searchPlot, null, -1);
                     });
 
-                    closeBtn.setOnClickListener(arg01 -> dialog.dismiss());
+//                    closeBtn.setOnClickListener(arg01 -> dialog.dismiss());
 
-                    backBtn.setOnClickListener(arg02 -> {
-                        setSavedDataSet(dataSet);
-                        dialog.dismiss();
-                        SearchDialog searchdialog = new SearchDialog(originActivity);
-                        searchdialog.show(originActivity.getSupportFragmentManager(), "DialogTag");
-                    });
+//                    backBtn.setOnClickListener(arg02 -> {
+//                        setSavedDataSet(dataSet);
+//                        dialog.dismiss();
+//                        SearchDialog searchdialog = new SearchDialog(originActivity);
+//                        searchdialog.show(originActivity.getSupportFragmentManager(), "DialogTag");
+//                    });
 
                     // If search has results, show them, otherwise display error message
 
@@ -294,6 +308,7 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
                     //Show the results dialog
                     dialog.show();
                 } else {
+                    setSavedDataSet(dataSet);
                     Utils.makeToast(getActivity(), getString(R.string.search_results_missing));
                 }
             } catch (Exception z) {
@@ -301,7 +316,7 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
             }
         });
 
-        close.setOnClickListener(arg0 -> dismiss());
+        builder.setNegativeButton(R.string.dialog_close, (dialogInterface, i) -> dismiss());
 
         clear.setOnClickListener(arg0 -> {
             dataSet.clear();
