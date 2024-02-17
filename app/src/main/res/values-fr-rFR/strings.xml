@@ -115,6 +115,7 @@
     <string name="traits_create_warning_name_blank">le nom du caractère ne peut pas être vide</string>
     <string name="traits_create_warning_duplicate">le caractère existe déjà</string>
     <string name="traits_create_warning_numeric_required">défaut, minimum, et maximum doivent être numériques</string>
+    <string name="edit_traits">Modifier</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">la valeur est inférieure au minimum qui a été défini</string>
