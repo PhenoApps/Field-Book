@@ -118,6 +118,7 @@
     <string name="traits_create_warning_name_blank">性状名称不能为空</string>
     <string name="traits_create_warning_duplicate">性状已经存在</string>
     <string name="traits_create_warning_numeric_required">默认值、最小值和最大值必须设定为数字</string>
+    <string name="edit_traits">编辑</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">数值低于最小值</string>
