@@ -18,7 +18,6 @@ import com.h6ah4i.android.preference.NumberPickerPreferenceDialogFragmentCompat;
 public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
 
     private static final String DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG";
-    PreferenceManager prefMgr;
     Context context;
 
     @Override
@@ -36,9 +35,6 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-
-        prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_appearance, rootKey);
         PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences_appearance, true);

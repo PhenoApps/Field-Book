@@ -34,8 +34,16 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class BrapiExportActivity extends ThemedActivity {
     private static final String TAG = BrapiExportActivity.class.getName();
+
+    @Inject
+    SharedPreferences preferences;
 
     private BrAPIService brAPIService;
     private DataHelper dataHelper;
@@ -149,7 +157,7 @@ public class BrapiExportActivity extends ThemedActivity {
 //        BrapiControllerResponse brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
 
         // Check whether our brapi auth response was exists or was successful
-    //    processBrapiControllerMessage(brapiControllerResponse);
+        //    processBrapiControllerMessage(brapiControllerResponse);
 
     }
 
@@ -177,21 +185,17 @@ public class BrapiExportActivity extends ThemedActivity {
     }
 
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.brapi_export_btn:
-                if (numNewObservations == 0 && numEditedObservations == 0 &&
-                        numNewImages == 0 && numEditedImages == 0 && numIncompleteImages == 0) {
-                    Toast.makeText(this, "Error: Nothing to sync", Toast.LENGTH_SHORT).show();
-                } else {
-                    showSaving();
-                    sendData();
-                }
-                break;
-            case R.id.brapi_cancel_btn:
-                finish();
-                break;
-            default:
-                break;
+        int id = v.getId();
+        if (id == R.id.brapi_export_btn) {
+            if (numNewObservations == 0 && numEditedObservations == 0 &&
+                    numNewImages == 0 && numEditedImages == 0 && numIncompleteImages == 0) {
+                Toast.makeText(this, "Error: Nothing to sync", Toast.LENGTH_SHORT).show();
+            } else {
+                showSaving();
+                sendData();
+            }
+        } else if (id == R.id.brapi_cancel_btn) {
+            finish();
         }
     }
 
@@ -741,8 +745,7 @@ public class BrapiExportActivity extends ThemedActivity {
             }
         }
 
-        SharedPreferences ep = this.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
-        String field = ep.getString(GeneralKeys.FIELD_FILE, "");
+        String field = preferences.getString(GeneralKeys.FIELD_FILE, "");
 
         runOnUiThread(() -> {
             ((TextView) findViewById(R.id.brapistudyValue)).setText(field);

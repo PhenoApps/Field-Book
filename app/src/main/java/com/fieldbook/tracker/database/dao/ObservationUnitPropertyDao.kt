@@ -30,7 +30,7 @@ class ObservationUnitPropertyDao {
 
         fun getAllRangeId(context: Context): Array<Int> = withDatabase { db ->
 
-            val studyId = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+            val studyId = PreferenceManager.getDefaultSharedPreferences(context)
                 .getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
             var sortCols: String? = try {

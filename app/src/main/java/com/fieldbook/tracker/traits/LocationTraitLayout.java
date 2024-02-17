@@ -5,12 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.widget.ImageButton;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class LocationTraitLayout extends BaseTraitLayout {
 
@@ -42,7 +42,7 @@ public class LocationTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init(Activity act) {
-        ImageButton getLocation = act.findViewById(R.id.getLocationBtn);
+        FloatingActionButton getLocation = act.findViewById(R.id.getLocationBtn);
 
         String locationSavedTts = getContext().getString(R.string.trait_location_saved_tts);
 

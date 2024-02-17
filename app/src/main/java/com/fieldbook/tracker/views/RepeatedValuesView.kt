@@ -1,14 +1,12 @@
 package com.fieldbook.tracker.views
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
-import android.os.Handler
-import android.os.Looper
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import android.widget.Button
-import android.widget.ImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Group
 import androidx.viewpager.widget.ViewPager
@@ -16,7 +14,11 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.RepeatedValuesPagerAdapter
 import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import com.fieldbook.tracker.utilities.Utils
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlin.math.abs
 
 /**
@@ -27,8 +29,12 @@ import kotlin.math.abs
  *
  * The collect activity has a toolbar indicator that shows the total number of repeated values.
  */
+@AndroidEntryPoint
 class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     ConstraintLayout(context, attributeSet) {
+
+    @Inject
+    lateinit var prefs: SharedPreferences
 
     data class ObservationModelViewHolder(var model: ObservationModel, val color: Int)
 
@@ -41,9 +47,11 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
                         // This page is way off-screen to the left.
                         0.1f
                     }
+
                     position <= 1 -> { // [-1,1]
                         1f
                     }
+
                     else -> { // (1,+Infinity]
                         // This page is way off-screen to the right.
                         0.1f
@@ -58,7 +66,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     private var mValues = arrayListOf<ObservationModelViewHolder>()
     private val leftButton: Button
     private val rightButton: Button
-    private val addButton: ImageButton
+    private val addButton: FloatingActionButton
     private val pager: ViewPager
     private val nonEmptyGroup: Group
 
@@ -77,11 +85,8 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         pager.adapter = RepeatedValuesPagerAdapter(context)
 
-        pager.setPageTransformer(true, SimplePageTransformer())
-
-        //update buttons when user scrolls
-        pager.setOnScrollChangeListener { _, _, _, _, _ ->
-            updateButtonVisibility()
+        if (!SharedPreferenceUtils.isHighContrastTheme(prefs)) {
+            pager.setPageTransformer(true, SimplePageTransformer())
         }
 
         rightButton.setOnClickListener {
@@ -92,17 +97,14 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
                 if (pager.currentItem < (pager.adapter?.count ?: 1) - 1) {
 
-                    pager.currentItem++
+                    setCurrentItem(pager.currentItem + 1)
 
                 }
 
                 updateButtonVisibility()
 
-                Handler(Looper.getMainLooper()).postDelayed({
+                act.traitLayoutRefresh()
 
-                    act.traitLayoutRefresh()
-
-                }, 100)
             }
         }
 
@@ -114,17 +116,14 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
                 if (pager.currentItem > 0) {
 
-                    pager.currentItem--
+                    setCurrentItem(pager.currentItem - 1)
 
                 }
 
                 updateButtonVisibility()
 
-                Handler(Looper.getMainLooper()).postDelayed({
+                act.traitLayoutRefresh()
 
-                    act.traitLayoutRefresh()
-
-                }, 100)
             }
         }
 
@@ -139,13 +138,14 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
                 //only add new measurements if the current one has been observed
                 if (current != null && current.value.isNotEmpty()) {
 
-                    val model = insertNewRep((mValues.maxOf { it.model.rep.toInt() } + 1).toString())
+                    val model =
+                        insertNewRep((mValues.maxOf { it.model.rep.toInt() } + 1).toString())
 
                     mValues.add(ObservationModelViewHolder(model, Color.BLACK))
 
                     submitList()
 
-                    pager.currentItem = mValues.size - 1
+                    setCurrentItem(mValues.size - 1)
 
                     updateButtonVisibility()
 
@@ -153,15 +153,29 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
                 } else {
 
-                    Utils.makeToast(context, context.getString(R.string.view_repeated_values_add_button_fail))
+                    Utils.makeToast(
+                        context,
+                        context.getString(R.string.view_repeated_values_add_button_fail)
+                    )
                 }
-                
+
             } else { //edge case for first value to be added and the trait supports blocking (date format)
 
-                Utils.makeToast(context, context.getString(R.string.view_repeated_values_add_button_fail))
+                Utils.makeToast(
+                    context,
+                    context.getString(R.string.view_repeated_values_add_button_fail)
+                )
 
             }
         }
+    }
+
+    private fun setCurrentItem(index: Int) {
+
+        pager.setCurrentItem(
+            index,
+            !SharedPreferenceUtils.isHighContrastTheme(prefs)
+        )
     }
 
     //inserts a dummy row which later is deleted if the value is blank
@@ -184,13 +198,13 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         val old = pager.currentItem
 
-        getSelectedModel()?.let { model ->
+        getSelectedModel()?.let {
 
             getSelectedModel()?.value = value
 
             submitList()
 
-            pager.currentItem = old
+            setCurrentItem(old)
 
             updateButtonVisibility()
         }
@@ -200,16 +214,18 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
      * Called during trait navigation in collect activity.
      * Used to detect if the current item is blank, it should be deleted in the database.
      */
-    fun refresh(onNew: Boolean) {
+    fun refresh() {
 
-        if (!onNew) {
-            val value = getSelectedModel()?.value ?: ""
+        deleteLastEmptyRep()
 
-            if (value.isEmpty()) {
+    }
 
-                deleteCurrentRep()
+    private fun deleteLastEmptyRep() {
 
-            }
+        mValues.lastOrNull { it.model.value.isEmpty() }?.let { deleteItem ->
+
+            (context as? CollectActivity)?.deleteRep(deleteItem.model.rep)
+
         }
     }
 
@@ -261,13 +277,13 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     //basic setup for linked list view's adapter
     fun initialize(values: List<ObservationModel>, initialRep: Int) {
 
-        mValues.clear()
+        clear()
 
         mValues.addAll(values.map { ObservationModelViewHolder(it, displayColor) })
 
         submitList()
 
-        pager.currentItem = if (initialRep == -1) values.size - 1 else initialRep - 1
+        setCurrentItem(if (initialRep == -1) values.size - 1 else initialRep - 1)
 
         updateButtonVisibility()
     }
@@ -288,31 +304,15 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
         } else {
 
             mValues.minByOrNull { abs(it.model.rep.toInt() - repToDelete.toInt()) }?.let { entry ->
-                pager.currentItem = mValues.indexOf(entry)
+                setCurrentItem(mValues.indexOf(entry))
             }
 
-            Handler(Looper.getMainLooper()).postDelayed({
+            submitList()
 
-                submitList()
+            //select closest rep
+            updateButtonVisibility()
 
-                //select closest rep
-                updateButtonVisibility()
-
-                (context as CollectActivity).traitLayoutRefresh()
-
-            }, 100)
-        }
-    }
-
-    //called on refresh if the value is undesirable
-    private fun deleteCurrentRep() {
-
-        val repToDelete = getRep()
-
-        mValues.firstOrNull { it.model.rep == repToDelete }?.let { deleteItem ->
-
-            (context as? CollectActivity)?.deleteRep(deleteItem.model.rep)
-
+            (context as CollectActivity).traitLayoutRefresh()
         }
     }
 
@@ -323,23 +323,27 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     }
 
     private fun getSelectedModel(): ObservationModel? {
-        return if (mValues.isNotEmpty()) mValues[pager.currentItem].model
-        else null
+        return if (mValues.isNotEmpty()) {
+            val model = mValues[pager.currentItem].model
+            model
+        } else null
     }
 
     private fun insertNewRep(rep: String): ObservationModel {
 
-        with (context as CollectActivity) {
+        with(context as CollectActivity) {
 
             insertRep("", rep)
 
-            return ObservationModel(mapOf(
-                "observation_variable_db_id" to currentTrait.id,
-                "observation_variable_name" to traitName,
-                "observation_variable_field_book_format" to traitFormat,
-                "value" to "",
-                "rep" to rep
-            ))
+            return ObservationModel(
+                mapOf(
+                    "observation_variable_db_id" to currentTrait.id,
+                    "observation_variable_name" to traitName,
+                    "observation_variable_field_book_format" to traitFormat,
+                    "value" to "",
+                    "rep" to rep
+                )
+            )
         }
     }
 

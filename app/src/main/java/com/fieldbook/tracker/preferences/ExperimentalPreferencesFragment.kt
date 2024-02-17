@@ -24,7 +24,7 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
             if (newValue == false) {
 
                 if (isAdded) {
-                    AlertDialog.Builder(context)
+                    AlertDialog.Builder(context, R.style.AppAlertDialog)
                         .setTitle(getString(R.string.pref_experimental_repeated_values_disabled_title))
                         .setMessage(getString(R.string.pref_experimental_repeated_values_disabled_message))
                         .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }

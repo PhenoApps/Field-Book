@@ -18,7 +18,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.graphics.scale
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -42,6 +41,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelector
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -90,8 +90,8 @@ class GoProTraitLayout :
     private lateinit var imageRecyclerView: RecyclerView
 
     //buttons
-    private lateinit var connectButton: AppCompatImageButton
-    private lateinit var shutterButton: AppCompatImageButton
+    private lateinit var connectButton: FloatingActionButton
+    private lateinit var shutterButton: FloatingActionButton
 
     //exoplayer instance
     private var player: ExoPlayer? = null
@@ -181,12 +181,8 @@ class GoProTraitLayout :
 
     override fun init(act: Activity) {
 
-        //slight delay to make navigation a bit faster
-        Handler(Looper.getMainLooper()).postDelayed({
+        initWork(act)
 
-            initWork(act)
-
-        }, 500)
     }
 
     private fun detectActiveConnection() {
@@ -247,7 +243,7 @@ class GoProTraitLayout :
 
                         val dialog = androidx.appcompat.app.AlertDialog.Builder(
                             context,
-                            R.style.AlertDialogStyle
+                            R.style.AppAlertDialog
                         )
                             .setTitle(context.getString(R.string.trait_go_pro_await_ap_title))
                             .setMessage(context.getString(R.string.trait_go_pro_await_ap_message, s, p))
@@ -277,6 +273,7 @@ class GoProTraitLayout :
                         helper?.connectToGoProWifi(dialog, s, p, gatt.bssid) {
 
                             activity?.runOnUiThread {
+
 
                                 helper?.requestStream()
 
@@ -386,7 +383,7 @@ class GoProTraitLayout :
         }
     }
 
-    private var credentialsDialog: androidx.appcompat.app.AlertDialog? = null
+    private var credentialsDialog: AlertDialog? = null
 
     private fun awaitCredentialsDialog() {
 
@@ -394,9 +391,9 @@ class GoProTraitLayout :
 
             if (credentialsDialog?.isShowing == true) credentialsDialog?.dismiss()
 
-            credentialsDialog = androidx.appcompat.app.AlertDialog.Builder(
+            credentialsDialog = AlertDialog.Builder(
                 context,
-                R.style.AlertDialogStyle
+                R.style.AppAlertDialog
             )
                 .setTitle(context.getString(R.string.trait_go_pro_await_ble_title))
                 .setMessage(context.getString(R.string.trait_go_pro_await_ble_message))
@@ -458,7 +455,7 @@ class GoProTraitLayout :
 
                     val dialog = androidx.appcompat.app.AlertDialog.Builder(
                         context,
-                        R.style.AlertDialogStyle
+                        R.style.AppAlertDialog
                     )
                         .setTitle(context.getString(R.string.trait_go_pro_await_device_title))
                         .setCancelable(true)
@@ -551,7 +548,7 @@ class GoProTraitLayout :
 
                 imageView.setImageBitmap(scaled)
 
-                AlertDialog.Builder(context)
+                AlertDialog.Builder(context, R.style.AppAlertDialog)
                     .setTitle(R.string.trait_go_pro_camera_delete_photo_title)
                     .setOnCancelListener { dialog -> dialog.dismiss() }
                     .setPositiveButton(android.R.string.ok) { dialog, _ ->

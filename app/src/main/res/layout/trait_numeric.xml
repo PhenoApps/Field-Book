@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.fieldbook.tracker.traits.NumericTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/numericLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:visibility="gone"
-    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="HardcodedText"
     tools:visibility="visible">
 
     <GridLayout
@@ -16,6 +17,7 @@
         android:orientation="horizontal">
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,6 +27,7 @@
             android:text=";" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,132 +37,120 @@
             android:text="1" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="2" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="3" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="+" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="4" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="5" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="6" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k9"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="-" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="7" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k11"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="8" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k12"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="9" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k13"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="*" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k14"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="." />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
             android:text="0" />
 
         <Button
+            android:layout_margin="1dp"
             android:id="@+id/k16"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:drawableLeft="@drawable/trait_numeric_backspace"
-            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
-            android:paddingLeft="29dp"
-            android:text=" " />
+            android:paddingLeft="29dp" />
 
     </GridLayout>
 </com.fieldbook.tracker.traits.NumericTraitLayout>

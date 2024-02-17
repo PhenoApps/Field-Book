@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.preferences;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -11,41 +12,40 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
-import com.fieldbook.tracker.utilities.DialogUtils;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ProfilePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+
+    @Inject
+    SharedPreferences preferences;
 
     private static final String TAG = ProfilePreferencesFragment.class.getSimpleName();
 
-    PreferenceManager prefMgr;
     Context context;
     private Preference profilePerson;
     private Preference profileReset;
-    SharedPreferences ep;
     private AlertDialog personDialog;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_profile, rootKey);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_profile));
-
-        ep = getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
 
         profilePerson = findPreference("pref_profile_person");
 
@@ -76,7 +76,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             }
         }
 
-        ep.edit().putLong(GeneralKeys.LAST_TIME_OPENED, System.nanoTime()).apply();
+        preferences.edit().putLong(GeneralKeys.LAST_TIME_OPENED, System.nanoTime()).apply();
 
         Preference requirePersonPref = findPreference(GeneralKeys.REQUIRE_USER_TO_COLLECT);
         if (requirePersonPref != null) {
@@ -99,9 +99,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
 
-                SharedPreferences ep = getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
-
-                SharedPreferences.Editor ed = ep.edit();
+                SharedPreferences.Editor ed = preferences.edit();
                 ed.putString(GeneralKeys.FIRST_NAME, "");
                 ed.putString(GeneralKeys.LAST_NAME, "");
                 ed.apply();
@@ -118,7 +116,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     private void showPersonDialog() {
@@ -127,8 +124,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         final EditText firstName = layout.findViewById(R.id.firstName);
         final EditText lastName = layout.findViewById(R.id.lastName);
 
-        firstName.setText(ep.getString(GeneralKeys.FIRST_NAME, ""));
-        lastName.setText(ep.getString(GeneralKeys.LAST_NAME, ""));
+        firstName.setText(preferences.getString(GeneralKeys.FIRST_NAME, ""));
+        lastName.setText(preferences.getString(GeneralKeys.LAST_NAME, ""));
 
         firstName.setSelectAllOnFocus(true);
         lastName.setSelectAllOnFocus(true);
@@ -140,7 +137,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                SharedPreferences.Editor e = ep.edit();
+                SharedPreferences.Editor e = preferences.edit();
 
                 e.putString(GeneralKeys.FIRST_NAME, firstName.getText().toString());
                 e.putString(GeneralKeys.LAST_NAME, lastName.getText().toString());
@@ -159,7 +156,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         personDialog = builder.create();
         personDialog.show();
-        DialogUtils.styleDialogs(personDialog);
 
         android.view.WindowManager.LayoutParams langParams = personDialog.getWindow().getAttributes();
         langParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
@@ -173,8 +169,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     private String personSummary() {
         String tagName = "";
 
-        if (ep.getString(GeneralKeys.FIRST_NAME, "").length() > 0 | ep.getString(GeneralKeys.LAST_NAME, "").length() > 0) {
-            tagName += ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, "");
+        if (preferences.getString(GeneralKeys.FIRST_NAME, "").length() > 0 | preferences.getString(GeneralKeys.LAST_NAME, "").length() > 0) {
+            tagName += preferences.getString(GeneralKeys.FIRST_NAME, "") + " " + preferences.getString(GeneralKeys.LAST_NAME, "");
         } else {
             tagName = "";
         }
@@ -186,7 +182,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         String newId = UUID.randomUUID().toString();
 
-        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.CRASHLYTICS_ID, newId).apply();
+        preferences.edit().putString(GeneralKeys.CRASHLYTICS_ID, newId).apply();
 
         refresh.setSummary(newId);
 
@@ -211,7 +207,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                 enablePref.setOnPreferenceChangeListener((pref, newValue) -> {
 
                     //get current id, might be null
-                    AtomicReference<String> id = new AtomicReference<>(prefMgr.getSharedPreferences().getString(GeneralKeys.CRASHLYTICS_ID, null));
+                    AtomicReference<String> id = new AtomicReference<>(preferences.getString(GeneralKeys.CRASHLYTICS_ID, null));
 
                     boolean enabled = (boolean) newValue;
 
@@ -244,7 +240,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                 });
 
                 //get current id, might be null
-                String id = prefMgr.getSharedPreferences().getString(GeneralKeys.CRASHLYTICS_ID, null);
+                String id = preferences.getString(GeneralKeys.CRASHLYTICS_ID, null);
 
                 //when checkbox is initialized, check if id is null and update refresh vis
                 //update refresh summary as well
@@ -277,7 +273,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         //set visibility of update choices only if enabled
         if (explicitUpdate == null) {
-            updateFlag = ep.getBoolean(GeneralKeys.REQUIRE_USER_TO_COLLECT, false);
+            updateFlag = preferences.getBoolean(GeneralKeys.REQUIRE_USER_TO_COLLECT, false);
         }
 
         Preference updateInterval = findPreference(GeneralKeys.REQUIRE_USER_INTERVAL);

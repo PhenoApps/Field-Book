@@ -136,27 +136,22 @@ public class BrapiProgramActivity extends ThemedActivity {
     }
 
     public void buttonClicked(View view) {
-        switch (view.getId()) {
-            case R.id.loadPrograms:
-                paginationManager.reset();
-                loadPrograms();
-                break;
-            case R.id.selectProgram:
-                if (this.brapiProgram != null) {
-                    Intent intent = new Intent();
-                    intent.setData(Uri.parse(this.brapiProgram.getProgramDbId()));
-                    setResult(RESULT_OK, intent);
-                    finish();
-                } else {
-                    Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_program, Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case R.id.prev:
-            case R.id.next:
-                // Update current page (if allowed) and start brapi call.
-                paginationManager.setNewPage(view.getId());
-                loadPrograms();
-                break;
+        int id = view.getId();
+        if (id == R.id.loadPrograms) {
+            paginationManager.reset();
+            loadPrograms();
+        } else if (id == R.id.selectProgram) {
+            if (this.brapiProgram != null) {
+                Intent intent = new Intent();
+                intent.setData(Uri.parse(this.brapiProgram.getProgramDbId()));
+                setResult(RESULT_OK, intent);
+                finish();
+            } else {
+                Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_program, Toast.LENGTH_SHORT).show();
+            }
+        } else if (id == R.id.prev || id == R.id.next) {// Update current page (if allowed) and start brapi call.
+            paginationManager.setNewPage(view.getId());
+            loadPrograms();
         }
     }
 }

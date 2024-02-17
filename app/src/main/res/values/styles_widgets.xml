@@ -2,16 +2,9 @@
 <resources>
 
     <!-- Widget styles -->
-    <!-- used only in trait editor activity toolbar, it wasn't detecting otherwise -->
-    <style name="TraitEditorToolbarPopupMenu" parent="Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">@android:color/white</item>
-        <item name="android:itemBackground">?attr/fb_color_background</item>
-    </style>
 
-    <!-- This styles the field editor pop up menu (three dot menu)-->
-    <style name="PopUpMenuStyle" parent="Widget.AppCompat.PopupMenu">
-        <item name="android:itemBackground">?attr/fb_color_background</item>
-        <item name="android:popupBackground">?attr/fb_color_background</item>
+    <style name="PopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/cell</item>
     </style>
 
     <!-- styles the trait date picker dialog -->
@@ -19,14 +12,16 @@
         <item name="android:datePickerMode">calendar</item>
         <item name="colorAccent">?attr/fb_color_accent</item>
         <item name="colorControlActivated">?attr/fb_color_primary_dark</item>
-        <item name="android:selectableItemBackgroundBorderless">?attr/fb_color_text_button_background</item>
+        <item name="android:selectableItemBackgroundBorderless">
+            ?attr/fb_color_text_button_background
+        </item>
         <item name="colorControlHighlight">?attr/fb_color_primary</item>
     </style>
 
     <!-- Info bar styling, trait selector -->
     <style name="SpinnerStyle" parent="Widget.AppCompat.Spinner">
         <item name="android:textViewStyle">@style/DropDownTextViewStyle</item>
-        <item name="android:popupBackground">?attr/fb_color_background</item>
+        <item name="android:popupBackground">@drawable/cell</item>
         <item name="android:backgroundTint">?attr/fb_color_primary_dark</item>
         <item name="android:fitsSystemWindows">true</item>
         <item name="android:textColor">?attr/fb_color_text_dark</item>
@@ -110,19 +105,41 @@
 
     <!-- fab styling, used in the trait editor activity -->
     <style name="FloatingActionButtonStyle" parent="Widget.Design.FloatingActionButton">
-        <item name="backgroundTint">?attr/fb_color_primary</item>
+        <!--        <item name="backgroundTint">?attr/fb_color_primary</item>-->
+        <item name="borderWidth">2dp</item>
+        <item name="android:backgroundTint">?fb_color_primary</item>
+        <item name="backgroundTint">?fb_icon_fill_tint</item>
+        <item name="android:elevation">0dp</item>
+        <item name="elevation">0dp</item>
+        <item name="fabSize">normal</item>
+    </style>
+
+    <style name="FloatingActionButtonStyle.TraitButtons">
+        <item name="fabCustomSize">@dimen/fb_trait_fab_size</item>
+        <item name="maxImageSize">@dimen/fb_trait_fab_image_size</item>
+        <item name="android:backgroundTint">?fb_trait_button_background_tint</item>
     </style>
 
     <!-- Preference Search bar card style, inherits android:widget style -->
-    <style name="CardViewStyle" parent="Base.CardView"/>
+    <style name="CardViewStyle" parent="Base.CardView" />
 
     <!-- generic button styling, used in many traits -->
     <style name="ButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/button_unselected</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">?attr/fb_color_text_dark</item>
         <item name="android:textSize">?attr/fb_body_text_size</item>
         <item name="android:textStyle">bold</item>
-<!--        //<item name="backgroundTint">?attr/fb_button_color_normal</item>-->
+        <!--        //<item name="backgroundTint">?attr/fb_button_color_normal</item>-->
+    </style>
+
+    <!-- generic button styling, used in many traits -->
+    <style name="ButtonStyle.HighContrast">
+        <item name="android:background">@drawable/cell_high_contrast</item>
+    </style>
+
+    <style name="ImageButtonStyle.HighContrast">
+        <item name="android:background">@drawable/cell_high_contrast</item>
     </style>
 
     <!-- Options menu overflow icon (three dot button on toolbars mainly) also used in trait list items -->
@@ -131,7 +148,7 @@
     </style>
 
     <style name="OverFlowMenuStyle" parent="Widget.AppCompat.PopupMenu.Overflow">
-        <item name="android:backgroundTint">?attr/fb_color_background</item>
+        <item name="android:popupBackground">@drawable/cell</item>
     </style>
 
     <!-- Action bar (toolbar) style -->
