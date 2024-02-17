@@ -745,6 +745,7 @@
     <string name="field_audio_recording_warning">Field level audio is already recording. Stop that first.</string>
     <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
     <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
+    <string name="field_audio_zip_error">Error creating zip file</string>
 
     <string name="pref_beta_mlkit_title">MLKit Library</string>
     <string name="pref_beta_mlkit_summary">This option uses the MLKit library instead of the ZXing library for scanning barcodes</string>

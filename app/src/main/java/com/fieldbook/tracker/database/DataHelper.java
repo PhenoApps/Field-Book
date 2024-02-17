@@ -1205,6 +1205,13 @@ public class DataHelper {
 //        return cursor;
     }
 
+    public Cursor getAllTraitObjectsForExport() {
+
+        open();
+
+        return ObservationVariableDao.Companion.getAllTraitObjectsForExport();
+    }
+
     /**
      * V4 - Get all traits in the system, in order, as TraitObjects
      */

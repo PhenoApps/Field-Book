@@ -209,6 +209,32 @@ class ObservationVariableDao {
             }
         }
 
+        fun getAllTraitObjectsForExport(): Cursor {
+            val requiredFields = arrayOf(
+                "trait", "format", "defaultValue", "minimum", "maximum",
+                "details", "categories", "isVisible", "realPosition"
+            )
+
+            return MatrixCursor(requiredFields).apply {
+                getAllTraitObjects().forEach { trait ->
+                    addRow(requiredFields.map { field ->
+                        when (field) {
+                            "trait" -> trait.name
+                            "format" -> trait.format
+                            "defaultValue" -> trait.defaultValue
+                            "minimum" -> trait.minimum
+                            "maximum" -> trait.maximum
+                            "details" -> trait.details
+                            "categories" -> trait.categories
+                            "isVisible" -> trait.visible.toString()
+                            "realPosition" -> trait.realPosition.toString()
+                            else -> throw IllegalArgumentException("Unexpected field: $field")
+                        }
+                    })
+                }
+            }
+        }
+
         fun getById(id: String): ObservationVariableModel? = withDatabase { db ->
 
             ObservationVariableModel(
