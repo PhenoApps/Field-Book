@@ -8,6 +8,7 @@ import android.util.Patterns;
 import android.widget.Toast;
 
 import androidx.arch.core.util.Function;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.ApiError;
@@ -33,30 +34,31 @@ import java.util.function.BiFunction;
 
 public interface BrAPIService {
 
-    public static String notUniqueFieldMessage = "not_unique";
-    public static String notUniqueIdMessage = "not_unique_id";
-    public static String noPlots = "no_plots";
+    String notUniqueFieldMessage = "not_unique";
+    String notUniqueIdMessage = "not_unique_id";
+    String noPlots = "no_plots";
 
-    // Helper functions for brapi configurations
-    public static Boolean isLoggedIn(Context context) {
+    static SharedPreferences getPreferences(Context ctx) {
 
-        String auth_token = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
-                .getString(GeneralKeys.BRAPI_TOKEN, "");
+        return PreferenceManager.getDefaultSharedPreferences(ctx);
 
-        if (auth_token == null || auth_token == "") {
-            return false;
-        }
-
-        return true;
     }
 
-    public static Boolean hasValidBaseUrl(Context context) {
+    // Helper functions for brapi configurations
+    static Boolean isLoggedIn(Context context) {
+
+        String token = getPreferences(context).getString(GeneralKeys.BRAPI_TOKEN, "");
+
+        return token != null && token != "";
+    }
+
+    static Boolean hasValidBaseUrl(Context context) {
         String url = getBrapiUrl(context);
 
         return Patterns.WEB_URL.matcher(url).matches();
     }
 
-    public static Boolean checkMatchBrapiUrl(Context context, String dataSource) {
+    static Boolean checkMatchBrapiUrl(Context context, String dataSource) {
 
         try {
             URL externalUrl = new URL(getBrapiUrl(context));
@@ -70,7 +72,7 @@ public interface BrAPIService {
 
     }
 
-    public static String getHostUrl(Context context) {
+    static String getHostUrl(Context context) {
         try {
             String brapiURL = getBrapiUrl(context);
             URL externalUrl = new URL(brapiURL);
@@ -81,12 +83,11 @@ public interface BrAPIService {
         }
     }
 
-    public static String getBrapiUrl(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
-        String baseURL = preferences.getString(GeneralKeys.BRAPI_BASE_URL, "");
-        String version = preferences.getString(GeneralKeys.BRAPI_VERSION, "");
+    static String getBrapiUrl(Context context) {
+        String baseURL = getPreferences(context).getString(GeneralKeys.BRAPI_BASE_URL, "");
+        String version = getPreferences(context).getString(GeneralKeys.BRAPI_VERSION, "");
         String path;
-        if(version.equals("V2"))
+        if (version.equals("V2"))
             path = Constants.BRAPI_PATH_V2;
         else
             path = Constants.BRAPI_PATH_V1;
@@ -94,8 +95,7 @@ public interface BrAPIService {
     }
 
     static int checkPreference(Context context, String key, String defaultValue) {
-        String prefValueString = context.getSharedPreferences("Settings", 0)
-                .getString(key, defaultValue);
+        String prefValueString = getPreferences(context).getString(key, defaultValue);
 
         int value = Integer.parseInt(defaultValue);
 
@@ -124,11 +124,11 @@ public interface BrAPIService {
         return checkPreference(context, GeneralKeys.BRAPI_CHUNK_SIZE, "500");
     }
 
-    public static boolean isConnectionError(int code) {
+    static boolean isConnectionError(int code) {
         return code == 401 || code == 403 || code == 404;
     }
 
-    public static void handleConnectionError(Context context, int code) {
+    static void handleConnectionError(Context context, int code) {
         ApiErrorCode apiErrorCode = ApiErrorCode.processErrorCode(code);
         String toastMsg;
 
@@ -156,33 +156,33 @@ public interface BrAPIService {
         });
     }
 
-    public void postImageMetaData(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
+    void postImageMetaData(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
 
-    public void putImageContent(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
+    void putImageContent(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
 
-    public void putImage(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
+    void putImage(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getPrograms(final BrapiPaginationManager paginationManager, final Function<List<BrapiProgram>, Void> function, final Function<Integer, Void> failFunction);
+    void getPrograms(final BrapiPaginationManager paginationManager, final Function<List<BrapiProgram>, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getTrials(String programDbId, BrapiPaginationManager paginationManager, final Function<List<BrapiTrial>, Void> function, final Function<Integer, Void> failFunction);
+    void getTrials(String programDbId, BrapiPaginationManager paginationManager, final Function<List<BrapiTrial>, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getStudies(String programDbId, String trialDbId, BrapiPaginationManager paginationManager, final Function<List<BrapiStudyDetails>, Void> function, final Function<Integer, Void> failFunction);
+    void getStudies(String programDbId, String trialDbId, BrapiPaginationManager paginationManager, final Function<List<BrapiStudyDetails>, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getStudyDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
+    void getStudyDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getPlotDetails(final String studyDbId, BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
+    void getPlotDetails(final String studyDbId, BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getObservations(final String studyDbId, final List<String> observationVariableDbIds, BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function, final Function<Integer, Void> failFunction );
+    void getObservations(final String studyDbId, final List<String> observationVariableDbIds, BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getOntology(BrapiPaginationManager paginationManager, final BiFunction<List<TraitObject>, Integer, Void> function, final Function<Integer, Void> failFunction);
+    void getOntology(BrapiPaginationManager paginationManager, final BiFunction<List<TraitObject>, Integer, Void> function, final Function<Integer, Void> failFunction);
 
-    public void createObservations(List<Observation> observations,
-                                   final Function<List<Observation>, Void> function,
-                                   final Function<Integer, Void> failFunction);
+    void createObservations(List<Observation> observations,
+                            final Function<List<Observation>, Void> function,
+                            final Function<Integer, Void> failFunction);
 
-    public void updateObservations(List<Observation> observations,
-                                   final Function<List<Observation>, Void> function,
-                                   final Function<Integer, Void> failFunction);
+    void updateObservations(List<Observation> observations,
+                            final Function<List<Observation>, Void> function,
+                            final Function<Integer, Void> failFunction);
 
     void createObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
     void updateObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
@@ -199,11 +199,11 @@ public interface BrAPIService {
 
      */
 
-    public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
+    void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId);
+    BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId);
 
-    public void authorizeClient();
+    void authorizeClient();
 
     void getObservationLevels(String programDbId, final SuccessFunction<List<BrapiObservationLevel>> successFn, final FailureFunction<ApiError> failFn);
 }

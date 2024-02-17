@@ -67,16 +67,15 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
     public static Handler mHandler = new Handler();
     private final int PERMISSIONS_REQUEST_DATABASE_IMPORT = 9980;
     private final int PERMISSIONS_REQUEST_DATABASE_EXPORT = 9970;
-    private SharedPreferences ep;
 
     @Inject
     DataHelper database;
 
+    @Inject
+    SharedPreferences preferences;
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
-        ep = getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setPreferencesFromResource(R.xml.preferences_database, rootKey);
 
@@ -123,7 +122,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
     private void invokeImportDatabase(DocumentFile docFile) {
         mHandler.post(() -> {
-           new ImportDBTask(docFile).execute(0);
+            new ImportDBTask(docFile).execute(0);
         });
     }
 
@@ -182,7 +181,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                             ZipUtil.Companion.unzip(context, input, output);
 
-                            SharedPreferences.Editor edit = ep.edit();
+                            SharedPreferences.Editor edit = preferences.edit();
 
                             edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
                             edit.putString(GeneralKeys.UNIQUE_NAME, "");
@@ -312,9 +311,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                         OutputStream zipOutput = context.getContentResolver().openOutputStream(zipFile.getUri());
 
-                        SharedPreferences prefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
-
-                        objectStream.writeObject(prefs.getAll());
+                        objectStream.writeObject(preferences.getAll());
 
                         objectStream.close();
 
@@ -327,7 +324,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
                                 zipOutput);
 
                         // share the zip file
-                        new FileUtil().shareFile(context, ep, zipFile);
+                        new FileUtil().shareFile(context, preferences, zipFile);
 
                         if (tempOutput != null && !tempOutput.delete()) {
 
@@ -398,7 +395,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
                 database.deleteDatabase();
 
                 // Clear all existing settings
-                SharedPreferences.Editor ed = ep.edit();
+                SharedPreferences.Editor ed = preferences.edit();
                 ed.clear();
                 ed.apply();
 

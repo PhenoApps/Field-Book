@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.Spinner
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -13,33 +14,33 @@ import com.fieldbook.tracker.utilities.Utils
 
 class GeoNavCollectDialog(private val activity: CollectActivity) :
     AlertDialog.Builder(activity, R.style.AppAlertDialog) {
-      
-    private val prefs by lazy {
-        context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+
+    private val preferences by lazy {
+        PreferenceManager.getDefaultSharedPreferences(context)
     }
 
     private var auto
-        get() = prefs.getBoolean(GeneralKeys.GEONAV_AUTO, false)
+        get() = preferences.getBoolean(GeneralKeys.GEONAV_AUTO, false)
         set(value) {
-            prefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, value).apply()
+            preferences.edit().putBoolean(GeneralKeys.GEONAV_AUTO, value).apply()
         }
 
     private var audioOnDrop
-        get() = prefs.getBoolean(GeneralKeys.GEONAV_CONFIG_AUDIO_ON_DROP, false)
+        get() = preferences.getBoolean(GeneralKeys.GEONAV_CONFIG_AUDIO_ON_DROP, false)
         set(value) {
-            prefs.edit().putBoolean(GeneralKeys.GEONAV_CONFIG_AUDIO_ON_DROP, value).apply()
+            preferences.edit().putBoolean(GeneralKeys.GEONAV_CONFIG_AUDIO_ON_DROP, value).apply()
         }
 
     private var degreeOfPrecision
-        get() = prefs.getString(GeneralKeys.GEONAV_CONFIG_DEGREE_PRECISION, "Any")
+        get() = preferences.getString(GeneralKeys.GEONAV_CONFIG_DEGREE_PRECISION, "Any")
         set(value) {
-            prefs.edit().putString(GeneralKeys.GEONAV_CONFIG_DEGREE_PRECISION, value).apply()
+            preferences.edit().putString(GeneralKeys.GEONAV_CONFIG_DEGREE_PRECISION, value).apply()
         }
 
     private var geoNavPopupDisplay
-        get() = prefs.getString(GeneralKeys.GEONAV_POPUP_DISPLAY, "plot_id")
+        get() = preferences.getString(GeneralKeys.GEONAV_POPUP_DISPLAY, "plot_id")
         set(value) {
-            prefs.edit().putString(GeneralKeys.GEONAV_POPUP_DISPLAY, value).apply()
+            preferences.edit().putString(GeneralKeys.GEONAV_POPUP_DISPLAY, value).apply()
         }
 
     private var autoNavigateCb: CheckBox? = null

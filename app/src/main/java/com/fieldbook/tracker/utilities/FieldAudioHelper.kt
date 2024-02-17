@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaRecorder
 import android.net.Uri
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -38,8 +39,8 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
 
     private var recordingLocation: Uri? = null
 
-    private val ep: SharedPreferences =
-        context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+    private val preferences: SharedPreferences =
+        PreferenceManager.getDefaultSharedPreferences(context)
 
     private var buttonState = ButtonState.WAITING_FOR_RECORDING
 
@@ -112,7 +113,7 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
         )
         val c = Calendar.getInstance()
         val mGeneratedName: String
-        val fieldAlias = ep.getString(GeneralKeys.FIELD_FILE, "")
+        val fieldAlias = preferences.getString(GeneralKeys.FIELD_FILE, "")
         mGeneratedName = try {
             if (isFieldAudio) "field_audio_" + (context as CollectActivity).cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(
                 c.time

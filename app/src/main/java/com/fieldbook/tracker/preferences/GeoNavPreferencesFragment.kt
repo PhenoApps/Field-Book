@@ -17,23 +17,34 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
+import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.security.Security
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
     Preference.OnPreferenceChangeListener {
 
     private var mPairDevicePref: Preference? = null
 
-    private lateinit var mPrefs: SharedPreferences
+    @Inject
+    lateinit var preferences: SharedPreferences
 
     private val advisor by Security().secureBluetooth()
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+    private val listener =
+        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            updateUi()
+        }
+
+    private fun updateUi() {
+        updateMethodSummaryText()
+        updateParametersVisibility()
+        changeGeoNavLoggingModeView()
+        updateParametersSummaryText()
+        updateDeviceAddressSummary()
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -42,11 +53,14 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
         setPreferencesFromResource(R.xml.preferences_geonav, rootKey)
 
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+
         // Show/hide preferences and category titles based on the ENABLE_GEONAV value
-        val geonavEnabledPref: CheckBoxPreference? = findPreference("com.fieldbook.tracker.geonav.ENABLE_GEONAV")
+        val geonavEnabledPref: CheckBoxPreference? =
+            findPreference("com.fieldbook.tracker.geonav.ENABLE_GEONAV")
         if (geonavEnabledPref != null) {
             geonavEnabledPref.onPreferenceChangeListener =
-                Preference.OnPreferenceChangeListener { preference, newValue ->
+                Preference.OnPreferenceChangeListener { _, newValue ->
                     val isChecked = newValue as Boolean
                     updatePreferencesVisibility(isChecked)
                     true
@@ -74,7 +88,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
             val value = newValue as? String ?: "0"
 
-            mPrefs.edit()
+            preferences.edit()
                 .putString(GeneralKeys.GEONAV_SEARCH_METHOD, newValue as? String ?: "0").apply()
 
             if (value == "1") {
@@ -92,7 +106,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
         changeGeoNavLoggingModeView()
         geoNavLoggingMode?.setOnPreferenceChangeListener { _, newValue ->
-            mPrefs.edit()
+            preferences.edit()
                 .putString(GeneralKeys.GEONAV_LOGGING_MODE, newValue as? String ?: "0").apply()
 
             changeGeoNavLoggingModeView()
@@ -107,7 +121,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
         updateInterval?.setOnPreferenceChangeListener { _, newValue ->
 
-            mPrefs.edit()
+            preferences.edit()
                 .putString(GeneralKeys.UPDATE_INTERVAL, newValue as? String ?: "0").apply()
 
             updateParametersSummaryText()
@@ -117,7 +131,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
         trapBase?.setOnPreferenceChangeListener { _, newValue ->
 
-            mPrefs.edit()
+            preferences.edit()
                 .putString(GeneralKeys.GEONAV_PARAMETER_D1, newValue as? String ?: "0.001").apply()
 
             updateParametersSummaryText()
@@ -127,7 +141,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
         trapDst?.setOnPreferenceChangeListener { _, newValue ->
 
-            mPrefs.edit()
+            preferences.edit()
                 .putString(GeneralKeys.GEONAV_PARAMETER_D2, newValue as? String ?: "0.01").apply()
 
             updateParametersSummaryText()
@@ -137,7 +151,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
         trapAngle?.setOnPreferenceChangeListener { _, newValue ->
 
-            mPrefs.edit()
+            preferences.edit()
                 .putString(GeneralKeys.SEARCH_ANGLE, newValue as? String ?: "22.5").apply()
 
             updateParametersSummaryText()
@@ -171,7 +185,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
     private fun changeGeoNavLoggingModeView() {
         val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
-        val currentMode = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0")
+        val currentMode = preferences.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0")
 
         if (currentMode == "0") {
             geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_off_description)
@@ -187,18 +201,15 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
     override fun onResume() {
         super.onResume()
-        updateParametersSummaryText()
-        updateMethodSummaryText()
-        updateDeviceAddressSummary()
-        updateParametersVisibility()
+        updateUi()
     }
 
     private fun updateParametersSummaryText() {
 
-        val d1 = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")
-        val d2 = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")
-        val theta = mPrefs.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
-        val interval = mPrefs.getString(GeneralKeys.UPDATE_INTERVAL, "0")
+        val d1 = preferences.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")
+        val d2 = preferences.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")
+        val theta = preferences.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
+        val interval = preferences.getString(GeneralKeys.UPDATE_INTERVAL, "0")
 
         val trapBase = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D1)
         val trapDst = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D2)
@@ -234,9 +245,12 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
     private fun updateMethodSummaryText() {
 
-        val method = if (mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD,
-            getString(R.string.pref_geonav_method_distance)) == "0") getString(R.string.pref_geonav_method_distance)
-            else getString(R.string.pref_geonav_method_trapezoid)
+        val method = if (preferences.getString(
+                GeneralKeys.GEONAV_SEARCH_METHOD,
+                getString(R.string.pref_geonav_method_distance)
+            ) == "0"
+        ) getString(R.string.pref_geonav_method_distance)
+        else getString(R.string.pref_geonav_method_trapezoid)
 
         findPreference<ListPreference>(GeneralKeys.GEONAV_SEARCH_METHOD)?.summary =
             getString(R.string.pref_geonav_search_method_summary, method)
@@ -244,15 +258,21 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
     private fun updateParametersVisibility() {
         val geoNavCat = findPreference<PreferenceCategory>(GeneralKeys.GEONAV_PARAMETERS_CATEGORY)
-        val geonavEnabled = mPrefs.getBoolean("com.fieldbook.tracker.geonav.ENABLE_GEONAV", false)
+        val geonavEnabled =
+            preferences.getBoolean("com.fieldbook.tracker.geonav.ENABLE_GEONAV", false)
 
         when {
             !geonavEnabled -> {
                 geoNavCat?.isVisible = false
             }
-            mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") == "0" -> { // Distance based
+
+            preferences.getString(
+                GeneralKeys.GEONAV_SEARCH_METHOD,
+                "0"
+            ) == "0" -> { // Distance based
                 geoNavCat?.isVisible = false
             }
+
             else -> { // Trapezoidal
                 geoNavCat?.isVisible = true
             }
@@ -264,7 +284,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
      */
     private fun updateDeviceAddressSummary() {
         if (mPairDevicePref != null) {
-            val address = mPrefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
+            val address = preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
             mPairDevicePref!!.summary = address
         }
     }
@@ -314,7 +334,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
                     if (device != null) {
                         address = device.address
                     }
-                    mPrefs.edit().putString(GeneralKeys.PAIRED_DEVICE_ADDRESS, address)
+                    preferences.edit().putString(GeneralKeys.PAIRED_DEVICE_ADDRESS, address)
                         .apply()
                     updateDeviceAddressSummary()
                     dialog.dismiss()
