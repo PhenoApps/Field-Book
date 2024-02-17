@@ -114,6 +114,7 @@
     <string name="traits_create_warning_name_blank">形質名は空欄不可</string>
     <string name="traits_create_warning_duplicate">形質は既に存在</string>
     <string name="traits_create_warning_numeric_required">初期値、最小値、最大値は数値で入力</string>
+    <string name="edit_traits">編集</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">設定した最小値よりも小さい値です</string>
