@@ -89,7 +89,8 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
             )
             val c = Calendar.getInstance()
-            val fieldAlias = ep.getString(GeneralKeys.FIELD_FILE, "")
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val fieldAlias = prefs.getString(GeneralKeys.FIELD_FILE, "")
             val traitFileName: String = "all_traits_" + timeStamp.format(c.time)    + ".csv"
 
             val audioDocumentFile = recordingLocation?.let {
