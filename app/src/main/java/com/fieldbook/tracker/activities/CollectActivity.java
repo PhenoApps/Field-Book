@@ -734,11 +734,7 @@ public class CollectActivity extends ThemedActivity
         // trait is unique, format is not
         String[] traits = database.getVisibleTrait();
         if (traits != null) {
-            ArrayAdapter<String> directionArrayAdapter = new ArrayAdapter<>(
-                    this, R.layout.custom_spinner_layout, traits);
-            directionArrayAdapter
-                    .setDropDownViewResource(R.layout.custom_spinner_layout);
-            traitBox.initTraitType(directionArrayAdapter, rangeSuppress);
+            traitBox.initTraitType(traits, rangeSuppress);
 
         }
     }

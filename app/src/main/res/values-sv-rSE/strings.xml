@@ -98,6 +98,7 @@
     <string name="traits_create_warning_name_blank">Karaktärsnamn får inte vara tomt</string>
     <string name="traits_create_warning_duplicate">Karaktären finns redan </string>
     <string name="traits_create_warning_numeric_required">Standardvärde samt minsta och största krävs och måste vara tal.</string>
+    <string name="edit_traits">Redigera</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Värdet är mindre än det minsta tillåtna</string>

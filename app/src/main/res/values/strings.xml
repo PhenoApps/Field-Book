@@ -273,6 +273,8 @@
     <string name="required">Required</string>
     <string name="traits_create_warning_percent_value_required">Value required</string>
 
+    <string name="select_trait">Select Trait</string>
+    <string name="edit_traits">Edit</string>
 
 
     <!-- COLLECT -->
@@ -773,6 +775,7 @@
     <string name="field_audio_recording_warning">Field level audio is already recording. Stop that first.</string>
     <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
     <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
+    <string name="field_audio_zip_error">Error creating zip file</string>
 
     <string name="pref_beta_enable_individual_field_page_title">Enable Individual Field Pages</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selecting a field in the fields list opens a detail page</string>
