@@ -18,9 +18,9 @@ import android.widget.TextView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
-import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
+import com.fieldbook.tracker.interfaces.FieldSyncController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
@@ -41,11 +41,13 @@ public class FieldAdapterOld extends BaseAdapter {
     private final Context context;
     private SharedPreferences ep;
     private final FieldSwitcher fieldSwitcher;
-    public FieldAdapterOld(Context context, ArrayList<FieldObject> list, FieldSwitcher switcher) {
+    private final FieldSyncController fieldSyncController;
+    public FieldAdapterOld(Context context, ArrayList<FieldObject> list, FieldSwitcher switcher, FieldSyncController fieldSyncController) {
         this.context = context;
         mLayoutInflater = LayoutInflater.from(context);
         this.list = list;
         this.fieldSwitcher = switcher;
+        this.fieldSyncController = fieldSyncController;
     }
 
     public int getCount() {
@@ -203,9 +205,10 @@ public class FieldAdapterOld extends BaseAdapter {
                     //DialogUtils.styleDialogs(alert);
                 }
                 else if (item.getItemId() == R.id.syncObs) {
-                    BrapiSyncObsDialog alert = new BrapiSyncObsDialog(context);
-                    alert.setFieldObject(getItem(position));
-                    alert.show();
+                    FieldObject fieldObject = getItem(position);
+                    if(fieldSyncController != null) {
+                        fieldSyncController.startSync(fieldObject);
+                    }
                 }
 
                 return false;

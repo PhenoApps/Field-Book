@@ -1002,24 +1002,19 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         trait.setMaximum("");
                     }
 
-                    trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                    if (var.getScale().getValidValues().getCategories() != null) {
+                        trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                        //For categorical traits, include label value pairs in details
+                        String details = trait.getDetails() + "\nCategories: ";
+                        details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
+                        trait.setDetails(details);
+                    }
+
                 }
                 if (var.getScale().getDataType() != null) {
                     trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getBrapiValue()));
                 } else {
                     trait.setFormat("text");
-                }
-                //For categorical traits, include label value pairs in details
-                if (trait.getFormat().equals("categorical")) {
-                    String details = trait.getDetails() + "\nCategories: ";
-                    details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
-                    trait.setDetails(details);
-
-//                    try {
-//                        trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
-//                    } catch (Exception e) {
-//                        Log.d("FieldBookError", "Error parsing trait label/value.");
-//                    }
                 }
 
             }

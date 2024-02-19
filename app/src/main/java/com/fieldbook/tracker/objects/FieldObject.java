@@ -20,6 +20,7 @@ public class FieldObject {
     private String date_import;
     private String date_edit;
     private String date_export;
+    private String date_sync;
     private String count;
     private String exp_source;
     private ImportFormat import_format;
@@ -159,6 +160,14 @@ public class FieldObject {
 
     public void setDate_export(String date_export) {
         this.date_export = date_export;
+    }
+
+    public String getDate_sync() {
+        return date_sync;
+    }
+
+    public void setDate_sync(String date_sync) {
+        this.date_sync = date_sync;
     }
 
     public String getCount() {

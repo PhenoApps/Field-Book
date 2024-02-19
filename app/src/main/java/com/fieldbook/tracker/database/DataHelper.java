@@ -2190,6 +2190,10 @@ public class DataHelper {
 //        cursor.close();
     }
 
+    public void updateSyncDate(int studyId) {
+        StudyDao.Companion.updateSyncDate(studyId);
+    }
+
     public void updateStudyAlias(int studyId, String newName) {
         open();
         StudyDao.Companion.updateStudyAlias(studyId, newName);

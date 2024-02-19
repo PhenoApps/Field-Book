@@ -42,11 +42,13 @@ import com.fieldbook.tracker.adapters.FieldAdapterOld;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
 import com.fieldbook.tracker.dialogs.FieldSortDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
+import com.fieldbook.tracker.interfaces.FieldSyncController;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -80,7 +82,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
 public class FieldEditorActivityOld extends ThemedActivity
-        implements FieldSortController, FieldAdapterController {
+        implements FieldSortController, FieldAdapterController, FieldSyncController {
 
     private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -94,7 +96,6 @@ public class FieldEditorActivityOld extends ThemedActivity
     public static EditText trait;
     private static final Handler mHandler = new Handler();
     private static FieldFileObject.FieldFileBase fieldFile;
-    private static SharedPreferences ep;
     private Toolbar toolbar;
     private final int PERMISSIONS_REQUEST_STORAGE = 998;
     Spinner unique;
@@ -109,6 +110,9 @@ public class FieldEditorActivityOld extends ThemedActivity
 
     @Inject
     FieldSwitchImpl fieldSwitcher;
+
+    @Inject
+    SharedPreferences preferences;
 
     // Creates a new thread to do importing
     private final Runnable importRunnable = new Runnable() {
@@ -125,7 +129,7 @@ public class FieldEditorActivityOld extends ThemedActivity
     // Helper function to load data
     public void loadData(ArrayList<FieldObject> fields) {
         try {
-            mAdapter = new FieldAdapterOld(thisActivity, fields, fieldSwitcher);
+            mAdapter = new FieldAdapterOld(thisActivity, fields, fieldSwitcher, this);
             fieldList.setAdapter(mAdapter);
         } catch (Exception e) {
             e.printStackTrace();
@@ -146,7 +150,7 @@ public class FieldEditorActivityOld extends ThemedActivity
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
         }
 
         loadData(database.getAllFieldObjects());
@@ -157,8 +161,6 @@ public class FieldEditorActivityOld extends ThemedActivity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setContentView(R.layout.activity_fields_old);
 
@@ -173,9 +175,9 @@ public class FieldEditorActivityOld extends ThemedActivity
         }
 
         thisActivity = this;
-        database.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        database.updateExpTable(false, true, false, preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         fieldList = findViewById(R.id.myList);
-        mAdapter = new FieldAdapterOld(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
+        mAdapter = new FieldAdapterOld(thisActivity, database.getAllFieldObjects(), fieldSwitcher, this);
         fieldList.setAdapter(mAdapter);
     }
 
@@ -187,8 +189,8 @@ public class FieldEditorActivityOld extends ThemedActivity
         String[] importArray = new String[2];
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_cloud);
-        if (ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
-            String displayName = ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
+        if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+            String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
             importArray = Arrays.copyOf(importArray, importArray.length + 1);
             importArray[2] = displayName;
         }
@@ -286,11 +288,22 @@ public class FieldEditorActivityOld extends ThemedActivity
     }
 
     @Override
+    public void startSync(FieldObject field) {
+        BrapiSyncObsDialog dialog = new BrapiSyncObsDialog(this, this, field);
+        dialog.show();
+    }
+
+    @Override
+    public void onSyncComplete() {
+        //no update needed
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(FieldEditorActivityOld.this).inflate(R.menu.menu_fields, menu);
 
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
 
         return true;
     }
@@ -333,7 +346,7 @@ public class FieldEditorActivityOld extends ThemedActivity
 
             sequence.start();
         } else if (itemId == R.id.importField) {
-            String importer = ep.getString("IMPORT_SOURCE_DEFAULT", "ask");
+            String importer = preferences.getString("IMPORT_SOURCE_DEFAULT", "ask");
 
             switch (importer) {
                 case "ask":
@@ -359,7 +372,7 @@ public class FieldEditorActivityOld extends ThemedActivity
 
                 //update list of fields
                 fieldList = findViewById(R.id.myList);
-                mAdapter = new FieldAdapterOld(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
+                mAdapter = new FieldAdapterOld(thisActivity, database.getAllFieldObjects(), fieldSwitcher, this);
                 fieldList.setAdapter(mAdapter);
 
             }));
@@ -430,7 +443,7 @@ public class FieldEditorActivityOld extends ThemedActivity
 
                     String studyName = study.getExp_alias();
 
-                    if (studyId == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
+                    if (studyId == preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
 
                         SnackbarUtils.showNavigateSnack(getLayoutInflater(),
                                 findViewById(R.id.main_content),
@@ -589,13 +602,13 @@ public class FieldEditorActivityOld extends ThemedActivity
 
                         String fieldFileName = fieldFile.getStem();
 
-                        Editor e = ep.edit();
+                        Editor e = preferences.edit();
                         e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
                         e.apply();
 
                         if (database.checkFieldName(fieldFileName) >= 0) {
                             Utils.makeToast(getApplicationContext(), getString(R.string.fields_study_exists_message));
-                            SharedPreferences.Editor ed = ep.edit();
+                            SharedPreferences.Editor ed = preferences.edit();
                             ed.putString(GeneralKeys.FIELD_FILE, null);
                             ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
                             ed.apply();
@@ -734,7 +747,7 @@ public class FieldEditorActivityOld extends ThemedActivity
     private void setSpinner(Spinner spinner, String[] data, String pref) {
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_layout, data);
         spinner.setAdapter(itemsAdapter);
-        int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(0)));
+        int spinnerPosition = itemsAdapter.getPosition(preferences.getString(pref, itemsAdapter.getItem(0)));
         spinner.setSelection(spinnerPosition);
     }
 
@@ -798,7 +811,7 @@ public class FieldEditorActivityOld extends ThemedActivity
 
             database.updateStudySort(joiner.toString(), field.getExp_id());
 
-            if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.getExp_id()) {
+            if (preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.getExp_id()) {
 
                 fieldSwitcher.switchField(field);
                 CollectActivity.reloadData = true;

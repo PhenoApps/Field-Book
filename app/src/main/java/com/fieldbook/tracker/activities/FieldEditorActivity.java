@@ -94,7 +94,6 @@ public class FieldEditorActivity extends ThemedActivity
     public EditText trait;
     private static final Handler mHandler = new Handler();
     private FieldFileObject.FieldFileBase fieldFile;
-    private static SharedPreferences ep;
     private final int PERMISSIONS_REQUEST_STORAGE = 998;
     Spinner unique;
     Spinner primary;

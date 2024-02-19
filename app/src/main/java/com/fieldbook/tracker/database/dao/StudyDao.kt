@@ -153,6 +153,7 @@ class StudyDao {
         private fun Map<String, Any?>.toFieldObject() = FieldObject().also {
 
             it.exp_id = this[Study.PK].toString().toInt()
+            it.study_db_id = this["study_db_id"].toString()
             it.exp_name = this["study_name"].toString()
             it.exp_alias = this["study_alias"].toString()
             it.unique_id = this["study_unique_id_name"].toString()
@@ -165,6 +166,10 @@ class StudyDao {
                 else -> date
             }
             it.date_export = when (val date = this["date_export"]?.toString()) {
+                null, "null" -> ""
+                else -> date
+            }
+            it.date_sync = when (val date = this["date_sync"]?.toString()) {
                 null, "null" -> ""
                 else -> date
             }
@@ -238,6 +243,7 @@ class StudyDao {
             val query = """
                 SELECT 
                     ${Study.PK},
+                    study_db_id,
                     study_name,
                     study_alias,
                     study_unique_id_name,
@@ -247,6 +253,7 @@ class StudyDao {
                     date_import,
                     date_edit,
                     date_export,
+                    date_sync,
                     import_format,
                     study_source,
                     study_sort_name,
@@ -336,6 +343,7 @@ class StudyDao {
                         put("date_import", timestamp)
                         put("date_export", e.date_export)
                         put("date_edit", e.date_edit)
+                        put("date_sync", e.date_sync)
                         put("import_format", e.import_format.toString())
                         put("study_source", e.exp_source)
                         put("count", e.count)
@@ -499,10 +507,16 @@ class StudyDao {
             }, "${Study.PK} = ?", arrayOf("$studyId"))
         }
 
-        fun updateStudyAlias(exp_id: Int, newName: String) = withDatabase { db ->
+        fun updateSyncDate(studyId: Int) = withDatabase { db ->
+            db.update(Study.tableName, ContentValues().apply {
+                put("date_sync", getTime())
+            }, "${Study.PK} = ?", arrayOf("$studyId"))
+        }
+
+        fun updateStudyAlias(studyId: Int, newName: String) = withDatabase { db ->
             val contentValues = ContentValues()
             contentValues.put("study_alias", newName)
-            db.update(Study.tableName, contentValues, "${Study.PK} = ?", arrayOf(exp_id.toString()))
+            db.update(Study.tableName, contentValues, "${Study.PK} = ?", arrayOf("$studyId"))
         }
 
 

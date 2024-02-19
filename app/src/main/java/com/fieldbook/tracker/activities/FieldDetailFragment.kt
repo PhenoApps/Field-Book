@@ -30,6 +30,7 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
 import com.fieldbook.tracker.interfaces.FieldAdapterController
 import com.fieldbook.tracker.interfaces.FieldSortController
+import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
@@ -42,7 +43,7 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class FieldDetailFragment : Fragment() {
+class FieldDetailFragment : Fragment(), FieldSyncController {
 
     @Inject
     lateinit var database: DataHelper
@@ -142,6 +143,15 @@ class FieldDetailFragment : Fragment() {
         loadFieldDetails()
     }
 
+    override fun onSyncComplete() {
+        loadFieldDetails()
+    }
+
+    override fun startSync(field: FieldObject) {
+        val syncDialog = BrapiSyncObsDialog(requireActivity(), this, field)
+        syncDialog.show()
+    }
+
     fun loadFieldDetails() {
         fieldId?.let { id ->
             val field = database.getFieldObject(id)
@@ -181,9 +191,7 @@ class FieldDetailFragment : Fragment() {
         if (importFormat == ImportFormat.BRAPI) {
             cardViewSync.visibility = View.VISIBLE
             cardViewSync.setOnClickListener {
-                val alert = BrapiSyncObsDialog(requireActivity())
-                alert.setFieldObject(field)
-                alert.show()
+                startSync(field)
             }
             observationLevel = "${field.observation_level}s"
         }
@@ -216,9 +224,9 @@ class FieldDetailFragment : Fragment() {
             getString(R.string.no_activity)
         }
 
-        val lastSync = ""
+        val lastSync = field.date_sync
         if (!lastSync.isNullOrEmpty()) {
-            // TODO: add last sync date to FieldObject and retrieve it
+            lastSyncTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastSync)
         }
 
         val traitString = getString(R.string.field_trait_total, field.trait_count)
