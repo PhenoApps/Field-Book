@@ -188,6 +188,7 @@ public class FieldEditorActivity extends ThemedActivity
         try {
             fieldList = database.getAllFieldObjects(); // Fetch data from the database
             mAdapter.submitList(new ArrayList<>(fieldList)); // Update the adapter's dataset
+            mAdapter.notifyDataSetChanged();
         } catch (Exception e) {
             Log.e(TAG, "Error updating fields list", e);
         }
