@@ -17,32 +17,6 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:choiceMode="singleChoice"
-        android:fastScrollEnabled="true" />
-
-<!--    <LinearLayout-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_gravity="center_horizontal"-->
-<!--        android:orientation="horizontal"-->
-<!--        android:paddingTop="10dp">-->
-
-<!--        <Button-->
-<!--            style="@style/Widget.AppCompat.Button.Borderless"-->
-<!--            android:id="@+id/backBtn"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_gravity="center_horizontal"-->
-<!--            android:minWidth="@dimen/button_default_width"-->
-<!--            android:text="@string/dialog_back" />-->
-
-<!--        <Button-->
-<!--            style="@style/Widget.AppCompat.Button.Borderless"-->
-<!--            android:id="@+id/closeBtn"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_gravity="center_horizontal"-->
-<!--            android:minWidth="@dimen/button_default_width"-->
-<!--            android:text="@string/dialog_close" />-->
-<!--    </LinearLayout>-->
+        android:scrollbars="none" />
 
 </LinearLayout>

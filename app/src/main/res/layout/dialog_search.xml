@@ -12,7 +12,7 @@
         android:layout_margin="4dp"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toTopOf="@id/dialog_search_delete_all_btn"
+        app:layout_constraintBottom_toTopOf="@id/dialog_search_add_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_default="percent"
         app:layout_constraintHeight_percent="0.75"
@@ -20,22 +20,6 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:itemCount="5"
         tools:listitem="@layout/list_item_search" />
-
-    <ImageButton
-        android:id="@+id/dialog_search_delete_all_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:background="@drawable/circle_background"
-        android:contentDescription="@string/dialog_field_sort_delete_all_content_description"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
-        android:src="@drawable/ic_tb_delete_sweep"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/dialog_search_add_btn"
-        app:layout_constraintStart_toStartOf="parent"
-        app:tint="@color/BLACK" />
-
 
     <ImageButton
         android:id="@+id/dialog_search_add_btn"
@@ -49,26 +33,8 @@
         android:src="@drawable/ic_add_white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/dialog_search_delete_all_btn"
+        app:layout_constraintStart_toStartOf="parent"
         app:tint="@color/BLACK" />
-
-<!--    <Button-->
-<!--        android:id="@+id/dialog_search_ok_btn"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="@android:string/ok"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toEndOf="@id/dialog_search_close_btn" />-->
-
-<!--    <Button-->
-<!--        android:id="@+id/dialog_search_close_btn"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="@string/dialog_close"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toStartOf="@id/dialog_search_ok_btn"-->
-<!--        app:layout_constraintStart_toStartOf="parent" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +59,10 @@ public class SearchResultsAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
             holder.itemContainer.removeAllViews();
         }
+        if (position % 2 == 0)
+            convertView.setBackgroundColor(Color.WHITE);
+        else
+            convertView.setBackgroundColor(Color.LTGRAY);
 
         createAndAddTextView(holder, getItem(position).range);
         createAndAddTextView(holder, getItem(position).plot);
