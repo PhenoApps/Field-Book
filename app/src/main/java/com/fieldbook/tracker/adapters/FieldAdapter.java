@@ -196,7 +196,7 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
                 holder.sourceIcon.setImageResource(R.drawable.ic_file_xls);
                 break;
             case INTERNAL:
-                holder.sourceIcon.setImageResource(R.drawable.ic_fields_creator);
+                holder.sourceIcon.setImageResource(R.drawable.ic_field);
                 break;
             default:
                 holder.sourceIcon.setImageResource(R.drawable.ic_file_csv);
@@ -209,7 +209,9 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
         if (field.getExp_id() == activeStudyId) {
             // Indicate active state
             Log.d("FieldAdapter", "Setting icon background for active field " + name);
-            holder.sourceIcon.setBackgroundResource(R.drawable.custom_round_button);
+//            holder.sourceIcon.setBackgroundResource(R.drawable.custom_round_button);
+            holder.sourceIcon.setBackgroundResource(R.drawable.round_outline_button);
+
         } else {
             // Clear any modifications for non-active fields
             holder.sourceIcon.setBackground(null);
