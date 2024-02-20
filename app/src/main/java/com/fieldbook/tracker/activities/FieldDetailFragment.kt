@@ -74,7 +74,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        Log.d("onCreateView", "Start")
+        Log.d("FieldDetailFragment", "onCreateView Start")
         rootView = inflater.inflate(R.layout.fragment_field_detail, container, false)
         toolbar = rootView.findViewById(R.id.toolbar)
         exportUtil = ExportUtil(requireActivity(), database)
@@ -122,7 +122,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     (activity as? FieldEditorActivity)?.setActiveField(id)
                     collectDataFilePermission()
                 }
-            } ?: Log.d("FieldDetailFragment", "Field ID is null, cannot collect data")
+            } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot collect data")
         }
 
         cardViewExport.setOnClickListener {
@@ -131,10 +131,10 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     (activity as? FieldEditorActivity)?.setActiveField(id)
                     exportUtil.exportActiveField()
                 }
-            } ?: Log.d("FieldDetailFragment", "Field ID is null, cannot export data")
+            } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot export data")
         }
 
-        Log.d("onCreateView", "End")
+        Log.d("FieldDetailFragment", "onCreateView End")
         return rootView
     }
 
@@ -166,7 +166,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 val newItems = createTraitDetailItems(field)
                 adapter?.updateItems(newItems)
             }
-        } ?: Log.d("FieldDetailFragment", "Field ID is null")
+        } ?: Log.e("FieldDetailFragment", "Field ID is null")
     }
 
     private fun updateFieldData(field: FieldObject) {
@@ -211,6 +211,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             HtmlCompat.fromHtml(narrativeString, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
         val lastEdit = field.date_edit
+        
         if (!lastEdit.isNullOrEmpty()) {
             lastEditTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastEdit)
         } else {
@@ -227,6 +228,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         val lastSync = field.date_sync
         if (!lastSync.isNullOrEmpty()) {
             lastSyncTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastSync)
+        } else {
+            getString(R.string.no_activity)
         }
 
         val traitString = getString(R.string.field_trait_total, field.trait_count)

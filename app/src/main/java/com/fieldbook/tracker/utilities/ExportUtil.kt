@@ -16,6 +16,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.documentfile.provider.DocumentFile
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.BrapiExportActivity
 import com.fieldbook.tracker.brapi.BrapiAuthDialog
@@ -65,7 +66,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private val ioScope = CoroutineScope(Dispatchers.IO)
     private var progressDialog: ProgressDialog? = null
 
-    private val ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+    private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
     private val timeStamp = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault())
     private var multipleFields = false
 
@@ -76,19 +77,19 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     }
 
     fun exportActiveField() {
-        val activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
+        val activeFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
         this.fieldIds = listOf(activeFieldId)
         export()
     }
 
     fun export() {
-        val exporter = ep.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "")
+        val exporter = preferences.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "")
 
         when (exporter) {
             "local" -> exportPermission()
             "brapi" -> fieldIds.forEach { fieldId -> exportBrAPI(fieldId) }
             else -> {
-                if (allFieldsBrAPI() && ep.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+                if (allFieldsBrAPI() && preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
                     showExportDialog()
                 } else {
                     exportPermission()
@@ -132,7 +133,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
         val exportArray = arrayOf(
             context.getString(R.string.export_source_local),
-            ep.getString(GeneralKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.preferences_brapi_server_test))
+            preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.preferences_brapi_server_test))
         )
 
         val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
@@ -202,18 +203,18 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val checkOverwrite: CheckBox = layout.findViewById(R.id.overwrite)
         val checkBundle: CheckBox = layout.findViewById(R.id.dialog_export_bundle_data_cb)
 
-        checkBundle.setChecked(ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false))
-        checkOverwrite.setChecked(ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false))
-        checkDB.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE, false))
-        checkTable.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, false))
+        checkBundle.setChecked(preferences.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false))
+        checkOverwrite.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false))
+        checkDB.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE, false))
+        checkTable.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, false))
 
-        val isOnlyUnique = ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, false)
+        val isOnlyUnique = preferences.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, false)
         onlyUnique?.setChecked(isOnlyUnique)
-        val isAllColumns = ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, false)
+        val isAllColumns = preferences.getBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, false)
         allColumns?.setChecked(isAllColumns)
-        val isAllTraits = ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ALL, false)
+        val isAllTraits = preferences.getBoolean(GeneralKeys.EXPORT_TRAITS_ALL, false)
         allTraits?.setChecked(isAllTraits)
-        val isActiveTraits = ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, false)
+        val isActiveTraits = preferences.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, false)
         activeTraits?.setChecked(isActiveTraits)
 
         var defaultFileString = ""
@@ -274,7 +275,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 return@setOnClickListener
             }
 
-            with(ep.edit()) {
+            with(preferences.edit()) {
                 putBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, isOnlyUniqueChecked)
                 putBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, isAllColumnsChecked)
                 putBoolean(GeneralKeys.EXPORT_TRAITS_ALL, isAllTraitsChecked)
@@ -306,8 +307,8 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             checkTableBool = checkTable.isChecked
 
 
-            Log.d(TAG, "The value of EXPORT_OVERWRITE is: " + ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false))
-            exportFileString = if (!multipleFields && ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
+            Log.d(TAG, "The value of EXPORT_OVERWRITE is: " + preferences.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false))
+            exportFileString = if (!multipleFields && preferences.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
                 getOverwriteFile(fileName.text.toString())
                 fileName.text.toString()
             } else {
@@ -347,7 +348,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private suspend fun exportData(fieldId: Int): ExportResult {
         return try {
             Log.d(TAG, "Export task started for fieldId: $fieldId")
-            val bundleChecked = ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false)
+            val bundleChecked = preferences.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false)
             val fo = database.getFieldObject(fieldId)
             var fieldFileString = exportFileString
             if (multipleFields) { fieldFileString = "${timeStamp.format(Calendar.getInstance().time)}_${fo.exp_name}" }
@@ -405,7 +406,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 handleBundledFiles(fieldId)
             }
 
-            database.updateExpTable(false, false, true, fieldId)
+            database.updateExportDate(fieldId)
             Log.d(TAG, "Export finished successfully for field ${fo.exp_name}")
             ExportResult.Success("Export successful for field ${fo.exp_name}")
         } catch (e: Exception) {
@@ -580,7 +581,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
      * Scan file to update file list and share exported file
      */
     private fun shareFile(docFile: DocumentFile) {
-        if (!ep.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
+        if (!preferences.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
             val intent = Intent()
             intent.action = Intent.ACTION_SEND
             intent.type = "text/plain"

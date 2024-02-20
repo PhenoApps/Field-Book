@@ -2138,56 +2138,16 @@ public class DataHelper {
 //        return true;
     }
 
-    public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int studyId) {
+    public void updateImportDate(int studyId) {
+        StudyDao.Companion.updateImportDate(studyId);
+    }
 
-        open();
+    public void updateEditDate(int studyId) {
+        StudyDao.Companion.updateEditDate(studyId);
+    }
 
-        StudyDao.Companion.updateStudyTable(imp, ed, ex, studyId);
-
-//        ConfigActivity.dt.open();
-//        Cursor cursor = db.rawQuery("SELECT * from " + EXP_INDEX, null);
-//        cursor.moveToFirst();
-//
-//        if (imp) {
-//            // get import date and count of plots
-//            Cursor cursor2 = db.rawQuery("SELECT * from plots where exp_id = " + exp_id, null);
-//            int count = cursor2.getCount();
-//
-//            ContentValues cv = new ContentValues();
-//            cv.put("count", count);
-//            cv.put("date_import", timeStamp.format(Calendar.getInstance().getTime()));
-//            db.update(EXP_INDEX, cv, "exp_id=" + exp_id, null);
-//        }
-//
-//        if (ed) {
-//            // get and save edit date
-//            for (int i = 0; i < cursor.getCount(); i++) {
-//                int experimental_id = cursor.getInt(0);
-//                String expIdString = Integer.toString(experimental_id);
-//                Cursor cursor3 = db.rawQuery("SELECT timeTaken from user_traits WHERE user_traits.exp_id = " + expIdString + " ORDER BY datetime(substr(timeTaken,1,19)) DESC", null);
-//
-//                if (cursor3.moveToFirst()) {
-//                    String date_edited = cursor3.getString(0);
-//                    ContentValues cv = new ContentValues();
-//                    cv.put("date_edit", date_edited);
-//                    db.update(EXP_INDEX, cv, "exp_id=" + experimental_id, null);
-//                    Log.d("date_edit", date_edited);
-//                }
-//                Log.d("date_edit2", Integer.toString(cursor3.getCount()));
-//
-//                cursor3.close();
-//                cursor.moveToNext();
-//            }
-//        }
-//
-//        if (ex) {
-//            // get export date
-//            ContentValues cv = new ContentValues();
-//            cv.put("date_export", timeStamp.format(Calendar.getInstance().getTime()));
-//            db.update(EXP_INDEX, cv, "exp_id=" + exp_id, null);
-//        }
-//
-//        cursor.close();
+    public void updateExportDate(int studyId) {
+        StudyDao.Companion.updateExportDate(studyId);
     }
 
     public void updateSyncDate(int studyId) {

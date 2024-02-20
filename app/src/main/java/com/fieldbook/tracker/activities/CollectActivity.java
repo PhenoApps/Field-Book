@@ -881,6 +881,8 @@ public class CollectActivity extends ThemedActivity
     @Override
     public void onPause() {
 
+        database.updateEditDate(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+
         guiThread.quit();
 
         // Backup database

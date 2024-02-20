@@ -175,7 +175,6 @@ public class FieldEditorActivityOld extends ThemedActivity
         }
 
         thisActivity = this;
-        database.updateExpTable(false, true, false, preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapterOld(thisActivity, database.getAllFieldObjects(), fieldSwitcher, this);
         fieldList.setAdapter(mAdapter);

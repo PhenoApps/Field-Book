@@ -462,7 +462,7 @@ class StudyDao {
             }
         }
 
-        private fun updateImportDate(db: SQLiteDatabase, studyId: Int) {
+        fun updateImportDate(studyId: Int) = withDatabase { db ->
 
             db.update(Study.tableName, ContentValues().apply {
                 put("count", getCount(studyId))
@@ -470,7 +470,7 @@ class StudyDao {
             }, "${Study.PK} = ?", arrayOf("$studyId"))
         }
 
-        private fun modifyDate(db: SQLiteDatabase, studyId: Int) {
+        fun updateEditDate(studyId: Int) = withDatabase { db ->
 
             db.query(
                 Study.tableName,
@@ -500,7 +500,7 @@ class StudyDao {
             }
         }
 
-        private fun updateExportDate(db: SQLiteDatabase, studyId: Int) {
+        fun updateExportDate(studyId: Int) = withDatabase { db ->
 
             db.update(Study.tableName, ContentValues().apply {
                 put("date_export", getTime())
@@ -517,25 +517,6 @@ class StudyDao {
             val contentValues = ContentValues()
             contentValues.put("study_alias", newName)
             db.update(Study.tableName, contentValues, "${Study.PK} = ?", arrayOf("$studyId"))
-        }
-
-
-        /**
-         * Updates the date_import field and count column of the study table.
-         * imp: boolean flag to get import date of observation units and count
-         *
-         */
-        fun updateStudyTable(
-            updateImportDate: Boolean = false,
-            modifyDate: Boolean = false,
-            updateExportDate: Boolean = false, studyId: Int
-        ) = withDatabase { db ->
-
-            if (updateImportDate) updateImportDate(db, studyId)
-
-            if (modifyDate) modifyDate(db, studyId)
-
-            if (updateExportDate) updateExportDate(db, studyId)
         }
 
         fun updateStudySort(sort: String?, studyId: Int) = withDatabase { db ->
