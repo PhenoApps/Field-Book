@@ -305,7 +305,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             if (newName.isNotBlank()) {
                 database.updateStudyAlias(field.exp_id, newName)
                 fieldDisplayNameTextView.text = newName
-                field.setExp_alias(newName)
                 (activity as? FieldAdapterController)?.queryAndLoadFields()
             }
             dialog.dismiss()

@@ -55,8 +55,7 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
             }
             @Override
             public boolean areContentsTheSame(@NonNull FieldObject oldItem, @NonNull FieldObject newItem) {
-                // No need to track field obj content changes for FieldEditorActivity
-                return true;
+                return oldItem.getExp_alias().equals(newItem.getExp_alias());
             }
         });
         this.context = context;
