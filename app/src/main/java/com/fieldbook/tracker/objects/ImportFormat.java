@@ -8,7 +8,8 @@ public enum ImportFormat {
     CSV("csv"), // CSV: Comma-Separated Values
     XLS("xls"), // Excel Spreadsheet format (97-2003) for Microsoft Excel
     XLSX("xlsx"), // Excel Spreadsheet format (Office Open XML) for newer versions of Microsoft Excel
-    BRAPI("brapi"); // Imports made using the Breeding API (BrAPI)
+    BRAPI("brapi"), // Imports made using the Breeding API (BrAPI)
+    INTERNAL("internal"); // Created internally (within Field Book)
 
     private final String format;
 

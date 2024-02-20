@@ -16,6 +16,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
+import com.fieldbook.tracker.objects.ImportFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -322,6 +323,9 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
                         secondary_id = "Column"
                         exp_sort = "Plot"
                         exp_name = name
+                        exp_alias = name
+                        exp_source = activity.getString(R.string.field_book)
+                        import_format = ImportFormat.INTERNAL
                         count = (rows * cols).toString()
                     }
 

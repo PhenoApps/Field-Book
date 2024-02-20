@@ -344,7 +344,7 @@ class StudyDao {
                         put("date_export", e.date_export)
                         put("date_edit", e.date_edit)
                         put("date_sync", e.date_sync)
-                        put("import_format", e.import_format.toString())
+                        put("import_format", e.import_format?.toString() ?: "")
                         put("study_source", e.exp_source)
                         put("count", e.count)
                         put("observation_levels", e.observation_level)

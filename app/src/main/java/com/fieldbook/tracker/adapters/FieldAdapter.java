@@ -195,7 +195,11 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
             case XLSX:
                 holder.sourceIcon.setImageResource(R.drawable.ic_file_xls);
                 break;
+            case INTERNAL:
+                holder.sourceIcon.setImageResource(R.drawable.ic_fields_creator);
+                break;
             default:
+                holder.sourceIcon.setImageResource(R.drawable.ic_file_csv);
                 break;
         }
 

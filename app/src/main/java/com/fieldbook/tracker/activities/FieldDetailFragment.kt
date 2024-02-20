@@ -180,8 +180,11 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             importDateTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), importDate)
         }
 
+        var source_prefix = getString(R.string.field_import_string)
         var exp_source: String? = field.exp_source
-        if (exp_source.isNullOrEmpty()) { // Sample file import
+        if (exp_source == getString(R.string.field_book)) {
+            source_prefix = getString(R.string.field_create_string)
+        } else if (exp_source.isNullOrEmpty()) { // Sample file import
             exp_source = field.exp_name + ".csv"
         }
 
@@ -195,11 +198,13 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             }
             observationLevel = "${field.observation_level}s"
         }
+
         val sortOrder =
             if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
 
         val narrativeString = getString(
             R.string.field_detail_narrative,
+            source_prefix,
             exp_source,
             field.exp_name,
             field.count,
