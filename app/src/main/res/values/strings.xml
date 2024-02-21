@@ -39,6 +39,7 @@
     <string name="settings_export">Export</string>
     <string name="settings_advanced">Settings</string>
     <string name="settings_profile">Profile</string>
+    <string name="settings_statistics">Statistics</string>
 
     <!-- Config Activity Fuzzy Search  -->
     <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
@@ -751,6 +752,11 @@
     <string name="pref_beta_mlkit_enabled_title">Barcode Scanning using MLKit enabled</string>
     <string name="pref_beta_mlkit_enabled_message">Enabling this feature will switch the barcode scanning library from ZXing to MLKit.</string>
 
+
+    <!-- STATISTICS -->
+
+    <string name="stats_export">Export Statistics</string>
+    <string name="stats_select_date_range">Select Date Range</string>
 
 
     <!-- ABOUT -->
