@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -48,6 +49,7 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.devices.camera.CanonApi;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
@@ -58,12 +60,14 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
+import com.fieldbook.tracker.traits.CanonTrait;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.DevicePairer;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
@@ -81,6 +85,7 @@ import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
 import com.fieldbook.tracker.utilities.VibrateUtil;
+import com.fieldbook.tracker.utilities.WifiHelper;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
@@ -139,6 +144,12 @@ public class CollectActivity extends ThemedActivity
     private final HandlerThread gnssRawLogHandlerThread = new HandlerThread("log");
 
     private GeoNavHelper geoNavHelper;
+
+    @Inject
+    CanonApi canonApi;
+
+    @Inject
+    WifiHelper wifiHelper;
 
     @Inject
     KeyboardListenerHelper keyboardListenerHelper;
@@ -315,6 +326,7 @@ public class CollectActivity extends ThemedActivity
         checkForInitialBarcodeSearch();
 
         verifyPersonHelper.checkLastOpened();
+
     }
 
     public void triggerTts(String text) {
@@ -2007,18 +2019,25 @@ public class CollectActivity extends ThemedActivity
         FragmentManager m = getSupportFragmentManager();
         int count = getSupportFragmentManager().getBackStackEntryCount();
 
+        String format = traitBox.getCurrentFormat();
+
         if (count == 0) {
 
             if (isNavigatingFromSummary) {
 
                 isNavigatingFromSummary = false;
 
-            } else {
+            } else if (format.equals(CanonTrait.type)) {
+
+                canonApi.stopSession();
+
+                wifiHelper.disconnect();
+
+            }else {
 
                 finish();
 
             }
-
 
         } else {
 
@@ -2527,4 +2546,13 @@ public class CollectActivity extends ThemedActivity
         usbCameraConnected = connected;
     }
 
+    @NonNull
+    @Override
+    public CanonApi getCanonApi() {
+        return canonApi;
+    }
+
+    @NonNull
+    @Override
+    public WifiHelper getWifiHelper() { return wifiHelper; }
 }

@@ -37,6 +37,12 @@
         app:fragment="com.fieldbook.tracker.preferences.GeoNavPreferencesFragment" />
 
     <Preference
+        android:icon="@drawable/camera_24px"
+        android:key="pref_key_canon_settings"
+        android:title="@string/preferences_canon_title"
+        app:fragment="com.fieldbook.tracker.preferences.CanonPreferencesFragment" />
+
+    <Preference
         android:icon="@drawable/ic_pref_sounds"
         android:key="pref_key_sounds_settings"
         android:title="@string/preferences_sounds"

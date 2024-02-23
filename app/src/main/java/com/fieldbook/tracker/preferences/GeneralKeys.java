@@ -112,6 +112,16 @@ public class GeneralKeys {
 
     public static final String GNSS_PRECISION_OK_SOUND           = "GNSS_PRECISION_OK_SOUND";
 
+    // Canon
+    public static final String CANON_SSID_NAME = "com.tracker.fieldbook.preferences.keys.canon.ssid_name";
+
+    public static final String CANON_IP = "com.tracker.fieldbook.preferences.keys.canon.ip";
+
+    public static final String CANON_PORT = "com.tracker.fieldbook.preferences.keys.canon.port";
+
+    public static final String CANON_DEBUG = "com.tracker.fieldbook.preferences.keys.canon.debug";
+    public static final String CANON_HELP = "com.tracker.fieldbook.preferences.keys.canon.help";
+
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
     public static final String MLKIT_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.mlkit";
@@ -216,10 +226,6 @@ public class GeneralKeys {
 
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
-
-    //Canon
-    public static final String CANON_IP = "CANON_IP";
-    public static final String CANON_PORT = "CANON_PORT";
 
     private GeneralKeys() {
 

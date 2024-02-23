@@ -17,7 +17,10 @@
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal"
             android:minWidth="128dp"
             android:minHeight="128dp"
@@ -41,10 +44,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <ImageView android:id="@+id/trait_canon_iv"
+        <ImageView
+            android:id="@+id/trait_canon_iv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constrainedHeight="true"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
             app:layout_constraintVertical_bias="0"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -58,7 +63,7 @@
             android:layout_width="@dimen/fb_trait_fab_size"
             android:layout_height="@dimen/fb_trait_fab_size"
             android:layout_margin="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/trait_canon_iv"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:contentDescription="TODO" />

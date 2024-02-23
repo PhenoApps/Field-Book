@@ -104,8 +104,8 @@ open class NumericFormat(
 
                 result = false
 
-                maxParameter.textInputLayout.endIconDrawable = null
-                minParameter.textInputLayout.endIconDrawable = null
+                maxParameter.textInputLayout?.endIconDrawable = null
+                minParameter.textInputLayout?.endIconDrawable = null
 
                 maxParameter.numericEt.error = magnitudeRelationError
                 minParameter.numericEt.error = magnitudeRelationError
@@ -114,7 +114,7 @@ open class NumericFormat(
 
                 result = false
 
-                minParameter.textInputLayout.endIconDrawable = null
+                minParameter.textInputLayout?.endIconDrawable = null
                 defaultParameter?.textInputLayout?.endIconDrawable = null
 
                 minParameter.numericEt.error = magnitudeRelationError
@@ -124,7 +124,7 @@ open class NumericFormat(
 
                 result = false
 
-                maxParameter.textInputLayout.endIconDrawable = null
+                maxParameter.textInputLayout?.endIconDrawable = null
                 defaultParameter?.textInputLayout?.endIconDrawable = null
 
                 maxParameter.numericEt.error = magnitudeRelationError

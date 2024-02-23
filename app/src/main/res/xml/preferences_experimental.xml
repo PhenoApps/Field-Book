@@ -41,18 +41,6 @@
         android:title="@string/preferences_experimental_alpha_title"
         app:iconSpaceReserved="false">
 
-        <EditTextPreference
-            android:icon="@drawable/camera_24px"
-            android:title="@string/pref_canon_ip_title"
-            android:defaultValue="192.168.1.19"
-            android:key="CANON_IP"/>
-
-        <EditTextPreference
-            android:icon="@drawable/camera_24px"
-            android:title="@string/pref_canon_port_title"
-            android:defaultValue="8080"
-            android:key="CANON_PORT"/>
-
     </PreferenceCategory>
 
 </PreferenceScreen>

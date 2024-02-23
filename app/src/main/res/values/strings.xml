@@ -215,6 +215,7 @@
     <string name="traits_create_details">Details</string>
     <string name="traits_create_optional">Optional</string>
     <string name="traits_create_categories_title">Categories</string>
+    <string name="traits_create_camera">Camera</string>
     <string name="traits_create_photo_maximum">Maximum number of photos</string>
     <string name="traits_create_true">True</string>
     <string name="traits_create_false">False</string>
@@ -1032,9 +1033,20 @@
     <string name="trait_date_minus_content_description">Subtracts one day from the current date</string>
     <string name="trait_date_add_content_description">Adds one day to the current date</string>
     <string name="trait_percent_ui_min_max_error">Something went wrong showing the min/max of this trait format</string>
+
+
     <string name="canon_frag_connect_btn_content_description">shutter button</string>
     <string name="traits_format_canon">Canon</string>
     <string name="pref_canon_ip_title">Canon IP Address</string>
     <string name="pref_canon_port_title">Canon Port</string>
+    <string name="preferences_canon_title">Canon</string>
+    <string name="pref_canon_ssid_summary">This name is used to find your device\'s AP. This name must be contained within the actual SSID.</string>
+    <string name="pref_canon_title">SSID Name</string>
+    <string name="pref_canon_ip_summary">This is the ip displayed on your camera when setting up the AP.</string>
+    <string name="pref_canon_port_summary">This is the port displayed on your camera when setting up the AP.</string>
+    <string name="pref_canon_help_title">Help</string>
+    <string name="pref_canon_help_summary">This will open a URL to the FieldBook Canon manual.</string>
+    <string name="pref_canon_debug_title">Debug</string>
+    <string name="pref_canon_debug_summary">A preferences for developers to monitor device output.</string>
 
 </resources>

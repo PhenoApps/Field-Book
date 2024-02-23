@@ -649,7 +649,7 @@ public class BrapiServiceTest {
         final FieldBookImage[] postImageMetaDataResponse = {null};
         final CountDownLatch signal = new CountDownLatch(1);
 
-        FieldBookImage image = new FieldBookImage(context, "/path/test.jpg", Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
+        FieldBookImage image = new FieldBookImage(context, "/path/test.jpg", "traitName", Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
         image.setUnitDbId(ouDbId);
         image.setTimestamp(OffsetDateTime.now());
 
