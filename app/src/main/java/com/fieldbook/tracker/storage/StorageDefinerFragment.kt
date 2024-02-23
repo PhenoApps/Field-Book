@@ -33,6 +33,8 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
         AssetSample("field_import", "field_sample3.csv") to R.string.dir_field_import,
         AssetSample("field_import", "rtk_sample.csv") to R.string.dir_field_import,
         AssetSample("field_import", "training_sample.csv") to R.string.dir_field_import,
+        AssetSample("resources", "feekes_sample.jpg") to R.string.dir_resources,
+        AssetSample("resources", "stem_rust_sample.jpg") to R.string.dir_resources,
         AssetSample("trait", "trait_sample.trt") to R.string.dir_trait,
         AssetSample("trait", "severity.txt") to R.string.dir_trait,
         AssetSample("database", "sample.db") to R.string.dir_database,
