@@ -38,6 +38,7 @@ public class BrapiActivity extends ThemedActivity {
     private BrapiStudyDetails selectedStudy;
 
     BrapiLoadDialog brapiLoadDialog;
+    private String sortBy;
 
     // Filter by
     private String programDbId;
@@ -79,6 +80,12 @@ public class BrapiActivity extends ThemedActivity {
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
                 baseURLText.setText(brapiBaseURL);
 
+                // Set the default sort option from strings.xml
+                String[] sortByOptions = getResources().getStringArray(R.array.brapi_study_sort_by_options);
+                if (sortByOptions.length > 0) {
+                    sortBy = sortByOptions[0];
+                }
+
                 loadToolbar();
                 loadObservationLevels();
             } else {
@@ -107,7 +114,25 @@ public class BrapiActivity extends ThemedActivity {
         }
     }
 
-    private void setupObservationLevelsSpinner() {
+    private void setupSpinners() {
+
+        Spinner sortBySpinner = findViewById(R.id.sortBySpinner);
+        ArrayAdapter<CharSequence> sortByAdapter = ArrayAdapter.createFromResource(this,
+                R.array.brapi_study_sort_by_options, android.R.layout.simple_spinner_item);
+        sortByAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortBySpinner.setAdapter(sortByAdapter);
+        sortBySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                sortBy = parent.getItemAtPosition(position).toString();
+                Toast.makeText(BrapiActivity.this, "New sortBy option selected: " + sortBy, Toast.LENGTH_SHORT).show();
+                loadStudiesList(); // Reload studies list with the new sort option
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
 
         if (!observationLevels.isEmpty()) {
             selectedObservationLevel = observationLevels.get(0);
@@ -142,8 +167,8 @@ public class BrapiActivity extends ThemedActivity {
         //init page numbers
         paginationManager.refreshPageIndicator();
         Integer initPage = paginationManager.getPage();
-
-        brAPIService.getStudies(this.programDbId, this.trialDbId, paginationManager, new Function<List<BrapiStudyDetails>, Void>() {
+        
+          brAPIService.getStudies(this.programDbId, this.trialDbId, this.sortBy, paginationManager, new Function<List<BrapiStudyDetails>, Void>() {
             @Override
             public Void apply(final List<BrapiStudyDetails> studies) {
 
@@ -195,7 +220,7 @@ public class BrapiActivity extends ThemedActivity {
         brAPIService.getObservationLevels(programDbId, input -> {
             this.observationLevels = input;
             runOnUiThread(() -> {
-                setupObservationLevelsSpinner();
+                setupSpinners();
                 loadStudiesList();
             });
         }, failureInput -> {
