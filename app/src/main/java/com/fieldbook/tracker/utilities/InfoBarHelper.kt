@@ -39,8 +39,8 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
 
         val database: DataHelper = (context as CollectActivity).getDatabase()
 
-        //get the preference number of infobars to load
-        val numInfoBars: Int = preferences.getInt(GeneralKeys.INFOBAR_NUMBER, 2)
+        //get the preference number of infobars to load, default to 3 if pref isn't set
+        val numInfoBars: Int = preferences.getInt(GeneralKeys.INFOBAR_NUMBER, 3)
 
         //get all plot attribute names for the study
         val attributes: MutableList<String> = ArrayList(database.rangeColumnNames.toList())
