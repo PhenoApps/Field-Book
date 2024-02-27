@@ -35,11 +35,11 @@ public class PreferencesActivity extends ThemedActivity implements PreferenceFra
         prefsFragment = new PreferencesFragment();
         getSupportFragmentManager().beginTransaction().replace(android.R.id.content, prefsFragment).commit();
 
-        //parse passed bundle and check if the person should be updated.
+        //parse passed bundle and check if specific preference should be updated.
         Bundle extras = getIntent().getExtras();
         if (extras != null && extras.getBoolean(GeneralKeys.PERSON_UPDATE, false)) {
 
-            //starts fragment with bundle that tells the fragment to open the person setting
+            //starts profile fragment with bundle that tells the fragment to open the person setting
             Fragment profile = new ProfilePreferencesFragment();
             Bundle personUpdate = new Bundle();
             personUpdate.putBoolean(GeneralKeys.PERSON_UPDATE, true);
@@ -51,6 +51,15 @@ public class PreferencesActivity extends ThemedActivity implements PreferenceFra
             //starts profile fragment without opening the person setting
             Fragment profile = new ProfilePreferencesFragment();
             getSupportFragmentManager().beginTransaction().replace(android.R.id.content, profile).commit();
+
+        } else if (extras != null && extras.getBoolean(GeneralKeys.INFOBAR_UPDATE, false)) {
+
+            //starts appearance fragment with bundle that tells the fragment to open the infobars setting
+            Fragment appearance = new AppearancePreferencesFragment();
+            Bundle infobarsUpdate = new Bundle();
+            infobarsUpdate.putBoolean(GeneralKeys.INFOBAR_UPDATE, true);
+            appearance.setArguments(infobarsUpdate);
+            getSupportFragmentManager().beginTransaction().replace(android.R.id.content, appearance).commit();
 
         }
 

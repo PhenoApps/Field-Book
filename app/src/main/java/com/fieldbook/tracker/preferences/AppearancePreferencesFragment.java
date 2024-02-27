@@ -41,6 +41,16 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_appearance_title));
 
+        Bundle arguments = getArguments();
+        if (arguments == null || !arguments.getBoolean(GeneralKeys.INFOBAR_UPDATE, false)) {
+            return;
+        }
+
+        Preference infobarPref = findPreference("INFOBAR_NUMBER");
+        if (infobarPref != null) {
+            onDisplayPreferenceDialog(infobarPref);
+        }
+
     }
 
     @Override

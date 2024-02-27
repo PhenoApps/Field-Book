@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.dialogs
 
 import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
@@ -8,6 +9,7 @@ import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.adapters.AttributeAdapter
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -31,6 +33,7 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
 
     private lateinit var tabLayout: TabLayout
     private lateinit var recyclerView: RecyclerView
+    private lateinit var customizeButton: Button
     private lateinit var cancelButton: Button
 
     private var attributes = arrayOf<String>()
@@ -52,11 +55,19 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
         //initialize ui elements
         tabLayout = findViewById(R.id.dialog_collect_att_chooser_tl)
         recyclerView = findViewById(R.id.dialog_collect_att_chooser_lv)
+        customizeButton = findViewById(R.id.dialog_collect_att_chooser_customize_btn)
         cancelButton = findViewById(R.id.dialog_collect_att_chooser_cancel_btn)
 
         //setCancelable(false)
 
         setCanceledOnTouchOutside(true)
+
+        customizeButton.setOnClickListener {
+            val preferenceIntent = Intent(context, PreferencesActivity::class.java)
+            preferenceIntent.putExtra("INFOBAR_UPDATE", true)
+            context.startActivity(preferenceIntent)
+            dismiss()
+        }
 
         cancelButton.setOnClickListener {
             this.cancel()
