@@ -10,6 +10,7 @@ class DateFormat : TraitFormat(
     format = Formats.DATE,
     defaultLayoutId = R.layout.trait_date,
     layoutView = null,
+    databaseName = "date",
     nameStringResourceId = R.string.traits_format_date,
     iconDrawableResourceId = R.drawable.ic_trait_date,
     stringNameAux = null,

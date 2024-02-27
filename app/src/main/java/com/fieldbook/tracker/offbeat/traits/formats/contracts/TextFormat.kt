@@ -11,6 +11,7 @@ class TextFormat : TraitFormat(
     format = Formats.TEXT,
     defaultLayoutId = R.layout.trait_text,
     layoutView = null,
+    databaseName = "text",
     nameStringResourceId = R.string.traits_format_text,
     iconDrawableResourceId = R.drawable.ic_trait_text,
     stringNameAux = null,

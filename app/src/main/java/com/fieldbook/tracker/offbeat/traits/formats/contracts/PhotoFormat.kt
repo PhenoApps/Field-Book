@@ -10,6 +10,7 @@ class PhotoFormat : TraitFormat(
     format = Formats.CAMERA,
     defaultLayoutId = R.layout.trait_photo,
     layoutView = null,
+    databaseName = "photo",
     nameStringResourceId = R.string.traits_format_photo,
     iconDrawableResourceId = R.drawable.ic_trait_camera,
     stringNameAux = null,

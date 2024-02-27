@@ -10,6 +10,7 @@ class UsbCameraFormat : TraitFormat(
     format = Formats.USB_CAMERA,
     defaultLayoutId = R.layout.trait_usb_camera,
     layoutView = null,
+    databaseName  = "usb camera",
     nameStringResourceId = R.string.traits_format_usb_camera,
     iconDrawableResourceId = R.drawable.ic_trait_usb,
     stringNameAux = null,
