@@ -70,6 +70,8 @@
     <string name="list_item_field_popup_menu_content_description">Opens a menu for the selected field.</string>
     <string name="selected_count">%1$d selected</string>
     <string name="fields_select_all">Select All</string>
+    <string name="field_generic_observation_level">entries</string>
+    <string name="field_observation_count_format">%1$s %2$s</string>
 
     <!-- Sort -->
     <string name="fields_sort_update">Sort</string>
@@ -158,8 +160,7 @@
 
     <string name="field_import_string">Imported from</string>
     <string name="field_create_string">Created within</string>
-    <string name="field_detail_narrative">"%1$s" "&lt;b>%2$s&lt;/b>" with name "&lt;b>%3$s&lt;/b>". Contains "&lt;b>%4$s&lt;/b>" "&lt;b>%5$s&lt;/b>" and "&lt;b>%6$s&lt;/b>" attributes. Sorted by "&lt;b>%7$s&lt;/b>"</string>
-    <string name="field_default_observation_level">entries</string>
+    <string name="field_detail_narrative">"%1$s" "%2$s" with name "%3$s". Contains "%4$s" entries and "%5$s" attributes. Sorted by "%6$s"</string>
     <string name="field_default_sort_order">import order</string>
 
     <string name="field_data_title">Data</string>

@@ -37,6 +37,7 @@ import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
+import com.fieldbook.tracker.utilities.StringUtil
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
@@ -189,31 +190,33 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         }
 
         var importFormat: ImportFormat? = field.import_format
-        var observationLevel = getString(R.string.field_default_observation_level)
+        var entryCount = field.count.toString()
 
         if (importFormat == ImportFormat.BRAPI) {
             cardViewSync.visibility = View.VISIBLE
             cardViewSync.setOnClickListener {
                 startSync(field)
             }
-            observationLevel = "${field.observation_level}s"
+            entryCount = "${entryCount} ${field.observation_level}"
         }
 
         val sortOrder =
             if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
 
-        val narrativeString = getString(
-            R.string.field_detail_narrative,
+        // Define the arguments for the narrative string
+        val narrativeArgs = arrayOf(
             source_prefix,
             exp_source,
             field.exp_name,
-            field.count,
-            observationLevel,
-            field.attribute_count,
+            entryCount,
+            field.attribute_count.toString(),
             sortOrder
         )
-        fieldNarrativeTextView.text =
-            HtmlCompat.fromHtml(narrativeString, HtmlCompat.FROM_HTML_MODE_LEGACY)
+
+        // Use the arguments to create the narrative string
+        val narrativeTemplate = getString(R.string.field_detail_narrative, *narrativeArgs)
+        val narrativeSpannable = StringUtil.applyBoldStyleToString(narrativeTemplate, *narrativeArgs)
+        fieldNarrativeTextView.text = narrativeSpannable
 
         val lastEdit = field.date_edit
         

@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.adapters;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -171,15 +172,15 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
         holder.itemView.setActivated(selectedIds.contains(field.getExp_id()));
         String name = field.getExp_alias();
         holder.name.setText(name);
-        String level = field.getObservation_level();
         String count = field.getCount();
+        String genericLevel = context.getString(R.string.field_generic_observation_level);
+        String specificLevel = field.getObservation_level();
 
-        if (level == null || level.isEmpty()) {
-            level = "entries";
-        } else {
-            level = level + "s"; // Making the string plural
-        }
-        holder.count.setText(count + " " + level);
+        // Include the specific observation level if defined, otherwise, fallback to just the generic level
+        String level = !TextUtils.isEmpty(specificLevel) ? specificLevel + " " + genericLevel : genericLevel;
+
+        String formattedCount = String.format(context.getString(R.string.field_observation_count_format), count, level);
+        holder.count.setText(formattedCount);
 
         // Set source icon
         ImportFormat importFormat = field.getImport_format();
