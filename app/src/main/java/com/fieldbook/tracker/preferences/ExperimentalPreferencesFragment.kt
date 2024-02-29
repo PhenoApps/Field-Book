@@ -2,11 +2,14 @@ package com.fieldbook.tracker.preferences
 
 import android.app.AlertDialog
 import android.os.Bundle
+import androidx.fragment.app.DialogFragment
 import androidx.preference.CheckBoxPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
+import com.fieldbook.tracker.dialogs.UploadFileDialog
 
 class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
 
@@ -37,6 +40,13 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
 
         val barcode = findPreference<CheckBoxPreference>(GeneralKeys.MLKIT_PREFERENCE_KEY)
         barcode?.setOnPreferenceChangeListener { _, newValue ->
+            true
+        }
+
+        val uploadPref = findPreference<Preference>("pref_beta_upload_files")
+        uploadPref?.setOnPreferenceClickListener {
+            val dialogFragment: DialogFragment = UploadFileDialog()
+            dialogFragment.show(childFragmentManager, "uploadFile")
             true
         }
     }

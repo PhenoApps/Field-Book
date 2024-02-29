@@ -39,6 +39,14 @@
     <PreferenceCategory
     android:key="experimental_settings_alpha"
     android:title="@string/preferences_experimental_alpha_title"
-    app:iconSpaceReserved="false"/>
+    app:iconSpaceReserved="false">
+
+        <Preference
+            android:icon="@drawable/ic_pref_database_export"
+            android:key="pref_beta_upload_files"
+            android:summary="@string/pref_beta_upload_files_summary"
+            android:title="@string/pref_beta_upload_files" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>
