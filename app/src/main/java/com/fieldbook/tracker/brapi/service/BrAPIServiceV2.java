@@ -9,6 +9,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import androidx.arch.core.util.Function;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
@@ -144,7 +145,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     @Override
     public void authorizeClient(){
         try {
-            apiClient.authenticate(t -> context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+            apiClient.authenticate(t -> PreferenceManager.getDefaultSharedPreferences(context)
                     .getString(GeneralKeys.BRAPI_TOKEN, null));
         } catch (ApiException error) {
             Log.e("BrAPIServiceV2", "API Exception", error);
@@ -205,7 +206,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 }
             };
             BrAPIImage request = mapImage(image);
-            imagesApi.imagesPostAsync(Arrays.asList(request), callback);
+            imagesApi.imagesPostAsync(Collections.singletonList(request), callback);
 
         } catch (ApiException error) {
             failFunction.apply(error.getCode());
@@ -506,7 +507,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         request.setDescription(image.getDescription());
         request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
         request.setFileName(image.getImageFileName());
-        if (image.getImageFileSize() != null) request.setFileSize((int) image.getImageFileSize());
+        if (image.getImageFileSize() != null) request.setFileSize(image.getImageFileSize());
         if (image.getImageHeight() != null) request.setHeight(image.getImageHeight());
         if (image.getImageWidth() != null) request.setWidth(image.getImageWidth());
         request.setImageName(image.getImageName());
@@ -763,7 +764,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
-            final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+            final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
                     .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
@@ -1271,11 +1272,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             // Get the synonyms for easier reading. Set it as the trait name.
             String synonym = var.getSynonyms().size() > 0 ? var.getSynonyms().get(0) : null;
-            trait.setTrait(getPrioritizedValue(synonym, var.getObservationVariableName())); //This will default to the Observation Variable Name if available.
+            trait.setName(getPrioritizedValue(synonym, var.getObservationVariableName())); //This will default to the Observation Variable Name if available.
 
             //v5.1.0 bugfix branch update, getPrioritizedValue can return null, trait name should never be null
             // Skip the trait if there brapi trait field isn't present
-            if (var.getTrait() == null || trait.getTrait() == null) {
+            if (var.getTrait() == null || trait.getName() == null) {
                 variablesMissingTrait += 1;
                 continue;
             }
@@ -1410,19 +1411,17 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
      * @return
      */
     private String convertBrAPIDataType(String dataType) {
-        //TODO: Check these out and make sure they match with fieldbook data types.
-        switch (dataType) {
-            case "Nominal":
-            case "Ordinal":
+        switch (dataType.toLowerCase()) {
+            case "nominal":
+            case "ordinal":
             case "categorical":
             case "qualitative":
                 // All Field Book categories are ordered, so this works
                 return "categorical";
             case "date":
-            case "Date":
                 return "date";
-            case "Numerical":
-            case "Duration":
+            case "numerical":
+            case "duration":
             case "numeric":
                 return "numeric";
             case "rust rating":
@@ -1446,12 +1445,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 return "barcode";
             case "gnss":
                 return "gnss";
+            case "zebra label printer":
             case "zebra label print":
                 return "zebra label print";
             case "usb camera":
                 return "usb camera";
-            case "Code":
-            case "Text":
+            case "code":
+            case "text":
             default:
                 return "text";
         }

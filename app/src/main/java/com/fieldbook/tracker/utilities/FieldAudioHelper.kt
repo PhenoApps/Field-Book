@@ -5,24 +5,26 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaRecorder
 import android.net.Uri
-import android.util.Log
+import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.interfaces.TraitCsvWriter
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldDataDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.ZipUtil.Companion.zip
+import dagger.hilt.android.qualifiers.ActivityContext
 import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getDirectory
 import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getFileOutputStream
-import dagger.hilt.android.qualifiers.ActivityContext
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.OutputStream
+import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import java.io.OutputStream
 import javax.inject.Inject
 
 
@@ -38,14 +40,19 @@ import javax.inject.Inject
  * for digital phenotyping
  *
  * AudioTraitLayout also uses methods from this helper
+ *
+ * Zips field audio, all traits and geonav log files in /field_export/
  */
-class FieldAudioHelper @Inject constructor(@ActivityContext private val context: Context) {
+
+class FieldAudioHelper @Inject constructor(@ActivityContext private val context: Context) : TraitCsvWriter {
 
     private var mediaRecorder: MediaRecorder? = null
 
     private var recordingLocation: Uri? = null
-
     private val mPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+
+    private val preferences: SharedPreferences =
+        PreferenceManager.getDefaultSharedPreferences(context)
 
     private val ep: SharedPreferences =
         context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
@@ -54,15 +61,6 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
 
     val isRecording: Boolean
         get() = buttonState != ButtonState.WAITING_FOR_RECORDING
-
-    private fun zipFiles(ctx: Context, paths: ArrayList<DocumentFile?>, outputStream: OutputStream) {
-        try {
-            zip(ctx, paths.toArray(arrayOf()), outputStream)
-            outputStream.close()
-        } catch (io: IOException) {
-            io.printStackTrace()
-        }
-    }
 
     private fun zipAudioAndLogFiles(){
         try {
@@ -119,6 +117,71 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
         }
     }
 
+    private fun zipFiles(ctx: Context, paths: ArrayList<DocumentFile?>, outputStream: OutputStream) {
+        try {
+            zip(ctx, paths.toArray(arrayOf()), outputStream)
+            outputStream.close()
+        } catch (io: IOException) {
+            io.printStackTrace()
+        }
+    }
+
+    /**
+     * This function zips field audio, geonav log and all traits files
+     */
+    private fun zipAudioLogAndTraits(){
+        try {
+            val timeStamp = SimpleDateFormat(
+                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
+            )
+            val c = Calendar.getInstance()
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val fieldAlias = prefs.getString(GeneralKeys.FIELD_FILE, "")
+            val traitFileName: String = "all_traits_" + timeStamp.format(c.time)    + ".csv"
+
+            val audioDocumentFile = recordingLocation?.let {
+                DocumentFile.fromSingleUri(context,
+                    it
+                )
+            }
+
+            // create a all traits csv file in /traits/
+            val traitsDocument = writeAllTraitsToCsv(traitFileName, (context as CollectActivity))
+            val traitsDocumentFile = traitsDocument?.let {
+                DocumentFile.fromSingleUri(context,
+                    it
+                )
+            }
+
+            val geoNavLogWriter = context.getGeoNavHelper().getGeoNavLogWriterUri()
+            val geoNavFile = geoNavLogWriter?.let {
+                DocumentFile.fromSingleUri(context,
+                    it
+                )
+            }
+
+            val paths = ArrayList<DocumentFile?>()
+            paths.add(audioDocumentFile)
+            paths.add(geoNavFile)
+            paths.add(traitsDocumentFile)
+
+            val mGeneratedName = "field_audio_log" + context.cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(c.time)    + ".zip"
+
+            val exportDir = getDirectory(context, R.string.dir_field_export)
+            val zipFile = exportDir?.createFile("*/*", mGeneratedName)
+
+            val output = getFileOutputStream(
+                context, R.string.dir_field_export, mGeneratedName
+            )
+
+            if(output != null){
+                zipFiles(context, paths, output)
+            }
+        }catch (e : Exception){
+            e.printStackTrace()
+        }
+    }
+
     fun stopRecording() {
         try {
             mediaRecorder?.stop()
@@ -126,9 +189,8 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
             releaseRecorder()
             // zip the field audio and log file only if logging is enabled
             val isLoggingEnabled = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0")
-            Log.d("TAG", "stopRecording: $isLoggingEnabled")
             if(isLoggingEnabled != "0"){
-                zipAudioAndLogFiles()
+                zipAudioLogAndTraits()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -141,11 +203,15 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
     }
 
     private fun setRecordingLocation(recordingName: String, isFieldAudio: Boolean) {
+
+        val traitName = (context as CollectActivity).traitName
+        val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+
         // get directory based on type of audio being recorded
         val audioDir = if (isFieldAudio) getFieldDataDirectory(
-            context, "field_audio"
+            context, DocumentTreeUtil.FIELD_AUDIO_MEDIA
         ) else getFieldMediaDirectory(
-            context, "audio"
+            context, sanitizedTraitName
         )
         if (audioDir != null && audioDir.exists()) {
             val audioFile = audioDir.createFile("*/mp4", "$recordingName.mp4")
@@ -175,7 +241,7 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
         )
         val c = Calendar.getInstance()
         val mGeneratedName: String
-        val fieldAlias = ep.getString(GeneralKeys.FIELD_FILE, "")
+        val fieldAlias = preferences.getString(GeneralKeys.FIELD_FILE, "")
         mGeneratedName = try {
             if (isFieldAudio) "field_audio_" + (context as CollectActivity).cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(
                 c.time
@@ -216,5 +282,59 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
 
     private enum class ButtonState(private val imageId: Int) {
         WAITING_FOR_RECORDING(R.drawable.ic_tb_field_mic_off), RECORDING(R.drawable.ic_tb_field_mic_on);
+    }
+
+    override fun writeAllTraitsToCsv(traitFileName: String, context: Context): Uri? {
+        val collectActivityContext = context as CollectActivity
+
+        try {
+            val traitDir = getDirectory(context, R.string.dir_trait)
+            if (traitDir != null && traitDir.exists()) {
+                val exportDoc = traitDir.createFile("*/*", traitFileName)
+                if (exportDoc != null && exportDoc.exists()) {
+                    val output =
+                        getFileOutputStream(context, R.string.dir_trait, traitFileName)
+                    if (output != null) {
+                        var osw: OutputStreamWriter? = null
+                        var csvWriter: CSVWriter? = null
+                        try {
+                            osw = OutputStreamWriter(output)
+                            csvWriter = CSVWriter(
+                                osw,
+                                collectActivityContext.getDatabase().allTraitObjectsForExport
+                            )
+                            csvWriter.writeTraitFile(collectActivityContext.getDatabase().allTraitsForExport?.columnNames)
+                        } catch (e: java.lang.Exception) {
+                            e.printStackTrace()
+                        } finally {
+                            try {
+                                csvWriter?.close()
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
+                            try {
+                                osw?.close()
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
+                            try {
+                                output.close()
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
+                        }
+                        return exportDoc.uri
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(
+                collectActivityContext,
+                R.string.field_audio_zip_error,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        return null
     }
 }

@@ -18,7 +18,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.graphics.scale
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,9 +25,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.ImageTraitAdapter
-import com.fieldbook.tracker.database.dao.ObservationDao
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
+import com.fieldbook.tracker.utilities.ExifUtil
+import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.GoProWrapper
 import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.ExoPlayer
@@ -40,6 +41,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelector
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -67,7 +69,7 @@ class GoProTraitLayout :
     GattCallbackInterface,
     GoProGattInterface,
     GoProGatt.GoProGattController,
-    GoProHelper.OnGoProStreamReady{
+    GoProHelper.OnGoProStreamReady {
 
     //go pro specific collector interface
     interface GoProCollector {
@@ -88,8 +90,8 @@ class GoProTraitLayout :
     private lateinit var imageRecyclerView: RecyclerView
 
     //buttons
-    private lateinit var connectButton: AppCompatImageButton
-    private lateinit var shutterButton: AppCompatImageButton
+    private lateinit var connectButton: FloatingActionButton
+    private lateinit var shutterButton: FloatingActionButton
 
     //exoplayer instance
     private var player: ExoPlayer? = null
@@ -179,12 +181,8 @@ class GoProTraitLayout :
 
     override fun init(act: Activity) {
 
-        //slight delay to make navigation a bit faster
-        Handler(Looper.getMainLooper()).postDelayed({
+        initWork(act)
 
-            initWork(act)
-
-        }, 500)
     }
 
     private fun detectActiveConnection() {
@@ -245,7 +243,7 @@ class GoProTraitLayout :
 
                         val dialog = androidx.appcompat.app.AlertDialog.Builder(
                             context,
-                            R.style.AlertDialogStyle
+                            R.style.AppAlertDialog
                         )
                             .setTitle(context.getString(R.string.trait_go_pro_await_ap_title))
                             .setMessage(context.getString(R.string.trait_go_pro_await_ap_message, s, p))
@@ -276,6 +274,7 @@ class GoProTraitLayout :
 
                             activity?.runOnUiThread {
 
+
                                 helper?.requestStream()
 
                             }
@@ -292,8 +291,8 @@ class GoProTraitLayout :
 
         val plot = currentRange.plot_id
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        val traitName = currentTrait.trait
-        val traitType = type
+        val traitName = currentTrait.name
+        val traitFormat = type
         val traitDbId = currentTrait.id
         val time = Utils.getDateTime()
         val name = "${traitName}_${plot}_$time.png"
@@ -303,7 +302,7 @@ class GoProTraitLayout :
             "studyId" to studyId,
             "plot" to plot,
             "traitName" to traitName,
-            "traitType" to traitType,
+            "traitFormat" to traitFormat,
             "traitDbId" to traitDbId,
             "name" to name
         )
@@ -384,7 +383,7 @@ class GoProTraitLayout :
         }
     }
 
-    private var credentialsDialog: androidx.appcompat.app.AlertDialog? = null
+    private var credentialsDialog: AlertDialog? = null
 
     private fun awaitCredentialsDialog() {
 
@@ -392,9 +391,9 @@ class GoProTraitLayout :
 
             if (credentialsDialog?.isShowing == true) credentialsDialog?.dismiss()
 
-            credentialsDialog = androidx.appcompat.app.AlertDialog.Builder(
+            credentialsDialog = AlertDialog.Builder(
                 context,
-                R.style.AlertDialogStyle
+                R.style.AppAlertDialog
             )
                 .setTitle(context.getString(R.string.trait_go_pro_await_ble_title))
                 .setMessage(context.getString(R.string.trait_go_pro_await_ble_message))
@@ -456,7 +455,7 @@ class GoProTraitLayout :
 
                     val dialog = androidx.appcompat.app.AlertDialog.Builder(
                         context,
-                        R.style.AlertDialogStyle
+                        R.style.AppAlertDialog
                     )
                         .setTitle(context.getString(R.string.trait_go_pro_await_device_title))
                         .setCancelable(true)
@@ -549,7 +548,7 @@ class GoProTraitLayout :
 
                 imageView.setImageBitmap(scaled)
 
-                AlertDialog.Builder(context)
+                AlertDialog.Builder(context, R.style.AppAlertDialog)
                     .setTitle(R.string.trait_go_pro_camera_delete_photo_title)
                     .setOnCancelListener { dialog -> dialog.dismiss() }
                     .setPositiveButton(android.R.string.ok) { dialog, _ ->
@@ -581,6 +580,7 @@ class GoProTraitLayout :
                 database.insertObservation(
                     plot,
                     data["traitDbId"],
+                    data["traitFormat"],
                     name,
                     prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
                             + prefs.getString(GeneralKeys.LAST_NAME, ""),
@@ -609,18 +609,22 @@ class GoProTraitLayout :
             withContext(Dispatchers.IO) {
 
                 //get current trait's trait name, use it as a plot_media directory
-                currentTrait.trait?.let { traitName ->
+                currentTrait.name?.let { traitName ->
 
                     val traitDbId = currentTrait.id
 
-                    DocumentTreeUtil.getFieldMediaDirectory(context, traitName)
+                    val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+
+                    DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)
                         ?.let { usbPhotosDir ->
 
                             val plot = data["plot"]
 
-                            val studyId = data["studyId"]
+                            val studyId = data["studyId"] ?: String()
 
                             val name = data["name"] ?: String()
+
+                            val timestamp = Utils.getDateTime()
 
                             usbPhotosDir.createFile("*/*", name)?.let { file ->
 
@@ -633,9 +637,9 @@ class GoProTraitLayout :
                                     database.insertObservation(
                                         plot,
                                         data["traitDbId"],
+                                        data["traitFormat"],
                                         file.uri.toString(),
-                                        prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
-                                                + prefs.getString(GeneralKeys.LAST_NAME, ""),
+                                        (activity as? CollectActivity)?.person,
                                         (activity as? CollectActivity)?.locationByPreferences,
                                         "",
                                         studyId,
@@ -643,6 +647,22 @@ class GoProTraitLayout :
                                         null,
                                         null
                                     )
+
+                                    //if sdk > 24, can write exif information to the image
+                                    //goal is to encode observation variable model into the user comments
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+                                        ExifUtil.saveVariableUnitModelToExif(
+                                            context,
+                                            (controller.getContext() as CollectActivity).person,
+                                            timestamp,
+                                            database.getStudyById(studyId),
+                                            database.getObservationUnitById(currentRange.plot_id),
+                                            database.getObservationVariableById(currentTrait.id),
+                                            file.uri
+                                        )
+
+                                    }
 
                                     activity?.runOnUiThread {
 
@@ -666,7 +686,7 @@ class GoProTraitLayout :
 
         imageRecyclerView.adapter = ImageTraitAdapter(context, this, hasProgressBar = true)
 
-        currentTrait.trait?.let { traitName ->
+        currentTrait.name?.let { traitName ->
 
             try {
 
@@ -698,48 +718,59 @@ class GoProTraitLayout :
         }
     }
 
+    private fun getImageObservations(): Array<ObservationModel> {
+
+        val traitDbId = collectActivity.traitDbId.toInt()
+        val plot = collectActivity.observationUnit
+        val studyId = collectActivity.studyId
+
+        return database.getAllObservations(studyId).filter {
+            it.observation_variable_db_id == traitDbId && it.observation_unit_id == plot
+        }.toTypedArray()
+    }
+
     private fun deleteItem(model: ImageTraitAdapter.Model) {
 
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
         //get current trait's trait name, use it as a plot_media directory
-        currentTrait?.trait?.let { traitName ->
+        currentTrait?.name?.let { traitName ->
 
-            val traitDbId = currentTrait.id
+            val plot = currentRange.plot_id
 
-            DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
+            getImageObservations().firstOrNull { it.value == model.uri }?.let { observation ->
 
-                val plot = currentRange.plot_id
+                try {
 
-                DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
+                    DocumentFile.fromSingleUri(context, Uri.parse(observation.value))?.let { image ->
 
-                    highResImages.firstOrNull {
-                        it.name == (DocumentFile.fromSingleUri(
-                            context,
-                            Uri.parse(model.uri)
-                        )?.name ?: String())
-                    }?.let { image ->
+                        val result = image.delete()
 
-                        try {
+                        if (result) {
 
-                            image.delete()
-                            DocumentFile.fromSingleUri(context, Uri.parse(model.uri))?.delete()
-
-                            ObservationDao.deleteTraitByValue(
+                            database.deleteTraitByValue(
                                 studyId,
                                 plot,
-                                traitDbId,
+                                currentTrait.id,
                                 image.uri.toString()
                             )
 
                             loadAdapterItems()
 
-                        } catch (e: Exception) {
+                        } else {
 
-                            Log.e(TAG, "Failed to delete images.", e)
+                            collectActivity.runOnUiThread {
 
+                                Toast.makeText(context, R.string.photo_failed_to_delete, Toast.LENGTH_SHORT).show()
+
+                            }
                         }
                     }
+
+                } catch (e: Exception) {
+
+                    Log.e(TAG, "Failed to delete images.", e)
+
                 }
             }
         }
@@ -824,39 +855,17 @@ class GoProTraitLayout :
 
     override fun onItemClicked(model: ImageTraitAdapter.Model) {
 
-        try {
+        if (!isLocked) {
 
-            if (!isLocked) {
+            getImageObservations().firstOrNull { it.value == model.uri }?.let { observation ->
 
-                //get current trait's trait name, use it as a plot_media directory
-                currentTrait?.trait?.let { traitName ->
+                DocumentFile.fromSingleUri(context, Uri.parse(observation.value))?.let { image ->
 
-                    DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
-
-                        val plot = currentRange.plot_id
-
-                        DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
-
-                            highResImages.firstOrNull {
-                                it.name == (DocumentFile.fromSingleUri(
-                                    context,
-                                    Uri.parse(model.uri)
-                                )?.name ?: String())
-                            }?.let { image ->
-
-                                activity?.startActivity(Intent(Intent.ACTION_VIEW, image.uri).also {
-                                    it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                })
-                            }
-                        }
-                    }
+                    activity?.startActivity(Intent(Intent.ACTION_VIEW, image.uri).also {
+                        it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    })
                 }
             }
-
-        } catch (e: Exception) {
-
-            e.printStackTrace()
-
         }
     }
 

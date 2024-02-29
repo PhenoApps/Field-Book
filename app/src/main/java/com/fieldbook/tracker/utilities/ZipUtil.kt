@@ -1,10 +1,9 @@
 package com.fieldbook.tracker.utilities
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
-import com.fieldbook.tracker.preferences.GeneralKeys
+import androidx.preference.PreferenceManager
 import java.io.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -159,7 +158,7 @@ class ZipUtil {
 
                             else -> {
 
-                                val prefs = ctx.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
+                                val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
 
                                 ObjectInputStream(zin).use { objectStream ->
 
@@ -181,6 +180,13 @@ class ZipUtil {
                                                     is Boolean -> putBoolean(key, x)
 
                                                     is String -> putString(key, x)
+
+                                                    is Set<*> -> {
+
+                                                        val newStringSet = hashSetOf<String>()
+                                                        newStringSet.addAll(x.map { value -> value.toString() })
+                                                        putStringSet(key, newStringSet)
+                                                    }
                                                 }
                                             }
 

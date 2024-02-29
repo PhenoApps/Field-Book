@@ -28,12 +28,17 @@ public final class FileUtil {
 
     private static final String PRIMARY_VOLUME_NAME = "primary";
 
+    //https://stackoverflow.com/questions/2679699/what-characters-allowed-in-file-names-on-android
+    public static String sanitizeFileName(String name) {
+        return name.replaceAll("[|\\?\\*<\"\\\\:>'\";]", "_");
+    }
+
     /**
      * Scan file to update file list and share exported file
      */
-    public static void shareFile(Context context, SharedPreferences ep, DocumentFile docFile) {
+    public static void shareFile(Context context, SharedPreferences preferences, DocumentFile docFile) {
         if (docFile != null && docFile.exists()) {
-            if (!ep.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
+            if (!preferences.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
                 Intent intent = new Intent();
                 intent.setAction(android.content.Intent.ACTION_SEND);
                 intent.setType("text/plain");

@@ -1,31 +1,34 @@
 package com.fieldbook.tracker.views
 
+import android.app.AlertDialog
 import android.app.Service
 import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.View
 import android.view.View.OnTouchListener
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat.startActivity
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.interfaces.CollectTraitController
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.BaseTraitLayout
+import com.fieldbook.tracker.traits.LayoutCollections
+
 
 class TraitBoxView : ConstraintLayout {
 
     private var controller: CollectTraitController
     private var prefixTraits: Array<String>
 
-    private var traitType: Spinner
+    private var traitTypeTv: TextView
     private var traitDetails: TextView
     private var traitLeft: ImageView
     private var traitRight: ImageView
@@ -33,6 +36,9 @@ class TraitBoxView : ConstraintLayout {
     private var traitsProgressBar: ProgressBar
 
     var currentTrait: TraitObject? = null
+
+    private var visibleTraitsList: Array<String>? = null
+    private var rangeSuppress: Boolean? = null
 
     /**
      * New traits is a map of observations where the key is the trait name
@@ -47,14 +53,13 @@ class TraitBoxView : ConstraintLayout {
 
         this.controller = context as CollectTraitController
 
-        traitType = v.findViewById(R.id.traitType)
+        traitTypeTv = findViewById(R.id.traitTypeTv)
         traitDetails = v.findViewById(R.id.traitDetails)
         traitLeft = v.findViewById(R.id.traitLeft)
         traitRight = v.findViewById(R.id.traitRight)
 
         prefixTraits = controller.getDatabase().rangeColumnNames
         newTraits = HashMap()
-        traitType = findViewById(R.id.traitType)
 
         traitsProgressBar = findViewById(R.id.traitsProgressBar)
     }
@@ -83,8 +88,8 @@ class TraitBoxView : ConstraintLayout {
         val flipFlopArrows: Boolean =
             controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
         if (flipFlopArrows) {
-            traitLeft = rangeBoxView.getRangeLeft()!!
-            traitRight = rangeBoxView.getRangeRight()!!
+            traitLeft = rangeBoxView.getRangeLeft()
+            traitRight = rangeBoxView.getRangeRight()
         } else {
             traitLeft = findViewById(R.id.traitLeft)
             traitRight = findViewById(R.id.traitRight)
@@ -148,66 +153,107 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun initTraitType(
-        adaptor: ArrayAdapter<String?>?,
+        visibleTraits: Array<String>?,
         rangeSuppress: Boolean
     ) {
-        val traitPosition = getSelectedItemPosition()
-        traitType.adapter = adaptor
-        traitType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                arg0: AdapterView<*>?, arg1: View?,
-                arg2: Int, arg3: Long
-            ) {
+        this.visibleTraitsList = visibleTraits
+        this.rangeSuppress = rangeSuppress
 
-                // This updates the in memory hashmap from database
-                currentTrait = controller.getDatabase().getDetail(
-                    traitType.selectedItem
-                        .toString()
-                )
+        // navigate to the last used trait using preferences
+        // if using for the first time, use the first element
+        traitTypeTv.text = controller.getPreferences().getString(GeneralKeys.LAST_USED_TRAIT,
+            visibleTraits?.get(0)
+        )
 
-                updateTraitProgressBar()
+        loadLayout(rangeSuppress)
 
-                val imm =
-                    context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
-                if (currentTrait!!.format != "text") {
-
-                    try {
-                        imm.hideSoftInputFromWindow(controller.getInputView().windowToken, 0)
-                    } catch (ignore: Exception) {
-                    }
-                }
-                traitDetails.text = currentTrait!!.details
-                if (!rangeSuppress or (currentTrait!!.format != "numeric")) {
-                    if (controller.getInputView().visibility == VISIBLE) {
-                        controller.getInputView().visibility = GONE
-                        controller.getInputView().isEnabled = false
-                    }
-                }
-
-                //Clear all layouts
-                //controller.getTraitLayouts().hideLayouts()
-
-                //Get current layout object and make it visible
-                val currentTraitLayout: BaseTraitLayout =
-                    controller.getTraitLayouts().getTraitLayout(currentTrait!!.format)
-
-                controller.inflateTrait(currentTraitLayout)
-
-                //currentTraitLayout.visibility = VISIBLE
-
-                //Call specific load layout code for the current trait layout
-                if (currentTraitLayout != null) {
-                    currentTraitLayout.loadLayout()
-                } else {
-                    controller.getInputView().visibility = VISIBLE
-                    controller.getInputView().isEnabled = true
-                }
-            }
-
-            override fun onNothingSelected(arg0: AdapterView<*>?) {}
+        traitTypeTv.setOnClickListener {
+            // Display dialog or menu for trait selection
+            showTraitPickerDialog(visibleTraits)
         }
+    }
+
+    private fun loadLayout(rangeSuppress: Boolean){
+        val traitPosition = getSelectedItemPosition()
 
         setSelection(traitPosition)
+
+        // This updates the in memory hashmap from database
+        currentTrait = controller.getDatabase().getDetail(
+            traitTypeTv.text
+                .toString()
+        )
+
+        traitTypeTv.text = currentTrait?.name
+
+
+        val imm =
+            context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
+        if (currentTrait?.format != "text") {
+
+            try {
+                imm.hideSoftInputFromWindow(controller.getInputView().windowToken, 0)
+            } catch (ignore: Exception) {
+            }
+        }
+        traitDetails.text = currentTrait?.details
+        if (!rangeSuppress or (currentTrait?.format != "numeric")) {
+            if (controller.getInputView().visibility == VISIBLE) {
+                controller.getInputView().visibility = GONE
+                controller.getInputView().isEnabled = false
+            }
+        }
+
+        //Clear all layouts
+        //controller.getTraitLayouts().hideLayouts()
+
+        //Get current layout object and make it visible
+        val layoutCollections: LayoutCollections =
+            controller.getTraitLayouts()
+
+        val currentTraitLayout: BaseTraitLayout = layoutCollections.getTraitLayout(currentTrait?.format)
+
+        controller.inflateTrait(currentTraitLayout)
+
+        //currentTraitLayout.visibility = VISIBLE
+
+        //Call specific load layout code for the current trait layout
+        if (currentTraitLayout != null) {
+            currentTraitLayout.loadLayout()
+        } else {
+            controller.getInputView().visibility = VISIBLE
+            controller.getInputView().isEnabled = true
+        }
+
+        updateTraitProgressBar()
+    }
+
+    private fun showTraitPickerDialog(visibleTraits: Array<String>?) {
+        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+
+        builder.setTitle(R.string.select_trait)
+            .setCancelable(true)
+            .setSingleChoiceItems(visibleTraits, getSelectedItemPosition()) { dialog, index ->
+                // Update selected trait
+                traitTypeTv.text = visibleTraits?.get(index) ?: ""
+                rangeSuppress?.let { loadLayout(it) }
+                dialog.dismiss()
+            }
+            .setPositiveButton(
+                android.R.string.ok
+            ) {
+                    d: DialogInterface, _: Int -> d.dismiss()
+            }
+            .setNeutralButton(
+                R.string.edit_traits
+            ) {
+                    _: DialogInterface, _: Int ->
+                    val intent = Intent(context, TraitEditorActivity::class.java)
+                    startActivity(context, intent, null)
+            }
+        val dialog = builder.create()
+        dialog.show()
+
     }
 
     private fun updateTraitProgressBar() {
@@ -219,12 +265,12 @@ class TraitBoxView : ConstraintLayout {
         val visibleTraits = ArrayList<String>()
         for (traitObject in traits) {
             if (traitObject.visible) {
-                visibleTraits.add(traitObject.trait)
+                visibleTraits.add(traitObject.name)
             }
         }
 
         traitsProgressBar.max = visibleTraits.size
-        traitsProgressBar.progress = visibleTraits.indexOf(currentTrait?.trait) + 1
+        traitsProgressBar.progress = visibleTraits.indexOf(currentTrait?.name) + 1
     }
 
     fun getNewTraits(): Map<String, String> {
@@ -248,11 +294,11 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun getTraitLeft(): ImageView {
-        return findViewById(R.id.traitLeft) as ImageView
+        return findViewById<ImageView>(R.id.traitLeft)
     }
 
     fun getTraitRight(): ImageView {
-        return findViewById(R.id.traitRight) as ImageView
+        return findViewById<ImageView>(R.id.traitRight)
     }
 
     fun existsNewTraits(): Boolean {
@@ -264,12 +310,15 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun setSelection(pos: Int) {
-        traitType.setSelection(pos)
+        // if pos is -1, default back to first element
+        // pos = -1 if the last used trait was disabled
+        traitTypeTv.text =  visibleTraitsList?.get(if (pos == -1) 0 else pos)
     }
 
     private fun getSelectedItemPosition(): Int {
         return try {
-            traitType.selectedItemPosition
+            // if the list does not contain the trait, default back to first element
+            if (visibleTraitsList!!.contains(traitTypeTv.text)) visibleTraitsList?.indexOf(traitTypeTv.text.toString()) ?: 0 else 0
         } catch (f: Exception) {
             0
         }
@@ -280,7 +329,7 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun existsTrait(): Boolean {
-        return newTraits!!.containsKey(currentTrait!!.trait)
+        return newTraits.containsKey(currentTrait!!.name)
     }
 
     fun createSummaryText(plotID: String?): String {
@@ -316,7 +365,7 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun remove(trait: TraitObject, plotID: String, rep: String) {
-        remove(trait.trait, plotID, rep)
+        remove(trait.name, plotID, rep)
     }
 
     private fun createTraitOnTouchListener(
@@ -337,6 +386,11 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun moveTrait(direction: String) {
+        // if visibleTraitsList is null
+        // don't move the trait
+        // as we won't get the length of the list
+        if (visibleTraitsList == null) return
+
         var pos = 0
         if (!controller.validateData()) {
             return
@@ -344,9 +398,9 @@ class TraitBoxView : ConstraintLayout {
 
         val rangeBox = controller.getRangeBox()
         if (direction == "left") {
-            pos = traitType.selectedItemPosition - 1
+            pos = getSelectedItemPosition() - 1
             if (pos < 0) {
-                pos = traitType.count - 1
+                pos = visibleTraitsList!!.count() - 1
                 if (controller.isCyclingTraitsAdvances()) {
                     rangeBox.clickLeft()
                 }
@@ -355,8 +409,8 @@ class TraitBoxView : ConstraintLayout {
                 }
             }
         } else if (direction == "right") {
-            pos = traitType.selectedItemPosition + 1
-            if (pos > traitType.count - 1) {
+            pos = getSelectedItemPosition() + 1
+            if (pos > visibleTraitsList!!.count() - 1) {
                 pos = 0
                 if (controller.isCyclingTraitsAdvances()) {
                     rangeBox.clickRight()
@@ -366,7 +420,9 @@ class TraitBoxView : ConstraintLayout {
                 }
             }
         }
-        traitType.setSelection(pos)
+//        traitType.setSelection(pos)
+        setSelection(pos)
+        rangeSuppress?.let { loadLayout(it) }
         controller.refreshLock()
         controller.getCollectInputView().resetInitialIndex()
     }
@@ -375,7 +431,8 @@ class TraitBoxView : ConstraintLayout {
         if (controller.getPreferences().getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND, false)) {
             controller.getSoundHelper().playCycle()
         }
-        traitType.setSelection(0)
+//        traitType.setSelection(0)
+        setSelection(0)
         controller.getCollectInputView().resetInitialIndex()
     }
 

@@ -30,7 +30,7 @@ class ObservationUnitPropertyDao {
 
         fun getAllRangeId(context: Context): Array<Int> = withDatabase { db ->
 
-            val studyId = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+            val studyId = PreferenceManager.getDefaultSharedPreferences(context)
                 .getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
             var sortCols: String? = try {
@@ -195,13 +195,21 @@ class ObservationUnitPropertyDao {
          * "plot_id","column","plot","tray_row","tray_id","seed_id","seed_name","pedigree","trait","value","timestamp","person","location","number"
          * "13RPN00001","1","1","1","13RPN_TRAY001","12GHT00001B","Kharkof","Kharkof","height","3","2021-08-05 11:52:45.379-05:00"," ","","2"
          */
-        fun getExportDbData(studyId: Int, uniqueName: String, fieldList: Array<String?>, traits: ArrayList<TraitObject>): Cursor? = withDatabase { db ->
+        fun getExportDbData(
+            studyId: Int,
+            uniqueName: String,
+            fieldList: Array<String?>,
+            traits: ArrayList<TraitObject>
+        ): Cursor? = withDatabase { db ->
 
-            val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
+            val traitRequiredFields =
+                arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
-                val varSelectFields = arrayOf("observation_variable_name", "observation_variable_field_book_format")
-                val obsSelectFields = arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
+                val varSelectFields =
+                    arrayOf("observation_variable_name", "observation_variable_field_book_format")
+                val obsSelectFields =
+                    arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
                 //val outputFields = fieldList + varSelectFields + obsSelectFields
                 val query = """
                     SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }} ${if (fieldList.isNotEmpty()) "," else " "} 
@@ -251,15 +259,20 @@ class ObservationUnitPropertyDao {
          * @param traits the list of traits to print, either all traits or just the active ones
          * @return a cursor that is used in CSVWriter and closed elsewhere
          */
-        fun convertDatabaseToTable(expId: Int, uniqueName: String, col: Array<String?>, traits: ArrayList<TraitObject>): Cursor? = withDatabase { db ->
+        fun convertDatabaseToTable(
+            expId: Int,
+            uniqueName: String,
+            col: Array<String?>,
+            traits: ArrayList<TraitObject>
+        ): Cursor? = withDatabase { db ->
 
-            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.trait) }
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
             val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }
 
             val maxStatements = arrayListOf<String>()
-            sanitizeTraits.forEach {
+            sanitizeTraits.forEachIndexed { index, traitName ->
                 maxStatements.add(
-                    "MAX (CASE WHEN o.observation_variable_name='$it' THEN o.value ELSE NULL END) AS '$it'"
+                    "MAX (CASE WHEN o.observation_variable_name='$traitName' THEN o.value ELSE NULL END) AS '${traitName}'"
                 )
             }
 
@@ -275,17 +288,25 @@ class ObservationUnitPropertyDao {
         }
 
         /**
-         * Same as above but filters by obs unit.
+         * Same as above but filters by obs unit and trait format
          */
-        fun convertDatabaseToTable(expId: Int, uniqueName: String, unit: String, col: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
+        fun convertDatabaseToTable(
+            expId: Int,
+            uniqueName: String,
+            unit: String,
+            col: Array<String?>,
+            traits: Array<TraitObject>
+        ): Cursor? = withDatabase { db ->
 
-            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it) }
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
+            val sanitizeFormats = traits.map { DataHelper.replaceIdentifiers(it.format) }
+
             val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }
 
             val maxStatements = arrayListOf<String>()
-            sanitizeTraits.forEach {
+            sanitizeTraits.forEachIndexed { index, it ->
                 maxStatements.add(
-                    "MAX (CASE WHEN o.observation_variable_name='$it' THEN o.value ELSE NULL END) AS '$it'"
+                    "MAX (CASE WHEN o.observation_variable_name='$it' AND o.observation_variable_field_book_format='${sanitizeFormats[index]}' THEN o.value ELSE NULL END) AS '$it'"
                 )
             }
 

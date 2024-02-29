@@ -15,7 +15,6 @@ import android.widget.ProgressBar
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.fieldbook.tracker.R
 
 /**
  * Reference:
@@ -38,9 +37,13 @@ class ImageTraitAdapter(
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val imageView: ImageView = view.findViewById(R.id.list_item_image_iv)
-        val progressBar: ProgressBar = view.findViewById(R.id.list_item_image_pb)
-        private val closeButton: ImageButton = view.findViewById(R.id.list_item_image_close_btn)
+        val imageView: ImageView =
+            view.findViewById(org.phenoapps.androidlibrary.R.id.list_item_image_iv)
+        val progressBar: ProgressBar =
+            view.findViewById(org.phenoapps.androidlibrary.R.id.list_item_image_pb)
+        private val closeButton: ImageButton =
+            view.findViewById(org.phenoapps.androidlibrary.R.id.list_item_image_close_btn)
+
         init {
             // Define click listener for the ViewHolder's View.
             view.setOnClickListener {
@@ -61,7 +64,7 @@ class ImageTraitAdapter(
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
-                .inflate(R.layout.list_item_image, viewGroup, false)
+            .inflate(org.phenoapps.androidlibrary.R.layout.list_item_image, viewGroup, false)
 
         return ViewHolder(view)
     }
@@ -85,11 +88,11 @@ class ImageTraitAdapter(
     class DiffCallback : DiffUtil.ItemCallback<Model>() {
 
         override fun areItemsTheSame(oldItem: Model, newItem: Model): Boolean {
-            return oldItem == newItem && oldItem == oldItem
+            return oldItem == newItem
         }
 
         override fun areContentsTheSame(oldItem: Model, newItem: Model): Boolean {
-            return oldItem == newItem && oldItem == oldItem
+            return oldItem == newItem
         }
     }
 

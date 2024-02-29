@@ -5,12 +5,13 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Simple wrapper class for trait data
  */
 public class TraitObject {
-    private String trait;
+    private String name;
     private String format;
     private String defaultValue;
     private String minimum;
@@ -30,12 +31,12 @@ public class TraitObject {
      */
     private List<String> observationLevelNames;
 
-    public String getTrait() {
-        return trait;
+    public String getName() {
+        return name;
     }
 
-    public void setTrait(@NonNull String trait) {
-        this.trait = trait;
+    public void setName(@NonNull String name) {
+        this.name = name;
     }
 
     public String getFormat() {
@@ -183,5 +184,39 @@ public class TraitObject {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TraitObject that = (TraitObject) o;
+        return realPosition == that.realPosition && Objects.equals(name, that.name) && Objects.equals(format, that.format) && Objects.equals(defaultValue, that.defaultValue) && Objects.equals(minimum, that.minimum) && Objects.equals(maximum, that.maximum) && Objects.equals(details, that.details) && Objects.equals(categories, that.categories) && Objects.equals(id, that.id) && Objects.equals(visible, that.visible) && Objects.equals(externalDbId, that.externalDbId) && Objects.equals(traitDataSource, that.traitDataSource) && Objects.equals(additionalInfo, that.additionalInfo) && Objects.equals(observationLevelNames, that.observationLevelNames);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, format, defaultValue, minimum, maximum, details, categories, realPosition, id, visible, externalDbId, traitDataSource, additionalInfo, observationLevelNames);
+    }
+
+    public TraitObject clone() {
+
+        TraitObject t = new TraitObject();
+        t.setName(this.name);
+        t.setFormat(this.format);
+        t.setDefaultValue(this.defaultValue);
+        t.setMinimum(this.minimum);
+        t.setMaximum(this.maximum);
+        t.setDetails(this.details);
+        t.setCategories(this.categories);
+        t.setRealPosition(this.realPosition);
+        t.setId(this.id);
+        t.setVisible(this.visible);
+        t.setExternalDbId(this.externalDbId);
+        t.setTraitDataSource(this.traitDataSource);
+        t.setAdditionalInfo(this.additionalInfo);
+        t.setObservationLevelNames(this.observationLevelNames);
+
+        return t;
     }
 }

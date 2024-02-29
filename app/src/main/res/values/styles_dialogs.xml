@@ -2,17 +2,6 @@
 <resources>
 
     <!-- Generic dialog theme for field creator dialog -->
-
-    <style name="AlertDialogStyle" parent="Theme.AppCompat.DayNight.Dialog.Alert">
-        <item name="android:textViewStyle">@style/TextViewStyle</item>
-        <item name="buttonBarNegativeButtonStyle">@style/ButtonBarStyle</item>
-        <item name="buttonBarNeutralButtonStyle">@style/ButtonBarStyle</item>
-        <item name="buttonBarPositiveButtonStyle">@style/ButtonBarStyle</item>
-        <item name="radioButtonStyle">@style/RadioButtonStyle</item>
-        <item name="checkboxStyle">@style/CheckBoxStyle</item>
-        <item name="android:checkedTextViewStyle">@style/AlertCheckedView</item>
-    </style>
-
     <style name="AlertCheckedView" parent="Base.Widget.MaterialComponents.CheckedTextView">
         <item name="android:textSize">?attr/fb_title_text_size</item>
         <item name="android:textColor">?attr/fb_color_text_dark</item>
@@ -22,6 +11,12 @@
 
     <style name="AppAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
 
+        <item name="buttonBarNegativeButtonStyle">@style/ButtonBarStyle</item>
+        <item name="buttonBarNeutralButtonStyle">@style/ButtonBarStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/ButtonBarStyle</item>
+
+        <item name="android:background">@color/TRANSPARENT</item>
+
         <item name="checkedTextViewStyle">@style/AlertCheckedView</item>
 
         <item name="colorAccent">?attr/fb_color_accent</item>
@@ -29,7 +24,6 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
-        <item name="android:background">?attr/fb_color_background</item>
         <item name="android:windowTitleStyle">@style/DialogTitleStyle</item>
 
         <item name="android:windowFullscreen">true</item>
@@ -50,6 +44,10 @@
         <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle</item>
         <item name="dropDownListViewStyle">@style/DropDownListViewStyle</item>
         <item name="android:checkedTextViewStyle">@style/AlertCheckedView</item>
+    </style>
+
+    <style name="AppAlertDialog.Preference">
+        <item name="android:windowBackground">@drawable/inset_border</item>
     </style>
 
     <style name="DialogTitleStyle">

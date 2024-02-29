@@ -14,7 +14,7 @@ class ObservationUnitDao {
 
     companion object {
 
-        fun checkUnique(values: HashMap<String, String>): Boolean? = withDatabase { db ->
+        fun checkUnique(values: HashMap<String, String>): Boolean = withDatabase { db ->
 
             var result = true
 
@@ -38,16 +38,19 @@ class ObservationUnitDao {
 
         } ?: emptyArray()
 
-        fun getAll(db: SQLiteDatabase): Array<ObservationUnitModel> =  arrayOf(*db.query(ObservationUnit.tableName)
-            .toTable()
-            .map { ObservationUnitModel(it) }
-            .toTypedArray())
+        fun getAll(db: SQLiteDatabase): Array<ObservationUnitModel> =
+            arrayOf(*db.query(ObservationUnit.tableName)
+                .toTable()
+                .map { ObservationUnitModel(it) }
+                .toTypedArray())
 
         fun getById(id: String): ObservationUnitModel? = withDatabase { db ->
 
-            val map = db.query(ObservationUnit.tableName,
+            val map = db.query(
+                ObservationUnit.tableName,
                 where = "observation_unit_db_id = ?",
-                whereArgs = arrayOf(id)).toFirst()
+                whereArgs = arrayOf(id)
+            ).toFirst()
 
             if ("observation_unit_db_id" in map.keys) {
                 ObservationUnitModel(map)
@@ -69,23 +72,33 @@ class ObservationUnitDao {
         /**
          * Updates a given observation unit row with a geo coordinates string.
          */
-        fun updateObservationUnit(unit: ObservationUnitModel, geoCoordinates: String) = withDatabase { db ->
+        fun updateObservationUnit(unit: ObservationUnitModel, geoCoordinates: String) =
+            withDatabase { db ->
 
-            db.update(ObservationUnit.tableName,
+                db.update(
+                    ObservationUnit.tableName,
                     ContentValues().apply {
                         put("geo_coordinates", geoCoordinates)
                     },
-                    "${ObservationUnit.PK} = ?", arrayOf(unit.internal_id_observation_unit.toString()))
+                    "${ObservationUnit.PK} = ?",
+                    arrayOf(unit.internal_id_observation_unit.toString())
+                )
 
-        }
+            }
 
-        fun updateObservationUnitModel(db: SQLiteDatabase, unit: ObservationUnitModel, geoCoordinates: String) {
+        fun updateObservationUnitModel(
+            db: SQLiteDatabase,
+            unit: ObservationUnitModel,
+            geoCoordinates: String
+        ) {
 
-            db.update(ObservationUnit.tableName,
+            db.update(
+                ObservationUnit.tableName,
                 ContentValues().apply {
                     put("geo_coordinates", geoCoordinates)
                 },
-                "${ObservationUnit.PK} = ?", arrayOf(unit.internal_id_observation_unit.toString()))
+                "${ObservationUnit.PK} = ?", arrayOf(unit.internal_id_observation_unit.toString())
+            )
 
         }
 

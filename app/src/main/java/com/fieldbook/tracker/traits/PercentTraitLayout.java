@@ -5,13 +5,18 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
+import com.fieldbook.tracker.objects.TraitObject;
 
 public class PercentTraitLayout extends BaseTraitLayout {
     private SeekBar seekBar;
+    private TextView mininmumTv;
+    private TextView maximumTv;
     private SeekBar.OnSeekBarChangeListener seekListener;
 
     public PercentTraitLayout(Context context) {
@@ -49,6 +54,9 @@ public class PercentTraitLayout extends BaseTraitLayout {
         // Progress bar
         seekBar = act.findViewById(R.id.seekbar);
         seekBar.setMax(100);
+
+        mininmumTv = act.findViewById(R.id.trait_percent_minimum_tv);
+        maximumTv = act.findViewById(R.id.trait_percent_maximum_tv);
 
         seekListener = new SeekBar.OnSeekBarChangeListener() {
 
@@ -89,6 +97,25 @@ public class PercentTraitLayout extends BaseTraitLayout {
         super.loadLayout();
 
         seekBar.setEnabled(!isLocked);
+
+        setupMinMaxUi();
+    }
+
+    private void setupMinMaxUi() {
+
+        try {
+
+            TraitObject percentTrait = getCurrentTrait();
+            mininmumTv.setText(percentTrait.getMinimum());
+            maximumTv.setText(percentTrait.getMaximum());
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Toast.makeText(getContext(), R.string.trait_percent_ui_min_max_error, Toast.LENGTH_LONG).show();
+
+        }
     }
 
     @Override
@@ -195,7 +222,7 @@ public class PercentTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        removeTrait(getCurrentTrait().getTrait());
+        removeTrait(getCurrentTrait().getName());
         super.deleteTraitListener();
         ObservationModel model = getCurrentObservation();
         seekBar.setOnSeekBarChangeListener(null);

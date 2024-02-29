@@ -8,16 +8,13 @@
     android:visibility="gone"
     tools:visibility="visible">
 
-    <ImageButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        style="@style/FloatingActionButtonStyle.TraitButtons"
         android:id="@+id/getLocationBtn"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
+        android:layout_width="@dimen/fb_trait_fab_size"
+        android:layout_height="@dimen/fb_trait_fab_size"
         android:layout_gravity="center"
-        android:layout_margin="10dp"
-        android:background="@drawable/custom_round_button"
-        android:gravity="center"
-        android:padding="10dp"
-        android:scaleType="fitXY"
+        android:layout_margin="8dp"
         android:src="@drawable/ic_trait_location"
         android:contentDescription="@string/trait_location_save_content_description" />
 

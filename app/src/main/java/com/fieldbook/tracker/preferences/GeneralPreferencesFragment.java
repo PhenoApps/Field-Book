@@ -3,13 +3,13 @@ package com.fieldbook.tracker.preferences;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.DefineStorageActivity;
@@ -17,7 +17,15 @@ import com.fieldbook.tracker.activities.PreferencesActivity;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class GeneralPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+
+    @Inject
+    SharedPreferences preferences;
 
     private static final int REQUEST_STORAGE_DEFINER_CODE = 999;
 
@@ -25,15 +33,11 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
     public static final int LOCATION_COLLECTION_OBS_UNIT = 1;
     public static final int LOCATION_COLLECTION_OBS = 2;
     public static final int LOCATION_COLLECTION_STUDY = 3;
-
-    PreferenceManager prefMgr;
     Context context;
     private Preference defaultStorageLocation;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_general, rootKey);
 
@@ -41,7 +45,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
         defaultStorageLocation = findPreference("DEFAULT_STORAGE_LOCATION_PREFERENCE");
 
-        String storageSummary = prefMgr.getSharedPreferences().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, null);
+        String storageSummary = preferences.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, null);
         defaultStorageLocation.setSummary(storageSummary);
 
         defaultStorageLocation.setOnPreferenceClickListener(preference -> {
@@ -58,7 +62,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
             skipEntriesPref.setOnPreferenceChangeListener(this);
 
             //also initialize the summary whenever the fragment is opened, or else it defaults to "disabled"
-            String skipMode = prefMgr.getSharedPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1");
+            String skipMode = preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1");
 
             switchSkipPreferenceMode(skipMode, skipEntriesPref);
 
@@ -72,7 +76,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
             moveToUniqueIdPref.setOnPreferenceChangeListener(this);
 
             //also initialize the summary whenever the fragment is opened, or else it defaults to "disabled"
-            String moveMode = prefMgr.getSharedPreferences().getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "1");
+            String moveMode = preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "1");
 
             switchMovePreferenceMode(moveMode, moveToUniqueIdPref);
 
@@ -192,24 +196,24 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
                     if (value == LOCATION_COLLECTION_OBS) {
 
-                        new AlertDialog.Builder(context)
-                            .setTitle(obsModeDialogTitle)
-                            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        new AlertDialog.Builder(context, R.style.AppAlertDialog)
+                                .setTitle(obsModeDialogTitle)
+                                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
 
-                                dialog.dismiss();
+                                    dialog.dismiss();
 
-                            })
-                            .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+                                })
+                                .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
 
-                                prefMgr.getSharedPreferences().edit().putString(GeneralKeys.GENERAL_LOCATION_COLLECTION, "0").apply();
+                                    preferences.edit().putString(GeneralKeys.GENERAL_LOCATION_COLLECTION, "0").apply();
 
-                                pref.setValueIndex(GeneralPreferencesFragment.LOCATION_COLLECTION_OFF);
+                                    pref.setValueIndex(GeneralPreferencesFragment.LOCATION_COLLECTION_OFF);
 
-                                dialog.dismiss();
+                                    dialog.dismiss();
 
-                                updateLocationCollectionSummary(GeneralPreferencesFragment.LOCATION_COLLECTION_OFF);
+                                    updateLocationCollectionSummary(GeneralPreferencesFragment.LOCATION_COLLECTION_OFF);
 
-                            }).show();
+                                }).show();
 
                     }
 
@@ -269,7 +273,6 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
         }
 
         updateLocationCollectionSummary(Integer
-                .parseInt(prefMgr.getSharedPreferences()
-                        .getString(GeneralKeys.GENERAL_LOCATION_COLLECTION, "-1")));
+                .parseInt(preferences.getString(GeneralKeys.GENERAL_LOCATION_COLLECTION, "-1")));
     }
 }

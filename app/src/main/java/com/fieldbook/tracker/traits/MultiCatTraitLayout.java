@@ -3,7 +3,6 @@ package com.fieldbook.tracker.traits;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
@@ -41,7 +40,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     //private StaggeredGridView gridMultiCat;
     private RecyclerView gridMultiCat;
 
-    private BrAPIScaleValidValuesCategories defaultNaCategory = new BrAPIScaleValidValuesCategories().label("NA").value("NA");
+    private final BrAPIScaleValidValuesCategories defaultNaCategory = new BrAPIScaleValidValuesCategories().label("NA").value("NA");
 
     public MultiCatTraitLayout(Context context) {
         super(context);
@@ -294,14 +293,11 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     }
 
     private void pressOnButton(Button button) {
-        button.setTextColor(Color.parseColor(getDisplayColor()));
-        button.getBackground().setColorFilter(getButtonPressedColor(), PorterDuff.Mode.MULTIPLY);
+        button.setBackgroundResource(R.drawable.button_selected);
     }
 
     private void pressOffButton(Button button) {
-        button.setTextColor(getButtonTextColor());
-        button.getBackground().setTint(getButtonBackgroundColor());
-        button.getBackground().setColorFilter(getButtonBackgroundColor(), PorterDuff.Mode.MULTIPLY);
+        button.setBackgroundResource(R.drawable.button_unselected);
     }
 
     private void addCategory(final BrAPIScaleValidValuesCategories category) {
