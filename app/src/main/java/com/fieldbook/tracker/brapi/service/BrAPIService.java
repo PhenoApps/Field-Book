@@ -19,6 +19,7 @@ import com.fieldbook.tracker.brapi.model.BrapiProgram;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.FileUploadRequest;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -157,6 +158,8 @@ public interface BrAPIService {
     }
 
     public void postImageMetaData(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
+
+    public void postFileMetaData(FileUploadRequest file, final Function<FileUploadRequest, Void> function, final Function<Integer, Void> failFunction);
 
     public void putImageContent(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
 

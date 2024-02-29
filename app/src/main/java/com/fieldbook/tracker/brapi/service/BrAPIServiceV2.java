@@ -1,7 +1,10 @@
 package com.fieldbook.tracker.brapi.service;
 
+import static com.google.android.gms.common.util.JsonUtils.escapeString;
+
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Point;
 import android.util.Log;
 import android.util.Pair;
 
@@ -10,11 +13,13 @@ import androidx.arch.core.util.Function;
 import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+import com.fieldbook.tracker.brapi.model.AdditionalInfo;
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiProgram;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.FileUploadRequest;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -23,15 +28,24 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
+import com.github.filosganga.geogson.gson.GeometryAdapterFactory;
+import com.github.filosganga.geogson.model.Geometry;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import org.brapi.client.v2.ApiCallback;
 import org.brapi.client.v2.BrAPIClient;
+import org.brapi.client.v2.JSON;
+import org.brapi.client.v2.auth.Authentication;
+import org.brapi.client.v2.auth.OAuth;
 import org.brapi.client.v2.model.exceptions.ApiException;
 import org.brapi.client.v2.model.queryParams.core.ProgramQueryParams;
 import org.brapi.client.v2.model.queryParams.core.StudyQueryParams;
 import org.brapi.client.v2.model.queryParams.core.TrialQueryParams;
+import org.brapi.client.v2.model.queryParams.phenotype.ImageQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams;
@@ -44,6 +58,7 @@ import org.brapi.client.v2.modules.phenotype.ObservationVariablesApi;
 import org.brapi.client.v2.modules.phenotype.ObservationsApi;
 import org.brapi.v2.model.BrAPIExternalReference;
 import org.brapi.v2.model.BrAPIMetadata;
+import org.brapi.v2.model.BrApiGeoJSON;
 import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
@@ -71,15 +86,29 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.OkHttp;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.internal.http.HttpMethod;
 
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
@@ -175,8 +204,44 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     failFunction.apply(error.getCode());
                 }
             };
-
             BrAPIImage request = mapImage(image);
+            imagesApi.imagesPostAsync(Arrays.asList(request), callback);
+
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+        }
+
+    }
+
+    public void postFileMetaData(FileUploadRequest file,
+                                 final Function<FileUploadRequest, Void> function,
+                                 final Function<Integer, Void> failFunction) {
+        try {
+            Log.d("TAG", "postImageMetaDataTry: ");
+            BrapiV2ApiCallBack<BrAPIImageListResponse> callback = new BrapiV2ApiCallBack<BrAPIImageListResponse>() {
+                @Override
+                public void onSuccess(BrAPIImageListResponse imageResponse, int i, Map<String, List<String>> map) {
+                    final BrAPIImage response = imageResponse.getResult().getData().get(0);
+//                    function.apply(mapToImage(response));
+                    Log.d("TAG", "onSuccess: " + imageResponse);
+                    Log.d("TAG", "onSuccess: " + imageResponse.getResult());
+//                    Log.d("TAG", "onSuccess: " + imageResponse.getResult().getData());
+                    function.apply(mapToFile(response));
+                }
+
+                @Override
+                public void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders) {
+                    Log.d("TAG", "onFailure: " + error);
+                    Log.d("TAG", "onFailure: " + error.getCode());
+                    Log.d("TAG", "onFailure: " + statusCode);
+                    Log.d("TAG", "onFailure: " + responseHeaders);
+
+                    failFunction.apply(statusCode);
+                }
+            };
+
+            BrAPIImage request = mapFile(file);
+            Log.d("TAG", "postImageMetaDataTry: " + request);
             imagesApi.imagesPostAsync(Arrays.asList(request), callback);
 
         } catch (ApiException error) {
@@ -185,6 +250,226 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
 
     }
+
+    public Call imagesPostAsync(List<BrAPIImage> body, final ApiCallback<BrAPIImageListResponse> callback) throws ApiException {
+        Call call = imagesPostCall(body);
+        Log.d("imagesPostAsync", "imagesPostAsync: " + call.toString());
+        Type localVarReturnType = new TypeToken<BrAPIImageListResponse>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+
+    private Call imagesPostCall(List<BrAPIImage> body) throws ApiException {
+        if(body == null) {
+            throw new IllegalArgumentException("body cannot be null");
+        }
+        Object localVarPostBody = body;
+
+        // create path and map variables
+        String localVarPath = "/images";
+
+        Map<String, String> localVarQueryParams = new HashMap<>();
+        Map<String, String> localVarCollectionQueryParams = new HashMap<>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+                "application/json"
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+                "application/json"
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        String[] localVarAuthNames = new String[] { "AuthorizationToken" };
+
+        Log.d("imagesPostAsync", "imagesPostAsync: " + localVarPath + localVarQueryParams + localVarCollectionQueryParams + localVarPostBody + localVarHeaderParams +  localVarFormParams + localVarAuthNames);
+        final Call temp = apiClient.buildCall(localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames);
+        Log.d("CallTemp", "imagesPostCall: " + temp.request().url() + " " + temp.request().headers() + temp.request().body() + temp.request().method() + temp.request().tag());
+        return temp;
+    }
+
+    public Call buildCall(String path, String method, Map<String, String> queryParams, Map<String, String> collectionQueryParams,
+                          Object body, Map<String, String> headerParams, Map<String, Object> formParams, String[] authNames) throws ApiException {
+        Request request = buildRequest(path, method, queryParams, collectionQueryParams, body, headerParams, formParams,
+                authNames);
+
+        OkHttpClient httpClient = new OkHttpClient.Builder()
+                .connectTimeout(10000, TimeUnit.MILLISECONDS)
+                .readTimeout(10000, TimeUnit.MILLISECONDS)
+                .writeTimeout(10000, TimeUnit.MILLISECONDS)
+                .build();
+
+        return httpClient.newCall(request);
+    }
+
+    public Request buildRequest(String path, String method, Map<String, String> queryParams, Map<String, String> collectionQueryParams,
+                                Object body, Map<String, String> headerParams, Map<String, Object> formParams, String[] authNames) throws ApiException {
+        updateParamsForAuth(authNames, queryParams, headerParams);
+
+        final String url = buildUrl(path, queryParams, collectionQueryParams);
+        final Request.Builder reqBuilder = new Request.Builder().url(url);
+        processHeaderParams(headerParams, reqBuilder);
+
+        String contentType = (String) headerParams.get("Content-Type");
+        // ensuring a default content type
+        if (contentType == null) {
+            contentType = "application/json";
+        }
+
+        RequestBody reqBody;
+        if (!HttpMethod.permitsRequestBody(method)) {
+            reqBody = null;
+        } else if ("application/x-www-form-urlencoded".equals(contentType)) {
+//            reqBody = buildRequestBodyFormEncoding(formParams);
+            reqBody = null;
+        } else if ("multipart/form-data".equals(contentType)) {
+//            reqBody = buildRequestBodyMultipart(formParams);
+            reqBody = null;
+        } else if (body == null) {
+            if ("DELETE".equals(method)) {
+                // allow calling DELETE without sending a request body
+                reqBody = null;
+            } else {
+                // use an empty request body (for POST, PUT and PATCH)
+                reqBody = RequestBody.create(MediaType.parse(contentType), "");
+            }
+        } else {
+            reqBody = serialize(body, contentType);
+        }
+
+        Request request = reqBuilder.method(method, reqBody).build();
+
+        return request;
+    }
+
+    public String buildUrl(String path, Map<String, String> queryParams, Map<String, String> collectionQueryParams) {
+        final StringBuilder url = new StringBuilder();
+        url.append("https://demo.breedbase.org/").append(path);
+
+        if (queryParams != null && !queryParams.isEmpty()) {
+            // support (constant) query string in `path`, e.g. "/posts?draft=1"
+            String prefix = path.contains("?") ? "&" : "?";
+            for (Map.Entry<String, String> param : queryParams.entrySet()) {
+                if (param.getValue() != null) {
+                    if (prefix != null) {
+                        url.append(prefix);
+                        prefix = null;
+                    } else {
+                        url.append("&");
+                    }
+                    String value = parameterToString(param.getValue());
+                    url.append(escapeString(param.getKey())).append("=").append(escapeString(value));
+                }
+            }
+        }
+
+        if (collectionQueryParams != null && !collectionQueryParams.isEmpty()) {
+            String prefix = url.toString().contains("?") ? "&" : "?";
+            for (Map.Entry<String, String> param  : collectionQueryParams.entrySet()) {
+                if (param.getValue() != null) {
+                    if (prefix != null) {
+                        url.append(prefix);
+                        prefix = null;
+                    } else {
+                        url.append("&");
+                    }
+                    String value = parameterToString(param.getValue());
+                    // collection query parameter value already escaped as part of parameterToPairs
+                    url.append(escapeString(param.getKey())).append("=").append(value);
+                }
+            }
+        }
+        Log.d("TAG", "buildUrl: " + url);
+        return url.toString();
+    }
+
+    public String parameterToString(Object param) {
+
+        JSON json = new JSON();
+        if (param == null) {
+            return "";
+        } else if (param instanceof Date || param instanceof OffsetDateTime || param instanceof LocalDate) {
+            // Serialize to json string and remove the " enclosing characters
+            String jsonStr = json.serialize(param);
+            return jsonStr.substring(1, jsonStr.length() - 1);
+        } else if (param instanceof Collection) {
+            StringBuilder b = new StringBuilder();
+            for (Object o : (Collection) param) {
+                if (b.length() > 0) {
+                    b.append(",");
+                }
+                b.append(String.valueOf(o));
+            }
+            return b.toString();
+        } else {
+            return String.valueOf(param);
+        }
+    }
+
+    public void updateParamsForAuth(String[] authNames, Map<String, String> queryParams, Map<String, String> headerParams) {
+        Map<String, Authentication> authentications = new HashMap<String, Authentication>();
+        authentications.put("AuthorizationToken", new OAuth());
+        // Prevent the authentications from being modified.
+        authentications = Collections.unmodifiableMap(authentications);
+        for (String authName : authNames) {
+            Authentication auth = authentications.get(authName);
+            if (auth == null)
+                throw new RuntimeException("Authentication undefined: " + authName);
+            auth.applyToParams(queryParams, headerParams);
+        }
+    }
+    public void processHeaderParams(Map<String, String> headerParams, Request.Builder reqBuilder) {
+
+        Map<String, String> defaultHeaderMap = new HashMap<String, String>();
+        defaultHeaderMap.put("User-Agent", "brapi-java-client/2.0");
+
+        for (Map.Entry<String, String> param : headerParams.entrySet()) {
+            reqBuilder.header(param.getKey(), parameterToString(param.getValue()));
+        }
+        for (Map.Entry<String, String> header : defaultHeaderMap.entrySet()) {
+            if (!headerParams.containsKey(header.getKey())) {
+                reqBuilder.header(header.getKey(), parameterToString(header.getValue()));
+            }
+        }
+    }
+
+    public RequestBody serialize(Object obj, String contentType) throws ApiException {
+
+        JSON json = new JSON();
+
+        if (obj instanceof byte[]) {
+            // Binary (byte array) body parameter support.
+            return RequestBody.create(MediaType.parse(contentType), (byte[]) obj);
+        } else if (obj instanceof File) {
+            // File body parameter support.
+            return RequestBody.create(MediaType.parse(contentType), (File) obj);
+        } else if (isJsonMime(contentType)) {
+            String content;
+            if (obj != null) {
+                content = json.serialize(obj);
+            } else {
+                content = null;
+            }
+            return RequestBody.create(MediaType.parse(contentType), content);
+        } else {
+            throw new ApiException("Content type \"" + contentType + "\" is not supported");
+        }
+    }
+
+    public boolean isJsonMime(String mime) {
+        String jsonMime = "(?i)^(application/json|[^;/ \t]+/[^;/ \t]+[+]json)[ \t]*(;.*)?$";
+        return mime != null && (mime.matches(jsonMime) || mime.equals("*/*"));
+    }
+
 
     private BrAPIImage mapImage(FieldBookImage image) {
         BrAPIImage request = new BrAPIImage();
@@ -204,6 +489,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         return request;
     }
 
+    private BrAPIImage mapFile(FileUploadRequest file) {
+        BrAPIImage request = new BrAPIImage();
+        request.setDescription(file.getDescription());
+        request.setImageFileName(file.getFileName());
+        request.setAdditionalInfo(file.getAdditionalInfo());
+        // TODO fix these
+        //request.setImageLocation(image.getLocation());
+        request.setImageTimeStamp(file.getTimeStamp());
+        request.mimeType("image/png");
+        return request;
+    }
+
     private FieldBookImage mapToImage(BrAPIImage image) {
         FieldBookImage request = new FieldBookImage();
         request.setDescription(image.getDescription());
@@ -219,6 +516,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         // TODO fix these
         //request.setLocation(image.getImageLocation());
         request.setTimestamp(TimeAdapter.convertFrom(image.getImageTimeStamp()));
+        return request;
+    }
+
+    private FileUploadRequest mapToFile(BrAPIImage image) {
+        JsonObject additionalInfo = image.getAdditionalInfo();
+        FileUploadRequest request = new FileUploadRequest(
+                null,
+                image.getImageFileName(),
+                image.getDescription(),
+                image.getImageTimeStamp()
+        );
+        request.setAdditionalInfo(additionalInfo);
         return request;
     }
 

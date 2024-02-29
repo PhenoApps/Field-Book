@@ -17,6 +17,7 @@ import com.fieldbook.tracker.brapi.model.BrapiProgram;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.FileUploadRequest;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -25,7 +26,9 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
+import com.google.gson.JsonObject;
 
+import org.brapi.v2.model.pheno.BrAPIImage;
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -162,6 +165,49 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
 
     }
 
+    public void postFileMetaData(FileUploadRequest file,
+                                 final Function<FileUploadRequest, Void> function,
+                                 final Function<Integer, Void> failFunction) {
+
+        try {
+            BrapiV1ApiCallBack<ImageResponse> callback = new BrapiV1ApiCallBack<ImageResponse>() {
+                @Override
+                public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
+                    final Image response = imageResponse.getResult();
+//                    function.apply(mapToFile(response));
+                    Log.d("TAG", "onSuccess: " + imageResponse);
+                    Log.d("TAG", "onSuccess: " + imageResponse.getResult());
+                }
+
+                @Override
+                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
+                    Log.d("TAG", "onFailure: " + e);
+                    Log.d("TAG", "onFailure: " + statusCode);
+                    Log.d("TAG", "onFailure: " + responseHeaders);
+                    failFunction.apply(statusCode);
+                }
+            };
+
+            NewImageRequest request = mapFile(file);
+            imagesApi.imagesPostAsync(request, getBrapiToken(), callback);
+
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private NewImageRequest mapFile(FileUploadRequest file) {
+        NewImageRequest request = new NewImageRequest();
+        request.setImageFileName(file.getFileName());
+        request.setMimeType("image/png");
+//        request.setAdditionalInfo(file.getAdditionalInfo());
+        // TODO fix these
+        //request.setImageLocation(image.getLocation());
+//        request.setImageTimeStamp(file.getTimeStamp());
+        return request;
+    }
+
     private NewImageRequest mapImage(FieldBookImage image) {
         NewImageRequest request = new NewImageRequest();
         request.setAdditionalInfo(image.getAdditionalInfo());
@@ -197,6 +243,18 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         request.setDbId(image.getImageDbId());
         return request;
     }
+
+//    private FileUploadRequest mapToFile(Image image) {
+//        Map<String, String> additionalInfo = image.getAdditionalInfo();
+//        FileUploadRequest request = new FileUploadRequest(
+//                null,
+//                image.getImageFileName(),
+//                image.getDescription(),
+////                image.getImageTimeStamp()
+//        );
+//        request.setAdditionalInfo(additionalInfo);
+//        return request;
+//    }
 
     public void putImageContent(FieldBookImage image,
                                 final Function<FieldBookImage, Void> function,
