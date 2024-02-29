@@ -18,14 +18,15 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <include
-        android:id="@+id/statistics_cards"
-        layout="@layout/statistics_card"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/statistics_card_rv"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
-        android:layout_centerInParent="true"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
-
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:listitem="@layout/statistics_card"
+        tools:itemCount="3"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2680,6 +2680,13 @@ public class DataHelper {
         return ObservationDao.Companion.getAll(studyId, plotId, traitDbId);
     }
 
+    public ObservationModel[] getAllObservationsFromAYear(String year) {
+
+        open();
+
+        return ObservationDao.Companion.getAllFromAYear(year);
+    }
+
     public ObservationModel[] getRepeatedValues(String studyId, String plotId, String traitDbId) {
 
         open();

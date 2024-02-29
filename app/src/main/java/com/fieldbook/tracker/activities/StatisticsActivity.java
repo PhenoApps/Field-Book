@@ -2,30 +2,28 @@ package com.fieldbook.tracker.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.adapters.StatisticsAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 
 import org.threeten.bp.format.DateTimeFormatter;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.TreeSet;
 
 import javax.inject.Inject;
 
@@ -59,11 +57,21 @@ public class StatisticsActivity extends ThemedActivity {
 
         timeFormat = DateTimeFormatter.ofPattern(TIME_FORMAT_PATTERN, Locale.getDefault());
 
-        try {
-            calculateStats();
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+        Set<String> uniqueSeasons = new TreeSet<>(Comparator.reverseOrder());
+
+        ObservationModel[] observations = database.getAllObservations();
+        for (ObservationModel observation: observations)
+        {
+            String timeStamp = observation.getObservation_time_stamp();
+            String year = timeStamp.substring(0,4);
+            uniqueSeasons.add(year);
         }
+
+        List<String> seasons = new ArrayList<>(uniqueSeasons);
+
+        RecyclerView rvStatisticsCard = findViewById(R.id.statistics_card_rv);
+        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons));
+        rvStatisticsCard.setLayoutManager(new LinearLayoutManager(this));
 
     }
 
@@ -91,54 +99,8 @@ public class StatisticsActivity extends ThemedActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void calculateStats() throws ParseException {
-        int fields = database.getAllFieldObjects().size();
-        int plots = database.getAllObservationUnits().length;
-        ObservationModel[] observations = database.getAllObservations();
-
-        Set<String> collectors = new HashSet<>();
-        ArrayList<Date> dateObjects = new ArrayList<>();
-        Map<String, Integer> dateCount = new HashMap<>();
-
-        for (ObservationModel observation : observations) {
-            String collector = observation.getCollector();
-            if (collector != null && !collector.trim().isEmpty()) {
-                collectors.add(collector);
-            }
-
-            String time = observation.getObservation_time_stamp();
-            Date dateObject = timeStamp.parse(time);
-            dateObjects.add(dateObject);
-        }
-
-        long totalInterval = 0;
-        for (int i = 1; i< dateObjects.size(); i++){
-            long diff = dateObjects.get(i).getTime() - dateObjects.get(i-1).getTime();
-            if (diff <= TimeUnit.MINUTES.toMillis(30)){
-                totalInterval += TimeUnit.MILLISECONDS.toSeconds(diff);
-            }
-        }
-        String timeString = String.format("%02d:%02d:%02d", totalInterval / 3600, (totalInterval % 3600) / 60, totalInterval % 60);
-
-        Log.d(TAG, "calculateStats: " + fields);
-        View statisticsCard = findViewById(R.id.statistics_cards);
-
-        TextView stat1 = statisticsCard.findViewById(R.id.stat_value_1);
-        TextView stat2 = statisticsCard.findViewById(R.id.stat_value_2);
-        TextView stat3 = statisticsCard.findViewById(R.id.stat_value_3);
-        TextView stat4 = statisticsCard.findViewById(R.id.stat_value_4);
-        TextView stat5 = statisticsCard.findViewById(R.id.stat_value_5);
-        TextView stat6 = statisticsCard.findViewById(R.id.stat_value_6);
-        TextView stat7 = statisticsCard.findViewById(R.id.stat_value_7);
-        TextView stat8 = statisticsCard.findViewById(R.id.stat_value_8);
-
-
-        stat1.setText(String.valueOf(fields));
-        stat2.setText(String.valueOf(plots));
-        stat3.setText(String.valueOf(observations.length));
-        stat4.setText(timeString);
-        stat5.setText(String.valueOf(collectors.size()));
-
-
+    @NonNull
+    public DataHelper getDatabase() {
+        return database;
     }
 }

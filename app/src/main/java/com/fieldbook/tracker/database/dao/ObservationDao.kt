@@ -84,6 +84,19 @@ class ObservationDao {
 
             } ?: emptyArray()
 
+        fun getAllFromAYear(year: String): Array<ObservationModel> = withDatabase { db ->
+
+            db.query(
+                    Observation.tableName,
+                    where = "observation_time_stamp LIKE ? AND study_id > 0",
+                    whereArgs = arrayOf("$year%")
+            )
+                    .toTable()
+                    .map { ObservationModel(it) }
+                    .toTypedArray()
+
+        } ?: emptyArray()
+
         fun getAllRepeatedValues(studyId: String, obsUnit: String, traitDbId: String) =
             getAll(studyId, obsUnit, traitDbId)
 
