@@ -227,6 +227,9 @@ public class GeneralKeys {
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
 
+    public static final String USB_CAMERA_LAST_PREVIEW_WIDTH = "com.fieldbook.tracker.fieldbook.usb_camera.last_width";
+    public static final String USB_CAMERA_LAST_PREVIEW_HEIGHT = "com.fieldbook.tracker.fieldbook.usb_camera.last_height";
+
     private GeneralKeys() {
 
     }

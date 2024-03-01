@@ -5,7 +5,7 @@ import com.fieldbook.tracker.offbeat.traits.formats.Formats
 
 class UsbCameraFormat : PhotoFormat(
     format = Formats.USB_CAMERA,
-    defaultLayoutId = R.layout.trait_usb_camera,
+    defaultLayoutId = R.layout.trait_camera,
     layoutView = null,
     nameStringResourceId = R.string.traits_format_usb_camera,
     iconDrawableResourceId = R.drawable.ic_trait_usb,

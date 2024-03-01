@@ -50,6 +50,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.devices.camera.CanonApi;
+import com.fieldbook.tracker.devices.camera.UsbCameraApi;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
@@ -67,7 +68,6 @@ import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
-import com.fieldbook.tracker.utilities.DevicePairer;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
@@ -93,6 +93,7 @@ import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.serenegiant.widget.UVCCameraTextureView;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.phenoapps.interfaces.security.SecureBluetooth;
@@ -146,6 +147,9 @@ public class CollectActivity extends ThemedActivity
     private GeoNavHelper geoNavHelper;
 
     @Inject
+    UsbCameraApi usbCameraApi;
+
+    @Inject
     CanonApi canonApi;
 
     @Inject
@@ -192,6 +196,8 @@ public class CollectActivity extends ThemedActivity
     public static boolean partialReload;
     public static String TAG = "Field Book";
     public static String GEOTAG = "GeoNav";
+
+    UVCCameraTextureView uvcView;
 
     ImageButton deleteValue;
     ImageButton missingValue;
@@ -327,6 +333,18 @@ public class CollectActivity extends ThemedActivity
 
         verifyPersonHelper.checkLastOpened();
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        usbCameraApi.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        usbCameraApi.onStop();
     }
 
     public void triggerTts(String text) {
@@ -513,6 +531,8 @@ public class CollectActivity extends ThemedActivity
         });
 
         refreshInfoBarAdapter();
+
+        uvcView = findViewById(R.id.collect_activity_uvc_tv);
     }
 
     //when softkeyboard is displayed, reset the snackbar to redisplay with a calculated bottom margin
@@ -962,6 +982,8 @@ public class CollectActivity extends ThemedActivity
         traitLayoutRefresh();
 
         gnssThreadHelper.stop();
+
+        usbCameraApi.onDestroy();
 
         super.onDestroy();
     }
@@ -2555,4 +2577,14 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public WifiHelper getWifiHelper() { return wifiHelper; }
+
+    @NonNull
+    @Override
+    public UsbCameraApi getUsbApi() {
+        return usbCameraApi;
+    }
+
+    @NonNull
+    @Override
+    public UVCCameraTextureView getUvcView() { return uvcView; }
 }

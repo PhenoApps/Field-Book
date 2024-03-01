@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.devices.ptpip.PtpSessionCallback
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -15,12 +16,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.phenoapps.adapters.ImageAdapter
 
 @AndroidEntryPoint
 class CanonTrait :
     CameraTrait,
-    ImageAdapter.ImageItemHandler,
     PtpSessionCallback,
     WifiHelper.WifiRequester {
 
@@ -40,6 +39,15 @@ class CanonTrait :
         defStyleAttr
     )
 
+    override fun type(): String {
+        return type
+    }
+
+    override fun loadLayout() {
+        super.loadLayout()
+        setup()
+    }
+
     private fun setup() {
 
         activity?.runOnUiThread {
@@ -47,6 +55,9 @@ class CanonTrait :
             captureBtn?.visibility = View.INVISIBLE
 
             imageView?.visibility = View.INVISIBLE
+
+            (imageView?.layoutParams as ConstraintLayout.LayoutParams)
+                .width = ConstraintLayout.LayoutParams.MATCH_PARENT
 
             connectBtn?.visibility = View.VISIBLE
 
@@ -94,11 +105,6 @@ class CanonTrait :
                 e.printStackTrace()
             }
         }
-    }
-
-    override fun loadLayout() {
-        super.loadLayout()
-        setup()
     }
 
     override fun onSessionStart() {

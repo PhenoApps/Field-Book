@@ -39,6 +39,7 @@
         android:id="@+id/frag_storage_definer_choose_dir_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="?fb_color_primary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

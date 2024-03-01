@@ -1048,5 +1048,10 @@
     <string name="pref_canon_help_summary">This will open a URL to the FieldBook Canon manual.</string>
     <string name="pref_canon_debug_title">Debug</string>
     <string name="pref_canon_debug_summary">A preferences for developers to monitor device output.</string>
+    <string name="usb_camera_resolution_options_title">Supported Resolutions</string>
+    <string name="usb_camera_plug_in_camera">Please plug in a UVC compatible web cam.</string>
+    <string name="trait_camera_connect_content_description">Starts a device connection.</string>
+    <string name="trait_camera_preview_content_description">This previews the camera\'s display.</string>
+    <string name="trait_camera_capture_content_description">Capture a photo</string>
 
 </resources>
