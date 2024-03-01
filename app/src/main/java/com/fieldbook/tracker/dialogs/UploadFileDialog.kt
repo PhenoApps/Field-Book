@@ -27,6 +27,8 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.BrapiExportActivity.UploadError
+import com.fieldbook.tracker.brapi.ApiErrorCode
 import com.fieldbook.tracker.brapi.model.AdditionalInfo
 import com.fieldbook.tracker.brapi.model.FileUploadRequest
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
@@ -37,7 +39,7 @@ import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.time.OffsetDateTime
 import java.time.ZoneId
-import kotlin.math.log
+import java.util.concurrent.CountDownLatch
 
 class UploadFileDialog : DialogFragment() {
     private var selectedAudioFileSrc: String? = null
@@ -237,7 +239,7 @@ class FirstCallWorker(context: Context, workerParams: WorkerParameters) :
             val selectedFile = selectedAudioFileUri?.path?.let { File(it) }
             val fileName = selectedFile?.name
 
-            var result: Result = Result.failure()
+            var result: Result = Result.failure(workDataOf("error" to "Initial Error"))
 
             if (fieldId != null) {
                 val fileUploadRequest = FileUploadRequest(
@@ -246,23 +248,47 @@ class FirstCallWorker(context: Context, workerParams: WorkerParameters) :
                     base64String,
                     timeStamp
                 )
+
+                // for performing async-await
+                val latch = CountDownLatch(1)
+
+
                 brAPIService.postFileMetaData(fileUploadRequest,
                     { _ ->
                         result = Result.success()
+                        latch.countDown()
                         null
                     },
-                    { statusCode ->
-                        Log.d("TAG", "doWork: $statusCode")
-                        if (statusCode == 200)
-                            result = Result.success()
-                        else
-                            result = Result.failure(workDataOf("error" to statusCode.toString()))
+                    { errorCode ->
+                        val apiErrorCode = processErrorCode(errorCode)
+                        if (apiErrorCode != null){
+                            val errorMessage = getMessageForErrorCode(apiErrorCode)
+
+                            if (errorMessage != null) {
+                                result = Result.failure(workDataOf("error" to errorMessage))
+                            }
+                        }
+                        // by default result is already set to failure in case apiErrorCode and errorMessage are null
+
+                        latch.countDown()
                         null
                     }
                 )
+
+                try {
+                    latch.await()
+                } catch (e: Exception){
+                    e.printStackTrace()
+                    return Result.failure(workDataOf("error" to "try-catch error"))
+                }
             } else {
+
+                Log.d("TAG", "doWork: Failure in else")
                 result = Result.failure(workDataOf("error" to "Something went wrong"))
             }
+
+
+            Log.d("TAG", "doWork: Returning Something")
 
             return  result
 
@@ -324,10 +350,58 @@ class FirstCallWorker(context: Context, workerParams: WorkerParameters) :
         } catch (e: Exception) {
             e.printStackTrace()
 
-            Log.d("TAG", "doWork: STILL EXECUTING")
+            Log.d("TAG", "doWork: Catch block")
             return Result.failure(workDataOf("error" to e.message))
         }
     }
+
+    private fun processErrorCode(code: Int): UploadError? {
+        val retVal: UploadError
+        val apiErrorCode =
+            ApiErrorCode.processErrorCode(code) ?: return UploadError.API_CALLBACK_ERROR
+        retVal = when (apiErrorCode) {
+            ApiErrorCode.FORBIDDEN ->                 // Warn that they do not have permissions to push traits
+                UploadError.API_PERMISSION_ERROR
+
+            ApiErrorCode.UNAUTHORIZED ->                 // Start the login process
+                UploadError.API_UNAUTHORIZED_ERROR
+
+            ApiErrorCode.NOT_FOUND ->                 // End point not supported
+                UploadError.API_NOTSUPPORTED_ERROR
+
+            ApiErrorCode.BAD_REQUEST ->                 // Do our generic error handler.
+                UploadError.API_CALLBACK_ERROR
+
+            else -> UploadError.API_CALLBACK_ERROR
+        }
+        return retVal
+    }
+
+    private fun getMessageForErrorCode(error: UploadError): String? {
+        val message: String
+        when (error) {
+            UploadError.API_CALLBACK_ERROR -> message = applicationContext.getString(R.string.brapi_export_failed)
+            UploadError.API_PERMISSION_ERROR -> message =
+                applicationContext.getString(R.string.brapi_export_permission_deny)
+
+            UploadError.API_NOTSUPPORTED_ERROR -> message =
+                applicationContext.getString(R.string.brapi_export_not_supported)
+
+            UploadError.WRONG_NUM_OBSERVATIONS_RETURNED -> message =
+                applicationContext.getString(R.string.brapi_export_wrong_num_obs)
+
+            UploadError.MISSING_OBSERVATION_IN_RESPONSE -> message =
+                applicationContext.getString(R.string.brapi_export_missing_obs)
+
+            UploadError.MULTIPLE_OBSERVATIONS_PER_VARIABLE -> message =
+                applicationContext.getString(R.string.brapi_export_multiple_obs)
+
+            UploadError.NONE -> message = applicationContext.getString(R.string.brapi_export_successful)
+            else -> message = applicationContext.getString(R.string.brapi_export_unknown_error)
+        }
+        return message
+    }
+
 }
 
 // SecondCallWorker.kt

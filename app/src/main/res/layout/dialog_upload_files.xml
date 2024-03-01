@@ -29,7 +29,7 @@
             android:id="@+id/pickAudioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select Audio File" />
+            android:text="Select File" />
 
         <TextView
             android:id="@+id/uploadStatusMessage"
