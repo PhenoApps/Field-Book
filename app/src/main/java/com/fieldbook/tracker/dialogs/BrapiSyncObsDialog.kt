@@ -14,8 +14,9 @@ import android.view.View
 import android.view.Window
 import android.widget.Button
 import android.widget.TextView
-import androidx.preference.PreferenceManager
+import android.widget.Toast
 import com.fieldbook.tracker.R
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.brapi.model.Observation
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
@@ -24,6 +25,7 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import java.lang.IllegalArgumentException
 
 data class StudyObservations(var fieldBookStudyDbId:Int=0, val traitList: MutableList<TraitObject> = mutableListOf(), val observationList: MutableList<Observation> = mutableListOf()) {
     fun merge(newStudy: StudyObservations) {
@@ -101,33 +103,33 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context), View.OnClickListen
         val fieldBookStudyDbId = study.exp_id
         val brAPIService = BrAPIServiceFactory.getBrAPIService(this.context)
 
+        try {
+            //Get the trait information first as we need to know that to associate an observation with a plot:
+            brAPIService!!.getTraits(brapiStudyDbId,
+                { input ->
+                    val observationVariableDbIds: MutableList<String> = ArrayList()
 
-        //Get the trait information first as we need to know that to associate an observation with a plot:
-        brAPIService!!.getTraits(brapiStudyDbId,
-            { input ->
-                val observationVariableDbIds: MutableList<String> = ArrayList()
+                    for (obj in input.traits) {
+                        println("Trait:" + obj.name)
+                        println("ObsIds: " + obj.externalDbId)
+                        observationVariableDbIds.add(obj.externalDbId)
+                    }
+                    val traitStudy =
+                        StudyObservations(fieldBookStudyDbId, input.traits, mutableListOf())
+                    studyObservations.merge(traitStudy)
 
-                for (obj in input.traits) {
-                    println("Trait:" + obj.name)
-                    println("ObsIds: " + obj.externalDbId)
-                    observationVariableDbIds.add(obj.externalDbId)
-                }
-                val traitStudy =
-                    StudyObservations(fieldBookStudyDbId, input.traits, mutableListOf())
-                studyObservations.merge(traitStudy)
-
-                brAPIService.getObservations(
-                    brapiStudyDbId,
-                    observationVariableDbIds,
-                    paginationManager,
-                    { obsInput ->
-                        ((context as ContextWrapper).baseContext as Activity).runOnUiThread {
-                            val currentStudy =
-                                StudyObservations(fieldBookStudyDbId, mutableListOf(), obsInput)
-                            studyObservations.merge(currentStudy)
+                    brAPIService.getObservations(
+                        brapiStudyDbId,
+                        observationVariableDbIds,
+                        paginationManager,
+                        { obsInput ->
+                            ((context as ContextWrapper).baseContext as Activity).runOnUiThread {
+                                val currentStudy =
+                                    StudyObservations(fieldBookStudyDbId, mutableListOf(), obsInput)
+                                studyObservations.merge(currentStudy)
 
 
-                            //Print out the values for debug
+                                //Print out the values for debug
 //                                for (obs in currentStudy.observationList) {
 //                                    println("***************************")
 //                                    println("StudyId: " + obs.studyId)
@@ -137,35 +139,40 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context), View.OnClickListen
 //                                    println("VariableName: " + obs.variableName)
 //                                    println("Value: " + obs.value)
 //                                }
-                            println("Size of ObsList: ${studyObservations.observationList.size}")
-                            //Adding 1 to the page number here so it makes more sense when debugging. Otherwise we get 0/10 as the first and 9/10 as the last message.
-                            println("Done pulling observations. Page: ${paginationManager.page + 1}/${paginationManager.totalPages}")
+                                println("Size of ObsList: ${studyObservations.observationList.size}")
+                                //Adding 1 to the page number here so it makes more sense when debugging. Otherwise we get 0/10 as the first and 9/10 as the last message.
+                                println("Done pulling observations. Page: ${paginationManager.page + 1}/${paginationManager.totalPages}")
 
-                            //Once we have loaded in all the observations, we can make the save button visible
-                            // We need to check page == totalPages - 1 otherwise it will loop indefinitely as the 0-based page will never reach totalPages(1based)
-                            if (paginationManager.page >= paginationManager.totalPages - 1) {
-                                //If we hit the last page but we have no observations we should not post the save button.
-                                if(studyObservations.observationList.size <= 0) {
+                                //Once we have loaded in all the observations, we can make the save button visible
+                                // We need to check page == totalPages - 1 otherwise it will loop indefinitely as the 0-based page will never reach totalPages(1based)
+                                if (paginationManager.page >= paginationManager.totalPages - 1) {
+                                    //If we hit the last page but we have no observations we should not post the save button.
+                                    if(studyObservations.observationList.size <= 0) {
+                                        makeNoObsWarningVisible()
+                                    }
+                                    else {
+                                        makeSaveBtnVisible()
+                                    }
+                                }
+                                else if(paginationManager.totalPages == 0) {
                                     makeNoObsWarningVisible()
                                 }
-                                else {
-                                    makeSaveBtnVisible()
-                                }
                             }
-                            else if(paginationManager.totalPages == 0) {
-                                makeNoObsWarningVisible()
-                            }
-                        }
 
-                        null
-                    }) {
+                            null
+                        }) {
                         println("Stopped:")
                         null
                     }
 
-                null
-            }) { null }
+                    null
+                }) { null }
 
+        } catch (e: IllegalArgumentException) {
+
+            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+
+        }
     }
 
     /**
