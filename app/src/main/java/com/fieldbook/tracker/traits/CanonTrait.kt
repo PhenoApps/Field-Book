@@ -50,6 +50,8 @@ class CanonTrait :
 
     private fun setup() {
 
+        val ssid = preferences.getString(GeneralKeys.CANON_SSID_NAME, "Canon") ?: "Canon"
+
         activity?.runOnUiThread {
 
             captureBtn?.visibility = View.INVISIBLE
@@ -65,7 +67,7 @@ class CanonTrait :
 
                 startCanonSession()
 
-            } else controller.getWifiHelper().startWifiSearch(this)
+            } else controller.getWifiHelper().startWifiSearch(ssid, this)
 
             connectBtn?.setOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -80,7 +82,7 @@ class CanonTrait :
 
                         controller.getWifiHelper().disconnect()
 
-                        controller.getWifiHelper().startWifiSearch(this)
+                        controller.getWifiHelper().startWifiSearch(ssid, this)
 
                     }
                 }
