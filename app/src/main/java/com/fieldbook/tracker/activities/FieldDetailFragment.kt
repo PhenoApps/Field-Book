@@ -36,6 +36,7 @@ import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
+import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
 import com.fieldbook.tracker.utilities.StringUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -203,8 +204,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         val sortOrder =
             if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
 
-        // Define the arguments for the narrative string
-        val narrativeArgs = arrayOf(
+        val narrativeTemplate = getString(
+            R.string.field_detail_narrative,
             source_prefix,
             exp_source,
             field.exp_name,
@@ -212,10 +213,15 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             field.attribute_count.toString(),
             sortOrder
         )
-
-        // Use the arguments to create the narrative string
-        val narrativeTemplate = getString(R.string.field_detail_narrative, *narrativeArgs)
-        val narrativeSpannable = StringUtil.applyBoldStyleToString(narrativeTemplate, *narrativeArgs)
+        val narrativeSpannable = StringUtil.applyBoldStyleToString(
+            narrativeTemplate,
+            source_prefix,
+            exp_source,
+            field.exp_name,
+            entryCount,
+            field.attribute_count.toString(),
+            sortOrder
+        )
         fieldNarrativeTextView.text = narrativeSpannable
 
         val lastEdit = field.date_edit
@@ -300,29 +306,70 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     private fun showEditDisplayNameDialog(field: FieldObject) {
-        val editText = EditText(context).apply {
-            inputType = InputType.TYPE_CLASS_TEXT
-            setText(field.exp_alias)
-        }
+        val inflater = requireActivity().layoutInflater
+        val dialogView = inflater.inflate(R.layout.dialog_field_edit_name, null)
+
+        val editText = dialogView.findViewById<EditText>(R.id.edit_text)
+        val errorMessageView = dialogView.findViewById<TextView>(R.id.error_message)
+        editText.setText(field.exp_alias)
 
         val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-        builder.setTitle(getString(R.string.field_edit_display_name))
-        builder.setView(editText)
-        builder.setPositiveButton(getString(R.string.dialog_save)) { dialog, _ ->
-            val newName = editText.text.toString()
-            if (newName.isNotBlank()) {
-                database.updateStudyAlias(field.exp_id, newName)
-                fieldDisplayNameTextView.text = newName
-                (activity as? FieldAdapterController)?.queryAndLoadFields()
-            }
-            dialog.dismiss()
-        }
-        builder.setNegativeButton(getString(R.string.dialog_cancel)) { dialog, _ ->
-            dialog.cancel()
-        }
+            .setTitle(getString(R.string.field_edit_display_name))
+            .setView(dialogView)
+            .setPositiveButton(getString(R.string.dialog_save), null) // Custom handling later
+            .setNegativeButton(getString(R.string.dialog_cancel), null) // Default dismiss action
 
         val dialog = builder.create()
+
+        dialog.setOnShowListener {
+            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            positiveButton.setOnClickListener {
+                val newName = editText.text.toString()
+
+                if (newName.isNotBlank()) {
+                    val illegalCharactersMessage = FileUtil.checkForIllegalCharacters(newName)
+                    if (illegalCharactersMessage.isEmpty()) {
+                        val nameCheckResult = nameUniquenessCheck(newName, field.exp_id)
+                        if (nameCheckResult.isUnique) {
+                            database.updateStudyAlias(field.exp_id, newName)
+                            fieldDisplayNameTextView.text = newName
+                            (activity as? FieldAdapterController)?.queryAndLoadFields()
+                            dialog.dismiss() // Only dismiss if everything is fine
+                        } else {
+                            val conflictType = if (nameCheckResult.conflictType == "name") getString(R.string.name_conflict_import_name) else getString(R.string.name_conflict_display_name)
+                            showErrorMessage(errorMessageView, getString(R.string.name_conflict_message, newName, conflictType))
+                        }
+                    } else {
+                        showErrorMessage(errorMessageView, getString(R.string.illegal_characters_message, illegalCharactersMessage))
+                    }
+                } else {
+                    showErrorMessage(errorMessageView, getString(R.string.name_cannot_be_empty))
+                }
+            }
+        }
+
         dialog.show()
+    }
+
+    /**
+     * Checks if the given newName is unique among all fields, considering both import names and aliases.
+     */
+
+    private fun nameUniquenessCheck(newName: String, currentFieldId: Int): NameCheckResult {
+        database.getAllFieldObjects().let { fields ->
+            fields.firstOrNull { it.exp_id != currentFieldId && (it.exp_name == newName || it.exp_alias == newName) }?.let { field ->
+                val conflictType = if (field.exp_name == newName) "name" else "alias"
+                return NameCheckResult(isUnique = false, conflictType = conflictType)
+            }
+        }
+        return NameCheckResult(isUnique = true)
+    }
+
+    data class NameCheckResult(val isUnique: Boolean, val conflictType: String? = null)
+
+    private fun showErrorMessage(messageView: TextView, message: String) {
+        messageView.text = message
+        messageView.visibility = View.VISIBLE
     }
 
     fun checkTraitsExist(): Int {

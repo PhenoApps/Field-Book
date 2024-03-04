@@ -157,6 +157,11 @@
     <!-- Field details -->
     <string name="field_detail_title">Field Detail</string>
     <string name="field_edit_display_name">Edit Field Display Name</string>
+    <string name="name_cannot_be_empty">Name cannot be empty.</string>
+    <string name="illegal_characters_message">Illegal characters found: %1$s</string>
+    <string name="name_conflict_message">"%1$s" is already used as a %2$s for another field.</string>
+    <string name="name_conflict_import_name">import name</string>
+    <string name="name_conflict_display_name">display name</string>
 
     <string name="field_import_string">Imported from</string>
     <string name="field_create_string">Created within</string>

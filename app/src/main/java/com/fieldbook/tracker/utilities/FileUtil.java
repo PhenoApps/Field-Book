@@ -21,6 +21,8 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Set;
+import java.util.LinkedHashSet;
 
 public final class FileUtil {
 
@@ -32,6 +34,31 @@ public final class FileUtil {
     public static String sanitizeFileName(String name) {
         return name.replaceAll("[|\\?\\*<\"\\\\:>'\";]", "_");
     }
+
+    /**
+     * Checks a name for illegal characters and returns details about any that are found.
+     */
+    public static String checkForIllegalCharacters(String name) {
+        String illegalChars = "|\\?*<\":>'/;";
+        Set<Character> foundIllegalChars = new LinkedHashSet<>();
+
+        for (char c : name.toCharArray()) {
+            if (illegalChars.indexOf(c) >= 0) {
+                foundIllegalChars.add(c);
+            }
+        }
+
+        if (!foundIllegalChars.isEmpty()) {
+            StringBuilder foundChars = new StringBuilder();
+            for (Character illegalChar : foundIllegalChars) {
+                foundChars.append(illegalChar).append(" ");
+            }
+            return foundChars.toString().trim();
+        } else {
+            return "";
+        }
+    }
+
 
     /**
      * Scan file to update file list and share exported file
