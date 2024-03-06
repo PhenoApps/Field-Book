@@ -1,7 +1,10 @@
 package com.fieldbook.tracker.brapi.service;
 
+import static com.google.android.gms.common.util.JsonUtils.escapeString;
+
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Point;
 import android.util.Log;
 import android.util.Pair;
 
@@ -11,11 +14,13 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+import com.fieldbook.tracker.brapi.model.AdditionalInfo;
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiProgram;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.FileUploadRequest;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -24,15 +29,24 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
+import com.github.filosganga.geogson.gson.GeometryAdapterFactory;
+import com.github.filosganga.geogson.model.Geometry;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import org.brapi.client.v2.ApiCallback;
 import org.brapi.client.v2.BrAPIClient;
+import org.brapi.client.v2.JSON;
+import org.brapi.client.v2.auth.Authentication;
+import org.brapi.client.v2.auth.OAuth;
 import org.brapi.client.v2.model.exceptions.ApiException;
 import org.brapi.client.v2.model.queryParams.core.ProgramQueryParams;
 import org.brapi.client.v2.model.queryParams.core.StudyQueryParams;
 import org.brapi.client.v2.model.queryParams.core.TrialQueryParams;
+import org.brapi.client.v2.model.queryParams.phenotype.ImageQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams;
@@ -45,6 +59,7 @@ import org.brapi.client.v2.modules.phenotype.ObservationVariablesApi;
 import org.brapi.client.v2.modules.phenotype.ObservationsApi;
 import org.brapi.v2.model.BrAPIExternalReference;
 import org.brapi.v2.model.BrAPIMetadata;
+import org.brapi.v2.model.BrApiGeoJSON;
 import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
@@ -72,14 +87,29 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.OkHttp;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.internal.http.HttpMethod;
 
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
@@ -175,9 +205,45 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     failFunction.apply(error.getCode());
                 }
             };
-
             BrAPIImage request = mapImage(image);
             imagesApi.imagesPostAsync(Collections.singletonList(request), callback);
+
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+        }
+
+    }
+
+    public void postFileMetaData(FileUploadRequest file,
+                                 final Function<FileUploadRequest, Void> function,
+                                 final Function<Integer, Void> failFunction) {
+        try {
+            Log.d("TAG", "postImageMetaDataTry: ");
+            BrapiV2ApiCallBack<BrAPIImageListResponse> callback = new BrapiV2ApiCallBack<BrAPIImageListResponse>() {
+                @Override
+                public void onSuccess(BrAPIImageListResponse imageResponse, int i, Map<String, List<String>> map) {
+                    final BrAPIImage response = imageResponse.getResult().getData().get(0);
+//                    function.apply(mapToImage(response));
+                    Log.d("TAG", "onSuccess: " + imageResponse);
+                    Log.d("TAG", "onSuccess: " + imageResponse.getResult());
+//                    Log.d("TAG", "onSuccess: " + imageResponse.getResult().getData());
+                    function.apply(mapToFile(response));
+                }
+
+                @Override
+                public void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders) {
+//                    Log.d("TAG", "onFailure: " + error);
+//                    Log.d("TAG", "onFailure: " + error.getCode());
+//                    Log.d("TAG", "onFailure: " + statusCode);
+//                    Log.d("TAG", "onFailure: " + responseHeaders);
+
+                    failFunction.apply(error.getCode());
+                }
+            };
+
+            BrAPIImage request = mapFile(file);
+            Log.d("TAG", "postImageMetaDataTry: " + request);
+            imagesApi.imagesPostAsync(Arrays.asList(request), callback);
 
         } catch (ApiException error) {
             failFunction.apply(error.getCode());
@@ -204,6 +270,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         return request;
     }
 
+    private BrAPIImage mapFile(FileUploadRequest file) {
+        BrAPIImage request = new BrAPIImage();
+        request.setDescription(file.getDescription());
+        request.setImageFileName(file.getFileName());
+        request.setAdditionalInfo(file.getAdditionalInfo());
+        // TODO fix these
+        //request.setImageLocation(image.getLocation());
+        request.setImageTimeStamp(file.getTimeStamp());
+        request.mimeType("image/png");
+        return request;
+    }
+
     private FieldBookImage mapToImage(BrAPIImage image) {
         FieldBookImage request = new FieldBookImage();
         request.setDescription(image.getDescription());
@@ -219,6 +297,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         // TODO fix these
         //request.setLocation(image.getImageLocation());
         request.setTimestamp(TimeAdapter.convertFrom(image.getImageTimeStamp()));
+        return request;
+    }
+
+    private FileUploadRequest mapToFile(BrAPIImage image) {
+        JsonObject additionalInfo = image.getAdditionalInfo();
+        FileUploadRequest request = new FileUploadRequest(
+                null,
+                image.getImageFileName(),
+                image.getDescription(),
+                image.getImageTimeStamp()
+        );
+        request.setAdditionalInfo(additionalInfo);
         return request;
     }
 

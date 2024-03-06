@@ -54,10 +54,56 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
     private val preferences: SharedPreferences =
         PreferenceManager.getDefaultSharedPreferences(context)
 
+    private val ep: SharedPreferences =
+        context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+
     private var buttonState = ButtonState.WAITING_FOR_RECORDING
 
     val isRecording: Boolean
         get() = buttonState != ButtonState.WAITING_FOR_RECORDING
+
+    private fun zipAudioAndLogFiles(){
+        try {
+            val audioDocumentFile = recordingLocation?.let {
+                DocumentFile.fromSingleUri(context,
+                    it
+                )
+            }
+
+            val geoNavLogWriter = (context as CollectActivity).getGeoNavHelper().getGeoNavLogWriterUri()
+            val geoNavFile = geoNavLogWriter?.let {
+                DocumentFile.fromSingleUri(context,
+                    it
+                )
+            }
+
+            val timeStamp = SimpleDateFormat(
+                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
+            )
+            val c = Calendar.getInstance()
+            val mGeneratedName: String
+            val fieldAlias = ep.getString(GeneralKeys.FIELD_FILE, "")
+            mGeneratedName = "field_audio_log" + context.cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(c.time)    + ".zip"
+
+            val paths = ArrayList<DocumentFile?>()
+            paths.add(audioDocumentFile)
+            paths.add(geoNavFile)
+
+            val exportDir = getDirectory(context, R.string.dir_field_audio_log_zip)
+            val zipFile = exportDir?.createFile("*/*", mGeneratedName)
+
+            val output = getFileOutputStream(
+                context, R.string.dir_field_audio_log_zip, mGeneratedName
+            )
+
+            if(output != null){
+                zipFiles(context, paths, output)
+            }
+        }catch (e : Exception){
+            e.printStackTrace()
+        }
+    }
+
 
     fun startRecording(isFieldAudio: Boolean = true) {
         try {

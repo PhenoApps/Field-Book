@@ -133,7 +133,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         return mGeoNavLogWriterUri
     }
 
-
     private val mGnssResponseReceiver: GNSSResponseReceiver = object : GNSSResponseReceiver() {
 
         override fun onNmeaMessageReceived(nmea: String?) {
