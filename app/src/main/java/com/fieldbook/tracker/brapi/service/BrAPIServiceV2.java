@@ -1384,8 +1384,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                 for (List<String> dataRow : studyDetails.getValues()) {
                     dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
-                    System.out.println("Saving: Attributes: "+studyDetails.getAttributes());
-                    System.out.println("Saving: dataRow: "+dataRow);
+                    Log.d("BrAPIServiceV2","Saving: Attributes: "+studyDetails.getAttributes());
+                    Log.d("BrAPIServiceV2","Saving: dataRow: "+dataRow);
                 }
 
                 // Insert the traits already associated with this study
