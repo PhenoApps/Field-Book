@@ -29,6 +29,8 @@ import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.database.models.ObservationVariableModel;
+import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
@@ -75,8 +77,8 @@ public class DataHelper {
     private static final String PLOT_ATTRIBUTES = "plot_attributes";
     private static final String PLOT_VALUES = "plot_values";
     public static SQLiteDatabase db;
-    private static String TAG = "Field Book";
-    private static String TICK = "`";
+    private static final String TAG = "Field Book";
+    private static final String TICK = "`";
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
     private Context context;
     private SimpleDateFormat timeStamp;
@@ -84,7 +86,7 @@ public class DataHelper {
 
     private OpenHelper openHelper;
 
-    private SharedPreferences ep;
+    private SharedPreferences preferences;
 
     private Bitmap missingPhoto;
 
@@ -92,7 +94,8 @@ public class DataHelper {
     public DataHelper(@ActivityContext Context context) {
         try {
             this.context = context;
-            ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+
+            preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
             openHelper = new OpenHelper(this);
             db = openHelper.getWritableDatabase();
@@ -118,7 +121,7 @@ public class DataHelper {
      */
     public static String replaceSpecialChars(String s) {
 
-        final Pattern p = Pattern.compile("[\\[\\]`\"\']");
+        final Pattern p = Pattern.compile("[\\[\\]`\"']");
 
         int lastIndex = 0;
 
@@ -161,7 +164,7 @@ public class DataHelper {
      */
     public static boolean hasSpecialChars(String s) {
 //        final Pattern p = Pattern.compile("[()<>/;\\*%$`\"\']");
-        final Pattern p = Pattern.compile("[\\[\\]`\"\']");
+        final Pattern p = Pattern.compile("[\\[\\]`\"']");
 
         final Matcher m = p.matcher(s);
 
@@ -172,7 +175,7 @@ public class DataHelper {
      * Helper function to convert array to csv format
      */
     private static String convertToCommaDelimited(String[] list) {
-        StringBuilder ret = new StringBuilder("");
+        StringBuilder ret = new StringBuilder();
         for (int i = 0; list != null && i < list.length; i++) {
             ret.append(list[i]);
             if (i < list.length - 1) {
@@ -272,11 +275,27 @@ public class DataHelper {
     }
 
     @Nullable
+    public StudyModel getStudyById(String id) {
+
+        open();
+
+        return StudyDao.Companion.getById(id);
+    }
+
+    @Nullable
     public ObservationUnitModel getObservationUnitById(String id) {
 
         open();
 
         return ObservationUnitDao.Companion.getById(id);
+    }
+
+    @Nullable
+    public ObservationVariableModel getObservationVariableById(String id) {
+
+        open();
+
+        return ObservationVariableDao.Companion.getById(id);
     }
 
     /**
@@ -285,11 +304,11 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
+    public long insertObservation(String plotId, String traitDbId, String traitFormat, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
 
         open();
 
-        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, lastSyncedTime, rep);
+        return ObservationDao.Companion.insertObservation(plotId, traitDbId, traitFormat, value, person, location, notes, studyId, observationDbId, lastSyncedTime, rep);
 
 //        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
 //        int rep = cursor.getCount() + 1;
@@ -414,7 +433,7 @@ public class DataHelper {
 
         open();
 
-        String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserTraitObservations(studyId);
 
@@ -463,7 +482,7 @@ public class DataHelper {
 
         open();
 
-        String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserTraitImageObservations(ctx, studyId, missingPhoto);
 
@@ -899,8 +918,8 @@ public class DataHelper {
         open();
 
         return ObservationUnitPropertyDao.Companion.getExportDbData(
-                ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                ep.getString(GeneralKeys.UNIQUE_NAME, ""), fieldList, traits);
+                preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
+                preferences.getString(GeneralKeys.UNIQUE_NAME, ""), fieldList, traits);
 
 //        String fields = arrayToString("range", fieldList);
 //        String activeTraits = arrayToLikeString(traits);
@@ -935,27 +954,30 @@ public class DataHelper {
     /**
      * Same as convertDatabaseToTable but filters by obs unit
      */
-    public Cursor convertDatabaseToTable(String[] col, String[] traits, String obsUnit) {
+    public Cursor convertDatabaseToTable(String[] col, ArrayList<TraitObject> traits, String obsUnit) {
 
         open();
 
         return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
-                ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                ep.getString(GeneralKeys.UNIQUE_NAME, ""), obsUnit, col, traits);
+                preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
+                preferences.getString(GeneralKeys.UNIQUE_NAME, ""),
+                obsUnit,
+                col,
+                traits.toArray(new TraitObject[]{}));
 
     }
 
-        /**
-         * Convert EAV database to relational
-         * TODO add where statement for repeated values
-         */
+    /**
+     * Convert EAV database to relational
+     * TODO add where statement for repeated values
+     */
     public Cursor convertDatabaseToTable(String[] col, ArrayList<TraitObject> traits) {
 
         open();
 
         return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
-                ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                ep.getString(GeneralKeys.UNIQUE_NAME, ""), col, traits);
+                preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
+                preferences.getString(GeneralKeys.UNIQUE_NAME, ""), col, traits);
 
 //        String query;
 //        String[] rangeArgs = new String[col.length];
@@ -1183,6 +1205,13 @@ public class DataHelper {
 //        return cursor;
     }
 
+    public Cursor getAllTraitObjectsForExport() {
+
+        open();
+
+        return ObservationVariableDao.Companion.getAllTraitObjectsForExport();
+    }
+
     /**
      * V4 - Get all traits in the system, in order, as TraitObjects
      */
@@ -1377,7 +1406,7 @@ public class DataHelper {
 
         open();
 
-        String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserDetail(studyId, plotId);
 
@@ -1461,7 +1490,7 @@ public class DataHelper {
 
         open();
 
-        return ObservationVariableDao.Companion.getTraitExists(ep.getString(GeneralKeys.UNIQUE_NAME, ""), plotId, traitDbId);
+        return ObservationVariableDao.Companion.getTraitExists(preferences.getString(GeneralKeys.UNIQUE_NAME, ""), plotId, traitDbId);
 
 //        boolean haveData = false;
 //
@@ -1511,7 +1540,7 @@ public class DataHelper {
         int count = 0;
 
         for (Integer i : result) {
-            data[count++] = (int) i;
+            data[count++] = i;
         }
 
         return data;
@@ -1637,8 +1666,8 @@ public class DataHelper {
      */
     public String getRangeFromId(String plot_id) {
         try {
-            Cursor cursor = db.query(RANGE, new String[]{TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK},
-                    TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " like ? ", new String[]{plot_id},
+            Cursor cursor = db.query(RANGE, new String[]{TICK + preferences.getString(GeneralKeys.PRIMARY_NAME, "") + TICK},
+                    TICK + preferences.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " like ? ", new String[]{plot_id},
                     null, null, null);
 
             String myList = null;
@@ -1686,7 +1715,7 @@ public class DataHelper {
         if (trait.length() == 0)
             return null;
 
-        return ObservationUnitPropertyDao.Companion.getDropDownRange(ep.getString(GeneralKeys.UNIQUE_NAME, ""), trait, plotId);
+        return ObservationUnitPropertyDao.Companion.getDropDownRange(preferences.getString(GeneralKeys.UNIQUE_NAME, ""), trait, plotId);
 
 //        try {
 //            Cursor cursor = db.query(RANGE, new String[]{TICK + trait + TICK},
@@ -1770,8 +1799,8 @@ public class DataHelper {
      */
     public String getPlotFromId(String plot_id) {
         try {
-            Cursor cursor = db.query(RANGE, new String[]{TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK},
-                    TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " like ?", new String[]{plot_id},
+            Cursor cursor = db.query(RANGE, new String[]{TICK + preferences.getString(GeneralKeys.SECONDARY_NAME, "") + TICK},
+                    TICK + preferences.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " like ?", new String[]{plot_id},
                     null, null, null);
 
             String myList = null;
@@ -2050,7 +2079,7 @@ public class DataHelper {
 
         open();
 
-        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getTrait(),
+        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
                 trait.getDetails(), trait.getCategories());
     }
@@ -2180,7 +2209,7 @@ public class DataHelper {
         //TODO lastplot is effectively erased when fields are switched, change this to persist and save each field's last plot.
         //potentially use preference map or db column
 
-        ep.edit().remove(GeneralKeys.LAST_PLOT).apply();
+        preferences.edit().remove(GeneralKeys.LAST_PLOT).apply();
         //ep.edit().putString("lastplot", null).apply();
 
         //delete the old table
@@ -2392,7 +2421,7 @@ public class DataHelper {
 
             }
 
-            SharedPreferences.Editor edit = ep.edit();
+            SharedPreferences.Editor edit = preferences.edit();
 
             edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
             edit.putString(GeneralKeys.UNIQUE_NAME, "");
@@ -2475,7 +2504,7 @@ public class DataHelper {
      */
     public void copyFileOrDir(String fullPath, String path) {
         AssetManager assetManager = context.getAssets();
-        String assets[];
+        String[] assets;
 
         try {
             assets = assetManager.list(path);
@@ -2626,6 +2655,13 @@ public class DataHelper {
         return ObservationDao.Companion.getAll();
     }
 
+    public ObservationModel[] getAllObservationsOfVariable(String traitDbId) {
+
+        open();
+
+        return ObservationDao.Companion.getAllOfTrait(traitDbId);
+    }
+
     public ObservationModel[] getAllObservations(SQLiteDatabase db) {
 
         return ObservationDao.Companion.getAll(db);
@@ -2645,18 +2681,18 @@ public class DataHelper {
         return ObservationDao.Companion.getAll(studyId, unit);
     }
 
-    public ObservationModel[] getAllObservations(String studyId, String unit, String traitDbId) {
+    public ObservationModel[] getAllObservations(String studyId, String plotId, String traitDbId) {
 
         open();
 
-        return ObservationDao.Companion.getAll(studyId, unit, traitDbId);
+        return ObservationDao.Companion.getAll(studyId, plotId, traitDbId);
     }
 
-    public ObservationModel[] getRepeatedValues(String studyId, String unit, String traitDbId) {
+    public ObservationModel[] getRepeatedValues(String studyId, String plotId, String traitDbId) {
 
         open();
 
-        return ObservationDao.Companion.getAllRepeatedValues(studyId, unit, traitDbId);
+        return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
     }
 
     /**
@@ -2665,11 +2701,11 @@ public class DataHelper {
      * v1.6 - Amended to add new parent field. It is called parent in consideration to the enhanced search
      */
     private static class OpenHelper extends SQLiteOpenHelper {
-        SharedPreferences ep2;
+        SharedPreferences preferences;
         DataHelper helper;
         OpenHelper(DataHelper helper) {
             super(helper.context, DATABASE_NAME, null, DATABASE_VERSION);
-            ep2 = helper.context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+            preferences = PreferenceManager.getDefaultSharedPreferences(helper.context);
             this.helper = helper;
         }
 
@@ -2745,7 +2781,7 @@ public class DataHelper {
                     if (traitName == null || format == null) continue;
 
                     o.setId(cursor.getString(0));
-                    o.setTrait(traitName);
+                    o.setName(traitName);
                     o.setFormat(format);
                     o.setDefaultValue(cursor.getString(3));
                     o.setMinimum(cursor.getString(4));
@@ -2804,7 +2840,7 @@ public class DataHelper {
 
                 // add current range info to exp_index
                 db.execSQL("insert into " + EXP_INDEX + "(exp_name, exp_alias, unique_id, primary_id, secondary_id) values (?,?,?,?,?)",
-                        new String[]{ep2.getString(GeneralKeys.FIELD_FILE, ""), ep2.getString(GeneralKeys.FIELD_FILE, ""), ep2.getString(GeneralKeys.UNIQUE_NAME, ""), ep2.getString(GeneralKeys.PRIMARY_NAME, ""), ep2.getString(GeneralKeys.SECONDARY_NAME, "")});
+                        new String[]{preferences.getString(GeneralKeys.FIELD_FILE, ""), preferences.getString(GeneralKeys.FIELD_FILE, ""), preferences.getString(GeneralKeys.UNIQUE_NAME, ""), preferences.getString(GeneralKeys.PRIMARY_NAME, ""), preferences.getString(GeneralKeys.SECONDARY_NAME, "")});
 
                 // convert current range table to plots
                 Cursor cursor = db.rawQuery("SELECT * from range", null);
@@ -2823,11 +2859,11 @@ public class DataHelper {
                 }
 
                 // plots into plots
-                String cur2 = "SELECT " + TICK + ep2.getString(GeneralKeys.UNIQUE_NAME, "")
+                String cur2 = "SELECT " + TICK + preferences.getString(GeneralKeys.UNIQUE_NAME, "")
                         + TICK + ", " + TICK
-                        + ep2.getString(GeneralKeys.PRIMARY_NAME, "")
+                        + preferences.getString(GeneralKeys.PRIMARY_NAME, "")
                         + TICK + ", " + TICK
-                        + ep2.getString(GeneralKeys.SECONDARY_NAME, "")
+                        + preferences.getString(GeneralKeys.SECONDARY_NAME, "")
                         + TICK + " from range";
 
                 Cursor cursor2 = db.rawQuery(cur2, null);
@@ -2853,7 +2889,7 @@ public class DataHelper {
                         attId = attribute_id.getInt(0);
                     }
 
-                    String att_val = "select range." + "'" + columnName + "'" + ", plots.plot_id from range inner join plots on range." + "'" + ep2.getString(GeneralKeys.UNIQUE_NAME, "") + "'" + "=plots.unique_id";
+                    String att_val = "select range." + "'" + columnName + "'" + ", plots.plot_id from range inner join plots on range." + "'" + preferences.getString(GeneralKeys.UNIQUE_NAME, "") + "'" + "=plots.unique_id";
                     Cursor attribute_val = db.rawQuery(att_val, null);
 
                     if (attribute_val.moveToFirst()) {
@@ -2898,14 +2934,14 @@ public class DataHelper {
 
                 Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
 
-                ep2.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
+                preferences.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
             }
 
             if (oldVersion <= 9 && newVersion >= 10) {
 
                 helper.fixGeoCoordinates(db);
 
-                ep2.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
+                preferences.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
 
             }
         }

@@ -3,7 +3,6 @@ package com.fieldbook.tracker.traits;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
@@ -46,9 +45,9 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    static public boolean isTraitCategorical(String traitName) {
+    static public boolean isTraitCategorical(String traitFormat) {
         for (String name : POSSIBLE_VALUES) {
-            if (name.equals(traitName)) return true;
+            if (name.equals(traitFormat)) return true;
         }
         return false;
     }
@@ -286,7 +285,8 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
                 getCollectInputView().setText(currentCat);
 
-                updateObservation(getCurrentTrait(), CategoryJsonUtil.Companion.encode(scale));
+                updateObservation(getCurrentTrait(),
+                        CategoryJsonUtil.Companion.encode(scale));
 
                 triggerTts(category);
 
@@ -296,13 +296,11 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     }
 
     private void pressOnButton(Button button) {
-        button.setTextColor(Color.parseColor(getDisplayColor()));
-        button.getBackground().setColorFilter(getButtonPressedColor(), PorterDuff.Mode.MULTIPLY);
+        button.setBackgroundResource(R.drawable.button_selected);
     }
 
     private void pressOffButton(Button button) {
-        button.setTextColor(getButtonTextColor());
-        button.getBackground().setColorFilter(getButtonBackgroundColor(), PorterDuff.Mode.MULTIPLY);
+        button.setBackgroundResource(R.drawable.button_unselected);
     }
 
     @Override

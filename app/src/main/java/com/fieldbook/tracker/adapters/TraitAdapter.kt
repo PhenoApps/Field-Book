@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.offbeat.traits.formats.Formats
 
 /**
  * Reference:
@@ -21,7 +22,7 @@ import com.fieldbook.tracker.objects.TraitObject
 class TraitAdapter(private val sorter: TraitSorter):
         ListAdapter<TraitObject, TraitAdapter.ViewHolder>(DiffCallback()) {
 
-    public var infoDialogShown: Boolean = false
+    var infoDialogShown: Boolean = false
 
     interface TraitSorter {
         fun onDrag(item: TraitAdapter.ViewHolder)
@@ -84,7 +85,7 @@ class TraitAdapter(private val sorter: TraitSorter):
         }
     }
 
-    public fun getTraitItem(position: Int): TraitObject {
+    fun getTraitItem(position: Int): TraitObject {
         return currentList[position]
     }
 
@@ -104,31 +105,15 @@ class TraitAdapter(private val sorter: TraitSorter):
         // contents of the view with that element
         with (currentList[position]) {
             viewHolder.itemView.tag = this
-            viewHolder.nameTextView.text = this.trait
-            viewHolder.formatImageView.setBackgroundResource(when(this.format) {
-                "numeric" -> R.drawable.ic_trait_numeric
-                "categorical" -> R.drawable.ic_trait_categorical
-                "date" -> R.drawable.ic_trait_date
-                "percent" -> R.drawable.ic_trait_percent
-                "boolean" -> R.drawable.ic_trait_boolean
-                "text" -> R.drawable.ic_trait_text
-                "photo" -> R.drawable.ic_trait_camera
-                "audio" -> R.drawable.ic_trait_audio
-                "counter" -> R.drawable.ic_trait_counter
-                "disease rating" -> R.drawable.ic_trait_disease_rating
-                "rust rating" -> R.drawable.ic_trait_disease_rating
-                "multicat" -> R.drawable.ic_trait_multicat
-                "location" -> R.drawable.ic_trait_location
-                "barcode" -> R.drawable.ic_trait_barcode
-                "zebra label print" -> R.drawable.ic_trait_labelprint
-                "gnss" -> R.drawable.ic_trait_gnss
-                "usb camera" -> R.drawable.ic_trait_usb
-                "gopro" -> R.drawable.ic_trait_gopro
-                else -> R.drawable.ic_reorder
-            })
+            viewHolder.nameTextView.text = this.name
+
+            val icon = Formats.values()
+                .find { it.getDatabaseName(viewHolder.itemView.context) == this.format }?.getIcon()
+
+            viewHolder.formatImageView.setBackgroundResource(icon ?: R.drawable.ic_reorder)
 
             // Check or uncheck the list items
-            val visible = sorter.getDatabase().traitVisibility[this.trait]
+            val visible = sorter.getDatabase().traitVisibility[this.name]
             viewHolder.visibleCheckBox.isChecked = visible == null || visible == "true"
         }
     }
@@ -139,11 +124,11 @@ class TraitAdapter(private val sorter: TraitSorter):
     class DiffCallback : DiffUtil.ItemCallback<TraitObject>() {
 
         override fun areItemsTheSame(oldItem: TraitObject, newItem: TraitObject): Boolean {
-            return oldItem.trait == newItem.trait
+            return oldItem == newItem
         }
 
         override fun areContentsTheSame(oldItem: TraitObject, newItem: TraitObject): Boolean {
-            return oldItem.trait == newItem.trait
+            return oldItem == newItem
         }
     }
 }

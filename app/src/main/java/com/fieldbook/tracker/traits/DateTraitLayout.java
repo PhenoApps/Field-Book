@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.ImageButton;
 
 import androidx.annotation.Nullable;
@@ -17,6 +16,7 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.dialogs.DatePickerFragment;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
@@ -28,9 +28,9 @@ import java.util.Locale;
 public class DateTraitLayout extends BaseTraitLayout {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    Button addDayBtn;
-    Button minusDayBtn;
-    ImageButton saveDayBtn;
+    FloatingActionButton addDayBtn;
+    FloatingActionButton minusDayBtn;
+    FloatingActionButton saveDayBtn;
     private String date;
     private boolean isBlocked = true; //tracks when multi measures can be navigated
     private boolean isFirstLoad = true;
@@ -76,7 +76,10 @@ public class DateTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init(Activity act) {
-        date = getPrefs().getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, "2000-01-01");
+
+        Calendar calendar = Calendar.getInstance();
+
+        date = getPrefs().getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, dateFormat.format(calendar.getTime()));
         log();
 
         addDayBtn = act.findViewById(R.id.addDateBtn);
@@ -94,9 +97,7 @@ public class DateTraitLayout extends BaseTraitLayout {
          */
         calendarVisibilityBtn.setOnClickListener((View) -> {
 
-            DialogFragment newFragment = new DatePickerFragment().newInstance(dateFormat, (y, m, d) -> {
-
-                Calendar calendar = Calendar.getInstance();
+            DialogFragment newFragment = new DatePickerFragment(getContext()).newInstance(dateFormat, (y, m, d) -> {
 
                 calendar.set(y, m, d);
 
@@ -124,7 +125,6 @@ public class DateTraitLayout extends BaseTraitLayout {
 
         // Add day
         addDayBtn.setOnClickListener(arg0 -> {
-            Calendar calendar = Calendar.getInstance();
 
             //Parse date
             try {
@@ -147,7 +147,6 @@ public class DateTraitLayout extends BaseTraitLayout {
 
         // Minus day
         minusDayBtn.setOnClickListener(arg0 -> {
-            Calendar calendar = Calendar.getInstance();
 
             //Parse date
             try {
@@ -170,7 +169,7 @@ public class DateTraitLayout extends BaseTraitLayout {
 
         // Saving date data
         saveDayBtn.setOnClickListener(arg0 -> {
-            Calendar calendar = Calendar.getInstance();
+
             //Parse date
             try {
                 Date d = dateFormat.parse(date);
@@ -224,7 +223,7 @@ public class DateTraitLayout extends BaseTraitLayout {
         getCollectInputView().setText(getMonthForInt(calendar.get(Calendar.MONTH)) + " " + dayOfMonth);
 
         // Change text color
-        if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
+        if (getNewTraits().containsKey(getCurrentTrait().getName())) {
             getCollectInputView().setTextColor(getValueAlteredColor());
         } else {
             getCollectInputView().setTextColor(getTextColor());
@@ -370,7 +369,7 @@ public class DateTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        removeTrait(getCurrentTrait().getTrait());
+        removeTrait(getCurrentTrait().getName());
 
         super.deleteTraitListener();
 

@@ -16,6 +16,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -49,6 +50,8 @@ class RangeBoxView : ConstraintLayout {
     private var rangeLeft: ImageView
     private var rangeRight: ImageView
 
+    private var plotsProgressBar: ProgressBar
+
     private var repeatHandler: Handler? = null
 
     /**
@@ -80,6 +83,7 @@ class RangeBoxView : ConstraintLayout {
         this.rangeEt = v.findViewById(R.id.range)
         this.rangeName = v.findViewById(R.id.rangeName)
         this.plotName = v.findViewById(R.id.plotName)
+        this.plotsProgressBar = v.findViewById(R.id.plotsProgressBar)
 
         this.controller = context as CollectRangeController
 
@@ -119,11 +123,11 @@ class RangeBoxView : ConstraintLayout {
         return rangeID[j]
     }
 
-    fun getRangeLeft(): ImageView? {
+    fun getRangeLeft(): ImageView {
         return rangeLeft
     }
 
-    fun getRangeRight(): ImageView? {
+    fun getRangeRight(): ImageView {
         return rangeRight
     }
 
@@ -200,7 +204,7 @@ class RangeBoxView : ConstraintLayout {
 
     }
 
-    private fun truncate(s: String, maxLen: Int): String? {
+    private fun truncate(s: String, maxLen: Int): String {
         return if (s.length > maxLen) s.substring(0, maxLen - 1) + ":" else s
     }
 
@@ -403,6 +407,21 @@ class RangeBoxView : ConstraintLayout {
     private fun updateCurrentRange(id: Int) {
         if (firstName.isNotEmpty() && secondName.isNotEmpty() && uniqueName.isNotEmpty()) {
             cRange = controller.getDatabase().getRange(firstName, secondName, uniqueName, id)
+
+            // update progress bar
+            plotsProgressBar.max = rangeID.size
+            // if there are two fields each having 200 plots
+            // the argument passed to this method would range from
+            // [1, 200] for field1
+            // [201, 400] for field2
+            // rangeID[0] would represent the id of the first plot for a field
+            // therefore, subtracted rangeID[0] from id
+            plotsProgressBar.progress = id - rangeID[0]
+
+            // did not do id % rangeID.size for the progress above
+            // to handle the case where sizes of field1 and field2 are different
+            // eg. [1, 200], [201, 500]
+            // using % would return a wrong value
         } else {
             //TODO switch to Utils
             Toast.makeText(
@@ -567,7 +586,7 @@ class RangeBoxView : ConstraintLayout {
         } else {
             if (rangeID.isNotEmpty()) {
                 //index.setEnabled(true);
-                // In addtion to advancing the entry, return to the first trait in the trait order if the preference is enabled
+                // In addition to advancing the entry, return to the first trait in the trait order if the preference is enabled
                 if (controller.isReturnFirstTrait()) {
                     traitBox.returnFirst()
                 }
@@ -597,7 +616,7 @@ class RangeBoxView : ConstraintLayout {
 //    }
 
     private fun getTraitIndex(traits: Array<String>): Int {
-        val currentTraitName: String? = controller.getTraitBox().currentTrait?.trait
+        val currentTraitName: String? = controller.getTraitBox().currentTrait?.name
         var traitIndex = 0
         for (i in traits.indices) {
             if (currentTraitName == traits[i]) {

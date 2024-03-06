@@ -42,6 +42,9 @@ public class BrapiTraitActivity extends ThemedActivity {
     @Inject
     DataHelper database;
 
+    @Inject
+    SharedPreferences preferences;
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -139,7 +142,7 @@ public class BrapiTraitActivity extends ThemedActivity {
                                 // Check to see if it is a selected trait
                                 for (TraitObject selectedTrait : selectedTraits) {
 
-                                    if (trait.getTrait().equals(selectedTrait.getTrait())) {
+                                    if (trait.getName().equals(selectedTrait.getName())) {
                                         traitList.setItemChecked(i, true);
                                         break;
                                     }
@@ -160,7 +163,7 @@ public class BrapiTraitActivity extends ThemedActivity {
 
                                         for (TraitObject selectedTrait : selectedTraits) {
 
-                                            if (trait.getTrait().equals(selectedTrait.getTrait())) {
+                                            if (trait.getName().equals(selectedTrait.getName())) {
                                                 selectedTraits.remove(selectedTrait);
                                                 break;
                                             }
@@ -204,8 +207,8 @@ public class BrapiTraitActivity extends ThemedActivity {
         ArrayList<String> itemDataList = new ArrayList<>();
 
         for (TraitObject trait : traits) {
-            if(trait.getTrait() != null)
-                itemDataList.add(trait.getTrait());
+            if (trait.getName() != null)
+                itemDataList.add(trait.getName());
             else
                 itemDataList.add(trait.getId());
         }
@@ -215,28 +218,20 @@ public class BrapiTraitActivity extends ThemedActivity {
 
     // Button event for load and save traits
     public void buttonClicked(View view) {
-        switch (view.getId()) {
-            case R.id.loadTraits:
-                // Start from beginning
-                paginationManager.reset();
-                loadTraitsList();
-                break;
+        int id = view.getId();
+        if (id == R.id.loadTraits) {// Start from beginning
+            paginationManager.reset();
+            loadTraitsList();
+        } else if (id == R.id.save) {// Save the selected traits
+            String saveMessage = saveTraits();
 
-            case R.id.save:
-                // Save the selected traits
-                String saveMessage = saveTraits();
-
-                setResult(RESULT_OK);
-                // navigate back to our traits list page
-                finish();
-                Toast.makeText(this, saveMessage, Toast.LENGTH_LONG).show();
-                break;
-            case R.id.prev:
-            case R.id.next:
-                // Update current page (if allowed) and start brapi call.
-                paginationManager.setNewPage(view.getId());
-                loadTraitsList();
-                break;
+            setResult(RESULT_OK);
+            // navigate back to our traits list page
+            finish();
+            Toast.makeText(this, saveMessage, Toast.LENGTH_LONG).show();
+        } else if (id == R.id.prev || id == R.id.next) {// Update current page (if allowed) and start brapi call.
+            paginationManager.setNewPage(view.getId());
+            loadTraitsList();
         }
     }
 
@@ -258,11 +253,11 @@ public class BrapiTraitActivity extends ThemedActivity {
 
             TraitObject trait = selectedTraits.get(i);
 
-            TraitObject existingTraitByName = database.getTraitByName(trait.getTrait());
+            TraitObject existingTraitByName = database.getTraitByName(trait.getName());
             TraitObject existingTraitByExId = database.getTraitByExternalDbId(trait.getExternalDbId(), trait.getTraitDataSource());
             // Check if the trait already exists
             if (existingTraitByName != null) {
-                secondaryMessage = getResources().getString(R.string.brapi_trait_already_exists, trait.getTrait());
+                secondaryMessage = getResources().getString(R.string.brapi_trait_already_exists, trait.getName());
                 // Skip this one, continue on.
                 continue;
             }else if (existingTraitByExId != null) {
@@ -278,9 +273,7 @@ public class BrapiTraitActivity extends ThemedActivity {
             }
         }
 
-        SharedPreferences ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
-        SharedPreferences.Editor ed = ep.edit();
-        ed.putBoolean(GeneralKeys.CREATE_TRAIT_FINISHED, true);
+        SharedPreferences.Editor ed = preferences.edit();
         ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false);
         ed.apply();
 

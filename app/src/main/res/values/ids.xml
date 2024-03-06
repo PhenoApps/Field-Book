@@ -132,18 +132,18 @@
     <item name="searchText" type="id" />
     <item name="text1" type="id" />
     <item name="formatbox" type="id" />
-    <item name="format" type="id" />
+    <item name="dialog_new_trait_format_sp" type="id" />
     <item name="traitbox" type="id" />
-    <item name="trait" type="id" />
-    <item name="defbox" type="id" />
-    <item name="def" type="id" />
-    <item name="boolBtn" type="id" />
+    <item name="dialog_new_trait_name_et" type="id" />
+    <item name="dialog_new_trait_default_ll" type="id" />
+    <item name="dialog_new_trait_default_et" type="id" />
+    <item name="dialog_new_trait_default_toggle_btn" type="id" />
     <item name="minbox" type="id" />
-    <item name="minimum" type="id" />
+    <item name="list_item_trait_parameter_minimum_et" type="id" />
     <item name="maxbox" type="id" />
-    <item name="maximum" type="id" />
+    <item name="list_item_maximum_parameter_et" type="id" />
     <item name="detailsbox" type="id" />
-    <item name="details" type="id" />
+    <item name="dialog_new_trait_details_et" type="id" />
     <item name="categorybox" type="id" />
     <item name="categories" type="id" />
     <item name="visible" type="id" />

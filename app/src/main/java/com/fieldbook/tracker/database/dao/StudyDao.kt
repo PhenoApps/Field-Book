@@ -12,6 +12,7 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.getTime
+import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
 import com.fieldbook.tracker.database.toFirst
 import com.fieldbook.tracker.database.toTable
@@ -64,7 +65,7 @@ class StudyDao {
 
             //combine the case statements with commas
             val selectStatement = if (select.isNotEmpty()) {
-                ", " + select.joinToString(", ")
+                select.joinToString(", ") + ", "
             } else ""
 
             /**
@@ -73,7 +74,7 @@ class StudyDao {
              */
             val query = """
             CREATE TABLE IF NOT EXISTS $sObservationUnitPropertyViewName AS 
-            SELECT units.${ObservationUnit.PK} AS id, units.`geo_coordinates` as "geo_coordinates" $selectStatement
+            SELECT $selectStatement units.${ObservationUnit.PK} AS id, units.`geo_coordinates` as "geo_coordinates"
             FROM ${ObservationUnit.tableName} AS units
             LEFT JOIN ${ObservationUnitValue.tableName} AS vals ON units.${ObservationUnit.PK} = vals.${ObservationUnit.FK}
             LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr on vals.${ObservationUnitAttribute.FK} = attr.${ObservationUnitAttribute.PK}
@@ -274,17 +275,18 @@ class StudyDao {
         /**
          * This function should always be called within a transaction.
          */
-        fun createFieldData(exp_id: Int, columns: List<String>, data: List<String>) = withDatabase { db ->
+        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) =
+            withDatabase { db ->
 
-            val names = getNames(exp_id)!!
+                val names = getNames(studyId)!!
 
-            //TODO: indexOf can return -1 which leads to array out of bounds exception
-            //input data corresponds to original database column names
-            val uniqueIndex = columns.indexOf(names.unique)
-            val primaryIndex = columns.indexOf(names.primary)
-            val secondaryIndex = columns.indexOf(names.secondary)
+                //TODO: indexOf can return -1 which leads to array out of bounds exception
+                //input data corresponds to original database column names
+                val uniqueIndex = columns.indexOf(names.unique)
+                val primaryIndex = columns.indexOf(names.primary)
+                val secondaryIndex = columns.indexOf(names.secondary)
 
-            //TODO remove when we handle primary/secondary ids better
+                //TODO remove when we handle primary/secondary ids better
             //check if data size matches the columns size, on mismatch fill with dummy data
             //mainly fixes issues with BrAPI when xtype/ytype and row/col values are not given
             val actualData = if (data.size != columns.size) {
@@ -305,21 +307,22 @@ class StudyDao {
             }
             
             val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
-                    Study.FK to exp_id,
-                    "observation_unit_db_id" to actualData[uniqueIndex],
-                    "primary_id" to if (primaryIndex < 0) "NA" else actualData[primaryIndex],
-                    "secondary_id" to if (secondaryIndex < 0) "NA" else actualData[secondaryIndex],
-                     "geo_coordinates" to geoCoordinates))
+                Study.FK to studyId,
+                "observation_unit_db_id" to actualData[uniqueIndex],
+                "primary_id" to if (primaryIndex < 0) "NA" else actualData[primaryIndex],
+                "secondary_id" to if (secondaryIndex < 0) "NA" else actualData[secondaryIndex],
+                "geo_coordinates" to geoCoordinates
+            ))
 
             columns.forEachIndexed { index, it ->
 
                 val attrId = ObservationUnitAttributeDao.getIdByName(it)
 
                 db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                        Study.FK to exp_id,
-                        ObservationUnit.FK to rowid,
-                        ObservationUnitAttribute.FK to attrId,
-                        "observation_unit_value_name" to actualData[index]
+                    Study.FK to studyId,
+                    ObservationUnit.FK to rowid,
+                    ObservationUnitAttribute.FK to attrId,
+                    "observation_unit_value_name" to actualData[index]
                 ))
             }
 
@@ -328,7 +331,7 @@ class StudyDao {
                 val attrId = ObservationUnitAttributeDao.getIdByName("Row")
 
                 db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                    Study.FK to exp_id,
+                    Study.FK to studyId,
                     ObservationUnit.FK to rowid,
                     ObservationUnitAttribute.FK to attrId,
                     "observation_unit_value_name" to "NA"
@@ -340,7 +343,7 @@ class StudyDao {
                 val attrId = ObservationUnitAttributeDao.getIdByName("Column")
 
                 db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                    Study.FK to exp_id,
+                    Study.FK to studyId,
                     ObservationUnit.FK to rowid,
                     ObservationUnitAttribute.FK to attrId,
                     "observation_unit_value_name" to "NA"
@@ -348,28 +351,34 @@ class StudyDao {
             }
         }
 
-        private fun updateImportDate(db: SQLiteDatabase, exp_id: Int) {
+        private fun updateImportDate(db: SQLiteDatabase, studyId: Int) {
 
             db.update(Study.tableName, ContentValues().apply {
-                put("count", getCount(exp_id))
+                put("count", getCount(studyId))
                 put("date_import", getTime())
-            }, "${Study.PK} = ?", arrayOf("$exp_id"))
+            }, "${Study.PK} = ?", arrayOf("$studyId"))
         }
 
-        private fun modifyDate(db: SQLiteDatabase, exp_id: Int) {
+        private fun modifyDate(db: SQLiteDatabase, studyId: Int) {
 
-            db.query(Study.tableName,
+            db.query(
+                Study.tableName,
                 where = "${Study.PK} = ?",
-                whereArgs = arrayOf(exp_id.toString())).toFirst().let { study ->
+                whereArgs = arrayOf(studyId.toString())
+            ).toFirst().let { study ->
 
-                if (study[Study.PK] == exp_id) {
+                if (study[Study.PK] == studyId) {
 
                     val studyKey = study[Study.PK]
 
-                    with(db.query(Observation.tableName, arrayOf("observation_time_stamp"),
+                    with(
+                        db.query(
+                            Observation.tableName, arrayOf("observation_time_stamp"),
                             where = "${Study.FK} = ?",
                             whereArgs = arrayOf("$studyKey"),
-                            orderBy = "datetime(substr(observation_time_stamp, 1, 19)) DESC").toFirst()) {
+                            orderBy = "datetime(substr(observation_time_stamp, 1, 19)) DESC"
+                        ).toFirst()
+                    ) {
 
                         db.update(Study.tableName, ContentValues().apply {
                             put("date_edit", this@with["observation_time_stamp"].toString())
@@ -380,11 +389,11 @@ class StudyDao {
             }
         }
 
-        private fun updateExportDate(db: SQLiteDatabase, exp_id: Int) {
+        private fun updateExportDate(db: SQLiteDatabase, studyId: Int) {
 
             db.update(Study.tableName, ContentValues().apply {
                 put("date_export", getTime())
-            }, "${Study.PK} = ?", arrayOf("$exp_id"))
+            }, "${Study.PK} = ?", arrayOf("$studyId"))
         }
 
         /**
@@ -392,25 +401,27 @@ class StudyDao {
          * imp: boolean flag to get import date of observation units and count
          *
          */
-        fun updateStudyTable(updateImportDate: Boolean = false,
-                             modifyDate: Boolean = false,
-                             updateExportDate: Boolean = false, exp_id: Int) = withDatabase { db ->
+        fun updateStudyTable(
+            updateImportDate: Boolean = false,
+            modifyDate: Boolean = false,
+            updateExportDate: Boolean = false, studyId: Int
+        ) = withDatabase { db ->
 
-            if (updateImportDate) updateImportDate(db, exp_id)
+            if (updateImportDate) updateImportDate(db, studyId)
 
-            if (modifyDate) modifyDate(db, exp_id)
+            if (modifyDate) modifyDate(db, studyId)
 
-            if (updateExportDate) updateExportDate(db, exp_id)
+            if (updateExportDate) updateExportDate(db, studyId)
         }
 
-        fun updateStudySort(sort: String?, exp_id: Int) = withDatabase { db ->
-            var contentVals = ContentValues();
-            if(sort == null) {
+        fun updateStudySort(sort: String?, studyId: Int) = withDatabase { db ->
+            val contentVals = ContentValues()
+            if (sort == null) {
                 contentVals.putNull("study_sort_name")
             } else {
                 contentVals.put("study_sort_name", sort)
             }
-            db.update(Study.tableName, contentVals, "${Study.PK} = ?", arrayOf("$exp_id"))
+            db.update(Study.tableName, contentVals, "${Study.PK} = ?", arrayOf("$studyId"))
         }
 
         /**
@@ -431,10 +442,12 @@ class StudyDao {
          * Default return value is -1
          */
         fun checkFieldNameAndObsLvl(name: String, observationLevel: String?): Int = withDatabase { db ->
-            db.query(Study.tableName,
-                    arrayOf(Study.PK),
-                    where = "study_name = ? AND observation_levels = ?",
-                    whereArgs = arrayOf(name, observationLevel ?: "")).toFirst()[Study.PK] as? Int ?: -1
+            db.query(
+                Study.tableName,
+                arrayOf(Study.PK),
+                where = "study_name = ? AND observation_levels = ?",
+                whereArgs = arrayOf(name, observationLevel ?: "")
+            ).toFirst()[Study.PK] as? Int ?: -1
 
         } ?: -1
 
@@ -443,5 +456,16 @@ class StudyDao {
             ObservationUnitDao.getAll(studyId).size
 
         } ?: 0
+
+        fun getById(id: String) = withDatabase { db ->
+
+            StudyModel(
+                db.query(
+                    Study.tableName,
+                    where = "internal_id_study = ?",
+                    whereArgs = arrayOf(id)
+                ).toFirst()
+            )
+        }
     }
 }

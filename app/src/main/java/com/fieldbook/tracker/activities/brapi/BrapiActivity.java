@@ -216,21 +216,15 @@ public class BrapiActivity extends ThemedActivity {
     }
 
     public void buttonClicked(View view) {
-        switch (view.getId()) {
-            case R.id.loadStudies:
-                // Start from beginning
-                paginationManager.reset();
-                loadStudiesList();
-                break;
-            case R.id.save:
-                saveStudy();
-                break;
-            case R.id.prev:
-            case R.id.next:
-                // Update current page (if allowed) and start brapi call.
-                paginationManager.setNewPage(view.getId());
-                loadStudiesList();
-                break;
+        int id = view.getId();
+        if (id == R.id.loadStudies) {// Start from beginning
+            paginationManager.reset();
+            loadStudiesList();
+        } else if (id == R.id.save) {
+            saveStudy();
+        } else if (id == R.id.prev || id == R.id.next) {// Update current page (if allowed) and start brapi call.
+            paginationManager.setNewPage(view.getId());
+            loadStudiesList();
         }
     }
 
@@ -249,19 +243,16 @@ public class BrapiActivity extends ThemedActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                break;
-            case R.id.filter_by_program:
-                Intent filterByProgramIntent = new Intent(this, BrapiProgramActivity.class);
-                startActivityForResult(filterByProgramIntent, FILTER_BY_PROGRAM_REQUEST_CODE);
-                break;
-            case R.id.filter_by_trial:
-                Intent filterByTrialIntent = new Intent(this, BrapiTrialActivity.class);
-                filterByTrialIntent.putExtra(PROGRAM_DB_ID_INTENT_PARAM, programDbId);
-                startActivityForResult(filterByTrialIntent, FILTER_BY_TRIAL_REQUEST_CODE);
-                break;
+        int itemId = item.getItemId();
+        if (itemId == android.R.id.home) {
+            finish();
+        } else if (itemId == R.id.filter_by_program) {
+            Intent filterByProgramIntent = new Intent(this, BrapiProgramActivity.class);
+            startActivityForResult(filterByProgramIntent, FILTER_BY_PROGRAM_REQUEST_CODE);
+        } else if (itemId == R.id.filter_by_trial) {
+            Intent filterByTrialIntent = new Intent(this, BrapiTrialActivity.class);
+            filterByTrialIntent.putExtra(PROGRAM_DB_ID_INTENT_PARAM, programDbId);
+            startActivityForResult(filterByTrialIntent, FILTER_BY_TRIAL_REQUEST_CODE);
         }
         return super.onOptionsItemSelected(item);
     }

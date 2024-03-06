@@ -8,17 +8,19 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Point
 import android.graphics.SurfaceTexture
 import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.DocumentsContract
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Group
 import androidx.documentfile.provider.DocumentFile
@@ -26,13 +28,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.database.dao.ObservationDao
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.receivers.UsbAttachReceiver
 import com.fieldbook.tracker.receivers.UsbDetachReceiver
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
+import com.fieldbook.tracker.utilities.ExifUtil
+import com.fieldbook.tracker.utilities.FileUtil
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.serenegiant.SimpleUVCCameraTextureView
-import com.serenegiant.usb.UVCCamera
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.phenoapps.adapters.ImageAdapter
@@ -41,7 +45,7 @@ import org.phenoapps.interfaces.usb.camera.CameraSurfaceListener
 import org.phenoapps.interfaces.usb.camera.UsbCameraInterface
 import org.phenoapps.receivers.UsbPermissionReceiver
 import org.phenoapps.usb.camera.UsbCameraHelper
-import kotlin.math.abs
+import java.io.FileNotFoundException
 
 class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
@@ -57,14 +61,15 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     private var mUsbAttachReceiver: UsbAttachReceiver? = null
     private var mUsbCameraHelper: UsbCameraHelper? = null
     private var textureView: SimpleUVCCameraTextureView? = null
-    private var connectBtn: ImageButton? = null
-    private var captureBtn: ImageButton? = null
+    private var connectBtn: FloatingActionButton? = null
+    private var captureBtn: FloatingActionButton? = null
     private var recyclerView: RecyclerView? = null
     private var previewGroup: Group? = null
     private var constraintLayout: ConstraintLayout? = null
+
     //zoom buttons
-    private var zoomInButton: ImageButton? = null
-    private var zoomOutButton: ImageButton? = null
+    private var zoomInButton: FloatingActionButton? = null
+    private var zoomOutButton: FloatingActionButton? = null
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -106,6 +111,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 val manager = ctx.getSystemService(Context.USB_SERVICE) as UsbManager
 
+                Log.d(TAG, "manager: $manager")
+
                 val permissionIntent = PendingIntent.getBroadcast(
                     ctx,
                     0,
@@ -114,9 +121,17 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 )
 
                 val devices = manager.deviceList.map { it.value }
+                Log.d(TAG, "devices: $devices ${devices.size}")
 
                 devices.forEach {
+                    Log.d(TAG, "${it.vendorId} ${it.productId}")
+                    Log.d(TAG, it.deviceName)
                     manager.requestPermission(it, permissionIntent)
+                }
+
+                if (devices.isNotEmpty()) {
+
+                    setup()
                 }
             }
         }
@@ -192,14 +207,19 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 context.unregisterReceiver(mUsbPermissionReceiver)
 
-            } catch (ignore: Exception) {} //might not be registered if already paired
+            } catch (ignore: Exception) {
+            } //might not be registered if already paired
 
             setup()
         }
 
         val filter = IntentFilter(UsbPermissionReceiver.ACTION_USB_PERMISSION)
 
-        context.registerReceiver(mUsbPermissionReceiver, filter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(mUsbPermissionReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            context.registerReceiver(mUsbPermissionReceiver, filter)
+        }
     }
 
     private fun registerDetachListener() {
@@ -216,6 +236,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
             mUsbDetachReceiver = UsbDetachReceiver {
 
+                (context as CollectActivity).usbCameraConnected = false
+
                 Log.d(TAG, "Detaching")
 
                 activity?.runOnUiThread {
@@ -226,7 +248,15 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 }
             }
 
-            context.registerReceiver(mUsbDetachReceiver, detachFilter)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.registerReceiver(
+                    mUsbDetachReceiver,
+                    detachFilter,
+                    Context.RECEIVER_NOT_EXPORTED
+                )
+            } else {
+                context.registerReceiver(mUsbDetachReceiver, detachFilter)
+            }
 
         } catch (e: Exception) {
 
@@ -253,12 +283,17 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 context.unregisterReceiver(mUsbAttachReceiver)
 
-            } catch (ignore: Exception) {} //might not be registered if already paired
+            } catch (ignore: Exception) {
+            } //might not be registered if already paired
         }
 
         val filter = IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED)
 
-        context.registerReceiver(mUsbAttachReceiver, filter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(mUsbAttachReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            context.registerReceiver(mUsbAttachReceiver, filter)
+        }
     }
 
     private fun setup() {
@@ -280,6 +315,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 Log.d(TAG, "Surface available..")
 
                 initPreview()
+
+                (context as CollectActivity).usbCameraConnected = true
 
             }
 
@@ -324,6 +361,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                     if (!isLocked) {
 
+                        captureBtn?.isEnabled = false
+
                         runBlocking {
 
                             Log.d(TAG, "Capture click.")
@@ -333,6 +372,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                             delay(CAMERA_DELAY_MS)
 
                             scrollToLast()
+
                         }
                     }
                 }
@@ -349,6 +389,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 val pos = recyclerView?.adapter?.itemCount ?: 1
 
                 recyclerView?.scrollToPosition(pos - 1)
+
+                captureBtn?.isEnabled = true
 
             }, 500L)
 
@@ -368,6 +410,19 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
             loadAdapterItems()
 
         }, 500)
+
+        if ((context as CollectActivity).usbCameraConnected) {
+
+            try {
+
+                setup()
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+            }
+        }
 
         super.loadLayout()
     }
@@ -398,7 +453,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 val imageView = ImageView(context)
                 imageView.setImageBitmap(BitmapFactory.decodeStream(input))
 
-                AlertDialog.Builder(context)
+                AlertDialog.Builder(context, R.style.AppAlertDialog)
                     .setTitle(R.string.trait_usb_camera_delete_photo)
                     .setOnCancelListener { dialog -> dialog.dismiss() }
                     .setPositiveButton(android.R.string.ok) { dialog, _ ->
@@ -418,76 +473,66 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     private fun saveBitmapToStorage() {
 
         //get current trait's trait name, use it as a plot_media directory
-        currentTrait.trait?.let { traitName ->
+        currentTrait.name?.let { traitName ->
+
+            val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
 
             val traitDbId = currentTrait.id
 
             //get the bitmap from the texture view, only use it if its not null
             textureView?.bitmap?.let { bmp ->
 
-                DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { usbPhotosDir ->
+                DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)
+                    ?.let { usbPhotosDir ->
 
-                    val plot = currentRange.plot_id
-
-                    val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-
-                    val time = Utils.getDateTime()
-
-                    val name = "${traitName}_${plot}_$time.png"
+                        val plot = collectActivity.observationUnit
+                        val studyId = collectActivity.studyId
+                        val time = Utils.getDateTime()
+                        val name = "${sanitizedTraitName}_${plot}_$time.png"
 
                     usbPhotosDir.createFile("*/*", name)?.let { file ->
 
                         context.contentResolver.openOutputStream(file.uri)?.let { output ->
 
+                            //if sdk > 24, can write exif information to the image
+                            //goal is to encode observation variable model into the user comments
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+                                ExifUtil.saveVariableUnitModelToExif(
+                                    context,
+                                    (controller.getContext() as CollectActivity).person,
+                                    time,
+                                    database.getStudyById(studyId),
+                                    database.getObservationUnitById(currentRange.plot_id),
+                                    database.getObservationVariableById(currentTrait.id),
+                                    file.uri
+                                )
+                            }
+
                             bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
 
                             database.insertObservation(
-                                plot, traitDbId, file.uri.toString(),
-                                prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
-                                        + prefs.getString(GeneralKeys.LAST_NAME, ""),
+                                plot, traitDbId, type, file.uri.toString(),
+                                (activity as? CollectActivity)?.person,
                                 (activity as? CollectActivity)?.locationByPreferences, "", studyId,
                                 null,
                                 null,
                                 null
                             )
 
-                            createThumbnail(traitName, name, bmp)
+                            //if sdk > 24, can write exif information to the image
+                            //goal is to encode observation variable model into the user comments
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+                                ExifUtil.saveJsonToExif(
+                                    context,
+                                    currentTrait,
+                                    file.uri
+                                )
+
+                            }
                         }
                     }
-                }
-            }
-        }
-    }
-
-    private fun createThumbnail(traitName: String, name: String, bitmap: Bitmap) {
-
-        DocumentTreeUtil.getThumbnailsDir(context, traitName)?.let { thumbnails ->
-
-            var thumbnailWidth = resources.getInteger(R.integer.thumbnailWidth)
-            var thumbnailHeight = resources.getInteger(R.integer.thumbnailHeight)
-            var aspectRatio = mUsbCameraHelper?.aspectRatio ?: (UVCCamera.DEFAULT_PREVIEW_WIDTH / UVCCamera.DEFAULT_PREVIEW_HEIGHT).toDouble()
-
-            val aspectKeys = resources.getStringArray(R.array.aspect_ratio_keys)
-            val aspectValues = resources.getStringArray(R.array.aspect_ratio_values)
-            aspectKeys.minByOrNull { abs(it.toDouble() - aspectRatio) }?.let { closest ->
-                val index = aspectKeys.indexOf(closest)
-                if (index < aspectValues.size) {
-                    val (width, height) = aspectValues[index].split("x")
-                    thumbnailWidth = width.toInt()
-                    thumbnailHeight = height.toInt()
-                    aspectRatio = thumbnailWidth / thumbnailHeight.toDouble()
-
-                    Log.d(TAG, "Chosen thumbnail: $thumbnailWidth x $thumbnailHeight a.r: $aspectRatio")
-                }
-            }
-
-            val thumbnailBitmap = Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, true)
-
-            thumbnails.createFile("image/png", name)?.let { thumbnail ->
-
-                context?.contentResolver?.openOutputStream(thumbnail.uri)?.use { output ->
-
-                    thumbnailBitmap.compress(Bitmap.CompressFormat.PNG, 100, output)
 
                     loadAdapterItems()
                 }
@@ -497,25 +542,41 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
     private fun loadAdapterItems() {
 
-        //get current trait's trait name, use it as a plot_media directory
-        currentTrait?.trait?.let { traitName ->
+        val thumbnailModels = getImageObservations().mapNotNull {
 
-            DocumentTreeUtil.getThumbnailsDir(context, traitName)?.let { thumbnailDir ->
+            var model: ImageAdapter.Model? = null
 
-                val plot = currentRange.plot_id
+            try {
 
-                val images = DocumentTreeUtil.getPlotMedia(thumbnailDir, plot, ".png")
+                DocumentsContract.getDocumentThumbnail(context.contentResolver,
+                    Uri.parse(it.value), Point(256, 256), null)?.let { bmp ->
 
-                with (context.contentResolver) {
+                    model = ImageAdapter.Model(it.value, bmp)
 
-                    (recyclerView?.adapter as? ImageAdapter)?.submitList(images.map {
-                        openInputStream(it.uri).use { input ->
-                            ImageAdapter.Model(it.uri.toString(), BitmapFactory.decodeStream(input))
-                        }
-                    })
                 }
+
+            } catch (f: FileNotFoundException) {
+
+                f.printStackTrace()
+
+                model = null
             }
+
+            model
         }
+
+        (recyclerView?.adapter as? ImageAdapter)?.submitList(thumbnailModels)
+    }
+
+    private fun getImageObservations(): Array<ObservationModel> {
+
+        val traitDbId = collectActivity.traitDbId.toInt()
+        val plot = collectActivity.observationUnit
+        val studyId = collectActivity.studyId
+
+        return database.getAllObservations(studyId).filter {
+            it.observation_variable_db_id == traitDbId && it.observation_unit_id == plot
+        }.toTypedArray()
     }
 
     private fun deleteItem(model: ImageAdapter.Model) {
@@ -523,33 +584,46 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
         //get current trait's trait name, use it as a plot_media directory
-        currentTrait?.trait?.let { traitName ->
+        currentTrait?.name?.let { traitName ->
+
+            val plot = currentRange.plot_id
 
             val traitDbId = currentTrait.id
 
-            DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
+            getImageObservations().firstOrNull { it.value == model.uri }?.let { observation ->
 
-                val plot = currentRange.plot_id
+                try {
 
-                DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
+                    DocumentFile.fromSingleUri(context, Uri.parse(observation.value))
+                        ?.let { image ->
 
-                    highResImages.firstOrNull { it.name == (DocumentFile.fromSingleUri(context, Uri.parse(model.uri))?.name ?: String()) }?.let { image ->
+                            val result = image.delete()
 
-                        try {
+                            if (result) {
 
-                            image.delete()
-                            DocumentFile.fromSingleUri(context, Uri.parse(model.uri))?.delete()
+                                database.deleteTraitByValue(
+                                    studyId,
+                                    plot,
+                                    traitDbId,
+                                    image.uri.toString()
+                                )
 
-                            ObservationDao.deleteTraitByValue(studyId, plot, traitDbId, image.uri.toString())
+                                loadAdapterItems()
 
-                            loadAdapterItems()
+                            } else {
 
-                        } catch (e: Exception) {
+                                collectActivity.runOnUiThread {
 
-                            Log.e(TAG, "Failed to delete images.", e)
+                                    Toast.makeText(context, R.string.photo_failed_to_delete, Toast.LENGTH_SHORT).show()
 
+                                }
+                            }
                         }
-                    }
+
+                } catch (e: Exception) {
+
+                    Log.e(TAG, "Failed to delete images.", e)
+
                 }
             }
         }
@@ -559,22 +633,13 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
         if (!isLocked) {
 
-            //get current trait's trait name, use it as a plot_media directory
-            currentTrait?.trait?.let { traitName ->
+            getImageObservations().firstOrNull { it.value == model.uri }?.let { observation ->
 
-                DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
+                DocumentFile.fromSingleUri(context, Uri.parse(observation.value))?.let { image ->
 
-                    val plot = currentRange.plot_id
-
-                    DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
-
-                        highResImages.firstOrNull { it.name == (DocumentFile.fromSingleUri(context, Uri.parse(model.uri))?.name ?: String()) }?.let { image ->
-
-                            activity?.startActivity(Intent(Intent.ACTION_VIEW, image.uri).also {
-                                it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            })
-                        }
-                    }
+                    activity?.startActivity(Intent(Intent.ACTION_VIEW, image.uri).also {
+                        it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    })
                 }
             }
         }

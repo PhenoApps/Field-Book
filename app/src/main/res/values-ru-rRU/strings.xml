@@ -61,8 +61,6 @@
     <string name="traits_format_photo">Фото</string>
     <string name="traits_format_audio">Звук</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">добавить показатель</string>
-    <string name="traits_create_trait">Показатель</string>
     <string name="traits_create_format">Формат</string>
     <string name="traits_create_value_default">значение по умолчанию</string>
     <string name="traits_create_value_minimum">минимум</string>
@@ -170,7 +168,7 @@
     <string name="database_reset_warning1">Все данные будут удалены при возвращении к исходным установкам. Продолжать?</string>
     <string name="database_reset_warning2">Это действие нельзя отменить. Приложение закончит работу после удаления данных. Продолжать?</string>
     <string name="database_reset_message">База данных удалена</string>
-    <!-- Beta -->
+    <!-- Experimental -->
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">О программе</string>

@@ -4,6 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <ProgressBar
+        android:id="@+id/plotsProgressBar"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progressTint="?attr/colorAccent"
+        style="?android:attr/progressBarStyleHorizontal"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <ImageView
         android:id="@+id/rangeLeft"
         android:layout_width="wrap_content"
@@ -15,7 +25,7 @@
         android:src="@drawable/chevron_left"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/plotsProgressBar" />
 
     <ImageView
         android:id="@+id/rangeRight"
@@ -28,7 +38,7 @@
         android:src="@drawable/chevron_right"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/plotsProgressBar" />
 
     <LinearLayout
         android:id="@+id/namesPlotRangeHolder"
@@ -40,7 +50,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/valuesPlotRangeHolder"
         app:layout_constraintStart_toEndOf="@+id/rangeLeft"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/plotsProgressBar">
 
         <TextView
             android:id="@+id/rangeName"
@@ -49,7 +59,7 @@
             android:gravity="right"
             android:paddingRight="10dp"
             android:text="@string/search_results_dialog_range"
-            android:textSize="@dimen/text_size_xlarge"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
 
         <TextView
@@ -59,7 +69,7 @@
             android:gravity="right"
             android:paddingRight="10dp"
             android:text="@string/search_results_dialog_plot"
-            android:textSize="@dimen/text_size_xlarge"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -74,7 +84,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/rangeRight"
         app:layout_constraintStart_toEndOf="@id/namesPlotRangeHolder"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/plotsProgressBar">
 
         <EditText
             android:id="@+id/range"
@@ -85,8 +95,7 @@
             android:inputType="textVisiblePassword"
             android:singleLine="true"
             android:text=""
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
 
         <TextView
@@ -97,8 +106,7 @@
             android:padding="0dp"
             android:singleLine="true"
             android:text=""
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_xlarge"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold"
             android:visibility="gone" />
 
@@ -111,8 +119,7 @@
             android:inputType="textVisiblePassword"
             android:singleLine="true"
             android:text=""
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
 
         <TextView
@@ -122,10 +129,10 @@
             android:gravity="center"
             android:singleLine="true"
             android:text=""
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_xlarge"
+            android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold"
             android:visibility="gone" />
     </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

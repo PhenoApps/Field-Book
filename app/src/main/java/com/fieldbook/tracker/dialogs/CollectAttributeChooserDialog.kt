@@ -67,6 +67,9 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
             //query database for attributes/traits to use
             try {
                 attributes = activity.getDatabase().getAllObservationUnitAttributeNames(activity.studyId.toInt())
+                val attributesList = attributes.toMutableList()
+                attributesList.add(0, context.getString(R.string.field_name_attribute))
+                attributes = attributesList.toTypedArray()
                 traits = activity.getDatabase().allTraitObjects.toTypedArray()
                 other = traits.filter { !it.visible }.toTypedArray()
                 traits = traits.filter { it.visible }.toTypedArray()
@@ -115,7 +118,7 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
 
         //manually select the first tab based on preferences
         val tabIndex = activity.getPreferences()
-            .getInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, 1)
+            .getInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, 0)
 
         tabLayout.selectTab(tabLayout.getTabAt(tabIndex))
     }
@@ -131,8 +134,8 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
         //get values to display based on cached arrays
         val infoBarLabels = when (label) {
             attributesLabel -> attributes
-            traitsLabel -> traits.filter { it.visible }.map { it.trait }.toTypedArray()
-            else -> other.map { it.trait }.toTypedArray()
+            traitsLabel -> traits.filter { it.visible }.map { it.name }.toTypedArray()
+            else -> other.map { it.name }.toTypedArray()
         }
 
         //create adapter of labels s.a : plot/column/block or height/picture/notes depending on what tab is selected

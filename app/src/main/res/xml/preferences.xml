@@ -2,8 +2,9 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.bytehamster.lib.preferencesearch.SearchPreference
-        android:key="searchPreference" />
+    <com.bytehamster.lib.preferencesearch.SearchPreference android:key="searchPreference" />
+
+    <EditTextPreference android:layout="@layout/view_preferences_horizontal_break" />
 
     <Preference
         android:icon="@drawable/ic_pref_general"
@@ -54,9 +55,9 @@
         app:fragment="com.fieldbook.tracker.preferences.DatabasePreferencesFragment" />
 
     <Preference
-        android:icon="@drawable/ic_beta"
-        android:key="pref_key_beta_settings"
-        android:title="@string/preferences_beta_title"
-        app:fragment="com.fieldbook.tracker.preferences.BetaPreferencesFragment" />
+        android:icon="@drawable/ic_experimental"
+        android:key="pref_key_experimental_settings"
+        android:title="@string/preferences_experimental_title"
+        app:fragment="com.fieldbook.tracker.preferences.ExperimentalPreferencesFragment" />
 
 </androidx.preference.PreferenceScreen>

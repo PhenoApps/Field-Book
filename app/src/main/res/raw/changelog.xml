@@ -1,6 +1,30 @@
 <changelog>
 
     <release
+        date="2023-12-08"
+        versionCode="50600"
+        versionName="v5.6">
+        <new>Updated trait creator</new>
+        <new>Updated Photo trait for devices without camera app (Boox Palma)</new>
+        <info>Beta settings renamed to Experimental</info>
+        <bugfix>Numerous bug fixes</bugfix>
+    </release>
+
+    <release
+        date="2023-11-01"
+        versionCode="50524"
+        versionName="v5.5.24">
+        <new>Progress bar in Collect screen</new>
+        <new>Person now required by default</new>
+        <new>Coordinate format modified to match ISO (longitude; latitude)</new>
+        <new>GeoNav logging updates and bugfixes</new>
+        <new>Capture field level audio (beta)</new>
+        <new>Field name visible in InfoBars</new>
+        <info>Merged duplicate settings</info>
+        <bugfix>Numerous bug fixes</bugfix>
+    </release>
+
+    <release
         date="2023-09-13"
         versionCode="550"
         versionName="v5.5">
