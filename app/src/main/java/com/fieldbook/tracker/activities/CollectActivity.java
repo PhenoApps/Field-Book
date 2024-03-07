@@ -30,7 +30,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -128,7 +127,8 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.interfaces.CollectTraitController,
         InfoBarAdapter.InfoBarController,
         GoProTraitLayout.GoProCollector,
-        GPSTracker.GPSTrackerListener {
+        GPSTracker.GPSTrackerListener,
+        SearchDialog.onSearchResultsClickedListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -1285,11 +1285,7 @@ public class CollectActivity extends ThemedActivity
                 sequence.start();
                 break;
             case searchId:
-//                intent.setClassName(CollectActivity.this,
-//                        SearchActivity.class.getName());
-//                startActivity(intent);
-
-                SearchDialog searchdialog = new SearchDialog(this);
+                SearchDialog searchdialog = new SearchDialog(this, this);
                 searchdialog.show(getSupportFragmentManager(), "DialogTag");
                 break;
 
@@ -2415,5 +2411,13 @@ public class CollectActivity extends ThemedActivity
         if (gps == null) return null;
 
         return gps.getLocation(0, 0);
+    }
+
+    @Override
+    public void onSearchResultsClicked(String unique, String range, String plot, boolean reload) {
+        searchUnique = unique;
+        searchRange = range;
+        searchPlot = plot;
+        searchReload = reload;
     }
 }

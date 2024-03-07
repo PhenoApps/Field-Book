@@ -47,9 +47,11 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
     private SharedPreferences ep;
     private static List<SearchDialogDataModel> dataSet;
     public static boolean openResults;
+    private final onSearchResultsClickedListener onSearchResultsClickedListener;
 
-    public SearchDialog(CollectActivity activity) {
+    public SearchDialog(CollectActivity activity, onSearchResultsClickedListener onSearchResultsClickedListener) {
         originActivity = activity;
+        this.onSearchResultsClickedListener = onSearchResultsClickedListener;
     }
 
     @NonNull
@@ -85,232 +87,6 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
             createSearchAttributeChooserDialog();
         });
 
-//        builder.setPositiveButton(R.string.search_dialog_search, (dialogInterface, id) -> {
-////            Spinner c = parent.getChildAt(0).findViewById(R.id.columns);
-////            Spinner s = parent.getChildAt(0).findViewById(R.id.like);
-////            SharedPreferences.Editor ed = ep.edit();
-////            ed.putInt(GeneralKeys.SEARCH_COLUMN_DEFAULT, c.getSelectedItemPosition());
-////            ed.putInt(GeneralKeys.SEARCH_LIKE_DEFAULT, s.getSelectedItemPosition());
-////            ed.apply();
-//
-//            try {
-//                createSearchResultsDialog();
-//                // Create the sql query based on user selection
-////                String sql = "";
-////                String sql1 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from ObservationUnitProperty where ObservationUnitProperty.id is not null";
-////                String sql2 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from observation_variables, ObservationUnitProperty, observations where observations.observation_unit_id = ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " and observations.observation_variable_name = observation_variables.observation_variable_name and observations.observation_variable_field_book_format = observation_variables.observation_variable_field_book_format";
-////
-////                //Array to store all the columns to be displayed in the search results dialog
-//////                ArrayList<String> columnsList = new ArrayList<>();
-//////                columnsList.add(ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)));
-//////                columnsList.add(ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_plot)));
-////
-////                for (int i = 0; i < dataSet.size(); i++) {
-////
-////                    String c = dataSet.get(i).getAttribute();
-////                    int s = dataSet.get(i).getImageResourceId();
-////                    String t = dataSet.get(i).getText();
-////
-////                    TraitObject traitObject = originActivity.getDatabase().getTraitByName(c);
-//////                    if (!columnsList.contains(c)) {
-//////                        columnsList.add(c);
-//////                    }
-////
-////                    String prefix;
-////                    boolean isAttribute; //Checks if 'c' is an attribute or a trait
-////                    boolean isCategorical = false; //Checks if 'c' is a categorical trait
-////
-////                    if (traitObject == null) {
-////                        isAttribute = true;
-////                        prefix = "ObservationUnitProperty." + TICK + c + TICK;
-////                    } else {
-////                        isAttribute = false;
-////                        prefix = "observation_variables.observation_variable_name = " + TICK + c + TICK;
-////
-////                        if (traitObject.getFormat().equals("categorical") || traitObject.getFormat().equals("multicat") || traitObject.getFormat().equals("qualitative")) {
-////                            isCategorical = true;
-////                            t = encodeCategorical(t);
-////                        }
-////                    }
-////
-////                    // This is to prevent crashes when the user uses special characters
-////                    String trunc = DatabaseUtils.sqlEscapeString(t);
-////
-////                    switch (s) {
-////
-////                        // 0: Equals to
-////                        case R.drawable.ic_tb_equal:
-////                            if (isAttribute) prefix = prefix + " = " + trunc;
-////                            else prefix = prefix + " and value = " + trunc;
-////                            break;
-////
-////                        // 1: Not equals to
-////                        case R.drawable.ic_tb_not_equal:
-////                            if (isAttribute) prefix = prefix + " != " + trunc;
-////                            else prefix = prefix + " and value != " + trunc;
-////                            break;
-////
-////                        // 2: Contains
-////                        case R.drawable.ic_tb_contains:
-////                            if (isAttribute)
-////                                prefix = prefix + " like " + DatabaseUtils.sqlEscapeString("%" + t + "%");
-////                            else {
-////                                if (!isCategorical)
-////                                    prefix = prefix + " and observations.value like " + DatabaseUtils.sqlEscapeString("%" + t + "%");
-////                                else {
-////                                    String decodedT = CategoryJsonUtil.Companion.decode(t).get(0).getValue();
-////                                    prefix = prefix + " and observations.value like " + DatabaseUtils.sqlEscapeString("%[{\"label\":\"%" + decodedT + "%\",\"value\":\"%" + decodedT + "%\"}]%");
-////                                }
-////                            }
-////                            break;
-////
-////                        // 3: More than
-////                        case R.drawable.ic_tb_greater_than:
-////                            if (isAttribute) prefix = prefix + " > " + trunc;
-////                            else prefix = prefix + " and CAST(value AS INTEGER) > " + trunc;
-////                            break;
-////
-////                        // 4: less than
-////                        case R.drawable.ic_tb_less_than:
-////                            if (isAttribute) prefix = prefix + " < " + trunc;
-////                            else prefix = prefix + " and CAST(value AS INTEGER) < " + trunc;
-////                            break;
-////
-////                    }
-////
-////                    if (isAttribute) sql += sql1 + " and " + prefix;
-////                    else sql += sql2 + " and " + prefix;
-////
-////                    if (i != (dataSet.size() - 1)) sql += " INTERSECT ";
-////
-////                }
-////
-////                final SearchData[] data = originActivity.getDatabase().getRangeBySql(sql);
-////                ObservationModel[] observations = originActivity.getDatabase().getAllObservations();
-//
-////                if (data != null) {
-//
-////                    // For each item in the search result and find the values for the selected traits/attributes
-////                    ArrayList<ArrayList<String>> traitData = new ArrayList<>();
-////
-////                    for (SearchData searchdata : data) {
-////                        ArrayList<String> temp = new ArrayList<>();
-////
-////                        // Skipping the first two columns (row and plot)
-////                        for (int j = 2; j < columnsList.size(); j++) {
-////
-////                            String column = columnsList.get(j);
-////                            TraitObject traitObject = originActivity.getDatabase().getTraitByName(column);
-////
-////                            // If column is a trait
-////                            if (traitObject != null) {
-////                                for (ObservationModel observation : observations) {
-////                                    if (observation.getObservation_variable_name().equals(column) && observation.getObservation_unit_id().equals(searchdata.unique)) {
-////                                        // If trait is categorical, format the data before adding it to the array
-////                                        if (traitObject.getFormat().equals("categorical") || traitObject.getFormat().equals("multicat") || traitObject.getFormat().equals("qualitative")) {
-////                                            temp.add(decodeCategorical(observation.getValue()));
-////                                        } else {
-////                                            temp.add(observation.getValue());
-////                                        }
-////                                        break;
-////                                    }
-////                                }
-////                            }
-////                            // If column is an attribute
-////                            else {
-////                                temp.add(originActivity.getDatabase().getObservationUnitPropertyByPlotId(column, searchdata.unique));
-////                            }
-////                        }
-////                        traitData.add(temp);
-////                    }
-//
-////                    AlertDialog.Builder builder1 = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
-////
-////                    View layout = getLayoutInflater().inflate(R.layout.dialog_search_results, null);
-////                    builder1.setTitle(R.string.search_results_dialog_title).setCancelable(true).setView(layout);
-////
-////                    builder1.setNeutralButton(R.string.dialog_back, (dialogInterface1, id1) -> {
-////                        setSavedDataSet(dataSet);
-////                        dialogInterface1.dismiss();
-////                        SearchDialog searchdialog = new SearchDialog(originActivity);
-////                        searchdialog.show(originActivity.getSupportFragmentManager(), TAG);
-////                    });
-////
-////                    builder1.setPositiveButton(R.string.dialog_close, (dialogInterface1, id1) -> {
-////                        dialogInterface1.dismiss();
-////                    });
-////
-////                    final AlertDialog dialog = builder1.create();
-////
-////                    WindowManager.LayoutParams params2 = dialog.getWindow().getAttributes();
-////                    params2.height = WindowManager.LayoutParams.WRAP_CONTENT;
-////                    params2.width = WindowManager.LayoutParams.MATCH_PARENT;
-////                    dialog.getWindow().setAttributes(params2);
-////
-////                    LinearLayout results_parent = layout.findViewById(R.id.search_results_parent);
-////                    for (String column : columnsList) {
-////                        View v = getLayoutInflater().inflate(R.layout.dialog_search_results_trait_headers, null);
-////                        TextView textView = v.findViewById(R.id.trait_header);
-////                        textView.setText(column);
-////                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(0, // width
-////                                LinearLayout.LayoutParams.WRAP_CONTENT, // height
-////                                1f // weight
-////                        );
-////                        textView.setLayoutParams(layoutParams);
-////                        results_parent.addView(textView);
-////                    }
-//////                    Button closeBtn = layout.findViewById(R.id.closeBtn);
-//////                    Button backBtn = layout.findViewById(R.id.backBtn);
-////                    ListView myList = layout.findViewById(R.id.myList);
-////
-//////                    myList.setDivider(new ColorDrawable(Color.BLACK));
-//////                    myList.setDividerHeight(5);
-////
-//////                    closeBtn.setTransformationMethod(null);
-////
-////                    myList.setOnItemClickListener((arg012, arg1, position, arg3) -> {
-////
-////                        // Save the dataset so that it will be loaded when the search dialog is opened again
-////                        setSavedDataSet(dataSet);
-////
-////                        // When you click on an item, send the data back to the main screen
-////                        CollectActivity.searchUnique = data[position].unique;
-////                        CollectActivity.searchRange = data[position].range;
-////                        CollectActivity.searchPlot = data[position].plot;
-////                        CollectActivity.searchReload = true;
-////                        dialog.dismiss();
-////
-////                        //Reloading collect activity screen to move to the selected plot
-////                        RangeBoxView rangeBox = originActivity.findViewById(R.id.act_collect_range_box);
-////                        int[] rangeID = rangeBox.getRangeID();
-////                        originActivity.moveToSearch("search", rangeID, CollectActivity.searchRange, CollectActivity.searchPlot, null, -1);
-////                    });
-////
-//////                    closeBtn.setOnClickListener(arg01 -> dialog.dismiss());
-////
-//////                    backBtn.setOnClickListener(arg02 -> {
-//////                        setSavedDataSet(dataSet);
-//////                        dialog.dismiss();
-//////                        SearchDialog searchdialog = new SearchDialog(originActivity);
-//////                        searchdialog.show(originActivity.getSupportFragmentManager(), "DialogTag");
-//////                    });
-////
-////                    // If search has results, show them, otherwise display error message
-////
-////                    myList.setAdapter(new SearchResultsAdapter(getActivity(), data, traitData));
-////                    //Dismiss the search dialog
-////                    dismiss();
-////                    //Show the results dialog
-////                    dialog.show();
-//
-////                } else {
-////                    setSavedDataSet(dataSet);
-////                    Utils.makeToast(getActivity(), getString(R.string.search_results_missing));
-////                }
-//            } catch (Exception z) {
-//                Log.e(TAG, "" + z.getMessage());
-//            }
-//        });
         builder.setPositiveButton(R.string.search_dialog_search, null);
 
         builder.setNegativeButton(R.string.dialog_close, (dialogInterface, id) -> dismiss());
@@ -540,7 +316,7 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
 
             builder1.setNeutralButton(R.string.dialog_back, (dialogInterface1, id1) -> {
                 dialogInterface1.dismiss();
-                SearchDialog searchdialog = new SearchDialog(originActivity);
+                SearchDialog searchdialog = new SearchDialog(originActivity, onSearchResultsClickedListener);
                 searchdialog.show(originActivity.getSupportFragmentManager(), TAG);
             });
 
@@ -576,10 +352,7 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
                 openResults = true;
 
                 // When you click on an item, send the data back to the main screen
-                CollectActivity.searchUnique = data[position].unique;
-                CollectActivity.searchRange = data[position].range;
-                CollectActivity.searchPlot = data[position].plot;
-                CollectActivity.searchReload = true;
+                onSearchResultsClickedListener.onSearchResultsClicked(data[position].unique, data[position].range, data[position].plot, true);
                 dialog.dismiss();
 
                 //Reloading collect activity screen to move to the selected plot
@@ -598,5 +371,12 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
         } else {
             Utils.makeToast(getActivity(), getString(R.string.search_results_missing));
         }
+    }
+
+    public interface onSearchResultsClickedListener {
+        /**
+         * Used to navigate to the plot selected in search results dialog
+         */
+        void onSearchResultsClicked(String unique, String range, String plot, boolean reload);
     }
 }
