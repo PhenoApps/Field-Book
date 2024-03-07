@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +13,13 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.StatisticsActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
+import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.objects.FieldObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,19 +33,22 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
     DataHelper database;
     List<String> seasons;
-    private SimpleDateFormat timeStamp;
+    private final SimpleDateFormat timeStampFormat;
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
+    private final SimpleDateFormat dateFormat;
+    private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
 
 
-    public StatisticsAdapter(StatisticsActivity context, List<String> seasons){
+    public StatisticsAdapter(StatisticsActivity context, List<String> seasons) {
         this.database = context.getDatabase();
         this.seasons = seasons;
-        this.timeStamp = new SimpleDateFormat(TIME_FORMAT_PATTERN,
-                Locale.getDefault());
+        this.timeStampFormat = new SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.getDefault());
+        this.dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault());
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView stat1, stat2, stat3, stat4, stat5, stat6, stat7, stat8, year_text_view;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             stat1 = itemView.findViewById(R.id.stat_value_1);
@@ -65,9 +72,23 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        int fields = database.getAllFieldObjects().size();
-        int plots = database.getAllObservationUnits().length;
-        ObservationModel[] observations = database.getAllObservationsFromAYear(seasons.get(position));
+
+        Date startDate, endDate;
+        try {
+            startDate = dateFormat.parse(seasons.get(position));
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(startDate);
+            calendar.add(Calendar.YEAR, +1);
+            calendar.add(Calendar.DATE, -1);
+            endDate = calendar.getTime();
+
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        ArrayList<FieldObject> fields = database.getAllFieldObjects();
+        ObservationUnitModel[] plots = database.getAllObservationUnits();
+        ObservationModel[] observations = database.getAllObservationsFromAYear(dateFormat.format(startDate), dateFormat.format(endDate));
 
         Set<String> collectors = new HashSet<>();
         ArrayList<Date> dateObjects = new ArrayList<>();
@@ -84,21 +105,21 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             String time = observation.getObservation_time_stamp();
             Date dateObject = null;
             try {
-                dateObject = timeStamp.parse(time);
+                dateObject = timeStampFormat.parse(time);
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
             dateObjects.add(dateObject);
 
-            if (observation.getObservation_variable_field_book_format().equals("photo")){
+            if (observation.getObservation_variable_field_book_format().equals("photo")) {
                 imageCount++;
             }
 
             String date = new SimpleDateFormat("MM-dd-yyyy").format(dateObject);
-            dateCount.put(date, dateCount.getOrDefault(date, 0)+1);
+            dateCount.put(date, dateCount.getOrDefault(date, 0) + 1);
 
             String observationUnitId = observation.getObservation_unit_id();
-            observationCount.put(observationUnitId, observationCount.getOrDefault(observationUnitId, 0)+1);
+            observationCount.put(observationUnitId, observationCount.getOrDefault(observationUnitId, 0) + 1);
 
         }
 
@@ -129,9 +150,9 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             }
         }
 
-        holder.year_text_view.setText(seasons.get(position));
-        holder.stat1.setText(String.valueOf(fields));
-        holder.stat2.setText(String.valueOf(plots));
+        holder.year_text_view.setText(dateFormat.format(startDate) + " to " + dateFormat.format(endDate));
+        holder.stat1.setText(String.valueOf(fields.size()));
+        holder.stat2.setText(String.valueOf(plots.length));
         holder.stat3.setText(String.valueOf(observations.length));
         holder.stat4.setText(timeString);
         holder.stat5.setText(String.valueOf(collectors.size()));

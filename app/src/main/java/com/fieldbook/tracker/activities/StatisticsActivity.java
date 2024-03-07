@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -10,12 +11,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.arthenica.ffmpegkit.Statistics;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.StatisticsAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
-
-import org.threeten.bp.format.DateTimeFormatter;
+import com.fieldbook.tracker.dialogs.DatePickerFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,9 +35,11 @@ public class StatisticsActivity extends ThemedActivity {
     public static String TAG = "Statistics Activity";
     @Inject
     DataHelper database;
-    private SimpleDateFormat timeStamp;
-    private DateTimeFormatter timeFormat;
-    private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
+    String seasonStartDate;
+    List<String> seasons = new ArrayList<>();
+    RecyclerView rvStatisticsCard;
+    private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd";
+    private SimpleDateFormat timeStamp = new SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,26 +55,14 @@ public class StatisticsActivity extends ThemedActivity {
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        timeStamp = new SimpleDateFormat(TIME_FORMAT_PATTERN,
-                Locale.getDefault());
+        timeStamp = new SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.getDefault());
 
-        timeFormat = DateTimeFormatter.ofPattern(TIME_FORMAT_PATTERN, Locale.getDefault());
+        seasonStartDate = "-01-01";
 
-        Set<String> uniqueSeasons = new TreeSet<>(Comparator.reverseOrder());
-
-        ObservationModel[] observations = database.getAllObservations();
-        for (ObservationModel observation: observations)
-        {
-            String timeStamp = observation.getObservation_time_stamp();
-            String year = timeStamp.substring(0,4);
-            uniqueSeasons.add(year);
-        }
-
-        List<String> seasons = new ArrayList<>(uniqueSeasons);
-
-        RecyclerView rvStatisticsCard = findViewById(R.id.statistics_card_rv);
-        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons));
+        rvStatisticsCard = findViewById(R.id.statistics_card_rv);
         rvStatisticsCard.setLayoutManager(new LinearLayoutManager(this));
+
+        setSeasons();
 
     }
 
@@ -92,6 +83,12 @@ public class StatisticsActivity extends ThemedActivity {
         if (itemId == exportId) {
             return true;
         } else if (itemId == calendarId) {
+            DialogFragment newFragment = new DatePickerFragment().newInstance(timeStamp, (y, m, d) -> {
+                seasonStartDate = "-" + String.format("%02d", m + 1) + "-" + String.format("%02d", d);
+                setSeasons();
+                return null;
+            });
+            newFragment.show(getSupportFragmentManager(), TAG);
             return true;
         } else if (itemId == android.R.id.home) {
             finish();
@@ -102,5 +99,25 @@ public class StatisticsActivity extends ThemedActivity {
     @NonNull
     public DataHelper getDatabase() {
         return database;
+    }
+
+    public void setSeasons() {
+        Set<String> uniqueSeasons = new TreeSet<>(Comparator.reverseOrder());
+
+        ObservationModel[] observations = database.getAllObservations();
+        for (ObservationModel observation : observations) {
+            String timeStamp = observation.getObservation_time_stamp();
+            String season;
+            if (seasonStartDate.compareTo(timeStamp.substring(4, 10)) < 0) {
+                season = timeStamp.substring(0, 4) + seasonStartDate;
+            } else {
+                season = Integer.parseInt(timeStamp.substring(0, 4)) - 1 + seasonStartDate;
+            }
+            uniqueSeasons.add(season);
+        }
+
+        seasons = new ArrayList<>(uniqueSeasons);
+        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons));
+
     }
 }
