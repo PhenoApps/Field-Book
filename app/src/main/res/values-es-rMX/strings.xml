@@ -833,4 +833,6 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="trait_date_minus_content_description">Resta un día de la fecha actual</string>
     <string name="trait_date_add_content_description">Agrega un día a la fecha actual</string>
     <string name="trait_percent_ui_min_max_error">Algo salió mal al mostrar mín/max del formato de variable</string>
+    <string name="tutorial_main_datagrid_title">Cuadrícula de datos</string>
+    <string name="tutorial_main_geonav_title">GeoNav</string>
 </resources>
