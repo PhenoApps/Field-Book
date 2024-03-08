@@ -415,4 +415,5 @@
     <string name="tutorial_traits_format_description">不同的性状格式通过图标来标识。</string>
     <string name="tutorial_traits_visibility_title">性状可见性</string>
     <string name="tutorial_traits_visibility_description">通过点击检查框来禁止性状采集数据。</string>
+    <string name="tutorial_main_datagrid_title">数据表格</string>
 </resources>
