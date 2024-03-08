@@ -412,4 +412,5 @@
     <string name="tutorial_traits_format_description">تتم الإشارة إلى أنواع السمات المختلفة برموز مختلفة.</string>
     <string name="tutorial_traits_visibility_title">رؤية السمة</string>
     <string name="tutorial_traits_visibility_description">يمكن تعطيل السمات من الجمع من خلال تبديل مربع الاختيار.</string>
+    <string name="tutorial_main_datagrid_title">جدول البيانات</string>
 </resources>
