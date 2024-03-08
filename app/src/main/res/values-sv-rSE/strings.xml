@@ -304,4 +304,5 @@ Karaktärer och fält som skapats manuellt eller importerats via CSV kommer beh�
     <string name="tutorial_fields_select_title">Aktivt fält </string>
     <string name="tutorial_fields_select_description">Ett fält väljs för datainsamling efter att ha importerats.</string>
     <string name="tutorial_fields_delete_title">Ta bort fält</string>
+    <string name="tutorial_main_datagrid_title">Tabell</string>
 </resources>

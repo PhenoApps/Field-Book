@@ -240,4 +240,5 @@
     <string name="tutorial_settings_traits_title">বৈশিষ্ট্য</string>
     <string name="tutorial_settings_settings_title">অগ্রসরমান</string>
     <string name="tutorial_settings_export_title">দিয়ে দেয়া</string>
+    <string name="tutorial_main_datagrid_title">উপাত্তবাছাই</string>
 </resources>

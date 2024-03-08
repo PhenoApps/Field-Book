@@ -409,4 +409,5 @@
     <string name="tutorial_traits_format_description">異なる形質フォーマットは異なるアイコンで示されます。</string>
     <string name="tutorial_traits_visibility_title">形質の表示/非表示</string>
     <string name="tutorial_traits_visibility_description">チェックボックスをチェックすることでデータ収集をできないようにします。</string>
+    <string name="tutorial_main_datagrid_title">データグリッド</string>
 </resources>
