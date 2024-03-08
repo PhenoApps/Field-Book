@@ -210,6 +210,7 @@
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Las variables no se pueden actualizar a las variables BrAPI.</string>
     <string name="required">Requerido</string>
     <string name="traits_create_warning_percent_value_required">Valor requerido</string>
+    <string name="select_trait">Seleccionar Variable</string>
     <string name="edit_traits">Editar</string>
     <!-- COLLECT -->
     <!-- Validation -->
@@ -605,6 +606,7 @@
     <string name="field_audio_recording_warning">El audio a nivel de campo ya se está grabando. Deténgalo primero.</string>
     <string name="trait_audio_recording_warning">El audio a nivel de variable ya se está grabando. Deténgalo primero.</string>
     <string name="trait_audio_playing_warning">El audio a nivel de variable se está reproduciendo. Deténgalo primero.</string>
+    <string name="field_audio_zip_error">Error al crear archivo zip</string>
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
     <string name="pref_beta_mlkit_summary">Esta opción utiliza la biblioteca MLKit en lugar de la biblioteca ZXing para escanear códigos de barras</string>
     <string name="pref_beta_mlkit_enabled_title">Escaneo de código de barras usando MLKit activado</string>
