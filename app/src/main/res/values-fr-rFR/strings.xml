@@ -399,4 +399,5 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <string name="tutorial_traits_format_description">Différents formats de caractères sont indiqués avec différents symboles</string>
     <string name="tutorial_traits_visibility_title">Visibilité du caractère</string>
     <string name="tutorial_traits_visibility_description">Les caractères peuvent être désactivés de la collecte en décochant la case associée.</string>
+    <string name="tutorial_main_datagrid_title">Grille de données</string>
 </resources>
