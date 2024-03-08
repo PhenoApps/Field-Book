@@ -404,4 +404,5 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_traits_format_description">Diversi formati di caratteri sono indicati con icone diverse.</string>
     <string name="tutorial_traits_visibility_title">Visibilità del carettere</string>
     <string name="tutorial_traits_visibility_description">I caretteri possono essere disabilitati dalla raccolta selezionando la casella di controllo.</string>
+    <string name="tutorial_main_datagrid_title">Griglia di dati</string>
 </resources>
