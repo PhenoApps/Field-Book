@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
@@ -37,6 +38,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -49,6 +51,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
+import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -86,6 +89,7 @@ import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -205,6 +209,8 @@ public class CollectActivity extends ThemedActivity
     private TraitBoxView traitBox;
     private RangeBoxView rangeBox;
     private RecyclerView infoBarRv;
+
+    private FloatingActionButton observationInfoButton;
 
     /**
      * Trait-related elements
@@ -490,6 +496,14 @@ public class CollectActivity extends ThemedActivity
         infoBarRv = findViewById(R.id.act_collect_infobar_rv);
         infoBarRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
+        observationInfoButton = findViewById(R.id.observationInfoButton);
+
+        observationInfoButton.setOnClickListener(view -> {
+            ObservationModel currentObservationObject = getCurrentObservation();
+            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(currentObservationObject);
+            dialogFragment.show(this.getSupportFragmentManager(), "observationMetadata");
+        });
+
         initCurrentVals();
 
         Log.d(TAG, "Load screen.");
@@ -681,6 +695,8 @@ public class CollectActivity extends ThemedActivity
             } else {
                 traitLayouts.deleteTraitListener(getTraitFormat());
             }
+
+            updateObservationInfoButton();
 
             triggerTts(deleteTts);
         });
@@ -1158,6 +1174,7 @@ public class CollectActivity extends ThemedActivity
         String traitDbId = getTraitDbId();
 
         database.deleteTrait(expId, obsUnit, traitDbId, rep);
+        updateObservationInfoButton();
     }
 
     public String getLocationByPreferences() {
@@ -2237,6 +2254,7 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void inflateTrait(@NonNull BaseTraitLayout layout) {
+        Log.d(TAG, "inflateTrait: ");
         getTraitLayout().onExit();
         View v = LayoutInflater.from(this).inflate(layout.layoutId(), null);
         LinearLayout holder = findViewById(R.id.traitHolder);
@@ -2244,6 +2262,8 @@ public class CollectActivity extends ThemedActivity
         holder.addView(v);
         layout.init(this);
         v.setVisibility(View.VISIBLE);
+
+        updateObservationInfoButton();
     }
 
     @Override
@@ -2452,6 +2472,28 @@ public class CollectActivity extends ThemedActivity
         return gps.getLocation(0, 0);
     }
 
+    // updates the state of the info button
+    @Override
+    public void updateObservationInfoButton() {
+        ObservationModel currentObservation = getCurrentObservation();
+        if(currentObservation == null){
+            // if no observation is found, hide the FAB
+            observationInfoButton.setVisibility(View.GONE);
+        }else{
+            observationInfoButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private ObservationModel getCurrentObservation() {
+        String rep = getCollectInputView().getRep();
+        List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
+            for (ObservationModel m : models) {
+            if (rep.equals(m.getRep())) {
+                return m;
+            }
+        }
+        return null;
+    }
     @Override
     public synchronized void logNmeaMessage(@NonNull String nmea) {
 
