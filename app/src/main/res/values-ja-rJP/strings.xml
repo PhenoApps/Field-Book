@@ -114,6 +114,7 @@
     <string name="traits_create_warning_name_blank">形質名は空欄不可</string>
     <string name="traits_create_warning_duplicate">形質は既に存在</string>
     <string name="traits_create_warning_numeric_required">初期値、最小値、最大値は数値で入力</string>
+    <string name="edit_traits">編集</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">設定した最小値よりも小さい値です</string>
@@ -408,4 +409,5 @@
     <string name="tutorial_traits_format_description">異なる形質フォーマットは異なるアイコンで示されます。</string>
     <string name="tutorial_traits_visibility_title">形質の表示/非表示</string>
     <string name="tutorial_traits_visibility_description">チェックボックスをチェックすることでデータ収集をできないようにします。</string>
+    <string name="tutorial_main_datagrid_title">データグリッド</string>
 </resources>

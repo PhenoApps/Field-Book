@@ -248,6 +248,8 @@
     <string name="required">Required</string>
     <string name="traits_create_warning_percent_value_required">Value required</string>
 
+    <string name="select_trait">Select Trait</string>
+    <string name="edit_traits">Edit</string>
 
 
     <!-- COLLECT -->
@@ -760,6 +762,7 @@
     <string name="field_audio_recording_warning">Field level audio is already recording. Stop that first.</string>
     <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
     <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
+    <string name="field_audio_zip_error">Error creating zip file</string>
 
     <string name="pref_beta_mlkit_title">MLKit Library</string>
     <string name="pref_beta_mlkit_summary">This option uses the MLKit library instead of the ZXing library for scanning barcodes</string>
@@ -1046,5 +1049,13 @@
     <string name="trait_date_minus_content_description">Subtracts one day from the current date</string>
     <string name="trait_date_add_content_description">Adds one day to the current date</string>
     <string name="trait_percent_ui_min_max_error">Something went wrong showing the min/max of this trait format</string>
+    <string name="tutorial_main_datagrid_title">Datagrid</string>
+    <string name="tutorial_main_field_audio_mic_title">Field Audio</string>
+    <string name="tutorial_main_datagrid_description">This opens a 2D phenotyping grid of the currently selected field.</string>
+    <string name="tutorial_main_field_audio_mic_description">This will start a field-level audio recording.</string>
+    <string name="tutorial_main_repeated_values_title">Repeated Values</string>
+    <string name="tutorial_main_repeated_values_description">This will open a dialog to manage the repeated values for the current observation unit.</string>
+    <string name="tutorial_main_geonav_title">GeoNav</string>
+    <string name="tutorial_main_geonav_description">This will open a configuration dialog to help with field navigation.</string>
 
 </resources>

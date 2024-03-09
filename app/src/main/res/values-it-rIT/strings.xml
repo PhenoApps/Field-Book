@@ -113,6 +113,7 @@
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
     <string name="traits_create_warning_numeric_required">Default, minimo e massimo devono essere numerici</string>
+    <string name="edit_traits">Modifica</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Il valore è minore rispetto al minimo impostato</string>
@@ -403,4 +404,5 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_traits_format_description">Diversi formati di caratteri sono indicati con icone diverse.</string>
     <string name="tutorial_traits_visibility_title">Visibilità del carettere</string>
     <string name="tutorial_traits_visibility_description">I caretteri possono essere disabilitati dalla raccolta selezionando la casella di controllo.</string>
+    <string name="tutorial_main_datagrid_title">Griglia di dati</string>
 </resources>

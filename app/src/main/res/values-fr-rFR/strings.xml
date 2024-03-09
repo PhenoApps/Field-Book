@@ -115,6 +115,7 @@
     <string name="traits_create_warning_name_blank">le nom du caractère ne peut pas être vide</string>
     <string name="traits_create_warning_duplicate">le caractère existe déjà</string>
     <string name="traits_create_warning_numeric_required">défaut, minimum, et maximum doivent être numériques</string>
+    <string name="edit_traits">Modifier</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">la valeur est inférieure au minimum qui a été défini</string>
@@ -398,4 +399,5 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <string name="tutorial_traits_format_description">Différents formats de caractères sont indiqués avec différents symboles</string>
     <string name="tutorial_traits_visibility_title">Visibilité du caractère</string>
     <string name="tutorial_traits_visibility_description">Les caractères peuvent être désactivés de la collecte en décochant la case associée.</string>
+    <string name="tutorial_main_datagrid_title">Grille de données</string>
 </resources>

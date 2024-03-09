@@ -119,6 +119,7 @@
     <string name="traits_create_warning_name_blank">Tên tính trạng không được để trống</string>
     <string name="traits_create_warning_duplicate">Tính trạng đã tồn tại</string>
     <string name="traits_create_warning_numeric_required">Giá trị mặc định, nhỏ nhất, lớn nhất là bắt buộc và phải là định dạng số</string>
+    <string name="edit_traits">Chỉnh sửa</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Giá trị nhỏ hơn mức nhỏ nhất</string>
@@ -410,4 +411,5 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <string name="tutorial_traits_format_description">Các định dạng tính trạng khác nhau được đánh dấu bằng các biểu tượng khác nhau.</string>
     <string name="tutorial_traits_visibility_title">Hiển thị tính trạng</string>
     <string name="tutorial_traits_visibility_description">Các tính trạng có thể được vô hiệu hóa khỏi danh sách bằng cách bỏ đánh dấu trong ô.</string>
+    <string name="tutorial_main_datagrid_title">Lưới dữ liệu</string>
 </resources>

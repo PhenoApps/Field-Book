@@ -42,6 +42,9 @@ public class BrapiTraitActivity extends ThemedActivity {
     @Inject
     DataHelper database;
 
+    @Inject
+    SharedPreferences preferences;
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -270,8 +273,7 @@ public class BrapiTraitActivity extends ThemedActivity {
             }
         }
 
-        SharedPreferences ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
-        SharedPreferences.Editor ed = ep.edit();
+        SharedPreferences.Editor ed = preferences.edit();
         ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false);
         ed.apply();
 
