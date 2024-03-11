@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -11,6 +12,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.h6ah4i.android.preference.NumberPickerPreferenceCompat;
 import com.h6ah4i.android.preference.NumberPickerPreferenceDialogFragmentCompat;
@@ -49,8 +51,22 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
         Preference infobarPref = findPreference("INFOBAR_NUMBER");
         if (infobarPref != null) {
             onDisplayPreferenceDialog(infobarPref);
-        }
 
+            infobarPref.setOnPreferenceChangeListener((preference, newValue) -> {
+
+                if (getActivity().getIntent().hasExtra(GeneralKeys.INFOBAR_UPDATE)) {
+
+                    Intent retIntent = new Intent(context, CollectActivity.class);
+
+                    retIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                    getActivity().startActivity(retIntent);
+
+                }
+                return true;
+            });
+
+        }
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.adapters.AttributeAdapter
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.preferences.AppearancePreferencesFragment
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
@@ -64,7 +65,7 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
 
         customizeButton.setOnClickListener {
             val preferenceIntent = Intent(context, PreferencesActivity::class.java)
-            preferenceIntent.putExtra("INFOBAR_UPDATE", true)
+            preferenceIntent.putExtra(GeneralKeys.INFOBAR_UPDATE, true)
             context.startActivity(preferenceIntent)
             dismiss()
         }
