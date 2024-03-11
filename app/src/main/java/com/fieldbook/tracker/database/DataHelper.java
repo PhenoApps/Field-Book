@@ -18,6 +18,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
@@ -32,6 +33,7 @@ import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
+import com.fieldbook.tracker.objects.SearchDialogDataModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
@@ -277,6 +279,11 @@ public class DataHelper {
         open();
 
         return ObservationUnitDao.Companion.getById(id);
+    }
+
+    public String getSearchQuery(CollectActivity originActivity, List<SearchDialogDataModel> dataSet) {
+        SearchQueryBuilder queryBuilder = new SearchQueryBuilder(originActivity, dataSet);
+        return queryBuilder.buildSearchQuery();
     }
 
     /**

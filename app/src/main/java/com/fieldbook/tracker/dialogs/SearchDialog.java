@@ -2,7 +2,6 @@ package com.fieldbook.tracker.dialogs;
 
 import android.app.Dialog;
 import android.content.SharedPreferences;
-import android.database.DatabaseUtils;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -41,9 +40,8 @@ import java.util.List;
 public class SearchDialog extends DialogFragment implements SearchAttributeChooserDialog.OnAttributeClickedListener, OperatorDialog.OnOperatorClickedListener, SearchAdapter.onEditTextChangedListener, SearchAdapter.onDeleteClickedListener {
 
     private static final String TAG = "SearchDialog";
-    public static String TICK = "\"";
     private static CollectActivity originActivity;
-    SearchAdapter searchAdapter;
+    private SearchAdapter searchAdapter;
     private SharedPreferences ep;
     private static List<SearchDialogDataModel> dataSet;
     public static boolean openResults;
@@ -83,9 +81,7 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
 
         ImageButton add = customView.findViewById(R.id.dialog_search_add_btn);
 
-        add.setOnClickListener(arg0 -> {
-            createSearchAttributeChooserDialog();
-        });
+        add.setOnClickListener(arg0 -> createSearchAttributeChooserDialog());
 
         builder.setPositiveButton(R.string.search_dialog_search, null);
 
@@ -123,17 +119,17 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
 
     private static String decodeCategorical(String value) {
         ArrayList<BrAPIScaleValidValuesCategories> cats = CategoryJsonUtil.Companion.decode(value);
-        String v = cats.get(0).getValue();
+        StringBuilder v = new StringBuilder(cats.get(0).getValue());
         if (cats.size() > 1) {
             for (int i = 1; i < cats.size(); i++)
-                v += (", " + cats.get(i).getValue());
+                v.append(", ").append(cats.get(i).getValue());
         }
-        return v;
+        return v.toString();
     }
 
     public void createSearchAttributeChooserDialog() {
-        SearchAttributeChooserDialog sacd = new SearchAttributeChooserDialog(originActivity, this);
-        sacd.show();
+        SearchAttributeChooserDialog searchAttributeChooserDialog = new SearchAttributeChooserDialog(originActivity, this);
+        searchAttributeChooserDialog.show();
     }
 
     @Override
@@ -161,101 +157,9 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
         }
     }
 
-    public String encodeCategorical(String t) {
-        return CategoryJsonUtil.Companion.encode(new ArrayList<BrAPIScaleValidValuesCategories>() {{
-            add(new BrAPIScaleValidValuesCategories().label(t).value(t));
-        }});
-    }
-
-    public String buildSearchQuery(){
-
-        // Create the sql query based on user selection
-        String sql = "";
-        String sql1 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from ObservationUnitProperty where ObservationUnitProperty.id is not null";
-        String sql2 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from observation_variables, ObservationUnitProperty, observations where observations.observation_unit_id = ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " and observations.observation_variable_name = observation_variables.observation_variable_name and observations.observation_variable_field_book_format = observation_variables.observation_variable_field_book_format";
-
-        for (int i = 0; i < dataSet.size(); i++) {
-
-            String c = dataSet.get(i).getAttribute();
-            int s = dataSet.get(i).getImageResourceId();
-            String t = dataSet.get(i).getText();
-
-            TraitObject traitObject = originActivity.getDatabase().getTraitByName(c);
-
-            String prefix;
-            boolean isAttribute; //Checks if 'c' is an attribute or a trait
-            boolean isCategorical = false; //Checks if 'c' is a categorical trait
-
-            if (traitObject == null) {
-                isAttribute = true;
-                prefix = "ObservationUnitProperty." + TICK + c + TICK;
-            } else {
-                isAttribute = false;
-                prefix = "observation_variables.observation_variable_name = " + TICK + c + TICK;
-
-                if (traitObject.getFormat().equals("categorical") || traitObject.getFormat().equals("multicat") || traitObject.getFormat().equals("qualitative")) {
-                    isCategorical = true;
-                    t = encodeCategorical(t);
-                }
-            }
-
-            // This is to prevent crashes when the user uses special characters
-            String trunc = DatabaseUtils.sqlEscapeString(t);
-
-            switch (s) {
-
-                // 0: Equals to
-                case R.drawable.ic_tb_equal:
-                    if (isAttribute) prefix = prefix + " = " + trunc;
-                    else prefix = prefix + " and value = " + trunc;
-                    break;
-
-                // 1: Not equals to
-                case R.drawable.ic_tb_not_equal:
-                    if (isAttribute) prefix = prefix + " != " + trunc;
-                    else prefix = prefix + " and value != " + trunc;
-                    break;
-
-                // 2: Contains
-                case R.drawable.ic_tb_contains:
-                    if (isAttribute)
-                        prefix = prefix + " like " + DatabaseUtils.sqlEscapeString("%" + t + "%");
-                    else {
-                        if (!isCategorical)
-                            prefix = prefix + " and observations.value like " + DatabaseUtils.sqlEscapeString("%" + t + "%");
-                        else {
-                            String decodedT = CategoryJsonUtil.Companion.decode(t).get(0).getValue();
-                            prefix = prefix + " and observations.value like " + DatabaseUtils.sqlEscapeString("%[{\"label\":\"%" + decodedT + "%\",\"value\":\"%" + decodedT + "%\"}]%");
-                        }
-                    }
-                    break;
-
-                // 3: More than
-                case R.drawable.ic_tb_greater_than:
-                    if (isAttribute) prefix = prefix + " > " + trunc;
-                    else prefix = prefix + " and CAST(value AS INTEGER) > " + trunc;
-                    break;
-
-                // 4: less than
-                case R.drawable.ic_tb_less_than:
-                    if (isAttribute) prefix = prefix + " < " + trunc;
-                    else prefix = prefix + " and CAST(value AS INTEGER) < " + trunc;
-                    break;
-
-            }
-
-            if (isAttribute) sql += sql1 + " and " + prefix;
-            else sql += sql2 + " and " + prefix;
-
-            if (i != (dataSet.size() - 1)) sql += " INTERSECT ";
-
-        }
-        return sql;
-    }
-
     public void createSearchResultsDialog () {
-        String sql = buildSearchQuery();
-        final SearchData[] data = originActivity.getDatabase().getRangeBySql(sql);
+        String searchQuery = originActivity.getDatabase().getSearchQuery(originActivity, dataSet);
+        final SearchData[] data = originActivity.getDatabase().getRangeBySql(searchQuery);
 
         if (data != null) {
 
@@ -320,9 +224,7 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
                 searchdialog.show(originActivity.getSupportFragmentManager(), TAG);
             });
 
-            builder1.setPositiveButton(R.string.dialog_close, (dialogInterface1, id1) -> {
-                dialogInterface1.dismiss();
-            });
+            builder1.setPositiveButton(R.string.dialog_close, (dialogInterface1, id1) -> dialogInterface1.dismiss());
 
             final AlertDialog dialog = builder1.create();
 
