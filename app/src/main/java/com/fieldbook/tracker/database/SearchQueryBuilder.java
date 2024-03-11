@@ -67,45 +67,42 @@ public class SearchQueryBuilder {
             // Represents the SQL condition based on the operator and search text
             String condition = "";
 
-            switch (operator) {
+            // 0: Equals to
+            if (operator == R.drawable.ic_tb_equal) {
+                if (isAttribute) condition = " = " + truncatedSearchText;
+                else condition = " and value = " + truncatedSearchText;
+            }
 
-                // 0: Equals to
-                case R.drawable.ic_tb_equal:
-                    if (isAttribute) condition = " = " + truncatedSearchText;
-                    else condition = " and value = " + truncatedSearchText;
-                    break;
+            // 1: Not equals to
+            else if (operator == R.drawable.ic_tb_not_equal) {
+                if (isAttribute) condition = " != " + truncatedSearchText;
+                else condition = " and value != " + truncatedSearchText;
+            }
 
-                // 1: Not equals to
-                case R.drawable.ic_tb_not_equal:
-                    if (isAttribute) condition = " != " + truncatedSearchText;
-                    else condition = " and value != " + truncatedSearchText;
-                    break;
-
-                // 2: Contains
-                case R.drawable.ic_tb_contains:
-                    if (isAttribute)
-                        condition = " like " + DatabaseUtils.sqlEscapeString("%" + searchText + "%");
+            // 2: Contains
+            else if (operator == R.drawable.ic_tb_contains) {
+                if (isAttribute)
+                    condition = " like " + DatabaseUtils.sqlEscapeString("%" + searchText + "%");
+                else {
+                    if (!isCategorical)
+                        condition = " and observations.value like " + DatabaseUtils.sqlEscapeString("%" + searchText + "%");
                     else {
-                        if (!isCategorical)
-                            condition = " and observations.value like " + DatabaseUtils.sqlEscapeString("%" + searchText + "%");
-                        else {
-                            String decodedT = CategoryJsonUtil.Companion.decode(searchText).get(0).getValue();
-                            condition = " and observations.value like " + DatabaseUtils.sqlEscapeString("%[{\"label\":\"%" + decodedT + "%\",\"value\":\"%" + decodedT + "%\"}]%");
-                        }
+                        String decodedT = CategoryJsonUtil.Companion.decode(searchText).get(0).getValue();
+                        condition = " and observations.value like " + DatabaseUtils.sqlEscapeString("%[{\"label\":\"%" + decodedT + "%\",\"value\":\"%" + decodedT + "%\"}]%");
                     }
-                    break;
+                }
+            }
 
-                // 3: More than
-                case R.drawable.ic_tb_greater_than:
-                    if (isAttribute) condition = " > " + truncatedSearchText;
-                    else condition = " and CAST(value AS INTEGER) > " + truncatedSearchText;
-                    break;
+            // 3: More than
+            else if (operator == R.drawable.ic_tb_greater_than) {
+                if (isAttribute) condition = " > " + truncatedSearchText;
+                else condition = " and CAST(value AS INTEGER) > " + truncatedSearchText;
+            }
 
-                // 4: less than
-                case R.drawable.ic_tb_less_than:
-                    if (isAttribute) condition = " < " + truncatedSearchText;
-                    else condition = " and CAST(value AS INTEGER) < " + truncatedSearchText;
-                    break;
+            // 4: less than
+            else if (operator == R.drawable.ic_tb_less_than) {
+                if (isAttribute) condition = " < " + truncatedSearchText;
+                else condition = " and CAST(value AS INTEGER) < " + truncatedSearchText;
             }
 
             currentSubQuery.append(condition);
