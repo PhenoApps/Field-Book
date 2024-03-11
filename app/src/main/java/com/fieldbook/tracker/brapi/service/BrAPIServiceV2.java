@@ -502,7 +502,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                     queryParams.page(queryParams.page() + 1);
 
-                    // Extract unique germplasm info
+                    // Extract germplasmDbIds from observationUnit info
                     List<String> germplasmDbIds = response.getResult().getData().stream()
                             .filter(unit -> unit.getGermplasmDbId() != null)
                             .map(BrAPIObservationUnit::getGermplasmDbId)
@@ -515,8 +515,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     if((queryParams.page() > 50)
                             || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
                             || (response.getResult().getData().size() == 0)){
-
-                        mapAttributeValues(study, allAttributeValues, getGermplasmDetails(allGermplasmDbIds, failFunction));
+                        List<String> uniqueDbIds = new ArrayList<>(new HashSet<>(allGermplasmDbIds));
+                        mapAttributeValues(study, allAttributeValues, getGermplasmDetails(uniqueDbIds, failFunction));
                         function.apply(study);
 
                     } else {
