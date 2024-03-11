@@ -150,8 +150,10 @@ class CollectAttributeChooserDialog(private val activity: CollectActivity):
             else -> other.map { it.name }.toTypedArray()
         }
 
+        val selected = activity.getPreferences().getString("DROP$infoBarPosition", null)
+
         //create adapter of labels s.a : plot/column/block or height/picture/notes depending on what tab is selected
-        val adapter = AttributeAdapter(this)
+        val adapter = AttributeAdapter(this, selected)
 
         recyclerView.adapter = adapter
 

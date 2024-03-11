@@ -91,6 +91,8 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
 
                 val value = (context).queryForLabelValue(plot, initialLabel, isAttribute)
 
+                context.preference.edit().putString("DROP$i", initialLabel).apply()
+
                 infoBarModels.add(InfoBarModel(initialLabel, value))
             }
         }
