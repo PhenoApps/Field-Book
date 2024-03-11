@@ -215,7 +215,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                                     startBarcodeScan(REQUEST_BARCODE_SCAN_BRAPI_CONFIG);
                                     break;
                                 case 1: // Generate QR Code for sharing settings
-                                    generateQRCodeFromPreferences();
+                                    if (getActivity() != null) {
+                                        generateQRCodeFromPreferences(getActivity());
+                                    }
                                     break;
                             }
                         })
@@ -248,7 +250,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     private void startBarcodeScan(int requestCode) {
         if (mlkitEnabled) {
-            ScannerActivity.Companion.requestCameraAndStartScanner(getContext(), requestCode, null, null, null);
+            if (getActivity() != null) {
+                ScannerActivity.Companion.requestCameraAndStartScanner(getActivity(), requestCode, null, null, null);
+            }
         } else {
             new IntentIntegrator(getActivity())
                     .setPrompt(getString(R.string.barcode_scanner_text))
@@ -258,7 +262,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
     }
 
-    private void generateQRCodeFromPreferences() {
+    private void generateQRCodeFromPreferences(Activity act) {
         try {
             BrAPIConfig config = new BrAPIConfig();
             config.setUrl(preferences.getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default)));
@@ -275,7 +279,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             String jsonConfig = gson.toJson(config);
 
             DisplayMetrics displayMetrics = new DisplayMetrics();
-            ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            act.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             int screenWidth = displayMetrics.widthPixels;
 
             // Set the QR Code size to be 80% of the screen width
@@ -297,7 +301,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setAdjustViewBounds(true);
 
-            new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+            new AlertDialog.Builder(act, R.style.AppAlertDialog)
                     .setTitle(getString(R.string.preferences_brapi_barcode_config_dialog_title))
                     .setView(imageView)
                     .setPositiveButton(getString(R.string.dialog_close), null)
