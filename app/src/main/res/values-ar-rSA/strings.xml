@@ -105,8 +105,6 @@
     <string name="traits_format_barcode">رمز شريطي (باركود)</string>
     <string name="traits_format_labelprint">طباعة الملصقات زيبرا Zebra</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">أضف سمة</string>
-    <string name="traits_create_trait">سمة</string>
     <string name="traits_create_format">التنسيق</string>
     <string name="traits_create_value_default">افتراضي</string>
     <string name="traits_create_value_minimum">أدنى</string>
@@ -121,6 +119,7 @@
     <string name="traits_create_warning_name_blank">لا يمكن أن يكون اسم السمة فارغ</string>
     <string name="traits_create_warning_duplicate">السمة موجودة مسبقا</string>
     <string name="traits_create_warning_numeric_required">القيمة الافتراضية والدنيا والقصوى يجب أن تكون عددية</string>
+    <string name="edit_traits">تعديل</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">القيمة أقل من الحد الأدنى</string>
@@ -384,6 +383,8 @@
     <string name="tutorial_main_search_title">بحث</string>
     <string name="tutorial_main_search_description">أيقونة البحث تسمح باستعلام قاعدة البيانات</string>
     <string name="tutorial_main_resources_title">مصادر</string>
+    <string name="tutorial_fields_add_title">إضافة حقل</string>
+    <string name="tutorial_fields_add_description">استيراد ملف الحقل</string>
     <string name="tutorial_main_resources_description">هذا يعرض قائمة بالملفات في مجلد الموارد.</string>
     <string name="tutorial_main_summary_title">ملخص</string>
     <string name="tutorial_main_summary_description">يعرض هذا ملخصًا لجميع البيانات الخاصة بالمدخل الحالي.</string>
@@ -400,8 +401,6 @@
     <string name="tutorial_settings_settings_description">يسمح بتكوين إضافي لجمع البيانات.</string>
     <string name="tutorial_settings_export_title">تصدير</string>
     <string name="tutorial_settings_export_description">يمكن تصدير البيانات بطريقتين: قاعدة بيانات أو جدول.</string>
-    <string name="tutorial_fields_add_title">إضافة حقل</string>
-    <string name="tutorial_fields_add_description">استيراد ملف الحقل</string>
     <string name="tutorial_fields_file_description">يجب أن تحتوي الملفات على ثلاثة أعمدة: معرّف فريد وترتيب أساسي وترتيب ثانوي. يتم استخدام الترتيب الأساسي / الثانوي للتنقل في هذا الحقل.</string>
     <string name="tutorial_fields_select_title">حقل نشط</string>
     <string name="tutorial_fields_select_description">يتم تحديد حقل لجمع البيانات بعد استيراده.</string>
@@ -413,4 +412,5 @@
     <string name="tutorial_traits_format_description">تتم الإشارة إلى أنواع السمات المختلفة برموز مختلفة.</string>
     <string name="tutorial_traits_visibility_title">رؤية السمة</string>
     <string name="tutorial_traits_visibility_description">يمكن تعطيل السمات من الجمع من خلال تبديل مربع الاختيار.</string>
+    <string name="tutorial_main_datagrid_title">جدول البيانات</string>
 </resources>

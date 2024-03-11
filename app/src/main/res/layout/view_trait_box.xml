@@ -12,11 +12,11 @@
         android:contentDescription="@string/view_trait_box_left_content_description"
         android:paddingStart="0dp"
         android:paddingEnd="5dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:src="@drawable/trait_chevron_left"
-        app:layout_constraintBottom_toTopOf="@id/traitsProgressBar"
-        app:layout_constraintTop_toTopOf="@+id/traitType"
+        app:layout_constraintBottom_toTopOf="@id/traitDetails"
+        app:layout_constraintTop_toTopOf="@+id/traitTypeTv"
         app:layout_constraintStart_toStartOf="parent"/>
 
     <ImageView
@@ -26,21 +26,25 @@
         android:adjustViewBounds="true"
         android:contentDescription="@string/view_trait_box_right_content_description"
         android:paddingStart="5dp"
-        android:paddingTop="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:paddingEnd="0dp"
-        android:paddingBottom="10dp"
         android:src="@drawable/trait_chevron_right"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/traitType"
-        app:layout_constraintBottom_toTopOf="@id/traitsProgressBar" />
+        app:layout_constraintTop_toTopOf="@+id/traitTypeTv"
+        app:layout_constraintBottom_toTopOf="@id/traitDetails" />
 
-    <Spinner
-        android:id="@+id/traitType"
+    <TextView
+        android:id="@+id/traitTypeTv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingTop="15dp"
-        android:paddingBottom="15dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
         android:gravity="center"
+        android:text=""
+        android:textColor="#000000"
+        android:textSize="?attr/fb_title_text_size"
+        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/traitDetails"
         app:layout_constraintEnd_toStartOf="@id/traitRight"
         app:layout_constraintTop_toTopOf="parent"
@@ -59,7 +63,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/traitType"
+        app:layout_constraintTop_toBottomOf="@id/traitTypeTv"
         app:layout_constraintBottom_toTopOf="@id/traitsProgressBar" />
 
     <ProgressBar

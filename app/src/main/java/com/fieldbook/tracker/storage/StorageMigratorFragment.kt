@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.storage
 
 import android.app.Activity
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -10,16 +9,10 @@ import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.DefineStorageActivity
 import com.fieldbook.tracker.database.dao.ObservationDao
-import com.fieldbook.tracker.database.dao.ObservationUnitDao
-import com.fieldbook.tracker.database.dao.StudyDao
 import com.fieldbook.tracker.database.models.ObservationModel
 import org.phenoapps.fragments.storage.PhenoLibMigratorFragment
 
 class StorageMigratorFragment: PhenoLibMigratorFragment() {
-
-    override val backgroundColor = Color.parseColor("#FFFFFF")
-    override val migrateButtonColor = Color.parseColor("#8BC34A")
-    override val skipButtonColor = Color.parseColor("#8BC34A")
 
     override fun onUpdateUri(from: DocumentFile, to: DocumentFile) {
         from.updateUri(to)
@@ -89,8 +82,10 @@ class StorageMigratorFragment: PhenoLibMigratorFragment() {
     override fun navigateEnd() {
         activity?.runOnUiThread {
 
-            Toast.makeText(context, R.string.frag_migrator_status_complete,
-                Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context, org.phenoapps.androidlibrary.R.string.frag_migrator_status_complete,
+                Toast.LENGTH_SHORT
+            ).show()
 
             activity?.setResult(Activity.RESULT_OK)
             activity?.finish()

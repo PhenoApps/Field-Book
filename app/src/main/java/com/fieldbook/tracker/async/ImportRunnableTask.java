@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.text.Html;
 
+import androidx.preference.PreferenceManager;
+
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.DataHelper;
@@ -27,7 +29,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
     FieldFileObject.FieldFileBase mFieldFile;
     String unique, primary, secondary;
     int idColPosition;
-    SharedPreferences mPrefs;
+    SharedPreferences preferences;
 
     int lineFail = -1;
     boolean fail;
@@ -45,7 +47,8 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
         mContext = new WeakReference<>(context);
 
-        this.mPrefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
         this.idColPosition = idColPosition;
         this.unique = unique;
         this.primary = primary;
@@ -214,7 +217,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
         if (fail | uniqueFail | mFieldFile.hasSpecialCharacters()) {
             controller.getDatabase().deleteField(result);
-            SharedPreferences.Editor ed = mPrefs.edit();
+            SharedPreferences.Editor ed = preferences.edit();
             ed.putString(GeneralKeys.FIELD_FILE, null);
             ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
             ed.apply();
@@ -230,7 +233,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         } else if (mFieldFile.hasSpecialCharacters()) {
             Utils.makeToast(context,context.getString(R.string.import_error_unique_characters_illegal));
         } else {
-            SharedPreferences.Editor ed = mPrefs.edit();
+            SharedPreferences.Editor ed = preferences.edit();
 
             CollectActivity.reloadData = true;
 

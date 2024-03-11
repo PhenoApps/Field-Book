@@ -40,7 +40,7 @@
         <item name="buttonStyle">@style/ButtonStyle</item>
         <item name="toolbarStyle">@style/AppToolbar</item>
         <item name="checkboxStyle">@style/CheckBoxStyle</item>
-        <item name="alertDialogTheme">@style/AlertDialogStyle</item>
+        <item name="alertDialogTheme">@style/AppAlertDialog</item>
         <item name="actionOverflowButtonStyle">@style/OverFlowStyle</item>
         <item name="progressBarStyle">@style/ProgressBarStyle</item>
         <item name="indeterminateProgressStyle">@style/IndeterminateProgressStyle</item>

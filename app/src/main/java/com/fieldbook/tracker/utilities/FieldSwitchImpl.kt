@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.utilities
 
 import android.content.Context
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.interfaces.FieldSwitcher
 import com.fieldbook.tracker.objects.FieldObject
@@ -17,8 +18,8 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
     @Inject
     lateinit var database: DataHelper
 
-    private val prefs by lazy {
-        context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+    private val preferences by lazy {
+        PreferenceManager.getDefaultSharedPreferences(context)
     }
 
     override fun switchField(studyId: Int) {
@@ -36,7 +37,7 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
             database.switchField(field.exp_id)
 
             //clear field selection after updates
-            prefs.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, field.exp_id)
+            preferences.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, field.exp_id)
                 .putString(GeneralKeys.FIELD_FILE, field.exp_name)
                 .putString(GeneralKeys.FIELD_ALIAS, field.exp_alias)
                 .putString(GeneralKeys.FIELD_OBS_LEVEL, field.observation_level)

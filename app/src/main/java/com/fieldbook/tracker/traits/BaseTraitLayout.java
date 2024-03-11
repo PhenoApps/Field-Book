@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
@@ -79,7 +80,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
      */
     public void refreshLayout(Boolean onNew) {
 
-        getCollectInputView().getRepeatView().refresh(onNew);
+        getCollectInputView().getRepeatView().refresh();
 
     }
 
@@ -134,10 +135,10 @@ public abstract class BaseTraitLayout extends LinearLayout {
                 }
 
                 act.getInputView().setTextColor(Color.parseColor(getDisplayColor()));
-
-                act.getInputView().prepareObservationsExistMode(Arrays.asList(observations));
-
             }
+
+            act.getInputView().prepareObservationsExistMode(Arrays.asList(observations));
+
 
             afterLoadExists(act, value);
 
@@ -216,7 +217,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public SharedPreferences getPrefs() {
-        return getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
+        return PreferenceManager.getDefaultSharedPreferences(getContext());
     }
 
     public CollectActivity getCollectActivity() {
@@ -232,7 +233,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public String getDisplayColor() {
-        return String.format("#%06X", (0xFFFFFF & getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+        return String.format("#%06X", (0xFFFFFF & PreferenceManager.getDefaultSharedPreferences(getContext())
                 .getInt(GeneralKeys.SAVED_DATA_COLOR, resolveThemeColor(R.attr.fb_value_saved_color))));
     }
 
@@ -293,7 +294,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     /**
      * Calls the collect activities db function to insert an observation row.
-     * @param trait the TraitObject to be updated
+     *
+     * @param trait the trait object to update
      * @param value the Text value to be saved in the row
      */
     public void updateObservation(TraitObject trait, String value) {

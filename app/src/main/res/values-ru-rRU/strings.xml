@@ -61,8 +61,6 @@
     <string name="traits_format_photo">Фото</string>
     <string name="traits_format_audio">Звук</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">добавить показатель</string>
-    <string name="traits_create_trait">Показатель</string>
     <string name="traits_create_format">Формат</string>
     <string name="traits_create_value_default">значение по умолчанию</string>
     <string name="traits_create_value_minimum">минимум</string>

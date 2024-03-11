@@ -58,27 +58,27 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
     @Override
     public void init(Activity act) {
         rustButtons = new LinkedHashMap<>();
-        rustButtons.put(R.id.rust0, (Button) act.findViewById(R.id.rust0));
-        rustButtons.put(R.id.rust5, (Button) act.findViewById(R.id.rust5));
-        rustButtons.put(R.id.rust10, (Button) act.findViewById(R.id.rust10));
-        rustButtons.put(R.id.rust15, (Button) act.findViewById(R.id.rust15));
-        rustButtons.put(R.id.rust20, (Button) act.findViewById(R.id.rust20));
-        rustButtons.put(R.id.rust25, (Button) act.findViewById(R.id.rust25));
-        rustButtons.put(R.id.rust30, (Button) act.findViewById(R.id.rust30));
-        rustButtons.put(R.id.rust35, (Button) act.findViewById(R.id.rust35));
-        rustButtons.put(R.id.rust40, (Button) act.findViewById(R.id.rust40));
-        rustButtons.put(R.id.rust45, (Button) act.findViewById(R.id.rust45));
-        rustButtons.put(R.id.rust50, (Button) act.findViewById(R.id.rust50));
-        rustButtons.put(R.id.rust55, (Button) act.findViewById(R.id.rust55));
-        rustButtons.put(R.id.rust60, (Button) act.findViewById(R.id.rust60));
-        rustButtons.put(R.id.rust65, (Button) act.findViewById(R.id.rust65));
-        rustButtons.put(R.id.rust70, (Button) act.findViewById(R.id.rust70));
-        rustButtons.put(R.id.rust75, (Button) act.findViewById(R.id.rust75));
-        rustButtons.put(R.id.rust80, (Button) act.findViewById(R.id.rust80));
-        rustButtons.put(R.id.rust85, (Button) act.findViewById(R.id.rust85));
-        rustButtons.put(R.id.rust90, (Button) act.findViewById(R.id.rust90));
-        rustButtons.put(R.id.rust95, (Button) act.findViewById(R.id.rust95));
-        rustButtons.put(R.id.rust100, (Button) act.findViewById(R.id.rust100));
+        rustButtons.put(R.id.rust0, act.findViewById(R.id.rust0));
+        rustButtons.put(R.id.rust5, act.findViewById(R.id.rust5));
+        rustButtons.put(R.id.rust10, act.findViewById(R.id.rust10));
+        rustButtons.put(R.id.rust15, act.findViewById(R.id.rust15));
+        rustButtons.put(R.id.rust20, act.findViewById(R.id.rust20));
+        rustButtons.put(R.id.rust25, act.findViewById(R.id.rust25));
+        rustButtons.put(R.id.rust30, act.findViewById(R.id.rust30));
+        rustButtons.put(R.id.rust35, act.findViewById(R.id.rust35));
+        rustButtons.put(R.id.rust40, act.findViewById(R.id.rust40));
+        rustButtons.put(R.id.rust45, act.findViewById(R.id.rust45));
+        rustButtons.put(R.id.rust50, act.findViewById(R.id.rust50));
+        rustButtons.put(R.id.rust55, act.findViewById(R.id.rust55));
+        rustButtons.put(R.id.rust60, act.findViewById(R.id.rust60));
+        rustButtons.put(R.id.rust65, act.findViewById(R.id.rust65));
+        rustButtons.put(R.id.rust70, act.findViewById(R.id.rust70));
+        rustButtons.put(R.id.rust75, act.findViewById(R.id.rust75));
+        rustButtons.put(R.id.rust80, act.findViewById(R.id.rust80));
+        rustButtons.put(R.id.rust85, act.findViewById(R.id.rust85));
+        rustButtons.put(R.id.rust90, act.findViewById(R.id.rust90));
+        rustButtons.put(R.id.rust95, act.findViewById(R.id.rust95));
+        rustButtons.put(R.id.rust100, act.findViewById(R.id.rust100));
         rustR = act.findViewById(R.id.rustR);
         rustM = act.findViewById(R.id.rustM);
         rustS = act.findViewById(R.id.rustS);
@@ -87,7 +87,6 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
         List<String> temps = getRustCodes();
         List<Button> rustBtnArray = new ArrayList<>(rustButtons.values());
         for (int i = 0; i < temps.size(); i++) {
-            rustBtnArray.get(i).setVisibility(View.VISIBLE);
             rustBtnArray.get(i).setText(temps.get(i));
             rustBtnArray.get(i).setOnClickListener(new RustButtonOnClickListener());
         }
@@ -149,7 +148,7 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        removeTrait(getCurrentTrait().getTrait());
+        removeTrait(getCurrentTrait().getName());
         super.deleteTraitListener();
 
         ObservationModel model = getCurrentObservation();

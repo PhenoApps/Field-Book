@@ -123,11 +123,11 @@ class RangeBoxView : ConstraintLayout {
         return rangeID[j]
     }
 
-    fun getRangeLeft(): ImageView? {
+    fun getRangeLeft(): ImageView {
         return rangeLeft
     }
 
-    fun getRangeRight(): ImageView? {
+    fun getRangeRight(): ImageView {
         return rangeRight
     }
 
@@ -204,7 +204,7 @@ class RangeBoxView : ConstraintLayout {
 
     }
 
-    private fun truncate(s: String, maxLen: Int): String? {
+    private fun truncate(s: String, maxLen: Int): String {
         return if (s.length > maxLen) s.substring(0, maxLen - 1) + ":" else s
     }
 
@@ -586,7 +586,7 @@ class RangeBoxView : ConstraintLayout {
         } else {
             if (rangeID.isNotEmpty()) {
                 //index.setEnabled(true);
-                // In addtion to advancing the entry, return to the first trait in the trait order if the preference is enabled
+                // In addition to advancing the entry, return to the first trait in the trait order if the preference is enabled
                 if (controller.isReturnFirstTrait()) {
                     traitBox.returnFirst()
                 }
@@ -616,7 +616,7 @@ class RangeBoxView : ConstraintLayout {
 //    }
 
     private fun getTraitIndex(traits: Array<String>): Int {
-        val currentTraitName: String? = controller.getTraitBox().currentTrait?.trait
+        val currentTraitName: String? = controller.getTraitBox().currentTrait?.name
         var traitIndex = 0
         for (i in traits.indices) {
             if (currentTraitName == traits[i]) {

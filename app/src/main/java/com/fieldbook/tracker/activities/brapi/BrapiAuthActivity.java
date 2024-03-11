@@ -14,7 +14,6 @@ import androidx.annotation.Nullable;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.ThemedActivity;
-import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import net.openid.appauth.AuthorizationException;
@@ -30,9 +29,18 @@ import net.openid.appauth.connectivity.ConnectionBuilder;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class BrapiAuthActivity extends ThemedActivity {
 
+    @Inject
+    SharedPreferences preferences;
+
     private boolean activityStarting = false;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,15 +55,14 @@ public class BrapiAuthActivity extends ThemedActivity {
 
         activityStarting = true;
 
-        SharedPreferences sp = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         // Start our login process
         //when coming back from deep link this check keeps app from auto-re-authenticating
         if (getIntent() != null && getIntent().getData() == null) {
-            String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+            String flow = preferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
             if (flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
-                authorizeBrAPI_OLD(sp, this);
+                authorizeBrAPI_OLD(preferences, this);
             } else {
-                authorizeBrAPI(sp, this);
+                authorizeBrAPI(preferences, this);
             }
         }
     }
@@ -75,13 +82,12 @@ public class BrapiAuthActivity extends ThemedActivity {
             // If the activity has just started, ignore the onResume code
             activityStarting = false;
         }else{
-            SharedPreferences sp = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
             AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
             Uri data = getIntent().getData();
 
             if (data != null) {
                 // authorization completed
-                String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+                String flow = preferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
                 if (flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
                     checkBrapiAuth_OLD(data);
                 } else {
@@ -107,6 +113,7 @@ public class BrapiAuthActivity extends ThemedActivity {
 
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
+
     public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(GeneralKeys.BRAPI_TOKEN, null);
@@ -138,8 +145,8 @@ public class BrapiAuthActivity extends ThemedActivity {
                 // normally, 3xx is redirect
                 int status = conn.getResponseCode();
                 if (status == HttpURLConnection.HTTP_MOVED_TEMP
-                            || status == HttpURLConnection.HTTP_MOVED_PERM
-                            || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                        || status == HttpURLConnection.HTTP_MOVED_PERM
+                        || status == HttpURLConnection.HTTP_SEE_OTHER) {
                     // get redirect url from "location" header field
                     String newUrl = conn.getHeaderField("Location");
                     // get the cookie if need, for login
@@ -148,7 +155,7 @@ public class BrapiAuthActivity extends ThemedActivity {
                     // open the new connection again
                     conn = (HttpURLConnection) new URL(newUrl).openConnection();
                     conn.setRequestProperty("Cookie", cookies);
-                }else{
+                } else {
                     conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
                 }
 
@@ -233,7 +240,6 @@ public class BrapiAuthActivity extends ThemedActivity {
 
     private void authSuccess(String accessToken) {
 
-        SharedPreferences preferences = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(GeneralKeys.BRAPI_TOKEN, accessToken);
         editor.apply();

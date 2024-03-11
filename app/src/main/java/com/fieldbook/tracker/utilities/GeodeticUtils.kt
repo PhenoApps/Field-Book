@@ -2,10 +2,7 @@ package com.fieldbook.tracker.utilities
 
 import android.content.SharedPreferences
 import android.location.Location
-import androidx.browser.trusted.sharing.ShareData
-import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.models.ObservationUnitModel
-import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.gson.Gson
 import math.geom2d.Point2D
@@ -67,23 +64,34 @@ class GeodeticUtils {
          *
          *  Update (8/2/23): "fix" has been added as a header to the log file, it is the tenth item. This can be any value GPS, RTK, or RTK Float
          */
-        fun writeGeoNavLog(prefs: SharedPreferences, geoNavPrefs: SharedPreferences, log: OutputStreamWriter?, geoNavLine: GeoNavHelper.GeoNavLine, isHeader: Boolean = false) {
+        fun writeGeoNavLog(
+            preferences: SharedPreferences,
+            log: OutputStreamWriter?,
+            geoNavLine: GeoNavHelper.GeoNavLine,
+            isHeader: Boolean = false
+        ) {
 
             log?.let { geonav ->
 
                 if (!isHeader) {
                     //update the geonav log line with the shared preference parameters
                     //set update interval from the preferences can be 1s, 5s or 10s
-                    val interval = prefs.getString(GeneralKeys.UPDATE_INTERVAL, "1") ?: "1"
+                    val interval = preferences.getString(GeneralKeys.UPDATE_INTERVAL, "1") ?: "1"
                     //find the mac address of the device, if not found then start the internal GPS
-                    val address: String = (prefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "internal") ?: "")
-                        .replace(":".toRegex(), "-")
-                        .replace("\\s".toRegex(), "_")
+                    val address: String =
+                        (preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "internal") ?: "")
+                            .replace(":".toRegex(), "-")
+                            .replace("\\s".toRegex(), "_")
                     //the angle of the IZ algorithm to use, see Geodetic util class for more details
-                    val theta: String = geoNavPrefs.getString(GeneralKeys.SEARCH_ANGLE, "0") ?: "0"
-                    val geoNavMethod: String = geoNavPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
-                    val d1: Double = geoNavPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble() ?: 0.001
-                    val d2: Double = geoNavPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble() ?: 0.01
+                    val theta: String = preferences.getString(GeneralKeys.SEARCH_ANGLE, "0") ?: "0"
+                    val geoNavMethod: String =
+                        preferences.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
+                    val d1: Double =
+                        preferences.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble()
+                            ?: 0.001
+                    val d2: Double =
+                        preferences.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble()
+                            ?: 0.01
 
                     geoNavLine.address = address
                     geoNavLine.interval = interval
@@ -139,18 +147,19 @@ class GeodeticUtils {
          * @param theta: the field of view angle
          * @return a object representing the returned location and it's distance
          **/
-        fun impactZoneSearch(log: OutputStreamWriter?,
-                             prefs: SharedPreferences,
-                             geoNavPrefs: SharedPreferences,
-                             currentLoggingMode: String,
-                             start: Location,
-                             coordinates: Array<ObservationUnitModel>,
-                             azimuth: Double,
-                             theta: Double,
-                             teslas: Double,
-                             geoNavMethod: String,
-                             d1: Double,
-                             d2: Double): Pair<ObservationUnitModel?, Double> {
+        fun impactZoneSearch(
+            log: OutputStreamWriter?,
+            preferences: SharedPreferences,
+            currentLoggingMode: String,
+            start: Location,
+            coordinates: Array<ObservationUnitModel>,
+            azimuth: Double?,
+            theta: Double,
+            teslas: Double,
+            geoNavMethod: String,
+            d1: Double,
+            d2: Double
+        ): Pair<ObservationUnitModel?, Double> {
 
             //greedy algorithm to find closest point, first point is set to inf
             var closestDistance = Double.MAX_VALUE
@@ -191,14 +200,17 @@ class GeodeticUtils {
 
                     } else { //trapezoidal method
 
-                        if (isInZone(start, location, azimuth, theta, d1, d2)) {
+                        azimuth?.let { nonNullAzimuth ->
 
-                            if (closestDistance > distance) {
+                            if (isInZone(start, location, nonNullAzimuth, theta, d1, d2)) {
 
-                                loggedString.closest = CLOSEST_UPDATE.toString()
-                                closestDistance = distance
-                                closestPoint = coordinate
+                                if (closestDistance > distance) {
 
+                                    loggedString.closest = CLOSEST_UPDATE.toString()
+                                    closestDistance = distance
+                                    closestPoint = coordinate
+
+                                }
                             }
                         }
                     }
@@ -213,10 +225,16 @@ class GeodeticUtils {
 
             if (currentLoggingMode == "1") {
                 //print only the closest plant to the log
-                izLogArray.forEach { if (it.closest == CLOSEST_FINAL.toString()) writeGeoNavLog(prefs, geoNavPrefs, log, it) }
+                izLogArray.forEach {
+                    if (it.closest == CLOSEST_FINAL.toString()) writeGeoNavLog(
+                        preferences,
+                        log,
+                        it
+                    )
+                }
             } else if (currentLoggingMode == "2") {
                 //print the entire array to log
-                izLogArray.forEach { writeGeoNavLog(prefs, geoNavPrefs, log, it) }
+                izLogArray.forEach { writeGeoNavLog(preferences, log, it) }
             }
 
             return closestPoint to closestDistance

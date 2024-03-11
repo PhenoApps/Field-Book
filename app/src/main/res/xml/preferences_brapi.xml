@@ -14,6 +14,12 @@
         android:title="@string/preferences_brapi_core_title"
         app:iconSpaceReserved="false">
 
+        <Preference
+                android:icon="@drawable/ic_trait_barcode"
+                android:key="brapi_config_barcode"
+                android:title="@string/preferences_brapi_barcode_config_title"
+                android:summary="@string/preferences_brapi_barcode_config_summary" />
+
         <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
             android:defaultValue="@string/brapi_base_url_default"
             android:dialogMessage="@string/brapi_base_url_desc"

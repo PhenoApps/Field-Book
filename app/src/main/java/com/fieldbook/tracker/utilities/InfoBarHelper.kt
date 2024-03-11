@@ -3,6 +3,7 @@ package com.fieldbook.tracker.utilities
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.DataHelper
@@ -10,7 +11,6 @@ import com.fieldbook.tracker.dialogs.CollectAttributeChooserDialog
 import com.fieldbook.tracker.objects.InfoBarModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.qualifiers.ActivityContext
-import java.util.*
 import javax.inject.Inject
 
 /**
@@ -28,8 +28,8 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
 
     private val ad = CollectAttributeChooserDialog(context as CollectActivity)
 
-    private val ep: SharedPreferences by lazy {
-        context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+    private val preferences: SharedPreferences by lazy {
+        PreferenceManager.getDefaultSharedPreferences(context)
     }
 
     /**
@@ -37,10 +37,10 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
      */
     fun getInfoBarData(): ArrayList<InfoBarModel> {
 
-        val database : DataHelper = (context as CollectActivity).getDatabase()
+        val database: DataHelper = (context as CollectActivity).getDatabase()
 
         //get the preference number of infobars to load
-        val numInfoBars: Int = ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2)
+        val numInfoBars: Int = preferences.getInt(GeneralKeys.INFOBAR_NUMBER, 2)
 
         //get all plot attribute names for the study
         val attributes: MutableList<String> = ArrayList(database.rangeColumnNames.toList())
@@ -53,7 +53,7 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
         val traitNames = ArrayList<String>()
         if (traits != null) {
             for (t in traits) {
-                traitNames.add(t.trait)
+                traitNames.add(t.name)
             }
         }
 
@@ -65,7 +65,10 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
 
             //get the preferred infobar label, default to "Select" if it doesn't exist for this position
             //adapter preferred values are saved as DROP1, DROP2, DROP3, DROP4, DROP5 in preferences, initialize the label with it
-            var initialLabel: String = ep.getString("DROP$i", context.getString(R.string.infobars_attribute_placeholder)) ?: context.getString(R.string.infobars_attribute_placeholder)
+            var initialLabel: String = preferences.getString(
+                "DROP$i",
+                context.getString(R.string.infobars_attribute_placeholder)
+            ) ?: context.getString(R.string.infobars_attribute_placeholder)
 
             //check if the label is an attribute or a trait, this will decide how to query the database for the value
             var isAttribute = attributes.contains(initialLabel)

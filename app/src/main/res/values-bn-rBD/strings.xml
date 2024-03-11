@@ -78,8 +78,6 @@
     <string name="traits_format_audio">শ্রবণ সংক্রান্ত</string>
     <string name="traits_format_multicategorical">বৃদ্ধি করা</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">বৈশিষ্ট্য যোগ করুন</string>
-    <string name="traits_create_trait">বৈশিষ্ট্য</string>
     <string name="traits_create_format">ছক</string>
     <string name="traits_create_value_default">নির্দিষ্ট</string>
     <string name="traits_create_value_minimum">সর্বনিম্ন</string>
@@ -94,6 +92,7 @@
     <string name="traits_create_warning_name_blank">বৈশিষ্ট্যের নাম ফাকা থাকতে পারে না</string>
     <string name="traits_create_warning_duplicate">বৈশিষ্ট্যটি আগে থেকেই উপাস্থিত</string>
     <string name="traits_create_warning_numeric_required">নির্দিষ্টতা, সর্বনিম্ন, এবং সরবুচ্চ এগুলো অবশ্যই নম্বর হতে হবে</string>
+    <string name="edit_traits">সংস্করণ</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">অনুমোদিত নিম্নমানের চেয়ে ছোট মান</string>
@@ -241,4 +240,5 @@
     <string name="tutorial_settings_traits_title">বৈশিষ্ট্য</string>
     <string name="tutorial_settings_settings_title">অগ্রসরমান</string>
     <string name="tutorial_settings_export_title">দিয়ে দেয়া</string>
+    <string name="tutorial_main_datagrid_title">উপাত্তবাছাই</string>
 </resources>

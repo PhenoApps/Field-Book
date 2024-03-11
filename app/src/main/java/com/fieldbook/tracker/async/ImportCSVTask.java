@@ -105,7 +105,7 @@ public class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
                     if (data != null && data.length > 1
                             && data[0] != null && data[1] != null) {
                         TraitObject t = new TraitObject();
-                        t.setTrait(data[0]);
+                        t.setName(data[0]);
                         t.setFormat(data[1]);
                         t.setDefaultValue(data[2]);
                         t.setMinimum(data[3]);
