@@ -85,6 +85,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.function.BiConsumer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -669,14 +670,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             body.setGermplasmDbIds(allGermplasmDbIds);
             body.page(0).pageSize(pageSize);
-            Log.d("BrAPIServiceV2","Retrieving germplasm details");
+            Log.d("BrAPIServiceV2", "Retrieving germplasm details for " + allGermplasmDbIds.size() + " DB IDs");
 
             ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> response = germplasmApi.searchGermplasmPost(body);
             Log.d("BrAPIServiceV2","Body class type: " + response.getBody().getClass().getName());
             Log.d("BrAPIServiceV2","Left class type: " + response.getBody().getLeft().getClass().getName());
             if (hasListResult(response)) { // Handle case where results are returned immediately
                 BrAPIGermplasmListResponse listResponse = response.getBody().getLeft().get();
-                germplasmDetailsMap = getListResultAsMap(response);
+                germplasmDetailsMap = getListResultAsMap(response, germplasmMapper);
                 if(hasMorePages(listResponse)) {
                     int currentPage = listResponse.getMetadata().getPagination().getCurrentPage() + 1;
                     int totalPages = listResponse.getMetadata().getPagination().getTotalPages();
@@ -685,7 +686,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         body.setPage(currentPage);
                         response = germplasmApi.searchGermplasmPost(body);
                         if (hasListResult(response)) {
-                            germplasmDetailsMap.putAll(getListResultAsMap(response));
+                            germplasmDetailsMap.putAll(getListResultAsMap(response, germplasmMapper));
                         }
                         currentPage++;
                     }
@@ -696,7 +697,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> getResponse = germplasmApi.searchGermplasmSearchResultsDbIdGet(searchResultsDbId, 0, pageSize);
                 if (hasListResult(getResponse)) { // Should have this now for sure
                     BrAPIGermplasmListResponse listResponse = getResponse.getBody().getLeft().get();
-                    germplasmDetailsMap = getListResultAsMap(getResponse);
+                    germplasmDetailsMap = getListResultAsMap(getResponse, germplasmMapper);
                     if(hasMorePages(listResponse)) {
 
                         int currentPage = listResponse.getMetadata().getPagination().getCurrentPage() + 1;
@@ -705,7 +706,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         while (currentPage < totalPages) {
                             getResponse = germplasmApi.searchGermplasmSearchResultsDbIdGet(searchResultsDbId, currentPage, pageSize);
                             if (hasListResult(getResponse)) {
-                                germplasmDetailsMap.putAll(getListResultAsMap(getResponse));
+                                germplasmDetailsMap.putAll(getListResultAsMap(getResponse, germplasmMapper));
                             }
                             currentPage++;
                         }
@@ -737,16 +738,30 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 && listResponse.getMetadata().getPagination().getCurrentPage() < listResponse.getMetadata().getPagination().getTotalPages() - 1;
     }
 
-    private <T, V extends BrAPIGermplasm> Map<String, V> getListResultAsMap(ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<T>, Optional<BrAPIAcceptedSearchResponse>>> searchGetResponse) {
-        Map<String, V> resultMap = new HashMap<>();
-        BrAPIResponse listResponse = (BrAPIResponse) searchGetResponse.getBody().getLeft().get();
-        BrAPIResponseResult<V> responseResult = (BrAPIResponseResult<V>) listResponse.getResult();
-
-        if (responseResult != null && responseResult.getData() != null) {
-            for (V item : responseResult.getData()) {
-                resultMap.put(item.getGermplasmDbId(), item);
+    BiConsumer<List<?>, Map<String, BrAPIGermplasm>> germplasmMapper = (data, map) -> {
+        data.forEach(item -> {
+            if (item instanceof BrAPIGermplasm) {
+                BrAPIGermplasm germplasm = (BrAPIGermplasm) item;
+                map.put(germplasm.getGermplasmDbId(), germplasm);
             }
-        }
+        });
+    };
+
+    private <U extends BrAPIResponse<?>, T> Map<String, T> getListResultAsMap(
+            ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<U>, Optional<BrAPIAcceptedSearchResponse>>> response,
+            BiConsumer<List<?>, Map<String, T>> mapper) {
+
+        Map<String, T> resultMap = new HashMap<>();
+
+        Optional<U> optionalResponseResult = response.getBody().getLeft();
+        optionalResponseResult.ifPresent(responseResult -> {
+            BrAPIResponseResult<?> result = (BrAPIResponseResult<?>) optionalResponseResult.get().getResult();
+            if (result != null && result.getData() != null) {
+                List<?> data = result.getData();
+                mapper.accept(data, resultMap);
+            }
+        });
+
         return resultMap;
     }
 
