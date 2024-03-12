@@ -49,6 +49,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
+import com.fieldbook.tracker.dialogs.SearchDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -130,7 +131,8 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.interfaces.CollectTraitController,
         InfoBarAdapter.InfoBarController,
         GoProTraitLayout.GoProCollector,
-        GPSTracker.GPSTrackerListener {
+        GPSTracker.GPSTrackerListener,
+        SearchDialog.onSearchResultsClickedListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -1310,9 +1312,8 @@ public class CollectActivity extends ThemedActivity
 
             sequence.start();
         } else if (itemId == searchId) {
-            intent.setClassName(CollectActivity.this,
-                    SearchActivity.class.getName());
-            startActivity(intent);
+            SearchDialog searchdialog = new SearchDialog(this, this);
+            searchdialog.show(getSupportFragmentManager(), "DialogTag");
         } else if (itemId == resourcesId) {
             DocumentFile dir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
             if (dir != null && dir.exists()) {
@@ -2536,4 +2537,12 @@ public class CollectActivity extends ThemedActivity
         usbCameraConnected = connected;
     }
 
+
+    @Override
+    public void onSearchResultsClicked(String unique, String range, String plot, boolean reload) {
+        searchUnique = unique;
+        searchRange = range;
+        searchPlot = plot;
+        searchReload = reload;
+    }
 }

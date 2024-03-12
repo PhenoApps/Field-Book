@@ -6,6 +6,7 @@
         versionName="v5.6">
         <new>Updated trait creator</new>
         <new>Updated Photo trait for devices without camera app (Boox Palma)</new>
+        <new>New Search layout</new>
         <info>Beta settings renamed to Experimental</info>
         <bugfix>Numerous bug fixes</bugfix>
     </release>
