@@ -135,6 +135,7 @@
     <string name="main_toolbar_search">Cerca</string>
     <string name="search_dialog_add">Aggiungi</string>
     <string name="search_dialog_clear">Cancellare</string>
+    <string name="search_dialog_search">Cerca</string>
     <string name="search_dialog_query_is_equal_to">è uguale a</string>
     <string name="search_dialog_query_is_not_equal_to">non è uguale a</string>
     <string name="search_dialog_query_contains">contiene</string>
