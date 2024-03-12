@@ -113,6 +113,7 @@
     <string name="main_toolbar_search">অনুসান্ধান</string>
     <string name="search_dialog_add">যোগ করুন</string>
     <string name="search_dialog_clear">পরিষ্কার করুন</string>
+    <string name="search_dialog_search">অনুসান্ধান</string>
     <string name="search_dialog_query_is_equal_to">সমান</string>
     <string name="search_dialog_query_is_not_equal_to">সমান নয়</string>
     <string name="search_dialog_query_contains">ধারণ করে</string>
@@ -240,4 +241,5 @@
     <string name="tutorial_settings_traits_title">বৈশিষ্ট্য</string>
     <string name="tutorial_settings_settings_title">অগ্রসরমান</string>
     <string name="tutorial_settings_export_title">দিয়ে দেয়া</string>
+    <string name="tutorial_main_datagrid_title">উপাত্তবাছাই</string>
 </resources>
