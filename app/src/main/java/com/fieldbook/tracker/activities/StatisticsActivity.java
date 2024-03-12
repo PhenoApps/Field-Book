@@ -40,6 +40,7 @@ public class StatisticsActivity extends ThemedActivity {
     RecyclerView rvStatisticsCard;
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd";
     private SimpleDateFormat timeStamp = new SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.getDefault());
+    private int toggleVariable = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,12 +84,14 @@ public class StatisticsActivity extends ThemedActivity {
         if (itemId == exportId) {
             return true;
         } else if (itemId == calendarId) {
-            DialogFragment newFragment = new DatePickerFragment().newInstance(timeStamp, (y, m, d) -> {
-                seasonStartDate = "-" + String.format("%02d", m + 1) + "-" + String.format("%02d", d);
-                setSeasons();
-                return null;
-            });
-            newFragment.show(getSupportFragmentManager(), TAG);
+//            DialogFragment newFragment = new DatePickerFragment().newInstance(timeStamp, (y, m, d) -> {
+//                seasonStartDate = "-" + String.format("%02d", m + 1) + "-" + String.format("%02d", d);
+//                setSeasons();
+//                return null;
+//            });
+//            newFragment.show(getSupportFragmentManager(), TAG);
+            toggleVariable = 1 - toggleVariable;
+            setSeasons();
             return true;
         } else if (itemId == android.R.id.home) {
             finish();
@@ -107,17 +110,19 @@ public class StatisticsActivity extends ThemedActivity {
         ObservationModel[] observations = database.getAllObservations();
         for (ObservationModel observation : observations) {
             String timeStamp = observation.getObservation_time_stamp();
-            String season;
-            if (seasonStartDate.compareTo(timeStamp.substring(4, 10)) < 0) {
-                season = timeStamp.substring(0, 4) + seasonStartDate;
-            } else {
-                season = Integer.parseInt(timeStamp.substring(0, 4)) - 1 + seasonStartDate;
-            }
-            uniqueSeasons.add(season);
+//            if (seasonStartDate.compareTo(timeStamp.substring(4, 10)) < 0) {
+//                season = timeStamp.substring(0, 4) + seasonStartDate;
+//            } else {
+//                season = Integer.parseInt(timeStamp.substring(0, 4)) - 1 + seasonStartDate;
+//            }
+            if (toggleVariable == 0)
+                uniqueSeasons.add(timeStamp.substring(0,4));
+            else
+                uniqueSeasons.add(timeStamp.substring(0,7));
         }
 
         seasons = new ArrayList<>(uniqueSeasons);
-        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons));
+        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons, toggleVariable));
 
     }
 }
