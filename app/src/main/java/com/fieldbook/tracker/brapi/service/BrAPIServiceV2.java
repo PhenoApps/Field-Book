@@ -48,6 +48,7 @@ import org.brapi.v2.model.BrAPIExternalReference;
 import org.brapi.v2.model.BrAPIMetadata;
 import org.brapi.v2.model.BrAPIResponse;
 import org.brapi.v2.model.BrAPIResponseResult;
+import org.brapi.v2.model.BrAPISearchRequestParametersPaging;
 import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
@@ -75,7 +76,6 @@ import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponseResult;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
 import org.brapi.v2.model.germ.BrAPIGermplasmSynonyms;
-import org.brapi.v2.model.germ.response.BrAPIGermplasmListResponse;
 import org.brapi.v2.model.BrAPIAcceptedSearchResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -94,8 +94,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.function.BiFunction;
-
-import io.swagger.client.model.ListResponse;
 
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
@@ -658,78 +656,113 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         Log.d("BrAPIServiceV2","Updated study with mapped attributes");
     }
 
-    // TODO: Refactor to a more generic function for accessing additional BrAPI search endpoints
     public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
-        Map<String, BrAPIGermplasm> germplasmDetailsMap = new HashMap<>();
-        try {
-            final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+        final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
                     .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
+        BrAPIGermplasmSearchRequest germplasmBody = new BrAPIGermplasmSearchRequest();
+        germplasmBody.setGermplasmDbIds(allGermplasmDbIds);
+        germplasmBody.page(0).pageSize(pageSize);
+        Log.d("BrAPIServiceV2", "Retrieving germplasm details for " + allGermplasmDbIds.size() + " DB IDs");
 
-            BrAPIGermplasmSearchRequest body = new BrAPIGermplasmSearchRequest();
-            String searchResultsDbId;
-
-            body.setGermplasmDbIds(allGermplasmDbIds);
-            body.page(0).pageSize(pageSize);
-            Log.d("BrAPIServiceV2", "Retrieving germplasm details for " + allGermplasmDbIds.size() + " DB IDs");
-
-            ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> response = germplasmApi.searchGermplasmPost(body);
-            Log.d("BrAPIServiceV2","Body class type: " + response.getBody().getClass().getName());
-            Log.d("BrAPIServiceV2","Left class type: " + response.getBody().getLeft().getClass().getName());
-            if (hasListResult(response)) { // Handle case where results are returned immediately
-                BrAPIGermplasmListResponse listResponse = response.getBody().getLeft().get();
-                germplasmDetailsMap = getListResultAsMap(response, germplasmMapper);
-                if(hasMorePages(listResponse)) {
-                    int currentPage = listResponse.getMetadata().getPagination().getCurrentPage() + 1;
-                    int totalPages = listResponse.getMetadata().getPagination().getTotalPages();
-
-                    while (currentPage < totalPages) {
-                        body.setPage(currentPage);
-                        response = germplasmApi.searchGermplasmPost(body);
-                        if (hasListResult(response)) {
-                            germplasmDetailsMap.putAll(getListResultAsMap(response, germplasmMapper));
-                        }
-                        currentPage++;
-                    }
+        BiConsumer<List<?>, Map<String, BrAPIGermplasm>> germplasmMapper = (data, map) -> {
+            data.forEach(item -> {
+                if (item instanceof BrAPIGermplasm) {
+                    BrAPIGermplasm germplasm = (BrAPIGermplasm) item;
+                    map.put(germplasm.getGermplasmDbId(), germplasm);
                 }
-            } else { // Handle case where searchResultDbId is returned, follow up with call to searchGermplasmSearchResultsDbIdGet
-                BrAPIAcceptedSearchResponse searchResponse = response.getBody().getRight().get();
-                searchResultsDbId = searchResponse.getResult().getSearchResultsDbId();
-                ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> getResponse = germplasmApi.searchGermplasmSearchResultsDbIdGet(searchResultsDbId, 0, pageSize);
-                if (hasListResult(getResponse)) { // Should have this now for sure
-                    BrAPIGermplasmListResponse listResponse = getResponse.getBody().getLeft().get();
-                    germplasmDetailsMap = getListResultAsMap(getResponse, germplasmMapper);
-                    if(hasMorePages(listResponse)) {
+            });
+        };
 
-                        int currentPage = listResponse.getMetadata().getPagination().getCurrentPage() + 1;
-                        int totalPages = listResponse.getMetadata().getPagination().getTotalPages();
-
-                        while (currentPage < totalPages) {
-                            getResponse = germplasmApi.searchGermplasmSearchResultsDbIdGet(searchResultsDbId, currentPage, pageSize);
-                            if (hasListResult(getResponse)) {
-                                germplasmDetailsMap.putAll(getListResultAsMap(getResponse, germplasmMapper));
-                            }
-                            currentPage++;
-                        }
-                    }
-                } else {
-                    Log.d("BrAPIServiceV2","Unable to retrieve a germplasm search results");
-                }
-            }
-
-        } catch (ApiException error) {
-            failFunction.apply(error.getCode());
-            Log.e("BrAPIServiceV2", "API Exception", error);
-        }
-        return germplasmDetailsMap;
+        return executeBrapiSearch(
+                body -> germplasmApi.searchGermplasmPost(body), // Using lambda for explicit type
+                (id, page, size) -> germplasmApi.searchGermplasmSearchResultsDbIdGet(id, page, size), // Using lambda for explicit type
+                germplasmBody,
+                germplasmMapper,
+                failFunction,
+                pageSize
+        );
     }
 
-    private boolean hasListResult(ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>>> response) {
-        if (response == null || response.getBody() == null) {
+    @FunctionalInterface
+    public interface GenericSearchCallFunction<T, R> {
+        ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> apply(T searchRequestBody) throws ApiException;
+    }
+
+    @FunctionalInterface
+    public interface GenericSearchCallWithDbIdFunction<R> {
+        ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> apply(String searchResultsDbId, Integer currentPage, Integer pageSize) throws ApiException;
+    }
+
+    public <T extends BrAPISearchRequestParametersPaging, R, U> Map<String, U> executeBrapiSearch(
+            GenericSearchCallFunction<T, R> searchCallFunction,
+            GenericSearchCallWithDbIdFunction<R> searchCallWithDbIdFunction,
+            T searchRequestBody,
+            BiConsumer<List<?>, Map<String, U>> mapper,
+            Function<Integer, Void> failFunction,
+            final Integer pageSize
+    ) {
+        Map<String, U> resultMap = new HashMap<>();
+        String searchResultsDbId = null;
+        int currentPage = 0;
+
+        try {
+            ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> response = searchCallFunction.apply(searchRequestBody);
+            validateResponse(response);
+
+            // Process initial response
+            Optional<R> listResultOpt = response.getBody().getLeft();
+            Optional<BrAPIAcceptedSearchResponse> searchResponseOpt = response.getBody().getRight();
+
+            if (listResultOpt.isPresent()) {
+                processResponse(response, mapper, resultMap);
+                currentPage++;
+            } else if (searchResponseOpt.isPresent()) {
+                searchResultsDbId = searchResponseOpt.get().getResult().getSearchResultsDbId();
+            } else {
+                throw new ApiException("Response body is missing result", response.getStatusCode(), response.getHeaders(), null);
+            }
+
+            while (searchResultsDbId != null || currentPage > 0) {
+                if (searchResultsDbId != null) {
+                    response = searchCallWithDbIdFunction.apply(searchResultsDbId, currentPage, pageSize);
+                } else {
+                    searchRequestBody.setPage(currentPage);
+                    response = searchCallFunction.apply(searchRequestBody);
+                }
+
+                validateResponse(response);
+
+                boolean hasMore = processResponse(response, mapper, resultMap);
+                if (!hasMore) break;
+                currentPage++;
+            }
+        } catch (ApiException apiException) {
+            Log.e("BrAPIServiceV2", "API Exception: " + apiException.getMessage() +
+                    " Code: " + apiException.getCode() +
+                    " Endpoint: " + (apiException.getResponseBody() != null ? apiException.getResponseBody() : "Unknown"));
+
+            failFunction.apply(apiException.getCode());
+        }
+
+        return resultMap;
+    }
+
+    private void validateResponse(ApiResponse<?> response) throws ApiException {
+        if (response == null) {
+            throw new ApiException("No response received", 0, null, null);
+        } else if (response.getBody() == null) {
+            throw new ApiException("Response is missing body", response.getStatusCode(), response.getHeaders(), null);
+        }
+    }
+
+    private <R, U> boolean processResponse(ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> response, BiConsumer<List<?>, Map<String, U>> mapper, Map<String, U> resultMap) {
+        if (response.getBody().getLeft().isPresent()) {
+            resultMap.putAll(getListResultAsMap(response, mapper));
+            BrAPIResponse listResponse = (BrAPIResponse) response.getBody().getLeft().get();
+            return hasMorePages(listResponse);
+        } else {
             return false;
         }
-        org.apache.commons.lang3.tuple.Pair<Optional<BrAPIGermplasmListResponse>, Optional<BrAPIAcceptedSearchResponse>> body = response.getBody();
-        Optional<BrAPIGermplasmListResponse> list = body.getLeft();
-        return list.isPresent();
     }
 
     private boolean hasMorePages(BrAPIResponse listResponse) {
@@ -738,25 +771,19 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 && listResponse.getMetadata().getPagination().getCurrentPage() < listResponse.getMetadata().getPagination().getTotalPages() - 1;
     }
 
-    BiConsumer<List<?>, Map<String, BrAPIGermplasm>> germplasmMapper = (data, map) -> {
-        data.forEach(item -> {
-            if (item instanceof BrAPIGermplasm) {
-                BrAPIGermplasm germplasm = (BrAPIGermplasm) item;
-                map.put(germplasm.getGermplasmDbId(), germplasm);
-            }
-        });
-    };
+    private <R, U> Map<String, U> getListResultAsMap(
+            ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> response,
+            BiConsumer<List<?>, Map<String, U>> mapper) {
 
-    private <U extends BrAPIResponse<?>, T> Map<String, T> getListResultAsMap(
-            ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<U>, Optional<BrAPIAcceptedSearchResponse>>> response,
-            BiConsumer<List<?>, Map<String, T>> mapper) {
+        Map<String, U> resultMap = new HashMap<>();
 
-        Map<String, T> resultMap = new HashMap<>();
-
-        Optional<U> optionalResponseResult = response.getBody().getLeft();
+        Optional<R> optionalResponseResult = response.getBody().getLeft();
         optionalResponseResult.ifPresent(responseResult -> {
-            BrAPIResponseResult<?> result = (BrAPIResponseResult<?>) optionalResponseResult.get().getResult();
-            if (result != null && result.getData() != null) {
+            BrAPIResponse brApiResponse = (BrAPIResponse) responseResult;
+            Object resultObj = brApiResponse.getResult();
+            BrAPIResponseResult<?> result = (BrAPIResponseResult<?>) resultObj;
+
+            if (result.getData() != null) {
                 List<?> data = result.getData();
                 mapper.accept(data, resultMap);
             }
