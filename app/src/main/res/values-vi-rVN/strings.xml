@@ -141,6 +141,7 @@
     <string name="main_toolbar_search">Tìm kiếm</string>
     <string name="search_dialog_add">Thêm</string>
     <string name="search_dialog_clear">Xóa</string>
+    <string name="search_dialog_search">Tìm kiếm</string>
     <string name="search_dialog_query_is_equal_to">giá trị bằng</string>
     <string name="search_dialog_query_is_not_equal_to">giá trị không bằng</string>
     <string name="search_dialog_query_contains">giá trị có chứa</string>
