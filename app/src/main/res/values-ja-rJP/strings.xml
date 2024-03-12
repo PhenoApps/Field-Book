@@ -136,6 +136,7 @@
     <string name="main_toolbar_search">検索</string>
     <string name="search_dialog_add">追加</string>
     <string name="search_dialog_clear">消去</string>
+    <string name="search_dialog_search">検索</string>
     <string name="search_dialog_query_is_equal_to">一致</string>
     <string name="search_dialog_query_is_not_equal_to">不一致</string>
     <string name="search_dialog_query_contains">含む</string>

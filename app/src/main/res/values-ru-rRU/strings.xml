@@ -93,6 +93,7 @@
     <string name="main_toolbar_search">Поиск</string>
     <string name="search_dialog_add">Добавить</string>
     <string name="search_dialog_clear">Удалить</string>
+    <string name="search_dialog_search">Поиск</string>
     <string name="search_dialog_query_is_equal_to">равно</string>
     <string name="search_dialog_query_is_not_equal_to">не равно</string>
     <string name="search_dialog_query_contains">содержит</string>

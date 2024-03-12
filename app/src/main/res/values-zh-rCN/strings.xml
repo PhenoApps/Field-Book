@@ -140,6 +140,7 @@
     <string name="main_toolbar_search">搜索</string>
     <string name="search_dialog_add">添加</string>
     <string name="search_dialog_clear">清除</string>
+    <string name="search_dialog_search">搜索</string>
     <string name="search_dialog_query_is_equal_to">等于</string>
     <string name="search_dialog_query_is_not_equal_to">不等于</string>
     <string name="search_dialog_query_contains">包含</string>

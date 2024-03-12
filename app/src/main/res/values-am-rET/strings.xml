@@ -93,6 +93,7 @@
     <string name="main_toolbar_search">መፈለግ፤</string>
     <string name="search_dialog_add">መደመር፤</string>
     <string name="search_dialog_clear">ንጹህ አርገዉ enter የምለዉን ንካዉ፤</string>
+    <string name="search_dialog_search">መፈለግ፤</string>
     <string name="search_dialog_query_is_equal_to">እኩል ይሆናል</string>
     <string name="search_dialog_query_is_not_equal_to">እኩል አይሆንም</string>
     <string name="search_dialog_query_contains">ያጠቃልላል</string>
