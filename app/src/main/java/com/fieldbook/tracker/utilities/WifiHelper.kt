@@ -8,7 +8,6 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiNetworkSpecifier
 import android.os.Build
 import android.os.PatternMatcher
-import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -19,7 +18,6 @@ class WifiHelper @Inject constructor(@ApplicationContext private val context: Co
     }
 
     interface WifiRequester {
-        fun getSsidName(): String
         fun onNetworkBound()
     }
 
@@ -31,20 +29,22 @@ class WifiHelper @Inject constructor(@ApplicationContext private val context: Co
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
 
-        @RequiresApi(Build.VERSION_CODES.M)
         override fun onAvailable(network: Network) {
             super.onAvailable(network)
 
-            val bound = connectivityManager.bindProcessToNetwork(network)
-
-            requester?.onNetworkBound()
-
+            val bound = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                connectivityManager.bindProcessToNetwork(network)
+                requester?.onNetworkBound()
+            } else {
+                TODO("VERSION.SDK_INT < M")
+            }
         }
 
-        @RequiresApi(Build.VERSION_CODES.M)
         override fun onLost(network: Network) {
             super.onLost(network)
-            connectivityManager.bindProcessToNetwork(null)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                connectivityManager.bindProcessToNetwork(null)
+            }
         }
     }
 
@@ -52,10 +52,46 @@ class WifiHelper @Inject constructor(@ApplicationContext private val context: Co
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-            connectivityManager.bindProcessToNetwork(null)
+            try {
 
-            connectivityManager.unregisterNetworkCallback(networkCallback)
+                connectivityManager.bindProcessToNetwork(null)
+
+                connectivityManager.unregisterNetworkCallback(networkCallback)
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+            }
         }
+    }
+
+    fun startWifiSearch(ssid: String, password: String, requester: WifiRequester) {
+
+        this.requester = requester
+
+        val specifier =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                WifiNetworkSpecifier.Builder()
+                    .setSsid(ssid)
+                    .setWpa2Passphrase(password)
+                    .build()
+            } else {
+                TODO("VERSION.SDK_INT < Q")
+            }
+
+        val request = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .setNetworkSpecifier(specifier)
+            .build()
+
+        //connectivityManager.registerNetworkCallback(request, networkCallback)
+
+        connectivityManager.requestNetwork(
+            request,
+            networkCallback
+        )
     }
 
     fun startWifiSearch(format: String, requester: WifiRequester) {

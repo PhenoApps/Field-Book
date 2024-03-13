@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -39,6 +38,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.ExoPlayer;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,6 +51,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.devices.camera.CanonApi;
+import com.fieldbook.tracker.devices.camera.GoProApi;
 import com.fieldbook.tracker.devices.camera.UsbCameraApi;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
@@ -64,17 +66,17 @@ import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CanonTrait;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
-import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
+import com.fieldbook.tracker.utilities.BluetoothHelper;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.FfmpegHelper;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
-import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
@@ -135,7 +137,6 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.interfaces.CollectRangeController,
         com.fieldbook.tracker.interfaces.CollectTraitController,
         InfoBarAdapter.InfoBarController,
-        GoProTraitLayout.GoProCollector,
         GPSTracker.GPSTrackerListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -147,6 +148,12 @@ public class CollectActivity extends ThemedActivity
     private GeoNavHelper geoNavHelper;
 
     @Inject
+    FfmpegHelper ffmpegHelper;
+
+    @Inject
+    GoProApi goProApi;
+
+    @Inject
     UsbCameraApi usbCameraApi;
 
     @Inject
@@ -154,6 +161,9 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     WifiHelper wifiHelper;
+
+    @Inject
+    BluetoothHelper bluetoothHelper;
 
     @Inject
     KeyboardListenerHelper keyboardListenerHelper;
@@ -182,9 +192,6 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     SoundHelperImpl soundHelper;
-
-    @Inject
-    GoProWrapper goProWrapper;
 
     private GPSTracker gps;
 
@@ -323,8 +330,6 @@ public class CollectActivity extends ThemedActivity
 
         mUsbCameraHelper = new UsbCameraHelper(this);
 
-        goProWrapper.attach();
-
         mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
 
         loadScreen();
@@ -339,12 +344,14 @@ public class CollectActivity extends ThemedActivity
     protected void onStart() {
         super.onStart();
         usbCameraApi.onStart();
+        bluetoothHelper.onStart();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         usbCameraApi.onStop();
+        bluetoothHelper.onStop();
     }
 
     public void triggerTts(String text) {
@@ -533,6 +540,7 @@ public class CollectActivity extends ThemedActivity
         refreshInfoBarAdapter();
 
         uvcView = findViewById(R.id.collect_activity_uvc_tv);
+
     }
 
     //when softkeyboard is displayed, reset the snackbar to redisplay with a calculated bottom margin
@@ -954,6 +962,8 @@ public class CollectActivity extends ThemedActivity
 
         ep.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
 
+        bluetoothHelper.onPause();
+
         super.onPause();
     }
 
@@ -977,13 +987,15 @@ public class CollectActivity extends ThemedActivity
 
         mUsbCameraHelper.destroy();
 
-        goProWrapper.destroy();
-
         traitLayoutRefresh();
 
         gnssThreadHelper.stop();
 
         usbCameraApi.onDestroy();
+
+        goProApi.onDestroy();
+
+        bluetoothHelper.onDestroy();
 
         super.onDestroy();
     }
@@ -2311,8 +2323,8 @@ public class CollectActivity extends ThemedActivity
 
     @NonNull
     @Override
-    public GoProWrapper wrapper() {
-        return goProWrapper;
+    public GoProApi getGoProApi() {
+        return goProApi;
     }
 
     @NonNull
@@ -2580,6 +2592,10 @@ public class CollectActivity extends ThemedActivity
 
     @NonNull
     @Override
+    public BluetoothHelper getBluetoothHelper() { return bluetoothHelper; }
+
+    @NonNull
+    @Override
     public UsbCameraApi getUsbApi() {
         return usbCameraApi;
     }
@@ -2587,4 +2603,10 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public UVCCameraTextureView getUvcView() { return uvcView; }
+
+    @NonNull
+    @Override
+    public FfmpegHelper getFfmpegHelper() {
+        return ffmpegHelper;
+    }
 }

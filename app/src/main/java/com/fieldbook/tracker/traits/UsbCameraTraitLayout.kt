@@ -160,7 +160,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
                         lastBitmap?.let { bmp ->
 
-                            saveBitmapToStorage(bmp, currentRange)
+                            saveBitmapToStorage(type(), bmp, currentRange)
 
                             activity?.runOnUiThread {
 

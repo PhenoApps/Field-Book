@@ -18,6 +18,7 @@ import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
+import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -48,13 +49,13 @@ abstract class AbstractCameraTrait :
 
     companion object {
         const val TAG = "Camera"
-        const val type = "canon"
     }
 
     protected var activity: Activity? = null
     protected var connectBtn: FloatingActionButton? = null
     protected var captureBtn: FloatingActionButton? = null
     protected var imageView: ImageView? = null
+    protected var styledPlayerView: PlayerView? = null
     protected var recyclerView: RecyclerView? = null
 
     protected val background = CoroutineScope(Dispatchers.IO)
@@ -73,18 +74,15 @@ abstract class AbstractCameraTrait :
     }
 
     override fun setNaTraitsText() {}
-    override fun type(): String {
-        return type
-    }
 
     override fun loadLayout() {
 
         //slight delay to make navigation a bit faster
-        Handler(Looper.getMainLooper()).postDelayed({
+        //Handler(Looper.getMainLooper()).postDelayed({
 
             loadAdapterItems()
 
-        }, 500)
+       // }, 500)
 
         super.loadLayout()
     }
@@ -94,6 +92,7 @@ abstract class AbstractCameraTrait :
         connectBtn = act.findViewById(R.id.camera_fragment_connect_btn)
         captureBtn = act.findViewById(R.id.camera_fragment_capture_btn)
         imageView = act.findViewById(R.id.trait_camera_iv)
+        styledPlayerView = act.findViewById(R.id.trait_camera_spv)
         recyclerView = act.findViewById(R.id.camera_fragment_rv)
 
         recyclerView?.adapter = ImageAdapter(this)
@@ -102,7 +101,7 @@ abstract class AbstractCameraTrait :
 
     }
 
-    protected fun saveBitmapToStorage(bmp: Bitmap, obsUnit: RangeObject) {
+    protected fun saveBitmapToStorage(format: String, bmp: Bitmap, obsUnit: RangeObject) {
 
         val plot = obsUnit.plot_id
         val studyId = collectActivity.studyId
@@ -123,16 +122,16 @@ abstract class AbstractCameraTrait :
 
                 DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { dir ->
 
-                    val name = "${sanitizedTraitName}_${plot}_$time.png"
+                    val name = "${sanitizedTraitName}_${plot}_$time.jpg"
 
                     dir.createFile("*/*", name)?.let { file ->
 
                         context.contentResolver.openOutputStream(file.uri)?.let { output ->
 
-                            bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
+                            bmp.compress(Bitmap.CompressFormat.JPEG, 80, output)
 
                             database.insertObservation(
-                                plot, traitDbId, type, file.uri.toString(),
+                                plot, traitDbId, format, file.uri.toString(),
                                 person,
                                 location, "", studyId,
                                 null,
@@ -227,47 +226,49 @@ abstract class AbstractCameraTrait :
 
     private fun loadAdapterItems() {
 
-        val thumbnailModels = getImageObservations().mapNotNull {
+        background.launch {
 
-            var model: ImageAdapter.Model? = null
+            val thumbnailModels = getImageObservations().mapNotNull {
 
-            try {
+                var model: ImageAdapter.Model? = null
 
-                DocumentsContract.getDocumentThumbnail(
-                    context.contentResolver,
-                    Uri.parse(it.value), Point(256, 256), null
-                )?.let { bmp ->
+                try {
 
-                    model = ImageAdapter.Model(it.value, bmp)
+                    DocumentsContract.getDocumentThumbnail(
+                        context.contentResolver,
+                        Uri.parse(it.value), Point(256, 256), null
+                    )?.let { bmp ->
 
+                        model = ImageAdapter.Model(it.value, bmp)
+
+                    }
+
+                } catch (f: FileNotFoundException) {
+
+                    f.printStackTrace()
+
+                    model = null
                 }
 
-            } catch (f: FileNotFoundException) {
-
-                f.printStackTrace()
-
-                model = null
+                model
             }
 
-            model
-        }
+            ui.launch {
 
-        activity?.runOnUiThread {
+                (recyclerView?.adapter as? ImageAdapter)?.submitList(thumbnailModels)
 
-            (recyclerView?.adapter as? ImageAdapter)?.submitList(thumbnailModels)
-
+                scrollToLast()
+            }
         }
     }
 
     private fun getImageObservations(): Array<ObservationModel> {
 
-        val traitDbId = collectActivity.traitDbId.toInt()
+        val traitDbId = collectActivity.traitDbId
         val plot = collectActivity.observationUnit
         val studyId = collectActivity.studyId
 
-        return database.getAllObservations(studyId).filter {
-            it.observation_variable_db_id == traitDbId && it.observation_unit_id == plot
-        }.toTypedArray()
+        return database.getAllObservations(studyId, plot, traitDbId)
     }
 
     private fun deleteItem(model: ImageAdapter.Model) {

@@ -1053,5 +1053,7 @@
     <string name="trait_camera_connect_content_description">Starts a device connection.</string>
     <string name="trait_camera_preview_content_description">This previews the camera\'s display.</string>
     <string name="trait_camera_capture_content_description">Capture a photo</string>
+    <string name="dialog_go_pro_wait_stream_title">Waiting for live preview</string>
+    <string name="dialog_go_pro_wait_stream_message">This may take a minute.</string>
 
 </resources>

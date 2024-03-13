@@ -162,13 +162,13 @@ class CanonTrait :
 
         uiScope.launch(Dispatchers.Main) {
 
-            saveBitmapToStorage(bmp, obsUnit)
+            saveBitmapToStorage(type(), bmp, obsUnit)
 
         }
     }
 
-    override fun getSsidName() =
-        preferences.getString(GeneralKeys.CANON_SSID_NAME, "Canon") ?: "Canon"
+//    override fun getSsidName() =
+//        preferences.getString(GeneralKeys.CANON_SSID_NAME, "Canon") ?: "Canon"
 
     override fun onNetworkBound() {
 
