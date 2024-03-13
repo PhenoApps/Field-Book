@@ -10,8 +10,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.provider.DocumentsContract
 import android.util.AttributeSet
 import android.util.Log
@@ -316,7 +314,7 @@ abstract class AbstractCameraTrait :
 
             } catch (e: Exception) {
 
-                Log.e(UsbCameraTraitLayout.TAG, "Failed to delete images.", e)
+                Log.e(TAG, "Failed to delete images.", e)
 
             }
         }
