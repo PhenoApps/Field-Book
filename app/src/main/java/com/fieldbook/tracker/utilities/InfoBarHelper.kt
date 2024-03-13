@@ -3,11 +3,12 @@ package com.fieldbook.tracker.utilities
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.fragment.app.FragmentManager
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.dialogs.CollectAttributeChooserDialog
+import com.fieldbook.tracker.dialogs.InfobarAttributeChooserDialog
 import com.fieldbook.tracker.objects.InfoBarModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.qualifiers.ActivityContext
@@ -22,11 +23,6 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
     companion object {
         const val TAG = "InfoBarHelper"
     }
-
-//    @Inject
-//    override lateinit var database: DataHelper
-
-    private val ad = CollectAttributeChooserDialog(context as CollectActivity)
 
     private val preferences: SharedPreferences by lazy {
         PreferenceManager.getDefaultSharedPreferences(context)
@@ -103,18 +99,12 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
     /**
      * Sets the infoBar position state and calls the dialog for users to choose an attribute.
      */
-    fun showInfoBarChoiceDialog(position: Int) {
-
+    fun showInfoBarChoiceDialog(fragmentManager: FragmentManager, position: Int) {
         try {
-
-            ad.infoBarPosition = position
-
-            ad.show()
-
+            val dialog = InfobarAttributeChooserDialog.newInstance(position)
+            dialog.show(fragmentManager, "infobarAttributeChooserDialog")
         } catch (e: Exception) {
-
             e.printStackTrace()
-
             Log.d(TAG, "Error showing infobar dialog: ${e.message}")
         }
     }

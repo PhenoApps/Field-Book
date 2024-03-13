@@ -2252,7 +2252,7 @@ public class CollectActivity extends ThemedActivity
     @Override
     public void onInfoBarClicked(int position) {
 
-        infoBarHelper.showInfoBarChoiceDialog(position);
+        infoBarHelper.showInfoBarChoiceDialog(getSupportFragmentManager(), position);
 
     }
 

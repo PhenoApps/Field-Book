@@ -34,25 +34,5 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/list_item_infobar" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button style="@style/Widget.AppCompat.Button.Borderless"
-            android:id="@+id/dialog_collect_att_chooser_customize_btn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/dialog_att_chooser_customize" />
-
-        <Button style="@style/Widget.AppCompat.Button.Borderless"
-            android:id="@+id/dialog_collect_att_chooser_cancel_btn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@android:string/cancel" />
-    </LinearLayout>
-
 </LinearLayout>
 
