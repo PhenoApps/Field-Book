@@ -94,7 +94,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
                 || type().equals(UsbCameraTraitLayout.type)
                 || isTraitType(LabelPrintTraitLayout.type)
                 || type().equals(AudioTraitLayout.type)
-                || type().equals(GoProTraitLayout.type)) {
+                || type().equals(GoProTraitLayout.type)
+                || type().equals(CanonTrait.type)) {
             toggleVisibility(View.GONE);
         } else {
             toggleVisibility(View.VISIBLE);
