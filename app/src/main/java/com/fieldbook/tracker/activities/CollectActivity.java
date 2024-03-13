@@ -48,6 +48,7 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.devices.camera.GoProApi;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
@@ -63,14 +64,15 @@ import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
+import com.fieldbook.tracker.utilities.BluetoothHelper;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.FfmpegHelper;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
-import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
@@ -81,6 +83,7 @@ import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
 import com.fieldbook.tracker.utilities.VibrateUtil;
+import com.fieldbook.tracker.utilities.WifiHelper;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
@@ -129,7 +132,6 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.interfaces.CollectRangeController,
         com.fieldbook.tracker.interfaces.CollectTraitController,
         InfoBarAdapter.InfoBarController,
-        GoProTraitLayout.GoProCollector,
         GPSTracker.GPSTrackerListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -142,6 +144,18 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     SharedPreferences preferences;
+
+    @Inject
+    FfmpegHelper ffmpegHelper;
+
+    @Inject
+    GoProApi goProApi;
+
+    @Inject
+    WifiHelper wifiHelper;
+
+    @Inject
+    BluetoothHelper bluetoothHelper;
 
     @Inject
     KeyboardListenerHelper keyboardListenerHelper;
@@ -170,9 +184,6 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     SoundHelperImpl soundHelper;
-
-    @Inject
-    GoProWrapper goProWrapper;
 
     private GPSTracker gps;
 
@@ -306,8 +317,6 @@ public class CollectActivity extends ThemedActivity
         });
 
         mUsbCameraHelper = new UsbCameraHelper(this);
-
-        goProWrapper.attach();
 
         mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
 
@@ -942,11 +951,13 @@ public class CollectActivity extends ThemedActivity
 
         mUsbCameraHelper.destroy();
 
-        goProWrapper.destroy();
-
         traitLayoutRefresh();
 
         gnssThreadHelper.stop();
+
+        goProApi.onDestroy();
+
+        bluetoothHelper.onDestroy();
 
         super.onDestroy();
     }
@@ -2279,12 +2290,6 @@ public class CollectActivity extends ThemedActivity
 
     @NonNull
     @Override
-    public GoProWrapper wrapper() {
-        return goProWrapper;
-    }
-
-    @NonNull
-    @Override
     public SecureBluetooth advisor() {
         return secureBluetooth;
     }
@@ -2536,4 +2541,23 @@ public class CollectActivity extends ThemedActivity
         usbCameraConnected = connected;
     }
 
+    @NonNull
+    @Override
+    public WifiHelper getWifiHelper() { return wifiHelper; }
+
+    @NonNull
+    @Override
+    public BluetoothHelper getBluetoothHelper() { return bluetoothHelper; }
+
+    @NonNull
+    @Override
+    public GoProApi getGoProApi() {
+        return goProApi;
+    }
+
+    @NonNull
+    @Override
+    public FfmpegHelper getFfmpegHelper() {
+        return ffmpegHelper;
+    }
 }

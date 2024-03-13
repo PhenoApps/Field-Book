@@ -16,6 +16,7 @@ import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
+import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -52,6 +53,7 @@ abstract class AbstractCameraTrait :
     protected var connectBtn: FloatingActionButton? = null
     protected var captureBtn: FloatingActionButton? = null
     protected var imageView: ImageView? = null
+    protected var styledPlayerView: PlayerView? = null
     protected var recyclerView: RecyclerView? = null
 
     protected val background = CoroutineScope(Dispatchers.IO)
@@ -88,6 +90,7 @@ abstract class AbstractCameraTrait :
         connectBtn = act.findViewById(R.id.camera_fragment_connect_btn)
         captureBtn = act.findViewById(R.id.camera_fragment_capture_btn)
         imageView = act.findViewById(R.id.trait_camera_iv)
+        styledPlayerView = act.findViewById(R.id.trait_camera_spv)
         recyclerView = act.findViewById(R.id.camera_fragment_rv)
 
         recyclerView?.adapter = ImageAdapter(this)

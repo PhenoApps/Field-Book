@@ -24,6 +24,7 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.offbeat.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.offbeat.traits.formats.ValidationResult
+import com.fieldbook.tracker.offbeat.traits.formats.parameters.CameraTypes
 import com.fieldbook.tracker.offbeat.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.SoundHelperImpl
@@ -268,7 +269,11 @@ class NewTraitDialog(
 
             traitFormatsRv.adapter = formatsAdapter
 
-            formatsAdapter.submitList(Formats.values().toList())
+            formatsAdapter.submitList(Formats.entries.filter { format ->
+                format !in CameraTypes.entries
+                    .filter { it.name != CameraTypes.DEFAULT.name }
+                    .map { it.format }
+            })
 
         }
     }
