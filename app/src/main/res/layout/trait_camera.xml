@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.fieldbook.tracker.traits.CameraTrait xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/camera_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:visibility="gone"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:visibility="visible">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/camera_fragment_cv">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="0dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:minWidth="128dp"
+            android:minHeight="128dp"
+            tools:listitem="@layout/list_item_image"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:id="@+id/camera_fragment_rv"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
+            android:contentDescription="@string/trait_camera_connect_content_description"
+            android:src="@drawable/ic_connection"
+            android:id="@+id/camera_fragment_connect_btn"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
+            android:layout_margin="8dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/camera_fragment_rv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageView
+            android:visibility="visible"
+            android:id="@+id/trait_camera_iv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/camera_fragment_rv"
+            android:contentDescription="@string/trait_camera_preview_content_description" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
+            android:id="@+id/camera_fragment_capture_btn"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
+            android:layout_margin="8dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/trait_camera_iv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:contentDescription="@string/trait_camera_capture_content_description" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.fieldbook.tracker.traits.CameraTrait>

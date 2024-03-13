@@ -1,18 +1,29 @@
 package com.fieldbook.tracker.offbeat.traits.formats.contracts
 
+import android.content.Context
+import android.view.View
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.offbeat.traits.formats.TraitFormat
+import com.fieldbook.tracker.offbeat.traits.formats.parameters.CameraParameters
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.NameParameter
 
-class PhotoFormat : TraitFormat(
-    format = Formats.CAMERA,
-    defaultLayoutId = R.layout.trait_photo,
-    layoutView = null,
-    nameStringResourceId = R.string.traits_format_photo,
-    iconDrawableResourceId = R.drawable.ic_trait_camera,
-    stringNameAux = null,
+open class PhotoFormat(
+    override var format: Formats = Formats.CAMERA,
+    override var defaultLayoutId: Int = R.layout.trait_photo,
+    override var layoutView: View? = null,
+    override var nameStringResourceId: Int = R.string.traits_format_photo,
+    override var iconDrawableResourceId: Int = R.drawable.ic_trait_camera,
+    override var stringNameAux: ((Context) -> String?)? = null
+) : TraitFormat(
+    format = format,
+    defaultLayoutId = defaultLayoutId,
+    layoutView = layoutView,
+    nameStringResourceId = nameStringResourceId,
+    iconDrawableResourceId = iconDrawableResourceId,
+    stringNameAux = stringNameAux,
     NameParameter(),
-    DetailsParameter()
+    DetailsParameter(),
+    CameraParameters()
 )
