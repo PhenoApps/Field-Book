@@ -1050,4 +1050,8 @@
     <string name="trait_camera_capture_content_description">Capture a photo</string>
     <string name="delete_local_photo">Delete Photo</string>
 
+    <!-- usb camera trait -->
+    <string name="usb_camera_resolution_options_title">Supported Resolutions</string>
+    <string name="usb_camera_plug_in_camera">Please plug in a UVC compatible web cam.</string>
+
 </resources>
