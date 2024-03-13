@@ -76,14 +76,11 @@ public class StatisticsActivity extends ThemedActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        final int exportId = R.id.stats_export;
         final int calendarId = R.id.stats_calendar;
 
         int itemId = item.getItemId();
 
-        if (itemId == exportId) {
-            return true;
-        } else if (itemId == calendarId) {
+        if (itemId == calendarId) {
 //            DialogFragment newFragment = new DatePickerFragment().newInstance(timeStamp, (y, m, d) -> {
 //                seasonStartDate = "-" + String.format("%02d", m + 1) + "-" + String.format("%02d", d);
 //                setSeasons();

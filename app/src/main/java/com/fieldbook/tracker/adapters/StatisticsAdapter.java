@@ -1,6 +1,11 @@
 package com.fieldbook.tracker.adapters;
 
 import android.app.AlertDialog;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,19 +14,20 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.StatisticsActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
-import com.fieldbook.tracker.database.models.ObservationUnitModel;
-import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,9 +64,13 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView statValue1, statValue2, statValue3, statValue4, statValue5, statValue6, statValue7, statValue8, year_text_view;
         LinearLayout stat1, stat2, stat3, stat4, stat5, stat6, stat7, stat8;
+        ConstraintLayout statisticsCard;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            statisticsCard = itemView.findViewById(R.id.statistics_card);
+
             statValue1 = itemView.findViewById(R.id.stat_value_1);
             statValue2 = itemView.findViewById(R.id.stat_value_2);
             statValue3 = itemView.findViewById(R.id.stat_value_3);
@@ -219,6 +229,34 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
                 }
             }
             displayDialog(R.string.stat8_title, data);
+        });
+
+        holder.statisticsCard.setOnLongClickListener(view -> {
+            Bitmap bitmap = Bitmap.createBitmap(holder.statisticsCard.getWidth(), holder.statisticsCard.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            canvas.drawColor(Color.WHITE);
+            holder.statisticsCard.draw(canvas);
+
+            Log.d("MyApp",Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download");
+
+            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download");
+            File myFile = new File(file, holder.year_text_view.getText() + "_" + System.currentTimeMillis() + ".jpg");
+            if (myFile.exists()) {
+                myFile.delete();
+            }
+
+            try {
+                FileOutputStream fileOutputStream = new FileOutputStream(myFile);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+                fileOutputStream.flush();
+                fileOutputStream.close();
+                Utils.makeToast(originActivity, "Image saved in the Downloads directory");
+
+            } catch (Exception e) {
+                Log.d("MyApp", e.toString());
+            }
+
+            return true;
         });
 
     }

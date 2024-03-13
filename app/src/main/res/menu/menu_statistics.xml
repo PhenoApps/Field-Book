@@ -3,11 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:ignore="AppCompatResource">
-    <item
-        android:id="@+id/stats_export"
-        android:icon="@drawable/ic_stats_export"
-        app:showAsAction="always"
-        android:title="@string/stats_export" />
+
     <item
         android:id="@+id/stats_calendar"
         android:icon="@drawable/ic_stats_calendar"
