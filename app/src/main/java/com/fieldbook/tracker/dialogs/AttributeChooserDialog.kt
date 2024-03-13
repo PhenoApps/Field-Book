@@ -51,10 +51,9 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
             .setCancelable(true)
             .create()
 
-        // Call loadData and setupTabLayout after dialog is shown
+        // Call loadData after dialog is shown
         dialog.setOnShowListener {
             loadData()
-            setupTabLayout()
         }
 
         return dialog
@@ -65,7 +64,7 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
         onAttributeSelectedListener = listener
     }
 
-    protected fun loadData() {
+    private fun loadData() {
 
         //query database for attributes/traits to use
         try {
@@ -96,7 +95,7 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
      * select first tab programmatically to load initial data
      * save the selected tab as preference
      */
-    protected fun setupTabLayout() {
+    private fun setupTabLayout() {
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
 
             override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -121,10 +120,11 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
         tabLayout.selectTab(tabLayout.getTabAt(tabIndex))
     }
 
-    /**
-     * handles loading data into the recycler view adapter
-     */
-    open fun loadTab(label: String, selected: String? = null) {
+    /** Placeholder method; overridden in infoBar class where selection is needed. */
+    protected open fun getSelected(): String? = null
+
+    /** Handles loading data into the recycler view adapter. */
+    private fun loadTab(label: String) {
         val attributesLabel = getString(R.string.dialog_att_chooser_attributes)
         val traitsLabel = getString(R.string.dialog_att_chooser_traits)
 
@@ -135,7 +135,8 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
             else -> other.map { it.name }.toTypedArray()
         }
 
-        // Initialize the adapter with the optionLabels. Optionally highlight or process 'selected'.
+        // Initialize the adapter with the optionLabels. Highlight 'selected' if defined.
+        val selected = getSelected()
         recyclerView.adapter = AttributeAdapter(this, selected).apply {
             submitList(optionLabels.toList())
         }
