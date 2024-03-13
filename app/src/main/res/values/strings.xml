@@ -755,8 +755,12 @@
 
     <!-- STATISTICS -->
 
+    <string name="warning_no_observations">No observations have been collected</string>
     <string name="stats_export">Export Statistics</string>
     <string name="stats_select_date_range">Select Date Range</string>
+    <string name="stat1_title">List of Fields</string>
+    <string name="stat5_title">List of People</string>
+    <string name="stat8_title">List of Observations</string>
 
 
     <!-- ABOUT -->

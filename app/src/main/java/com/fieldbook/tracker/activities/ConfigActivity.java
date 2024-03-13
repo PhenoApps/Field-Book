@@ -45,6 +45,7 @@ import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
@@ -361,9 +362,11 @@ public class ConfigActivity extends ThemedActivity {
                     startActivity(intent);
                     break;
                 case 5:
-                    intent.setClassName(ConfigActivity.this,
-                            StatisticsActivity.class.getName());
-                    startActivity(intent);
+                    if (checkObservationsExist() > 0) {
+                        intent.setClassName(ConfigActivity.this,
+                                StatisticsActivity.class.getName());
+                        startActivity(intent);
+                    }
                     break;
                 case 6:
                     intent.setClassName(ConfigActivity.this,
@@ -424,6 +427,19 @@ public class ConfigActivity extends ThemedActivity {
             return -1;
         }
 
+        return 1;
+    }
+
+    /**
+     * Checks if any observations are collected.
+     * @return -1 if there are no observations, else 1
+     */
+    private int checkObservationsExist() {
+        final ObservationModel[] observations = database.getAllObservations();
+        if (observations.length == 0) {
+            Utils.makeToast(getApplicationContext(), getString(R.string.warning_no_observations));
+            return -1;
+        }
         return 1;
     }
 

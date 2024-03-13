@@ -1,8 +1,11 @@
 package com.fieldbook.tracker.adapters;
 
+import android.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,6 +17,10 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.Utils;
+
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.ViewHolder> {
 
+    StatisticsActivity originActivity;
     DataHelper database;
     List<String> seasons;
     private final SimpleDateFormat timeStampFormat;
@@ -39,7 +47,8 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
 
     public StatisticsAdapter(StatisticsActivity context, List<String> seasons, int toggleVariable) {
-        this.database = context.getDatabase();
+        this.originActivity = context;
+        this.database = originActivity.getDatabase();
         this.seasons = seasons;
         this.timeStampFormat = new SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.getDefault());
         this.dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault());
@@ -47,19 +56,29 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView stat1, stat2, stat3, stat4, stat5, stat6, stat7, stat8, year_text_view;
+        TextView statValue1, statValue2, statValue3, statValue4, statValue5, statValue6, statValue7, statValue8, year_text_view;
+        LinearLayout stat1, stat2, stat3, stat4, stat5, stat6, stat7, stat8;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            stat1 = itemView.findViewById(R.id.stat_value_1);
-            stat2 = itemView.findViewById(R.id.stat_value_2);
-            stat3 = itemView.findViewById(R.id.stat_value_3);
-            stat4 = itemView.findViewById(R.id.stat_value_4);
-            stat5 = itemView.findViewById(R.id.stat_value_5);
-            stat6 = itemView.findViewById(R.id.stat_value_6);
-            stat7 = itemView.findViewById(R.id.stat_value_7);
-            stat8 = itemView.findViewById(R.id.stat_value_8);
+            statValue1 = itemView.findViewById(R.id.stat_value_1);
+            statValue2 = itemView.findViewById(R.id.stat_value_2);
+            statValue3 = itemView.findViewById(R.id.stat_value_3);
+            statValue4 = itemView.findViewById(R.id.stat_value_4);
+            statValue5 = itemView.findViewById(R.id.stat_value_5);
+            statValue6 = itemView.findViewById(R.id.stat_value_6);
+            statValue7 = itemView.findViewById(R.id.stat_value_7);
+            statValue8 = itemView.findViewById(R.id.stat_value_8);
             year_text_view = itemView.findViewById(R.id.year_text_view);
+
+            stat1 = itemView.findViewById(R.id.stat_1);
+            stat2 = itemView.findViewById(R.id.stat_2);
+            stat3 = itemView.findViewById(R.id.stat_3);
+            stat4 = itemView.findViewById(R.id.stat_4);
+            stat5 = itemView.findViewById(R.id.stat_5);
+            stat6 = itemView.findViewById(R.id.stat_6);
+            stat7 = itemView.findViewById(R.id.stat_7);
+            stat8 = itemView.findViewById(R.id.stat_8);
         }
     }
 
@@ -142,29 +161,91 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         }
 
         int maxObservationsOnSingleUnit = 0;
-        String UnitWithMostObservations = null;
+        String unitWithMostObservations = null;
         for (Map.Entry<String, Integer> entry : observationCount.entrySet()) {
             if (entry.getValue() > maxObservationsOnSingleUnit) {
                 maxObservationsOnSingleUnit = entry.getValue();
-                UnitWithMostObservations = entry.getKey();
+                unitWithMostObservations = entry.getKey();
             }
         }
 
         holder.year_text_view.setText(seasons.get(position));
-        holder.stat1.setText(String.valueOf(fields.size()));
-        holder.stat2.setText(String.valueOf(plots.length));
-        holder.stat3.setText(String.valueOf(observations.length));
-        holder.stat4.setText(timeString);
-        holder.stat5.setText(String.valueOf(collectors.size()));
-        holder.stat6.setText(String.valueOf(imageCount));
-        holder.stat7.setText(dateWithMostObservations);
-        holder.stat8.setText(String.valueOf(maxObservationsOnSingleUnit));
+        holder.statValue1.setText(String.valueOf(fields.size()));
+        holder.statValue2.setText(String.valueOf(plots.length));
+        holder.statValue3.setText(String.valueOf(observations.length));
+        holder.statValue4.setText(timeString);
+        holder.statValue5.setText(String.valueOf(collectors.size()));
+        holder.statValue6.setText(String.valueOf(imageCount));
+        holder.statValue7.setText(dateWithMostObservations);
+        holder.statValue8.setText(String.valueOf(maxObservationsOnSingleUnit));
+
+        holder.stat1.setOnClickListener(view -> {
+            List<String> fieldNames = new ArrayList<>();
+            for (FieldObject field: fields) {
+                fieldNames.add(field.getExp_name());
+            }
+            displayDialog(R.string.stat1_title, fieldNames);
+        });
+
+        holder.stat2.setOnClickListener(view -> Utils.makeToast(originActivity, plots.length + " plots have had data collected"));
+        holder.stat3.setOnClickListener(view -> Utils.makeToast(originActivity, observations.length + " total observations have been collected"));
+        holder.stat4.setOnClickListener(view -> Utils.makeToast(originActivity, timeString + " hours have been spent in collecting the data"));
+        holder.stat5.setOnClickListener(view -> displayDialog(R.string.stat5_title, new ArrayList<>(collectors)));
+
+        int finalImageCount = imageCount;
+        holder.stat6.setOnClickListener(view -> Utils.makeToast(originActivity, finalImageCount + " photos have been clicked"));
+
+        int finalMaxObservationsInADay = maxObservationsInADay;
+        String finalDateWithMostObservations = dateWithMostObservations;
+        holder.stat7.setOnClickListener(view -> Utils.makeToast(originActivity, finalMaxObservationsInADay + " observations were collected on " + finalDateWithMostObservations));
+
+        String finalUnitWithMostObservations = unitWithMostObservations;
+        holder.stat8.setOnClickListener(view -> {
+            List<String> data = new ArrayList<>();
+            for (ObservationModel observation : observations) {
+                if (observation.getObservation_unit_id().equals(finalUnitWithMostObservations)) {
+                    final String traitFormat = observation.getObservation_variable_field_book_format();
+                    if (traitFormat.equals("categorical") || traitFormat.equals("multicat") || traitFormat.equals("qualitative"))
+                        data.add(observation.getObservation_variable_name() + ": " + decodeCategorical(observation.getValue()));
+                    else if (traitFormat.equals("photo"))
+                        data.add(observation.getObservation_variable_name() + ": " + "<image>");
+                    else
+                        data.add(observation.getObservation_variable_name() + ": " + observation.getValue());
+                }
+            }
+            displayDialog(R.string.stat8_title, data);
+        });
 
     }
 
     @Override
     public int getItemCount() {
         return seasons.size();
+    }
+
+    public void displayDialog(int titleStringId, List<String> data) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
+
+        View layout = originActivity.getLayoutInflater().inflate(R.layout.dialog_individual_statistics, null);
+        builder.setTitle(titleStringId).setView(layout);
+        builder.setNegativeButton(R.string.dialog_close, (dialogInterface, id) -> dialogInterface.dismiss());
+
+        final AlertDialog dialog = builder.create();
+
+        ListView statsList = layout.findViewById(R.id.statsList);
+        statsList.setAdapter(new StatisticsListAdapter(originActivity, data));
+
+        dialog.show();
+    }
+
+    private String decodeCategorical(String value) {
+        ArrayList<BrAPIScaleValidValuesCategories> cats = CategoryJsonUtil.Companion.decode(value);
+        StringBuilder v = new StringBuilder(cats.get(0).getValue());
+        if (cats.size() > 1) {
+            for (int i = 1; i < cats.size(); i++)
+                v.append(", ").append(cats.get(i).getValue());
+        }
+        return v.toString();
     }
 
 }
