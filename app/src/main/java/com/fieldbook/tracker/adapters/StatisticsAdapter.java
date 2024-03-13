@@ -105,10 +105,10 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 //            throw new RuntimeException(e);
 //        }
 
-        ArrayList<FieldObject> fields = database.getAllFieldObjects();
-        ObservationUnitModel[] plots = database.getAllObservationUnits();
         ObservationModel[] observations = database.getAllObservationsFromAYear(seasons.get(position));
 
+        Set<String> fields = new HashSet<>();
+        Set<String> observationUnits = new HashSet<>();
         Set<String> collectors = new HashSet<>();
         ArrayList<Date> dateObjects = new ArrayList<>();
         Map<String, Integer> dateCount = new HashMap<>();
@@ -116,6 +116,11 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         int imageCount = 0;
 
         for (ObservationModel observation : observations) {
+
+            fields.add(observation.getStudy_id());
+
+            observationUnits.add(observation.getObservation_unit_id());
+
             String collector = observation.getCollector();
             if (collector != null && !collector.trim().isEmpty()) {
                 collectors.add(collector);
@@ -171,7 +176,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
         holder.year_text_view.setText(seasons.get(position));
         holder.statValue1.setText(String.valueOf(fields.size()));
-        holder.statValue2.setText(String.valueOf(plots.length));
+        holder.statValue2.setText(String.valueOf(observationUnits.size()));
         holder.statValue3.setText(String.valueOf(observations.length));
         holder.statValue4.setText(timeString);
         holder.statValue5.setText(String.valueOf(collectors.size()));
@@ -181,13 +186,13 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
         holder.stat1.setOnClickListener(view -> {
             List<String> fieldNames = new ArrayList<>();
-            for (FieldObject field: fields) {
-                fieldNames.add(field.getExp_name());
+            for (String field: fields) {
+                fieldNames.add(database.getFieldObject(Integer.valueOf(field)).getExp_name());
             }
             displayDialog(R.string.stat1_title, fieldNames);
         });
 
-        holder.stat2.setOnClickListener(view -> Utils.makeToast(originActivity, plots.length + " plots have had data collected"));
+        holder.stat2.setOnClickListener(view -> Utils.makeToast(originActivity, observationUnits.size() + " plots have had data collected"));
         holder.stat3.setOnClickListener(view -> Utils.makeToast(originActivity, observations.length + " total observations have been collected"));
         holder.stat4.setOnClickListener(view -> Utils.makeToast(originActivity, timeString + " hours have been spent in collecting the data"));
         holder.stat5.setOnClickListener(view -> displayDialog(R.string.stat5_title, new ArrayList<>(collectors)));
