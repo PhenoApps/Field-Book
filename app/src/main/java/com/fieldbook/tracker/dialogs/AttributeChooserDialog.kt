@@ -45,7 +45,7 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
         recyclerView.layoutManager = LinearLayoutManager(requireActivity())
         recyclerView.adapter = AttributeAdapter(this, null)
 
-        val dialog = AlertDialog.Builder(requireActivity())
+        val dialog = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
             .setView(view)
             .setNegativeButton(android.R.string.cancel, null)
             .setCancelable(true)
