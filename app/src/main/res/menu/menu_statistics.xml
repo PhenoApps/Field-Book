@@ -8,6 +8,6 @@
         android:id="@+id/stats_calendar"
         android:icon="@drawable/ic_stats_calendar"
         app:showAsAction="always"
-        android:title="@string/stats_select_date_range" />
+        android:title="@string/stats_toggle_view" />
 
 </menu>

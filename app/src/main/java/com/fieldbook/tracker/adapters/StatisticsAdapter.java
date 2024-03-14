@@ -4,7 +4,7 @@ import android.app.AlertDialog;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.os.Environment;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +15,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
@@ -22,12 +24,13 @@ import com.fieldbook.tracker.activities.StatisticsActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.Utils;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
+import org.phenoapps.utils.BaseDocumentTreeUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -101,19 +104,6 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
-//        Date startDate, endDate;
-//        try {
-//            startDate = dateFormat.parse(seasons.get(position));
-//            Calendar calendar = Calendar.getInstance();
-//            calendar.setTime(startDate);
-//            calendar.add(Calendar.YEAR, +1);
-//            calendar.add(Calendar.DATE, -1);
-//            endDate = calendar.getTime();
-//
-//        } catch (ParseException e) {
-//            throw new RuntimeException(e);
-//        }
 
         ObservationModel[] observations = database.getAllObservationsFromAYear(seasons.get(position));
 
@@ -232,30 +222,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         });
 
         holder.statisticsCard.setOnLongClickListener(view -> {
-            Bitmap bitmap = Bitmap.createBitmap(holder.statisticsCard.getWidth(), holder.statisticsCard.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            canvas.drawColor(Color.WHITE);
-            holder.statisticsCard.draw(canvas);
-
-            Log.d("MyApp",Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download");
-
-            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download");
-            File myFile = new File(file, holder.year_text_view.getText() + "_" + System.currentTimeMillis() + ".jpg");
-            if (myFile.exists()) {
-                myFile.delete();
-            }
-
-            try {
-                FileOutputStream fileOutputStream = new FileOutputStream(myFile);
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
-                fileOutputStream.flush();
-                fileOutputStream.close();
-                Utils.makeToast(originActivity, "Image saved in the Downloads directory");
-
-            } catch (Exception e) {
-                Log.d("MyApp", e.toString());
-            }
-
+            exportCard(holder);
             return true;
         });
 
@@ -266,7 +233,18 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         return seasons.size();
     }
 
+    /**
+     * Displays a dialog with the list of matching items of a statistic
+     * @param titleStringId: title of the dialog
+     * @param data list of items to be displayed
+     */
     public void displayDialog(int titleStringId, List<String> data) {
+
+        if (data.size() == 0) {
+            Utils.makeToast(originActivity, originActivity.getString(R.string.warning_no_data));
+            return;
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
 
         View layout = originActivity.getLayoutInflater().inflate(R.layout.dialog_individual_statistics, null);
@@ -279,6 +257,42 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         statsList.setAdapter(new StatisticsListAdapter(originActivity, data));
 
         dialog.show();
+    }
+
+    /**
+     * Exports a statistics card as an image
+     * @param holder
+     */
+    public void exportCard(ViewHolder holder) {
+        Bitmap cardBitmap = Bitmap.createBitmap(holder.statisticsCard.getWidth(), holder.statisticsCard.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas cardCanvas = new Canvas(cardBitmap);
+        cardCanvas.drawColor(Color.WHITE);
+        holder.statisticsCard.draw(cardCanvas);
+
+        // Adding the field book logo
+        Drawable drawable = ContextCompat.getDrawable(originActivity, R.mipmap.ic_launcher);
+        Bitmap logoBitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth() / 2, drawable.getIntrinsicHeight() / 2, Bitmap.Config.ARGB_8888);
+        Canvas logoCanvas = new Canvas(logoBitmap);
+        drawable.setBounds(0, 0, logoCanvas.getWidth(), logoCanvas.getHeight());
+        drawable.draw(logoCanvas);
+        cardCanvas.drawBitmap(logoBitmap, cardBitmap.getWidth() - logoBitmap.getWidth() - 10, 10, null); // setting the co-ordinates for the logo with a padding of 10dp
+
+        try {
+            DocumentFile imagesDir = BaseDocumentTreeUtil.Companion.getDirectory(originActivity, R.string.dir_media_photos);
+            if (imagesDir != null && imagesDir.exists()) {
+                DocumentFile exportImage = imagesDir.createFile("image/jpg", holder.year_text_view.getText() + "_" + System.currentTimeMillis() + ".jpg");
+                if (exportImage != null && exportImage.exists()) {
+                    OutputStream outputStream = originActivity.getContentResolver().openOutputStream(exportImage.getUri());
+                    if (outputStream != null) {
+                        cardBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                        outputStream.close();
+                        FileUtil.shareFile(originActivity, originActivity.getPrefs(), exportImage);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private String decodeCategorical(String value) {
