@@ -26,7 +26,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.adapters.SearchAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -42,12 +41,14 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class SearchActivity extends ActivityDialog {
     public static String TICK = "\"";
     private static final String TAG = "Field Book";
-    private SharedPreferences ep;
     private LinearLayout parent;
     private int rangeUntil;
 
     @Inject
     DataHelper database;
+
+    @Inject
+    SharedPreferences preferences;
 
     // Helper function to merge arrays
     public static <T> T[] concat(T[] first, T[] second) {
@@ -65,8 +66,6 @@ public class SearchActivity extends ActivityDialog {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setContentView(R.layout.activity_search);
 
@@ -95,15 +94,15 @@ public class SearchActivity extends ActivityDialog {
             public void onClick(View arg0) {
                 Spinner c = parent.getChildAt(0).findViewById(R.id.columns);
                 Spinner s = parent.getChildAt(0).findViewById(R.id.like);
-                SharedPreferences.Editor ed = ep.edit();
+                SharedPreferences.Editor ed = preferences.edit();
                 ed.putInt(GeneralKeys.SEARCH_COLUMN_DEFAULT, c.getSelectedItemPosition());
                 ed.putInt(GeneralKeys.SEARCH_LIKE_DEFAULT, s.getSelectedItemPosition());
                 ed.apply();
 
                 try {
                     // Create the sql query based on user selection
-                    String sql1 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from ObservationUnitProperty where ObservationUnitProperty.id is not null ";
-                    String sql2 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from observation_variables, ObservationUnitProperty, observations where observations.observation_unit_id = ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " and observations.observation_variable_name = observation_variables.observation_variable_name and observations.observation_variable_field_book_format = observation_variables.observation_variable_field_book_format ";
+                    String sql1 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + preferences.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + preferences.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + preferences.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from ObservationUnitProperty where ObservationUnitProperty.id is not null ";
+                    String sql2 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + preferences.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + ", " + " ObservationUnitProperty." + TICK + preferences.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + preferences.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from observation_variables, ObservationUnitProperty, observations where observations.observation_unit_id = ObservationUnitProperty." + TICK + preferences.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " and observations.observation_variable_name = observation_variables.observation_variable_name and observations.observation_variable_field_book_format = observation_variables.observation_variable_field_book_format ";
 
                     String sql = "";
 
@@ -224,8 +223,8 @@ public class SearchActivity extends ActivityDialog {
                     TextView primaryTitle = layout.findViewById(R.id.range);
                     TextView secondaryTitle = layout.findViewById(R.id.plot);
 
-                    primaryTitle.setText(ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)));
-                    secondaryTitle.setText(ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_plot)));
+                    primaryTitle.setText(preferences.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)));
+                    secondaryTitle.setText(preferences.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_plot)));
 
                     Button closeBtn = layout.findViewById(R.id.closeBtn);
                     ListView myList = layout.findViewById(R.id.myList);
@@ -267,7 +266,7 @@ public class SearchActivity extends ActivityDialog {
 
                     // If search has results, show them, otherwise display error message
                     if (data != null) {
-                        myList.setAdapter(new SearchAdapter(SearchActivity.this, data));
+//                        myList.setAdapter(new SearchResultsAdapter(SearchActivity.this, data));
 
                         dialog.show();
                     } else {
@@ -346,8 +345,8 @@ public class SearchActivity extends ActivityDialog {
 
             parent.addView(v);
         }
-        int columnDefault = ep.getInt(GeneralKeys.SEARCH_COLUMN_DEFAULT, 0);
-        int likeDefault = ep.getInt(GeneralKeys.SEARCH_LIKE_DEFAULT, 0);
+        int columnDefault = preferences.getInt(GeneralKeys.SEARCH_COLUMN_DEFAULT, 0);
+        int likeDefault = preferences.getInt(GeneralKeys.SEARCH_LIKE_DEFAULT, 0);
         if (columnDefault < c.getCount()) {
             c.setSelection(columnDefault);
         } else {

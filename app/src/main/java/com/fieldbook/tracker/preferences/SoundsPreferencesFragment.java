@@ -13,13 +13,10 @@ import com.fieldbook.tracker.activities.PreferencesActivity;
 
 public class SoundsPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
-    PreferenceManager prefMgr;
     Context context;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_sounds, rootKey);
 

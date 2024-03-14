@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.documentfile.provider.DocumentFile
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
 import org.phenoapps.utils.BaseDocumentTreeUtil
@@ -31,7 +32,7 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
 
             if (context != null) {
 
-                val prefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 val field = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
 
                 if (field.isNotBlank()) {
@@ -59,7 +60,7 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
 
             if (context != null) {
 
-                val prefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 val field = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
 
                 if (field.isNotBlank()) {

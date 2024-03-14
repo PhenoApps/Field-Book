@@ -97,7 +97,7 @@ public class DateTraitLayout extends BaseTraitLayout {
          */
         calendarVisibilityBtn.setOnClickListener((View) -> {
 
-            DialogFragment newFragment = new DatePickerFragment().newInstance(dateFormat, (y, m, d) -> {
+            DialogFragment newFragment = new DatePickerFragment(getContext()).newInstance(dateFormat, (y, m, d) -> {
 
                 calendar.set(y, m, d);
 

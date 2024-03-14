@@ -118,6 +118,7 @@
     <string name="traits_create_warning_name_blank">性状名称不能为空</string>
     <string name="traits_create_warning_duplicate">性状已经存在</string>
     <string name="traits_create_warning_numeric_required">默认值、最小值和最大值必须设定为数字</string>
+    <string name="edit_traits">编辑</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">数值低于最小值</string>
@@ -139,6 +140,7 @@
     <string name="main_toolbar_search">搜索</string>
     <string name="search_dialog_add">添加</string>
     <string name="search_dialog_clear">清除</string>
+    <string name="search_dialog_search">搜索</string>
     <string name="search_dialog_query_is_equal_to">等于</string>
     <string name="search_dialog_query_is_not_equal_to">不等于</string>
     <string name="search_dialog_query_contains">包含</string>
@@ -414,4 +416,5 @@
     <string name="tutorial_traits_format_description">不同的性状格式通过图标来标识。</string>
     <string name="tutorial_traits_visibility_title">性状可见性</string>
     <string name="tutorial_traits_visibility_description">通过点击检查框来禁止性状采集数据。</string>
+    <string name="tutorial_main_datagrid_title">数据表格</string>
 </resources>

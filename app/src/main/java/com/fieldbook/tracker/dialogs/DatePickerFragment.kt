@@ -7,6 +7,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
 import java.text.SimpleDateFormat
@@ -18,12 +19,16 @@ import java.util.Calendar
  * The date trait layout sends the observed or current date and format to parse.
  * This class also has an onSet callback which sends back the year, month and day to be saved.
  */
-class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
+class DatePickerFragment(private val context: Context) : DialogFragment(),
+    DatePickerDialog.OnDateSetListener {
 
     private var format: SimpleDateFormat? = null
     private var onSet: ((Int, Int, Int) -> Boolean)? = null
 
-    fun newInstance(format: SimpleDateFormat, onSet: (Int, Int, Int) -> Boolean): DatePickerFragment {
+    fun newInstance(
+        format: SimpleDateFormat,
+        onSet: (Int, Int, Int) -> Boolean
+    ): DatePickerFragment {
         this.format = format
         this.onSet = onSet
         return this
@@ -35,7 +40,7 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
 
         val defaultFirstDate = format?.format(calendar.time)
 
-        val date = context?.getSharedPreferences("Settings", Context.MODE_PRIVATE)
+        val date = PreferenceManager.getDefaultSharedPreferences(context)
             ?.getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, defaultFirstDate) ?: defaultFirstDate
 
         // Use the current date as the default date in the picker

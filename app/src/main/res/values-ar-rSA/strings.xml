@@ -119,6 +119,7 @@
     <string name="traits_create_warning_name_blank">لا يمكن أن يكون اسم السمة فارغ</string>
     <string name="traits_create_warning_duplicate">السمة موجودة مسبقا</string>
     <string name="traits_create_warning_numeric_required">القيمة الافتراضية والدنيا والقصوى يجب أن تكون عددية</string>
+    <string name="edit_traits">تعديل</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">القيمة أقل من الحد الأدنى</string>
@@ -140,6 +141,7 @@
     <string name="main_toolbar_search">بحث</string>
     <string name="search_dialog_add">إضافة</string>
     <string name="search_dialog_clear">إزالة</string>
+    <string name="search_dialog_search">بحث</string>
     <string name="search_dialog_query_is_equal_to">يساوي</string>
     <string name="search_dialog_query_is_not_equal_to">لا يساوي</string>
     <string name="search_dialog_query_contains">يتضمن</string>
@@ -411,4 +413,5 @@
     <string name="tutorial_traits_format_description">تتم الإشارة إلى أنواع السمات المختلفة برموز مختلفة.</string>
     <string name="tutorial_traits_visibility_title">رؤية السمة</string>
     <string name="tutorial_traits_visibility_description">يمكن تعطيل السمات من الجمع من خلال تبديل مربع الاختيار.</string>
+    <string name="tutorial_main_datagrid_title">جدول البيانات</string>
 </resources>

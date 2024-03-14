@@ -2,7 +2,7 @@ package com.fieldbook.tracker.application
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.fieldbook.tracker.preferences.GeneralKeys
+import androidx.preference.PreferenceManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,5 +15,5 @@ object ActivityModule {
 
     @Provides
     fun providesPreferences(@ActivityContext context: Context): SharedPreferences =
-        context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+        PreferenceManager.getDefaultSharedPreferences(context)
 }
