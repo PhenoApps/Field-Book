@@ -2,21 +2,19 @@ package com.fieldbook.tracker.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.arthenica.ffmpegkit.Statistics;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.StatisticsAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
-import com.fieldbook.tracker.dialogs.DatePickerFragment;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,7 +29,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class StatisticsActivity extends ThemedActivity {
+public class StatisticsActivity extends ThemedActivity implements StatisticsAdapter.statisticsCardLongPressedListener {
     public static String TAG = "Statistics Activity";
     @Inject
     DataHelper database;
@@ -41,6 +39,7 @@ public class StatisticsActivity extends ThemedActivity {
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd";
     private SimpleDateFormat timeStamp = new SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.getDefault());
     private int toggleVariable = 0;
+    private Snackbar snackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +64,8 @@ public class StatisticsActivity extends ThemedActivity {
 
         setSeasons();
 
+        snackbar = Snackbar.make(rvStatisticsCard, R.string.stats_export, Snackbar.LENGTH_INDEFINITE);
+        snackbar.show();
     }
 
     @Override
@@ -119,7 +120,12 @@ public class StatisticsActivity extends ThemedActivity {
         }
 
         seasons = new ArrayList<>(uniqueSeasons);
-        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons, toggleVariable));
+        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons, toggleVariable, this));
 
+    }
+
+    @Override
+    public void dismissSnackBar() {
+        snackbar.dismiss();
     }
 }

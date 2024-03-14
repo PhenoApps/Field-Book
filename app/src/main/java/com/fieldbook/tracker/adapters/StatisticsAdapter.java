@@ -53,15 +53,17 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
     private final SimpleDateFormat dateFormat;
     private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
     private int toggleVariable;
+    private statisticsCardLongPressedListener listener;
 
 
-    public StatisticsAdapter(StatisticsActivity context, List<String> seasons, int toggleVariable) {
+    public StatisticsAdapter(StatisticsActivity context, List<String> seasons, int toggleVariable, StatisticsAdapter.statisticsCardLongPressedListener listener) {
         this.originActivity = context;
         this.database = originActivity.getDatabase();
         this.seasons = seasons;
         this.timeStampFormat = new SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.getDefault());
         this.dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault());
         this.toggleVariable = toggleVariable;
+        this.listener = listener;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -264,6 +266,9 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
      * @param holder
      */
     public void exportCard(ViewHolder holder) {
+
+        listener.dismissSnackBar();
+
         Bitmap cardBitmap = Bitmap.createBitmap(holder.statisticsCard.getWidth(), holder.statisticsCard.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas cardCanvas = new Canvas(cardBitmap);
         cardCanvas.drawColor(Color.WHITE);
@@ -303,6 +308,13 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
                 v.append(", ").append(cats.get(i).getValue());
         }
         return v.toString();
+    }
+
+    public interface statisticsCardLongPressedListener {
+        /**
+         * Used to dismiss the snackbar on Statistics Activity when a card is long pressed
+         */
+        void dismissSnackBar();
     }
 
 }
