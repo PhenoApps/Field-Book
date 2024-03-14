@@ -125,7 +125,6 @@ public class BrapiActivity extends ThemedActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 sortBy = parent.getItemAtPosition(position).toString();
-                Toast.makeText(BrapiActivity.this, "New sortBy option selected: " + sortBy, Toast.LENGTH_SHORT).show();
                 loadStudiesList(); // Reload studies list with the new sort option
             }
 
