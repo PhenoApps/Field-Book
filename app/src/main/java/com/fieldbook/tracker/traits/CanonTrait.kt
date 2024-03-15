@@ -65,9 +65,9 @@ class CanonTrait :
 
             if (controller.getCanonApi().isConnected) {
 
-                startCanonSession()
+                startCanonSession(currentRange)
 
-            } else controller.getWifiHelper().startWifiSearch(ssid, this)
+            } //else controller.getWifiHelper().startWifiSearch(ssid, this)
 
             connectBtn?.setOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -90,7 +90,7 @@ class CanonTrait :
         }
     }
 
-    private fun startCanonSession() {
+    private fun startCanonSession(rangeObject: RangeObject) {
 
         val scope = CoroutineScope(Dispatchers.IO)
 
@@ -98,7 +98,7 @@ class CanonTrait :
 
             try {
 
-                controller.getCanonApi().initiateSession(this@CanonTrait)
+                controller.getCanonApi().initiateSession(this@CanonTrait, rangeObject)
 
             } catch (e: Exception) {
 
@@ -172,7 +172,7 @@ class CanonTrait :
 
     override fun onNetworkBound() {
 
-        startCanonSession()
+        startCanonSession(currentRange)
 
     }
 }

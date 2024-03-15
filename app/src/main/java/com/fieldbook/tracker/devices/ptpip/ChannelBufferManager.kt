@@ -46,19 +46,6 @@ class ChannelBufferManager(val channel: SocketChannel) {
 
     fun getBytes(length: Int): ByteArray {
 
-        val data = ByteBuffer.allocate(length)
-
-        channel.read(data)
-
-        val bytes = data.array().copyOf()
-
-        data.clear()
-
-        return bytes
-    }
-
-    fun getBitmap(length: Int): ByteArray {
-
         val reader = channel.socket().getInputStream()
 
         val data = ByteArray(length)
@@ -70,7 +57,7 @@ class ChannelBufferManager(val channel: SocketChannel) {
             index += bytes
         }
 
-        return data
+        return data.clone()
     }
 
 }

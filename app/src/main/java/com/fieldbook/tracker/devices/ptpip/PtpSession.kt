@@ -33,6 +33,7 @@ class PtpSession(val comMan: ChannelBufferManager,
 
         const val OP_START_SESSION: Short = 0x1002
         const val OP_CLOSE_SESSION: Short = 0x1003
+        const val OP_9087: Short = 0x9087.toShort()
         const val OP_GET_LIVE_VIEW: Short = 0x9153.toShort()
         const val OP_REMOTE_MODE: Short = 0x9114.toShort()
         const val OP_EVENT_MODE: Short = 0x9115.toShort()
@@ -81,11 +82,13 @@ class PtpSession(val comMan: ChannelBufferManager,
 
         val length = chanMan.getInt()
 
-        val response = chanMan.getBytes(length - Int.SIZE_BYTES)
+        return if (length > 0) {
 
-        val data = response.slice(4..5).toByteArray().toShort()
+            val response = chanMan.getBytes(length - Int.SIZE_BYTES)
+            val data = response.slice(4..5).toByteArray().toShort()
+            data == 0x2001.toShort()
 
-        return data == 0x2001.toShort()
+        } else true
 
     }
 
@@ -277,6 +280,30 @@ class PtpSession(val comMan: ChannelBufferManager,
                 0x1, 0x0, 0x0, 0x0, //param
                 0x0, 0x0, 0x0, 0x0
             )
+        )
+    }
+
+    fun write902f(tid: Int) {
+
+        PtpOperations.writeOperation(
+            comMan.channel,
+            PACKET_TYPE_OPERATION_REQUEST,
+            DATA_TO_CAMERA,
+            OP_902f,
+            tid,
+            byteArrayOf()
+        )
+    }
+
+    fun write9087(tid: Int) {
+
+        PtpOperations.writeOperation(
+            comMan.channel,
+            PACKET_TYPE_OPERATION_REQUEST,
+            DATA_TO_CAMERA,
+            OP_9087,
+            tid,
+            byteArrayOf()
         )
     }
 

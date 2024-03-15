@@ -38,8 +38,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
     companion object {
         const val TAG = "CanonAPI"
-        const val HANDLE_UPDATE_FRAME_COUNT = 60
-        const val IMAGE_SIZE = 50000
+        const val HANDLE_UPDATE_FRAME_COUNT = 30
         const val PHONE_NAME = "Field Book"
     }
 
@@ -83,7 +82,9 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
         }
     }
 
-    fun initiateSession(sessionCallback: PtpSessionCallback) {
+    fun initiateSession(sessionCallback: PtpSessionCallback, rangeObject: RangeObject) {
+
+        obsUnit = rangeObject
 
         if (isConnected) {
             resumeSession(sessionCallback)
@@ -212,6 +213,21 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
         } while (true)
     }
 
+    private fun writeParameter902f(session: PtpSession, storageId: ByteArray) {
+
+        log("Writing operation 902f")
+
+        session.transaction({
+
+            session.write902f(it)
+
+        }) { response ->
+
+            requestInitHandles(session, storageId)
+
+        }
+    }
+
     private fun writeParameter1(session: PtpSession, storageId: ByteArray) {
 
         log("Writing parameter d136, required for live view")
@@ -257,7 +273,36 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
             if (response) {
 
-                startMainLoop(session, storageId)
+                writeParameter3(session, storageId)
+
+            }
+        }
+    }
+
+    private fun writeParameter3(session: PtpSession, storageId: ByteArray) {
+
+        log("Writing parameter d246 required for live view")
+
+        session.transaction({ tid ->
+
+            val length = 4
+            val data =
+                byteArrayOf(0x46.toByte(), 0xd2.toByte(), 0x0, 0x0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+
+            session.writePropertyValue(tid)
+
+            session.writeStartDataPacket(length + data.size, tid)
+
+            session.writeEndDataPacket(data, tid)
+
+        }) { response ->
+
+            log("d246 response $response")
+
+            if (response) {
+
+                writeParameter902f(session, storageId)
+
             }
         }
     }
@@ -353,21 +398,17 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
                 val (packetType, data) = awaitImageEndPacket(session)
 
-                if (payloadSize >= IMAGE_SIZE) {
+                try {
 
-                    log("Found image")
-
-                    try {
-
-                        val bmp = BitmapFactory.decodeStream(ByteArrayInputStream(data))
+                    BitmapFactory.decodeStream(ByteArrayInputStream(data))?.let { bmp ->
 
                         session.callbacks?.onBitmapCaptured(bmp, unit)
 
-                    } catch (ignore: Exception) {
                     }
-                }
 
-                if (packetType == 12) break
+                } catch (_: Exception) {}
+
+                if (packetType == PACKET_TYPE_END_DATA) break
             }
 
         }) { response ->
@@ -394,24 +435,27 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
                 startCapture(session)
 
+                Thread.sleep(1500)
+
                 requestUpdateHandles(session, storageId)
 
                 continue
 
             } else {
 
-                requestLiveViewImage(session)
-
                 if (frame == 0) {
 
+                    log("REQUESTING UPDATES")
+
                     requestUpdateHandles(session, storageId)
+
+                } else {
+
+                    requestLiveViewImage(session)
 
                 }
 
                 frame = (frame + 1) % HANDLE_UPDATE_FRAME_COUNT
-
-                //Thread.sleep(1000/24)
-                Thread.sleep(1000 / 60)
 
             }
         }
@@ -437,33 +481,45 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
             log("Response update image handles $response")
 
-            if (response) {
+            newHandles?.forEach { handle ->
 
-                var newImage = handles.isNotEmpty()
+                val handleInteger = handle.toInt()
 
-                newHandles?.forEach { handle ->
+                if (handleInteger !in handles) {
 
-                    val handleInteger = handle.toInt()
+                    obsUnit?.let { unit ->
 
-                    if (newImage) {
+                        log("Found new image $handleInteger for ${unit.plot_id}")
 
-                        if (handleInteger !in handles) {
+                        requestGetImage(session, handle, unit)
 
-                            obsUnit?.let { unit ->
-
-                                log("Found new image $handleInteger for ${unit.plot_id}")
-
-                                requestGetImage(session, handle, unit)
-
-                            }
-                        }
                     }
-
-                    handles[handleInteger] = handle
                 }
+
+                handles[handleInteger] = handle
             }
         }
     }
+
+    private fun requestInitHandles(session: PtpSession, storageId: ByteArray) {
+
+        session.transaction({ tid ->
+
+            session.writeGetObjectHandles(storageId, tid)
+
+            val size = awaitStartPacket(session)
+
+            awaitEndPacketHandles(session).forEach {
+
+                handles[it.toInt()] = it
+            }
+
+        }) { response ->
+
+            startMainLoop(session, storageId)
+        }
+    }
+
 
     private fun requestLiveViewImage(session: PtpSession) {
 
@@ -475,21 +531,26 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
             var payloadSize = awaitStartPacket(session)
 
+            log("$tid Payload: $payloadSize")
+
             var total = 0
 
             while (true) {
 
-                val (size, type) = awaitDataPacket(session)
+                val (size, type) = awaitDataPacket(session, payloadSize)
 
-                if (type == 12) break
+                if (type == PACKET_TYPE_END_DATA) break
 
                 total += size
+
+                log("Size: +$size $total/$payloadSize")
 
             }
 
         }) { response ->
 
             log("Response live view image $response")
+
         }
     }
 
@@ -796,27 +857,13 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
             val totalBytesToRead = length - 12 //+ final - 12 + 10
 
-            val reader = session.comMan.channel.socket().getInputStream()
+            val data = session.comMan.getBytes(totalBytesToRead)
 
-            val data = ByteArray(totalBytesToRead)
-            var index = 0
-            while (index < totalBytesToRead) {
-
-                val bytes = reader.read(data, index, totalBytesToRead - index)
-
-                index += bytes
-            }
-
-            if (totalBytesToRead >= IMAGE_SIZE) {
-
-                val bmp = try {
-                    BitmapFactory.decodeStream(ByteArrayInputStream(data))
-                } catch (e: Exception) {
-                    null
+            try {
+                BitmapFactory.decodeStream(ByteArrayInputStream(data))?.let { bmp ->
+                    session.callbacks?.onPreview(bmp)
                 }
-
-                if (bmp != null) session.callbacks?.onPreview(bmp)
-            }
+            } catch (_: Exception) {}
 
         } else if (packetType == PACKET_TYPE_END_DATA) {
 
@@ -827,7 +874,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
         return length to packetType
     }
 
-    private fun awaitDataPacket(session: PtpSession): Pair<Int, Int> {
+    private fun awaitDataPacket(session: PtpSession, payload: Int): Pair<Int, Int> {
 
         val endDataPacketSize = session.comMan.getInt()
 
@@ -835,49 +882,30 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
         val tid = session.comMan.getInt()
 
+        log("Packet: $packetTypeInt")
+
         if (packetTypeInt == PACKET_TYPE_DATA) {
 
             val totalBytesToRead = endDataPacketSize - 12
-            val reader = session.comMan.channel.socket().getInputStream()
 
-            val data = ByteArray(totalBytesToRead)
-            var index = 0
-            while (index < totalBytesToRead) {
+            val data = session.comMan.getBytes(totalBytesToRead)
 
-                val bytes = reader.read(data, index, totalBytesToRead - index)
+            try {
 
-                index += bytes
-            }
-
-            if (totalBytesToRead >= IMAGE_SIZE) {
-
-                val bmp = try {
-                    BitmapFactory.decodeStream(ByteArrayInputStream(data))
-                } catch (e: Exception) {
-                    null
+                BitmapFactory.decodeStream(ByteArrayInputStream(data))?.let { bmp ->
+                    session.callbacks?.onPreview(bmp)
                 }
 
-                if (bmp != null) session.callbacks?.onPreview(bmp)
+            } catch (_: Exception) { }
 
+        } else if (packetTypeInt == PACKET_TYPE_END_DATA) {
+
+            if (payload > 0) {
+
+                session.comMan.getInt()
+
+                session.comMan.getInt()
             }
-
-        } else if (packetTypeInt == 12) {
-
-            session.comMan.getInt()
-
-            session.comMan.getInt()
-
-        } else {
-
-            log("Something went wrong...debugging to log file")
-
-            if (isDebug) {
-
-                session.debugBuffer(context)
-
-            }
-
-            throw Exception()
         }
 
         return Pair(endDataPacketSize, packetTypeInt)
@@ -897,7 +925,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
         if (packetTypeInt == PACKET_TYPE_END_DATA) {
 
-            data = session.comMan.getBitmap(totalBytesToRead)
+            data = session.comMan.getBytes(totalBytesToRead)
 
         } else {
 
