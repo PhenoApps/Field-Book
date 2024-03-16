@@ -227,7 +227,6 @@
     <string name="dialog_att_chooser_attributes">Atributos</string>
     <string name="dialog_att_chooser_traits">Variables</string>
     <string name="dialog_att_chooser_other">Otro</string>
-    <string name="dialog_collect_att_chooser_title">Elegir atributo</string>
     <string name="infobars_attribute_placeholder">Seleccionar</string>
     <string name="field_name_attribute">campo_nombre</string>
     <!-- ID/Barcode Search -->
