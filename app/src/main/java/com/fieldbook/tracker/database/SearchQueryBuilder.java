@@ -28,7 +28,7 @@ public class SearchQueryBuilder {
 
 
     public String buildSearchQuery(){
-        SharedPreferences ep = originActivity.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+        SharedPreferences ep = originActivity.getPreferences();
         queryBuilder = new StringBuilder();
 
         // Create the sql query based on user selection
