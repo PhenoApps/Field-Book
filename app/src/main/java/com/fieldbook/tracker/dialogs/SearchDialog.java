@@ -37,7 +37,7 @@ import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchDialog extends DialogFragment implements SearchAttributeChooserDialog.OnAttributeClickedListener, OperatorDialog.OnOperatorClickedListener, SearchAdapter.onEditTextChangedListener, SearchAdapter.onDeleteClickedListener {
+public class SearchDialog extends DialogFragment implements AttributeChooserDialog.OnAttributeSelectedListener, OperatorDialog.OnOperatorClickedListener, SearchAdapter.onEditTextChangedListener, SearchAdapter.onDeleteClickedListener {
 
     private static final String TAG = "SearchDialog";
     private static CollectActivity originActivity;
@@ -81,7 +81,7 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
 
         ImageButton add = customView.findViewById(R.id.dialog_search_add_btn);
 
-        add.setOnClickListener(arg0 -> createSearchAttributeChooserDialog());
+        add.setOnClickListener(arg0 -> createAttributeChooserDialog());
 
         builder.setPositiveButton(R.string.search_dialog_search, null);
 
@@ -127,9 +127,10 @@ public class SearchDialog extends DialogFragment implements SearchAttributeChoos
         return v.toString();
     }
 
-    public void createSearchAttributeChooserDialog() {
-        SearchAttributeChooserDialog searchAttributeChooserDialog = new SearchAttributeChooserDialog(originActivity, this);
-        searchAttributeChooserDialog.show();
+    public void createAttributeChooserDialog() {
+        AttributeChooserDialog attributeChooserDialog = new AttributeChooserDialog();
+        attributeChooserDialog.setOnAttributeSelectedListener(this);
+        attributeChooserDialog.show(originActivity.getSupportFragmentManager(), "attributeChooserDialog");
     }
 
     @Override
