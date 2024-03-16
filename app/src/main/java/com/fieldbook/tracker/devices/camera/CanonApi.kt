@@ -384,37 +384,48 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
         return verifyInitCommandAckPacket(chanMan)
     }
 
-    private fun requestGetImage(session: PtpSession, handle: ByteArray, unit: RangeObject) {
+    private fun requestGetImage(session: PtpSession, handle: ByteArray, unit: RangeObject, offset: Int? = 0, data: ByteArray = byteArrayOf()) {
+
+        var length = byteArrayOf(0x0, 0x0, 0x08, 0x0).toInt()
 
         log("Requesting get image")
 
+        var payloadSize = 0
+
+        var nextData: ByteArray = byteArrayOf()
+
         session.transaction({ tid ->
 
-            session.writeGetImage(handle, tid)
+            session.writeGetImage1(handle, tid, (offset ?: 0).toByteArray(), length.toByteArray())
 
-            val payloadSize = awaitStartPacket(session)
+            payloadSize = awaitStartPacket(session)
+
+            log("Payload size: $payloadSize")
 
             while (true) {
 
-                val (packetType, data) = awaitImageEndPacket(session)
+                val (packetType, nd) = awaitImageEndPacket(session)
 
-                try {
+                nextData += nd
 
-                    BitmapFactory.decodeStream(ByteArrayInputStream(data))?.let { bmp ->
+                if (packetType == PACKET_TYPE_END_DATA) {
 
-                        session.callbacks?.onBitmapCaptured(bmp, unit)
-
-                    }
-
-                } catch (_: Exception) {}
-
-                if (packetType == PACKET_TYPE_END_DATA) break
+                    break
+                }
             }
 
         }) { response ->
 
             log("Response get image $response")
 
+            if (payloadSize == length) {
+
+                requestGetImage(session, handle, unit, (offset ?: 0) + length, data = data + nextData)
+
+            } else {
+
+                session.callbacks?.onJpegCaptured(data + nextData, unit)
+            }
         }
     }
 
@@ -434,8 +445,6 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
                 capturing = false
 
                 startCapture(session)
-
-                Thread.sleep(1500)
 
                 requestUpdateHandles(session, storageId)
 
@@ -481,15 +490,19 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
             log("Response update image handles $response")
 
-            newHandles?.forEach { handle ->
+            newHandles?.forEach {  handle ->
 
                 val handleInteger = handle.toInt()
 
                 if (handleInteger !in handles) {
 
+                    log("Handle: ${handle.toInt()}")
+
                     obsUnit?.let { unit ->
 
                         log("Found new image $handleInteger for ${unit.plot_id}")
+
+                        //requestUiLock(true, session, storageId, unit)
 
                         requestGetImage(session, handle, unit)
 
@@ -498,6 +511,24 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
                 handles[handleInteger] = handle
             }
+        }
+    }
+
+
+    private fun requestUiLock(lock: Boolean, session: PtpSession, storageId: ByteArray, unit: RangeObject) {
+
+        log("Requesting UI lock")
+
+        session.transaction({ tid ->
+
+            session.writeUiLock(tid, lock)
+
+        }) { response ->
+
+            log("UI lock response $response")
+
+            if (lock) requestGetImage(session, storageId, unit)
+
         }
     }
 
@@ -922,6 +953,8 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
         val tid = session.comMan.getInt()
 
         val totalBytesToRead = endDataPacketSize - 12
+
+        log("bytes: $totalBytesToRead")
 
         if (packetTypeInt == PACKET_TYPE_END_DATA) {
 

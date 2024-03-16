@@ -28,7 +28,7 @@ class CanonTrait :
     companion object {
         const val TAG = "Canon"
         const val type = "canon"
-        const val CAMERA_SHUTTER_DELAY_MS = 2000L
+        const val CAMERA_SHUTTER_DELAY_MS = 1000L
     }
 
     constructor(context: Context?) : super(context)
@@ -158,11 +158,11 @@ class CanonTrait :
         }
     }
 
-    override fun onBitmapCaptured(bmp: Bitmap, obsUnit: RangeObject) {
+    override fun onJpegCaptured(data: ByteArray, obsUnit: RangeObject) {
 
         uiScope.launch(Dispatchers.Main) {
 
-            saveBitmapToStorage(type(), bmp, obsUnit)
+            saveJpegToStorage(type(), data, obsUnit)
 
         }
     }

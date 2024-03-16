@@ -7,5 +7,6 @@ interface PtpSessionCallback {
     fun onSessionStart()
     fun onSessionStop()
     fun onPreview(bmp: Bitmap)
-    fun onBitmapCaptured(bmp: Bitmap, obsUnit: RangeObject)
+    fun onBitmapCaptured(bmp: Bitmap, obsUnit: RangeObject) = Unit
+    fun onJpegCaptured(data: ByteArray, obsUnit: RangeObject) = Unit
 }

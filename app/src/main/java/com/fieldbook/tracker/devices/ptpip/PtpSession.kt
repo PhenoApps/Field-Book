@@ -39,9 +39,11 @@ class PtpSession(val comMan: ChannelBufferManager,
         const val OP_EVENT_MODE: Short = 0x9115.toShort()
         const val OP_SET_PROP_VALUE: Short = 0x9110.toShort()
         const val OP_902f: Short = 0x902f.toShort()
+        const val OP_UI_UNLOCK: Short = 0x911c.toShort()
+        const val OP_UI_LOCK: Short = 0x911b.toShort()
         const val OP_GET_OBJECT_HANDLES: Short = 0x1007.toShort()
         const val OP_GET_STORAGE_IDS: Short = 0x9101.toShort()
-        const val OP_GET_IMAGE: Short = 0x9172.toShort()
+        const val OP_GET_IMAGE: Short = 0x101b.toShort()
     }
 
     private fun nextId() = try {
@@ -76,7 +78,7 @@ class PtpSession(val comMan: ChannelBufferManager,
 
     }
 
-    private fun verifyResponse(chanMan: ChannelBufferManager): Boolean {
+    fun verifyResponse(chanMan: ChannelBufferManager): Boolean {
 
         chanMan.channel.socket().getOutputStream().flush()
 
@@ -92,7 +94,7 @@ class PtpSession(val comMan: ChannelBufferManager,
 
     }
 
-    fun writeGetImage(handle: ByteArray, tid: Int) {
+    fun writeGetImage1(handle: ByteArray, tid: Int, offset: ByteArray, length: ByteArray) {
 
         PtpOperations.writeOperation(
             comMan.channel,
@@ -100,11 +102,19 @@ class PtpSession(val comMan: ChannelBufferManager,
             DATA_FROM_CAMERA,
             OP_GET_IMAGE,
             tid,
-            handle + byteArrayOf(
-                0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x20, 0x00,
-                0x00, 0x00, 0x00, 0x00
-            )
+            handle + offset + length
+        )
+    }
+
+    fun writeUiLock(tid: Int, lock: Boolean) {
+
+        PtpOperations.writeOperation(
+            comMan.channel,
+            PACKET_TYPE_OPERATION_REQUEST,
+            DATA_TO_CAMERA,
+            if (lock) OP_UI_LOCK else OP_UI_UNLOCK,
+            tid,
+            byteArrayOf()
         )
     }
 
