@@ -203,6 +203,7 @@ public class CollectActivity extends ThemedActivity
      * Main screen elements
      */
     private Menu systemMenu;
+    private Toolbar toolbar;
     private InfoBarAdapter infoBarAdapter;
     private TraitBoxView traitBox;
     private RangeBoxView rangeBox;
@@ -632,7 +633,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     private void initToolbars() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         Toolbar toolbarBottom = findViewById(R.id.toolbarBottom);
@@ -1247,6 +1248,44 @@ public class CollectActivity extends ThemedActivity
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) { // Ensure the menu item view is already created before setting longpress listener
+            toolbar.post(() -> setupLongPressListener());
+        }
+    }
+
+    private void setupLongPressListener() {
+        final View menuItemView = toolbar.findViewById(R.id.resources);
+        if (menuItemView != null) {
+            menuItemView.setOnLongClickListener(v -> {
+                openSavedResourceFile();
+                return true;
+            });
+        }
+    }
+
+    private void openSavedResourceFile() {
+        String fileString = preferences.getString(GeneralKeys.LAST_USED_RESOURCE_FILE, "");
+        if (!fileString.isEmpty()) {
+            try {
+                Uri resultUri = Uri.parse(fileString);
+                String suffix = fileString.substring(fileString.lastIndexOf('.') + 1).toLowerCase();
+                String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+
+                Intent open = new Intent(Intent.ACTION_VIEW);
+                open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                open.setDataAndType(resultUri, mime);
+                startActivity(open);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            Toast.makeText(this, "No file preference saved, select a file with a short press", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
     }
@@ -1781,17 +1820,17 @@ public class CollectActivity extends ThemedActivity
             case REQUEST_FILE_EXPLORER_CODE:
                 if (resultCode == RESULT_OK) {
                     try {
-
                         String resultString = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
+                        //save most recently used resource file
+                        preferences.edit().putString(GeneralKeys.LAST_USED_RESOURCE_FILE, resultString).apply();
+
                         Uri resultUri = Uri.parse(resultString);
-
                         String suffix = resultString.substring(resultString.lastIndexOf('.') + 1).toLowerCase();
-
                         String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+
                         Intent open = new Intent(Intent.ACTION_VIEW);
                         open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         open.setDataAndType(resultUri, mime);
-
                         startActivity(open);
                     } catch (Exception e) {
                         e.printStackTrace();
