@@ -56,6 +56,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -422,8 +423,8 @@ public class DataHelper {
 //        return synced;
     }
 
-    public void setTraitObservations(Integer studyId, Observation observation) {
-        ObservationDao.Companion.insertObservation(studyId, observation);
+    public void setTraitObservations(Integer studyId, Observation observation, Map<String,String> traitIdToTypeMap) {
+        ObservationDao.Companion.insertObservation(studyId, observation, traitIdToTypeMap);
     }
 
     /**

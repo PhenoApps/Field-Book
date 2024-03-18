@@ -18,6 +18,10 @@ import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.ObservationUnitDao;
+import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.database.models.ObservationVariableModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -664,9 +668,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                     if (response.getResult() != null) {
 
+                        Map<String,String> extVariableDbIdMap = getExtVariableDbIdMapping();
+                        Map<String,String> extUnitDbIdMap = getExtUnitDbIdMapping();
                         // Result contains a list of observation variables
                         List<BrAPIObservation> brapiObservationList = response.getResult().getData();
-                        final List<Observation> observationList = mapObservations(brapiObservationList);
+                        final List<Observation> observationList = mapObservations(brapiObservationList, extVariableDbIdMap, extUnitDbIdMap);
 
                         function.apply(observationList);
 
@@ -722,6 +728,25 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
+    private Map<String,String> getExtVariableDbIdMapping() {
+        String[] traitNames = ObservationVariableDao.Companion.getAllTraits();
+        Map<String,String> externalIdToInternalMap = new HashMap<>();
+        for(String trait : traitNames) {
+            TraitObject traitObject = ObservationVariableDao.Companion.getTraitByName(trait);
+            externalIdToInternalMap.put(traitObject.getExternalDbId(), traitObject.getId());
+        }
+        return externalIdToInternalMap;
+    }
+
+    private Map<String,String> getExtUnitDbIdMapping(){
+        ObservationUnitModel[] observationUnits = ObservationUnitDao.Companion.getAll();
+        Map<String, String> externalIdToInternalMap = new HashMap<>();
+        for(ObservationUnitModel model : observationUnits) {
+            externalIdToInternalMap.put(model.getObservation_unit_db_id(),String.valueOf(model.getInternal_id_observation_unit()));
+        }
+        return externalIdToInternalMap;
+    }
+
     private Observation mapToObservation(BrAPIObservation obs){
         Observation newObservation = new Observation();
         newObservation.setDbId(obs.getObservationDbId());
@@ -751,18 +776,28 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
      * @param brapiObservationList
      * @return list of Fieldbook Observation objects
      */
-    private List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList) {
+    private List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList,Map<String,String> extVariableDbIdMap, Map<String,String> extUnitDbIdMap) {
         List<Observation> outputList = new ArrayList<>();
         for(BrAPIObservation brapiObservation : brapiObservationList) {
             Observation newObservation = new Observation();
 
+            newObservation.setStudyId(brapiObservation.getStudyDbId());
+
             newObservation.setVariableName(brapiObservation.getObservationVariableName());
             newObservation.setDbId(brapiObservation.getObservationDbId());
+            String internalUnitId = extUnitDbIdMap.get(brapiObservation.getObservationUnitDbId());
+
             newObservation.setUnitDbId(brapiObservation.getObservationUnitDbId());
-            newObservation.setVariableDbId(brapiObservation.getObservationVariableDbId());
+            //need to get out the internal observation variable DB ID or else we will store the wrong thing in the table
+            String internalVarId = extVariableDbIdMap.get(brapiObservation.getObservationVariableDbId());
+            newObservation.setVariableDbId(internalVarId);
             newObservation.setValue(brapiObservation.getValue());
 
-            outputList.add(newObservation);
+            //Make sure we are on the right experiment level.
+            // This will cause bugs if there have been plot and plant level traits found as the observations retrieves all of them
+            if(internalUnitId != null) {
+                outputList.add(newObservation);
+            }
 
         }
         return outputList;
@@ -955,6 +990,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     private Pair<List<TraitObject>, Integer> mapTraits(List<BrAPIObservationVariable> variables) throws JSONException {
         List<TraitObject> traits = new ArrayList<>();
         int variablesMissingTrait = 0;
+        int positionCount = 1;
         for (BrAPIObservationVariable var : variables) {
 
             TraitObject trait = new TraitObject();
@@ -1035,7 +1071,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             // Set some config variables in fieldbook
             trait.setVisible(true);
-            trait.setRealPosition(0);
+            trait.setRealPosition(positionCount);
+            positionCount++;
 
             traits.add(trait);
         }
