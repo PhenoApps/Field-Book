@@ -99,9 +99,12 @@ class GoProApi @Inject constructor(
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
             when (playbackState) {
-                Player.STATE_IDLE, Player.STATE_ENDED -> Log.d(
-                    TAG, "Player Idle/Ended"
-                )
+                Player.STATE_IDLE, Player.STATE_ENDED -> {
+                    Log.d(
+                        TAG, "Player Idle/Ended"
+                    )
+                    streamStarted = false
+                }
 
                 Player.STATE_BUFFERING -> if (!streamStarted) {
                     Log.d(TAG, "Player Buffering")
@@ -250,20 +253,28 @@ class GoProApi @Inject constructor(
                 response.close()
             }
         })
-
-        controller.getFfmpegHelper().cancel()
-
     }
 
     fun onDestroy() {
 
         stopStream()
 
+        disableAp()
+
         controller.getFfmpegHelper().cancel()
 
         controller.getWifiHelper().disconnect()
 
         gatt.clear()
+
+        //reset ui component states
+        player?.stop()
+        player?.release()
+        player?.clearMediaItems()
+        player?.clearVideoSurface()
+        player = null
+        //reset global flags
+        this.streamStarted = false
 
     }
 
@@ -274,18 +285,6 @@ class GoProApi @Inject constructor(
         device.connectGatt(context, false, gatt.callback)
 
         callbacks.onInitializeGatt()
-    }
-
-    fun initialize() {
-        //reset ui component states
-        player?.stop()
-        player?.release()
-        player?.clearMediaItems()
-        player?.clearVideoSurface()
-        player = null
-        //reset global flags
-        this.streamStarted = false
-
     }
 
     fun isStreamStarted(): Boolean = streamStarted
