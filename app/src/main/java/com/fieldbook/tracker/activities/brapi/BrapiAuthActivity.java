@@ -124,7 +124,8 @@ public class BrapiAuthActivity extends ThemedActivity {
                 ResponseTypeValues.TOKEN : ResponseTypeValues.CODE;
 
         try {
-            String clientId = "fieldbook";
+            String clientId = sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
+            String scope = sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_SCOPE, "");
 
             // Authorization code flow works better with custom URL scheme fieldbook://app/auth
             // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
@@ -180,6 +181,10 @@ public class BrapiAuthActivity extends ThemedActivity {
                                             clientId, // the client ID, typically pre-registered and static
                                             responseType, // the response_type value: token or code
                                             redirectURI); // the redirect URI to which the auth response is sent
+
+                            if (!scope.trim().isEmpty()){
+                                authRequestBuilder.setScope(scope);
+                            }
 
                             AuthorizationRequest authRequest = authRequestBuilder.setPrompt("login").build();
 

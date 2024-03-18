@@ -847,6 +847,14 @@
     <string name="brapi_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
     <string name="brapi_oidc_url_default" translatable="false">https://test-server.brapi.org/.well-known/openid-configuration</string>
 
+    <string name="brapi_oidc_clientid">OIDC Client ID</string>
+    <string name="brapi_oidc_clientid_desc">The Client Id to be used in the authentication provider</string>
+    <string name="brapi_oidc_clientid_default" translatable="false">fieldbook</string>
+
+    <string name="brapi_oidc_scope">OIDC Scope</string>
+    <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
+    <string name="brapi_oidc_scope_default" translatable="false"></string>
+
     <string name="preferences_brapi_traits_title">BrAPI Variables</string>
     <string name="preferences_appearance_collect_labelval_customize">Value vs Label Display</string>
     <string name="preferences_appearance_collect_labelval_customize_description">Display values or labels on the collect screen</string>
