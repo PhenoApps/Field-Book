@@ -5,7 +5,6 @@ import android.view.View
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.offbeat.traits.formats.TraitFormat
-import com.fieldbook.tracker.offbeat.traits.formats.parameters.CameraParameters
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.NameParameter
 
@@ -25,5 +24,4 @@ open class PhotoFormat(
     stringNameAux = stringNameAux,
     NameParameter(),
     DetailsParameter(),
-    CameraParameters()
 )
