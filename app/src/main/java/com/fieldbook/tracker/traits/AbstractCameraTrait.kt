@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
+import android.os.CancellationSignal
 import android.provider.DocumentsContract
 import android.util.AttributeSet
 import android.util.Log
@@ -76,9 +77,9 @@ abstract class AbstractCameraTrait :
         //slight delay to make navigation a bit faster
         //Handler(Looper.getMainLooper()).postDelayed({
 
-            loadAdapterItems()
+        loadAdapterItems()
 
-       // }, 500)
+        // }, 500)
 
         super.loadLayout()
     }
@@ -177,10 +178,22 @@ abstract class AbstractCameraTrait :
     private fun showDeleteImageDialog(model: ImageAdapter.Model) {
 
         if (!isLocked) {
-            context.contentResolver.openInputStream(Uri.parse(model.uri)).use { input ->
+
+            val uri = Uri.parse(model.uri)
+
+            context.contentResolver.openInputStream(uri).use { input ->
+
+                val signal = CancellationSignal()
+                val bmp = DocumentsContract.getDocumentThumbnail(
+                    context.contentResolver,
+                    uri,
+                    Point(512, 512),
+                    signal
+                )
 
                 val imageView = ImageView(context)
-                imageView.setImageBitmap(BitmapFactory.decodeStream(input))
+
+                imageView.setImageBitmap(bmp)
 
                 AlertDialog.Builder(context, R.style.AppAlertDialog)
                     .setTitle(R.string.delete_local_photo)
