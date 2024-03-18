@@ -20,14 +20,21 @@ import com.fieldbook.tracker.offbeat.traits.formats.contracts.TextFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.UsbCameraFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.ZebraLabelPrintFormat
 
-enum class Formats(val type: Types = Types.SYSTEM) {
+enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false) {
 
     //SYSTEM formats
-    AUDIO, BOOLEAN, CAMERA, CATEGORICAL, MULTI_CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT,
+    AUDIO, BOOLEAN, CAMERA(isCamera = true), CATEGORICAL, MULTI_CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT,
 
     //CUSTOM formats
-    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM), USB_CAMERA(Types.CUSTOM), GO_PRO(Types.CUSTOM), CANON(Types.CUSTOM),
+    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM),
+    USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM),
     LABEL_PRINT(Types.CUSTOM), BRAPI(Types.CUSTOM);
+
+    companion object {
+        fun getCameraFormats() = entries.filter { it.isCamera }
+
+        fun getMainFormats() = entries - listOf(USB_CAMERA, GO_PRO)
+    }
 
     fun getTraitFormatDefinition() = when (this) {
         AUDIO -> AudioFormat()
