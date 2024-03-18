@@ -107,7 +107,7 @@ class NewTraitDialog(
         }
     }
 
-    private fun showFormatLayouts() {
+    private fun showFormatLayouts(formats: List<Formats>, showBack: Boolean = false) {
 
         positiveBtn?.visibility = View.INVISIBLE
         negativeBtn?.visibility = View.INVISIBLE
@@ -117,9 +117,21 @@ class NewTraitDialog(
         traitFormatsRv.visibility = View.VISIBLE
         parametersSv.visibility = View.GONE
 
-        neutralBtn?.setText(R.string.dialog_cancel)
-        neutralBtn?.setOnClickListener {
-            dismiss()
+        if (showBack) {
+
+            neutralBtn?.setText(R.string.dialog_back)
+            neutralBtn?.setOnClickListener {
+                isShowingCameraOptions = false
+                traitFormatsRv.adapter = null
+                showFormatLayouts(Formats.getMainFormats())
+            }
+
+        } else {
+
+            neutralBtn?.setText(R.string.dialog_cancel)
+            neutralBtn?.setOnClickListener {
+                dismiss()
+            }
         }
 
         positiveBtn?.setText(R.string.next)
@@ -136,11 +148,8 @@ class NewTraitDialog(
 
         if (traitFormatsRv.adapter == null) {
 
-            context?.let { ctx ->
+            setupTraitFormatsRv(formats)
 
-                setupTraitFormatsRv()
-
-            }
         }
     }
 
@@ -175,7 +184,17 @@ class NewTraitDialog(
                     onCancel()
                 }
 
-                showFormatLayouts()
+                if (format in Formats.getCameraFormats()) {
+
+                    isShowingCameraOptions = true
+
+                    showFormatLayouts(Formats.getCameraFormats(), showBack = true)
+
+                } else {
+
+                    showFormatLayouts(Formats.getMainFormats())
+
+                }
             }
         }
 
@@ -186,10 +205,10 @@ class NewTraitDialog(
 
         positiveBtn?.setText(R.string.dialog_save)
         positiveBtn?.setOnClickListener {
-            onSave()
+            onSave(format)
         }
 
-        setupParametersLinearLayout()
+        setupParametersLinearLayout(format)
 
         context?.let { ctx ->
             dialog?.setTitle(
@@ -227,38 +246,33 @@ class NewTraitDialog(
     }
 
     private fun show(ctx: Context) {
-        if (initialTraitObject == null) showFormatLayouts() else showFormatParameters(
-            Formats.values().first {
+        if (initialTraitObject == null) showFormatLayouts(Formats.getMainFormats()) else showFormatParameters(
+            Formats.entries.first {
                 initialTraitObject?.format == it.getDatabaseName(ctx)
             }
         )
     }
 
     private fun getSelectedFormat(ctx: Context): Formats? =
-        Formats.values().find { it.getDatabaseName(ctx) == initialTraitObject?.format }
+        Formats.entries.find { it.getDatabaseName(ctx) == initialTraitObject?.format }
             ?: (traitFormatsRv.adapter as? TraitFormatAdapter)?.selectedFormat
 
-    private fun setupParametersLinearLayout() {
+    private fun setupParametersLinearLayout(format: Formats) {
 
         parametersSv.clear()
 
-        context?.let { ctx ->
+        format.getTraitFormatDefinition().parameters.forEach { parameter ->
 
-            val format = getSelectedFormat(ctx)
+            parameter.createViewHolder(parametersSv)?.let { holder ->
 
-            format?.getTraitFormatDefinition()?.parameters?.forEach { parameter ->
+                holder.bind(parameter, initialTraitObject)
 
-                parameter.createViewHolder(parametersSv)?.let { holder ->
-
-                    holder.bind(parameter, initialTraitObject)
-
-                    parametersSv.addViewHolder(holder)
-                }
+                parametersSv.addViewHolder(holder)
             }
         }
     }
 
-    private fun setupTraitFormatsRv() {
+    private fun setupTraitFormatsRv(formats: List<Formats>) {
 
         context?.let { ctx ->
 
@@ -268,12 +282,12 @@ class NewTraitDialog(
 
             traitFormatsRv.adapter = formatsAdapter
 
-            formatsAdapter.submitList(Formats.values().toList())
+            formatsAdapter.submitList(formats)
 
         }
     }
 
-    private fun onSave() {
+    private fun onSave(format: Formats) {
 
         var pass = true
 
@@ -308,11 +322,16 @@ class NewTraitDialog(
 
                 } else {
 
-                    val t = updateInitialTraitObjectFromUi(traitObject)
+                    context?.let { ctx ->
 
-                    updateDatabaseTrait(t)
+                        val t = updateInitialTraitObjectFromUi(traitObject)
 
-                    onSaveFinish()
+                        t.format = format.getDatabaseName(ctx)
+
+                        updateDatabaseTrait(t)
+
+                        onSaveFinish()
+                    }
                 }
             }
         }
@@ -484,6 +503,7 @@ class NewTraitDialog(
         }
     }
 
+    var isShowingCameraOptions = false
     override fun onSelected(format: Formats) {
 
         if (format == Formats.BRAPI) {
@@ -503,9 +523,17 @@ class NewTraitDialog(
                 (activity as TraitEditorActivity).startBrapiTraitActivity(true)
             }
 
+        } else if (format in Formats.getCameraFormats() && !isShowingCameraOptions) {
+
+            isShowingCameraOptions = true
+
+            traitFormatsRv.adapter = null
+
+            showFormatLayouts(Formats.getCameraFormats(), showBack = true)
+
         } else {
 
-            showFormatParameters()
+            showFormatParameters(format)
 
         }
     }
