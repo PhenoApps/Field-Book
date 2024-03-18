@@ -27,13 +27,13 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
 
     //CUSTOM formats
     DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM),
-    USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM),
+    USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM, isCamera = true),
     LABEL_PRINT(Types.CUSTOM), BRAPI(Types.CUSTOM);
 
     companion object {
         fun getCameraFormats() = entries.filter { it.isCamera }
 
-        fun getMainFormats() = entries - listOf(USB_CAMERA, GO_PRO)
+        fun getMainFormats() = entries - listOf(USB_CAMERA, GO_PRO, CANON)
     }
 
     fun getTraitFormatDefinition() = when (this) {
