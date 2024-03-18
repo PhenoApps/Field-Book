@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.adapters
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -14,7 +15,7 @@ import com.fieldbook.tracker.R
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
 
-class AttributeAdapter(private val controller: AttributeAdapterController) :
+class AttributeAdapter(private val controller: AttributeAdapterController, private val selected: String?) :
     ListAdapter<String, AttributeAdapter.ViewHolder>(DiffCallback()) {
 
     interface AttributeAdapterController {
@@ -36,6 +37,10 @@ class AttributeAdapter(private val controller: AttributeAdapterController) :
         with (currentList[position]) {
             holder.itemView.tag = this
             setViewHolderText(holder, this)
+
+            holder.attributeTv.setBackgroundResource(
+                if (selected == this) R.drawable.table_cell_selected else R.drawable.cell)
+
         }
     }
 

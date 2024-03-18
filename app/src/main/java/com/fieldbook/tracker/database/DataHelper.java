@@ -35,6 +35,7 @@ import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
+import com.fieldbook.tracker.objects.SearchDialogDataModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
@@ -348,6 +349,11 @@ public class DataHelper {
         open();
 
         return ObservationVariableDao.Companion.getById(id);
+    }
+
+    public String getSearchQuery(CollectActivity originActivity, List<SearchDialogDataModel> dataSet) {
+        SearchQueryBuilder queryBuilder = new SearchQueryBuilder(originActivity, dataSet);
+        return queryBuilder.buildSearchQuery();
     }
 
     /**
@@ -2697,6 +2703,13 @@ public class DataHelper {
         open();
 
         return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
+    }
+
+    public String getObservationUnitPropertyByPlotId(String column, String plot_id) {
+
+        open();
+
+        return ObservationUnitPropertyDao.Companion.getObservationUnitPropertyByPlotId(column, plot_id);
     }
 
     /**

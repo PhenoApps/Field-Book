@@ -84,6 +84,10 @@ class TextTraitLayout : BaseTraitLayout {
 
         inputEditText?.setOnKeyListener { _, code, event ->
 
+            if (inputEditText?.text?.toString() != scan) {
+                scan = inputEditText?.text?.toString() ?: ""
+            }
+
             if (event.keyCode == KeyEvent.KEYCODE_BACK) {
 
                 (context as CollectActivity).onBackPressed()
@@ -95,10 +99,24 @@ class TextTraitLayout : BaseTraitLayout {
 
                 scan = if (code != KeyEvent.KEYCODE_ENTER && event.unicodeChar != 10) {
 
-                    val newScan = "$scan${event.unicodeChar.toChar()}"
+                    val newScan = if (code == KeyEvent.KEYCODE_DEL) {
+
+                        scan.dropLast(1)
+
+                    } else {
+
+                        "$scan${event.unicodeChar.toChar()}"
+
+                    }
 
                     //set text for current trait/plot
                     inputEditText?.setText(newScan)
+
+                    inputEditText?.text?.toString()?.let { x ->
+
+                        inputEditText?.setSelection(x.length)
+
+                    }
 
                     newScan
 
@@ -144,6 +162,7 @@ class TextTraitLayout : BaseTraitLayout {
             input.setText(value ?: "")
             input.setSelection(value?.length ?: 0)
             input.setTextColor(Color.parseColor(displayColor))
+            scan = input.text.toString()
         }
 
         selectEditText()
@@ -156,6 +175,7 @@ class TextTraitLayout : BaseTraitLayout {
             input.setText("")
             input.setSelection(0)
             input.setTextColor(Color.BLACK)
+            scan = ""
         }
 
         selectEditText()

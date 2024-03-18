@@ -49,6 +49,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
+import com.fieldbook.tracker.dialogs.SearchDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -130,7 +131,8 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.interfaces.CollectTraitController,
         InfoBarAdapter.InfoBarController,
         GoProTraitLayout.GoProCollector,
-        GPSTracker.GPSTrackerListener {
+        GPSTracker.GPSTrackerListener,
+        SearchDialog.onSearchResultsClickedListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -974,6 +976,8 @@ public class CollectActivity extends ThemedActivity
             systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
         }
 
+        refreshInfoBarAdapter();
+
         // If reload data is true, it means there was an import operation, and
         // the screen should refresh
         if (reloadData) {
@@ -1278,7 +1282,7 @@ public class CollectActivity extends ThemedActivity
             TapTargetSequence sequence = new TapTargetSequence(this)
                     .targets(collectDataTapTargetView(R.id.act_collect_infobar_rv, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), 200),
                             collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), 60),
-                            collectDataTapTargetView(R.id.traitType, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), 80),
+                            collectDataTapTargetView(R.id.traitTypeTv, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), 80),
                             collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), 60),
                             collectDataTapTargetView(R.id.valuesPlotRangeHolder, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), 60),
                             collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), 200),
@@ -1297,12 +1301,23 @@ public class CollectActivity extends ThemedActivity
             if (systemMenu.findItem(R.id.lockData).isVisible()) {
                 sequence.target(collectDataTapTargetView(R.id.lockData, getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), 60));
             }
+            if (systemMenu.findItem(R.id.datagrid).isVisible()) {
+                sequence.target(collectDataTapTargetView(R.id.datagrid, getString(R.string.tutorial_main_datagrid_title), getString(R.string.tutorial_main_datagrid_description), 60));
+            }
+            if (systemMenu.findItem(R.id.field_audio_mic).isVisible()) {
+                sequence.target(collectDataTapTargetView(R.id.field_audio_mic, getString(R.string.tutorial_main_field_audio_mic_title), getString(R.string.tutorial_main_field_audio_mic_description), 60));
+            }
+            if (systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator).isVisible()) {
+                sequence.target(collectDataTapTargetView(R.id.action_act_collect_repeated_values_indicator, getString(R.string.tutorial_main_repeated_values_title), getString(R.string.tutorial_main_repeated_values_description), 60));
+            }
+            if (systemMenu.findItem(R.id.action_act_collect_geonav_sw).isVisible()) {
+                sequence.target(collectDataTapTargetView(R.id.action_act_collect_geonav_sw, getString(R.string.tutorial_main_geonav_title), getString(R.string.tutorial_main_geonav_description), 60));
+            }
 
             sequence.start();
         } else if (itemId == searchId) {
-            intent.setClassName(CollectActivity.this,
-                    SearchActivity.class.getName());
-            startActivity(intent);
+            SearchDialog searchdialog = new SearchDialog(this, this);
+            searchdialog.show(getSupportFragmentManager(), "DialogTag");
         } else if (itemId == resourcesId) {
             DocumentFile dir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
             if (dir != null && dir.exists()) {
@@ -2239,7 +2254,7 @@ public class CollectActivity extends ThemedActivity
     @Override
     public void onInfoBarClicked(int position) {
 
-        infoBarHelper.showInfoBarChoiceDialog(position);
+        infoBarHelper.showInfoBarChoiceDialog(getSupportFragmentManager(), position);
 
     }
 
@@ -2526,4 +2541,12 @@ public class CollectActivity extends ThemedActivity
         usbCameraConnected = connected;
     }
 
+
+    @Override
+    public void onSearchResultsClicked(String unique, String range, String plot, boolean reload) {
+        searchUnique = unique;
+        searchRange = range;
+        searchPlot = plot;
+        searchReload = reload;
+    }
 }

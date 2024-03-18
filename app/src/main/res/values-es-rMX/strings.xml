@@ -210,6 +210,7 @@
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Las variables no se pueden actualizar a las variables BrAPI.</string>
     <string name="required">Requerido</string>
     <string name="traits_create_warning_percent_value_required">Valor requerido</string>
+    <string name="select_trait">Seleccionar Variable</string>
     <string name="edit_traits">Editar</string>
     <!-- COLLECT -->
     <!-- Validation -->
@@ -226,7 +227,6 @@
     <string name="dialog_att_chooser_attributes">Atributos</string>
     <string name="dialog_att_chooser_traits">Variables</string>
     <string name="dialog_att_chooser_other">Otro</string>
-    <string name="dialog_collect_att_chooser_title">Elegir atributo</string>
     <string name="infobars_attribute_placeholder">Seleccionar</string>
     <string name="field_name_attribute">campo_nombre</string>
     <!-- ID/Barcode Search -->
@@ -240,6 +240,8 @@
     <string name="main_toolbar_search">Buscar</string>
     <string name="search_dialog_add">Agregar</string>
     <string name="search_dialog_clear">Borrar</string>
+    <string name="search_dialog_search">Buscar</string>
+    <string name="search_dialog_operator_dialog_title">Seleccionar un operador</string>
     <string name="search_dialog_query_is_equal_to">es igual a</string>
     <string name="search_dialog_query_is_not_equal_to">no es igual a</string>
     <string name="search_dialog_query_contains">contiene</string>
@@ -605,6 +607,7 @@
     <string name="field_audio_recording_warning">El audio a nivel de campo ya se está grabando. Deténgalo primero.</string>
     <string name="trait_audio_recording_warning">El audio a nivel de variable ya se está grabando. Deténgalo primero.</string>
     <string name="trait_audio_playing_warning">El audio a nivel de variable se está reproduciendo. Deténgalo primero.</string>
+    <string name="field_audio_zip_error">Error al crear archivo zip</string>
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
     <string name="pref_beta_mlkit_summary">Esta opción utiliza la biblioteca MLKit en lugar de la biblioteca ZXing para escanear códigos de barras</string>
     <string name="pref_beta_mlkit_enabled_title">Escaneo de código de barras usando MLKit activado</string>
@@ -831,4 +834,12 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="trait_date_minus_content_description">Resta un día de la fecha actual</string>
     <string name="trait_date_add_content_description">Agrega un día a la fecha actual</string>
     <string name="trait_percent_ui_min_max_error">Algo salió mal al mostrar mín/max del formato de variable</string>
+    <string name="tutorial_main_datagrid_title">Cuadrícula de datos</string>
+    <string name="tutorial_main_field_audio_mic_title">Audio en Campo</string>
+    <string name="tutorial_main_datagrid_description">Esto abre una grilla de fenotipos 2D del campo seleccionado actualmente.</string>
+    <string name="tutorial_main_field_audio_mic_description">Esto iniciará una grabación de audio de nivel de campo.</string>
+    <string name="tutorial_main_repeated_values_title">Valores Repetidos</string>
+    <string name="tutorial_main_repeated_values_description">Esto abrirá un diálogo para administrar los valores repetidos para la unidad de observación actual.</string>
+    <string name="tutorial_main_geonav_title">GeoNav</string>
+    <string name="tutorial_main_geonav_description">Esto abrirá un diálogo de configuración para ayudar con la navegación del campo.</string>
 </resources>

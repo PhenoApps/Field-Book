@@ -20,6 +20,7 @@ public class GeneralKeys {
     public static final String REQUIRE_USER_INTERVAL              = "com.tracker.fieldbook.preference.require_user_interval";
 
     // Appearance
+    public static final String INFOBAR_UPDATE = "INFOBAR_UPDATE";
     public static final String TOOLBAR_CUSTOMIZE                    = "TOOLBAR_CUSTOMIZE";
     public static final String INFOBAR_NUMBER                       = "INFOBAR_NUMBER";
     public static final String APPLICATION_THEME                    = "APPLICATION_THEME";
