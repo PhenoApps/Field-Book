@@ -75,6 +75,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private static final String DIALOG_FRAGMENT_TAG = "com.tracker.fieldbook.preferences.BRAPI_DIALOG_FRAGMENT";
 
     private Context context;
+    private Activity activity;
     private PreferenceCategory brapiPrefCategory;
     private Preference brapiLogoutButton;
     private Menu mMenu;
@@ -95,7 +96,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         super.onAttach(context);
         // Occurs before onCreate function. We get the context this way.
         BrapiPreferencesFragment.this.context = context;
+    }
 
+    @Override
+    public void onAttach(@NonNull Activity activity) {
+        super.onAttach(activity);
+        BrapiPreferencesFragment.this.activity = activity;
     }
 
     @Override
@@ -273,7 +279,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             String jsonConfig = gson.toJson(config);
 
             DisplayMetrics displayMetrics = new DisplayMetrics();
-            ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+            activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
             int screenWidth = displayMetrics.widthPixels;
 
             // Set the QR Code size to be 80% of the screen width
