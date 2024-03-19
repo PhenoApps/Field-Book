@@ -115,7 +115,7 @@ public class ConfigActivity extends ThemedActivity {
     private boolean mlkitEnabled;
 
     private void invokeDatabaseImport(DocumentFile doc) {
-
+        database.open();
         mHandler.post(() -> {
             new ImportDBTask(doc).execute(0);
         });
