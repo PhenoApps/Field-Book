@@ -729,11 +729,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     private Map<String,String> getExtVariableDbIdMapping() {
-        String[] traitNames = ObservationVariableDao.Companion.getAllTraits();
+        List<TraitObject> traits = ObservationVariableDao.Companion.getAllTraitObjects();
         Map<String,String> externalIdToInternalMap = new HashMap<>();
-        for(String trait : traitNames) {
-            TraitObject traitObject = ObservationVariableDao.Companion.getTraitByName(trait);
-            externalIdToInternalMap.put(traitObject.getExternalDbId(), traitObject.getId());
+        for(TraitObject trait : traits) {
+            String dbId = trait.getId();
+            externalIdToInternalMap.put(trait.getExternalDbId(),dbId);
         }
         return externalIdToInternalMap;
     }
