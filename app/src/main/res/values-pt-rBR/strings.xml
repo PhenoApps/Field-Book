@@ -23,9 +23,13 @@
     <string name="startup_sample_data_message">Carregar dados de amostra?</string>
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">A importação de arquivos requer acesso aos arquivos do dispositivo.</string>
+    <string name="permission_rationale_storage_export">A exportação de dados requer acesso aos arquivos do dispositivo.</string>
+    <string name="permission_rationale_trait_features">A coleta de dados requer acesso aos arquivos do dispositivo, microfone e câmera do dispositivo.</string>
+    <string name="permission_ask_bluetooth">Por favor, aceite permissões de Bluetooth.</string>
     <!-- Config Activity  -->
     <string name="settings_fields">Campos</string>
     <string name="settings_traits">Caracteres</string>
+    <string name="settings_collect">Coletar</string>
     <string name="settings_export">Exportar</string>
     <string name="settings_advanced">Configurações avançadas</string>
     <!-- Config Activity Fuzzy Search  -->
