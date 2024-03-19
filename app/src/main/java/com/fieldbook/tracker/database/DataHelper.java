@@ -2821,7 +2821,7 @@ public class DataHelper {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w("Field Book", "Upgrading database.");
+            Log.w(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion);
 
             if (oldVersion < 5) {
                 db.execSQL("DROP TABLE IF EXISTS " + RANGE);
