@@ -3,6 +3,7 @@ package com.fieldbook.tracker.interfaces
 import android.content.Context
 import android.location.Location
 import android.os.Handler
+import com.fieldbook.tracker.devices.camera.UsbCameraApi
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.utilities.GeoNavHelper
 import com.fieldbook.tracker.utilities.GnssThreadHelper
@@ -11,6 +12,7 @@ import com.fieldbook.tracker.utilities.VibrateUtil
 import com.fieldbook.tracker.views.CollectInputView
 import com.fieldbook.tracker.views.RangeBoxView
 import com.fieldbook.tracker.views.TraitBoxView
+import com.serenegiant.widget.UVCCameraTextureView
 import org.phenoapps.security.SecureBluetoothActivityImpl
 
 interface CollectController: FieldController {
@@ -39,4 +41,6 @@ interface CollectController: FieldController {
     ) : String
     fun getGeoNavPopupSpinnerItems(): ArrayList<String>
     fun logNmeaMessage(nmea: String)
+    fun getUsbApi(): UsbCameraApi
+    fun getUvcView(): UVCCameraTextureView
 }

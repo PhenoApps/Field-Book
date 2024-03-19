@@ -48,6 +48,7 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.devices.camera.UsbCameraApi;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
@@ -86,8 +87,10 @@ import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.serenegiant.widget.UVCCameraTextureView;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.phenoapps.interfaces.security.SecureBluetooth;
@@ -124,7 +127,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends ThemedActivity
-        implements UsbCameraInterface, SummaryFragment.SummaryOpenListener,
+        implements SummaryFragment.SummaryOpenListener,
         com.fieldbook.tracker.interfaces.CollectController,
         com.fieldbook.tracker.interfaces.CollectRangeController,
         com.fieldbook.tracker.interfaces.CollectTraitController,
@@ -139,6 +142,9 @@ public class CollectActivity extends ThemedActivity
     private final HandlerThread gnssRawLogHandlerThread = new HandlerThread("log");
 
     private GeoNavHelper geoNavHelper;
+
+    @Inject
+    UsbCameraApi usbCameraApi;
 
     @Inject
     SharedPreferences preferences;
@@ -184,6 +190,8 @@ public class CollectActivity extends ThemedActivity
     public static boolean partialReload;
     public static String TAG = "Field Book";
     public static String GEOTAG = "GeoNav";
+
+    UVCCameraTextureView uvcView;
 
     ImageButton deleteValue;
     ImageButton missingValue;
@@ -232,11 +240,6 @@ public class CollectActivity extends ThemedActivity
     private boolean mSkipLastUsedTrait = false;
 
     private TextToSpeechHelper ttsHelper = null;
-    /**
-     * Usb Camera Helper
-     */
-    private UsbCameraHelper mUsbCameraHelper = null;
-    private boolean usbCameraConnected = false;
 
     private SecureBluetoothActivityImpl secureBluetooth;
 
@@ -305,8 +308,6 @@ public class CollectActivity extends ThemedActivity
             return null;
         });
 
-        mUsbCameraHelper = new UsbCameraHelper(this);
-
         goProWrapper.attach();
 
         mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
@@ -316,6 +317,19 @@ public class CollectActivity extends ThemedActivity
         checkForInitialBarcodeSearch();
 
         verifyPersonHelper.checkLastOpened();
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        usbCameraApi.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        usbCameraApi.onStop();
     }
 
     public void triggerTts(String text) {
@@ -502,6 +516,8 @@ public class CollectActivity extends ThemedActivity
         });
 
         refreshInfoBarAdapter();
+
+        uvcView = findViewById(R.id.collect_activity_uvc_tv);
     }
 
     //when softkeyboard is displayed, reset the snackbar to redisplay with a calculated bottom margin
@@ -940,11 +956,11 @@ public class CollectActivity extends ThemedActivity
 
         getTraitLayout().onExit();
 
-        mUsbCameraHelper.destroy();
-
         goProWrapper.destroy();
 
         traitLayoutRefresh();
+
+        usbCameraApi.onDestroy();
 
         gnssThreadHelper.stop();
 
@@ -2178,12 +2194,6 @@ public class CollectActivity extends ThemedActivity
 
     }
 
-    @Nullable
-    @Override
-    public UsbCameraHelper getCameraHelper() {
-        return mUsbCameraHelper;
-    }
-
     @Override
     public void onSummaryDestroy() {
         isNavigatingFromSummary = true;
@@ -2528,12 +2538,14 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
-    public boolean getUsbCameraConnected() {
-        return usbCameraConnected;
+    @NonNull
+    @Override
+    public UsbCameraApi getUsbApi() {
+        return usbCameraApi;
     }
 
-    public void setUsbCameraConnected(boolean connected) {
-        usbCameraConnected = connected;
-    }
+    @NonNull
+    @Override
+    public UVCCameraTextureView getUvcView() { return uvcView; }
 
 }

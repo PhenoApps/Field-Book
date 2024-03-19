@@ -81,6 +81,14 @@
 
     </androidx.appcompat.widget.Toolbar>
 
+    <com.serenegiant.widget.UVCCameraTextureView
+        android:layout_width="640px"
+        android:layout_height="480px"
+        android:visibility="visible"
+        android:id="@+id/collect_activity_uvc_tv"
+        app:layout_constraintTop_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="parent"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/act_collect_infobar_rv"
         android:layout_width="0dp"

@@ -147,7 +147,7 @@ dependencies {
 
     implementation 'com.google.zxing:core:3.4.1'
 
-    implementation('com.github.phenoapps:phenolib:v0.9.50')
+    implementation('com.github.phenoapps:phenolib:v0.9.51-SNAPSHOT')
 
     implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
     implementation 'com.arthenica:ffmpeg-kit-min:5.1.LTS'
