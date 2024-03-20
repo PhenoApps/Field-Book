@@ -305,15 +305,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
             checkDbBool = checkDB.isChecked
             checkTableBool = checkTable.isChecked
-
-
-            Log.d(TAG, "The value of EXPORT_OVERWRITE is: " + preferences.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false))
-            exportFileString = if (!multipleFields && preferences.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
-                getOverwriteFile(fileName.text.toString())
-                fileName.text.toString()
-            } else {
-                fileName.text.toString()
-            }
+            exportFileString = fileName.text.toString()
 
             startExportTasks()
             saveDialog.dismiss()
@@ -497,7 +489,6 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         object NoData: ExportResult()
     }
 
-
     // Function to handle the result of the export (formerly onPostExecute)
     private fun handleExportResult(result: ExportResult) {
         when (result) {
@@ -505,8 +496,20 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 processedFieldCount++
                 if (processedFieldCount == fieldIds.size) {
                     val finalFile = if (filesToExport.size > 1) {
-                        createZipFile(filesToExport, exportFileString)
+                        val zipFile = createZipFile(filesToExport, exportFileString)
+                        // Archive the individual files after zipping
+                        filesToExport.forEach { documentFile ->
+                            if (!documentFile.isDirectory) {
+                                val fileName = documentFile.name ?: return@forEach
+                                archiveFile(documentFile, fileName)
+                            }
+                        }
+                        zipFile
                     } else {
+                        if (preferences.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
+
+                            archivePreviousExport(filesToExport.first())
+                        }
                         filesToExport.firstOrNull()
                     }
 
@@ -526,35 +529,55 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         }
     }
 
-    private fun getOverwriteFile(filename: String): String {
+    private fun archivePreviousExport(newFile: DocumentFile) {
         val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
-        val archiveDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_archive)
+        val newFileName = newFile.name ?: return
+        Log.d(TAG, "Exported file is $newFileName and overwrite checkbox was checked. Looking for previous exports to archive.")
+
+        // Exclude timestamp when matching previous exports by filename
+        val truncatedNewFileName = newFileName.substringAfter("_")
 
         exportDir?.takeIf { it.exists() }?.listFiles()?.forEach { file ->
             val fileName = file.name ?: return@forEach
 
-            if (fileName.contains(defaultFieldString) &&
-                ((checkDbBool && fileName.contains("database")) || (checkTableBool && fileName.contains("table")))) {
+            // Apply the same truncation logic to each file name in the directory
+            val truncatedFileName = fileName.substringAfter("_")
+
+            // Check if the truncated file name matches and the file name is not exactly the new file name
+            if (fileName != newFileName && truncatedFileName == truncatedNewFileName) {
                 val oldDoc = BaseDocumentTreeUtil.getFile(context, R.string.dir_field_export, fileName)
 
-                if (oldDoc != null && archiveDir != null) {
-                    // Copy to the archive directory
-                    val newDoc = copyFileToDirectory(oldDoc, archiveDir, fileName)
-
-                    if (newDoc != null) {
-                        Log.d(TAG, "File moved to archive: ${newDoc.uri}")
-                        // Delete the original
-                        val deleteSuccess = oldDoc.delete()
-                    } else {
-                        Log.e(TAG, "Failed to move file to archive: $fileName")
-                    }
+                if (oldDoc != null) {
+                    Log.d(TAG, "Archiving previous version: $fileName")
+                    archiveFile(oldDoc, fileName)
                 } else {
                     Log.e(TAG, "Failed to retrieve DocumentFiles for overwriting/archiving: $fileName")
                 }
+            } else {
+                if (fileName == newFileName) {
+                    Log.d(TAG, "Skipping $fileName, this is our current export version.")
+                } else {
+                    Log.d(TAG, "Skipping $fileName, it's a different field or format.")
+                }
             }
         }
+        Log.d(TAG, "Archive process completed for previous exports.")
+    }
 
-        return filename
+
+    private fun archiveFile(file: DocumentFile, newFileName: String) {
+        val archiveDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_archive)
+        if (archiveDir != null && archiveDir.exists()) {
+            val archivedFile = copyFileToDirectory(file, archiveDir, newFileName)
+            if (archivedFile != null) {
+                Log.d(TAG, "File archived: ${archivedFile.uri}")
+                file.delete() // Delete the original file after archiving
+            } else {
+                Log.e(TAG, "Failed to archive file: ${file.uri}")
+            }
+        } else {
+            Log.e(TAG, "Archive directory not found or does not exist.")
+        }
     }
 
     private fun copyFileToDirectory(file: DocumentFile, directory: DocumentFile, newFileName: String): DocumentFile? {
@@ -574,8 +597,6 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         }
         return null
     }
-
-
 
     /**
      * Scan file to update file list and share exported file
