@@ -1410,6 +1410,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             DataHelper.db.beginTransaction();
             // All checks finished, insert our data.
             int expId = dataHelper.createField(field, studyDetails.getAttributes());
+            field.setExp_id(expId);
 
             boolean fail = false;
             String failMessage = "";
@@ -1463,7 +1464,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             if (fail) {
                 return new BrapiControllerResponse(false, failMessage);
             } else {
-                return new BrapiControllerResponse(true, "");
+                return new BrapiControllerResponse(true, "", field);
             }
 
 

@@ -89,6 +89,7 @@ public class FieldEditorActivity extends ThemedActivity
     private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
     private static final int REQUEST_CLOUD_FILE_CODE = 5;
+    private static final int REQUEST_BRAPI_IMPORT_ACTIVITY = 10;
     private ArrayList<FieldObject> fieldList;
     public FieldAdapter mAdapter;
     public EditText trait;
@@ -430,11 +431,8 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     public void loadBrAPI() {
-        Intent intent = new Intent();
-
-        intent.setClassName(FieldEditorActivity.this,
-                BrapiActivity.class.getName());
-        startActivityForResult(intent, 1);
+        Intent intent = new Intent(this, BrapiActivity.class);
+        startActivityForResult(intent, REQUEST_BRAPI_IMPORT_ACTIVITY);
     }
 
     public void loadCloud() {
@@ -684,6 +682,15 @@ public class FieldEditorActivity extends ThemedActivity
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
                 showFieldFileDialog(chosenFile, null);
+            }
+        }
+
+        if (requestCode == REQUEST_BRAPI_IMPORT_ACTIVITY) {
+            if (resultCode == RESULT_OK && data != null) {
+                int fieldId = data.getIntExtra("fieldId", -1);
+                if (fieldId != -1) {
+                    getFieldSwitcher().switchField(fieldId);
+                }
             }
         }
 
