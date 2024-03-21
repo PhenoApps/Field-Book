@@ -57,11 +57,13 @@ class GoProApi @Inject constructor(
         fun onInitializeGatt()
         fun onStreamReady()
         fun onStreamRequested()
-        fun onImageRequestReady(bitmap: Bitmap, data: ImageRequestData)
+        fun onImageRequestReady(bytes: ByteArray, data: ImageRequestData)
+        fun onBusyStateChanged(state: Int)
     }
 
     companion object {
         const val TAG = "GoProApi"
+        const val FILE_SYSTEM_PREFIX = "GOPR"
         private const val ffmpegOutputUri = "udp://@localhost:8555"
     }
 
@@ -113,7 +115,8 @@ class GoProApi @Inject constructor(
                 }
 
                 Player.STATE_READY -> {
-                    Log.d(TAG, "Player Ready")
+                    Log.d(TAG, "Player Ready ${if (range.isNotEmpty()) range[0].range.plot_id else ""}")
+
                     callbacks?.onStreamReady()
                 }
             }
@@ -124,6 +127,50 @@ class GoProApi @Inject constructor(
     private var callbacks: Callbacks? = null
 
     var streamStarted = false
+    var range: ArrayList<ImageRequestData> = arrayListOf()
+    var lastMoved: ImageRequestData? = null
+
+    fun getBusyState() {
+
+        //stop stream first, on fail or success start stream again:
+        val getState: Request = Request.Builder()
+            .url(URI.create("http://10.5.5.9:8080/gopro/camera/state").toHttpUrlOrNull()!!)
+            .build()
+
+        httpClient.newCall(getState).enqueue(object : Callback {
+
+            override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
+                Log.e(TAG, "Request state failed.")
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: okhttp3.Call, response: Response) {
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "Request state response = not success")
+                } else {
+                    parseState(response.body?.string() ?: "{}")
+                    Log.i(TAG, "Request state response = success")
+                }
+                response.close()
+            }
+        })
+    }
+
+    private fun parseState(responseBody: String) {
+        try {
+            val json = JSONObject(responseBody)
+            //Log.d(TAG, json.toString(1))
+            val state = json.getJSONObject("status")
+            //Log.d(TAG, "GoPro state: $state")
+            val busy = state.getInt("8")
+            Log.d(TAG, "Camera is busy: ${busy == 1}")
+
+            callbacks?.onBusyStateChanged(busy)
+
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+    }
 
     fun requestStream() {
 
@@ -189,7 +236,9 @@ class GoProApi @Inject constructor(
     /**
      * http request to read media list (files on gopro device)
      */
-    fun queryMedia(model: ImageRequestData) {
+    fun queryMedia() {
+
+        val model = if (range.isNotEmpty()) range.removeAt(0) else lastMoved
 
         Log.d(TAG, "Attempting media list query.")
 
@@ -215,7 +264,7 @@ class GoProApi @Inject constructor(
 
                 } else {
 
-                    parseMediaQueryResponse(response.body?.string() ?: "{}", model)
+                    parseMediaQueryResponse(response.body?.string() ?: "{}", model!!)
 
                     Log.i(TAG, "Media query success.")
 
@@ -282,6 +331,8 @@ class GoProApi @Inject constructor(
 
         this.callbacks = callbacks
 
+        gatt.clear()
+
         device.connectGatt(context, false, gatt.callback)
 
         callbacks.onInitializeGatt()
@@ -343,34 +394,30 @@ class GoProApi @Inject constructor(
 
                 val numFiles = files.length()
 
-                val fileName = files.getJSONObject(files.length() - 1).getString("n")
+                for (j in 0 until numFiles) {
 
-                requestFileUrl("http://10.5.5.9:8080/videos/DCIM/$dir/$fileName", model)
+                    val file = files.getJSONObject(j)
 
-                break
-//                println(files)
-//
-//                for (j in 0 until numFiles) {
-//
-//                    val file = files.getJSONObject(j)
-//
-//                    val fileName = file.getString("n")
-//
-//                    images.add(
-//                        GoProImage(
-//                            dir,
-//                            fileName,
-//                            file.getString("mod").toLong(),
-//                            file.getString("s").toLong(),
-//                            "http://10.5.5.9:8080/videos/DCIM/$dir/$fileName"
-//                        )
-//                    )
-//                }
+                    val fileName = file.getString("n")
+
+                    if (FILE_SYSTEM_PREFIX in fileName) {
+
+                        images.add(
+                            GoProImage(
+                                dir,
+                                fileName,
+                                file.getString("mod").toLong(),
+                                file.getString("s").toLong(),
+                                "http://10.5.5.9:8080/videos/DCIM/$dir/$fileName"
+                            )
+                        )
+                    }
+                }
             }
 
-            //val latest = images.maxBy { it.mod }.url
+            val latest = images.maxBy { it.fileName.split(".")[0].split("GOPR")[1].toInt() }.url
 
-            //requestFileUrl(latest, model)
+            requestFileUrl(latest, model)
 
         } catch (e: JSONException) {
 
@@ -384,7 +431,7 @@ class GoProApi @Inject constructor(
      */
     private fun requestFileUrl(url: String, model: ImageRequestData) {
 
-        Log.d(TAG, "Image request: $url")
+        Log.d(TAG, "Image request: $url for model: ${model.range.plot_id}")
 
         //stop stream first, on fail or success start stream again:
         val requestImage: Request = Request.Builder()
@@ -412,11 +459,14 @@ class GoProApi @Inject constructor(
 
                     response.body?.byteStream()?.use { inputStream ->
 
+                        val bytes = inputStream.readBytes()
+
+                        Log.d(TAG, "Found image response with: ${bytes.size} bytes")
+
                         callbacks?.onImageRequestReady(
-                            BitmapFactory.decodeStream(inputStream),
+                            bytes,
                             model
                         )
-
                     }
                 }
 

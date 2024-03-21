@@ -17,6 +17,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.phenoapps.fragments.gopro.GoProFragment
 import java.text.SimpleDateFormat
@@ -41,6 +42,10 @@ class GoProTraitLayout :
     }
 
     private var dialogWaitForStream: AlertDialog? = null
+
+    private var cameraBusy: Boolean = false
+
+    private var currentPlotId: String? = null
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -108,6 +113,7 @@ class GoProTraitLayout :
     override fun loadLayout() {
         super.loadLayout()
         setup()
+        currentPlotId = currentRange.plot_id
     }
 
     private fun initializeConnectButton() {
@@ -121,9 +127,7 @@ class GoProTraitLayout :
         }
     }
 
-    @UnstableApi private fun onShutter() {
-
-        captureBtn?.isEnabled = false
+    private fun getImageRequestData(): GoProApi.ImageRequestData {
 
         //val plot = currentRange.plot_id
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
@@ -132,17 +136,12 @@ class GoProTraitLayout :
             .format(Calendar.getInstance().time)
         //val name = "${traitName}_${plot}_$timestamp.png"
 
-        Handler(Looper.getMainLooper()).postDelayed({
-
-            controller.getGoProApi().queryMedia(
-                GoProApi.ImageRequestData(
-                    studyId,
-                    currentRange,
-                    currentTrait,
-                    timestamp
-                )
-            )
-        }, CAMERA_DELAY_MS)
+        return GoProApi.ImageRequestData(
+            studyId,
+            currentRange,
+            currentTrait,
+            timestamp
+        )
     }
 
     private fun initializeCameraShutterButton() {
@@ -159,19 +158,61 @@ class GoProTraitLayout :
 
             captureBtn?.isEnabled = false
 
+            controller.getGoProApi().range.add(getImageRequestData())
+
             controller.getGoProApi().shutterOn()
 
-            onShutter()
+            captureBtn?.isEnabled = false
+        }
+
+        background.launch {
+
+            val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+            var currentStudyId = studyId
+            while (currentStudyId == studyId) {
+
+                controller.getGoProApi().getBusyState()
+
+                delay(2000)
+
+                currentStudyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+            }
         }
     }
 
-    override fun onImageRequestReady(bitmap: Bitmap, data: GoProApi.ImageRequestData) {
+    override fun onImageRequestReady(bytes: ByteArray, data: GoProApi.ImageRequestData) {
 
         ui.launch {
 
-            saveBitmapToStorage(type(), bitmap, data.range)
+            saveJpegToStorage(type(), bytes, data.range)
 
             captureBtn?.isEnabled = true
+
+        }
+    }
+
+    override fun onBusyStateChanged(state: Int) {
+
+        Log.d(TAG, "Busy state changed: $state")
+
+        val old = cameraBusy
+
+        cameraBusy = state == 1
+
+        if (cameraBusy) {
+
+            //capturing photo
+
+        } else {
+
+            //waiting for capture
+            //check if capture is done
+            if (old) {
+                //capture is done
+                controller.getGoProApi().queryMedia()
+            }
+
+            controller.getGoProApi().lastMoved = getImageRequestData()
 
         }
     }
