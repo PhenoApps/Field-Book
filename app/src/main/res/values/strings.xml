@@ -956,6 +956,7 @@
     <string name="brapi_export_successful">BrAPI Export Successful</string>
     <string name="brapi_saving_indicator">Saving Observations…</string>
     <string name="brapi_field_non_matching_sources">Unable to sync data. Field data originates from, %1$s, BrAPI url currently set to %2$s. Sources must match.</string>
+    <string name="brapi_enable_before_sync">BRAPI is disabled. Please enable it in settings before using sync.</string>
     <string name="brapi_trait_already_exists">Trait already exists: %1$s. Not saving.</string>
     <string name="brapi_error_saving_all_traits">Error saving traits. No traits were saved.</string>
     <string name="brapi_error_saving_some_traits">Error saving some traits. Some traits were not saved</string>

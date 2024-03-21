@@ -196,7 +196,11 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         if (importFormat == ImportFormat.BRAPI) {
             cardViewSync.visibility = View.VISIBLE
             cardViewSync.setOnClickListener {
-                startSync(field)
+                if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+                    startSync(field)
+                } else {
+                    Toast.makeText(context, getString(R.string.brapi_enable_before_sync), Toast.LENGTH_LONG).show()
+                }
             }
             entryCount = "${entryCount} ${field.observation_level}"
         }
