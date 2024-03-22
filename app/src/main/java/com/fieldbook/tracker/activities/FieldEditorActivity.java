@@ -287,7 +287,6 @@ public class FieldEditorActivity extends ThemedActivity
         }
     }
 
-
     public void showDeleteConfirmationDialog(final List<Integer> fieldIds, boolean isFromDetailFragment) {
         String fieldNames = getFieldNames(fieldIds);
         String message = getResources().getQuantityString(R.plurals.fields_delete_confirmation, fieldIds.size(), fieldNames);
@@ -511,7 +510,13 @@ public class FieldEditorActivity extends ThemedActivity
             handleImportAction();
         } else if (itemId == R.id.menu_field_editor_item_creator) {
             FieldCreatorDialog dialog = new FieldCreatorDialog(this);
-            dialog.setOnDismissListener(dismiss -> refreshFieldList());
+            dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
+                @Override
+                public void onFieldCreated(int studyDbId) {
+                    fieldSwitcher.switchField(studyDbId);
+                    updateFieldsList();
+                }
+            });
             dialog.show();
         } else if (itemId == android.R.id.home) {
             CollectActivity.reloadData = true;

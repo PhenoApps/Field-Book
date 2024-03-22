@@ -2,6 +2,7 @@ package com.fieldbook.tracker.dialogs
 
 import android.database.sqlite.SQLiteAbortException
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -21,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 /**
@@ -46,6 +48,14 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
     var studyDbId: Int = -1
 
     var mCancelJobFlag = false
+
+    // Inside FieldCreatorDialog class
+    interface FieldCreationCallback {
+        fun onFieldCreated(studyDbId: Int)
+    }
+
+    var fieldCreationCallback: FieldCreationCallback? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -304,18 +314,20 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
 //    private fun insertBasicField(name: String, rows: Int, cols: Int, startId: Int, pattern: Int) {
 
     private fun insertBasicField(name: String, rows: Int, cols: Int, pattern: Int) {
-
+        Log.d("FieldCreatorDialog", "Starting to insert basic field with name: $name")
         //insert job is cancelled when the cancel button is pressed
         val cancelButton = findViewById<Button>(R.id.dialog_field_creator_cancel_button)
-        cancelButton.setOnClickListener { mCancelJobFlag = true }
+        cancelButton.setOnClickListener {
+            mCancelJobFlag = true
+            Log.d("FieldCreatorDialog", "New field insert job cancelled by user.")
+        }
 
         scope.launch {
-
-            with(DataHelper.db) {
-
+            // Database operation might be time-consuming, so we run it on the IO dispatcher
+            val createdFieldId = withContext(Dispatchers.IO) {
                 try {
-
-                    beginTransaction()
+                    DataHelper.db.beginTransaction()
+                    Log.d("FieldCreatorDialog", "Inserting new field in the database.")
 
                     val field = FieldObject().apply {
                         unique_id = "plot_id"
@@ -333,12 +345,11 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
                     studyDbId = helper.createField(field, fieldColumns)
 
                     updateFieldInsertText(rows.toString(), cols.toString())
-
                     insertPlotData(
-                            fieldColumns,
-                            rows,
-                            cols,
-                            linear = pattern == R.id.plot_linear_button
+                        fieldColumns,
+                        rows,
+                        cols,
+                        linear = pattern == R.id.plot_linear_button
                     )
 
                     //eight different cases to consider, P = patterns (linear and zigzag), S = starting states (TL, BR, TR, BL)
@@ -388,20 +399,23 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
 //                        }
 //                    }
 
-                    setTransactionSuccessful()
+                    DataHelper.db.setTransactionSuccessful()
+                    studyDbId // Return the new study ID
 
-                } catch (e: SQLiteAbortException) {
-
-                    e.printStackTrace()
-
+                } catch (e: Exception) {
+                    Log.e("FieldCreatorDialog", "Exception during new field insertion: ${e.message}", e)
+                    -1 // Indicate failure
                 } finally {
-
-                    endTransaction()
-
-                    this@FieldCreatorDialog.dismiss()
-
+                    DataHelper.db.endTransaction()
                 }
             }
+
+            if (studyDbId != -1) {
+                Log.d("FieldCreatorDialog", "New field insertion successful, invoking callback with new field id: $studyDbId")
+                fieldCreationCallback?.onFieldCreated(createdFieldId)
+            }
+            dismiss()
+
         }
     }
 
