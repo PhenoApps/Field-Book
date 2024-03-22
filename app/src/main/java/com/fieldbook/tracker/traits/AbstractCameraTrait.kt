@@ -17,6 +17,7 @@ import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
+import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -53,6 +54,7 @@ abstract class AbstractCameraTrait :
     protected var connectBtn: FloatingActionButton? = null
     protected var captureBtn: FloatingActionButton? = null
     protected var imageView: ImageView? = null
+    protected var styledPlayerView: PlayerView? = null
     protected var recyclerView: RecyclerView? = null
 
     protected val background = CoroutineScope(Dispatchers.IO)
@@ -89,6 +91,7 @@ abstract class AbstractCameraTrait :
         connectBtn = act.findViewById(R.id.camera_fragment_connect_btn)
         captureBtn = act.findViewById(R.id.camera_fragment_capture_btn)
         imageView = act.findViewById(R.id.trait_camera_iv)
+        styledPlayerView = act.findViewById(R.id.trait_camera_spv)
         recyclerView = act.findViewById(R.id.camera_fragment_rv)
 
         recyclerView?.adapter = ImageAdapter(this)
@@ -97,7 +100,31 @@ abstract class AbstractCameraTrait :
 
     }
 
+    protected fun saveJpegToStorage(format: String, data: ByteArray, obsUnit: RangeObject) {
+
+        saveToStorage(format, obsUnit) { uri ->
+
+            context.contentResolver.openOutputStream(uri)?.use { output ->
+
+                output.write(data)
+
+            }
+        }
+    }
+
     protected fun saveBitmapToStorage(format: String, bmp: Bitmap, obsUnit: RangeObject) {
+
+        saveToStorage(format, obsUnit) { uri ->
+
+            context.contentResolver.openOutputStream(uri)?.let { output ->
+
+                bmp.compress(Bitmap.CompressFormat.JPEG, 80, output)
+
+            }
+        }
+    }
+
+    private fun saveToStorage(format: String, obsUnit: RangeObject, saver: (Uri) -> Unit) {
 
         val plot = obsUnit.plot_id
         val studyId = collectActivity.studyId
@@ -122,29 +149,26 @@ abstract class AbstractCameraTrait :
 
                     dir.createFile("*/*", name)?.let { file ->
 
-                        context.contentResolver.openOutputStream(file.uri)?.let { output ->
+                        saver.invoke(file.uri)
 
-                            bmp.compress(Bitmap.CompressFormat.JPEG, 80, output)
+                        database.insertObservation(
+                            plot, traitDbId, format, file.uri.toString(),
+                            person,
+                            location, "", studyId,
+                            null,
+                            null,
+                            null
+                        )
 
-                            database.insertObservation(
-                                plot, traitDbId, format, file.uri.toString(),
-                                person,
-                                location, "", studyId,
-                                null,
-                                null,
-                                null
+                        //if sdk > 24, can write exif information to the image
+                        //goal is to encode observation variable model into the user comments
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+                            ExifUtil.saveJsonToExif(
+                                context,
+                                currentTrait,
+                                file.uri
                             )
-
-                            //if sdk > 24, can write exif information to the image
-                            //goal is to encode observation variable model into the user comments
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-
-                                ExifUtil.saveJsonToExif(
-                                    context,
-                                    currentTrait,
-                                    file.uri
-                                )
-                            }
                         }
                     }
 

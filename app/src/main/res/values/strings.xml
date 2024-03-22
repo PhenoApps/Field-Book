@@ -1050,4 +1050,7 @@
     <string name="trait_camera_capture_content_description">Capture a photo</string>
     <string name="delete_local_photo">Delete Photo</string>
 
+    <!-- gopro -->
+    <string name="dialog_go_pro_wait_stream_title">Waiting for live preview</string>
+    <string name="dialog_go_pro_wait_stream_message">This may take a minute.</string>
 </resources>
