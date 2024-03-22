@@ -52,7 +52,7 @@
             android:layout_margin="5dp"
             android:keepScreenOn="true"
             android:minHeight="256dp"
-            app:resize_mode="fit"
+            app:resize_mode="zoom"
             app:show_buffering="when_playing"
             app:show_shuffle_button="true"
             app:use_controller="false"

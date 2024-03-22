@@ -61,6 +61,15 @@ class GoProApi @Inject constructor(
         fun onBusyStateChanged(state: Int)
     }
 
+    enum class GoProBusyState(value: Int) {
+        BUSY(1),
+        NOT_BUSY(0)
+    }
+
+    enum class GoProStateKeys(val key: String) {
+        BUSY("8")
+    }
+
     companion object {
         const val TAG = "GoProApi"
         const val FILE_SYSTEM_PREFIX = "GOPR"
@@ -400,7 +409,7 @@ class GoProApi @Inject constructor(
 
                     val fileName = file.getString("n")
 
-                    if (FILE_SYSTEM_PREFIX in fileName) {
+                    if (fileName.startsWith(FILE_SYSTEM_PREFIX)) {
 
                         images.add(
                             GoProImage(
@@ -415,7 +424,7 @@ class GoProApi @Inject constructor(
                 }
             }
 
-            val latest = images.maxBy { it.fileName.split(".")[0].split("GOPR")[1].toInt() }.url
+            val latest = images.maxBy { it.fileName.split(".")[0].split(FILE_SYSTEM_PREFIX)[1].toInt() }.url
 
             requestFileUrl(latest, model)
 
@@ -512,17 +521,7 @@ class GoProApi @Inject constructor(
 
     override fun onModelId(modelID: Int) {}
 
-    override fun onModelName(modelName: String) {
-        if ("HERO11 Black" !in modelName) {
-//            activity?.runOnUiThread {
-//                Toast.makeText(
-//                    context,
-//                    activity?.getString(R.string.go_pro_layout_black_11_not_detected),
-//                    Toast.LENGTH_LONG
-//                ).show()
-//            }
-        }
-    }
+    override fun onModelName(modelName: String) {}
 
     override fun onSerialNumber(serialNumber: String) {}
 
