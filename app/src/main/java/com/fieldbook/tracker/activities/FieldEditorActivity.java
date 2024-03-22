@@ -616,7 +616,10 @@ public class FieldEditorActivity extends ThemedActivity
                                 getString(R.string.activity_field_editor_switch_field, studyName),
                                 null,
                                 8000,
-                                null, (v) -> mAdapter.selectItem(studyId)
+                                null, (v) -> {
+                                    fieldSwitcher.switchField(studyId);
+                                    updateFieldsList();
+                                }
                         );
                     }
                 }
