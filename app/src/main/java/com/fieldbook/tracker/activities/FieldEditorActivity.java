@@ -289,10 +289,10 @@ public class FieldEditorActivity extends ThemedActivity
             mAdapter.notifyDataSetChanged(); // Refresh adapter to update active icon indication
         }
         // Check if this is a BrAPI field and show BrAPI info dialog if so
-        if (field.getImport_format() == ImportFormat.BRAPI) {
-            BrapiInfoDialog brapiInfo = new BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
-            brapiInfo.show();
-        }
+//        if (field.getImport_format() == ImportFormat.BRAPI) {
+//            BrapiInfoDialog brapiInfo = new BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
+//            brapiInfo.show();
+//        }
     }
 
     public void showDeleteConfirmationDialog(final List<Integer> fieldIds, boolean isFromDetailFragment) {

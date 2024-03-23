@@ -268,11 +268,11 @@ public class FieldAdapterOld extends BaseAdapter {
         notifyDataSetChanged();
 
         // Check if this is a BrAPI field and show BrAPI info dialog if so
-        if (selectedField.getImport_format() == ImportFormat.BRAPI) {
-            BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context,
-                    context.getResources().getString(R.string.brapi_info_message));
-            brapiInfo.show();
-        }
+//        if (selectedField.getImport_format() == ImportFormat.BRAPI) {
+//            BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context,
+//                    context.getResources().getString(R.string.brapi_info_message));
+//            brapiInfo.show();
+//        }
 
     }
 
