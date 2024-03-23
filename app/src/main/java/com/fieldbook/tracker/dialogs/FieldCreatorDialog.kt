@@ -411,8 +411,11 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
             }
 
             if (studyDbId != -1) {
-                Log.d("FieldCreatorDialog", "New field insertion successful, invoking callback with new field id: $studyDbId")
-                fieldCreationCallback?.onFieldCreated(createdFieldId)
+                // Switch to the Main dispatcher for UI operations
+                withContext(Dispatchers.Main) {
+                    Log.d("FieldCreatorDialog", "New field insertion successful, invoking callback with new field id: $studyDbId")
+                    fieldCreationCallback?.onFieldCreated(createdFieldId)
+                }
             }
             dismiss()
 

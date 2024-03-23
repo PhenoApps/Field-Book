@@ -40,6 +40,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiActivity;
 import com.fieldbook.tracker.adapters.FieldAdapterOld;
 import com.fieldbook.tracker.async.ImportRunnableTask;
+import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
@@ -87,6 +88,7 @@ public class FieldEditorActivityOld extends ThemedActivity
     private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
     private static final int REQUEST_CLOUD_FILE_CODE = 5;
+    private static final int REQUEST_BRAPI_IMPORT_ACTIVITY = 10;
 
     private static final int DIALOG_LOAD_FIELDFILECSV = 1000;
     private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
@@ -252,12 +254,16 @@ public class FieldEditorActivityOld extends ThemedActivity
         }
     }
 
+//    public void loadBrAPI() {
+//        Intent intent = new Intent();
+//
+//        intent.setClassName(FieldEditorActivityOld.this,
+//                BrapiActivity.class.getName());
+//        startActivityForResult(intent, 1);
+//    }
     public void loadBrAPI() {
-        Intent intent = new Intent();
-
-        intent.setClassName(FieldEditorActivityOld.this,
-                BrapiActivity.class.getName());
-        startActivityForResult(intent, 1);
+        Intent intent = new Intent(this, BrapiActivity.class);
+        startActivityForResult(intent, REQUEST_BRAPI_IMPORT_ACTIVITY);
     }
 
     public void loadCloud() {
@@ -365,17 +371,13 @@ public class FieldEditorActivityOld extends ThemedActivity
             }
         } else if (itemId == R.id.menu_field_editor_item_creator) {
             FieldCreatorDialog dialog = new FieldCreatorDialog(this);
-
-            //when the dialog is dismissed, the field data is created or failed
-            dialog.setOnDismissListener((dismiss -> {
-
-                //update list of fields
-                fieldList = findViewById(R.id.myList);
-                mAdapter = new FieldAdapterOld(thisActivity, database.getAllFieldObjects(), fieldSwitcher, this);
-                fieldList.setAdapter(mAdapter);
-
-            }));
-
+            dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
+                @Override
+                public void onFieldCreated(int studyDbId) {
+                    fieldSwitcher.switchField(studyDbId);
+                    queryAndLoadFields();
+                }
+            });
             dialog.show();
         } else if (itemId == android.R.id.home) {
             CollectActivity.reloadData = true;
@@ -527,6 +529,17 @@ public class FieldEditorActivityOld extends ThemedActivity
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
                 showFieldFileDialog(chosenFile, null);
+            }
+        }
+
+        if (requestCode == REQUEST_BRAPI_IMPORT_ACTIVITY) {
+            if (resultCode == RESULT_OK && data != null) {
+                int fieldId = data.getIntExtra("fieldId", -1);
+                if (fieldId != -1) {
+                    getFieldSwitcher().switchField(fieldId);
+                    BrapiInfoDialog brapiInfo = new BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
+                    brapiInfo.show();
+                }
             }
         }
 

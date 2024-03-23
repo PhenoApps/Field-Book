@@ -46,6 +46,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiActivity;
 import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
+import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
@@ -56,6 +57,7 @@ import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
@@ -280,10 +282,16 @@ public class FieldEditorActivity extends ThemedActivity
     };
 
     public void setActiveField(int studyId) {
+        FieldObject field = database.getFieldObject(studyId);
         fieldSwitcher.switchField(studyId);
         CollectActivity.reloadData = true;
         if (mAdapter != null) {
             mAdapter.notifyDataSetChanged(); // Refresh adapter to update active icon indication
+        }
+        // Check if this is a BrAPI field and show BrAPI info dialog if so
+        if (field.getImport_format() == ImportFormat.BRAPI) {
+            BrapiInfoDialog brapiInfo = new BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
+            brapiInfo.show();
         }
     }
 
@@ -698,6 +706,8 @@ public class FieldEditorActivity extends ThemedActivity
                 int fieldId = data.getIntExtra("fieldId", -1);
                 if (fieldId != -1) {
                     getFieldSwitcher().switchField(fieldId);
+                    BrapiInfoDialog brapiInfo = new BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
+                    brapiInfo.show();
                 }
             }
         }
