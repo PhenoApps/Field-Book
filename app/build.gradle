@@ -220,6 +220,10 @@ dependencies {
     implementation "androidx.camera:camera-view:$camerax_version"
     implementation "androidx.camera:camera-core:$camerax_version"
 
+    // The view and compose calendar library
+    implementation 'com.kizitonwose.calendar:view:2.5.0'
+    implementation 'com.kizitonwose.calendar:compose:2.5.0'
+
     // Core library
     androidTestImplementation "androidx.test:core:$coreVersion"
 

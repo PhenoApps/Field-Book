@@ -7,20 +7,20 @@
         android:name=".application.FieldBook"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher"
         android:label="@string/field_book"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/BaseAppTheme"
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:label">
-
+        <activity
+            android:name=".activities.StatisticsActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.ScannerActivity"
-            android:exported="false" />
-
-        <!-- The Main Page activity that lists all other activities -->
+            android:exported="false" /> <!-- The Main Page activity that lists all other activities -->
         <activity
             android:name=".activities.ConfigActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -32,11 +32,10 @@
             android:targetActivity=".activities.ConfigActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- - File Import activity (field manager, local and brapi) -->
+        </activity> <!-- - File Import activity (field manager, local and brapi) -->
         <activity
             android:name=".activities.FieldEditorActivity"
             android:alwaysRetainTaskState="false"
@@ -60,12 +59,10 @@
         <activity
             android:name=".activities.CollectActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale|keyboard"
+            android:exported="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:exported="true"
-            android:windowSoftInputMode="adjustPan|stateHidden" />
-
-        <!-- Data grid is available through the collect activity, once the setting is set -->
+            android:windowSoftInputMode="adjustPan|stateHidden" /> <!-- Data grid is available through the collect activity, once the setting is set -->
         <activity
             android:name=".activities.DataGridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -81,9 +78,7 @@
             android:name=".activities.PreferencesActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-
-        <!-- About activity uses a library, which uses material design components, it has its own style file -->
+            android:screenOrientation="portrait" /> <!-- About activity uses a library, which uses material design components, it has its own style file -->
         <!-- shows version information and references to other apps, etc. -->
         <activity
             android:name=".activities.AboutActivity"
@@ -167,18 +162,13 @@
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"
-            tools:replace="android:screenOrientation" />
-
-        <!-- used to define SAF storage directory, required at start of app -->
+            tools:replace="android:screenOrientation" /> <!-- used to define SAF storage directory, required at start of app -->
         <activity
             android:name=".activities.DefineStorageActivity"
-            android:theme="@style/AppTheme" />
-
-        <!-- found in preferences, used to select a TTS language locale -->
+            android:theme="@style/AppTheme" /> <!-- found in preferences, used to select a TTS language locale -->
         <activity
             android:name=".activities.LocaleChoiceActivity"
             android:theme="@style/AppTheme" />
-
         <activity
             android:name=".activities.CameraActivity"
             android:exported="true"
@@ -208,6 +198,7 @@
             <action android:name="android.intent.action.GET_CONTENT" />
         </intent>
     </queries>
+
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
@@ -221,6 +212,7 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -239,9 +231,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
