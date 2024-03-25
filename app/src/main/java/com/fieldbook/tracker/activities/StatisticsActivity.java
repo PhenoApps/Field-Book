@@ -49,7 +49,7 @@ public class StatisticsActivity extends ThemedActivity implements StatisticsAdap
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Statistics");
+            getSupportActionBar().setTitle(getString(R.string.settings_statistics));
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
@@ -65,6 +65,7 @@ public class StatisticsActivity extends ThemedActivity implements StatisticsAdap
         setSeasons();
 
         snackbar = Snackbar.make(rvStatisticsCard, R.string.stats_export, Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction(getString(R.string.dialog_close), view -> snackbar.dismiss());
         snackbar.show();
     }
 

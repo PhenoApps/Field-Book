@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -191,13 +190,13 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             for (String field: fields) {
                 fieldNames.add(database.getFieldObject(Integer.valueOf(field)).getExp_name());
             }
-            displayDialog(R.string.stat1_title, fieldNames);
+            displayDialog(R.string.stat_fields_dialog_title, fieldNames);
         });
 
         holder.stat2.setOnClickListener(view -> Utils.makeToast(originActivity, observationUnits.size() + " plots have had data collected"));
         holder.stat3.setOnClickListener(view -> Utils.makeToast(originActivity, observations.length + " total observations have been collected"));
         holder.stat4.setOnClickListener(view -> Utils.makeToast(originActivity, timeString + " hours have been spent in collecting the data"));
-        holder.stat5.setOnClickListener(view -> displayDialog(R.string.stat5_title, new ArrayList<>(collectors)));
+        holder.stat5.setOnClickListener(view -> displayDialog(R.string.stat_people_dialog_title, new ArrayList<>(collectors)));
 
         int finalImageCount = imageCount;
         holder.stat6.setOnClickListener(view -> Utils.makeToast(originActivity, finalImageCount + " photos have been clicked"));
@@ -220,7 +219,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
                         data.add(observation.getObservation_variable_name() + ": " + observation.getValue());
                 }
             }
-            displayDialog(R.string.stat8_title, data);
+            displayDialog(R.string.stat_most_dialog_title, data);
         });
 
         holder.statisticsCard.setOnLongClickListener(view -> {

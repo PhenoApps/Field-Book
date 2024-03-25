@@ -766,9 +766,18 @@
     <string name="stats_toggle_view">Toggle between year and month view</string>
     <string name="stats_export">Long press on a card to export</string>
 
-    <string name="stat1_title">List of Fields</string>
-    <string name="stat5_title">List of People</string>
-    <string name="stat8_title">List of Observations</string>
+    <string name="stat_title_fields">Fields</string>
+    <string name="stat_title_entries">Entries</string>
+    <string name="stat_title_data">Data</string>
+    <string name="stat_title_hours">Hours</string>
+    <string name="stat_title_people">People</string>
+    <string name="stat_title_photos">Photos</string>
+    <string name="stat_title_busiest">Busiest</string>
+    <string name="stat_title_most">Most</string>
+
+    <string name="stat_fields_dialog_title">List of Fields</string>
+    <string name="stat_people_dialog_title">List of People</string>
+    <string name="stat_most_dialog_title">List of Observations</string>
 
 
     <!-- ABOUT -->
