@@ -23,10 +23,12 @@ import com.fieldbook.tracker.devices.ptpip.toByteArray
 import com.fieldbook.tracker.devices.ptpip.toInt
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.AbstractCameraTrait
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.phenoapps.androidlibrary.Utils
 import java.io.ByteArrayInputStream
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -48,6 +50,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
     private var session: PtpSession? = null
     private var handles = hashMapOf<Int, ByteArray>()
     private var capturing = false
+    private var lastSaveTime: String? = null
 
     private val prefs by lazy {
         PreferenceManager.getDefaultSharedPreferences(context)
@@ -384,9 +387,15 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
         return verifyInitCommandAckPacket(chanMan)
     }
 
-    private fun requestGetImage(session: PtpSession, handle: ByteArray, unit: RangeObject, offset: Int? = 0, data: ByteArray = byteArrayOf()) {
+    private fun requestGetImage(
+        session: PtpSession,
+        handle: ByteArray,
+        unit: RangeObject,
+        offset: Int? = 0,
+        saveTime: String
+    ) {
 
-        var length = byteArrayOf(0x0, 0x0, 0x08, 0x0).toInt()
+        val length = byteArrayOf(0x0, 0x0, 0x08, 0x0).toInt()
 
         log("Requesting get image")
 
@@ -396,7 +405,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
         session.transaction({ tid ->
 
-            session.writeGetImage1(handle, tid, (offset ?: 0).toByteArray(), length.toByteArray())
+            session.writeGetImage(handle, tid, (offset ?: 0).toByteArray(), length.toByteArray())
 
             payloadSize = awaitStartPacket(session)
 
@@ -416,17 +425,19 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
         }) { response ->
 
-            log("Response get image $response")
+            log("Response get image $offset $payloadSize $response")
 
             if (payloadSize == length) {
 
-                requestGetImage(session, handle, unit, (offset ?: 0) + length, data = data + nextData)
+                session.callbacks?.onJpegCaptured(nextData, unit, saveTime,
+                    saveState = if (offset == 0) AbstractCameraTrait.SaveState.NEW else AbstractCameraTrait.SaveState.SAVING)
 
-            } else {
+                requestGetImage(session, handle, unit, (offset ?: 0) + length, saveTime)
 
-                session.callbacks?.onJpegCaptured(data + nextData, unit)
             }
         }
+
+        session.callbacks?.onJpegCaptured(byteArrayOf(), unit, saveTime, AbstractCameraTrait.SaveState.COMPLETE)
     }
 
     private fun startMainLoop(
@@ -446,7 +457,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
                 startCapture(session)
 
-                requestUpdateHandles(session, storageId)
+                requestUpdateHandles(session, storageId, lastSaveTime)
 
                 continue
 
@@ -456,7 +467,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
                     log("REQUESTING UPDATES")
 
-                    requestUpdateHandles(session, storageId)
+                    requestUpdateHandles(session, storageId, lastSaveTime)
 
                 } else {
 
@@ -470,7 +481,11 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
         }
     }
 
-    private fun requestUpdateHandles(session: PtpSession, storageId: ByteArray) {
+    private fun requestUpdateHandles(
+        session: PtpSession,
+        storageId: ByteArray,
+        lastSavedTime: String? = null
+    ) {
 
         log("Requesting update image handles")
 
@@ -500,35 +515,19 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
                     obsUnit?.let { unit ->
 
-                        log("Found new image $handleInteger for ${unit.plot_id}")
+                        lastSavedTime?.let { time ->
 
-                        //requestUiLock(true, session, storageId, unit)
+                            log("Found new image $handleInteger for ${unit.plot_id}")
 
-                        requestGetImage(session, handle, unit)
+                            //requestUiLock(true, session, storageId, unit)
 
+                            requestGetImage(session, handle, unit, saveTime = time)
+                        }
                     }
                 }
 
                 handles[handleInteger] = handle
             }
-        }
-    }
-
-
-    private fun requestUiLock(lock: Boolean, session: PtpSession, storageId: ByteArray, unit: RangeObject) {
-
-        log("Requesting UI lock")
-
-        session.transaction({ tid ->
-
-            session.writeUiLock(tid, lock)
-
-        }) { response ->
-
-            log("UI lock response $response")
-
-            if (lock) requestGetImage(session, storageId, unit)
-
         }
     }
 
@@ -698,9 +697,11 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
     }
 
-    fun startSingleShotCapture(unit: RangeObject) {
+    fun startSingleShotCapture(unit: RangeObject, saveTime: String) {
 
         capturing = true
+
+        lastSaveTime = saveTime
 
         obsUnit = unit
 

@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.phenoapps.androidlibrary.Utils
 
 @AndroidEntryPoint
 class CanonTrait :
@@ -28,7 +29,7 @@ class CanonTrait :
     companion object {
         const val TAG = "Canon"
         const val type = "canon"
-        const val CAMERA_SHUTTER_DELAY_MS = 1000L
+        const val CAMERA_SHUTTER_DELAY_MS = 3000L
     }
 
     constructor(context: Context?) : super(context)
@@ -121,13 +122,17 @@ class CanonTrait :
 
                 captureBtn?.isEnabled = false
 
+                controller.getCanonApi().startSingleShotCapture(currentRange, Utils.getDateTime())
+
+                controller.getRangeBox().toggleNavigation(false)
+
                 Handler(Looper.getMainLooper()).postDelayed({
 
                     captureBtn?.isEnabled = true
 
-                }, CAMERA_SHUTTER_DELAY_MS)
+                    controller.getRangeBox().toggleNavigation(true)
 
-                controller.getCanonApi().startSingleShotCapture(currentRange)
+                }, CAMERA_SHUTTER_DELAY_MS)
 
             }
         }
@@ -158,11 +163,16 @@ class CanonTrait :
         }
     }
 
-    override fun onJpegCaptured(data: ByteArray, obsUnit: RangeObject) {
+    override fun onJpegCaptured(
+        data: ByteArray,
+        obsUnit: RangeObject,
+        saveTime: String,
+        saveState: SaveState
+    ) {
 
         uiScope.launch(Dispatchers.Main) {
 
-            saveJpegToStorage(type(), data, obsUnit)
+            saveJpegToStorage(type(), data, obsUnit, saveTime, saveState)
 
         }
     }

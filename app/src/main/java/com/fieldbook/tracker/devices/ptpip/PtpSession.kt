@@ -94,7 +94,7 @@ class PtpSession(val comMan: ChannelBufferManager,
 
     }
 
-    fun writeGetImage1(handle: ByteArray, tid: Int, offset: ByteArray, length: ByteArray) {
+    fun writeGetImage(handle: ByteArray, tid: Int, offset: ByteArray, length: ByteArray) {
 
         PtpOperations.writeOperation(
             comMan.channel,

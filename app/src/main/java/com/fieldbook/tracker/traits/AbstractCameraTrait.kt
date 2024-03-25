@@ -48,6 +48,10 @@ abstract class AbstractCameraTrait :
         const val TAG = "Camera"
     }
 
+    enum class SaveState {
+        NEW, SAVING, COMPLETE
+    }
+
     protected var activity: Activity? = null
     protected var connectBtn: FloatingActionButton? = null
     protected var captureBtn: FloatingActionButton? = null
@@ -96,11 +100,17 @@ abstract class AbstractCameraTrait :
 
     }
 
-    protected fun saveJpegToStorage(format: String, data: ByteArray, obsUnit: RangeObject) {
+    protected fun saveJpegToStorage(
+        format: String,
+        data: ByteArray,
+        obsUnit: RangeObject,
+        saveTime: String,
+        saveState: SaveState
+    ) {
 
-        saveToStorage(format, obsUnit) { uri ->
+        saveToStorage(format, obsUnit, saveTime, saveState) { uri ->
 
-            context.contentResolver.openOutputStream(uri)?.use { output ->
+            context.contentResolver.openOutputStream(uri, "wa")?.use { output ->
 
                 output.write(data)
 
@@ -110,7 +120,7 @@ abstract class AbstractCameraTrait :
 
     protected fun saveBitmapToStorage(format: String, bmp: Bitmap, obsUnit: RangeObject) {
 
-        saveToStorage(format, obsUnit) { uri ->
+        saveToStorage(format, obsUnit, saveTime = Utils.getDateTime(), saveState = SaveState.NEW) { uri ->
 
             context.contentResolver.openOutputStream(uri)?.let { output ->
 
@@ -120,11 +130,30 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    private fun saveToStorage(format: String, obsUnit: RangeObject, saver: (Uri) -> Unit) {
+    private fun writeExif(file: DocumentFile) {
+
+        //if sdk > 24, can write exif information to the image
+        //goal is to encode observation variable model into the user comments
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+            ExifUtil.saveJsonToExif(
+                context,
+                currentTrait,
+                file.uri
+            )
+        }
+    }
+
+    private fun saveToStorage(
+        format: String,
+        obsUnit: RangeObject,
+        saveTime: String,
+        saveState: SaveState,
+        saver: (Uri) -> Unit
+    ) {
 
         val plot = obsUnit.plot_id
         val studyId = collectActivity.studyId
-        val time = Utils.getDateTime()
         val person = (activity as? CollectActivity)?.person
         val location = (activity as? CollectActivity)?.locationByPreferences
 
@@ -139,37 +168,41 @@ abstract class AbstractCameraTrait :
 
                 //get the bitmap from the texture view, only use it if its not null
 
+                val name = "${sanitizedTraitName}_${plot}_$saveTime.jpg"
+
                 DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { dir ->
 
-                    val name = "${sanitizedTraitName}_${plot}_$time.jpg"
+                    if (saveState == SaveState.NEW) {
 
-                    dir.createFile("*/*", name)?.let { file ->
+                        dir.createFile("*/*", name)?.let { file ->
 
-                        saver.invoke(file.uri)
+                            saver.invoke(file.uri)
 
-                        database.insertObservation(
-                            plot, traitDbId, format, file.uri.toString(),
-                            person,
-                            location, "", studyId,
-                            null,
-                            null,
-                            null
-                        )
-
-                        //if sdk > 24, can write exif information to the image
-                        //goal is to encode observation variable model into the user comments
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-
-                            ExifUtil.saveJsonToExif(
-                                context,
-                                currentTrait,
-                                file.uri
+                            database.insertObservation(
+                                plot, traitDbId, format, file.uri.toString(),
+                                person,
+                                location, "", studyId,
+                                null,
+                                null,
+                                null
                             )
+
+                        }
+
+                    } else if (saveState in setOf(SaveState.SAVING, SaveState.COMPLETE)) {
+
+                        dir.findFile(name)?.let { file ->
+
+                            saver.invoke(file.uri)
+
                         }
                     }
 
-                    loadAdapterItems()
+                    if (saveState == SaveState.COMPLETE) {
 
+                        loadAdapterItems()
+
+                    }
                 }
             }
         }
@@ -252,7 +285,7 @@ abstract class AbstractCameraTrait :
 
                     DocumentsContract.getDocumentThumbnail(
                         context.contentResolver,
-                        Uri.parse(it.value), Point(256, 256), null
+                        Uri.parse(it.value), Point(512, 512), null
                     )?.let { bmp ->
 
                         model = ImageAdapter.Model(it.value, bmp)
@@ -367,4 +400,3 @@ abstract class AbstractCameraTrait :
         (context as CollectActivity).traitLockData()
     }
 }
-
