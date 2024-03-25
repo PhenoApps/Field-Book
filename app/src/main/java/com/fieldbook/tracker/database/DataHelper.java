@@ -480,8 +480,8 @@ public class DataHelper {
 //        return synced;
     }
 
-    public void setTraitObservations(Integer studyId, Observation observation) {
-        ObservationDao.Companion.insertObservation(studyId, observation);
+    public void setTraitObservations(Integer studyId, Observation observation, Map<String,String> traitIdToTypeMap) {
+        ObservationDao.Companion.insertObservation(studyId, observation, traitIdToTypeMap);
     }
 
     /**

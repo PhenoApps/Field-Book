@@ -22,6 +22,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.dao.ObservationVariableDao
 import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitObject
@@ -235,10 +236,16 @@ internal class ImportRunnableTask(
         println("dbId: ${studyObservations.fieldBookStudyDbId}")
         val dataHelper = DataHelper(context)
 
+        val traitIdToType = mutableMapOf<String,String>()
         try {
             //Sync the traits first and update date
             for (trait in studyObservations.traitList) {
                 dataHelper.insertTraits(trait)
+            }
+            //link up the ids to the type for when we add in the observations
+            for (trait in studyObservations.traitList) {
+                val currentId = ObservationVariableDao.getTraitByName(trait.name)!!.id
+                traitIdToType[currentId] = trait.format
             }
             dataHelper.updateSyncDate(studyObservations.fieldBookStudyDbId)
         }
@@ -262,13 +269,14 @@ internal class ImportRunnableTask(
 //            println("Saving: studyId: " + obs.studyId)
 //            println("Saving: unitDBId: " + obs.unitDbId)
 //            println("Saving: varDbId: " + obs.variableDbId)
-                dataHelper.setTraitObservations(studyObservations.fieldBookStudyDbId, obs)
+                dataHelper.setTraitObservations(studyObservations.fieldBookStudyDbId, obs, traitIdToType)
             }
             return 0
         }
         catch (exc: Exception) {
             fail = true
             failMessage = exc.message ?: "ERROR"
+            println(exc)
             return null
         }
 
