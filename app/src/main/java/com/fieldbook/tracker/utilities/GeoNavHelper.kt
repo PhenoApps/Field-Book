@@ -26,6 +26,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.documentfile.provider.DocumentFile
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
@@ -116,7 +117,8 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private var mDeclination: Float? = null
     private var mAzimuth: Double? = null
     private var mNotWarnedInterference = true
-    private var mGeoNavLogWriterUri: Uri? = null
+    private var mGeoNavLogLimitedUri: Uri? = null
+    private var mGeoNavLogFullUri: Uri? = null
 
     private var currentFixQuality = false
 
@@ -129,8 +131,12 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
     }
 
-    fun getGeoNavLogWriterUri(): Uri? {
-        return mGeoNavLogWriterUri
+    fun getGeoNavLogLimitedUri(): Uri? {
+        return mGeoNavLogLimitedUri
+    }
+
+    fun getGeoNavLogFullUri(): Uri? {
+        return mGeoNavLogFullUri
     }
 
 
@@ -174,7 +180,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             val altLength = alt.length
             alt = alt.substring(0, altLength - 1) //drop the "M"
 
-            //always log location updates for verbose log
+            //always log location updates for full log
             if (currentLoggingMode() == "2") {
 
                 val geoNavLine = GeoNavLine(
@@ -186,7 +192,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
                 writeGeoNavLog(
                     preferences,
-                    mGeoNavLogWriter,
+                    mLimitedGeoNavLogWriter,
                     geoNavLine
                 )
             }
@@ -278,7 +284,8 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private var lastPlotIdNav: String? = null
     private var mGeoNavSnackbar: Snackbar? = null
     private val preferences = PreferenceManager.getDefaultSharedPreferences(controller.getContext())
-    private var mGeoNavLogWriter: OutputStreamWriter? = null
+    private var mLimitedGeoNavLogWriter: OutputStreamWriter? = null
+    private var mFullGeoNavLogWriter: OutputStreamWriter? = null
 
     var snackBarBottomMargin: Int = 0
 
@@ -510,7 +517,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
             //long toc = System.currentTimeMillis();
             val (first) = impactZoneSearch(
-                mGeoNavLogWriter, preferences, currentLoggingMode(),
+                mLimitedGeoNavLogWriter, mFullGeoNavLogWriter, preferences, currentLoggingMode(),
                 start, coordinates.toTypedArray(),
                 mAzimuth, theta, mTeslas, geoNavMethod, d1, d2
             )
@@ -661,9 +668,13 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         mMessageHandlerThread.quit()
         //flush and close geo nav log writer
         try {
-            if (mGeoNavLogWriter != null) {
-                mGeoNavLogWriter?.flush()
-                mGeoNavLogWriter?.close()
+            if (mLimitedGeoNavLogWriter != null) {
+                mLimitedGeoNavLogWriter?.flush()
+                mLimitedGeoNavLogWriter?.close()
+            }
+            if (mFullGeoNavLogWriter != null) {
+                mFullGeoNavLogWriter?.flush()
+                mFullGeoNavLogWriter?.close()
             }
         } catch (io: IOException) {
             io.printStackTrace()
@@ -707,36 +718,80 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                             .replace("\\s".toRegex(), "_")
                     val thetaPref = preferences.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
                     // if the currentLoggingMode is for limited logging, use "limited_" as the prefix for filename
-                    val prefixOfFile = if (currentLoggingMode() == "1") {
-                        "limited_"
-                    } else {
-                        ""
-                    }
-                    val fileName = "${prefixOfFile}log.csv"
-                    var isNew = false
-                    var geoNavLogFile = geoNavFolder.findFile(fileName)
-                    if (geoNavLogFile == null) {
-                        geoNavLogFile = geoNavFolder.createFile("*/csv", fileName)
-                        isNew = true
-                    }
-                    if (geoNavLogFile != null && geoNavLogFile.exists()) {
-                        //open the only log file in 'write append' mode
-                        val outputStream = resolver.openOutputStream(geoNavLogFile.uri, "wa")
-                        Log.d(CollectActivity.TAG, "GeoNav Logger started successfully.")
-                        mGeoNavLogWriterUri = geoNavLogFile.uri
-                        mGeoNavLogWriter = OutputStreamWriter(outputStream)
+//                    val prefixOfFile = if (currentLoggingMode() == "1") {
+//                        "limited_"
+//                    } else {
+//                        ""
+//                    }
 
-                        if (isNew) {
-                            writeGeoNavLog(
-                                preferences,
-                                mGeoNavLogWriter,
-                                GeoNavLine.HeaderLine,
-                                isHeader = true
-                            )
+                    // file names for logging modes
+                    val limitedModeFileName = "limited_log.csv"
+                    val fullModeFileName = "log.csv"
+
+                    // find log files for both logging modes
+                    var limitedGeoNavLogFile: DocumentFile? = null
+                    var fullGeoNavLogFile: DocumentFile? = null
+
+                    if (currentLoggingMode() == "1" || currentLoggingMode() == "3")
+                        limitedGeoNavLogFile = geoNavFolder.findFile(limitedModeFileName)
+
+                    if (currentLoggingMode() == "2" || currentLoggingMode() == "3")
+                        fullGeoNavLogFile = geoNavFolder.findFile(fullModeFileName)
+
+                    // flags if new file(s) have to be created
+                    var isLimitedLogNew = false
+                    var isFullLogNew = false
+
+                    // handle limited mode
+                    if (currentLoggingMode() == "1" || currentLoggingMode() == "3"){
+                        if (limitedGeoNavLogFile == null) {
+                            limitedGeoNavLogFile = geoNavFolder.createFile("*/csv", limitedModeFileName)
+                            isLimitedLogNew = true
                         }
+                        if (limitedGeoNavLogFile != null && limitedGeoNavLogFile.exists()) {
+                            //open the only log file in 'write append' mode
+                            val outputStream = resolver.openOutputStream(limitedGeoNavLogFile.uri, "wa")
+                            Log.d(CollectActivity.TAG, "GeoNav Logger started successfully.")
+                            mGeoNavLogLimitedUri = limitedGeoNavLogFile.uri
+                            mLimitedGeoNavLogWriter = OutputStreamWriter(outputStream)
 
-                    } else {
-                        Log.d(CollectActivity.TAG, "GeoNav Logger start failed.")
+                            if (isLimitedLogNew) {
+                                writeGeoNavLog(
+                                    preferences,
+                                    mLimitedGeoNavLogWriter,
+                                    GeoNavLine.HeaderLine,
+                                    isHeader = true
+                                )
+                            }
+                        } else {
+                            Log.d(CollectActivity.TAG, "GeoNav Logger start failed.")
+                        }
+                    }
+
+                    // handle full mode
+                    if (currentLoggingMode() == "2" || currentLoggingMode() == "3"){
+                        if (fullGeoNavLogFile == null) {
+                            fullGeoNavLogFile = geoNavFolder.createFile("*/csv", fullModeFileName)
+                            isFullLogNew = true
+                        }
+                        if (fullGeoNavLogFile != null && fullGeoNavLogFile.exists()) {
+                            //open the only log file in 'write append' mode
+                            val outputStream = resolver.openOutputStream(fullGeoNavLogFile.uri, "wa")
+                            Log.d(CollectActivity.TAG, "GeoNav Logger started successfully.")
+                            mGeoNavLogFullUri = fullGeoNavLogFile.uri
+                            mFullGeoNavLogWriter = OutputStreamWriter(outputStream)
+
+                            if (isFullLogNew) {
+                                writeGeoNavLog(
+                                    preferences,
+                                    mFullGeoNavLogWriter,
+                                    GeoNavLine.HeaderLine,
+                                    isHeader = true
+                                )
+                            }
+                        } else {
+                            Log.d(CollectActivity.TAG, "GeoNav Logger start failed.")
+                        }
                     }
                 }
             } catch (io: IOException) {
@@ -865,7 +920,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
             writeGeoNavLog(
                 preferences,
-                mGeoNavLogWriter,
+                mLimitedGeoNavLogWriter,
                 geoNavLine
             )
         }

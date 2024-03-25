@@ -691,6 +691,8 @@
     <string name="pref_geonav_log_limited_description">Limited: Logging closest entry to storage/geonav/limited_log.txt</string>
     <string name="pref_geonav_log_full">Full</string>
     <string name="pref_geonav_log_full_description">Full: Logging all location updates and algorithm steps to storage/geonav/log.txt</string>
+    <string name="pref_geonav_log_both">Both</string>
+    <string name="pref_geonav_log_both_description">Both: Logging all location updates and algorithm steps to storage/geonav/log.txt, closest entry to storage/geonav/limited_log.txt</string>
 
     <string name="pref_geonav_update_interval_title">Update Interval (s)</string>
     <string name="pref_geonav_update_interval_summary">The time between location updates is %ss.</string>

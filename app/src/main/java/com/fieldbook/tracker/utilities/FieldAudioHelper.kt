@@ -107,7 +107,7 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
                 )
             }
 
-            val geoNavLogWriter = context.getGeoNavHelper().getGeoNavLogWriterUri()
+            val geoNavLogWriter = context.getGeoNavHelper().getGeoNavLogLimitedUri()
             val geoNavFile = geoNavLogWriter?.let {
                 DocumentFile.fromSingleUri(context,
                     it

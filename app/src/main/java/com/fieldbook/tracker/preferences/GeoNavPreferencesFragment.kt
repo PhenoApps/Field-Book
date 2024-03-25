@@ -193,8 +193,11 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         } else if (currentMode == "1") {
             geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_limited_description)
             geoNavLoggingMode?.setIcon(R.drawable.ic_note_outline)
-        } else {
+        } else if (currentMode == "2") {
             geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_full_description)
+            geoNavLoggingMode?.setIcon(R.drawable.ic_note_multiple_outline)
+        } else {
+            geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_both_description)
             geoNavLoggingMode?.setIcon(R.drawable.ic_note_multiple_outline)
         }
     }
