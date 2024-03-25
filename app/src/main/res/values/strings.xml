@@ -1050,4 +1050,18 @@
     <string name="trait_camera_capture_content_description">Capture a photo</string>
     <string name="delete_local_photo">Delete Photo</string>
 
+    <!-- canon camera strings -->
+    <string name="canon_frag_connect_btn_content_description">shutter button</string>
+    <string name="traits_format_canon">Canon</string>
+    <string name="pref_canon_ip_title">Canon IP Address</string>
+    <string name="pref_canon_port_title">Canon Port</string>
+    <string name="preferences_canon_title">Canon</string>
+    <string name="pref_canon_ssid_summary">This name is used to find your device\'s AP. This name must be contained within the actual SSID.</string>
+    <string name="pref_canon_title">SSID Name</string>
+    <string name="pref_canon_ip_summary">This is the ip displayed on your camera when setting up the AP.</string>
+    <string name="pref_canon_port_summary">This is the port displayed on your camera when setting up the AP.</string>
+    <string name="pref_canon_help_title">Help</string>
+    <string name="pref_canon_help_summary">This will open a URL to the FieldBook Canon manual.</string>
+    <string name="pref_canon_debug_title">Debug</string>
+    <string name="pref_canon_debug_summary">A preferences for developers to monitor device output.</string>
 </resources>

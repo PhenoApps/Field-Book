@@ -4,6 +4,7 @@ import android.content.Context
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.AudioFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.BooleanFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.BrapiFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.CanonFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.CategoricalFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.CounterFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.DateFormat
@@ -25,13 +26,14 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
     AUDIO, BOOLEAN, CAMERA(isCamera = true), CATEGORICAL, MULTI_CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT,
 
     //CUSTOM formats
-    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM), USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true),
+    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM),
+    USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM, isCamera = true),
     LABEL_PRINT(Types.CUSTOM), BRAPI(Types.CUSTOM);
 
     companion object {
         fun getCameraFormats() = entries.filter { it.isCamera }
 
-        fun getMainFormats() = entries - listOf(USB_CAMERA, GO_PRO)
+        fun getMainFormats() = entries - listOf(USB_CAMERA, GO_PRO, CANON)
     }
 
     fun getTraitFormatDefinition() = when (this) {
@@ -40,6 +42,7 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
         CAMERA -> PhotoFormat()
         USB_CAMERA -> UsbCameraFormat()
         GO_PRO -> GoProFormat()
+        CANON -> CanonFormat()
         CATEGORICAL -> CategoricalFormat()
         MULTI_CATEGORICAL -> MultiCategoricalFormat()
         COUNTER -> CounterFormat()
