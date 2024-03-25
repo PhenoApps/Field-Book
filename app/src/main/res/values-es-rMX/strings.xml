@@ -500,7 +500,7 @@
     <string name="preferences_appearance_collection_category_title">Pantalla de captura</string>
     <string name="preferences_appearance_toolbar_customize">Personalizar iconos en barra de herramientas</string>
     <string name="preferences_appearance_toolbar_customize_description">Modificar iconos predeterminados en la pantalla de captura</string>
-    <string name="preferences_appearance_toolbar_customize_search">Busqueda</string>
+    <string name="preferences_appearance_toolbar_customize_search">Buscar</string>
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
     <string name="preferences_appearance_toolbar_customize_summary">Resumen</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloquear</string>
@@ -792,7 +792,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_main_na_title">Datos perdidos</string>
     <string name="tutorial_main_na_description">El botón NA se usa para marcar valores como faltantes.</string>
     <string name="tutorial_main_delete_title">Eliminar dato</string>
-    <string name="tutorial_main_delete_description">Los datos se eliminan usando este botón.</string>
+    <string name="tutorial_main_delete_description">Los datos son eliminados usando este botón.</string>
     <string name="tutorial_main_search_title">Buscar</string>
     <string name="tutorial_main_search_description">El icono de búsqueda permite realizar consultas en la base de datos.</string>
     <string name="tutorial_main_resources_title">Recursos</string>
