@@ -17,7 +17,7 @@
     <string name="dialog_save_error_title">Error al Guardar</string>
     <string name="dialog_back">Atrás</string>
     <string name="dialog_scan">Escanear</string>
-    <string name="barcode_scanner_text">Escanear código de barras</string>
+    <string name="barcode_scanner_text">Escanear un código de barras</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Datos de ejemplo</string>
     <string name="startup_sample_data_message">¿Cargar datos de ejemplo?</string>
@@ -94,7 +94,7 @@
     <string name="dialog_field_creator_ask_size">Por favor, eligir un nombre y tamaño de Campo.</string>
     <string name="dialog_field_creator_ask_start_point">Por favor, eligir un punto de partida del Campo.</string>
     <string name="dialog_field_creator_ask_pattern">Por favor, eligir un patrón de Campo.</string>
-    <string name="dialog_field_creator_ask_name_hint">Nombre</string>
+    <string name="dialog_field_creator_ask_name_hint">Variable</string>
     <string name="dialog_field_creator_ask_row_hint">Filas</string>
     <string name="dialog_field_creator_ask_columns_hint">Columnas</string>
     <string name="dialog_field_creator_top_left">Arriba a la izquierda</string>
@@ -173,7 +173,7 @@
     <string name="trait_creator_title_layout">Diseño de Variable</string>
     <string name="trait_creator_parameters_title">Parámetros %s</string>
     <string name="activity_traits_new_button_content_description">Crear una nueva variable.</string>
-    <string name="traits_create_name">Nombre</string>
+    <string name="traits_create_name">Variable</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Predeterminado</string>
     <string name="traits_create_value_minimum">Mínimo</string>
