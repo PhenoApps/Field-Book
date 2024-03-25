@@ -271,7 +271,8 @@
     <string name="dialog_att_chooser_attributes">Attributes</string>
     <string name="dialog_att_chooser_traits">Traits</string>
     <string name="dialog_att_chooser_other">Other</string>
-    <string name="dialog_collect_att_chooser_title">Choose an attribute</string>
+    <string name="dialog_att_chooser_customize">Customize</string>
+    <string name="dialog_infobar_att_chooser_title">Infobar %d</string>
     <string name="infobars_attribute_placeholder">Select</string>
     <string name="field_name_attribute">field_name</string>
 

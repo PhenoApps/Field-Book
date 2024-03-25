@@ -974,6 +974,8 @@ public class CollectActivity extends ThemedActivity
             systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
         }
 
+        refreshInfoBarAdapter();
+
         // If reload data is true, it means there was an import operation, and
         // the screen should refresh
         if (reloadData) {
@@ -2250,7 +2252,7 @@ public class CollectActivity extends ThemedActivity
     @Override
     public void onInfoBarClicked(int position) {
 
-        infoBarHelper.showInfoBarChoiceDialog(position);
+        infoBarHelper.showInfoBarChoiceDialog(getSupportFragmentManager(), position);
 
     }
 
