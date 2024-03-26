@@ -34,69 +34,19 @@ class ObservationUnitPropertyDao {
         }?: ""
 
         fun getAllRangeId(context: Context): Array<Int> = withDatabase { db ->
-
             val studyId = PreferenceManager.getDefaultSharedPreferences(context)
                 .getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-            var sortCols: String? = try {
-                val toString = db.query(
-                    Study.tableName,
-                    select = arrayOf("study_sort_name"),
-                    where = "${Study.PK} = ?",
-                    whereArgs = arrayOf(studyId),
-                    orderBy = Study.PK
-                ).toFirst()["study_sort_name"].toString()
+            val sortOrderClause = getSortOrderClause(context, studyId)
 
-                if(toString == "null") {
-                    null
-                } else {
-                    toString
-                }
-            } catch (e: Exception) {
-                Log.e("ObsUnitPropertyDao", "Error fetching sort order for study", e)
-                null
-            }
+            val table = db.query(
+                sObservationUnitPropertyViewName,
+                select = arrayOf("id"),
+                orderBy = sortOrderClause
+            ).toTable()
 
-            sortCols = if(sortCols != null && sortCols != "") {
-                val sortColsSplit = sortCols.split(',')
-                val sortColsList = sortColsSplit.map{ "cast(`$it` as integer),`$it`" }.toList()
-                "${sortColsList.joinToString ( "," )}, id"
-            } else {
-                "id"
-            }
-
-            sortCols = "$sortCols ${getSortOrder(context, studyId)}"
-
-            val table = db.query(sObservationUnitPropertyViewName,
-                    select = arrayOf("id"),
-                    orderBy = sortCols).toTable()
-
-            table.map { (it["id"] as Int) }
-                    .toTypedArray()
+            table.map { it["id"] as Int }.toTypedArray()
         } ?: emptyArray()
-
-        //TODO original code uses switchField if object is null
-//        fun getRangeByIdAndPlot(firstName: String,
-//                                secondName: String,
-//                                uniqueName: String,
-//                                id: Int, pid: String): RangeObject? = withDatabase { db ->
-//
-//            with(db.query(sObservationUnitPropertyViewName,
-//                    select = arrayOf(firstName, secondName, uniqueName, "id").map { "`$it`" }.toTypedArray(),
-//                    where = "id = ? AND plot_id = ?",
-//                    whereArgs = arrayOf(id.toString(), pid)
-//            ).toFirst()) {
-//                RangeObject().apply {
-//                    range = this@with[firstName] as? String ?: ""
-//                    plot = this@with[secondName] as? String ?: ""
-//                    plot_id = this@with[uniqueName] as? String ?: ""
-//                }
-//            }
-//
-//        }
-
-        private fun getSortOrder(context: Context, studyId: String) = if (PreferenceManager.getDefaultSharedPreferences(context)
-            .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
 
         fun getRangeFromId(firstName: String, secondName: String, uniqueName: String, id: Int): RangeObject = withDatabase { db ->
 //            data.range = cursor.getString(0);
@@ -265,12 +215,14 @@ class ObservationUnitPropertyDao {
          * @return a cursor that is used in CSVWriter and closed elsewhere
          */
         fun convertDatabaseToTable(
+            context: Context,
             expId: Int,
             uniqueName: String,
             col: Array<String?>,
             traits: ArrayList<TraitObject>
         ): Cursor? = withDatabase { db ->
 
+            val sortOrderClause = getSortOrderClause(context, expId.toString())
             val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
             val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }
 
@@ -287,6 +239,7 @@ class ObservationUnitPropertyDao {
                 FROM ObservationUnitProperty as props
                 LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $expId
                 GROUP BY props.id
+                ORDER BY $sortOrderClause
             """.trimIndent()
 
             db.rawQuery(query, null)
@@ -326,5 +279,31 @@ class ObservationUnitPropertyDao {
 
             db.rawQuery(query, null)
         }
+
+        private fun getSortOrderClause(context: Context, studyId: String): String = withDatabase { db ->
+            val sortOrder = if (PreferenceManager.getDefaultSharedPreferences(context)
+                    .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
+
+            var sortCols = "id" // Default sort column
+            try {
+                val sortName = db.query(
+                    Study.tableName,
+                    select = arrayOf("study_sort_name"),
+                    where = "${Study.PK} = ?",
+                    whereArgs = arrayOf(studyId)
+                ).toFirst()["study_sort_name"]?.toString()
+
+                if (!sortName.isNullOrEmpty() && sortName != "null") {
+                    sortCols = sortName.split(',')
+                        .joinToString(",") { col -> "cast(`$col` as integer), `$col`" } + ", id"
+                }
+            } catch (e: Exception) {
+                Log.e("ObsUnitPropertyDao", "Error fetching sort order for study: $e")
+            }
+
+            "$sortCols $sortOrder"
+        } ?: "id ASC" // Provide a default non-null value
+
+
     }
 }

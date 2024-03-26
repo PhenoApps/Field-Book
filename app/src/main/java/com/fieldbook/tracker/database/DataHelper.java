@@ -984,6 +984,7 @@ public class DataHelper {
         open();
 
         return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
+                context,
                 preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
                 preferences.getString(GeneralKeys.UNIQUE_NAME, ""), col, traits);
 
