@@ -130,8 +130,9 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         cardViewExport.setOnClickListener {
             fieldId?.let { id ->
                 if (checkTraitsExist() >= 0) {
-                    (activity as? FieldEditorActivity)?.setActiveField(id)
-                    exportUtil.exportActiveField()
+//                    (activity as? FieldEditorActivity)?.setActiveField(id)
+//                    exportUtil.exportActiveField()
+                    exportUtil.exportMultipleFields(listOf(id))
                 }
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot export data")
         }
