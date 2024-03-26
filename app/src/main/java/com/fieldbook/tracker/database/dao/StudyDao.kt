@@ -200,7 +200,7 @@ class StudyDao {
                     Studies.*,
                     (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK}) AS trait_count,
-                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK}) AS observation_count
+                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
             """
             db.rawQuery(query, null).use { cursor ->
@@ -260,7 +260,7 @@ class StudyDao {
                     count,
                     (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK}) AS trait_count,
-                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK}) AS observation_count
+                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
                 WHERE ${Study.PK} = ?
                 """
@@ -298,7 +298,7 @@ class StudyDao {
                 val cursor = db.rawQuery("""
             SELECT observation_variable_name, observation_variable_field_book_format, COUNT(*) as count
             FROM observations
-            WHERE study_id = ?
+            WHERE study_id = ? AND observation_variable_db_id > 0
             GROUP BY observation_variable_name
         """, arrayOf(studyId.toString()))
 
