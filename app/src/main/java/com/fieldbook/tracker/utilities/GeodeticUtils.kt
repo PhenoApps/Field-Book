@@ -2,6 +2,7 @@ package com.fieldbook.tracker.utilities
 
 import android.content.SharedPreferences
 import android.location.Location
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.gson.Gson
@@ -224,7 +225,8 @@ class GeodeticUtils {
             //after a full run of IZ, update the last CLOSEST_UPDATE to CLOSEST_FINAL
             izLogArray.findLast { it.closest == CLOSEST_UPDATE.toString() }?.closest = CLOSEST_FINAL.toString()
 
-            if (currentLoggingMode == "1" || currentLoggingMode == "3") {
+            // limited mode
+            if (currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.LIMITED.value || currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.BOTH.value) {
                 //print only the closest plant to the log
                 izLogArray.forEach {
                     if (it.closest == CLOSEST_FINAL.toString()) writeGeoNavLog(
@@ -234,7 +236,9 @@ class GeodeticUtils {
                     )
                 }
             }
-            if (currentLoggingMode == "2" || currentLoggingMode == "3") {
+
+            // full mode
+            if (currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.FULL.value || currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.BOTH.value) {
                 //print the entire array to log
                 izLogArray.forEach { writeGeoNavLog(preferences, fullLog, it) }
             }

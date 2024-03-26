@@ -19,6 +19,7 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
+import com.fieldbook.tracker.utilities.GeoNavHelper
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.security.Security
 import javax.inject.Inject
@@ -187,13 +188,13 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
         val currentMode = preferences.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0")
 
-        if (currentMode == "0") {
+        if (currentMode == GeoNavHelper.GeoNavLoggingMode.OFF.value) {
             geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_off_description)
             geoNavLoggingMode?.setIcon(R.drawable.ic_note_off_outline)
-        } else if (currentMode == "1") {
+        } else if (currentMode == GeoNavHelper.GeoNavLoggingMode.LIMITED.value) {
             geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_limited_description)
             geoNavLoggingMode?.setIcon(R.drawable.ic_note_outline)
-        } else if (currentMode == "2") {
+        } else if (currentMode == GeoNavHelper.GeoNavLoggingMode.FULL.value) {
             geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_full_description)
             geoNavLoggingMode?.setIcon(R.drawable.ic_note_multiple_outline)
         } else {

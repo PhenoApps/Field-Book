@@ -181,7 +181,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             alt = alt.substring(0, altLength - 1) //drop the "M"
 
             //always log location updates for full log
-            if (currentLoggingMode() == "2") {
+            if (currentLoggingMode() == GeoNavLoggingMode.FULL.value) {
 
                 val geoNavLine = GeoNavLine(
                     startLat = lat,
@@ -706,7 +706,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
      * Starts a file in storage/geonav/log.txt
      */
     fun setupGeoNavLogger() {
-        if (currentLoggingMode() != "0") {
+        if (currentLoggingMode() != GeoNavLoggingMode.OFF.value) {
             try {
                 val resolver: ContentResolver = controller.getContext().contentResolver
                 val geoNavFolder = getDirectory(controller.getContext(), R.string.dir_geonav)
@@ -732,10 +732,10 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                     var limitedGeoNavLogFile: DocumentFile? = null
                     var fullGeoNavLogFile: DocumentFile? = null
 
-                    if (currentLoggingMode() == "1" || currentLoggingMode() == "3")
+                    if (currentLoggingMode() == GeoNavLoggingMode.LIMITED.value || currentLoggingMode() == GeoNavLoggingMode.BOTH.value)
                         limitedGeoNavLogFile = geoNavFolder.findFile(limitedModeFileName)
 
-                    if (currentLoggingMode() == "2" || currentLoggingMode() == "3")
+                    if (currentLoggingMode() == GeoNavLoggingMode.FULL.value || currentLoggingMode() == GeoNavLoggingMode.BOTH.value)
                         fullGeoNavLogFile = geoNavFolder.findFile(fullModeFileName)
 
                     // flags if new file(s) have to be created
@@ -743,7 +743,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                     var isFullLogNew = false
 
                     // handle limited mode
-                    if (currentLoggingMode() == "1" || currentLoggingMode() == "3"){
+                    if (currentLoggingMode() == GeoNavLoggingMode.LIMITED.value || currentLoggingMode() == GeoNavLoggingMode.BOTH.value){
                         if (limitedGeoNavLogFile == null) {
                             limitedGeoNavLogFile = geoNavFolder.createFile("*/csv", limitedModeFileName)
                             isLimitedLogNew = true
@@ -769,7 +769,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                     }
 
                     // handle full mode
-                    if (currentLoggingMode() == "2" || currentLoggingMode() == "3"){
+                    if (currentLoggingMode() == GeoNavLoggingMode.FULL.value || currentLoggingMode() == GeoNavLoggingMode.BOTH.value){
                         if (fullGeoNavLogFile == null) {
                             fullGeoNavLogFile = geoNavFolder.createFile("*/csv", fullModeFileName)
                             isFullLogNew = true
@@ -909,8 +909,8 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
         mInternalLocation = location
 
-        //always log location updates for verbose log
-        if (currentLoggingMode() == "2") {
+        //always log location updates for full log
+        if (currentLoggingMode() == GeoNavLoggingMode.FULL.value) {
 
             val geoNavLine = GeoNavLine(
                 startLat = location.latitude.toString(),
@@ -931,5 +931,12 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
     fun getAverageHandler(): Handler? {
         return averageHandler
+    }
+
+    enum class GeoNavLoggingMode (val value: String) {
+        OFF("0"),
+        LIMITED("1"),
+        FULL("2"),
+        BOTH("3")
     }
 }
