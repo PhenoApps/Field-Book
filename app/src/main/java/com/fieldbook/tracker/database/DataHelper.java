@@ -18,6 +18,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
@@ -34,6 +35,7 @@ import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
+import com.fieldbook.tracker.objects.SearchDialogDataModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
@@ -56,6 +58,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -298,6 +301,11 @@ public class DataHelper {
         return ObservationVariableDao.Companion.getById(id);
     }
 
+    public String getSearchQuery(CollectActivity originActivity, List<SearchDialogDataModel> dataSet) {
+        SearchQueryBuilder queryBuilder = new SearchQueryBuilder(originActivity, dataSet);
+        return queryBuilder.buildSearchQuery();
+    }
+
     /**
      * Helper function to insert user data. For example, the data entered for
      * numeric format, or date for date format The timestamp is updated within
@@ -422,8 +430,8 @@ public class DataHelper {
 //        return synced;
     }
 
-    public void setTraitObservations(Integer studyId, Observation observation) {
-        ObservationDao.Companion.insertObservation(studyId, observation);
+    public void setTraitObservations(Integer studyId, Observation observation, Map<String,String> traitIdToTypeMap) {
+        ObservationDao.Companion.insertObservation(studyId, observation, traitIdToTypeMap);
     }
 
     /**
@@ -2693,6 +2701,13 @@ public class DataHelper {
         open();
 
         return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
+    }
+
+    public String getObservationUnitPropertyByPlotId(String column, String plot_id) {
+
+        open();
+
+        return ObservationUnitPropertyDao.Companion.getObservationUnitPropertyByPlotId(column, plot_id);
     }
 
     /**

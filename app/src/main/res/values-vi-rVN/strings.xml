@@ -141,6 +141,7 @@
     <string name="main_toolbar_search">Tìm kiếm</string>
     <string name="search_dialog_add">Thêm</string>
     <string name="search_dialog_clear">Xóa</string>
+    <string name="search_dialog_search">Tìm kiếm</string>
     <string name="search_dialog_query_is_equal_to">giá trị bằng</string>
     <string name="search_dialog_query_is_not_equal_to">giá trị không bằng</string>
     <string name="search_dialog_query_contains">giá trị có chứa</string>
@@ -411,4 +412,5 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <string name="tutorial_traits_format_description">Các định dạng tính trạng khác nhau được đánh dấu bằng các biểu tượng khác nhau.</string>
     <string name="tutorial_traits_visibility_title">Hiển thị tính trạng</string>
     <string name="tutorial_traits_visibility_description">Các tính trạng có thể được vô hiệu hóa khỏi danh sách bằng cách bỏ đánh dấu trong ô.</string>
+    <string name="tutorial_main_datagrid_title">Lưới dữ liệu</string>
 </resources>
