@@ -338,6 +338,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                         if (nameCheckResult.isUnique) {
                             database.updateStudyAlias(field.exp_id, newName)
                             fieldDisplayNameTextView.text = newName
+                            field.exp_alias = newName
                             (activity as? FieldAdapterController)?.queryAndLoadFields()
                             dialog.dismiss() // Only dismiss if everything is fine
                         } else {
