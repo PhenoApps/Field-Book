@@ -155,7 +155,8 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
             if (intent != null && intent.getExtras() != null) {
 
                 String message = intent.getExtras().getString("message");
-                String size = intent.getExtras().getString("size");
+                int numLabels = intent.getExtras().getInt("numLabels", 0);
+
 
                 if (message != null) {
 
@@ -163,10 +164,10 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
                 }
 
-                if (size != null) {
-
-                    // record each print event
-                    ((CollectActivity) getContext()).insertPrintObservation(size);
+                if (numLabels > 0) {
+                    String labelNumber = String.valueOf(numLabels);
+                    // Use the number of labels printed to record each print event
+                    ((CollectActivity) getContext()).insertPrintObservation(labelNumber);
                 }
             }
         }

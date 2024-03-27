@@ -95,7 +95,7 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
                             }
 
                             intent.putExtra("message", success)
-                            intent.putExtra("size", mSize)
+                            intent.putExtra("numLabels", mLabelCommands.size)
 
                         } else if (printerStatus.isHeadOpen) {
 
