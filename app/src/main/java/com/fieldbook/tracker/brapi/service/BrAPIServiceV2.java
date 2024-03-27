@@ -23,6 +23,7 @@ import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
@@ -1248,24 +1249,19 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         trait.setMaximum("");
                     }
 
-                    trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                    if (var.getScale().getValidValues().getCategories() != null) {
+                        trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                        //For categorical traits, include label value pairs in details
+                        String details = trait.getDetails() + "\nCategories: ";
+                        details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
+                        trait.setDetails(details);
+                    }
+
                 }
                 if (var.getScale().getDataType() != null) {
                     trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getBrapiValue()));
                 } else {
                     trait.setFormat("text");
-                }
-                //For categorical traits, include label value pairs in details
-                if (trait.getFormat().equals("categorical")) {
-                    String details = trait.getDetails() + "\nCategories: ";
-                    details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
-                    trait.setDetails(details);
-
-//                    try {
-//                        trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
-//                    } catch (Exception e) {
-//                        Log.d("FieldBookError", "Error parsing trait label/value.");
-//                    }
                 }
 
             }
@@ -1400,15 +1396,17 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         DataHelper dataHelper = new DataHelper(context);
 
         String observationLevel;
-        if (selectedObservationLevel == null) observationLevel = "Plot";
-        else observationLevel = selectedObservationLevel.getObservationLevelName().substring(0, 1).toUpperCase() + selectedObservationLevel.getObservationLevelName().substring(1);
+        if (selectedObservationLevel == null) observationLevel = "plot";
+        else observationLevel = selectedObservationLevel.getObservationLevelName();
         try {
             FieldObject field = new FieldObject();
+            field.setStudy_db_id(studyDetails.getStudyDbId());
             field.setExp_name(studyDetails.getStudyName());
-            field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
+            field.setExp_alias(studyDetails.getStudyName());
             field.setExp_species(studyDetails.getCommonCropName());
             field.setCount(studyDetails.getNumberOfPlots().toString());
             field.setObservation_level(observationLevel);
+            field.setImport_format(ImportFormat.BRAPI);
 
             // Get our host url
             if (BrAPIService.getHostUrl(context) != null) {
@@ -1437,7 +1435,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             // Construct our map to check for uniques
             for (List<String> dataRow : studyDetails.getValues()) {
-                Integer idColumn = studyDetails.getAttributes().indexOf(observationLevel);
+                Integer idColumn = studyDetails.getAttributes().indexOf("ObservationUnitName");
                 checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
             }
 
@@ -1449,6 +1447,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             DataHelper.db.beginTransaction();
             // All checks finished, insert our data.
             int expId = dataHelper.createField(field, studyDetails.getAttributes());
+            field.setExp_id(expId);
 
             boolean fail = false;
             String failMessage = "";
@@ -1502,7 +1501,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             if (fail) {
                 return new BrapiControllerResponse(false, failMessage);
             } else {
-                return new BrapiControllerResponse(true, "");
+                return new BrapiControllerResponse(true, "", field);
             }
 
 

@@ -883,6 +883,8 @@ public class CollectActivity extends ThemedActivity
     @Override
     public void onPause() {
 
+        database.updateEditDate(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+
         guiThread.quit();
 
         // Backup database
@@ -1853,7 +1855,7 @@ public class CollectActivity extends ThemedActivity
                         if (found && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
 
                             int studyId = studyObj.getExp_id();
-                            String fieldName = studyObj.getExp_name();
+                            String fieldName = studyObj.getExp_alias();
 
                             String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
 
@@ -2303,7 +2305,7 @@ public class CollectActivity extends ThemedActivity
         if (isAttribute) {
 
             if (label.equals(context.getString(R.string.field_name_attribute))) {
-                String fieldName = ((CollectActivity) context).getPreferences().getString(GeneralKeys.FIELD_FILE, "");
+                String fieldName = ((CollectActivity) context).getPreferences().getString(GeneralKeys.FIELD_ALIAS, "");
                 return (fieldName == null || fieldName.isEmpty()) ? dataMissingString : fieldName;
             }
 

@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -17,19 +16,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -40,17 +31,13 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.brapi.BrapiExportActivity;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
-import com.fieldbook.tracker.brapi.BrapiAuthDialog;
-import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
-import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
-import com.fieldbook.tracker.utilities.CSVWriter;
+import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.FileUtil;
@@ -60,7 +47,6 @@ import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
-import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
@@ -75,16 +61,8 @@ import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 import org.apache.commons.lang3.ArrayUtils;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -114,11 +92,9 @@ public class ConfigActivity extends ThemedActivity {
 
     private static final int REQUEST_BARCODE = 100;
     private final static String TAG = ConfigActivity.class.getSimpleName();
-    private final int PERMISSIONS_REQUEST_EXPORT_DATA = 9990;
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
-    private final int PERMISSIONS_REQUEST_MAKE_DIRS = 9930;
     private final int REQUEST_STORAGE_DEFINER = 104;
-    private final Runnable exportData = () -> new ExportDataTask().execute(0);
+//    private final Runnable exportData = () -> new ExportDataTask().execute(0);
     @Inject
     public DataHelper database;
     @Inject
@@ -128,30 +104,18 @@ public class ConfigActivity extends ThemedActivity {
     VerifyPersonHelper verifyPersonHelper;
     @Inject
     SharedPreferences preferences;
+    @Inject
+    public ExportUtil exportUtil;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     ListView settingsList;
-    private AlertDialog saveDialog;
-    private EditText exportFile;
-    private String exportFileString = "";
-    private String fFile;
-    private CheckBox checkDB;
-    private CheckBox checkExcel;
-    private Boolean checkDbBool = false;
-    private Boolean checkExcelBool = false;
-    private RadioButton onlyUnique;
-    private RadioButton allColumns;
-    private RadioButton allTraits;
-    private RadioButton activeTraits;
-    private ArrayList<String> newRange;
-    private ArrayList<TraitObject> exportTrait;
     private Menu systemMenu;
     //barcode search fab
     private FloatingActionButton barcodeSearchFab;
     private boolean mlkitEnabled;
 
     private void invokeDatabaseImport(DocumentFile doc) {
-
+        database.open();
         mHandler.post(() -> {
             new ImportDBTask(doc).execute(0);
         });
@@ -264,6 +228,7 @@ public class ConfigActivity extends ThemedActivity {
                     REQUEST_STORAGE_DEFINER);
         } else {
 
+        verifyPersonHelper.updateLastOpenedTime();
             ManufacturerUtil.Companion.eInkDeviceSetup(this, prefs, getResources(), () -> {
 
                 recreate();
@@ -350,10 +315,16 @@ public class ConfigActivity extends ThemedActivity {
             Intent intent = new Intent();
             switch (position) {
                 case 0:
-                    intent.setClassName(ConfigActivity.this,
-                            FieldEditorActivity.class.getName());
+                    if (preferences.getBoolean(GeneralKeys.INDIVIDUAL_FIELD_PAGE_ENABLED, false)) {
+                        Log.d("Config", "individual field enabled");
+                        intent.setClassName(ConfigActivity.this,
+                                FieldEditorActivity.class.getName());
+                    } else {
+                        Log.d("Config", "individual field disabled");
+                        intent.setClassName(ConfigActivity.this,
+                                FieldEditorActivityOld.class.getName());
+                    }
                     startActivity(intent);
-
                     break;
                 case 1:
                     intent.setClassName(ConfigActivity.this,
@@ -362,34 +333,12 @@ public class ConfigActivity extends ThemedActivity {
 
                     break;
                 case 2:
-
                     if (checkTraitsExist() < 0) return;
-
                     collectDataFilePermission();
                     break;
                 case 3:
-
                     if (checkTraitsExist() < 0) return;
-
-                    String exporter = preferences.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "");
-
-                    switch (exporter) {
-                        case "local":
-                            exportPermission();
-                            break;
-                        case "brapi":
-                            exportBrAPI();
-                            break;
-                        default:
-                            // Skip dialog if BrAPI is disabled
-                            if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
-                                showExportDialog();
-                            } else {
-                                exportPermission();
-                            }
-                            break;
-                    }
-
+                    exportUtil.exportActiveField();
                     break;
                 case 4:
                     intent.setClassName(ConfigActivity.this,
@@ -456,76 +405,6 @@ public class ConfigActivity extends ThemedActivity {
         }
 
         return 1;
-    }
-
-    private String getOverwriteFile(String filename) {
-        String[] fileArray;
-
-        DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_field_export);
-
-        if (exportDir != null && exportDir.exists()) {
-
-            DocumentFile[] files = exportDir.listFiles();
-
-            fileArray = new String[files.length];
-            for (int i = 0; i < files.length; ++i) {
-                fileArray[i] = files[i].getName();
-            }
-
-            if (filename.contains(fFile)) {
-                for (String aFileArray : fileArray) {
-
-                    DocumentFile oldDoc = BaseDocumentTreeUtil.Companion.getFile(this, R.string.dir_field_export, aFileArray);
-                    DocumentFile newDoc = BaseDocumentTreeUtil.Companion.getFile(this, R.string.dir_archive, aFileArray);
-
-                    if (checkDbBool) {
-                        if (aFileArray.contains(fFile) && aFileArray.contains("database")) {
-                            if (newDoc != null && oldDoc != null) {
-                                if (newDoc.getName() != null) {
-                                    oldDoc.renameTo(newDoc.getName());
-                                }
-                            }
-                        }
-                    }
-
-                    if (checkExcelBool) {
-                        if (aFileArray.contains(fFile) && aFileArray.contains("table")) {
-                            if (newDoc != null && oldDoc != null) {
-                                if (newDoc.getName() != null) {
-                                    oldDoc.renameTo(newDoc.getName());
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
-        return filename;
-    }
-
-    private void showCitationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
-
-        builder.setTitle(getString(R.string.citation_title))
-                .setMessage(getString(R.string.citation_string) + "\n\n" + getString(R.string.citation_text))
-                .setCancelable(false);
-
-        builder.setPositiveButton(getString(R.string.dialog_ok), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-
-                dialog.dismiss();
-                invalidateOptionsMenu();
-                Intent intent = new Intent();
-                intent.setClassName(ConfigActivity.this,
-                        ConfigActivity.class.getName());
-                startActivity(intent);
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
     }
 
     private void showTipsDialog() {
@@ -596,207 +475,6 @@ public class ConfigActivity extends ThemedActivity {
         return n;
     }
 
-    private void showExportDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
-        ListView exportSourceList = layout.findViewById(R.id.myList);
-
-        String[] exportArray = new String[2];
-        exportArray[0] = getString(R.string.export_source_local);
-        exportArray[1] = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, exportArray);
-        exportSourceList.setAdapter(adapter);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        builder.setTitle(R.string.export_dialog_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setPositiveButton(getString(R.string.dialog_cancel), (dialogInterface, i) -> { /* do nothing */ });
-
-        final AlertDialog exportDialog = builder.create();
-        exportDialog.show();
-
-        exportSourceList.setOnItemClickListener((av, arg1, which, arg3) -> {
-            switch (which) {
-                case 0:
-                    exportPermission();
-                    break;
-                case 1:
-                    exportBrAPI();
-                    break;
-            }
-            exportDialog.dismiss();
-        });
-    }
-
-    private void exportBrAPI() {
-        // Get our active field
-        int activeFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-        FieldObject activeField;
-        if (activeFieldId != -1) {
-            activeField = database.getFieldObject(activeFieldId);
-        } else {
-            activeField = null;
-            Toast.makeText(ConfigActivity.this, R.string.warning_field_missing, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        // Check that our field is a brapi field
-        if (activeField.getExp_source() == null ||
-                activeField.getExp_source().equals("") ||
-                activeField.getExp_source().equals("local")) {
-
-            Toast.makeText(ConfigActivity.this, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        // Check that the field data source is the same as the current target
-        if (!BrAPIService.checkMatchBrapiUrl(ConfigActivity.this, activeField.getExp_source())) {
-
-            String hostURL = BrAPIService.getHostUrl(ConfigActivity.this);
-            String badSourceMsg = getResources().getString(R.string.brapi_field_non_matching_sources, activeField.getExp_source(), hostURL);
-            Toast.makeText(ConfigActivity.this, badSourceMsg, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        // Check if we are authorized and force authorization if not.
-        if (BrAPIService.isLoggedIn(getApplicationContext())) {
-            Intent exportIntent = new Intent(ConfigActivity.this, BrapiExportActivity.class);
-            startActivity(exportIntent);
-        } else {
-            // Show our login dialog
-            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this);
-            brapiAuth.show();
-        }
-    }
-
-    private void showSaveDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_export, null);
-
-        exportFile = layout.findViewById(R.id.fileName);
-        checkDB = layout.findViewById(R.id.formatDB);
-        checkExcel = layout.findViewById(R.id.formatExcel);
-        allColumns = layout.findViewById(R.id.allColumns);
-        onlyUnique = layout.findViewById(R.id.onlyUnique);
-        allTraits = layout.findViewById(R.id.allTraits);
-        activeTraits = layout.findViewById(R.id.activeTraits);
-        CheckBox checkOverwrite = layout.findViewById(R.id.overwrite);
-        CheckBox checkBundle = layout.findViewById(R.id.dialog_export_bundle_data_cb);
-
-        checkBundle.setChecked(preferences.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false));
-        checkOverwrite.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false));
-        checkDB.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABSE, false));
-        checkExcel.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, false));
-        onlyUnique.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, false));
-        allColumns.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, false));
-        allTraits.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_TRAITS_ALL, false));
-        activeTraits.setChecked(preferences.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, false));
-
-        SimpleDateFormat timeStamp = new SimpleDateFormat(
-                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
-
-        fFile = preferences.getString(GeneralKeys.FIELD_FILE, "");
-
-        if (fFile.length() > 4 & fFile.toLowerCase().endsWith(".csv")) {
-            fFile = fFile.substring(0, fFile.length() - 4);
-        }
-
-        String exportString = timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile;
-        exportFile.setText(exportString);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.settings_export)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setPositiveButton(getString(R.string.dialog_save), null);
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, i) -> dialog.dismiss());
-
-        saveDialog = builder.create();
-        saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        saveDialog.show();
-
-        android.view.WindowManager.LayoutParams params2 = saveDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.MATCH_PARENT;
-        saveDialog.getWindow().setAttributes(params2);
-
-        // Override positive button so it doesnt automatically dismiss dialog
-        Button positiveButton = saveDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        positiveButton.setOnClickListener(arg0 -> {
-            if (!checkDB.isChecked() & !checkExcel.isChecked()) {
-                Utils.makeToast(getApplicationContext(), getString(R.string.export_error_missing_format));
-                return;
-            }
-
-            if (!onlyUnique.isChecked() & !allColumns.isChecked()) {
-                Utils.makeToast(getApplicationContext(), getString(R.string.export_error_missing_column));
-                return;
-            }
-
-            if (!activeTraits.isChecked() & !allTraits.isChecked()) {
-                Utils.makeToast(getApplicationContext(), getString(R.string.export_error_missing_trait));
-                return;
-            }
-
-            Editor ed = preferences.edit();
-            ed.putBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, onlyUnique.isChecked());
-            ed.putBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, allColumns.isChecked());
-            ed.putBoolean(GeneralKeys.EXPORT_TRAITS_ALL, allTraits.isChecked());
-            ed.putBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, activeTraits.isChecked());
-            ed.putBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, checkExcel.isChecked());
-            ed.putBoolean(GeneralKeys.EXPORT_FORMAT_DATABSE, checkDB.isChecked());
-            ed.putBoolean(GeneralKeys.EXPORT_OVERWRITE, checkOverwrite.isChecked());
-            ed.putBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, checkBundle.isChecked());
-            ed.apply();
-
-            BaseDocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
-
-            newRange = new ArrayList<>();
-
-            if (onlyUnique.isChecked()) {
-                newRange.add(preferences.getString(GeneralKeys.UNIQUE_NAME, ""));
-            }
-
-            if (allColumns.isChecked()) {
-                String[] columns = database.getRangeColumns();
-                Collections.addAll(newRange, columns);
-            }
-
-            exportTrait = new ArrayList<>();
-
-            if (activeTraits.isChecked()) {
-                ArrayList<TraitObject> traits = database.getAllTraitObjects();
-                for (TraitObject t : traits) {
-                    if (t.getVisible()) {
-                        exportTrait.add(t);
-                    }
-                }
-            }
-
-            if (allTraits.isChecked()) {
-                exportTrait.addAll(database.getAllTraitObjects());
-            }
-
-            checkDbBool = checkDB.isChecked();
-            checkExcelBool = checkExcel.isChecked();
-
-            if (preferences.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
-                exportFileString = getOverwriteFile(exportFile.getText().toString());
-            } else {
-                exportFileString = exportFile.getText().toString();
-            }
-
-            saveDialog.dismiss();
-            mHandler.post(exportData);
-        });
-    }
-
     private void resolveFuzzySearchResult(FieldObject f, @Nullable String plotId) {
 
         soundHelper.playCelebrate();
@@ -827,10 +505,9 @@ public class ConfigActivity extends ThemedActivity {
     @Nullable
     private FieldObject searchStudiesForBarcode(String barcode) {
 
-        // first, search to try and match study alias (brapi stores study_db_id here)
         ArrayList<FieldObject> fields = database.getAllFieldObjects();
 
-        // start by searching for alias
+        // first, search to try and match study alias
         for (FieldObject f : fields) {
 
             if (f != null && f.getExp_alias() != null && f.getExp_alias().equals(barcode)) {
@@ -933,19 +610,6 @@ public class ConfigActivity extends ThemedActivity {
                 }
             }
         }
-    }
-
-    @AfterPermissionGranted(PERMISSIONS_REQUEST_EXPORT_DATA)
-    private void exportPermission() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            if (EasyPermissions.hasPermissions(this, perms)) {
-                showSaveDialog();
-            } else {
-                EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
-                        PERMISSIONS_REQUEST_EXPORT_DATA, perms);
-            }
-        } else showSaveDialog();
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_TRAIT_DATA)
@@ -1093,269 +757,6 @@ public class ConfigActivity extends ThemedActivity {
 
         fieldSwitcher.switchField(studyId);
 
-    }
-
-    private class ExportDataTask extends AsyncTask<Integer, Integer, Integer> {
-        boolean fail;
-        boolean noData = false;
-
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            fail = false;
-
-            dialog = new ProgressDialog(ConfigActivity.this);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html
-                    .fromHtml(getString(R.string.export_progress)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-
-            //flag telling if the user checked the media bundle option
-            boolean bundleChecked = preferences.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false);
-
-            newRange.clear();
-
-            if (onlyUnique.isChecked()) {
-                newRange.add(preferences.getString(GeneralKeys.UNIQUE_NAME, ""));
-            }
-
-            if (allColumns.isChecked()) {
-                String[] columns = database.getRangeColumns();
-                Collections.addAll(newRange, columns);
-            }
-
-            String[] newRanges = newRange.toArray(new String[newRange.size()]);
-
-            // Retrieves the data needed for export
-            Cursor exportData = database.getExportDBData(newRanges, exportTrait);
-
-            for (String i : newRanges) {
-                Log.i("Field Book : Ranges : ", i);
-            }
-
-            for (TraitObject j : exportTrait) {
-                Log.i("Field Book : Traits : ", j.getName());
-            }
-
-            if (exportData.getCount() == 0) {
-                noData = true;
-                return (0);
-            }
-
-            //separate files for table and database
-            DocumentFile dbFile = null;
-            DocumentFile tableFile = null;
-
-            ArrayList<TraitObject> traits = database.getAllTraitObjects();
-
-            //check if export database has been selected
-            if (checkDbBool) {
-                if (exportData.getCount() > 0) {
-                    try {
-
-                        String exportFileName = exportFileString + "_database.csv";
-
-                        dbFile = BaseDocumentTreeUtil.Companion.getFile(ConfigActivity.this, R.string.dir_field_export, exportFileName);
-
-                        DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
-
-                        if (dbFile != null && dbFile.exists()) {
-                            dbFile.delete();
-                        }
-                        if (exportDir != null && exportDir.exists()) {
-                            dbFile = exportDir.createFile("*/*", exportFileName);
-                        }
-
-                        OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(ConfigActivity.this, R.string.dir_field_export, exportFileName);
-
-                        if (output != null) {
-                            OutputStreamWriter fw = new OutputStreamWriter(output);
-                            CSVWriter csvWriter = new CSVWriter(fw, exportData);
-                            csvWriter.writeDatabaseFormat(newRange);
-
-                            System.out.println(exportFileString);
-                        }
-
-                    } catch (Exception e) {
-                        fail = true;
-                    }
-                }
-            }
-
-            //check if export table has been selected
-            if (checkExcelBool) {
-                if (exportData.getCount() > 0) {
-                    try {
-
-                        String tableFileName = exportFileString + "_table.csv";
-
-                        tableFile = BaseDocumentTreeUtil.Companion.getFile(ConfigActivity.this, R.string.dir_field_export, tableFileName);
-
-                        DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
-
-                        if (tableFile != null && tableFile.exists()) {
-                            tableFile.delete();
-                        }
-                        if (exportDir != null && exportDir.exists()) {
-                            tableFile = exportDir.createFile("*/*", tableFileName);
-                        }
-
-                        OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(ConfigActivity.this, R.string.dir_field_export, tableFileName);
-                        OutputStreamWriter fw = new OutputStreamWriter(output);
-
-                        exportData = database.convertDatabaseToTable(newRanges, exportTrait);
-                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
-
-                        ArrayList<String> labels = new ArrayList<>(Arrays.asList(newRanges));
-                        for (TraitObject t : exportTrait) labels.add(t.getName());
-
-                        csvWriter.writeTableFormat(labels.toArray(new String[]{}), newRanges.length, traits);
-
-                    } catch (Exception e) {
-                        fail = true;
-                    }
-                }
-            }
-
-            //if the export did not fail, create a zip file with the exported files
-            if (!fail) {
-
-                String zipFileName = exportFileString + ".zip";
-
-                //if bundle is checked, zip the files with the media dir for the given study
-                if (bundleChecked) {
-
-                    //query selected study to get the study name
-                    int studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
-
-                    //study name is the same as the media directory in plot_data
-                    FieldObject fieldObject = database.getFieldObject(studyId);
-
-                    if (fieldObject != null) {
-
-                        String studyName = fieldObject.getExp_name();
-
-                        //create media dir directory from fieldBook/plot_data/studyName path
-                        DocumentFile mediaDir = BaseDocumentTreeUtil.Companion.getFile(
-                                ConfigActivity.this, R.string.dir_plot_data, studyName);
-
-                        if (mediaDir != null && mediaDir.exists()) {
-
-                            //create zip file output from user created name
-                            DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(
-                                    ConfigActivity.this, R.string.dir_field_export);
-
-                            if (exportDir != null && exportDir.exists()) {
-
-                                DocumentFile zipFile = exportDir.createFile("*/*", zipFileName);
-
-                                OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(
-                                        ConfigActivity.this, R.string.dir_field_export, zipFileName);
-
-                                if (output != null) {
-
-                                    //add media folders and database or export files to zip file
-                                    ArrayList<DocumentFile> paths = new ArrayList<>();
-
-                                    if (dbFile != null) paths.add(dbFile);
-                                    if (tableFile != null) paths.add(tableFile);
-                                    paths.add(mediaDir);
-
-                                    zipFiles(ConfigActivity.this, paths, output);
-
-                                    if (dbFile != null && dbFile.exists()) dbFile.delete();
-                                    if (tableFile != null && tableFile.exists()) tableFile.delete();
-
-                                    //share the zip file
-                                    FileUtil.shareFile(ConfigActivity.this, preferences, zipFile);
-                                }
-                            }
-                        }
-                    }
-
-                } else { //if not bundling media data, create zip of the table or database files
-
-                    DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(
-                            ConfigActivity.this, R.string.dir_field_export);
-
-                    if (exportDir != null && exportDir.exists()) {
-
-                        if (checkDbBool && checkExcelBool) {
-
-                            DocumentFile zipFile = exportDir.createFile("*/*", zipFileName);
-
-                            OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(
-                                    ConfigActivity.this, R.string.dir_field_export, zipFileName);
-
-                            ArrayList<DocumentFile> paths = new ArrayList<>();
-
-                            if (dbFile != null) paths.add(dbFile);
-                            if (tableFile != null) paths.add(tableFile);
-
-                            zipFiles(ConfigActivity.this, paths, output);
-
-                            if (dbFile != null) dbFile.delete();
-                            if (tableFile != null) tableFile.delete();
-
-                            FileUtil.shareFile(ConfigActivity.this, preferences, zipFile);
-
-                        } else if (checkDbBool) {
-
-                            FileUtil.shareFile(ConfigActivity.this, preferences, dbFile);
-
-                        } else if (checkExcelBool) {
-
-                            FileUtil.shareFile(ConfigActivity.this, preferences, tableFile);
-                        }
-                    }
-                }
-            }
-
-            return 0;
-        }
-
-        private void zipFiles(Context ctx, ArrayList<DocumentFile> paths, OutputStream outputStream) {
-
-            try {
-
-                ZipUtil.Companion.zip(ctx, paths.toArray(new DocumentFile[]{}), outputStream);
-
-                outputStream.close();
-
-            } catch (IOException io) {
-
-                io.printStackTrace();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            newRange.clear();
-
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
-
-            if (!fail) {
-                showCitationDialog();
-                database.updateExpTable(false, false, true, preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-            }
-
-            if (fail) {
-                Utils.makeToast(getApplicationContext(), getString(R.string.export_error_general));
-            }
-
-            if (noData) {
-                Utils.makeToast(getApplicationContext(), getString(R.string.export_error_data_missing));
-            }
-        }
     }
 
     private class ImportDBTask extends AsyncTask<Integer, Integer, Integer> {

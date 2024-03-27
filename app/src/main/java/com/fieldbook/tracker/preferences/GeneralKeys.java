@@ -120,6 +120,8 @@ public class GeneralKeys {
 
     public static final String ENABLE_FIELD_AUDIO = "com.tracker.fieldbook.preferences.keys.enable_field_audio";
 
+    public static final String INDIVIDUAL_FIELD_PAGE_ENABLED = "com.tracker.fieldbook.preferences.keys.enable_individual_field_page";
+
     public static final String LAST_TIME_OPENED = "LastTimeAppOpened";
     public static final String ASKED_SINCE_OPENED = "AskedSinceAppOpened";
     public static final String VERIFY_USER = "VerifyUserEvery24Hours";
@@ -186,8 +188,11 @@ public class GeneralKeys {
     public static final String EXPORT_TRAITS_ALL = "EXPORT_TRAITS_ALL";
     public static final String EXPORT_TRAITS_ACTIVE = "EXPORT_TRAITS_ACTIVE";
     public static final String EXPORT_FORMAT_TABLE = "EXPORT_FORMAT_TABLE";
-    public static final String EXPORT_FORMAT_DATABSE = "EXPORT_FORMAT_DATABASE";
+    public static final String EXPORT_FORMAT_DATABASE = "EXPORT_FORMAT_DATABASE";
     public static final String EXPORT_OVERWRITE = "Overwrite";
+
+    // Field detail
+    public static final String FIELD_DETAIL_COLLAPSED = "FIELD_DETAIL_COLLAPSED";
 
     //Data grid
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
