@@ -30,6 +30,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
+import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.database.DataHelper;
@@ -51,6 +52,7 @@ import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -153,6 +155,14 @@ public class ConfigActivity extends ThemedActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
+        if (BuildConfig.DEBUG) {
+            instance.deleteUnsentReports();
+            instance.setCrashlyticsCollectionEnabled(false);
+        } else {
+            instance.setCrashlyticsCollectionEnabled(true);
+        }
 
         //important: this must be called before super.onCreate or else you get a black flicker
         AppLanguageUtil.Companion.refreshAppText(this);
