@@ -75,6 +75,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private static final String DIALOG_FRAGMENT_TAG = "com.tracker.fieldbook.preferences.BRAPI_DIALOG_FRAGMENT";
 
     private Context context;
+    private Activity activity;
     private PreferenceCategory brapiPrefCategory;
     private Preference brapiLogoutButton;
     private Menu mMenu;
@@ -82,6 +83,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private NeutralButtonEditTextDialog brapiDisplayName;
     private NeutralButtonEditTextDialog brapiOIDCURLPreference;
     private ListPreference brapiOIDCFlow;
+    private NeutralButtonEditTextDialog brapiOIDCClientIdPreference;
+    private NeutralButtonEditTextDialog brapiOIDCScopePreference;
 
     //old base url must be in memory now, since NeutralEditText preference updates preferences
     private String oldBaseUrl = "";
@@ -95,7 +98,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         super.onAttach(context);
         // Occurs before onCreate function. We get the context this way.
         BrapiPreferencesFragment.this.context = context;
+    }
 
+    @Override
+    public void onAttach(@NonNull Activity activity) {
+        super.onAttach(activity);
+        BrapiPreferencesFragment.this.activity = activity;
     }
 
     @Override
@@ -164,14 +172,22 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             brapiOIDCFlow.setOnPreferenceChangeListener(this);
         }
 
+        brapiOIDCClientIdPreference = findPreference(GeneralKeys.BRAPI_OIDC_CLIENT_ID);
+        brapiOIDCScopePreference = findPreference(GeneralKeys.BRAPI_OIDC_SCOPE);
+
         //set saved urls, default to the test server
         String url = preferences.getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
         String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
         String oidcUrl = preferences.getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
+        String clientId = preferences.getString(GeneralKeys.BRAPI_OIDC_CLIENT_ID, getString(R.string.brapi_oidc_clientid_default));
+        String scope = preferences.getString(GeneralKeys.BRAPI_OIDC_SCOPE, getString(R.string.brapi_oidc_scope_default));
+
         oldBaseUrl = url;
         brapiURLPreference.setText(url);
         brapiDisplayName.setText(displayName);
         brapiOIDCURLPreference.setText(oidcUrl);
+        brapiOIDCClientIdPreference.setText(clientId);
+        brapiOIDCScopePreference.setText(scope);
 
         //set logout button
         if (brapiLogoutButton != null) {
@@ -268,12 +284,16 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             config.setAuthFlow(preferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)));
             config.setOidcUrl(preferences.getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default)));
             config.setCatDisplay(preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value"));
+            config.setClientId(preferences.getString(GeneralKeys.BRAPI_OIDC_CLIENT_ID, getString(R.string.brapi_oidc_clientid_default)));
+            config.setScope(preferences.getString(GeneralKeys.BRAPI_OIDC_SCOPE, getString(R.string.brapi_oidc_scope_default)));
 
             Gson gson = new Gson();
             String jsonConfig = gson.toJson(config);
 
             DisplayMetrics displayMetrics = new DisplayMetrics();
-            ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+            activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
             int screenWidth = displayMetrics.widthPixels;
 
             // Set the QR Code size to be 80% of the screen width
@@ -468,7 +488,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     text = (text == null || text.isEmpty()) ? getString(R.string.export_source_brapi) : text;
                     brapiDisplayName.setText(text);
                     onPreferenceChange(brapiDisplayName, text);
-                } else {
+                } else if (preference.getKey().equals(brapiOIDCURLPreference.getKey())) {
                     preferences.edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
                     brapiOIDCURLPreference.setText(text);
                 }
@@ -723,6 +743,17 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize());
                     ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli());
                     ((ListPreference)findPreference(GeneralKeys.LABELVAL_CUSTOMIZE)).setValue(brAPIConfig.getCatDisplay());
+
+                    String clientId = brAPIConfig.getClientId();
+                    String scope = brAPIConfig.getScope();
+
+                    if (clientId != null) {
+                        ((NeutralButtonEditTextDialog)findPreference(GeneralKeys.BRAPI_OIDC_CLIENT_ID)).setText(clientId);
+                    }
+
+                    if (scope != null) {
+                        ((NeutralButtonEditTextDialog)findPreference(GeneralKeys.BRAPI_OIDC_SCOPE)).setText(scope);
+                    }
 
                     String oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_implicit);
                     String codeFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);

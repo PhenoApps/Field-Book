@@ -21,6 +21,10 @@ public class BrAPIConfig {
     private String oidcUrl;
     @SerializedName("cat")
     private String catDisplay;
+    @SerializedName("clientId")
+    private String clientId;
+    @SerializedName("scope")
+    private String scope;
 
     public String getUrl() {
         return url;
@@ -94,6 +98,22 @@ public class BrAPIConfig {
         this.catDisplay = catDisplay;
     }
 
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -104,11 +124,11 @@ public class BrAPIConfig {
         }
         BrAPIConfig that = (BrAPIConfig) o;
         return pageSize.equals(that.pageSize) && chunkSize.equals(that.chunkSize) && serverTimeoutMilli.equals(that.serverTimeoutMilli) && url.equals(that.url) && name.equals(that.name) && version.equals(that.version) && authFlow.equals(that.authFlow) && oidcUrl.equals(
-                that.oidcUrl) && catDisplay.equals(that.catDisplay);
+                that.oidcUrl) && catDisplay.equals(that.catDisplay) && clientId.equals(that.clientId) && scope.equals(that.scope);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(url, name, version, pageSize, chunkSize, serverTimeoutMilli, authFlow, oidcUrl, catDisplay);
+        return Objects.hash(url, name, version, pageSize, chunkSize, serverTimeoutMilli, authFlow, oidcUrl, catDisplay, clientId, scope);
     }
 }
