@@ -35,6 +35,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">দিয়ে দেয়া</string>
     <!-- Delete -->
     <string name="fields_delete_study">ক্ষেত্র মুছে ফেলুন</string>
     <string name="fields_delete_study_confirmation">আপনি কি নিশ্চিত যে আপনি ক্ষেত্রটি মুছে ফেলতে চান? এটি ক্ষেত্রের সাথে সম্পৃক্ত সমস্ত উপাত্তও মুছে দিবে।</string>
@@ -48,7 +50,8 @@
     <string name="fields_study_exists_message">এ নামের ক্ষেত্র ইতিমধ্যেই বিদ্যমান। আপনি কি বিদ্যমান ক্ষেত্রের উপরে লিখতে চান?</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_sort_title">বাছাই করা</string>
