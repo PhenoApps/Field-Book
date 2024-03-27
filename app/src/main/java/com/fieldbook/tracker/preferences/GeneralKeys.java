@@ -131,6 +131,7 @@ public class GeneralKeys {
     public static final String TRAITS_EXPORTED = "TraitsExported";
     public static final String ALL_TRAITS_VISIBLE = "allTraitsVisible";
     public static final String LAST_USED_TRAIT = "com.fieldbook.tracker.LAST_USED_TRAIT";
+    public static final String LAST_USED_RESOURCE_FILE = "com.fieldbook.tracker.LAST_USED_RESOURCE_FILE";
 
     //themes
     public static final String SAVED_DATA_COLOR = "SAVED_DATA_COLOR";
