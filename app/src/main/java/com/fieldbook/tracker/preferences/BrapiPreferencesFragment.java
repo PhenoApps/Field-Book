@@ -34,6 +34,7 @@ import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.activities.ScannerActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.objects.BrAPIConfig;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.google.gson.Gson;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -47,6 +48,8 @@ import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialogFragme
 
 import java.util.Arrays;
 import java.util.List;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 import javax.inject.Inject;
 
@@ -194,16 +197,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         Preference brapiServerBarcode = findPreference("brapi_server_barcode");
         if (brapiServerBarcode != null) {
             brapiServerBarcode.setOnPreferenceClickListener(preference -> {
-                if(mlkitEnabled) {
-                    ScannerActivity.Companion.requestCameraAndStartScanner(getContext(), IntentIntegrator.REQUEST_CODE, null, null, null);
-                }
-                else {
-                    new IntentIntegrator(getActivity())
-                            .setPrompt(getString(R.string.barcode_scanner_text))
-                            .setBeepEnabled(true)
-                            .setRequestCode(IntentIntegrator.REQUEST_CODE)
-                            .initiateScan();
-                }
+                startBarcodeScan(IntentIntegrator.REQUEST_CODE);
                 return true;
             });
         }
@@ -218,14 +212,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                         .setItems(new String[]{getString(R.string.preferences_brapi_barcode_config_scan), getString(R.string.preferences_brapi_barcode_config_share)}, (dialog, which) -> {
                             switch (which) {
                                 case 0: // Scan QR Code to import settings
-                                    new IntentIntegrator(getActivity())
-                                            .setPrompt(getString(R.string.barcode_scanner_text))
-                                            .setBeepEnabled(true)
-                                            .setRequestCode(REQUEST_BARCODE_SCAN_BRAPI_CONFIG)
-                                            .initiateScan();
+                                    startBarcodeScan(REQUEST_BARCODE_SCAN_BRAPI_CONFIG);
                                     break;
                                 case 1: // Generate QR Code for sharing settings
-                                    generateQRCodeFromPreferences();
+                                    if (getActivity() != null) {
+                                        generateQRCodeFromPreferences(getActivity());
+                                    }
                                     break;
                             }
                         })
@@ -256,7 +248,21 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
     }
 
-    private void generateQRCodeFromPreferences() {
+    private void startBarcodeScan(int requestCode) {
+        if (mlkitEnabled) {
+            if (getActivity() != null) {
+                ScannerActivity.Companion.requestCameraAndStartScanner(getActivity(), requestCode, null, null, null);
+            }
+        } else {
+            new IntentIntegrator(getActivity())
+                    .setPrompt(getString(R.string.barcode_scanner_text))
+                    .setBeepEnabled(true)
+                    .setRequestCode(requestCode)
+                    .initiateScan();
+        }
+    }
+
+    private void generateQRCodeFromPreferences(Activity act) {
         try {
             BrAPIConfig config = new BrAPIConfig();
             config.setUrl(preferences.getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default)));
@@ -273,7 +279,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             String jsonConfig = gson.toJson(config);
 
             DisplayMetrics displayMetrics = new DisplayMetrics();
-            ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            act.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             int screenWidth = displayMetrics.widthPixels;
 
             // Set the QR Code size to be 80% of the screen width
@@ -295,7 +301,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setAdjustViewBounds(true);
 
-            new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+            new AlertDialog.Builder(act, R.style.AppAlertDialog)
                     .setTitle(getString(R.string.preferences_brapi_barcode_config_dialog_title))
                     .setView(imageView)
                     .setPositiveButton(getString(R.string.dialog_close), null)
@@ -422,32 +428,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 //neutral edit text callback
                 //change request code for brapi url vs oidc url
                 if (preference.getKey().equals(brapiURLPreference.getKey())) {
-                    if(mlkitEnabled) {
-                        ScannerActivity.Companion.requestCameraAndStartScanner(getContext(), REQUEST_BARCODE_SCAN_BASE_URL, null, null, null);
-                    }
-                    else {
-                        new IntentIntegrator(getActivity())
-                                .setPrompt(getString(R.string.barcode_scanner_text))
-                                .setBeepEnabled(false)
-                                .setRequestCode(REQUEST_BARCODE_SCAN_BASE_URL)
-                                .initiateScan();
-                    }
+                    startBarcodeScan(REQUEST_BARCODE_SCAN_BASE_URL);
                 } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
                     text = oldBaseUrl.replaceAll("https?://(?:www\\.)?(.*?)(?:/.*)?$", "$1");
                     brapiDisplayName.setText(text);
                     onPreferenceChange(brapiDisplayName, text);
                 } else {
                     preferences.edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
-                    if(mlkitEnabled) {
-                        ScannerActivity.Companion.requestCameraAndStartScanner(getContext(), REQUEST_BARCODE_SCAN_OIDC_URL, null, null, null);
-                    }
-                    else {
-                        new IntentIntegrator(getActivity())
-                                .setPrompt(getString(R.string.barcode_scanner_text))
-                                .setBeepEnabled(false)
-                                .setRequestCode(REQUEST_BARCODE_SCAN_OIDC_URL)
-                                .initiateScan();
-                    }
+                    startBarcodeScan(REQUEST_BARCODE_SCAN_OIDC_URL);
                 }
 
                 if (dialog != null)
@@ -664,80 +652,95 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
     }
 
+    private boolean isValidUrl(String url) {
+        try {
+            URL obj = new URL(url);
+            return obj.getProtocol().equals("http") || obj.getProtocol().equals("https");
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "Invalid URL: " + url, e);
+            return false;
+        }
+    }
+
+    private void handleScannedData(String scannedData) {
+        if (JsonUtil.Companion.isJsonValid(scannedData)) {
+            // Process as JSON config
+            Log.d(TAG, "onActivityResult: config data received: " + scannedData);
+            BrAPIConfig brAPIConfig = new Gson().fromJson(scannedData, BrAPIConfig.class);
+
+            String brapiVersion = getString(R.string.preferences_brapi_version_v2);
+            if("v1".equalsIgnoreCase(brAPIConfig.getVersion())) {
+                brapiVersion = getString(R.string.preferences_brapi_version_v1);
+            }
+            ((ListPreference)findPreference(GeneralKeys.BRAPI_VERSION)).setValue(brapiVersion);
+            ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_PAGE_SIZE)).setText(brAPIConfig.getPageSize());
+            ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize());
+            ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli());
+            ((ListPreference)findPreference(GeneralKeys.LABELVAL_CUSTOMIZE)).setValue(brAPIConfig.getCatDisplay());
+
+            String oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_implicit);
+            String codeFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);
+            if(codeFlow.equalsIgnoreCase(brAPIConfig.getAuthFlow())) {
+                oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);
+            }
+
+            setServer(brAPIConfig.getUrl(), brAPIConfig.getName(), brAPIConfig.getOidcUrl(), oidcFlow);
+        } else if (isValidUrl(scannedData)) {
+            updateUrls(scannedData);
+            brapiAuth();
+        } else {
+            // Neither JSON nor valid URL, show error message
+            showErrorDialog("Scanned data "+scannedData+" is neither a valid URL nor a valid QR-encoded BrAPI config object.");
+        }
+    }
+
+    private void showErrorDialog(String message) {
+        new AlertDialog.Builder(this.getActivity())
+                .setTitle(R.string.preferences_brapi_server_scan_error)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case IntentIntegrator.REQUEST_CODE:
-                String barcodeResult;
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            String scannedData = null;
+            // Check if the result is from a barcode scan
+            if (requestCode == REQUEST_BARCODE_SCAN_BASE_URL ||
+                    requestCode == REQUEST_BARCODE_SCAN_OIDC_URL ||
+                    requestCode == REQUEST_BARCODE_SCAN_BRAPI_CONFIG ||
+                    requestCode == IntentIntegrator.REQUEST_CODE) {
                 if (mlkitEnabled) {
-                    barcodeResult = data.getStringExtra("barcode");
+                    scannedData = data.getStringExtra("barcode");
                 } else {
-                    IntentResult urlDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                    barcodeResult = urlDataResult.getContents();
+                    IntentResult result = IntentIntegrator.parseActivityResult(resultCode, data);
+                    scannedData = result.getContents();
                 }
-                preferences.edit()
-                        .putString(GeneralKeys.BRAPI_BASE_URL, barcodeResult)
-                        .apply();
+            }
 
-                brapiAuth();
-                break;
-            case REQUEST_BARCODE_SCAN_OIDC_URL: //barcode scan result for oidc url
-                if (resultCode == RESULT_OK) {
-                    String scannedBarcode;
-                    if (mlkitEnabled) {
-                        scannedBarcode = data.getStringExtra("barcode");
+            switch (requestCode) {
+                case REQUEST_BARCODE_SCAN_BASE_URL:
+                    if (isValidUrl(scannedData)) {
+                        updateUrls(scannedData);
+                        brapiAuth();
                     } else {
-                        IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                        scannedBarcode = plotDataResult.getContents();
+                        showErrorDialog("Scanned data "+scannedData+" is not a valid URL.");
                     }
-                    brapiOIDCURLPreference.setText(scannedBarcode);
-                }
-                break;
-            case REQUEST_BARCODE_SCAN_BASE_URL: //barcode scan result for brapi url
-                if(resultCode == RESULT_OK) {
-                    String scannedBarcode;
-                    if(mlkitEnabled) {
-                        scannedBarcode = data.getStringExtra("barcode");
-                    }
-                    else {
-                        IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                        scannedBarcode = plotDataResult.getContents();
-                    }
-                    oldBaseUrl = brapiURLPreference.getText();
-                    updateUrls(scannedBarcode);
-                }
-                break;
-            case REQUEST_BARCODE_SCAN_BRAPI_CONFIG: //barcode scan result for brapi config
-                if(resultCode == RESULT_OK) {
-                    Log.d(TAG, "onActivityResult: processing config code scan!");
-                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                    String scannedConfigJson = plotDataResult.getContents();
-                    Log.d(TAG, "onActivityResult: config data received: " + scannedConfigJson);
-                    BrAPIConfig brAPIConfig = new Gson().fromJson(scannedConfigJson, BrAPIConfig.class);
-
-                    String brapiVersion = getString(R.string.preferences_brapi_version_v2);
-                    if("v1".equalsIgnoreCase(brAPIConfig.getVersion())) {
-                        brapiVersion = getString(R.string.preferences_brapi_version_v1);
-                    }
-                    ((ListPreference)findPreference(GeneralKeys.BRAPI_VERSION)).setValue(brapiVersion);
-                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_PAGE_SIZE)).setText(brAPIConfig.getPageSize());
-                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize());
-                    ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli());
-                    ((ListPreference)findPreference(GeneralKeys.LABELVAL_CUSTOMIZE)).setValue(brAPIConfig.getCatDisplay());
-
-                    String oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_implicit);
-                    String codeFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);
-                    if(codeFlow.equalsIgnoreCase(brAPIConfig.getAuthFlow())) {
-                        oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);
-                    }
-
-                    setServer(brAPIConfig.getUrl(), brAPIConfig.getName(), brAPIConfig.getOidcUrl(), oidcFlow);
-                }
-                break;
-            case AUTH_REQUEST_CODE: // Add your new request code here
-                if (resultCode == RESULT_OK) {
+                    break;
+                case REQUEST_BARCODE_SCAN_OIDC_URL:
+                    brapiOIDCURLPreference.setText(scannedData);
+                    break;
+                case REQUEST_BARCODE_SCAN_BRAPI_CONFIG:
+                case IntentIntegrator.REQUEST_CODE:
+                    handleScannedData(scannedData);
+                    break;
+                case AUTH_REQUEST_CODE:
                     displaySuccessDialog();
-                }
-                break;
+                    break;
+            }
         }
     }
 }
