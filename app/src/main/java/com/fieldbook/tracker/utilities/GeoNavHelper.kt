@@ -15,6 +15,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Location
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
@@ -48,6 +49,7 @@ import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getDirectory
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.util.Arrays
+import java.util.Calendar
 import javax.inject.Inject
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -155,7 +157,21 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     }
 
     private fun updateLocationWithGnss(parser: NmeaParser) {
-        val time = parser.utc.toDouble()
+
+        //should be strings like 202225.0
+        val nmeaUtcString = parser.utc
+
+        val hourOfDay = nmeaUtcString.substring(0, 2).toInt()
+        val minute = nmeaUtcString.substring(2, 4).toInt()
+        val seconds = nmeaUtcString.substring(4, 6).toInt()
+
+        val todayString = Calendar.getInstance().also { c ->
+            c.set(Calendar.HOUR_OF_DAY, hourOfDay)
+            c.set(Calendar.MINUTE, minute)
+            c.set(Calendar.SECOND, seconds)
+        }
+
+        val time = todayString.toInstant().toEpochMilli().toDouble()
 
         //only update the gps if it is a newly parsed coordinate
         if (time > mLastGeoNavTime) {
@@ -208,7 +224,9 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                 mExternalLocation?.latitude = latValue
                 mExternalLocation?.longitude = lngValue
                 mExternalLocation?.altitude = altValue
-                mExternalLocation?.extras?.putString("fix", fix)
+                mExternalLocation?.extras = Bundle().also {
+                    it.putString("fix", fix)
+                }
             }
         }
     }
