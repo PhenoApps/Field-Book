@@ -64,6 +64,8 @@
     <string name="dialog_field_sort_delete_all_content_description">Elimina todas las entradas de ordenación.</string>
     <string name="dialog_field_sort_toggle_order_content_description">Invierte el orden.</string>
     <string name="dialog_field_sort_add_content_description">Abre un diálogo para agregar un nuevo atributo para ordenar por.</string>
+    <!-- Modify -->
+    <string name="fields_export">Exportar</string>
     <!-- Delete -->
     <string name="fields_delete">Eliminar</string>
     <string name="fields_delete_study">Eliminar campo</string>
@@ -118,13 +120,9 @@
     <string name="activity_field_editor_switch_field_action">Cambiar</string>
     <string name="activity_field_editor_no_location_yet">No se ha encontrado ninguna ubicación.</string>
     <string name="activity_field_editor_switch_field_same">El Campo más cercano ya ha sido seleccionado.</string>
-    <!-- Unimplemented -->
-    <string name="fields_study_statistics">Estadísticas</string>
-    <string name="fields_date_imported">Fecha de importación</string>
-    <string name="fields_date_edited">Editar fecha</string>
-    <string name="fields_date_exported">Fecha de exportación</string>
-    <string name="fields_summary">Resumen del Campo</string>
-    <string name="fields_options">Opciones</string>
+    <!-- Field details -->
+    <!-- Semantic dates -->
+    <string name="today">Hoy</string>
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Ordenar</string>
@@ -561,6 +559,7 @@
     <string name="pref_geonav_log_limited_description">Limitado: Registro de entrada más cercana en almacenamiento/geonav/limited_log.txt</string>
     <string name="pref_geonav_log_full">Completo</string>
     <string name="pref_geonav_log_full_description">Completo: Registrando todas las actualizaciones de ubicación y los pasos del algoritmo en almacenamiento/geonav/log.txt</string>
+    <string name="pref_geonav_log_both">Ambos</string>
     <string name="pref_geonav_update_interval_title">Intervalo de Actualización (s)</string>
     <string name="pref_geonav_update_interval_summary">El tiempo entre actualizaciones de ubicación es %ss.</string>
     <string name="pref_geonav_pair">Vincular Dispositivo</string>
