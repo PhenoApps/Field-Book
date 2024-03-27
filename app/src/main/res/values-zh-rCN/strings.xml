@@ -45,6 +45,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">导出</string>
     <!-- Delete -->
     <string name="fields_delete">删除</string>
     <string name="fields_delete_study">删除地块</string>
@@ -64,7 +66,8 @@
     <string name="act_field_editor_file_open_failed">打开文件失败。</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">排序</string>
@@ -259,6 +262,7 @@
     <string name="preferences_general_skip_entries_with_data">跳过有数据的记录</string>
     <string name="preferences_general_skip_entries_with_data_description">跳过当前性状已有数据的记录</string>
     <!-- GeoNav -->
+    <string name="pref_geonav_log_both">都是</string>
     <!-- Sounds -->
     <string name="preferences_sounds">声音</string>
     <string name="preferences_sound_primary_order_sound">主顺序通知音</string>
