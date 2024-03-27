@@ -84,6 +84,22 @@ public class LayoutCollections {
         }
     }
 
+    public void registerAllReceivers() {
+        for (BaseTraitLayout layout : this.traitLayouts) {
+            if (layout instanceof LabelPrintTraitLayout) {
+                ((LabelPrintTraitLayout) layout).registerReceiver();
+            }
+        }
+    }
+
+    public void unregisterAllReceivers() {
+        for (BaseTraitLayout layout : this.traitLayouts) {
+            if (layout instanceof LabelPrintTraitLayout) {
+                ((LabelPrintTraitLayout) layout).unregisterReceiver();
+            }
+        }
+    }
+
     /**
      * Triggers trait specific code for refreshing lock status.
      * Some traits may need to refresh UI.

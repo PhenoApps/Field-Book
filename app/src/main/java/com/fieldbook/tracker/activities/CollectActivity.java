@@ -921,6 +921,8 @@ public class CollectActivity extends ThemedActivity
 
         preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
 
+        traitLayouts.unregisterAllReceivers();
+
         super.onPause();
     }
 
@@ -1035,6 +1037,8 @@ public class CollectActivity extends ThemedActivity
         }
 
         dataLocked = preferences.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
+
+        traitLayouts.registerAllReceivers();
 
         refreshLock();
     }

@@ -69,6 +69,17 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
     private Activity mActivity = null;
 
+    public void registerReceiver() {
+        Log.d(TAG, "Registering mPrinterMessageReceiver");
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mPrinterMessageReceiver,
+                new IntentFilter("printer_message"));
+    }
+
+    public void unregisterReceiver() {
+        Log.d(TAG, "Unregistering mPrinterMessageReceiver");
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mPrinterMessageReceiver);
+    }
+
     public LabelPrintTraitLayout(Context context) { super(context); }
 
     public LabelPrintTraitLayout(Context context, AttributeSet attrs) { super(context, attrs); }
@@ -141,23 +152,23 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-        if (intent != null && intent.getExtras() != null) {
+            if (intent != null && intent.getExtras() != null) {
 
-            String message = intent.getExtras().getString("message");
-            String size = intent.getExtras().getString("size");
+                String message = intent.getExtras().getString("message");
+                String size = intent.getExtras().getString("size");
 
-            if (message != null) {
+                if (message != null) {
 
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
+                }
+
+                if (size != null) {
+
+                    // record each print event
+                    ((CollectActivity) getContext()).insertPrintObservation(size);
+                }
             }
-
-            if (size != null) {
-
-                // record each print event
-                ((CollectActivity) getContext()).insertPrintObservation(size);
-            }
-        }
         }
     };
 
@@ -168,9 +179,6 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         connectPrinter = act.findViewById(R.id.connectPrinterButton);
         printLabel = act.findViewById(R.id.printLabelButton);
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mPrinterMessageReceiver);
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mPrinterMessageReceiver,
-                new IntentFilter("printer_message"));
 
         mBluetoothUtil = new BluetoothUtil();
         Integer studyId = getPrefs().getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
