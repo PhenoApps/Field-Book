@@ -32,6 +32,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">निर्यात करें</string>
     <!-- Delete -->
     <!-- Import -->
     <string name="import_dialog_unique">अद्वितीय पहचानकर्ता</string>
@@ -40,7 +42,8 @@
     <string name="import_error_unique">अद्वितीय पहचानकर्ता में नकल</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <!-- Trait import/export -->
