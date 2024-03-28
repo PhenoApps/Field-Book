@@ -53,6 +53,27 @@
         android:layout_margin="8dp">
 
         <TextView style="@style/TextViewStyle.Bold"
+            android:id="@+id/labelcopiestext"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/trait_layout_print_label_copies_title" />
+
+        <Spinner
+            android:id="@+id/labelcopies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="200dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="8dp">
+
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/labelsizetext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -172,27 +193,6 @@
             android:layout_width="0dp"
             android:layout_weight="3"
             android:maxLines="1" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="8dp">
-
-        <TextView style="@style/TextViewStyle.Bold"
-            android:id="@+id/labelcopiestext"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/trait_layout_print_label_copies_title" />
-
-        <Spinner
-            android:id="@+id/labelcopies"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="200dp" />
-
     </LinearLayout>
 
 </com.fieldbook.tracker.traits.LabelPrintTraitLayout>
