@@ -764,6 +764,8 @@
     <string name="warning_no_observations">No observations have been collected</string>
     <string name="warning_no_data">No data to display</string>
     <string name="stats_toggle_view">Toggle between year and month view</string>
+    <string name="stats_heatmap_title">Heatmap</string>
+    <string name="stats_heatmap">View a heatmap of the collected observations</string>
     <string name="stats_export">Long press on a card to export</string>
 
     <string name="stat_title_fields">Fields</string>

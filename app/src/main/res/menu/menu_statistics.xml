@@ -5,7 +5,13 @@
     tools:ignore="AppCompatResource">
 
     <item
-        android:id="@+id/stats_calendar"
+        android:id="@+id/stats_heatmap"
+        android:icon="@drawable/ic_stats_checkerboard"
+        app:showAsAction="always"
+        android:title="@string/stats_heatmap" />
+
+    <item
+        android:id="@+id/stats_toggle_view"
         android:icon="@drawable/ic_stats_calendar"
         app:showAsAction="always"
         android:title="@string/stats_toggle_view" />
