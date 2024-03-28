@@ -209,6 +209,13 @@ public class GeneralKeys {
     //categorical trait
     public static final String LABELVAL_CUSTOMIZE = "LABELVAL_CUSTOMIZE";
 
+    //camera traits
+    public static final String CAMERA_SYSTEM_PREVIEW = "com.fieldbook.tracker.traits.camera.SYSTEM_PREVIEW";
+
+    public static final String CAMERA_SYSTEM = "com.fieldbook.tracker.traits.camera.SYSTEM";
+
+    public static final String CAMERA_RESOLUTION = "com.fieldbook.tracker.traits.camera.RESOLUTION";
+
     //tts
     public static final String TTS_LANGUAGE_ENABLED = "TTS_LANGUAGE_ENABLED";
     public static final String TTS_LANGUAGE = "TTS_LANGUAGE";

@@ -29,6 +29,8 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
     LABEL_PRINT(Types.CUSTOM), BRAPI(Types.CUSTOM);
 
     companion object {
+        fun isCameraTrait(format: String) = format in setOf("photo", "usb camera", "gopro", "canon")
+
         fun getCameraFormats() = entries.filter { it.isCamera }
 
         fun getMainFormats() = entries - listOf(USB_CAMERA, GO_PRO)

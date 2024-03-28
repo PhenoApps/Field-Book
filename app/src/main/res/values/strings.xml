@@ -1049,5 +1049,10 @@
     <string name="trait_camera_preview_content_description">This previews the camera\'s display.</string>
     <string name="trait_camera_capture_content_description">Capture a photo</string>
     <string name="delete_local_photo">Delete Photo</string>
+    <string name="trait_system_photo_settings_title">System Photo Settings</string>
+    <string name="trait_photos_no_settings">This trait has no settings.</string>
+    <string name="view_trait_photo_settings_preview_title">Preview</string>
+    <string name="view_trait_photo_settings_resolution_title">Target Resolution</string>
+    <string name="view_trait_photo_settings_system_title">System Camera</string>
 
 </resources>

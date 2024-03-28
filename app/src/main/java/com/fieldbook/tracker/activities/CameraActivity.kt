@@ -14,6 +14,7 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.traits.AbstractCameraTrait
 import com.google.common.util.concurrent.ListenableFuture
 import java.io.File
 import java.util.concurrent.Executors
@@ -99,7 +100,7 @@ class CameraActivity : ThemedActivity() {
 
             shutterButton.setOnClickListener {
 
-                val file = File(cacheDir, "temp.jpg")
+                val file = File(cacheDir, AbstractCameraTrait.TEMPORARY_IMAGE_NAME)
 
                 val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
                 imageCapture.takePicture(outputFileOptions, cameraExecutor,
