@@ -38,6 +38,5 @@ interface CollectController: FieldController {
         plotId: String, label: String, isAttribute: Boolean?
     ) : String
     fun getGeoNavPopupSpinnerItems(): ArrayList<String>
-    fun updateObservationInfoButton()
     fun logNmeaMessage(nmea: String)
 }

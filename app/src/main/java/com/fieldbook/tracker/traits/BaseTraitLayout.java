@@ -300,7 +300,6 @@ public abstract class BaseTraitLayout extends LinearLayout {
      */
     public void updateObservation(TraitObject trait, String value) {
         ((CollectActivity) getContext()).updateObservation(trait, value, null);
-        controller.updateObservationInfoButton();
     }
 
     public void removeTrait(String parent) {

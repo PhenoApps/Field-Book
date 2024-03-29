@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
@@ -24,7 +23,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -209,8 +207,6 @@ public class CollectActivity extends ThemedActivity
     private TraitBoxView traitBox;
     private RangeBoxView rangeBox;
     private RecyclerView infoBarRv;
-
-    private FloatingActionButton observationInfoButton;
 
     /**
      * Trait-related elements
@@ -496,14 +492,6 @@ public class CollectActivity extends ThemedActivity
         infoBarRv = findViewById(R.id.act_collect_infobar_rv);
         infoBarRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
-        observationInfoButton = findViewById(R.id.observationInfoButton);
-
-        observationInfoButton.setOnClickListener(view -> {
-            ObservationModel currentObservationObject = getCurrentObservation();
-            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(currentObservationObject);
-            dialogFragment.show(this.getSupportFragmentManager(), "observationMetadata");
-        });
-
         initCurrentVals();
 
         Log.d(TAG, "Load screen.");
@@ -516,6 +504,14 @@ public class CollectActivity extends ThemedActivity
         });
 
         refreshInfoBarAdapter();
+    }
+
+    public void showObservationMetadataDialog(){
+        ObservationModel currentObservationObject = getCurrentObservation();
+        if (currentObservationObject != null){
+            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(currentObservationObject);
+            dialogFragment.show(this.getSupportFragmentManager(), "observationMetadata");
+        }
     }
 
     //when softkeyboard is displayed, reset the snackbar to redisplay with a calculated bottom margin
@@ -695,8 +691,6 @@ public class CollectActivity extends ThemedActivity
             } else {
                 traitLayouts.deleteTraitListener(getTraitFormat());
             }
-
-            updateObservationInfoButton();
 
             triggerTts(deleteTts);
         });
@@ -1174,7 +1168,6 @@ public class CollectActivity extends ThemedActivity
         String traitDbId = getTraitDbId();
 
         database.deleteTrait(expId, obsUnit, traitDbId, rep);
-        updateObservationInfoButton();
     }
 
     public String getLocationByPreferences() {
@@ -2262,8 +2255,6 @@ public class CollectActivity extends ThemedActivity
         holder.addView(v);
         layout.init(this);
         v.setVisibility(View.VISIBLE);
-
-        updateObservationInfoButton();
     }
 
     @Override
@@ -2470,18 +2461,6 @@ public class CollectActivity extends ThemedActivity
         if (gps == null) return null;
 
         return gps.getLocation(0, 0);
-    }
-
-    // updates the state of the info button
-    @Override
-    public void updateObservationInfoButton() {
-        ObservationModel currentObservation = getCurrentObservation();
-        if(currentObservation == null){
-            // if no observation is found, hide the FAB
-            observationInfoButton.setVisibility(View.GONE);
-        }else{
-            observationInfoButton.setVisibility(View.VISIBLE);
-        }
     }
 
     private ObservationModel getCurrentObservation() {

@@ -3,8 +3,6 @@ package com.fieldbook.tracker.dialogs
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
@@ -40,6 +38,8 @@ class ObservationMetadataFragment : DialogFragment() {
         recyclerView?.adapter = ObservationMetadataAdapter()
 
         loadData()
+
+        builder.setPositiveButton(getString(R.string.dialog_close), null)
 
         builder.setView(view)
 
