@@ -139,7 +139,7 @@ abstract class AbstractCameraTrait :
 
     protected fun saveBitmapToStorage(format: String, bmp: Bitmap, obsUnit: RangeObject) {
 
-        saveToStorage(format, obsUnit, saveTime = Utils.getDateTime(), saveState = SaveState.NEW) { uri ->
+        saveToStorage(format, obsUnit, saveTime = Utils.getDateTime(), saveState = SaveState.SINGLE_SHOT) { uri ->
 
             context.contentResolver.openOutputStream(uri)?.let { output ->
 

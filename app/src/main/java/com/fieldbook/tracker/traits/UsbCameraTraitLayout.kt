@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.devices.camera.UsbCameraApi
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.serenegiant.usb.Size
 import com.serenegiant.usb.UVCCamera
 import com.serenegiant.widget.CameraViewInterface
@@ -19,8 +20,6 @@ import com.serenegiant.widget.UVCCameraTextureView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import org.phenoapps.interfaces.usb.camera.CameraSurfaceListener
-import java.io.File
-import java.util.UUID
 
 @AndroidEntryPoint
 class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
@@ -76,8 +75,13 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
     private fun setup() {
 
+        imageView?.visibility = View.VISIBLE
+
         (imageView?.layoutParams as ConstraintLayout.LayoutParams)
             .width = ConstraintLayout.LayoutParams.WRAP_CONTENT
+
+        (captureBtn?.layoutParams as ConstraintLayout.LayoutParams)
+            .topToBottom = imageView?.id ?: ConstraintLayout.LayoutParams.PARENT_ID
 
         if (controller.getUsbApi().isConnected()) {
             
@@ -93,6 +97,8 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
     private fun initUi() {
 
         captureBtn?.visibility = View.INVISIBLE
+
+        settingsBtn?.visibility = View.INVISIBLE
 
         connectBtn?.visibility = View.VISIBLE
 
@@ -110,6 +116,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
         val dialog = AlertDialog.Builder(context)
         dialog.setTitle(R.string.usb_camera_resolution_options_title)
         dialog.setItems(widthByHeightListValues) { _, which ->
+            prefs.edit().putInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, which).apply()
             updatePreviewSize(sizes[which].width, sizes[which].height)
         }
         dialog.show()
@@ -145,33 +152,24 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
             captureBtn?.visibility = View.VISIBLE
             connectBtn?.visibility = View.INVISIBLE
+            settingsBtn?.visibility = View.VISIBLE
 
             captureBtn?.setOnClickListener {
 
                 captureBtn?.isEnabled = false
 
-                val file = File(context.cacheDir, "${UUID.randomUUID()}.png")
+                lastBitmap?.let { bmp ->
 
-                with (controller.getUsbApi()) {
+                    saveBitmapToStorage(type(), bmp, currentRange)
 
-                    background.launch {
+                    activity?.runOnUiThread {
 
-                        lastBitmap?.let { bmp ->
-
-                            saveBitmapToStorage(type(), bmp, currentRange)
-
-                            activity?.runOnUiThread {
-
-                                captureBtn?.isEnabled = true
-
-                                file.delete()
-                            }
-                        }
+                        captureBtn?.isEnabled = true
                     }
                 }
             }
 
-            imageView?.setOnClickListener {
+            settingsBtn?.setOnClickListener {
 
                 if (camera != null && sizes?.isNotEmpty() == true) {
 
@@ -195,6 +193,11 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
                         }
                     }
                 }
+
+            val resIndex = prefs.getInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, 0)
+            if (!sizes.isNullOrEmpty() && resIndex < sizes.size) {
+                updatePreviewSize(sizes[resIndex].width, sizes[resIndex].height)
+            }
         }
     }
 }
