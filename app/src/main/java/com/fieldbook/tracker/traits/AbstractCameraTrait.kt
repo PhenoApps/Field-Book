@@ -208,6 +208,8 @@ abstract class AbstractCameraTrait :
 
                             if (saveState == SaveState.SINGLE_SHOT) {
 
+                                writeExif(file)
+
                                 notifyItemInserted()
                             }
                         }
@@ -216,14 +218,18 @@ abstract class AbstractCameraTrait :
 
                         dir.findFile(name)?.let { file ->
 
-                            saver.invoke(file.uri)
+                            if (saveState == SaveState.COMPLETE) {
 
+                                writeExif(file)
+
+                                notifyItemInserted()
+
+                            } else {
+
+                                saver.invoke(file.uri)
+
+                            }
                         }
-                    }
-
-                    if (saveState == SaveState.COMPLETE) {
-
-                        notifyItemInserted()
                     }
                 }
             }
