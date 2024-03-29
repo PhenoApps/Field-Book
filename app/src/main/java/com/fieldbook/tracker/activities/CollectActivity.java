@@ -56,7 +56,9 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.offbeat.traits.formats.Formats;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
@@ -687,10 +689,12 @@ public class CollectActivity extends ThemedActivity
             boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitDbId(), getRep());
             // if a brapi observation that has been synced, don't allow deleting
             if (status) {
-                if (getTraitFormat().equals("photo")) {
+                String format = getTraitFormat();
+                if (Formats.Companion.isCameraTrait(format)) {
                     // I want to use abstract method
-                    PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                    traitPhoto.brapiDelete();
+                    //TODO update when merged with other offbeat camera formats
+                    AbstractCameraTrait traitPhoto = traitLayouts.getPhotoTrait(format);
+                    traitPhoto.deleteTraitListener();
                 } else {
                     brapiDelete(getTraitName(), false);
                 }
@@ -1931,9 +1935,11 @@ public class CollectActivity extends ThemedActivity
                 String success = getString(R.string.trait_photo_tts_success);
                 String fail = getString(R.string.trait_photo_tts_fail);
                 if (resultCode == RESULT_OK) {
-                    PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                    traitPhoto.makeImage(traitBox.getCurrentTrait(),
-                            traitBox.getNewTraits(), resultCode == RESULT_OK);
+                    //TODO update when merged with other offbeat camera formats
+                    AbstractCameraTrait traitPhoto = traitLayouts.getPhotoTrait("photo");
+                    if (traitPhoto instanceof PhotoTraitLayout) {
+                        ((PhotoTraitLayout) traitPhoto).makeImage(traitBox.getCurrentTrait());
+                    }
 
                     triggerTts(success);
                 } else triggerTts(fail);

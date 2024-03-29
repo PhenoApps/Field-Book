@@ -523,7 +523,7 @@ class NewTraitDialog(
                 (activity as TraitEditorActivity).startBrapiTraitActivity(true)
             }
 
-        } else if (format in Formats.getCameraFormats() && !isShowingCameraOptions) {
+        } else if (format == Formats.BASE_PHOTO && !isShowingCameraOptions) {
 
             isShowingCameraOptions = true
 
