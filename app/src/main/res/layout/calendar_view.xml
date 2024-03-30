@@ -2,33 +2,25 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:background="@color/WHITE">
 
-    <LinearLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/month_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:paddingLeft="8dp"
-            android:textStyle="bold"
-            tools:text="March 2024">
-
-        </TextView>
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:minHeight="?attr/actionBarSize" />
 
     <LinearLayout
-        android:id="@+id/titlesContainer"
+        android:id="@+id/calendarDayTitlesContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:weightSum="7">
 
         <include layout="@layout/calendar_day_title_text" />
@@ -50,8 +42,10 @@
     <com.kizitonwose.calendar.view.CalendarView
         android:id="@+id/calendarView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:cv_dayViewResource="@layout/calendar_day_layout"
-        app:cv_outDateStyle="endOfGrid" />
+        app:cv_monthHeaderResource="@layout/calendar_month_title"
+        app:cv_scrollPaged="false"
+        app:cv_orientation="vertical" />
 </LinearLayout>
 

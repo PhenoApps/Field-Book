@@ -49,19 +49,16 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
     List<String> seasons;
     private final SimpleDateFormat timeStampFormat;
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
-    private final SimpleDateFormat dateFormat;
-    private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
-    private int toggleVariable;
-    private statisticsCardLongPressedListener listener;
+    private static final String DATE_FORMAT_PATTERN = "MM-dd-yy";
+    private final statisticsCardLongPressedListener listener;
+    private final int intervalThreshold = 30;
 
 
-    public StatisticsAdapter(StatisticsActivity context, List<String> seasons, int toggleVariable, StatisticsAdapter.statisticsCardLongPressedListener listener) {
+    public StatisticsAdapter(StatisticsActivity context, List<String> seasons, StatisticsAdapter.statisticsCardLongPressedListener listener) {
         this.originActivity = context;
         this.database = originActivity.getDatabase();
         this.seasons = seasons;
         this.timeStampFormat = new SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.getDefault());
-        this.dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault());
-        this.toggleVariable = toggleVariable;
         this.listener = listener;
     }
 
@@ -128,7 +125,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             }
 
             String time = observation.getObservation_time_stamp();
-            Date dateObject = null;
+            Date dateObject;
             try {
                 dateObject = timeStampFormat.parse(time);
             } catch (ParseException e) {
@@ -140,7 +137,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
                 imageCount++;
             }
 
-            String date = new SimpleDateFormat("MM-dd-yy").format(dateObject);
+            String date = new SimpleDateFormat(DATE_FORMAT_PATTERN).format(dateObject);
             dateCount.put(date, dateCount.getOrDefault(date, 0) + 1);
 
             String observationUnitId = observation.getObservation_unit_id();
@@ -151,7 +148,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         long totalInterval = 0;
         for (int i = 1; i< dateObjects.size(); i++){
             long diff = dateObjects.get(i).getTime() - dateObjects.get(i-1).getTime();
-            if (diff <= TimeUnit.MINUTES.toMillis(30)){
+            if (diff <= TimeUnit.MINUTES.toMillis(intervalThreshold)){
                 totalInterval += TimeUnit.MILLISECONDS.toSeconds(diff);
             }
         }
@@ -262,7 +259,6 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
     /**
      * Exports a statistics card as an image
-     * @param holder
      */
     public void exportCard(ViewHolder holder) {
 

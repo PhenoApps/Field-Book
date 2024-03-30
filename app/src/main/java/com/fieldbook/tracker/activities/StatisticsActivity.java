@@ -13,7 +13,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.StatisticsAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
-import com.fieldbook.tracker.dialogs.StatisticsCalendarDialog;
+import com.fieldbook.tracker.dialogs.StatisticsCalendarFragment;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -79,10 +79,10 @@ public class StatisticsActivity extends ThemedActivity implements StatisticsAdap
             setSeasons();
             return true;
         } else if (itemId == heatmapId) {
-            StatisticsCalendarDialog dialog = new StatisticsCalendarDialog(this);
-            dialog.show(getSupportFragmentManager(), TAG);
+            StatisticsCalendarFragment calendarFragment = new StatisticsCalendarFragment(this);
+            getSupportFragmentManager().beginTransaction().replace(android.R.id.content, calendarFragment).addToBackStack(null).commit();
         } else if (itemId == android.R.id.home) {
-            finish();
+            onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -105,7 +105,7 @@ public class StatisticsActivity extends ThemedActivity implements StatisticsAdap
         }
 
         seasons = new ArrayList<>(uniqueSeasons);
-        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons, toggleVariable, this));
+        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons, this));
 
     }
 
