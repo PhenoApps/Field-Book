@@ -1053,5 +1053,6 @@
     <string name="tutorial_main_repeated_values_description">This will open a dialog to manage the repeated values for the current observation unit.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="tutorial_main_geonav_description">This will open a configuration dialog to help with field navigation.</string>
+    <string name="oauth_configured_incorrectly">Authorization request failed, please check your BrAPI settings.</string>
 
 </resources>
