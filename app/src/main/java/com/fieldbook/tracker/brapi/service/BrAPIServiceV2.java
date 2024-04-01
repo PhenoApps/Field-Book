@@ -1258,8 +1258,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 //For categorical traits, include label value pairs in details
                 if (trait.getFormat().equals("categorical")) {
                     String details = trait.getDetails();
-                    List<BrAPIScaleValidValuesCategories> categories = var.getScale().getValidValues().getCategories();
-                    if (categories != null && !categories.isEmpty()) {
+
+                    if (var.getScale() != null &&
+                            var.getScale().getValidValues() != null &&
+                            var.getScale().getValidValues().getCategories() != null &&
+                            !var.getScale().getValidValues().getCategories().isEmpty()) {
+
+                        List<BrAPIScaleValidValuesCategories> categories = var.getScale().getValidValues().getCategories();
                         details += "\nCategories: " + buildCategoryDescriptionString(categories);
                     }
                     trait.setDetails(details);
