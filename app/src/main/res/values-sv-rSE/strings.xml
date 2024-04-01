@@ -36,6 +36,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">Exportera </string>
     <!-- Delete -->
     <string name="fields_delete">Radera</string>
     <string name="fields_delete_study">Ta bort fält</string>
@@ -44,13 +46,8 @@
     <string name="fields_study_exists_message">Fältet finns redan.</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
-    <string name="fields_study_statistics">Statistik</string>
-    <string name="fields_date_imported">Importera datum</string>
-    <string name="fields_date_edited">Redigera datum</string>
-    <string name="fields_date_exported">Exportera datum</string>
-    <string name="fields_summary">Fältsammanfattning</string>
-    <string name="fields_options">Alternativ</string>
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sortera</string>
@@ -216,6 +213,7 @@
     <string name="preferences_general_skip_entries_with_data">Hoppa över poster med data </string>
     <string name="preferences_general_skip_entries_with_data_description">Hoppa över poster som har data för aktuell karaktär</string>
     <!-- GeoNav -->
+    <string name="pref_geonav_log_both">Båda</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Ljud</string>
     <string name="preferences_sound_primary_order_sound">Första ordningens ljud</string>

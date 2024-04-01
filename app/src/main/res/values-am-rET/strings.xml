@@ -32,6 +32,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">ማውጣት፤</string>
     <!-- Delete -->
     <!-- Import -->
     <string name="import_dialog_unique">መለያ</string>
@@ -40,7 +42,8 @@
     <string name="import_error_unique">መለያዉ ተመላልስዋል</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <!-- Trait import/export -->
