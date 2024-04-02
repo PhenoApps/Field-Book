@@ -65,6 +65,14 @@ public class AudioTraitLayout extends BaseTraitLayout {
         controlButton = act.findViewById(R.id.record);
         controlButton.setOnClickListener(new AudioTraitOnClickListener());
         controlButton.requestFocus();
+
+        audioRecordingText.setOnLongClickListener( view -> {
+            // handle the long click when some audio was saved
+            if(audioRecordingText.getText().toString().equals(getContext().getString(R.string.trait_layout_data_stored))){
+                ((CollectActivity) getContext()).showObservationMetadataDialog();
+            }
+            return true;
+        });
     }
 
     @Override

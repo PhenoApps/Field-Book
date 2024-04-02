@@ -509,14 +509,6 @@ public class CollectActivity extends ThemedActivity
         refreshInfoBarAdapter();
     }
 
-    public void showObservationMetadataDialog(){
-        ObservationModel currentObservationObject = getCurrentObservation();
-        if (currentObservationObject != null){
-            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(currentObservationObject);
-            dialogFragment.show(this.getSupportFragmentManager(), "observationMetadata");
-        }
-    }
-
     //when softkeyboard is displayed, reset the snackbar to redisplay with a calculated bottom margin
     //this is necessary when its needed to display content above the keyboard without using adjustPan,
     //such as the geonav snackbar messages
@@ -2507,6 +2499,14 @@ public class CollectActivity extends ThemedActivity
         return gps.getLocation(0, 0);
     }
 
+    public void showObservationMetadataDialog(){
+        ObservationModel currentObservationObject = getCurrentObservation();
+        if (currentObservationObject != null){
+            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(currentObservationObject);
+            dialogFragment.show(this.getSupportFragmentManager(), "observationMetadata");
+        }
+    }
+
     private ObservationModel getCurrentObservation() {
         String rep = getCollectInputView().getRep();
         List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
@@ -2517,6 +2517,7 @@ public class CollectActivity extends ThemedActivity
         }
         return null;
     }
+
     @Override
     public synchronized void logNmeaMessage(@NonNull String nmea) {
 

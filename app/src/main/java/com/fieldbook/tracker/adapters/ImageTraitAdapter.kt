@@ -12,9 +12,13 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
+import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.dialogs.ObservationMetadataFragment
 
 /**
  * Reference:
@@ -78,8 +82,38 @@ class ImageTraitAdapter(
             val bmp = decodeBitmap(Uri.parse(this.uri))
             if (bmp != null) viewHolder.progressBar.visibility = View.GONE
             viewHolder.imageView.setImageBitmap(bmp)
+            viewHolder.imageView.setOnLongClickListener {
+                showObservationMetadataDialog(position + 1)
+                true
+            }
             viewHolder.itemView.tag = this
         }
+    }
+
+    private fun showObservationMetadataDialog(position: Int?) {
+        val currentObservationObject: ObservationModel? = getCurrentObservation(position)
+        if (currentObservationObject != null) {
+            val dialogFragment: DialogFragment =
+                ObservationMetadataFragment().newInstance(currentObservationObject)
+            dialogFragment.show((context as CollectActivity).supportFragmentManager, "observationMetadata")
+        }
+    }
+
+    private fun getCurrentObservation(position: Int?): ObservationModel? {
+        val act = context as CollectActivity
+        val models = listOf<ObservationModel>(
+            *act.getDatabase().getRepeatedValues(
+                act.studyId,
+                act.observationUnit,
+                act.traitDbId
+            )
+        )
+        for (m in models) {
+            if (position.toString() == m.rep) {
+                return m
+            }
+        }
+        return null
     }
 
     // Return the size of your dataset (invoked by the layout manager)

@@ -6,6 +6,7 @@ import com.fieldbook.tracker.database.Row
 import com.fieldbook.tracker.database.dao.ObservationVariableDao
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.CategoricalTraitLayout
+import com.fieldbook.tracker.utilities.CategoryJsonUtil.Companion.decode
 
 data class ObservationModel(val map: Row) {
         val internal_id_observation: Int by map
@@ -67,9 +68,7 @@ data class ObservationModel(val map: Row) {
                                                 currentTrait.format
                                                 )
                                                 if ( isTraitCategoricalOrMulticategorical && key == "value"){
-                                                        val decodedValue : String = CategoricalTraitLayout(context).decodeValue(
-                                                                value.toString()
-                                                        )
+                                                        val decodedValue : String = decodeCategorical(value.toString())
                                                         nonNullAttributes[getKeyDisplayName(context, key)] = decodedValue
                                                 }else{
                                                         nonNullAttributes[getKeyDisplayName(context, key)] = value
@@ -99,4 +98,15 @@ data class ObservationModel(val map: Row) {
                         "rep" -> context.getString(R.string.observation_info_rep)
                         else -> context.getString(R.string.observation_info_other)
                 }
+
+        // function to help code value for categorical and multicategorical trait
+        private fun decodeCategorical(value: String): String {
+                val categories = decode(value)
+                val v = StringBuilder(categories[0].value)
+                if (categories.size > 1) {
+                        for (i in 1 until categories.size) v.append(":").append(categories[i].value)
+                }
+                return v.toString()
+        }
+
 }
