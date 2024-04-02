@@ -26,7 +26,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.adapters.SearchAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -267,7 +266,7 @@ public class SearchActivity extends ActivityDialog {
 
                     // If search has results, show them, otherwise display error message
                     if (data != null) {
-                        myList.setAdapter(new SearchAdapter(SearchActivity.this, data));
+//                        myList.setAdapter(new SearchResultsAdapter(SearchActivity.this, data));
 
                         dialog.show();
                     } else {

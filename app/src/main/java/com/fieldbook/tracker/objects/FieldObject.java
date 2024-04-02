@@ -1,10 +1,14 @@
 package com.fieldbook.tracker.objects;
 
+import java.util.List;
+
+
 /**
  * Simple wrapper class for field data
  */
 public class FieldObject {
     private int exp_id;
+    private String study_db_id;
     private String exp_name;
     private String exp_alias;
     private String unique_id;
@@ -16,9 +20,40 @@ public class FieldObject {
     private String date_import;
     private String date_edit;
     private String date_export;
+    private String date_sync;
     private String count;
     private String exp_source;
+    private ImportFormat import_format;
     private String observation_level;
+    private String attribute_count;
+    private String trait_count;
+    private String observation_count;
+
+    public static class TraitDetail {
+        private final String traitName;
+        private final String format;
+        private final int count;
+
+        public TraitDetail(String traitName, String format, int count) {
+            this.traitName = traitName;
+            this.format = format;
+            this.count = count;
+        }
+
+        // Getters
+        public String getTraitName() { return traitName; }
+        public String getFormat() { return format; }
+        public int getCount() { return count; }
+    }
+
+    private List<TraitDetail> traitDetails;
+    public List<TraitDetail> getTraitDetails() {
+        return traitDetails;
+    }
+
+    public void setTraitDetails(List<TraitDetail> traitDetails) {
+        this.traitDetails = traitDetails;
+    }
 
     public FieldObject() {
     }
@@ -29,6 +64,14 @@ public class FieldObject {
 
     public void setExp_id(int exp_id) {
         this.exp_id = exp_id;
+    }
+
+    public String getStudy_db_id() {
+        return study_db_id;
+    }
+
+    public void setStudy_db_id(String study_db_id) {
+        this.study_db_id = study_db_id;
     }
 
     public String getExp_name() {
@@ -119,6 +162,14 @@ public class FieldObject {
         this.date_export = date_export;
     }
 
+    public String getDate_sync() {
+        return date_sync;
+    }
+
+    public void setDate_sync(String date_sync) {
+        this.date_sync = date_sync;
+    }
+
     public String getCount() {
         return count;
     }
@@ -135,11 +186,40 @@ public class FieldObject {
         this.exp_source = exp_source;
     }
 
+    public ImportFormat getImport_format() {
+        return import_format;
+    }
+
+    public void setImport_format(ImportFormat import_format) {
+        this.import_format = import_format;
+    }
+
     public String getObservation_level() {
         return observation_level;
     }
 
     public void setObservation_level(String observation_level) {
         this.observation_level = observation_level;
+    }
+    public String getAttribute_count() {
+        return attribute_count;
+    }
+
+    public void setAttribute_count(String attribute_count) {
+        this.attribute_count = attribute_count;
+    }
+    public String getTrait_count() {
+        return trait_count;
+    }
+
+    public void setTrait_count(String trait_count) {
+        this.trait_count = trait_count;
+    }
+    public String getObservation_count() {
+        return observation_count;
+    }
+
+    public void setObservation_count(String observation_count) {
+        this.observation_count = observation_count;
     }
 }

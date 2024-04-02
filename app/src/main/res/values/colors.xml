@@ -33,6 +33,7 @@
     <color name="main_color_seekbar">#42000000</color>
     <color name="main_color_seekbar_thumb">#90654321</color>
     <color name="light_gray">#E7E8E8</color>
+    <color name="main_card_color_pressed">#9E9E9E</color>
 
     <!-- blue theme colors -->
     <color name="blue_border">@color/BLACK</color>

@@ -31,13 +31,16 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">kara biraatti baasuu</string>
     <!-- Delete -->
     <!-- Import -->
     <string name="import_dialog_unique">adda baasaa dhuunfaa</string>
     <string name="import_error_unique">Maqaan dhuunfa deddeebi\'e</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <!-- Trait import/export -->
@@ -90,6 +93,7 @@
     <string name="main_toolbar_search">Barbaacha</string>
     <string name="search_dialog_add">Ida\'i</string>
     <string name="search_dialog_clear">Balleessi</string>
+    <string name="search_dialog_search">Barbaacha</string>
     <string name="search_dialog_query_is_equal_to">walqixa</string>
     <string name="search_dialog_query_is_not_equal_to">walqixa miti</string>
     <string name="search_dialog_query_contains">ni qabata</string>

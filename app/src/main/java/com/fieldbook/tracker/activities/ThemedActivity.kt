@@ -37,7 +37,7 @@ open class ThemedActivity: AppCompatActivity() {
 
         fun applyTheme(activity: Activity) {
 
-            val prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+            val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
 
             //set the theme
             val (themeIndex, textIndex) = with(prefs) {
