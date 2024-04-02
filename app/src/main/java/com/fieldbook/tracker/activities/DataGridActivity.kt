@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -29,6 +30,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -186,7 +188,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
     }
 
     /**
-     * Uses the convertDatabaseToTable query to create a spreadsheet of values.
+     * Uses the getExportTableData query to create a spreadsheet of values.
      * Columns returned are plot_id followed by all traits.
      */
     private fun loadGridData(prefixTrait: String? = null,
@@ -230,13 +232,14 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
                 val cursor =
-                    database.getExportTableDataShort(
+                    database.getExportTableData(
                         preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                        preferences.getString(GeneralKeys.UNIQUE_NAME, ""),
                         mTraits
                     )
 
                 if (cursor.moveToFirst()) {
+
+                    Log.d("DataGridActivity", "Query executed. Row count: ${cursor.count}")
 
                     mRowHeaders = arrayListOf()
 
@@ -258,6 +261,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                                 val id = cursor.getString(uniqueIndex)
 
                                 val header = cursor.getString(rowHeaderIndex)
+
+                                Log.d("DataGridActivity", "Processing row with uniqueIndex: $uniqueIndex, id: $id, header: $header")
 
                                 val dataList = arrayListOf<CellData>()
 
@@ -322,7 +327,9 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                     } catch (e: java.lang.IllegalStateException) {
 
-                        Utils.makeToast(this@DataGridActivity, getString(R.string.act_data_grid_cursor_failed))
+                        withContext(Dispatchers.Main) {
+                            Utils.makeToast(this@DataGridActivity, getString(R.string.act_data_grid_cursor_failed))
+                        }
 
                         e.printStackTrace()
 

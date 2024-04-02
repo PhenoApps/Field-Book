@@ -35,20 +35,24 @@ class ObservationUnitPropertyDao {
                     .toFirst()[column].toString()
         }?: ""
 
-        fun getAllRangeId(context: Context): Array<Int> = withDatabase { db ->
+        fun getAllRangeId(context: Context): Array<Int> {
             val studyId = PreferenceManager.getDefaultSharedPreferences(context)
-                .getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+                .getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
 
-            val sortOrderClause = getSortOrderClause(context, studyId)
+            getSortedObservationUnitData(context, studyId)?.use { cursor ->
+                val ids = mutableListOf<Int>()
+                while (cursor.moveToNext()) {
+                    val idIndex = cursor.getColumnIndex("id")
+                    if (idIndex != -1) {
+                        ids.add(cursor.getInt(idIndex))
+                    }
+                }
+                return ids.toTypedArray()
+            }
 
-            val table = db.query(
-                sObservationUnitPropertyViewName,
-                select = arrayOf("id"),
-                orderBy = sortOrderClause
-            ).toTable()
+            return emptyArray()
+        }
 
-            table.map { it["id"] as Int }.toTypedArray()
-        } ?: emptyArray()
 
         fun getRangeFromId(firstName: String, secondName: String, uniqueName: String, id: Int): RangeObject = withDatabase { db ->
 //            data.range = cursor.getString(0);
@@ -203,64 +207,38 @@ class ObservationUnitPropertyDao {
         }
 
         /**
-         * This will print all observation data (if a trait is not observed it is null/empty string) for all observation units.
+         * This will print all observation data (if a trait is not observed it is null/empty string) and attributes for all observation units in a study.
          * The maxStatements parameter builds aggregate case statements for each variable, this way the output has column names that are one-to-one with variable names.
          * Where the column observation_variable_name value will be the observation value.
          * All observation_units are captured, even if they did not make an observation.
          * Inputs:
          * @param expId the field/study id
-         * @param uniqueName the field/study id
          * @param traits the list of traits to print, either all traits or just the active ones
          * @return a cursor that is used in CSVWriter and closed elsewhere
          */
 
-        fun getExportTableDataShort(
+        fun getExportTableData(
             context: Context,
             expId: Int,
-            uniqueName: String,
             traits: ArrayList<TraitObject>
         ): Cursor? = withDatabase { db ->
-
-            val selectAttribute = "units.observation_unit_db_id AS \"$uniqueName\""
-            val sortOrderClause = getSortOrderClause(context, expId.toString())
-
-            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
-            val selectObservations = sanitizeTraits.map { traitName ->
-                "MAX(CASE WHEN obs.observation_variable_name='$traitName' THEN obs.value ELSE NULL END) AS \"$traitName\""
-            }.joinToString(", ")
-
-            val query = """
-                SELECT $selectAttribute, $selectObservations
-                FROM observation_units AS units
-                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id
-                WHERE units.study_id = $expId
-                GROUP BY units.internal_id_observation_unit
-                ORDER BY $sortOrderClause
-            """.trimIndent()
-
-            Log.d("getExportTableDataShort", "Final Query: $query")
-            db.rawQuery(query, null)
-        }
-
-        fun getExportTableDataLong(
-                context: Context,
-                expId: Int,
-                traits: ArrayList<TraitObject>
-        ): Cursor? = withDatabase { db ->
-
             val headers = ObservationUnitAttributeDao.getAllNames(expId)
+
             val selectAttributes = headers.map { attributeName ->
                 "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
             }.joinToString(", ")
-            val sortOrderClause = getSortOrderClause(context, expId.toString())
 
-            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
-            val selectObservations = sanitizeTraits.map { traitName ->
+            val selectObservations = traits.map { trait ->
+                val traitName = DataHelper.replaceIdentifiers(trait.name)
                 "MAX(CASE WHEN obs.observation_variable_name='$traitName' THEN obs.value ELSE NULL END) AS \"$traitName\""
             }.joinToString(", ")
 
+            val combinedSelection = listOf(selectAttributes, selectObservations).filter { it.isNotEmpty() }.joinToString(", ")
+
+            // Construct the query
+            val sortOrderClause = getSortOrderClause(context, expId.toString())
             val query = """
-                SELECT $selectAttributes, $selectObservations
+                SELECT units.internal_id_observation_unit AS id, $combinedSelection
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
@@ -270,11 +248,41 @@ class ObservationUnitPropertyDao {
                 ORDER BY $sortOrderClause
             """.trimIndent()
 
-            Log.d("getExportTableDataLong", "Final Query: $query")
+            Log.d("getExportTableData", "Executing query: $query")
             db.rawQuery(query, null)
         }
 
-            /**
+        /**
+         * Same as above, but filters out all observation unit attributes other than the unique identifier chosen when the study was loaded
+         * @param expId the field/study id
+         * @param uniqueName the preference string that user chooses on field selection for unique plot names
+         * @param traits the list of traits to print, either all traits or just the active ones
+         * @return a cursor that is used in CSVWriter and closed elsewhere
+         */
+
+        fun getExportTableDataShort(
+            context: Context,
+            expId: Int,
+            uniqueName: String,
+            traits: ArrayList<TraitObject>
+        ): Cursor? {
+            getExportTableData(context, expId, traits)?.use { cursor ->
+                val matrixCursor = MatrixCursor(cursor.columnNames)
+                while (cursor.moveToNext()) {
+                    val rowData = arrayOfNulls<String>(cursor.columnCount)
+                    for (i in rowData.indices) {
+                        if (cursor.getColumnName(i) == uniqueName || traits.any { trait -> trait.name == cursor.getColumnName(i) }) {
+                            rowData[i] = cursor.getString(i)
+                        }
+                    }
+                    matrixCursor.addRow(rowData)
+                }
+                return matrixCursor
+            }
+            return null
+        }
+
+        /**
          * Same as above but filters by obs unit and trait format
          */
         fun convertDatabaseToTable(
@@ -309,11 +317,35 @@ class ObservationUnitPropertyDao {
             db.rawQuery(query, null)
         }
 
+        fun getSortedObservationUnitData(context: Context, studyId: Int): Cursor? = withDatabase { db ->
+            val headers = ObservationUnitAttributeDao.getAllNames(studyId).filter { it != "geo_coordinates" }
+
+            val selectStatement = headers.map { col ->
+                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
+            }.joinToString(", ")
+
+            val orderByClause = getSortOrderClause(context, studyId.toString())
+
+            val query = """
+                SELECT ${if (selectStatement.isNotEmpty()) "$selectStatement, " else ""} units.internal_id_observation_unit AS id, units.geo_coordinates
+                FROM ${ObservationUnit.tableName} AS units
+                LEFT JOIN ${ObservationUnitValue.tableName} AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
+                LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
+                WHERE units.study_id = $studyId
+                GROUP BY units.internal_id_observation_unit
+                ORDER BY $orderByClause
+            """.trimIndent()
+
+            Log.d("getSortedObsUnitData", "Executing dynamic query: $query")
+            db.rawQuery(query, null)
+        }
+
+
         private fun getSortOrderClause(context: Context, studyId: String): String = withDatabase { db ->
             val sortOrder = if (PreferenceManager.getDefaultSharedPreferences(context)
                     .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
 
-            var sortCols = "id" // Default sort column
+            var sortCols = "internal_id_observation_unit" // Default sort column
             try {
                 val sortName = db.query(
                     Study.tableName,
@@ -324,14 +356,14 @@ class ObservationUnitPropertyDao {
 
                 if (!sortName.isNullOrEmpty() && sortName != "null") {
                     sortCols = sortName.split(',')
-                        .joinToString(",") { col -> "cast(`$col` as integer), `$col`" } + ", id"
+                        .joinToString(",") { col -> "cast(`$col` as integer), `$col`" } + ", internal_id_observation_unit"
                 }
             } catch (e: Exception) {
                 Log.e("ObsUnitPropertyDao", "Error fetching sort order for study: $e")
             }
 
             "$sortCols $sortOrder"
-        } ?: "id ASC" // Provide a default non-null value
+        } ?: "internal_id_observation_unit ASC" // Provide a default non-null value
 
 
     }

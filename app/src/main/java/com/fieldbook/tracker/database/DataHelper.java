@@ -1034,10 +1034,10 @@ public class DataHelper {
 
     }
 
-    public Cursor getExportTableDataLong(int fieldId, ArrayList<TraitObject> traits) {
+    public Cursor getExportTableData(int fieldId, ArrayList<TraitObject> traits) {
 
         open();
-        return ObservationUnitPropertyDao.Companion.getExportTableDataLong(context, fieldId, traits);
+        return ObservationUnitPropertyDao.Companion.getExportTableData(context, fieldId, traits);
 
     }
 

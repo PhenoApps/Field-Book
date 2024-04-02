@@ -376,7 +376,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                         { database.getExportTableDataShort(fieldId, fo.unique_id, exportTrait) }
                     }
                     allColumns?.isChecked == true -> {
-                        { database.getExportTableDataLong(fieldId, exportTrait) }
+                        { database.getExportTableData(fieldId, exportTrait) }
                     }
                     else -> throw IllegalStateException("Neither onlyUnique nor allColumns checkboxes are checked.")
                 }
