@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:enabled="false"
+        android:focusable="false"
         android:gravity="center"
         android:inputType="textNoSuggestions"
         android:maxLines="1"

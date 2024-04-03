@@ -503,6 +503,21 @@
     <string name="act_collect_barcode_button_content_description">Start a barcode scanner.</string>
     <string name="act_collect_na_value_button_content_description">Fill value with not available.</string>
 
+    <!-- Observation Info -->
+    <string name="observation_metadata_title">Observation Metadata</string>
+    <string name="observation_info_study_name">Study Name</string>
+    <string name="observation_info_entry_id">Entry Id</string>
+    <string name="observation_info_trait_format">Trait Format</string>
+    <string name="observation_info_trait_name">Trait Name</string>
+    <string name="observation_info_value">Value</string>
+    <string name="observation_info_timestamp">Observation Timestamp</string>
+    <string name="observation_info_collector">Collector</string>
+    <string name="observations_info_geo_coordinates">Geo Coordinates</string>
+    <string name="observation_info_last_synced_time">Last Synced Time</string>
+    <string name="observation_info_additional_info">Additional Info</string>
+    <string name="observation_info_rep">Rep</string>
+    <string name="observation_info_other">Other</string>
+
 
 
 

@@ -23,7 +23,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -37,6 +36,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -49,6 +49,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
+import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
 import com.fieldbook.tracker.dialogs.SearchDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
@@ -87,6 +88,7 @@ import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -2285,6 +2287,7 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void inflateTrait(@NonNull BaseTraitLayout layout) {
+        Log.d(TAG, "inflateTrait: ");
         getTraitLayout().onExit();
         View v = LayoutInflater.from(this).inflate(layout.layoutId(), null);
         LinearLayout holder = findViewById(R.id.traitHolder);
@@ -2498,6 +2501,25 @@ public class CollectActivity extends ThemedActivity
         if (gps == null) return null;
 
         return gps.getLocation(0, 0);
+    }
+
+    public void showObservationMetadataDialog(){
+        ObservationModel currentObservationObject = getCurrentObservation();
+        if (currentObservationObject != null){
+            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(currentObservationObject);
+            dialogFragment.show(this.getSupportFragmentManager(), "observationMetadata");
+        }
+    }
+
+    private ObservationModel getCurrentObservation() {
+        String rep = getCollectInputView().getRep();
+        List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
+            for (ObservationModel m : models) {
+            if (rep.equals(m.getRep())) {
+                return m;
+            }
+        }
+        return null;
     }
 
     @Override

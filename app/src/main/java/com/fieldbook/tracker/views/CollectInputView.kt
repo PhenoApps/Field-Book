@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 
@@ -81,7 +82,12 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
     val editText: EditText
         get() = if (isRepeatEnabled()) {
             repeatView.getEditText() ?: originalEditText
-        } else originalEditText
+        } else originalEditText.apply {
+            setOnLongClickListener {
+                (context as CollectActivity).showObservationMetadataDialog()
+                true
+            }
+        }
 
     var text: String
         get() = if (isRepeatEnabled()) {
