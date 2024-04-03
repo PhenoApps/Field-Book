@@ -12,7 +12,7 @@ class UsbCameraFormat : TraitFormat(
     layoutView = null,
     nameStringResourceId = R.string.traits_format_usb_camera,
     iconDrawableResourceId = R.drawable.ic_trait_usb,
-    stringNameAux = null,
+    stringNameAux = { ctx -> ctx.getString(R.string.trait_name_alt_usb) },
     NameParameter(),
     DetailsParameter()
 )

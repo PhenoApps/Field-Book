@@ -4,51 +4,53 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
+import android.graphics.ImageFormat
+import android.hardware.camera2.CameraCharacteristics
 import android.provider.MediaStore
 import android.util.AttributeSet
 import android.util.Log
+import android.util.Size
 import android.view.View
-import androidx.documentfile.provider.DocumentFile
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.annotation.OptIn
+import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CameraActivity
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.adapters.ImageTraitAdapter
-import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.provider.GenericFileProvider
-import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
-import com.fieldbook.tracker.utilities.ExifUtil
-import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.Utils
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.fieldbook.tracker.views.CameraTraitSettingsView
+import com.google.common.util.concurrent.ListenableFuture
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
+import java.util.concurrent.Executors
 
-class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
+class PhotoTraitLayout : CameraTrait {
 
     companion object {
         const val TAG = "PhotoTrait"
         const val type = "photo"
         const val PICTURE_REQUEST_CODE = 252
+        val DEFAULT_CAMERAX_PREVIEW_SIZE = Size(640, 480)
     }
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    enum class Mode {
+        PREVIEW,
+        NO_PREVIEW
+    }
 
-    private var uris = arrayListOf<Uri>()
+    private lateinit var cameraSelector: CameraSelector
+    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
 
-    private var activity: Activity? = null
-
-    private lateinit var recyclerView: RecyclerView
-
+    private var supportedResolutions: List<Size> = listOf()
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -58,338 +60,282 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
         defStyleAttr
     )
 
-    override fun setNaTraitsText() {}
     override fun type() = type
 
-    override fun layoutId(): Int {
-        return R.layout.trait_photo
+    private fun displayPreviewMode(mode: Mode) {
+
+        cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+
+        cameraSelector =
+            CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
+
+        cameraProviderFuture.get().unbindAll()
+
+        cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
+            if (mode == Mode.NO_PREVIEW) {
+                bindNoPreviewLifecycle(cameraProvider)
+            } else bindPreviewLifecycle(cameraProvider)
+        }, ContextCompat.getMainExecutor(context))
     }
 
-    override fun init(act: Activity) {
+    private fun setupCaptureButton(takePictureCallback: () -> Unit) {
 
-        val capture = act.findViewById<FloatingActionButton>(R.id.capture)
-        capture.setOnClickListener(PhotoTraitOnClickListener())
+        captureBtn?.setOnClickListener {
 
-        activity = act
+            if (!isLocked) {
 
-        recyclerView = act.findViewById(R.id.trait_photo_rv)
-        recyclerView.adapter = ImageTraitAdapter(context, this)
+                if (checkPictureLimit()) {
 
-        recyclerView.requestFocus()
+                    takePictureCallback()
+
+                } else {
+
+                    Utils.makeToast(
+                        context,
+                        context.getString(R.string.traits_create_photo_maximum)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun setup() {
+
+        captureBtn?.visibility = View.VISIBLE
+        connectBtn?.visibility = View.GONE
+        settingsBtn?.visibility = View.VISIBLE
+
+        setupCaptureButton {
+
+            takePicture()
+
+        }
+
+        settingsBtn?.isEnabled = false
+
+        cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+
+        cameraSelector =
+            CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
+
+        cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
+            bindCameraForInformation(cameraProvider)
+        }, ContextCompat.getMainExecutor(context))
+    }
+
+    @OptIn(ExperimentalCamera2Interop::class)
+    private fun bindCameraForInformation(cameraProvider: ProcessCameraProvider) {
+
+        cameraProvider.unbindAll()
+
+        val cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+            .build()
+
+        val camera = cameraProvider.bindToLifecycle(
+            context as LifecycleOwner,
+            cameraSelector,
+        )
+
+        val info = Camera2CameraInfo.from(camera.cameraInfo)
+        val configs =
+            info.getCameraCharacteristic(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+        supportedResolutions = (configs?.getOutputSizes(ImageFormat.JPEG) ?: arrayOf()).toList()
+
+        settingsBtn?.isEnabled = true
+
+        cameraProvider.unbindAll()
+
+        //trigger ui update based on preferences
+        onSettingsChanged()
+    }
+
+    private fun bindNoPreviewLifecycle(cameraProvider: ProcessCameraProvider) {
+
+        previewView?.visibility = View.GONE
+
+        val cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+            .build()
+
+        val imageCapture = ImageCapture.Builder()
+            .build()
+
+        val cameraExecutor = Executors.newSingleThreadExecutor()
+
+        try {
+
+            val camera = cameraProvider.bindToLifecycle(
+                context as LifecycleOwner,
+                cameraSelector,
+                imageCapture
+            )
+
+            Log.d(CameraActivity.TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
+
+            setupCaptureButton {
+
+                val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
+
+                val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
+                imageCapture.takePicture(outputFileOptions, cameraExecutor,
+                    object : ImageCapture.OnImageSavedCallback {
+                        override fun onError(error: ImageCaptureException) {}
+                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                            makeImage(currentTrait)
+                        }
+                    })
+            }
+
+        } catch (_: IllegalArgumentException) {
+
+        }
+    }
+
+    private fun bindPreviewLifecycle(cameraProvider: ProcessCameraProvider) {
+
+        previewView?.visibility = View.VISIBLE
+
+        val preview = Preview.Builder()
+            .setTargetResolution(DEFAULT_CAMERAX_PREVIEW_SIZE)
+            .setTargetRotation(previewView?.display?.rotation ?: 0)
+            .build()
+
+        val cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+            .build()
+
+        val supportedResolutionPreferredIndex = prefs.getInt(
+            GeneralKeys.CAMERA_RESOLUTION,
+            0
+        )
+
+        val builder = ImageCapture.Builder()
+
+        if (supportedResolutions.isNotEmpty() && supportedResolutionPreferredIndex < supportedResolutions.size) {
+
+            val supportedResolution = supportedResolutions[supportedResolutionPreferredIndex]
+
+            builder.setTargetResolution(Size(supportedResolution.height, supportedResolution.width))
+                .build()
+
+        }
+
+        previewView?.display?.rotation?.let { rot ->
+            builder.setTargetRotation(rot)
+        }
+
+        val imageCapture = builder.build()
+
+        val cameraExecutor = Executors.newSingleThreadExecutor()
+
+        preview.setSurfaceProvider(previewView?.surfaceProvider)
+
+        try {
+
+            val camera = cameraProvider.bindToLifecycle(
+                context as LifecycleOwner,
+                cameraSelector,
+                preview,
+                imageCapture
+            )
+
+            Log.d(CameraActivity.TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
+
+            setupCaptureButton {
+
+                val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
+
+                val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
+                imageCapture.takePicture(outputFileOptions, cameraExecutor,
+                    object : ImageCapture.OnImageSavedCallback {
+                        override fun onError(error: ImageCaptureException) {}
+                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                            makeImage(currentTrait)
+                        }
+                    })
+            }
+
+        } catch (_: IllegalArgumentException) {
+
+        }
     }
 
     override fun loadLayout() {
-
-        loadLayoutWork()
-
+        super.loadLayout()
+        setup()
     }
 
-    private fun loadLayoutWork() {
+    override fun showSettings() {
 
-        val studyId = (context as CollectActivity).studyId
-
-        uris = arrayListOf()
-
-        currentTrait.name?.let { traitName ->
-
-            try {
-
-                val traitDbId = currentTrait.id
-
-                scope.launch {
-
-                    val plot = currentRange.plot_id
-                    val toc = System.currentTimeMillis()
-                    val uris = database.getAllObservations(studyId, plot, traitDbId)
-                    val tic = System.currentTimeMillis()
-                    Log.d(TAG, "Photo trait query time ${uris.size} photos: ${(tic - toc) * 1e-3}")
-
-                    val models = uris.mapIndexed { index, model ->
-                        ImageTraitAdapter.Model(
-                            model.value,
-                            index
-                        )
-                    }
-
-                    activity?.runOnUiThread {
-                        (recyclerView.adapter as ImageTraitAdapter).submitList(models)
-                        recyclerView.adapter?.notifyItemRangeChanged(0, models.size)
-                    }
-                }
-
-            } catch (e: Exception) {
-
-                e.printStackTrace()
-
+        AlertDialog.Builder(context)
+            .setTitle(R.string.trait_system_photo_settings_title)
+            .setPositiveButton(R.string.dialog_ok) { dialog, _ ->
+                onSettingsChanged()
+                dialog.dismiss()
             }
+            .setView(CameraTraitSettingsView(context, supportedResolutions))
+            .show()
+    }
+
+    override fun onSettingsChanged() {
+
+        val systemEnabled = preferences.getBoolean(GeneralKeys.CAMERA_SYSTEM, false)
+
+        if (systemEnabled) {
+
+            setupSystemCameraMode()
+
+        } else {
+
+            setupCameraXMode()
+
         }
     }
 
-    override fun deleteTraitListener() {
-        deletePhoto(isBrapi = false)
-    }
+    private fun setupSystemCameraMode() {
 
-    fun brapiDelete() {
-        deletePhoto(isBrapi = true)
-    }
+        previewView?.visibility = View.GONE
 
-    private fun displayPlotImage(path: Uri) {
-        try {
-            Log.w(TAG, path.toString())
-            val intent = Intent()
-            intent.action = Intent.ACTION_VIEW
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            intent.setDataAndType(path, "image/*")
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        cameraProviderFuture.get().unbindAll()
+
+        setupCaptureButton {
+
+            takePicture()
         }
     }
 
-    fun makeImage(currentTrait: TraitObject, newTraits: MutableMap<String, String>?, success: Boolean) {
+    private fun setupCameraXMode() {
 
-        val timeFormat = SimpleDateFormat(
-            "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
-        )
-
-        scope.launch {
-
-            currentTrait.name?.let { traitName ->
-
-                val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
-
-                val traitDbId = currentTrait.id
-                val studyId = (context as CollectActivity).studyId
-                val photosDir = getFieldMediaDirectory(context, sanitizedTraitName)
-                val unit = currentRange.plot_id
-
-                if (photosDir != null) {
-
-                    try {
-
-                        val cache = File(context.cacheDir, "temp.jpg")
-
-                        val uri = GenericFileProvider.getUriForFile(
-                            context,
-                            "com.fieldbook.tracker.fileprovider",
-                            cache
-                        )
-
-                        val rep = database.getNextRep(studyId, unit, traitDbId)
-
-                        val time = org.phenoapps.androidlibrary.Utils.getDateTime()
-
-                        val generatedName =
-                            currentRange.plot_id + "_" + sanitizedTraitName + "_" + rep + "_" + time + ".jpg"
-
-                        Log.w(TAG, photosDir.uri.toString() + generatedName)
-
-                        val file = photosDir.createFile("image/jpg", generatedName)
-
-                        if (file != null) {
-
-                            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                                context.contentResolver.openOutputStream(file.uri)
-                                    ?.use { outputStream ->
-                                        inputStream.copyTo(outputStream)
-
-                                        //if sdk > 24, can write exif information to the image
-                                        //goal is to encode observation variable model into the user comments
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-
-                                            ExifUtil.saveVariableUnitModelToExif(
-                                                context,
-                                                (controller.getContext() as CollectActivity).person,
-                                                time,
-                                                database.getStudyById(studyId),
-                                                database.getObservationUnitById(currentRange.plot_id),
-                                                database.getObservationVariableById(currentTrait.id),
-                                                file.uri
-                                            )
-
-                                        }
-                                    }
-                            }
-
-                            if (success) {
-
-                                try {
-
-                                    Utils.scanFile(context, file.uri.toString(), "image/*")
-
-                                    updateTraitAllowDuplicates(
-                                        plotId = unit,
-                                        traitDbId,
-                                        traitName,
-                                        type,
-                                        file.uri.toString(),
-                                        null,
-                                        newTraits,
-                                        rep
-                                    )
-
-                                } catch (e: Exception) {
-
-                                    e.printStackTrace()
-
-                                }
-
-                            } else {
-
-                                file.delete()
-
-                            }
-                        }
-
-                    } catch (e: Exception) {
-
-                        e.printStackTrace()
-
-                    }
-                }
-
-                activity?.runOnUiThread {
-
-                    loadLayoutWork()
-
-                    (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
-
-                }
-            }
-        }
-    }
-
-    private fun updateTraitAllowDuplicates(
-        plotId: String,
-        traitDbId: String,
-        traitName: String,
-        format: String,
-        value: String?,
-        newValue: String?,
-        newTraits: MutableMap<String, String>?,
-        rep: String,
-    ) {
-        if (value != newValue) {
-            if (currentRange == null || currentRange.plot_id.isEmpty()) {
-                return
-            }
-
-            value?.let { v ->
-
-                Log.d(TAG, "$format $v")
-                newTraits?.remove(traitName)
-                newTraits?.set(traitName, v)
-                val studyId = (context as CollectActivity).studyId
-                val observation =
-                    database.getObservationByValue(studyId, plotId, traitDbId, v)
-                database.deleteTraitByValue(studyId, plotId, traitDbId, v)
-                database.insertObservation(
-                    plotId,
-                    traitDbId,
-                    format,
-                    newValue ?: v,
-                    prefs.getString(
-                        GeneralKeys.FIRST_NAME,
-                        ""
-                    ) + " " + prefs.getString(GeneralKeys.LAST_NAME, ""),
-                    (activity as? CollectActivity)?.locationByPreferences,
-                    "",
-                    studyId,
-                    observation.dbId,
-                    observation.lastSyncedTime,
-                    rep
+        displayPreviewMode(
+            if (prefs.getBoolean(
+                    GeneralKeys.CAMERA_SYSTEM_PREVIEW,
+                    false
                 )
-            }
+            ) Mode.PREVIEW else Mode.NO_PREVIEW
+        )
+    }
+
+    fun makeImage(currentTrait: TraitObject) {
+
+        val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
+
+        file.inputStream().use { stream ->
+
+            val data = stream.readBytes()
+
+            saveJpegToStorage(
+                currentTrait.format,
+                data,
+                currentRange,
+                org.phenoapps.androidlibrary.Utils.getDateTime(),
+                SaveState.SINGLE_SHOT
+            )
         }
     }
 
-    private fun deletePhoto(isBrapi: Boolean, modelToDelete: ImageTraitAdapter.Model? = null) {
-
-        var model = modelToDelete
-        if (!isLocked) {
-
-            //if pressing the delete button bottom button, find the first visible photo to delete
-            if (model == null) {
-                val position =
-                    (recyclerView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
-                val adapter = (recyclerView.adapter as ImageTraitAdapter)
-                if (adapter.currentList.isNotEmpty()) {
-                    model = adapter.currentList[position]
-                }
-            }
-
-            model?.let { m ->
-
-                val studyId = (context as CollectActivity).studyId
-
-                val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
-
-                builder.setTitle(context.getString(R.string.dialog_warning))
-                builder.setMessage(context.getString(R.string.trait_delete_warning_photo))
-                builder.setPositiveButton(context.getString(R.string.dialog_yes)) { dialog, _ ->
-                    dialog.dismiss()
-
-                    if ((recyclerView.adapter?.itemCount ?: 0) > 0) {
-
-                        try {
-
-                            val file = DocumentFile.fromSingleUri(context, Uri.parse(m.uri))
-                            if (file != null && file.exists()) {
-                                file.delete()
-                            }
-
-                            // Remove individual images
-                            if (isBrapi) {
-                                updateTraitAllowDuplicates(
-                                    currentRange.plot_id,
-                                    currentTrait.id,
-                                    currentTrait.name,
-                                    "photo",
-                                    m.uri,
-                                    "NA",
-                                    newTraits,
-                                    (context as CollectActivity).rep
-                                )
-                            } else {
-                                database.deleteTraitByValue(
-                                    studyId,
-                                    currentRange.plot_id,
-                                    currentTrait.id,
-                                    m.uri
-                                )
-                            }
-
-                        } catch (e: Exception) {
-
-                            e.printStackTrace()
-
-                        }
-
-                    } else {
-
-                        // If an NA exists, delete it
-                        database.deleteTraitByValue(
-                            studyId,
-                            currentRange.plot_id,
-                            currentTrait.id,
-                            "NA"
-                        )
-                    }
-
-                    loadLayoutWork()
-
-                    (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
-                }
-
-                builder.setNegativeButton(context.getString(R.string.dialog_no)) { dialog, _ -> dialog.dismiss() }
-
-                activity?.runOnUiThread {
-                    val alert = builder.create()
-                    alert.show()
-                }
-            }
-        }
-    }
 
     /**
      * When button is pressed, create a cached image and switch to the camera intent.
@@ -397,7 +343,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
      */
     private fun takePicture() {
 
-        val file = File(context.cacheDir, "temp.jpg")
+        val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
 
         file.createNewFile()
 
@@ -430,57 +376,5 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
-    }
-
-    private fun getImageObservations(): Array<ObservationModel> {
-
-        val traitDbId = collectActivity.traitDbId.toInt()
-        val plot = collectActivity.observationUnit
-        val studyId = collectActivity.studyId
-
-        return database.getAllObservations(studyId).filter {
-            it.observation_variable_db_id == traitDbId && it.observation_unit_id == plot
-        }.toTypedArray()
-    }
-
-    private inner class PhotoTraitOnClickListener : OnClickListener {
-        override fun onClick(view: View) {
-            if (!isLocked) {
-                try {
-                    val m: Int = try {
-                        currentTrait.details.toInt()
-                    } catch (n: Exception) {
-                        0
-                    }
-                    val locations = getImageObservations()
-                    // Do not take photos if limit is reached
-                    if (m == 0 || locations.size < m) {
-                        takePicture()
-                    } else Utils.makeToast(
-                        context,
-                        context.getString(R.string.traits_create_photo_maximum)
-                    )
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Utils.makeToast(context, context.getString(R.string.trait_error_hardware_missing))
-                }
-            }
-        }
-    }
-
-    override fun onItemClicked(model: ImageTraitAdapter.Model) {
-
-        displayPlotImage(Uri.parse(model.uri))
-
-    }
-
-    override fun onItemDeleted(model: ImageTraitAdapter.Model) {
-
-        val studyId = (context as CollectActivity).studyId
-        val rep = (context as CollectActivity).rep
-        val status = database.isBrapiSynced(studyId, currentRange.plot_id, currentTrait.id, rep)
-
-        deletePhoto(status, model)
-
     }
 }

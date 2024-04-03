@@ -46,7 +46,11 @@ public class LayoutCollections {
         return getTraitLayout("text");
     }
 
-    public PhotoTraitLayout getPhotoTrait() {
+    public AbstractCameraTrait getPhotoTrait(String format) {
+        switch (format) {
+            case "photo":
+                return (PhotoTraitLayout) getTraitLayout("photo");
+        }
         return (PhotoTraitLayout) getTraitLayout("photo");
     }
 

@@ -252,6 +252,7 @@
     <string name="traits_create_true">True</string>
     <string name="traits_create_false">False</string>
     <string name="traits_create_categories_text">Use / to separate categories</string>
+    <string name="traits_create_camera">Camera</string>
 
     <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
     <string name="traits_create_warning_duplicate">Trait already exists</string>
@@ -1085,5 +1086,18 @@
     <string name="tutorial_main_repeated_values_description">This will open a dialog to manage the repeated values for the current observation unit.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="tutorial_main_geonav_description">This will open a configuration dialog to help with field navigation.</string>
+
+    <!-- base camera strings -->
+    <string name="trait_camera_connect_content_description">Starts a device connection.</string>
+    <string name="trait_camera_preview_content_description">This previews the camera\'s display.</string>
+    <string name="trait_camera_capture_content_description">Capture a photo</string>
+    <string name="delete_local_photo">Delete Photo</string>
+    <string name="trait_system_photo_settings_title">System Photo Settings</string>
+    <string name="trait_photos_no_settings">This trait has no settings.</string>
+    <string name="view_trait_photo_settings_preview_title">Preview</string>
+    <string name="view_trait_photo_settings_resolution_title">Target Resolution</string>
+    <string name="view_trait_photo_settings_system_title">System Camera</string>
+    <string name="trait_name_alt_photo_system">System</string>
+    <string name="trait_name_alt_usb">USB</string>
 
 </resources>

@@ -120,6 +120,12 @@
         <item name="android:backgroundTint">?fb_trait_button_background_tint</item>
     </style>
 
+    <style name="FloatingActionButtonStyle.SmallTraitButtons">
+        <item name="fabCustomSize">@dimen/fb_trait_fab_size_small</item>
+        <item name="maxImageSize">@dimen/fb_trait_fab_image_size_small</item>
+        <item name="android:backgroundTint">?fb_trait_button_background_tint</item>
+    </style>
+
     <!-- Preference Search bar card style, inherits android:widget style -->
     <style name="CardViewStyle" parent="Base.CardView" />
 

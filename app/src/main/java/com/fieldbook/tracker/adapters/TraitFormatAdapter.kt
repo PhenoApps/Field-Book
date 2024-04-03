@@ -60,7 +60,7 @@ class TraitFormatAdapter(
         // contents of the view with that element
         with(currentList[position]) {
             viewHolder.iconBtn.setImageResource(getIcon())
-            viewHolder.nameTv.text = getName(context)
+            viewHolder.nameTv.text = getReadableName(context)
 
             viewHolder.iconBtn.setOnClickListener {
 
