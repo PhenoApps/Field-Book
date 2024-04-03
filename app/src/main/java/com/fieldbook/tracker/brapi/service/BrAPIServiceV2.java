@@ -1263,7 +1263,25 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 } else {
                     trait.setFormat("text");
                 }
+                //For categorical traits, include label value pairs in details
+                if (trait.getFormat().equals("categorical")) {
+                    String details = trait.getDetails();
 
+                    if (var.getScale() != null &&
+                            var.getScale().getValidValues() != null &&
+                            var.getScale().getValidValues().getCategories() != null &&
+                            !var.getScale().getValidValues().getCategories().isEmpty()) {
+
+                        List<BrAPIScaleValidValuesCategories> categories = var.getScale().getValidValues().getCategories();
+                        details += "\nCategories: " + buildCategoryDescriptionString(categories);
+                    }
+                    trait.setDetails(details);
+//                    try {
+//                        trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
+//                    } catch (Exception e) {
+//                        Log.d("FieldBookError", "Error parsing trait label/value.");
+//                    }
+                }
             }
 
             // The BMS implementation of BrAPI 2.x Variables includes an Observation Variable with observationLevelNames metadata in the additionalInfo field.
