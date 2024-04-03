@@ -72,12 +72,16 @@ public class StatisticsCalendarFragment extends Fragment {
             @Override
             public void bind(@NonNull DayViewContainer container, CalendarDay day) {
                 container.calendarDayText.setText(String.valueOf(day.getDate().getDayOfMonth()));
+
+                // Reset the text and background color
+                container.calendarDayText.setTextColor(Color.TRANSPARENT);
+                container.circleBackground.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+
                 if (day.getPosition() == DayPosition.MonthDate) {
                     // Setting the background color for the date
+                    container.calendarDayText.setTextColor(Color.BLACK);
                     int count = observationCount.getOrDefault(day.getDate(), 0);
                     if (count > 0) container.circleBackground.setBackgroundTintList(ColorStateList.valueOf(getColorForObservations(count)));
-                } else {
-                    container.calendarDayText.setTextColor(Color.TRANSPARENT);
                 }
             }
         });

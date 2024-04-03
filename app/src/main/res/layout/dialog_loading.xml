@@ -11,7 +11,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/loading_stats">
+        app:layout_constraintEnd_toStartOf="@id/loading_stats"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp" >
     </ProgressBar>
 
     <TextView
@@ -23,8 +25,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/loading_icon"
         android:text="@string/stats_loading"
-        android:textStyle="bold">
-
+        android:textStyle="bold"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp" >
     </TextView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
