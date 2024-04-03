@@ -54,6 +54,11 @@ class ImageTraitAdapter(
                 listener.onItemClicked(view.tag as Model)
             }
 
+            view.setOnLongClickListener {
+                showObservationMetadataDialog(layoutPosition + 1)
+                true
+            }
+
             closeButton.setOnClickListener {
                 listener.onItemDeleted(view.tag as Model)
             }
@@ -82,10 +87,6 @@ class ImageTraitAdapter(
             val bmp = decodeBitmap(Uri.parse(this.uri))
             if (bmp != null) viewHolder.progressBar.visibility = View.GONE
             viewHolder.imageView.setImageBitmap(bmp)
-            viewHolder.imageView.setOnLongClickListener {
-                showObservationMetadataDialog(position + 1)
-                true
-            }
             viewHolder.itemView.tag = this
         }
     }
