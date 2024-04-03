@@ -893,6 +893,7 @@
 
     <string name="preferences_brapi_servers_title">Community Servers</string>
     <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
+    <string name="preferences_brapi_server_scan_error">Scan Error</string>
     <string name="preferences_brapi_server_cassavabase" translatable="false">CassavaBase</string>
     <string name="preferences_brapi_server_t3_wheat" translatable="false">T3 Wheat Sandbox</string>
     <string name="preferences_brapi_server_t3_oat" translatable="false">T3 Oat Sandbox</string>
