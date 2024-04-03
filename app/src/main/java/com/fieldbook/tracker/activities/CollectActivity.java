@@ -924,6 +924,8 @@ public class CollectActivity extends ThemedActivity
 
         preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
 
+        traitLayouts.unregisterAllReceivers();
+
         super.onPause();
     }
 
@@ -1038,6 +1040,8 @@ public class CollectActivity extends ThemedActivity
         }
 
         dataLocked = preferences.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
+
+        traitLayouts.registerAllReceivers();
 
         refreshLock();
     }
@@ -2207,15 +2211,15 @@ public class CollectActivity extends ThemedActivity
     /**
      * Inserts a user observation whenever a label is printed.
      * See ResultReceiver onReceiveResult in LabelPrintLayout
-     * @param size: The size of the label. e.g "2 x 4 detailed"
+     * @param labelNumber: The number of labels printed.
      */
-    public void insertPrintObservation(String size) {
+    public void insertPrintObservation(String labelNumber) {
 
         TraitObject trait = getCurrentTrait();
 
         String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertObservation(rangeBox.getPlotID(), trait.getId(), trait.getFormat(), size,
+        database.insertObservation(rangeBox.getPlotID(), trait.getId(), trait.getFormat(), labelNumber,
                 getPerson(),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);
