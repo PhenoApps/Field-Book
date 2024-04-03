@@ -148,6 +148,7 @@
     <!--- Repeated measures -->
     <!--- GeoNav -->
     <!--- Content Descriptions -->
+    <!-- Observation Info -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">ডাটাবেজ</string>
