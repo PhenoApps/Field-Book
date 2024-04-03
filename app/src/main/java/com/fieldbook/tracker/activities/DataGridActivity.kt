@@ -262,8 +262,6 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                                 val header = cursor.getString(rowHeaderIndex)
 
-                                Log.d("DataGridActivity", "Processing row with uniqueIndex: $uniqueIndex, id: $id, header: $header")
-
                                 val dataList = arrayListOf<CellData>()
 
                                 mRowHeaders.add(header) //add unique name row header

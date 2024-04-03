@@ -347,20 +347,31 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
             if (checkDbBool) {
                 val columns = ArrayList<String>().apply {
-                    if (onlyUnique?.isChecked == true) add(fo.unique_id)
-                    if (allColumns?.isChecked == true) addAll(database.getAllObservationUnitAttributeNames(fieldId))
+                    addAll(database.getAllObservationUnitAttributeNames(fieldId))
                 }
-                Log.d(TAG, "Columns are: " + columns.joinToString())
-                database.getExportDBData(columns.toTypedArray(), exportTrait, fieldId).use { cursor ->
-                    try {
-                        if (cursor.count > 0) {
-                            createExportFile(cursor, "database", fieldFileString, columns)
-                        } else {
-                            ExportResult.NoData
+
+                try {
+                    val cursorAndColumnsPair = when {
+                        onlyUnique?.isChecked == true -> {
+                            database.getExportDBDataShort(columns.toTypedArray(), fo.unique_id, exportTrait, fieldId) to arrayListOf(fo.unique_id)
                         }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Operation failed: ${e.message}", e)
+                        allColumns?.isChecked == true -> {
+                            database.getExportDBData(columns.toTypedArray(), exportTrait, fieldId) to columns
+                        }
+                        else -> null
                     }
+
+                    cursorAndColumnsPair?.let { (cursor, columnsForExport) ->
+                        cursor.use { cur ->
+                            if (cur.count > 0) {
+                                createExportFile(cur, "database", fieldFileString, columnsForExport)
+                            } else {
+                                ExportResult.NoData
+                            }
+                        }
+                    } ?: Log.d(TAG, "No database export condition matched.")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Operation failed: ${e.message}", e)
                 }
             }
 
