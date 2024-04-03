@@ -1,6 +1,9 @@
 package com.fieldbook.tracker.activities;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -35,6 +38,7 @@ public class StatisticsActivity extends ThemedActivity implements StatisticsAdap
     RecyclerView rvStatisticsCard;
     private int toggleVariable = 0;
     private Snackbar snackbar;
+    AlertDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +57,11 @@ public class StatisticsActivity extends ThemedActivity implements StatisticsAdap
         rvStatisticsCard = findViewById(R.id.statistics_card_rv);
         rvStatisticsCard.setLayoutManager(new LinearLayoutManager(this));
 
-        setSeasons();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+        builder.setView(getLayoutInflater().inflate(R.layout.dialog_loading, null));
+        loadingDialog = builder.create();
+
+        loadData();
 
         snackbar = Snackbar.make(rvStatisticsCard, R.string.stats_export, Snackbar.LENGTH_INDEFINITE);
         snackbar.setAction(getString(R.string.dialog_close), view -> snackbar.dismiss());
@@ -76,7 +84,7 @@ public class StatisticsActivity extends ThemedActivity implements StatisticsAdap
 
         if (itemId == toggleViewId) {
             toggleVariable = 1 - toggleVariable;
-            setSeasons();
+            loadData();
             return true;
         } else if (itemId == heatmapId) {
             StatisticsCalendarFragment calendarFragment = new StatisticsCalendarFragment(this);
@@ -90,6 +98,16 @@ public class StatisticsActivity extends ThemedActivity implements StatisticsAdap
     @NonNull
     public DataHelper getDatabase() {
         return database;
+    }
+
+    /**
+     * Displays the loading screen and loads the statistics asynchronously
+     */
+    public void loadData() {
+        loadingDialog.show();
+
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        mainHandler.post(this::setSeasons);
     }
 
     public void setSeasons() {
@@ -107,6 +125,8 @@ public class StatisticsActivity extends ThemedActivity implements StatisticsAdap
         seasons = new ArrayList<>(uniqueSeasons);
         rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons, this));
 
+        // Dismiss the dialog after the recycler view loads all its children
+        rvStatisticsCard.post(() -> loadingDialog.dismiss());
     }
 
     @Override
