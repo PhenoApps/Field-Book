@@ -2449,7 +2449,7 @@ public class DataHelper {
      */
     public void exportDatabase(Context ctx, String filename) throws IOException {
         String internalDbPath = getDatabasePath(this.context);
-        String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
+        String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/com.fieldbook.tracker_preferences.xml";
 
         close();
 
@@ -2728,6 +2728,8 @@ public class DataHelper {
 
         @Override
         public void onOpen(SQLiteDatabase db) {
+
+            db.disableWriteAheadLogging();
 
             //enables foreign keys for cascade deletes
             db.rawQuery("PRAGMA foreign_keys=ON;", null).close();
