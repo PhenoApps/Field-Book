@@ -2,6 +2,7 @@ package com.fieldbook.tracker.dialogs
 
 import android.database.sqlite.SQLiteAbortException
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -13,13 +14,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.Group
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.FieldEditorActivity
+import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
+import com.fieldbook.tracker.objects.ImportFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 /**
@@ -33,7 +36,7 @@ import java.util.UUID
  *
  *                 FieldCreatorDialog dialog = new FieldCreatorDialog(this);
  */
-class FieldCreatorDialog(private val activity: FieldEditorActivity) :
+class FieldCreatorDialog(private val activity: ThemedActivity) :
     BorderedDialog(activity, R.style.AppAlertDialog), CoroutineScope by MainScope() {
 
     private val helper by lazy { DataHelper(context) }
@@ -45,6 +48,14 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) :
     var studyDbId: Int = -1
 
     var mCancelJobFlag = false
+
+    // Inside FieldCreatorDialog class
+    interface FieldCreationCallback {
+        fun onFieldCreated(studyDbId: Int)
+    }
+
+    var fieldCreationCallback: FieldCreationCallback? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -303,18 +314,20 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) :
 //    private fun insertBasicField(name: String, rows: Int, cols: Int, startId: Int, pattern: Int) {
 
     private fun insertBasicField(name: String, rows: Int, cols: Int, pattern: Int) {
-
+        Log.d("FieldCreatorDialog", "Starting to insert basic field with name: $name")
         //insert job is cancelled when the cancel button is pressed
         val cancelButton = findViewById<Button>(R.id.dialog_field_creator_cancel_button)
-        cancelButton.setOnClickListener { mCancelJobFlag = true }
+        cancelButton.setOnClickListener {
+            mCancelJobFlag = true
+            Log.d("FieldCreatorDialog", "New field insert job cancelled by user.")
+        }
 
         scope.launch {
-
-            with(DataHelper.db) {
-
+            // Database operation might be time-consuming, so we run it on the IO dispatcher
+            val createdFieldId = withContext(Dispatchers.IO) {
                 try {
-
-                    beginTransaction()
+                    DataHelper.db.beginTransaction()
+                    Log.d("FieldCreatorDialog", "Inserting new field in the database.")
 
                     val field = FieldObject().apply {
                         unique_id = "plot_id"
@@ -322,6 +335,9 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) :
                         secondary_id = "Column"
                         exp_sort = "Plot"
                         exp_name = name
+                        exp_alias = name
+                        exp_source = activity.getString(R.string.field_book)
+                        import_format = ImportFormat.INTERNAL
                         count = (rows * cols).toString()
                     }
 
@@ -329,12 +345,11 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) :
                     studyDbId = helper.createField(field, fieldColumns)
 
                     updateFieldInsertText(rows.toString(), cols.toString())
-
                     insertPlotData(
-                            fieldColumns,
-                            rows,
-                            cols,
-                            linear = pattern == R.id.plot_linear_button
+                        fieldColumns,
+                        rows,
+                        cols,
+                        linear = pattern == R.id.plot_linear_button
                     )
 
                     //eight different cases to consider, P = patterns (linear and zigzag), S = starting states (TL, BR, TR, BL)
@@ -384,20 +399,26 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) :
 //                        }
 //                    }
 
-                    setTransactionSuccessful()
+                    DataHelper.db.setTransactionSuccessful()
+                    studyDbId // Return the new study ID
 
-                } catch (e: SQLiteAbortException) {
-
-                    e.printStackTrace()
-
+                } catch (e: Exception) {
+                    Log.e("FieldCreatorDialog", "Exception during new field insertion: ${e.message}", e)
+                    -1 // Indicate failure
                 } finally {
-
-                    endTransaction()
-
-                    this@FieldCreatorDialog.dismiss()
-
+                    DataHelper.db.endTransaction()
                 }
             }
+
+            if (studyDbId != -1) {
+                // Switch to the Main dispatcher for UI operations
+                withContext(Dispatchers.Main) {
+                    Log.d("FieldCreatorDialog", "New field insertion successful, invoking callback with new field id: $studyDbId")
+                    fieldCreationCallback?.onFieldCreated(createdFieldId)
+                }
+            }
+            dismiss()
+
         }
     }
 

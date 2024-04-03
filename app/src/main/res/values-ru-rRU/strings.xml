@@ -32,6 +32,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">Экспорт</string>
     <!-- Delete -->
     <!-- Import -->
     <string name="import_dialog_unique">уникальный идентификатор</string>
@@ -40,7 +42,8 @@
     <string name="import_error_unique">Уникальный идентификатор содержит повторения</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <!-- Trait import/export -->

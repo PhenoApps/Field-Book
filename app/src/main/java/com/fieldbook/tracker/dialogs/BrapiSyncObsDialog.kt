@@ -10,6 +10,7 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.text.Html
+import android.util.Log
 import android.view.View
 import android.view.Window
 import android.widget.Button
@@ -22,6 +23,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.dao.ObservationVariableDao
+import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -34,7 +36,7 @@ data class StudyObservations(var fieldBookStudyDbId:Int=0, val traitList: Mutabl
     }
 }
 
-class BrapiSyncObsDialog(context: Context) : Dialog(context), View.OnClickListener {
+class BrapiSyncObsDialog(context: Context, private val syncController: FieldSyncController, private val fieldObject: FieldObject ) : Dialog(context), View.OnClickListener {
     private var saveBtn: Button? = null
     private var noObsLabel: TextView? = null
     private var brAPIService: BrAPIService? = null
@@ -43,19 +45,21 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context), View.OnClickListen
 
     lateinit var paginationManager: BrapiPaginationManager
 
-    lateinit var selectedField: FieldObject
     lateinit var fieldNameLbl: TextView
 
     // Creates a new thread to do importing
     private val importRunnable =
-        Runnable { ImportRunnableTask(context,studyObservations).execute(0) }
-
+        Runnable { ImportRunnableTask(context, studyObservations, syncController).execute(0) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setCanceledOnTouchOutside(false)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.dialog_brapi_sync_observations)
+        setupUI()
+    }
+
+    private fun setupUI() {
         brAPIService = BrAPIServiceFactory.getBrAPIService(this.context)
         val pageSize = PreferenceManager.getDefaultSharedPreferences(context)
             .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50")!!.toInt()
@@ -68,20 +72,16 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context), View.OnClickListen
         cancelBtn.setOnClickListener(this)
     }
 
-    fun setFieldObject(fieldObject: FieldObject) {
-        this.selectedField = fieldObject
-    }
-
     override fun onStart() {
         // Set our OK button to be disabled until we are finished loading
         saveBtn!!.visibility = View.GONE
         //Hide the error message in case no observations are downloaded.
         noObsLabel!!.visibility = View.GONE
 
-        fieldNameLbl.text = selectedField.exp_name
+        fieldNameLbl.text = fieldObject.exp_name
 
         //need to call the load code
-        loadObservations(selectedField)
+        loadObservations()
     }
 
     override fun onClick(v: View) {
@@ -97,9 +97,10 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context), View.OnClickListen
     /**
      * Function to load the observations from a specific study
      */
-    private fun loadObservations(study: FieldObject) {
-        val brapiStudyDbId = study.exp_alias
-        val fieldBookStudyDbId = study.exp_id
+    private fun loadObservations() {
+        val brapiStudyDbId = fieldObject.study_db_id
+        val fieldBookStudyDbId = fieldObject.exp_id
+        Log.d("BrapiSyncObsDialog", "brapiStudyDbId is "+brapiStudyDbId+" and fieldBookStudyDbId is "+fieldBookStudyDbId);
         val brAPIService = BrAPIServiceFactory.getBrAPIService(this.context)
 
 
@@ -128,7 +129,7 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context), View.OnClickListen
                             studyObservations.merge(currentStudy)
 
 
-                            //Print out the values for debug
+//                            Print out the values for debug
 //                                for (obs in currentStudy.observationList) {
 //                                    println("***************************")
 //                                    println("StudyId: " + obs.studyId)
@@ -212,7 +213,9 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context), View.OnClickListen
 }
 // Mimics the class used in the csv field importer to run the saving
 // task in a different thread from the UI thread so the app doesn't freeze up.
-internal class ImportRunnableTask(val context: Context, val studyObservations: StudyObservations) : AsyncTask<Int, Int, Int>() {
+internal class ImportRunnableTask(
+    val context: Context, val studyObservations: StudyObservations,
+    private val syncController: FieldSyncController) : AsyncTask<Int, Int, Int>() {
 
     var dialog: ProgressDialog? = null
     var fail = false
@@ -235,7 +238,7 @@ internal class ImportRunnableTask(val context: Context, val studyObservations: S
 
         val traitIdToType = mutableMapOf<String,String>()
         try {
-            //Sync the traits first
+            //Sync the traits first and update date
             for (trait in studyObservations.traitList) {
                 dataHelper.insertTraits(trait)
             }
@@ -244,6 +247,7 @@ internal class ImportRunnableTask(val context: Context, val studyObservations: S
                 val currentId = ObservationVariableDao.getTraitByName(trait.name)!!.id
                 traitIdToType[currentId] = trait.format
             }
+            dataHelper.updateSyncDate(studyObservations.fieldBookStudyDbId)
         }
         catch (exc: Exception) {
             fail = true
@@ -279,9 +283,9 @@ internal class ImportRunnableTask(val context: Context, val studyObservations: S
     }
 
 
-    override fun onPostExecute(result: Int) {
-        if (dialog!!.isShowing) dialog!!.dismiss()
-        if(fail) {
+    override fun onPostExecute(result: Int?) {
+        if (dialog?.isShowing == true) dialog?.dismiss()
+        if (result == null || fail) {
             val alertDialogBuilder = AlertDialog.Builder(context, R.style.AppAlertDialog)
             alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
                 .setPositiveButton(R.string.dialog_ok) { dialogInterface, i ->
@@ -291,6 +295,8 @@ internal class ImportRunnableTask(val context: Context, val studyObservations: S
             alertDialogBuilder.setMessage(failMessage)
             val alertDialog = alertDialogBuilder.create()
             alertDialog.show()
+        } else {
+            syncController?.onSyncComplete()
         }
     }
 }

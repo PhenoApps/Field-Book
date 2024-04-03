@@ -193,7 +193,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             controller.getDatabase().close();
             controller.getDatabase().open();
 
-            controller.getDatabase().updateExpTable(true, false, false, studyId);
+            controller.getDatabase().updateImportDate(studyId);
 
         } catch (Exception e) {
             e.printStackTrace();
