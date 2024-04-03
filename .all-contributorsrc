@@ -386,6 +386,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "rmcp",
+      "name": "Renier Pestana",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5850588?v=4",
+      "profile": "https://github.com/rmcp",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
