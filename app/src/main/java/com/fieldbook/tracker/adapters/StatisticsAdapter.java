@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -50,27 +51,27 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
     private final SimpleDateFormat timeStampFormat;
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
     private static final String DATE_FORMAT_PATTERN = "MM-dd-yy";
-    private final statisticsCardLongPressedListener listener;
     private final int intervalThreshold = 30;
 
 
-    public StatisticsAdapter(StatisticsActivity context, List<String> seasons, StatisticsAdapter.statisticsCardLongPressedListener listener) {
+    public StatisticsAdapter(StatisticsActivity context, List<String> seasons) {
         this.originActivity = context;
         this.database = originActivity.getDatabase();
         this.seasons = seasons;
         this.timeStampFormat = new SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.getDefault());
-        this.listener = listener;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView statValue1, statValue2, statValue3, statValue4, statValue5, statValue6, statValue7, statValue8, year_text_view;
         LinearLayout stat1, stat2, stat3, stat4, stat5, stat6, stat7, stat8;
         ConstraintLayout statisticsCard;
+        ImageView exportCard;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             statisticsCard = itemView.findViewById(R.id.statistics_card);
+            exportCard = itemView.findViewById(R.id.export_card);
 
             statValue1 = itemView.findViewById(R.id.stat_value_1);
             statValue2 = itemView.findViewById(R.id.stat_value_2);
@@ -224,6 +225,8 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             return true;
         });
 
+        holder.exportCard.setOnClickListener(view -> exportCard(holder));
+
     }
 
     @Override
@@ -261,8 +264,6 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
      * Exports a statistics card as an image
      */
     public void exportCard(ViewHolder holder) {
-
-        listener.dismissSnackBar();
 
         Bitmap cardBitmap = Bitmap.createBitmap(holder.statisticsCard.getWidth(), holder.statisticsCard.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas cardCanvas = new Canvas(cardBitmap);
@@ -303,13 +304,6 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
                 v.append(", ").append(cats.get(i).getValue());
         }
         return v.toString();
-    }
-
-    public interface statisticsCardLongPressedListener {
-        /**
-         * Used to dismiss the snackbar on Statistics Activity when a card is long pressed
-         */
-        void dismissSnackBar();
     }
 
 }

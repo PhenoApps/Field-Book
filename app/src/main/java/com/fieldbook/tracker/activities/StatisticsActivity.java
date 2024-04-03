@@ -17,7 +17,6 @@ import com.fieldbook.tracker.adapters.StatisticsAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.dialogs.StatisticsCalendarFragment;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,14 +29,13 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class StatisticsActivity extends ThemedActivity implements StatisticsAdapter.statisticsCardLongPressedListener {
+public class StatisticsActivity extends ThemedActivity {
     public static String TAG = "Statistics Activity";
     @Inject
     DataHelper database;
     List<String> seasons = new ArrayList<>();
     RecyclerView rvStatisticsCard;
     private int toggleVariable = 0;
-    private Snackbar snackbar;
     AlertDialog loadingDialog;
 
     @Override
@@ -63,9 +61,6 @@ public class StatisticsActivity extends ThemedActivity implements StatisticsAdap
 
         loadData();
 
-        snackbar = Snackbar.make(rvStatisticsCard, R.string.stats_export, Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction(getString(R.string.dialog_close), view -> snackbar.dismiss());
-        snackbar.show();
     }
 
     @Override
@@ -123,14 +118,10 @@ public class StatisticsActivity extends ThemedActivity implements StatisticsAdap
         }
 
         seasons = new ArrayList<>(uniqueSeasons);
-        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons, this));
+        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons));
 
         // Dismiss the dialog after the recycler view loads all its children
         rvStatisticsCard.post(() -> loadingDialog.dismiss());
     }
 
-    @Override
-    public void dismissSnackBar() {
-        snackbar.dismiss();
-    }
 }

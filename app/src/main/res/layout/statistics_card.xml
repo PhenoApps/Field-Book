@@ -11,22 +11,39 @@
         android:layout_height="wrap_content"
         android:id="@+id/statistics_card">
 
-        <TextView
-            android:id="@+id/year_text_view"
+        <LinearLayout
+            android:id="@+id/card_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="?attr/fb_title_text_size"
-            android:textStyle="bold"
-            android:padding="8dp"
-            android:paddingStart="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/stats_container" />
+            app:layout_constraintBottom_toTopOf="@id/stats_container">
+
+            <TextView
+                android:id="@+id/year_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:textSize="?attr/fb_title_text_size"
+                android:textStyle="bold"
+                android:padding="8dp"
+                android:paddingStart="16dp" />
+
+            <ImageView
+                android:id="@+id/export_card"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="5dp"
+                android:src="@drawable/ic_stats_export">
+            </ImageView>
+
+        </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/stats_container"
-            app:layout_constraintTop_toBottomOf="@id/year_text_view">
+            app:layout_constraintTop_toBottomOf="@id/card_header">
 
             <LinearLayout
                 android:id="@+id/first_row"
