@@ -141,6 +141,7 @@
     <string name="dialog_multi_measure_delete">Radera</string>
     <!--- GeoNav -->
     <!--- Content Descriptions -->
+    <!-- Observation Info -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">Databas</string>

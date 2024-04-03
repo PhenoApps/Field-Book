@@ -178,6 +178,7 @@
     <string name="dialog_multi_measure_delete">Cancella</string>
     <!--- GeoNav -->
     <!--- Content Descriptions -->
+    <!-- Observation Info -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Locale</string>

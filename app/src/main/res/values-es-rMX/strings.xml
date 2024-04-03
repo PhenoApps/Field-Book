@@ -400,6 +400,10 @@
     <string name="act_collect_delete_value_button_content_description">Elimina el valor actual.</string>
     <string name="act_collect_barcode_button_content_description">Iniciar escáner de código de barras.</string>
     <string name="act_collect_na_value_button_content_description">Rellenar el valor con no disponible.</string>
+    <!-- Observation Info -->
+    <string name="observation_info_trait_format">Formato de Variable</string>
+    <string name="observation_info_value">Valor</string>
+    <string name="observation_info_other">Otro</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Local</string>
