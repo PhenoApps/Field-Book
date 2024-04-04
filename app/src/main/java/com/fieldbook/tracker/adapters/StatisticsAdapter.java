@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -25,7 +26,6 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FileUtil;
-import com.fieldbook.tracker.utilities.Utils;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
@@ -52,6 +52,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
     private static final String DATE_FORMAT_PATTERN = "MM-dd-yy";
     private final int intervalThreshold = 30;
+    Toast toast;
 
 
     public StatisticsAdapter(StatisticsActivity context, List<String> seasons) {
@@ -188,20 +189,20 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             for (String field: fields) {
                 fieldNames.add(database.getFieldObject(Integer.valueOf(field)).getExp_name());
             }
-            displayDialog(R.string.stat_fields_dialog_title, fieldNames);
+            displayDialog(originActivity.getString(R.string.stat_fields_dialog_title) + " " + seasons.get(position), fieldNames);
         });
 
-        holder.stat2.setOnClickListener(view -> Utils.makeToast(originActivity, observationUnits.size() + " plots have had data collected"));
-        holder.stat3.setOnClickListener(view -> Utils.makeToast(originActivity, observations.length + " total observations have been collected"));
-        holder.stat4.setOnClickListener(view -> Utils.makeToast(originActivity, timeString + " hours have been spent in collecting the data"));
-        holder.stat5.setOnClickListener(view -> displayDialog(R.string.stat_people_dialog_title, new ArrayList<>(collectors)));
+        holder.stat2.setOnClickListener(view -> displayToast(observationUnits.size() + " " + originActivity.getString(R.string.stat_entries_toast_message)));
+        holder.stat3.setOnClickListener(view -> displayToast(observations.length + " " + originActivity.getString(R.string.stat_data_toast_message)));
+        holder.stat4.setOnClickListener(view -> displayToast(timeString + " " + originActivity.getString(R.string.stat_hours_toast_message)));
+        holder.stat5.setOnClickListener(view -> displayDialog(originActivity.getString(R.string.stat_people_dialog_title), new ArrayList<>(collectors)));
 
         int finalImageCount = imageCount;
-        holder.stat6.setOnClickListener(view -> Utils.makeToast(originActivity, finalImageCount + " photos have been clicked"));
+        holder.stat6.setOnClickListener(view -> displayToast(finalImageCount + " " + originActivity.getString(R.string.stat_photos_toast_message)));
 
         int finalMaxObservationsInADay = maxObservationsInADay;
         String finalDateWithMostObservations = dateWithMostObservations;
-        holder.stat7.setOnClickListener(view -> Utils.makeToast(originActivity, finalMaxObservationsInADay + " observations were collected on " + finalDateWithMostObservations));
+        holder.stat7.setOnClickListener(view -> displayToast(finalMaxObservationsInADay + " " + originActivity.getString(R.string.stat_busiest_toast_message) + " " + finalDateWithMostObservations));
 
         String finalUnitWithMostObservations = unitWithMostObservations;
         holder.stat8.setOnClickListener(view -> {
@@ -217,12 +218,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
                         data.add(observation.getObservation_variable_name() + ": " + observation.getValue());
                 }
             }
-            displayDialog(R.string.stat_most_dialog_title, data);
-        });
-
-        holder.statisticsCard.setOnLongClickListener(view -> {
-            exportCard(holder);
-            return true;
+            displayDialog(finalUnitWithMostObservations, data);
         });
 
         holder.exportCard.setOnClickListener(view -> exportCard(holder));
@@ -236,20 +232,24 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
     /**
      * Displays a dialog with the list of matching items of a statistic
-     * @param titleStringId: title of the dialog
+     * @param titleString: title of the dialog
      * @param data list of items to be displayed
      */
-    public void displayDialog(int titleStringId, List<String> data) {
+    public void displayDialog(String titleString, List<String> data) {
+
+        if (toast != null) {
+            toast.cancel();
+        }
 
         if (data.size() == 0) {
-            Utils.makeToast(originActivity, originActivity.getString(R.string.warning_no_data));
+            displayToast(originActivity.getString(R.string.warning_no_data));
             return;
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
 
         View layout = originActivity.getLayoutInflater().inflate(R.layout.dialog_individual_statistics, null);
-        builder.setTitle(titleStringId).setView(layout);
+        builder.setTitle(titleString).setView(layout);
         builder.setNegativeButton(R.string.dialog_close, (dialogInterface, id) -> dialogInterface.dismiss());
 
         final AlertDialog dialog = builder.create();
@@ -258,6 +258,18 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         statsList.setAdapter(new StatisticsListAdapter(originActivity, data));
 
         dialog.show();
+    }
+
+    /**
+     * Displays a toast with the given message
+     * @param toastMessage: message to be displayed
+     */
+    public void displayToast(String toastMessage) {
+        if (toast != null) {
+            toast.cancel();
+        }
+        toast = Toast.makeText(originActivity, toastMessage, Toast.LENGTH_LONG);
+        toast.show();
     }
 
     /**

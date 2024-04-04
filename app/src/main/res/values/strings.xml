@@ -778,9 +778,15 @@
     <string name="stat_title_busiest">Busiest</string>
     <string name="stat_title_most">Most</string>
 
-    <string name="stat_fields_dialog_title">List of Fields</string>
+    <string name="stat_fields_dialog_title">Fields imported in</string>
     <string name="stat_people_dialog_title">List of People</string>
     <string name="stat_most_dialog_title">List of Observations</string>
+
+    <string name="stat_entries_toast_message">entries have been phenotyped</string>
+    <string name="stat_data_toast_message">observations have been collected</string>
+    <string name="stat_hours_toast_message">hours spent phenotyping</string>
+    <string name="stat_photos_toast_message">photos have been captured</string>
+    <string name="stat_busiest_toast_message">observations were collected on </string>
 
 
     <!-- ABOUT -->
