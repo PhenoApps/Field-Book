@@ -1391,7 +1391,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId) {
+    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId, String sortOrder) {
 
         DataHelper dataHelper = new DataHelper(context);
 
@@ -1419,6 +1419,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setUnique_id("ObservationUnitDbId");
             field.setPrimary_id(primaryId);
             field.setSecondary_id(secondaryId);
+            field.setExp_sort(sortOrder);
 
             // Do a pre-check to see if the field exists so we can show an error
             int FieldUniqueStatus = dataHelper.checkFieldNameAndObsLvl(field.getExp_name(), field.getObservation_level());
