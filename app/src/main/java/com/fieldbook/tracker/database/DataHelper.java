@@ -58,6 +58,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,7 +72,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
 public class DataHelper {
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 10;
+    public static final int DATABASE_VERSION = 11;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -233,6 +234,56 @@ public class DataHelper {
             db.endTransaction();
         }
     }
+
+    /**
+     * Populates import format based on study_source values
+     */
+    public void populateImportFormat(SQLiteDatabase db) {
+        db.beginTransaction();
+        try {
+            String updateImportFormatSQL =
+                    "UPDATE studies " +
+                            "SET import_format = CASE " +
+                            "WHEN study_source IS NULL OR study_source = 'csv' OR study_source LIKE '%.csv' THEN 'csv' " +
+                            "WHEN study_source = 'excel' OR study_source LIKE '%.xls' THEN 'xls'" +
+                            "WHEN study_source LIKE '%.xlsx' THEN 'xlsx'" +
+                            "ELSE 'brapi' " +
+                            "END";
+
+            db.execSQL(updateImportFormatSQL);
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+
+    /**
+     * Fixes issue where BrAPI study_db_ids are saved in study_alias
+     */
+    public void fixStudyAliases(SQLiteDatabase db) {
+        db.beginTransaction();
+        try {
+            // Update `study_db_id` and `study_alias` for studies imported via 'brapi'
+            String updateAliasesSQL =
+                    "UPDATE studies " +
+                            "SET study_db_id = study_alias, " +
+                            "study_alias = study_name " +
+                            "WHERE import_format = 'brapi'";
+
+            db.execSQL(updateAliasesSQL);
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
 
     /**
      * Helper function to change visibility of a trait. Used in the ratings
@@ -429,18 +480,18 @@ public class DataHelper {
 //        return synced;
     }
 
-    public void setTraitObservations(Integer studyId, Observation observation) {
-        ObservationDao.Companion.insertObservation(studyId, observation);
+    public void setTraitObservations(Integer studyId, Observation observation, Map<String,String> traitIdToTypeMap) {
+        ObservationDao.Companion.insertObservation(studyId, observation, traitIdToTypeMap);
     }
 
     /**
      * Get user created trait observations for currently selected study
      */
-    public List<Observation> getUserTraitObservations() {
+    public List<Observation> getUserTraitObservations(int fieldId) {
 
         open();
 
-        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(fieldId);
 
         return ObservationDao.Companion.getUserTraitObservations(studyId);
 
@@ -485,11 +536,11 @@ public class DataHelper {
     /**
      * Get user created trait observations for currently selected study
      */
-    public List<FieldBookImage> getUserTraitImageObservations(Context ctx) {
+    public List<FieldBookImage> getUserTraitImageObservations(Context ctx, int fieldId) {
 
         open();
 
-        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(fieldId);
 
         return ObservationDao.Companion.getUserTraitImageObservations(ctx, studyId, missingPhoto);
 
@@ -920,13 +971,11 @@ public class DataHelper {
     /**
      * Retrieves the columns needed for export using a join statement
      */
-    public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits) {
+    public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits, int fieldId) {
 
         open();
-
         return ObservationUnitPropertyDao.Companion.getExportDbData(
-                preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                preferences.getString(GeneralKeys.UNIQUE_NAME, ""), fieldList, traits);
+                fieldId, fieldList, traits);
 
 //        String fields = arrayToString("range", fieldList);
 //        String activeTraits = arrayToLikeString(traits);
@@ -978,35 +1027,18 @@ public class DataHelper {
      * Convert EAV database to relational
      * TODO add where statement for repeated values
      */
-    public Cursor convertDatabaseToTable(String[] col, ArrayList<TraitObject> traits) {
+    public Cursor getExportTableDataShort(int fieldId,  String uniqueId, ArrayList<TraitObject> traits) {
 
         open();
+        return ObservationUnitPropertyDao.Companion.getExportTableDataShort(fieldId, uniqueId, traits);
 
-        return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
-                preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                preferences.getString(GeneralKeys.UNIQUE_NAME, ""), col, traits);
+    }
 
-//        String query;
-//        String[] rangeArgs = new String[col.length];
-//        String[] traitArgs = new String[traits.length];
-//        String joinArgs = "";
-//
-//        for (int i = 0; i < col.length; i++) {
-//            rangeArgs[i] = "range." + TICK + col[i] + TICK;
-//        }
-//
-//        for (int i = 0; i < traits.length; i++) {
-//            traitArgs[i] = "m" + i + ".userValue as '" + traits[i] + "'";
-//            joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + TICK + ep.getString("ImportUniqueName", "")
-//                    + TICK + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
-//        }
-//
-//        query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
-//                " FROM range range " + joinArgs + "GROUP BY range." + TICK + ep.getString("ImportUniqueName", "") + TICK + "ORDER BY range.id";
-//
-//        Log.i("DH", query);
-//
-//        return db.rawQuery(query, null);
+    public Cursor getExportTableDataLong(int fieldId, ArrayList<TraitObject> traits) {
+
+        open();
+        return ObservationUnitPropertyDao.Companion.getExportTableDataLong(fieldId, traits);
+
     }
 
     /**
@@ -2112,56 +2144,27 @@ public class DataHelper {
 //        return true;
     }
 
-    public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int studyId) {
+    public void updateImportDate(int studyId) {
+        StudyDao.Companion.updateImportDate(studyId);
+    }
 
+    public void updateEditDate(int studyId) {
+        StudyDao.Companion.updateEditDate(studyId);
+    }
+
+    public void updateExportDate(int studyId) {
+        StudyDao.Companion.updateExportDate(studyId);
+    }
+
+    public void updateSyncDate(int studyId) {
+        StudyDao.Companion.updateSyncDate(studyId);
+    }
+
+    public void updateStudyAlias(int studyId, String newName) {
         open();
-
-        StudyDao.Companion.updateStudyTable(imp, ed, ex, studyId);
-
-//        ConfigActivity.dt.open();
-//        Cursor cursor = db.rawQuery("SELECT * from " + EXP_INDEX, null);
-//        cursor.moveToFirst();
-//
-//        if (imp) {
-//            // get import date and count of plots
-//            Cursor cursor2 = db.rawQuery("SELECT * from plots where exp_id = " + exp_id, null);
-//            int count = cursor2.getCount();
-//
-//            ContentValues cv = new ContentValues();
-//            cv.put("count", count);
-//            cv.put("date_import", timeStamp.format(Calendar.getInstance().getTime()));
-//            db.update(EXP_INDEX, cv, "exp_id=" + exp_id, null);
-//        }
-//
-//        if (ed) {
-//            // get and save edit date
-//            for (int i = 0; i < cursor.getCount(); i++) {
-//                int experimental_id = cursor.getInt(0);
-//                String expIdString = Integer.toString(experimental_id);
-//                Cursor cursor3 = db.rawQuery("SELECT timeTaken from user_traits WHERE user_traits.exp_id = " + expIdString + " ORDER BY datetime(substr(timeTaken,1,19)) DESC", null);
-//
-//                if (cursor3.moveToFirst()) {
-//                    String date_edited = cursor3.getString(0);
-//                    ContentValues cv = new ContentValues();
-//                    cv.put("date_edit", date_edited);
-//                    db.update(EXP_INDEX, cv, "exp_id=" + experimental_id, null);
-//                    Log.d("date_edit", date_edited);
-//                }
-//                Log.d("date_edit2", Integer.toString(cursor3.getCount()));
-//
-//                cursor3.close();
-//                cursor.moveToNext();
-//            }
-//        }
-//
-//        if (ex) {
-//            // get export date
-//            ContentValues cv = new ContentValues();
-//            cv.put("date_export", timeStamp.format(Calendar.getInstance().getTime()));
-//            db.update(EXP_INDEX, cv, "exp_id=" + exp_id, null);
-//        }
-//
-//        cursor.close();
+        StudyDao.Companion.updateStudyAlias(studyId, newName);
+        preferences.edit().putString(GeneralKeys.FIELD_ALIAS, newName).apply();
+        close();
     }
 
     public void deleteField(int studyId) {
@@ -2446,7 +2449,7 @@ public class DataHelper {
      */
     public void exportDatabase(Context ctx, String filename) throws IOException {
         String internalDbPath = getDatabasePath(this.context);
-        String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
+        String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/com.fieldbook.tracker_preferences.xml";
 
         close();
 
@@ -2726,6 +2729,8 @@ public class DataHelper {
         @Override
         public void onOpen(SQLiteDatabase db) {
 
+            db.disableWriteAheadLogging();
+
             //enables foreign keys for cascade deletes
             db.rawQuery("PRAGMA foreign_keys=ON;", null).close();
 
@@ -2818,7 +2823,7 @@ public class DataHelper {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w("Field Book", "Upgrading database.");
+            Log.w(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion);
 
             if (oldVersion < 5) {
                 db.execSQL("DROP TABLE IF EXISTS " + RANGE);
@@ -2956,6 +2961,16 @@ public class DataHelper {
                 helper.fixGeoCoordinates(db);
 
                 preferences.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
+
+            }
+
+            if (oldVersion <= 10 & newVersion >= 11) {
+
+                // modify studies table for better handling of brapi study attributes
+                db.execSQL("ALTER TABLE studies ADD COLUMN import_format TEXT");
+                db.execSQL("ALTER TABLE studies ADD COLUMN date_sync TEXT");
+                helper.populateImportFormat(db);
+                helper.fixStudyAliases(db);
 
             }
         }

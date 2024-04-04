@@ -41,6 +41,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class BrapiExportActivity extends ThemedActivity {
     private static final String TAG = BrapiExportActivity.class.getName();
+    public static final String FIELD_ID = "FIELD_ID";
 
     @Inject
     SharedPreferences preferences;
@@ -51,7 +52,7 @@ public class BrapiExportActivity extends ThemedActivity {
     private List<Observation> editedObservations;
     private List<FieldBookImage> imagesNew;
     private List<FieldBookImage> imagesEditedIncomplete;
-
+    private int fieldId;
     private int postImageMetaDataUpdatesCount;
     private int putImageContentUpdatesCount;
     private int putImageMetaDataUpdatesCount;
@@ -93,6 +94,12 @@ public class BrapiExportActivity extends ThemedActivity {
 
                 if(this.dataHelper == null) {
                     this.dataHelper = new DataHelper(this);
+                }
+
+                // Extract the fieldId from the intent
+                Intent intent = getIntent();
+                if (intent != null && intent.hasExtra(FIELD_ID)) {
+                    fieldId = intent.getIntExtra(FIELD_ID, -1);
                 }
 
                 brAPIService = BrAPIServiceFactory.getBrAPIService(this);
@@ -700,13 +707,13 @@ public class BrapiExportActivity extends ThemedActivity {
 
         String hostURL = BrAPIService.getHostUrl(this);
         List<Observation> observations = dataHelper.getObservations(hostURL);
-        List<Observation> userCreatedTraitObservations = dataHelper.getUserTraitObservations();
+        List<Observation> userCreatedTraitObservations = dataHelper.getUserTraitObservations(fieldId);
         List<Observation> wrongSourceObservations = dataHelper.getWrongSourceObservations(hostURL);
 
         List<FieldBookImage> images = dataHelper.getImageObservations(this, hostURL);
         imagesNew.clear();
         imagesEditedIncomplete.clear();
-        List<FieldBookImage> userCreatedTraitImages = dataHelper.getUserTraitImageObservations(this);
+        List<FieldBookImage> userCreatedTraitImages = dataHelper.getUserTraitImageObservations(this, fieldId);
         List<FieldBookImage> wrongSourceImages = dataHelper.getWrongSourceImageObservations(this, hostURL);
 
         for (Observation observation : observations) {

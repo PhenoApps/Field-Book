@@ -8,14 +8,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.location.Location;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.OpenableColumns;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,18 +31,22 @@ import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
-
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiActivity;
 import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
+import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
@@ -50,17 +57,17 @@ import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
-
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -70,38 +77,35 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.StringJoiner;
-
 import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
 public class FieldEditorActivity extends ThemedActivity
-        implements FieldSortController, FieldAdapterController {
+        implements FieldSortController, FieldAdapterController, FieldAdapter.AdapterCallback {
 
     private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
     private static final int REQUEST_CLOUD_FILE_CODE = 5;
-
-    private static final int DIALOG_LOAD_FIELDFILECSV = 1000;
-    private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
-    public static ListView fieldList;
-    public static FieldAdapter mAdapter;
-    public static AppCompatActivity thisActivity;
-    public static EditText trait;
+    private static final int REQUEST_BRAPI_IMPORT_ACTIVITY = 10;
+    private ArrayList<FieldObject> fieldList;
+    public FieldAdapter mAdapter;
+    public EditText trait;
     private static final Handler mHandler = new Handler();
-    private static FieldFileObject.FieldFileBase fieldFile;
-    private Toolbar toolbar;
+    private FieldFileObject.FieldFileBase fieldFile;
     private final int PERMISSIONS_REQUEST_STORAGE = 998;
     Spinner unique;
     Spinner primary;
     Spinner secondary;
     private Menu systemMenu;
-
     private GPSTracker mGpsTracker;
+    private ActionMode actionMode;
+    private TextView customTitleView;
+    public ExportUtil exportUtil;
 
     @Inject
     DataHelper database;
@@ -111,11 +115,12 @@ public class FieldEditorActivity extends ThemedActivity
 
     @Inject
     SharedPreferences preferences;
+    RecyclerView recyclerView;
 
     // Creates a new thread to do importing
     private final Runnable importRunnable = new Runnable() {
         public void run() {
-            new ImportRunnableTask(thisActivity,
+            new ImportRunnableTask(FieldEditorActivity.this,
                     fieldFile,
                     unique.getSelectedItemPosition(),
                     unique.getSelectedItem().toString(),
@@ -124,23 +129,45 @@ public class FieldEditorActivity extends ThemedActivity
         }
     };
 
-    // Helper function to load data
-    public void loadData(ArrayList<FieldObject> fields) {
-        try {
-            mAdapter = new FieldAdapter(thisActivity, fields, fieldSwitcher);
-            fieldList.setAdapter(mAdapter);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void scanFile(File filePath) {
-        MediaScannerConnection.scanFile(thisActivity, new String[]{filePath.getAbsolutePath()}, null, null);
-    }
-
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_fields);
+        Toolbar toolbar = findViewById(R.id.field_toolbar);
+        setSupportActionBar(toolbar);
+        exportUtil = new ExportUtil(this, database);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(getString(R.string.settings_fields));
+            getSupportActionBar().getThemedContext();
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
+
+        recyclerView = findViewById(R.id.fieldRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
+        // Initialize adapter
+        mAdapter = new FieldAdapter(this, fieldSwitcher, this);
+        mAdapter.setOnFieldSelectedListener(new FieldAdapter.OnFieldSelectedListener() {
+            @Override
+            public void onFieldSelected(int fieldId) {
+                FieldDetailFragment fragment = new FieldDetailFragment();
+                Bundle args = new Bundle();
+                args.putInt("fieldId", fieldId);
+                fragment.setArguments(args);
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(android.R.id.content, fragment,"FieldDetailFragmentTag")
+                        .addToBackStack(null)
+                        .commit();
+            }
+        });
+        recyclerView.setAdapter(mAdapter);
+
+        updateFieldsList();
+
     }
 
     @Override
@@ -151,32 +178,191 @@ public class FieldEditorActivity extends ThemedActivity
             systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
         }
 
-        loadData(database.getAllFieldObjects());
-
+        updateFieldsList();
         mGpsTracker = new GPSTracker(this);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onDestroy() {
+        super.onDestroy();
+    }
 
-        setContentView(R.layout.activity_fields);
+    public void updateFieldsList() {
+        try {
+            fieldList = database.getAllFieldObjects(); // Fetch data from the database
+            mAdapter.submitList(new ArrayList<>(fieldList)); // Update the adapter's dataset
+            mAdapter.notifyDataSetChanged();
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating fields list", e);
+        }
+    }
 
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+    // Implementations of methods from FieldAdapter.AdapterCallback
+    @Override
+    public void onItemSelected(int selectedCount) {
+        if (selectedCount == 0 && actionMode != null) {
+            actionMode.finish();
+        } else if (selectedCount > 0 && actionMode == null) {
+            actionMode = startSupportActionMode(actionModeCallback);
+        }
+        if (actionMode != null && customTitleView != null) {
+            customTitleView.setText(getString(R.string.selected_count, selectedCount));
+        }
+    }
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(getString(R.string.settings_fields));
-            getSupportActionBar().getThemedContext();
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setHomeButtonEnabled(true);
+    @Override
+    public void onItemClear() {
+        if (actionMode != null) {
+            actionMode.finish();
+        }
+    }
+
+    private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.cab_menu, menu);
+
+            // Create and style the custom title view
+            customTitleView = new TextView(FieldEditorActivity.this);
+            customTitleView.setTextColor(Color.BLACK); // Set text color
+            customTitleView.setTextSize(18); // Set text size
+
+            // Set layout parameters
+            ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    ActionBar.LayoutParams.WRAP_CONTENT);
+            customTitleView.setLayoutParams(layoutParams);
+
+            // Set the custom view
+            mode.setCustomView(customTitleView);
+
+            return true;
         }
 
-        thisActivity = this;
-        database.updateExpTable(false, true, false, preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-        fieldList = findViewById(R.id.myList);
-        mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
-        fieldList.setAdapter(mAdapter);
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_select_all) {
+                mAdapter.selectAll();
+                int selectedCount = mAdapter.getSelectedItemCount();
+                if (actionMode != null && customTitleView != null) {
+                    customTitleView.setText(getString(R.string.selected_count, selectedCount));
+                }
+                return true;
+            } else if (itemId == R.id.menu_export) {
+                exportUtil.exportMultipleFields(mAdapter.getSelectedItems());
+                mAdapter.exitSelectionMode();
+                mode.finish();
+                return true;
+//            } else if (itemId == R.id.menu_archive) {
+//                Toast.makeText(getApplicationContext(), "Archive not yet implemented", Toast.LENGTH_SHORT).show();
+//                mAdapter.exitSelectionMode();
+//                mode.finish();
+//                return true;
+            } else if (itemId == R.id.menu_delete) {
+                showDeleteConfirmationDialog(mAdapter.getSelectedItems(), false);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mAdapter.exitSelectionMode();
+            actionMode = null;
+        }
+    };
+
+    public void setActiveField(int studyId) {
+        FieldObject field = database.getFieldObject(studyId);
+        fieldSwitcher.switchField(studyId);
+        CollectActivity.reloadData = true;
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged(); // Refresh adapter to update active icon indication
+        }
+        // Check if this is a BrAPI field and show BrAPI info dialog if so
+//        if (field.getImport_format() == ImportFormat.BRAPI) {
+//            BrapiInfoDialog brapiInfo = new BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
+//            brapiInfo.show();
+//        }
+    }
+
+    public void showDeleteConfirmationDialog(final List<Integer> fieldIds, boolean isFromDetailFragment) {
+        String fieldNames = getFieldNames(fieldIds);
+        String message = getResources().getQuantityString(R.plurals.fields_delete_confirmation, fieldIds.size(), fieldNames);
+        Spanned formattedMessage;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            formattedMessage = Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY);
+        } else {
+            formattedMessage = Html.fromHtml(message);
+        }
+
+        new AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(getString(R.string.fields_delete_study))
+            .setMessage(formattedMessage)
+            .setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    deleteFields(fieldIds);
+                    if (isFromDetailFragment) { getSupportFragmentManager().popBackStack(); }
+                }
+            })
+            .setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            })
+            .show();
+    }
+
+    private String getFieldNames(final List<Integer> fieldIds) {
+
+        List<String> fieldNames = fieldIds.stream()
+                .flatMap(id -> fieldList.stream()
+                        .filter(field -> field.getExp_id() == id)
+                        .map(field -> "<b>" + field.getExp_alias() + "</b>"))
+                .collect(Collectors.toList());
+
+        return TextUtils.join(", ", fieldNames);
+    }
+
+    private void deleteFields(List<Integer> fieldIds) {
+
+        for (Integer fieldId : fieldIds) {
+            database.deleteField(fieldId);
+        }
+
+        // Check if the active field is among those deleted in order to reset related shared preferences
+        if (fieldIds.contains(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1))) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.remove(GeneralKeys.FIELD_FILE);
+            editor.remove(GeneralKeys.FIELD_ALIAS);
+            editor.remove(GeneralKeys.FIELD_OBS_LEVEL);
+            editor.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+            editor.remove(GeneralKeys.UNIQUE_NAME);
+            editor.remove(GeneralKeys.PRIMARY_NAME);
+            editor.remove(GeneralKeys.SECONDARY_NAME);
+            editor.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+            editor.remove(GeneralKeys.LAST_PLOT);
+            editor.apply();
+            CollectActivity.reloadData = true;
+        }
+
+        updateFieldsList();
+        mAdapter.exitSelectionMode();
+        if (actionMode != null) {
+            actionMode.finish();
+            actionMode = null;
+        }
+
     }
 
     private void showFileDialog() {
@@ -252,11 +438,8 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     public void loadBrAPI() {
-        Intent intent = new Intent();
-
-        intent.setClassName(FieldEditorActivity.this,
-                BrapiActivity.class.getName());
-        startActivityForResult(intent, 1);
+        Intent intent = new Intent(this, BrapiActivity.class);
+        startActivityForResult(intent, REQUEST_BRAPI_IMPORT_ACTIVITY);
     }
 
     public void loadCloud() {
@@ -296,7 +479,7 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     private Rect fieldsListItemLocation(int item) {
-        View v = fieldList.getChildAt(item);
+        View v = recyclerView.getChildAt(item);
         final int[] location = new int[2];
         v.getLocationOnScreen(location);
         Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth() / 5, location[1] + v.getHeight());
@@ -322,10 +505,9 @@ public class FieldEditorActivity extends ThemedActivity
         int itemId = item.getItemId();
         if (itemId == R.id.help) {
             TapTargetSequence sequence = new TapTargetSequence(this)
-                    .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
-                            fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
-                    );
-
+                .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
+                        fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
+                );
             if (fieldExists()) {
                 sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_select_title), getString(R.string.tutorial_fields_select_description)));
                 sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_delete_title), getString(R.string.tutorial_fields_delete_description)));
@@ -333,53 +515,53 @@ public class FieldEditorActivity extends ThemedActivity
 
             sequence.start();
         } else if (itemId == R.id.importField) {
-            String importer = preferences.getString("IMPORT_SOURCE_DEFAULT", "ask");
-
-            switch (importer) {
-                case "ask":
-                    showFileDialog();
-                    break;
-                case "local":
-                    loadLocal();
-                    break;
-                case "brapi":
-                    loadBrAPI();
-                    break;
-                case "cloud":
-                    loadCloud();
-                    break;
-                default:
-                    showFileDialog();
-            }
+            handleImportAction();
         } else if (itemId == R.id.menu_field_editor_item_creator) {
             FieldCreatorDialog dialog = new FieldCreatorDialog(this);
-
-            //when the dialog is dismissed, the field data is created or failed
-            dialog.setOnDismissListener((dismiss -> {
-
-                //update list of fields
-                fieldList = findViewById(R.id.myList);
-                mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects(), fieldSwitcher);
-                fieldList.setAdapter(mAdapter);
-
-            }));
-
+            dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
+                @Override
+                public void onFieldCreated(int studyDbId) {
+                    fieldSwitcher.switchField(studyDbId);
+                    updateFieldsList();
+                }
+            });
             dialog.show();
         } else if (itemId == android.R.id.home) {
             CollectActivity.reloadData = true;
             finish();
         } else if (itemId == R.id.action_select_plot_by_distance) {
             if (mGpsTracker != null && mGpsTracker.canGetLocation()) {
-
                 selectPlotByDistance();
-
             } else {
-
                 Toast.makeText(this, R.string.activity_field_editor_no_location_yet, Toast.LENGTH_SHORT).show();
-
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void refreshFieldList() {
+        fieldList = database.getAllFieldObjects();
+        mAdapter.submitList(new ArrayList<>(fieldList));
+    }
+
+    private void handleImportAction() {
+        String importer = preferences.getString("IMPORT_SOURCE_DEFAULT", "ask");
+        switch (importer) {
+            case "ask":
+                showFileDialog();
+                break;
+            case "local":
+                loadLocal();
+                break;
+            case "brapi":
+                loadBrAPI();
+                break;
+            case "cloud":
+                loadCloud();
+                break;
+            default:
+                showFileDialog();
+        }
     }
 
     /**
@@ -406,13 +588,8 @@ public class FieldEditorActivity extends ThemedActivity
 
             //sort the coordinates based on the distance from the user
             Collections.sort(coordinates, (a, b) -> {
-                double distanceA, distanceB;
-                Location locationA = a.getLocation();
-                Location locationB = b.getLocation();
-                if (locationA == null) distanceA = Double.MAX_VALUE;
-                else distanceA = thisLocation.distanceTo(locationA);
-                if (locationB == null) distanceB = Double.MAX_VALUE;
-                else distanceB = thisLocation.distanceTo(locationB);
+                double distanceA = distanceTo(thisLocation, a.getLocation());
+                double distanceB = distanceTo(thisLocation, b.getLocation());
                 return Double.compare(distanceA, distanceB);
             });
 
@@ -428,7 +605,7 @@ public class FieldEditorActivity extends ThemedActivity
 
                     FieldObject study = database.getFieldObject(studyId);
 
-                    String studyName = study.getExp_name();
+                    String studyName = study.getExp_alias();
 
                     if (studyId == preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
 
@@ -437,9 +614,7 @@ public class FieldEditorActivity extends ThemedActivity
                                 getString(R.string.activity_field_editor_switch_field_same),
                                 null,
                                 8000, null, null
-                        );
-//                        Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
-//                                Snackbar.LENGTH_LONG).show();
+                                );
 
                     } else {
 
@@ -450,15 +625,10 @@ public class FieldEditorActivity extends ThemedActivity
                                 null,
                                 8000,
                                 null, (v) -> {
-                                    int count = mAdapter.getCount();
-
-                                    for (int i = 0; i < count; i++) {
-                                        FieldObject field = mAdapter.getItem(i);
-                                        if (field.getExp_id() == studyId) {
-                                            mAdapter.getView(i, null, null).performClick();
-                                        }
-                                    }
-                                });
+                                    fieldSwitcher.switchField(studyId);
+                                    updateFieldsList();
+                                }
+                        );
                     }
                 }
 
@@ -471,6 +641,11 @@ public class FieldEditorActivity extends ThemedActivity
             Toast.makeText(this, R.string.activity_field_editor_no_location_yet, Toast.LENGTH_SHORT).show();
 
         }
+    }
+
+    private double distanceTo(Location thisLocation, Location targetLocation) {
+        if (targetLocation == null) return Double.MAX_VALUE;
+        else return thisLocation.distanceTo(targetLocation);
     }
 
     public String getFileName(Uri uri) {
@@ -495,10 +670,18 @@ public class FieldEditorActivity extends ThemedActivity
         return result;
     }
 
+    @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        CollectActivity.reloadData = true;
-        finish();
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            // Return to Fields screen if pressed in detail fragment
+            if (mAdapter != null) {
+                mAdapter.notifyDataSetChanged();
+            }
+            getSupportFragmentManager().popBackStack();
+        } else {
+            CollectActivity.reloadData = true;
+            super.onBackPressed();
+        }
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -515,6 +698,17 @@ public class FieldEditorActivity extends ThemedActivity
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
                 showFieldFileDialog(chosenFile, null);
+            }
+        }
+
+        if (requestCode == REQUEST_BRAPI_IMPORT_ACTIVITY) {
+            if (resultCode == RESULT_OK && data != null) {
+                int fieldId = data.getIntExtra("fieldId", -1);
+                if (fieldId != -1) {
+                    getFieldSwitcher().switchField(fieldId);
+                    BrapiInfoDialog brapiInfo = new BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
+                    brapiInfo.show();
+                }
             }
         }
 
@@ -556,7 +750,7 @@ public class FieldEditorActivity extends ThemedActivity
                 String extension = FieldFileObject.getExtension(chosenFile);
 
                 if (!extension.equals("csv") && !extension.equals("xls") && !extension.equals("xlsx")) {
-                    Toast.makeText(FieldEditorActivity.thisActivity, getString(R.string.import_error_format_field), Toast.LENGTH_LONG).show();
+                    Toast.makeText(FieldEditorActivity.this, getString(R.string.import_error_format_field), Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -591,6 +785,7 @@ public class FieldEditorActivity extends ThemedActivity
 
                         Editor e = preferences.edit();
                         e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
+                        e.putString(GeneralKeys.FIELD_ALIAS, fieldFileName);
                         e.apply();
 
                         if (database.checkFieldName(fieldFileName) >= 0) {
@@ -622,14 +817,6 @@ public class FieldEditorActivity extends ThemedActivity
         }
     }
 
-    /**
-     * The user selects between the columns in fieldFile to determine the primary/secondary/unique ids
-     * These ids are used to navigate between plots in the collect activity.
-     * Sanitization has to happen here to ensure no empty string column is selected.
-     * Also special characters are checked for and replaced here, if they exist a message is shown to the user.
-     *
-     * @param fieldFile contains the parsed input file which has columns
-     */
     private void loadFile(FieldFileObject.FieldFileBase fieldFile) {
 
         String[] importColumns = fieldFile.getColumns();
@@ -808,6 +995,12 @@ public class FieldEditorActivity extends ThemedActivity
             toast.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL, 0, 0);
             toast.show();
 
+            // Refresh the fragment's data
+            FieldDetailFragment fragment = (FieldDetailFragment) getSupportFragmentManager().findFragmentByTag("FieldDetailFragmentTag");
+            if (fragment != null) {
+                fragment.loadFieldDetails();
+            }
+
         } catch (Exception e) {
 
             Log.e(TAG, "Error updating sorting", e);
@@ -820,13 +1013,13 @@ public class FieldEditorActivity extends ThemedActivity
                     .show();
         }
 
-        loadData(database.getAllFieldObjects());
+        updateFieldsList();
 
     }
 
     @Override
     public void queryAndLoadFields() {
-        loadData(database.getAllFieldObjects());
+        updateFieldsList();
     }
 
     @NonNull
@@ -846,4 +1039,5 @@ public class FieldEditorActivity extends ThemedActivity
     public FieldSwitcher getFieldSwitcher() {
         return fieldSwitcher;
     }
+
 }

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.viewpager.widget.PagerAdapter
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.views.RepeatedValuesView
 
 /**
@@ -31,6 +32,12 @@ class RepeatedValuesPagerAdapter(private val mContext: Context) : PagerAdapter()
         //disable editing but allow scrolling
         editText.isFocusableInTouchMode = false
         editText.clearFocus()
+
+        // Set the long click listener
+        editText.setOnLongClickListener {
+            (mContext as CollectActivity).showObservationMetadataDialog()
+            true
+        }
 
         editText.setTextColor(items[position].color)
         views.put(position, editText)

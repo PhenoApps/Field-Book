@@ -43,6 +43,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">Esporta</string>
     <!-- Delete -->
     <string name="fields_delete">Cancella</string>
     <string name="fields_delete_study">Cancella campo</string>
@@ -61,7 +63,8 @@
     <string name="fields_study_exists_message">Un campo con questo nome esiste già. Vuoi sovrascrivere?</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Ordina</string>
@@ -175,6 +178,7 @@
     <string name="dialog_multi_measure_delete">Cancella</string>
     <!--- GeoNav -->
     <!--- Content Descriptions -->
+    <!-- Observation Info -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Locale</string>
@@ -253,6 +257,7 @@
     <string name="preferences_general_skip_entries_with_data">Nascondi voci con dati</string>
     <string name="preferences_general_skip_entries_with_data_description">Salta le voci che hanno gia\' un dato per questo carattere</string>
     <!-- GeoNav -->
+    <string name="pref_geonav_log_both">Ambo</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Suoni</string>
     <string name="preferences_sound_primary_order_sound">Suono dell\'ordine primario</string>
