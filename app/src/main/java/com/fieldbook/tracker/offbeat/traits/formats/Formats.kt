@@ -63,7 +63,7 @@ enum class Formats(val type: Types = Types.SYSTEM) {
      *  FB classically enforces lower cased names in the database, when querying make sure to
      *  use this function
      */
-    fun getDatabaseName(ctx: Context) = getName(ctx).lowercase()
+    fun getDatabaseName() = getTraitFormatDefinition().databaseName
 
     fun getIcon() = getTraitFormatDefinition().iconDrawableResourceId
 

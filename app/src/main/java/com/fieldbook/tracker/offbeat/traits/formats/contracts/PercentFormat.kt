@@ -15,6 +15,7 @@ class PercentFormat : NumericFormat(
     format = Formats.PERCENT,
     defaultLayoutId = R.layout.trait_percent,
     layoutView = null,
+    databaseName = "percent",
     nameStringResourceId = R.string.traits_format_percent,
     iconDrawableResourceId = R.drawable.ic_trait_percent,
     stringNameAux = null,

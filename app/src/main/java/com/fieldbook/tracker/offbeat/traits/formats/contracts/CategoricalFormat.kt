@@ -14,6 +14,7 @@ class CategoricalFormat : TraitFormat(
     format = Formats.CATEGORICAL,
     defaultLayoutId = R.layout.trait_categorical,
     layoutView = null,
+    databaseName = "categorical",
     nameStringResourceId = R.string.traits_format_categorical,
     iconDrawableResourceId = R.drawable.ic_trait_categorical,
     stringNameAux = null,
