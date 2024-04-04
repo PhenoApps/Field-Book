@@ -43,6 +43,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">エクスポート</string>
     <!-- Delete -->
     <string name="fields_delete">削除</string>
     <string name="fields_delete_study">圃場を削除</string>
@@ -61,7 +63,8 @@
     <string name="fields_study_exists_message">この圃場は既に存在しています。</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">並べ替え</string>
@@ -136,6 +139,7 @@
     <string name="main_toolbar_search">検索</string>
     <string name="search_dialog_add">追加</string>
     <string name="search_dialog_clear">消去</string>
+    <string name="search_dialog_search">検索</string>
     <string name="search_dialog_query_is_equal_to">一致</string>
     <string name="search_dialog_query_is_not_equal_to">不一致</string>
     <string name="search_dialog_query_contains">含む</string>
@@ -254,6 +258,7 @@
     <string name="preferences_general_skip_entries_with_data">入力済エントリーのスキップ</string>
     <string name="preferences_general_skip_entries_with_data_description">調査中形質のデータ入力済エントリーをスキップ</string>
     <!-- GeoNav -->
+    <string name="pref_geonav_log_both">両方</string>
     <!-- Sounds -->
     <string name="preferences_sounds">音声</string>
     <string name="preferences_sound_primary_order_sound">第1オーダーの音</string>
@@ -409,4 +414,5 @@
     <string name="tutorial_traits_format_description">異なる形質フォーマットは異なるアイコンで示されます。</string>
     <string name="tutorial_traits_visibility_title">形質の表示/非表示</string>
     <string name="tutorial_traits_visibility_description">チェックボックスをチェックすることでデータ収集をできないようにします。</string>
+    <string name="tutorial_main_datagrid_title">データグリッド</string>
 </resources>

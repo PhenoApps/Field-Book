@@ -23,9 +23,13 @@
     <string name="startup_sample_data_message">Carregar dados de amostra?</string>
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">A importação de arquivos requer acesso aos arquivos do dispositivo.</string>
+    <string name="permission_rationale_storage_export">A exportação de dados requer acesso aos arquivos do dispositivo.</string>
+    <string name="permission_rationale_trait_features">A coleta de dados requer acesso aos arquivos do dispositivo, microfone e câmera do dispositivo.</string>
+    <string name="permission_ask_bluetooth">Por favor, aceite permissões de Bluetooth.</string>
     <!-- Config Activity  -->
     <string name="settings_fields">Campos</string>
     <string name="settings_traits">Caracteres</string>
+    <string name="settings_collect">Coletar</string>
     <string name="settings_export">Exportar</string>
     <string name="settings_advanced">Configurações avançadas</string>
     <!-- Config Activity Fuzzy Search  -->
@@ -40,6 +44,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">Exportar</string>
     <!-- Delete -->
     <!-- Import -->
     <string name="import_dialog_unique">Identificador único</string>
@@ -48,7 +54,8 @@
     <string name="import_error_unique">Identificador único contém duplicatas</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <!-- Trait import/export -->
@@ -102,6 +109,7 @@
     <string name="main_toolbar_search">Buscar</string>
     <string name="search_dialog_add">Adicionar</string>
     <string name="search_dialog_clear">Limpar</string>
+    <string name="search_dialog_search">Buscar</string>
     <string name="search_dialog_query_is_equal_to">é igual a</string>
     <string name="search_dialog_query_is_not_equal_to">não é igual a</string>
     <string name="search_dialog_query_contains">contém</string>

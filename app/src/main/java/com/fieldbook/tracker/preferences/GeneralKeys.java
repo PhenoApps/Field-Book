@@ -20,6 +20,7 @@ public class GeneralKeys {
     public static final String REQUIRE_USER_INTERVAL              = "com.tracker.fieldbook.preference.require_user_interval";
 
     // Appearance
+    public static final String INFOBAR_UPDATE = "INFOBAR_UPDATE";
     public static final String TOOLBAR_CUSTOMIZE                    = "TOOLBAR_CUSTOMIZE";
     public static final String INFOBAR_NUMBER                       = "INFOBAR_NUMBER";
     public static final String APPLICATION_THEME                    = "APPLICATION_THEME";
@@ -119,6 +120,8 @@ public class GeneralKeys {
 
     public static final String ENABLE_FIELD_AUDIO = "com.tracker.fieldbook.preferences.keys.enable_field_audio";
 
+    public static final String INDIVIDUAL_FIELD_PAGE_ENABLED = "com.tracker.fieldbook.preferences.keys.enable_individual_field_page";
+
     public static final String LAST_TIME_OPENED = "LastTimeAppOpened";
     public static final String ASKED_SINCE_OPENED = "AskedSinceAppOpened";
     public static final String VERIFY_USER = "VerifyUserEvery24Hours";
@@ -128,6 +131,7 @@ public class GeneralKeys {
     public static final String TRAITS_EXPORTED = "TraitsExported";
     public static final String ALL_TRAITS_VISIBLE = "allTraitsVisible";
     public static final String LAST_USED_TRAIT = "com.fieldbook.tracker.LAST_USED_TRAIT";
+    public static final String LAST_USED_RESOURCE_FILE = "com.fieldbook.tracker.LAST_USED_RESOURCE_FILE";
 
     //themes
     public static final String SAVED_DATA_COLOR = "SAVED_DATA_COLOR";
@@ -185,8 +189,11 @@ public class GeneralKeys {
     public static final String EXPORT_TRAITS_ALL = "EXPORT_TRAITS_ALL";
     public static final String EXPORT_TRAITS_ACTIVE = "EXPORT_TRAITS_ACTIVE";
     public static final String EXPORT_FORMAT_TABLE = "EXPORT_FORMAT_TABLE";
-    public static final String EXPORT_FORMAT_DATABSE = "EXPORT_FORMAT_DATABASE";
+    public static final String EXPORT_FORMAT_DATABASE = "EXPORT_FORMAT_DATABASE";
     public static final String EXPORT_OVERWRITE = "Overwrite";
+
+    // Field detail
+    public static final String FIELD_DETAIL_COLLAPSED = "FIELD_DETAIL_COLLAPSED";
 
     //Data grid
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";

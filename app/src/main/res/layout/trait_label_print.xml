@@ -50,7 +50,35 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="8dp">
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp">
+
+        <TextView style="@style/TextViewStyle.Bold"
+            android:id="@+id/labelcopiestext"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/trait_layout_print_label_copies_title" />
+
+        <Spinner
+            android:id="@+id/labelcopies"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:maxLines="1" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp">
 
         <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/labelsizetext"
@@ -61,16 +89,20 @@
 
         <Spinner
             android:id="@+id/labelsize"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp" />
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:maxLines="1" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="8dp">
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp">
 
         <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/textfieldtitle"
@@ -91,7 +123,34 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp">
+
+        <TextView style="@style/TextViewStyle.Bold"
+            android:id="@+id/barcodefieldtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/trait_layout_print_barcode_field_title" />
+
+        <Spinner
+            android:id="@+id/barcodefield"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
         android:visibility="gone">
 
         <TextView style="@style/TextViewStyle.Bold"
@@ -113,10 +172,13 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
         android:visibility="gone">
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/textfieldtitle3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -135,7 +197,10 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
         android:visibility="gone">
 
         <TextView style="@style/TextViewStyle.Bold"
@@ -151,48 +216,6 @@
             android:layout_width="0dp"
             android:layout_weight="3"
             android:maxLines="1" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="8dp">
-
-        <TextView style="@style/TextViewStyle.Bold"
-            android:id="@+id/barcodefieldtitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/trait_layout_print_barcode_field_title" />
-
-        <Spinner
-            android:id="@+id/barcodefield"
-            android:layout_height="wrap_content"
-            android:layout_width="0dp"
-            android:layout_weight="3"
-            android:maxLines="1" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="8dp">
-
-        <TextView style="@style/TextViewStyle.Bold"
-            android:id="@+id/labelcopiestext"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/trait_layout_print_label_copies_title" />
-
-        <Spinner
-            android:id="@+id/labelcopies"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="200dp" />
-
     </LinearLayout>
 
 </com.fieldbook.tracker.traits.LabelPrintTraitLayout>

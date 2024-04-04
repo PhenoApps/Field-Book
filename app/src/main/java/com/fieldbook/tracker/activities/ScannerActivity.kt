@@ -236,17 +236,17 @@ class ScannerActivity : ThemedActivity() {
         const val EXTRA_PHOTO_URI = "photo_uri"
 
         fun startScanner(
-            context: Context,
+            activity: Activity,
             traitDbId: String?,
             plotId: String?,
             rep: String?,
             requestCode: Int
         ) {
-            Intent(context, ScannerActivity::class.java).also {
+            Intent(activity, ScannerActivity::class.java).also {
                 it.putExtra(INPUT_EXTRA_TRAIT_DB_ID, traitDbId)
                 it.putExtra(INPUT_EXTRA_PLOT_ID, plotId)
                 it.putExtra(INPUT_EXTRA_REP, rep)
-                (context as ComponentActivity).startActivityForResult(it, requestCode)
+                (activity as ComponentActivity).startActivityForResult(it, requestCode)
             }
         }
 
@@ -278,7 +278,7 @@ class ScannerActivity : ThemedActivity() {
             }
         }
 
-        fun Context.requestCameraAndStartScanner(
+        fun Activity.requestCameraAndStartScanner(
             requestCode: Int,
             traitDbId: String? = null,
             plotId: String? = null,

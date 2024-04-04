@@ -184,6 +184,8 @@ class TraitBoxView : ConstraintLayout {
                 .toString()
         )
 
+        // Update last used trait so it is preserved when entry moves
+        controller.getPreferences().edit().putString(GeneralKeys.LAST_USED_TRAIT,traitTypeTv.text.toString()).apply()
         traitTypeTv.text = currentTrait?.name
 
 
@@ -431,8 +433,9 @@ class TraitBoxView : ConstraintLayout {
         if (controller.getPreferences().getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND, false)) {
             controller.getSoundHelper().playCycle()
         }
-//        traitType.setSelection(0)
         setSelection(0)
+        rangeSuppress?.let { loadLayout(it) }
+        controller.refreshLock()
         controller.getCollectInputView().resetInitialIndex()
     }
 

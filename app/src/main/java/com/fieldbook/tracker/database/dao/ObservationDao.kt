@@ -12,6 +12,7 @@ import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sLocalImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sNonImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sRemoteImageObservationsViewName
+import com.fieldbook.tracker.database.dao.ObservationVariableDao.Companion.getTraitByName
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import org.threeten.bp.OffsetDateTime
@@ -119,7 +120,7 @@ class ObservationDao {
                 obs.rep,
                 
                 study.${Study.PK} AS ${Study.FK},
-                study.study_alias,
+                study.study_db_id,
                 
                 vars.external_db_id AS external_db_id,
                 vars.observation_variable_name as observation_variable_name,
@@ -176,7 +177,7 @@ class ObservationDao {
                     obs.collector,
                     obs.rep,
                     study.${Study.PK} AS ${Study.FK},
-                    study.study_alias, 
+                    study.study_db_id, 
                     vars.external_db_id AS external_db_id,
                     vars.observation_variable_name as observation_variable_name, 
                     vars.observation_variable_details,
@@ -203,8 +204,7 @@ class ObservationDao {
                         setTimestamp(getStringVal(row, "observation_time_stamp"))
                         setLastSyncedTime(getStringVal(row, "last_synced_time"))
                         collector = getStringVal(row, "collector")
-                        //study alias is the actual brapi private key
-                        studyId = getStringVal(row, "study_alias")
+                        studyId = getStringVal(row, "study_db_id")
                     } }
 
         } ?: emptyList()
@@ -376,31 +376,9 @@ class ObservationDao {
 
         } ?: -1
 
-        fun insertObservation(studyId: Int, model: BrapiObservation): Int = withDatabase { db ->
-            //         * @param exp_id the field identifier
-            //         * @param plotId the unique name of the currently selected field
-            //         * @param parent the variable name of the observation
-//            val obs = getObservation("$expId", model.unitDbId,model.variableName)
-//            println("**************************")
-//            println("FAIL Season: ${obs?.season}")
-//            println("FAIL studyId: ${obs?.studyId}")
-//            println("FAIL Value: ${obs?.value}")
-//            println("FAIL unitId: ${obs?.unitDbId}")
-//            println("FAIL VariableDbId: ${obs?.variableDbId}")
-//            println("FAIL DbId: ${obs?.dbId}")
-//            println("FAIL FieldbookDbId: ${obs?.fieldbookDbId}")
-//            println("FAIL VariableName: ${obs?.variableName}")
-//            println("**************************")
+        fun insertObservation(studyId: Int, model: BrapiObservation, traitIdToTypeMap:Map<String,String>): Int = withDatabase { db ->
 
             if (getObservation("$studyId", model.unitDbId, model.variableDbId, "1")?.dbId != null) {
-
-//                println("**************************")
-//                println("FAIL Value: ${obs?.value}")
-//                println("FAIL VariableDbId: ${obs?.variableDbId}")
-//                println("FAIL VariableName: ${obs?.variableName}")
-//                println("FAIL UnitDbId: ${obs?.unitDbId}")
-//                println("**************************")
-
                 println(
                     "DbId: ${
                         getObservation(
@@ -414,10 +392,11 @@ class ObservationDao {
                 -1
             }
             else {
+                //get observationVariableFieldbookformat based on the variableName
+                val variableFormat = traitIdToTypeMap[model.variableDbId]?:ObservationVariableDao.Companion.getTraitByName(model.variableName)!!.format
                 val varRowId =  db.insert(Observation.tableName, null, contentValuesOf(
                     "observation_variable_name" to model.variableName,
-//                "observation_variable_field_book_format" to model.observation_variable_field_book_format,
-                    "observation_variable_field_book_format" to null,
+                    "observation_variable_field_book_format" to variableFormat,
                     "value" to model.value,
                     "observation_time_stamp" to model.timestamp,
                     "collector" to model.collector,
@@ -426,8 +405,8 @@ class ObservationDao {
                     "last_synced_time" to model.lastSyncedTime,
 //                "additional_info" to model.additional_info,
                     "additional_info" to null,
-//                Study.FK to model.studyId,
                     "observation_db_id" to model.dbId,
+                    "rep" to "1",
                     Study.FK to studyId,
                     ObservationUnit.FK to model.unitDbId,
                     ObservationVariable.FK to model.variableDbId

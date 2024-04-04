@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/rename"
+        android:icon="@drawable/pencil"
+        app:showAsAction="always"
+        android:title="@string/fields_rename_study" />
+
+    <item
+        android:id="@+id/sort"
+        android:icon="@drawable/ic_field_sort"
+        app:showAsAction="always"
+        android:title="@string/fields_sort_update" />
+
+    <item
+        android:id="@+id/delete"
+        android:icon="@drawable/ic_tb_delete"
+        app:showAsAction="always"
+        android:title="@string/fields_delete" />
+</menu>

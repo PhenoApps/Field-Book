@@ -42,6 +42,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">تصدير</string>
     <!-- Delete -->
     <string name="fields_delete">حذف</string>
     <string name="fields_delete_study">حذف الحقل</string>
@@ -60,13 +62,8 @@
     <string name="fields_study_exists_message">هذا الحقل موجود مسبقا.</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
-    <string name="fields_study_statistics">إحصائيات</string>
-    <string name="fields_date_imported">تم استيراد التاريخ</string>
-    <string name="fields_date_edited">تعديل التاريخ</string>
-    <string name="fields_date_exported">تصدير التاريخ</string>
-    <string name="fields_summary">ملخص الحقل</string>
-    <string name="fields_options">خيارات</string>
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">ترتيب</string>
@@ -141,6 +138,7 @@
     <string name="main_toolbar_search">بحث</string>
     <string name="search_dialog_add">إضافة</string>
     <string name="search_dialog_clear">إزالة</string>
+    <string name="search_dialog_search">بحث</string>
     <string name="search_dialog_query_is_equal_to">يساوي</string>
     <string name="search_dialog_query_is_not_equal_to">لا يساوي</string>
     <string name="search_dialog_query_contains">يتضمن</string>
@@ -258,6 +256,7 @@
     <string name="preferences_general_skip_entries_with_data">إخفاء المدخلات التي سبق جمعها</string>
     <string name="preferences_general_skip_entries_with_data_description">تجاوز المدخلات التي لديها بيانات للسمة الحالية</string>
     <!-- GeoNav -->
+    <string name="pref_geonav_log_both">كلاهما</string>
     <!-- Sounds -->
     <string name="preferences_sounds">اصوات</string>
     <string name="preferences_sound_primary_order_sound">صوت التنبيه عند تغيير الترتيب الأساسي</string>
@@ -412,4 +411,5 @@
     <string name="tutorial_traits_format_description">تتم الإشارة إلى أنواع السمات المختلفة برموز مختلفة.</string>
     <string name="tutorial_traits_visibility_title">رؤية السمة</string>
     <string name="tutorial_traits_visibility_description">يمكن تعطيل السمات من الجمع من خلال تبديل مربع الاختيار.</string>
+    <string name="tutorial_main_datagrid_title">جدول البيانات</string>
 </resources>
