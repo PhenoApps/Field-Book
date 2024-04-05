@@ -49,8 +49,12 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
     DataHelper database;
     List<String> seasons;
     private final SimpleDateFormat timeStampFormat;
-    private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
+    private static final String TIME_STAMP_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
     private static final String DATE_FORMAT_PATTERN = "MM-dd-yy";
+    private static final String YEAR_MONTH_PATTERN = "yyyy-MM";
+    private static final String MONTH_VIEW_CARD_TITLE_PATTERN ="MMMM yyyy";
+    private final SimpleDateFormat yearMonthFormat;
+    private final SimpleDateFormat monthViewCardTitle;
     private final int intervalThreshold = 30;
     Toast toast;
 
@@ -59,7 +63,9 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         this.originActivity = context;
         this.database = originActivity.getDatabase();
         this.seasons = seasons;
-        this.timeStampFormat = new SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.getDefault());
+        this.timeStampFormat = new SimpleDateFormat(TIME_STAMP_PATTERN, Locale.getDefault());
+        this.yearMonthFormat = new SimpleDateFormat(YEAR_MONTH_PATTERN, Locale.getDefault());
+        this.monthViewCardTitle = new SimpleDateFormat(MONTH_VIEW_CARD_TITLE_PATTERN, Locale.getDefault());
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -139,7 +145,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
                 imageCount++;
             }
 
-            String date = new SimpleDateFormat(DATE_FORMAT_PATTERN).format(dateObject);
+            String date = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault()).format(dateObject);
             dateCount.put(date, dateCount.getOrDefault(date, 0) + 1);
 
             String observationUnitId = observation.getObservation_unit_id();
@@ -174,7 +180,20 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             }
         }
 
-        holder.year_text_view.setText(seasons.get(position));
+        String cardTitle = seasons.get(position);
+        Date date;
+
+        // e.g. '2024-03'
+        if (cardTitle.length() == 7) {
+            try {
+                date = yearMonthFormat.parse(cardTitle);
+                cardTitle = monthViewCardTitle.format(date);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        holder.year_text_view.setText(cardTitle);
         holder.statValue1.setText(String.valueOf(fields.size()));
         holder.statValue2.setText(String.valueOf(observationUnits.size()));
         holder.statValue3.setText(String.valueOf(observations.length));
