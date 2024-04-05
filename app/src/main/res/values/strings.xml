@@ -1060,5 +1060,7 @@
     <!-- usb camera trait -->
     <string name="usb_camera_resolution_options_title">Supported Resolutions</string>
     <string name="usb_camera_plug_in_camera">Please plug in a UVC compatible web cam.</string>
+    <string name="view_trait_photo_settings_white_balance_title">Auto White Balance</string>
+    <string name="view_trait_photo_settings_auto_focus_title">Auto Focus</string>
 
 </resources>

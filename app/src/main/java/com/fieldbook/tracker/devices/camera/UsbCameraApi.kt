@@ -32,6 +32,7 @@ class UsbCameraApi @Inject constructor(@ActivityContext private val context: Con
     val ui = CoroutineScope(Dispatchers.Main)
 
     var camera: UVCCamera? = null
+    var supportedSizes: List<Size>? = null
 
     private var callbacks: Callbacks? = null
     private var monitor: USBMonitor? = null
@@ -80,6 +81,8 @@ class UsbCameraApi @Inject constructor(@ActivityContext private val context: Con
             camera = UVCCamera()
 
             camera?.open(ctrlBlock)
+
+            supportedSizes = camera?.supportedSizeList ?: listOf()
 
             initializePreview(callbacks, camera)
 

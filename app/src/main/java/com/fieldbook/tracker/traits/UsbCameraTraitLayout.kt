@@ -13,6 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.devices.camera.UsbCameraApi
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.views.UsbCameraTraitSettingsView
 import com.serenegiant.usb.Size
 import com.serenegiant.usb.UVCCamera
 import com.serenegiant.widget.CameraViewInterface
@@ -56,7 +57,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
             updatePreviewSize(size.width, size.height)
         }
 
-        startCaptureUi(camera, sizes)
+        startCaptureUi()
     }
 
     override fun onDisconnected() {
@@ -73,6 +74,28 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
         return imageView
     }
 
+    override fun onSettingsChanged() {
+
+        imageView?.visibility = if (prefs.getBoolean(GeneralKeys.USB_CAMERA_PREVIEW, true))
+            View.VISIBLE else View.GONE
+
+        val camera = controller.getUsbApi().camera
+        val sizes = camera?.supportedSizeList ?: listOf()
+        val resIndex = prefs.getInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, 0)
+
+        camera?.autoFocus = prefs.getBoolean(GeneralKeys.USB_CAMERA_AUTO_FOCUS, true)
+        camera?.autoWhiteBlance = prefs.getBoolean(GeneralKeys.USB_CAMERA_AUTO_WHITE_BALANCE, true)
+        camera?.updateCameraParams()
+
+        if (sizes.isNotEmpty() && resIndex in sizes.indices) {
+            val size = sizes[resIndex] ?: Size(0,0,0,
+                1920,
+                1080
+            )
+            updatePreviewSize(size.width, size.height)
+        }
+    }
+
     private fun setup() {
 
         imageView?.visibility = View.VISIBLE
@@ -85,13 +108,18 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
         if (controller.getUsbApi().isConnected()) {
             
-            startCaptureUi(controller.getUsbApi().camera,
-                controller.getUsbApi().getSizes())
+            startCaptureUi()
 
         } else initUi()
 
         controller.getUsbApi().attach(this)
 
+        settingsBtn?.setOnClickListener {
+
+            showResolutionChoiceDialog()
+        }
+
+        onSettingsChanged()
     }
 
     private fun initUi() {
@@ -109,17 +137,17 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
         }
     }
 
-    private fun showResolutionChoiceDialog(sizes: List<Size>) {
-        val widthByHeightListValues = sizes.map { "${it.width}x${it.height}" }
-            .distinct()
-            .toTypedArray()
-        val dialog = AlertDialog.Builder(context)
-        dialog.setTitle(R.string.usb_camera_resolution_options_title)
-        dialog.setItems(widthByHeightListValues) { _, which ->
-            prefs.edit().putInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, which).apply()
-            updatePreviewSize(sizes[which].width, sizes[which].height)
-        }
-        dialog.show()
+    private fun showResolutionChoiceDialog() {
+        val supportedSizes = controller.getUsbApi().supportedSizes?.map { android.util.Size(it.width, it.height) }
+
+        AlertDialog.Builder(context)
+            .setTitle(R.string.trait_system_photo_settings_title)
+            .setPositiveButton(R.string.dialog_ok) { dialog, _ ->
+                onSettingsChanged()
+                dialog.dismiss()
+            }
+            .setView(UsbCameraTraitSettingsView(context, supportedSizes ?: listOf()))
+            .show()
     }
 
     private fun setCameraPreviewSize(camera: UVCCamera?, size: Size) {
@@ -146,7 +174,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
         }
     }
 
-    private fun startCaptureUi(camera: UVCCamera?, sizes: List<Size>?) {
+    private fun startCaptureUi() {
 
         ui.launch {
 
@@ -169,14 +197,6 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
                 }
             }
 
-            settingsBtn?.setOnClickListener {
-
-                if (camera != null && sizes?.isNotEmpty() == true) {
-
-                    showResolutionChoiceDialog(sizes)
-                }
-            }
-
             controller.getUvcView().surfaceTextureListener =
                 object : CameraSurfaceListener {
                     override fun onSurfaceTextureAvailable(
@@ -194,8 +214,9 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
                     }
                 }
 
+            val sizes = controller.getUsbApi().camera?.supportedSizeList ?: listOf()
             val resIndex = prefs.getInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, 0)
-            if (!sizes.isNullOrEmpty() && resIndex < sizes.size) {
+            if (sizes.isNotEmpty() && resIndex < sizes.size) {
                 updatePreviewSize(sizes[resIndex].width, sizes[resIndex].height)
             }
         }
