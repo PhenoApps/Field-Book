@@ -768,6 +768,8 @@
     <string name="stats_heatmap">View a heatmap of the collected observations</string>
     <string name="stats_export">Long press on a card to export</string>
     <string name="stats_loading">Loading stats...</string>
+    <string name="stats_first_day">Scroll to the first day with a collected observation</string>
+    <string name="stats_last_day">Scroll to the last day with a collected observation</string>
 
     <string name="stat_title_fields">Fields</string>
     <string name="stat_title_entries">Entries</string>

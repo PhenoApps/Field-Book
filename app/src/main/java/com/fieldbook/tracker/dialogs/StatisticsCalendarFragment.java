@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -44,6 +45,8 @@ public class StatisticsCalendarFragment extends Fragment {
     StatisticsActivity originActivity;
     Toolbar toolbar;
     CalendarView monthCalendarView;
+    LocalDate firstDay;
+    LocalDate lastDay;
 
     public StatisticsCalendarFragment(StatisticsActivity statisticsActivity) {
         this.originActivity = statisticsActivity;
@@ -136,7 +139,23 @@ public class StatisticsCalendarFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
-        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_statistics_calendar_heatmap, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        final int firstDay = R.id.stats_first_day;
+        final int lastDay = R.id.stats_last_day;
+
+        int itemId = item.getItemId();
+
+        if (itemId == firstDay) {
+            monthCalendarView.scrollToDate(this.firstDay);
+        } else if (itemId == lastDay) {
+            monthCalendarView.scrollToDate(this.lastDay);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -147,6 +166,11 @@ public class StatisticsCalendarFragment extends Fragment {
 
         Map<LocalDate, Integer> observationCount = new HashMap<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
+
+        if (observations.length > 0) {
+            firstDay = LocalDate.parse(observations[0].getObservation_time_stamp(), formatter);
+            lastDay = LocalDate.parse(observations[observations.length - 1].getObservation_time_stamp(), formatter);
+        }
 
         for (ObservationModel observation : observations) {
             LocalDate date = LocalDate.parse(observation.getObservation_time_stamp(), formatter);
