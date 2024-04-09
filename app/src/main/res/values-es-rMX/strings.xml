@@ -76,6 +76,10 @@
     <string name="fields_delete">Eliminar</string>
     <string name="fields_delete_study">Eliminar campo</string>
     <string name="fields_delete_study_confirmation">¿Estás seguro(a) de que quieres eliminar este campo? Esto eliminará todos los datos de este campo.</string>
+    <plurals name="fields_delete_confirmation">
+        <item quantity="one">¿Estás seguro(a) de que quieres eliminar los campos: \"%s\"?</item>
+        <item quantity="other">¿Estás seguro de que deseas eliminar los campos: \"%s\"?</item>
+    </plurals>
     <!-- Import -->
     <string name="fields_toolbar_add_field">Importar Campo</string>
     <string name="import_dialog_title_fields">Importar campo</string>
@@ -437,6 +441,10 @@
     <string name="observation_info_value">Valor</string>
     <string name="observation_info_timestamp">Timestamp de la Observación</string>
     <string name="observation_info_collector">Colector</string>
+    <string name="observations_info_geo_coordinates">Geo Coordenadas</string>
+    <string name="observation_info_last_synced_time">Última sincronización</string>
+    <string name="observation_info_additional_info">Información adicional</string>
+    <string name="observation_info_rep">Rep</string>
     <string name="observation_info_other">Otro</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
@@ -460,6 +468,8 @@
     <string name="export_error_missing_trait">Se debe seleccionar el tipo de variable</string>
     <string name="export_overwrite">Sobrescribir exportación anterior</string>
     <string name="dialog_export_bundle_data_cb_text">Empaquetar datos multimedia con archivo de exportación.</string>
+    <string name="export_multiple_fields_name">campos_múltiples</string>
+    <string name="export_multiple_fields_message">Nota: Múltiples exportaciones de campos se incluyen en un archivo ZIP</string>
     <!-- Citation -->
     <string name="citation_title">Cita</string>
     <string name="citation_string">Si utiliza Field Book para la investigación, cite la siguiente publicación:</string>
@@ -598,6 +608,7 @@
     <string name="pref_geonav_log_full">Completo</string>
     <string name="pref_geonav_log_full_description">Completo: Registrando todas las actualizaciones de ubicación y los pasos del algoritmo en almacenamiento/geonav/log.txt</string>
     <string name="pref_geonav_log_both">Ambos</string>
+    <string name="pref_geonav_log_both_description">Ambos: Registrando todas las actualizaciones de ubicación y los pasos del algoritmo para storage/geonav/log.txt, la entrada más cercana al storage/geonav/limited_log.txt</string>
     <string name="pref_geonav_update_interval_title">Intervalo de Actualización (s)</string>
     <string name="pref_geonav_update_interval_summary">El tiempo entre actualizaciones de ubicación es %ss.</string>
     <string name="pref_geonav_pair">Vincular Dispositivo</string>
@@ -647,6 +658,8 @@
     <string name="trait_audio_recording_warning">El audio a nivel de variable ya se está grabando. Deténgalo primero.</string>
     <string name="trait_audio_playing_warning">El audio a nivel de variable se está reproduciendo. Deténgalo primero.</string>
     <string name="field_audio_zip_error">Error al crear archivo zip</string>
+    <string name="pref_beta_enable_individual_field_page_title">Habilitar Páginas de Campos Individuales</string>
+    <string name="pref_beta_enable_individual_field_page_summary">Seleccionar un campo en la lista de campos abre una página de detalles</string>
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
     <string name="pref_beta_mlkit_summary">Esta opción utiliza la biblioteca MLKit en lugar de la biblioteca ZXing para escanear códigos de barras</string>
     <string name="pref_beta_mlkit_enabled_title">Escaneo de código de barras usando MLKit activado</string>
@@ -706,6 +719,10 @@
     <string name="preferences_brapi_oidc_flow_old_custom">Field Book Original Personalizado</string>
     <string name="brapi_oidc_url">URL de Descubrimiento OIDC</string>
     <string name="brapi_oidc_url_desc">La ubicación del documento JSON de Descubrimiento OIDC</string>
+    <string name="brapi_oidc_clientid">ID de Cliente OIDC</string>
+    <string name="brapi_oidc_clientid_desc">El ID de Cliente a ser usado en el proveedor de autenticación</string>
+    <string name="brapi_oidc_scope">Alcance OIDC</string>
+    <string name="brapi_oidc_scope_desc">El Alcance a ser utilizado en el proveedor de autenticación</string>
     <string name="preferences_brapi_traits_title">Variables BrAPI</string>
     <string name="preferences_appearance_collect_labelval_customize">Mostrar Categoria Valor vs Etiqueta</string>
     <string name="preferences_appearance_collect_labelval_customize_description">Mostrar valores o etiquetas de categorias en la pantalla de captura</string>
