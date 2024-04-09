@@ -52,6 +52,10 @@
     <!-- FIELDS -->
     <!-- General -->
     <string name="list_item_field_popup_menu_content_description">Abre un menú para el campo seleccionado.</string>
+    <string name="selected_count">%1$d seleccionado</string>
+    <string name="fields_select_all">Seleccionar Todo</string>
+    <string name="field_generic_observation_level">entradas</string>
+    <string name="field_observation_count_format">%1$s %2$s</string>
     <!-- Sort -->
     <string name="fields_sort_update">Ordenar</string>
     <string name="sort_dialog_saved">Orden actualizado</string>
@@ -65,7 +69,9 @@
     <string name="dialog_field_sort_toggle_order_content_description">Invierte el orden.</string>
     <string name="dialog_field_sort_add_content_description">Abre un diálogo para agregar un nuevo atributo para ordenar por.</string>
     <!-- Modify -->
+    <string name="fields_rename_study">Renombrar</string>
     <string name="fields_export">Exportar</string>
+    <string name="fields_archive">Archivar</string>
     <!-- Delete -->
     <string name="fields_delete">Eliminar</string>
     <string name="fields_delete_study">Eliminar campo</string>
