@@ -136,8 +136,21 @@
     <string name="name_conflict_display_name">nombre a mostrar</string>
     <string name="field_import_string">Importado desde</string>
     <string name="field_create_string">Creado dentro de</string>
+    <string name="field_detail_narrative">"%1$s\" \"%2$s\" con el nombre \"%3$s\". Contiene entradas \"%4$s\" y atributos \"%5$s. Ordenado por \"%6$s"</string>
+    <string name="field_default_sort_order">ordenamiento de importación</string>
+    <string name="field_data_title">Datos</string>
+    <string name="field_trait_total">\"&lt;b&gt;%1$s&lt;/b&gt;\" variables</string>
+    <string name="field_observation_total">\"&lt;b&gt;%1$s&lt;/b&gt;\" observaciones</string>
+    <string name="field_trait_observation_total">\"%d\" observaciones</string>
     <!-- Semantic dates -->
     <string name="today">Hoy</string>
+    <string name="yesterday">Ayer</string>
+    <plurals name="years_ago">
+        <item quantity="one">Hace %d año</item>
+        <item quantity="other">Hace %d años</item>
+    </plurals>
+    <string name="no_activity">No hay actividad</string>
+    <string name="invalid_date">Fecha inválida</string>
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Ordenar</string>
@@ -416,8 +429,13 @@
     <string name="act_collect_barcode_button_content_description">Iniciar escáner de código de barras.</string>
     <string name="act_collect_na_value_button_content_description">Rellenar el valor con no disponible.</string>
     <!-- Observation Info -->
+    <string name="observation_metadata_title">Metadatos de Observación</string>
+    <string name="observation_info_study_name">Nombre del Estudio</string>
+    <string name="observation_info_entry_id">Id de la entrada</string>
     <string name="observation_info_trait_format">Formato de Variable</string>
+    <string name="observation_info_trait_name">Nombre de Variable</string>
     <string name="observation_info_value">Valor</string>
+    <string name="observation_info_timestamp">Timestamp de la Observación</string>
     <string name="observation_info_other">Otro</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
@@ -694,6 +712,7 @@
     <string name="preferences_appearance_collect_labelval_customize_label">Etiqueta</string>
     <string name="preferences_brapi_servers_title">Servidores Comunitarios</string>
     <string name="preferences_brapi_server_barcode">Escanear código de barras del servidor</string>
+    <string name="preferences_brapi_server_scan_error">Error al Escanear</string>
     <string name="preferences_brapi_server_test">Servidor de Pruebas BrAPI</string>
     <string name="preferences_brapi_server_add">Enviar un servidor</string>
     <!-- Authorization -->
@@ -751,6 +770,7 @@ para sincronizar tus datos.
     <string name="brapi_export_successful">Exportación por BrAPI exitosa</string>
     <string name="brapi_saving_indicator">Guardando Observaciones...</string>
     <string name="brapi_field_non_matching_sources">No se pueden sincronizar datos. Los datos de campo se originan en %1$s, la url de BrAPI  establecida actualmente en %2$s. Los origenes deben coincidir.</string>
+    <string name="brapi_enable_before_sync">BRAPI está desactivado. Por favor, actívalo en la configuración antes de usar la sincronización.</string>
     <string name="brapi_trait_already_exists">La variable ya existe: %1$s. No guardado</string>
     <string name="brapi_error_saving_all_traits">Error al guardar las variables. No se guardaron variables.</string>
     <string name="brapi_error_saving_some_traits">Error al guardar algunas variables. Algunas variables no se guardaron</string>
@@ -862,4 +882,5 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_main_repeated_values_description">Esto abrirá un diálogo para administrar los valores repetidos para la unidad de observación actual.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="tutorial_main_geonav_description">Esto abrirá un diálogo de configuración para ayudar con la navegación del campo.</string>
+    <string name="oauth_configured_incorrectly">Falló la solicitud de autorización, por favor compruebe la configuración de BrAPI.</string>
 </resources>
