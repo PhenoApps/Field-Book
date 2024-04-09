@@ -870,8 +870,10 @@ public class CollectActivity extends ThemedActivity
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         traitBox.setSelection(traitIndex);
+        if (traitBox.getCurrentTrait() != null)
+            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
 
-        Log.d(TAG, "Move to result core: " + j);
+        Log.d(TAG, "Move to result core: " + j + "with trait index "+ traitIndex);
 
         initWidgets(false);
     }
