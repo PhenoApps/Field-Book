@@ -436,6 +436,7 @@
     <string name="observation_info_trait_name">Nombre de Variable</string>
     <string name="observation_info_value">Valor</string>
     <string name="observation_info_timestamp">Timestamp de la Observación</string>
+    <string name="observation_info_collector">Colector</string>
     <string name="observation_info_other">Otro</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
