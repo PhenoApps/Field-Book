@@ -127,6 +127,15 @@
     <string name="activity_field_editor_no_location_yet">No se ha encontrado ninguna ubicación.</string>
     <string name="activity_field_editor_switch_field_same">El Campo más cercano ya ha sido seleccionado.</string>
     <!-- Field details -->
+    <string name="field_detail_title">Detalle del Campo</string>
+    <string name="field_edit_display_name">Editar Nombre de Campo</string>
+    <string name="name_cannot_be_empty">El nombre no puede estar en blanco.</string>
+    <string name="illegal_characters_message">Caracteres no válidos encontrados: %1$s</string>
+    <string name="name_conflict_message">\"%1$s\" ya se usó como %2$s para otro campo.</string>
+    <string name="name_conflict_import_name">nombre de importación</string>
+    <string name="name_conflict_display_name">nombre a mostrar</string>
+    <string name="field_import_string">Importado desde</string>
+    <string name="field_create_string">Creado dentro de</string>
     <!-- Semantic dates -->
     <string name="today">Hoy</string>
     <!-- TRAITS -->
