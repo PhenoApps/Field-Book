@@ -770,6 +770,8 @@
     <string name="stats_loading">Loading stats...</string>
     <string name="stats_first_day">Scroll to the first day with a collected observation</string>
     <string name="stats_last_day">Scroll to the last day with a collected observation</string>
+    <string name="stats_calendar_range">Select a date range to filter the displayed dates</string>
+    <string name="stats_counter">Swap the date with the number of observations collected that day</string>
 
     <string name="stat_title_fields">Fields</string>
     <string name="stat_title_entries">Entries</string>

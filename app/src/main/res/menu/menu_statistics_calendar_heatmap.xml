@@ -14,4 +14,16 @@
         android:title="@string/stats_last_day"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/stats_calendar_range"
+        android:icon="@drawable/ic_stats_calendar_range"
+        android:title="@string/stats_calendar_range"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/stats_counter"
+        android:icon="@drawable/ic_stats_counter"
+        android:title="@string/stats_counter"
+        app:showAsAction="always" />
+
 </menu>

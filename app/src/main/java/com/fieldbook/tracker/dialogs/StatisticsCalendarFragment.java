@@ -45,8 +45,9 @@ public class StatisticsCalendarFragment extends Fragment {
     StatisticsActivity originActivity;
     Toolbar toolbar;
     CalendarView monthCalendarView;
-    LocalDate firstDay;
-    LocalDate lastDay;
+    YearMonth firstMonth;
+    YearMonth lastMonth;
+    int dateToggle = 0;
 
     public StatisticsCalendarFragment(StatisticsActivity statisticsActivity) {
         this.originActivity = statisticsActivity;
@@ -74,7 +75,10 @@ public class StatisticsCalendarFragment extends Fragment {
 
             @Override
             public void bind(@NonNull DayViewContainer container, CalendarDay day) {
-                container.calendarDayText.setText(String.valueOf(day.getDate().getDayOfMonth()));
+                int count = observationCount.getOrDefault(day.getDate(), 0);
+                if (dateToggle == 0)
+                    container.calendarDayText.setText(String.valueOf(day.getDate().getDayOfMonth()));
+                else container.calendarDayText.setText(String.valueOf(count));
 
                 // Reset the text and background color
                 container.calendarDayText.setTextColor(Color.TRANSPARENT);
@@ -83,7 +87,6 @@ public class StatisticsCalendarFragment extends Fragment {
                 if (day.getPosition() == DayPosition.MonthDate) {
                     // Setting the background color for the date
                     container.calendarDayText.setTextColor(Color.BLACK);
-                    int count = observationCount.getOrDefault(day.getDate(), 0);
                     if (count > 0) container.circleBackground.setBackgroundTintList(ColorStateList.valueOf(getColorForObservations(count)));
                 }
             }
@@ -103,11 +106,9 @@ public class StatisticsCalendarFragment extends Fragment {
         });
 
         YearMonth currentMonth = YearMonth.now();
-        YearMonth startMonth = currentMonth.minusMonths(48);  // TODO: set start and end month of calendar
-        YearMonth endMonth = currentMonth.plusMonths(0);
         List<DayOfWeek> daysOfWeek = daysOfWeek();
 
-        monthCalendarView.setup(startMonth, endMonth, daysOfWeek.get(0));
+        monthCalendarView.setup(firstMonth, currentMonth, daysOfWeek.get(0));
         monthCalendarView.scrollToMonth(currentMonth);
 
         // Displaying the days of the week titles
@@ -147,13 +148,18 @@ public class StatisticsCalendarFragment extends Fragment {
 
         final int firstDay = R.id.stats_first_day;
         final int lastDay = R.id.stats_last_day;
+        final int calendarRange = R.id.stats_calendar_range;
+        final int counter = R.id.stats_counter;
 
         int itemId = item.getItemId();
 
         if (itemId == firstDay) {
-            monthCalendarView.scrollToDate(this.firstDay);
+            monthCalendarView.scrollToMonth(this.firstMonth);
         } else if (itemId == lastDay) {
-            monthCalendarView.scrollToDate(this.lastDay);
+            monthCalendarView.scrollToMonth(this.lastMonth);
+        } else if (itemId == counter) {
+            dateToggle = 1 - dateToggle;
+            monthCalendarView.notifyCalendarChanged();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -168,8 +174,8 @@ public class StatisticsCalendarFragment extends Fragment {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
 
         if (observations.length > 0) {
-            firstDay = LocalDate.parse(observations[0].getObservation_time_stamp(), formatter);
-            lastDay = LocalDate.parse(observations[observations.length - 1].getObservation_time_stamp(), formatter);
+            firstMonth = YearMonth.from(LocalDate.parse(observations[0].getObservation_time_stamp(), formatter));
+            lastMonth = YearMonth.from(LocalDate.parse(observations[observations.length - 1].getObservation_time_stamp(), formatter));
         }
 
         for (ObservationModel observation : observations) {
