@@ -195,7 +195,9 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                              plotId: Int? = null,
                              trait: Int? = null) {
 
-        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+
+        val study = database.getFieldObject(studyId)
 
         val showLabel = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") == "value"
 
@@ -231,11 +233,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                 val traits = database.allTraitObjects
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
-                val cursor =
-                    database.getExportTableData(
-                        preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                        mTraits
-                    )
+                val cursor = database.getExportTableData(studyId, mTraits)
 
                 if (cursor.moveToFirst()) {
 
@@ -254,7 +252,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                             val rowHeaderIndex = cursor.getColumnIndex(rowHeader)
 
                             //unique name column is always the first column
-                            val uniqueIndex = cursor.getColumnIndex(cursor.getColumnName(0))
+                            val uniqueIndex = cursor.getColumnIndex(study.unique_id)
 
                             if (uniqueIndex > -1) { //if it doesn't exist skip this row
 
@@ -279,7 +277,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                                         val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
 
                                         val repeatedValues =
-                                            database.getRepeatedValues(studyId, id, variable.id)
+                                            database.getRepeatedValues(studyId.toString(), id, variable.id)
                                         if (repeatedValues.size > 1) {
                                             println("$studyId $id $variable has repeated values...!")
                                         }
