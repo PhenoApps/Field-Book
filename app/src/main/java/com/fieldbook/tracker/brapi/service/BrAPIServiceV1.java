@@ -354,7 +354,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         return brapiTrials;
     }
 
-    public void getStudies(String programDbId, String trialDbId, String sortBy, BrapiPaginationManager paginationManager,
+    public void getStudies(String programDbId, String trialDbId, String sortBy, String sortOrder, BrapiPaginationManager paginationManager,
                            final Function<List<BrapiStudyDetails>, Void> function,
                            final Function<Integer, Void> failFunction) {
         Integer initPage = paginationManager.getPage();
@@ -384,7 +384,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             studiesApi.studiesGetAsync(
                     null, null, null, programDbId,
                     null, null, trialDbId, null, null,
-                    null, true, sortBy, null,
+                    null, true, sortBy, sortOrder,
                     paginationManager.getPage(), paginationManager.getPageSize(), getBrapiToken(), callback);
 
         } catch (ApiException e) {

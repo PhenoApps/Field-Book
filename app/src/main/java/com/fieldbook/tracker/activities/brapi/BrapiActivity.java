@@ -39,6 +39,7 @@ public class BrapiActivity extends ThemedActivity {
 
     BrapiLoadDialog brapiLoadDialog;
     private String sortBy;
+    private String sortOrder;
 
     // Filter by
     private String programDbId;
@@ -80,11 +81,9 @@ public class BrapiActivity extends ThemedActivity {
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
                 baseURLText.setText(brapiBaseURL);
 
-                // Set the default sort option from strings.xml
-                String[] sortByOptions = getResources().getStringArray(R.array.brapi_study_sort_by_options);
-                if (sortByOptions.length > 0) {
-                    sortBy = sortByOptions[0];
-                }
+                // Set the default sort options from the corresponding values array
+                String[] apiValues = getResources().getStringArray(R.array.brapi_study_sort_values);
+                if (apiValues.length > 0) setSortParameters(apiValues[0]);
 
                 loadToolbar();
                 loadObservationLevels();
@@ -116,16 +115,20 @@ public class BrapiActivity extends ThemedActivity {
 
     private void setupSpinners() {
 
-        Spinner sortBySpinner = findViewById(R.id.sortBySpinner);
-        ArrayAdapter<CharSequence> sortByAdapter = ArrayAdapter.createFromResource(this,
-                R.array.brapi_study_sort_by_options, android.R.layout.simple_spinner_item);
-        sortByAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        sortBySpinner.setAdapter(sortByAdapter);
-        sortBySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        Spinner sortSpinner = findViewById(R.id.sortSpinner);
+        ArrayAdapter<CharSequence> sortAdapter = ArrayAdapter.createFromResource(this,
+                R.array.brapi_study_sort_options, android.R.layout.simple_spinner_item);
+        sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortSpinner.setAdapter(sortAdapter);
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                sortBy = parent.getItemAtPosition(position).toString();
-                loadStudiesList(); // Reload studies list with the new sort option
+                String[] apiValues = getResources().getStringArray(R.array.brapi_study_sort_values);
+                if (position < apiValues.length) {
+                    String selectedValue = apiValues[position];
+                    setSortParameters(selectedValue);
+                    loadStudiesList();
+                }
             }
 
             @Override
@@ -167,7 +170,7 @@ public class BrapiActivity extends ThemedActivity {
         paginationManager.refreshPageIndicator();
         Integer initPage = paginationManager.getPage();
         
-          brAPIService.getStudies(this.programDbId, this.trialDbId, this.sortBy, paginationManager, new Function<List<BrapiStudyDetails>, Void>() {
+          brAPIService.getStudies(this.programDbId, this.trialDbId, this.sortBy, this.sortOrder, paginationManager, new Function<List<BrapiStudyDetails>, Void>() {
             @Override
             public Void apply(final List<BrapiStudyDetails> studies) {
 
@@ -262,6 +265,14 @@ public class BrapiActivity extends ThemedActivity {
             Toast toast = Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_study, Toast.LENGTH_LONG);
             toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
             toast.show();
+        }
+    }
+
+    private void setSortParameters(String sortValue) {
+        String[] parts = sortValue.split(" ");
+        if (parts.length == 2) {
+            sortBy = parts[0];
+            sortOrder = parts[1];
         }
     }
 

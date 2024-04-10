@@ -391,7 +391,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         return brapiTrials;
     }
 
-    public void getStudies(String programDbId, String trialDbId, String sortBy, BrapiPaginationManager paginationManager,
+    public void getStudies(String programDbId, String trialDbId, String sortBy, String sortOrder, BrapiPaginationManager paginationManager,
                            final Function<List<BrapiStudyDetails>, Void> function,
                            final Function<Integer, Void> failFunction) {
         Integer initPage = paginationManager.getPage();
@@ -422,7 +422,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             };
 
             StudyQueryParams queryParams = new StudyQueryParams();
-            queryParams.active("true").programDbId(programDbId).trialDbId(trialDbId).sortBy(sortBy).page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
+            queryParams.active("true").programDbId(programDbId).trialDbId(trialDbId).sortBy(sortBy).sortOrder(sortOrder).page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
             studiesApi.studiesGetAsync(queryParams, callback);
 
         } catch (ApiException error) {

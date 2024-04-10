@@ -68,6 +68,7 @@ public class BrapiServiceTest {
 
     private static final String BRAPI_URL = "https://test-server.brapi.org";
     private static final String SORT_BY = "studyName";
+    private static final String SORT_ORDER = "ASC";
     private BrAPIService brAPIService;
     private final String programDbId;
     private final String trialDbId;
@@ -120,7 +121,7 @@ public class BrapiServiceTest {
 
         BrapiPaginationManager pageMan = new BrapiPaginationManager(0, 1000);
         // Call our get studies endpoint with the same parsing that our classes use.
-        this.brAPIService.getStudies(null, this.trialDbId, SORT_BY, pageMan, new Function<List<BrapiStudyDetails>, Void>() {
+        this.brAPIService.getStudies(null, this.trialDbId, SORT_BY, SORT_ORDER, pageMan, new Function<List<BrapiStudyDetails>, Void>() {
             @Override
             public Void apply(List<BrapiStudyDetails> input) {
                 // Check that there is atleast one study returned.
