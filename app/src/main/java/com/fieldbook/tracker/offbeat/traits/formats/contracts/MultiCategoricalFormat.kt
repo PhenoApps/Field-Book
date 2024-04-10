@@ -11,6 +11,7 @@ class MultiCategoricalFormat : TraitFormat(
     format = Formats.MULTI_CATEGORICAL,
     defaultLayoutId = R.layout.trait_multicat,
     layoutView = null,
+    databaseName = "multicat",
     nameStringResourceId = R.string.traits_format_multicategorical,
     iconDrawableResourceId = R.drawable.ic_trait_multicat,
     stringNameAux = null,

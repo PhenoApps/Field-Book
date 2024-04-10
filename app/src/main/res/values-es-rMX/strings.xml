@@ -17,7 +17,7 @@
     <string name="dialog_save_error_title">Error al Guardar</string>
     <string name="dialog_back">Atrás</string>
     <string name="dialog_scan">Escanear</string>
-    <string name="barcode_scanner_text">Escanear código de barras</string>
+    <string name="barcode_scanner_text">Escanear un código de barras</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Datos de ejemplo</string>
     <string name="startup_sample_data_message">¿Cargar datos de ejemplo?</string>
@@ -64,6 +64,8 @@
     <string name="dialog_field_sort_delete_all_content_description">Elimina todas las entradas de ordenación.</string>
     <string name="dialog_field_sort_toggle_order_content_description">Invierte el orden.</string>
     <string name="dialog_field_sort_add_content_description">Abre un diálogo para agregar un nuevo atributo para ordenar por.</string>
+    <!-- Modify -->
+    <string name="fields_export">Exportar</string>
     <!-- Delete -->
     <string name="fields_delete">Eliminar</string>
     <string name="fields_delete_study">Eliminar campo</string>
@@ -94,7 +96,7 @@
     <string name="dialog_field_creator_ask_size">Por favor, eligir un nombre y tamaño de Campo.</string>
     <string name="dialog_field_creator_ask_start_point">Por favor, eligir un punto de partida del Campo.</string>
     <string name="dialog_field_creator_ask_pattern">Por favor, eligir un patrón de Campo.</string>
-    <string name="dialog_field_creator_ask_name_hint">Nombre</string>
+    <string name="dialog_field_creator_ask_name_hint">Variable</string>
     <string name="dialog_field_creator_ask_row_hint">Filas</string>
     <string name="dialog_field_creator_ask_columns_hint">Columnas</string>
     <string name="dialog_field_creator_top_left">Arriba a la izquierda</string>
@@ -118,13 +120,9 @@
     <string name="activity_field_editor_switch_field_action">Cambiar</string>
     <string name="activity_field_editor_no_location_yet">No se ha encontrado ninguna ubicación.</string>
     <string name="activity_field_editor_switch_field_same">El Campo más cercano ya ha sido seleccionado.</string>
-    <!-- Unimplemented -->
-    <string name="fields_study_statistics">Estadísticas</string>
-    <string name="fields_date_imported">Fecha de importación</string>
-    <string name="fields_date_edited">Editar fecha</string>
-    <string name="fields_date_exported">Fecha de exportación</string>
-    <string name="fields_summary">Resumen del Campo</string>
-    <string name="fields_options">Opciones</string>
+    <!-- Field details -->
+    <!-- Semantic dates -->
+    <string name="today">Hoy</string>
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Ordenar</string>
@@ -173,7 +171,7 @@
     <string name="trait_creator_title_layout">Diseño de Variable</string>
     <string name="trait_creator_parameters_title">Parámetros %s</string>
     <string name="activity_traits_new_button_content_description">Crear una nueva variable.</string>
-    <string name="traits_create_name">Nombre</string>
+    <string name="traits_create_name">Variable</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Predeterminado</string>
     <string name="traits_create_value_minimum">Mínimo</string>
@@ -402,6 +400,10 @@
     <string name="act_collect_delete_value_button_content_description">Elimina el valor actual.</string>
     <string name="act_collect_barcode_button_content_description">Iniciar escáner de código de barras.</string>
     <string name="act_collect_na_value_button_content_description">Rellenar el valor con no disponible.</string>
+    <!-- Observation Info -->
+    <string name="observation_info_trait_format">Formato de Variable</string>
+    <string name="observation_info_value">Valor</string>
+    <string name="observation_info_other">Otro</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Local</string>
@@ -500,7 +502,7 @@
     <string name="preferences_appearance_collection_category_title">Pantalla de captura</string>
     <string name="preferences_appearance_toolbar_customize">Personalizar iconos en barra de herramientas</string>
     <string name="preferences_appearance_toolbar_customize_description">Modificar iconos predeterminados en la pantalla de captura</string>
-    <string name="preferences_appearance_toolbar_customize_search">Busqueda</string>
+    <string name="preferences_appearance_toolbar_customize_search">Buscar</string>
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
     <string name="preferences_appearance_toolbar_customize_summary">Resumen</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloquear</string>
@@ -561,6 +563,7 @@
     <string name="pref_geonav_log_limited_description">Limitado: Registro de entrada más cercana en almacenamiento/geonav/limited_log.txt</string>
     <string name="pref_geonav_log_full">Completo</string>
     <string name="pref_geonav_log_full_description">Completo: Registrando todas las actualizaciones de ubicación y los pasos del algoritmo en almacenamiento/geonav/log.txt</string>
+    <string name="pref_geonav_log_both">Ambos</string>
     <string name="pref_geonav_update_interval_title">Intervalo de Actualización (s)</string>
     <string name="pref_geonav_update_interval_summary">El tiempo entre actualizaciones de ubicación es %ss.</string>
     <string name="pref_geonav_pair">Vincular Dispositivo</string>
@@ -792,7 +795,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_main_na_title">Datos perdidos</string>
     <string name="tutorial_main_na_description">El botón NA se usa para marcar valores como faltantes.</string>
     <string name="tutorial_main_delete_title">Eliminar dato</string>
-    <string name="tutorial_main_delete_description">Los datos se eliminan usando este botón.</string>
+    <string name="tutorial_main_delete_description">Los datos son eliminados usando este botón.</string>
     <string name="tutorial_main_search_title">Buscar</string>
     <string name="tutorial_main_search_description">El icono de búsqueda permite realizar consultas en la base de datos.</string>
     <string name="tutorial_main_resources_title">Recursos</string>

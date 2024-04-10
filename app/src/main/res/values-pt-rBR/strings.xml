@@ -44,6 +44,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">Exportar</string>
     <!-- Delete -->
     <!-- Import -->
     <string name="import_dialog_unique">Identificador único</string>
@@ -52,7 +54,8 @@
     <string name="import_error_unique">Identificador único contém duplicatas</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <!-- Trait import/export -->
@@ -137,6 +140,7 @@
     <!--- Repeated measures -->
     <!--- GeoNav -->
     <!--- Content Descriptions -->
+    <!-- Observation Info -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">Base de dados</string>

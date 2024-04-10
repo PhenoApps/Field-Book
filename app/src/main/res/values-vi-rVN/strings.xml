@@ -42,6 +42,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">Xuất</string>
     <!-- Delete -->
     <string name="fields_delete">Xóa</string>
     <string name="fields_delete_study">Xóa ruộng</string>
@@ -60,13 +62,8 @@
     <string name="fields_study_exists_message">Ruộng này đã tồn tại.</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
-    <string name="fields_study_statistics">Thống kê</string>
-    <string name="fields_date_imported">Ngày nhập</string>
-    <string name="fields_date_edited">Chỉnh sửa ngày</string>
-    <string name="fields_date_exported">Ngày xuất</string>
-    <string name="fields_summary">Tóm tắt ruộng</string>
-    <string name="fields_options">Các lựa chọn</string>
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sắp xếp</string>
@@ -181,6 +178,7 @@
     <string name="dialog_multi_measure_delete">Xóa</string>
     <!--- GeoNav -->
     <!--- Content Descriptions -->
+    <!-- Observation Info -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Bộ nhớ máy</string>
@@ -259,6 +257,7 @@
     <string name="preferences_general_skip_entries_with_data">Bỏ qua nghiệm thức có dữ liệu</string>
     <string name="preferences_general_skip_entries_with_data_description">Bỏ qua những nghiệm thức có dữ liệu đối với tính trạng hiện tại</string>
     <!-- GeoNav -->
+    <string name="pref_geonav_log_both">Cả hai</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Tiếng</string>
     <string name="preferences_sound_primary_order_sound">Tiếng trật tự chính</string>

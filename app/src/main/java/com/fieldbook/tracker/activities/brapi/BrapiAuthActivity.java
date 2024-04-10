@@ -124,7 +124,8 @@ public class BrapiAuthActivity extends ThemedActivity {
                 ResponseTypeValues.TOKEN : ResponseTypeValues.CODE;
 
         try {
-            String clientId = "fieldbook";
+            String clientId = sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
+            String scope = sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_SCOPE, "");
 
             // Authorization code flow works better with custom URL scheme fieldbook://app/auth
             // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
@@ -167,6 +168,7 @@ public class BrapiAuthActivity extends ThemedActivity {
                         public void onFetchConfigurationCompleted(
                                 @Nullable AuthorizationServiceConfiguration serviceConfig,
                                 @Nullable AuthorizationException ex) {
+
                             if (ex != null) {
                                 Log.e("BrAPIService", "failed to fetch configuration", ex);
                                 authError(ex);
@@ -174,23 +176,18 @@ public class BrapiAuthActivity extends ThemedActivity {
                                 return;
                             }
 
-                            AuthorizationRequest.Builder authRequestBuilder =
-                                    new AuthorizationRequest.Builder(
-                                            serviceConfig, // the authorization service configuration
-                                            clientId, // the client ID, typically pre-registered and static
-                                            responseType, // the response_type value: token or code
-                                            redirectURI); // the redirect URI to which the auth response is sent
+                            try {
 
-                            AuthorizationRequest authRequest = authRequestBuilder.setPrompt("login").build();
+                                requestAuthorization(serviceConfig, clientId, responseType, redirectURI, scope, context);
 
-                            AuthorizationService authService = new AuthorizationService(context);
+                            } catch (IllegalArgumentException e) {
 
-                            Intent responseIntent = new Intent(context, BrapiAuthActivity.class);
-                            responseIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                e.printStackTrace();
 
-                            authService.performAuthorizationRequest(
-                                    authRequest,
-                                    PendingIntent.getActivity(context, 0, responseIntent, PendingIntent.FLAG_MUTABLE));
+                                Toast.makeText(context, R.string.oauth_configured_incorrectly, Toast.LENGTH_LONG).show();
+
+                                finish();
+                            }
                         }
 
                     }, builder);
@@ -200,6 +197,37 @@ public class BrapiAuthActivity extends ThemedActivity {
             authError(ex);
 
         }
+    }
+
+    private void requestAuthorization(
+            AuthorizationServiceConfiguration serviceConfig,
+            String clientId,
+            String responseType,
+            Uri redirectURI,
+            String scope,
+            Context context) {
+
+        AuthorizationRequest.Builder authRequestBuilder =
+                new AuthorizationRequest.Builder(
+                        serviceConfig, // the authorization service configuration
+                        clientId, // the client ID, typically pre-registered and static
+                        responseType, // the response_type value: token or code
+                        redirectURI); // the redirect URI to which the auth response is sent
+
+        if (!scope.trim().isEmpty()){
+            authRequestBuilder.setScope(scope);
+        }
+
+        AuthorizationRequest authRequest = authRequestBuilder.setPrompt("login").build();
+
+        AuthorizationService authService = new AuthorizationService(context);
+
+        Intent responseIntent = new Intent(context, BrapiAuthActivity.class);
+        responseIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        authService.performAuthorizationRequest(
+                authRequest,
+                PendingIntent.getActivity(context, 0, responseIntent, PendingIntent.FLAG_MUTABLE));
     }
 
     public void authorizeBrAPI_OLD(SharedPreferences sharedPreferences, Context context) {
