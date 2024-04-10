@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/list_item_search_search_text"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:inputType="text"
+        android:singleLine="true"
+        android:textSize="?attr/fb_body_text_size"
+        android:gravity="end"
+        app:layout_constraintBottom_toBottomOf="@id/list_item_search_like"
+        app:layout_constraintEnd_toStartOf="@id/list_item_search_delete_btn"
+        app:layout_constraintStart_toEndOf="@id/list_item_search_like"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Text to search for" />
+
+    <ImageButton
+        android:id="@+id/list_item_search_like"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:background="@color/zxing_transparent"
+        android:contentDescription="@string/list_item_field_sort_delete_content_description"
+        android:padding="8dp"
+        android:src="@drawable/ic_tb_less_than"
+        android:text="@string/fields_delete"
+        app:layout_constraintEnd_toStartOf="@+id/list_item_search_search_text"
+        app:layout_constraintStart_toEndOf="@id/list_item_search_columns"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/list_item_search_columns"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_margin="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textSize="?attr/fb_body_text_size"
+        app:layout_constraintBottom_toBottomOf="@id/list_item_search_like"
+        app:layout_constraintEnd_toStartOf="@id/list_item_search_like"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Value" />
+
+    <ImageButton
+        android:padding="8dp"
+        android:background="@color/zxing_transparent"
+        android:src="@drawable/ic_tb_delete"
+        android:text="@string/fields_delete"
+        android:id="@+id/list_item_search_delete_btn"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+
+    <View
+        android:id="@+id/view2"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@drawable/cell_line_divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/list_item_search_like" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

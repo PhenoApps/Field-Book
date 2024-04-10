@@ -150,12 +150,14 @@
         <item>@string/pref_geonav_log_off</item>
         <item>@string/pref_geonav_log_limited</item>
         <item>@string/pref_geonav_log_full</item>
+        <item>@string/pref_geonav_log_both</item>
     </string-array>
 
     <string-array name="pref_geonav_logging_mode_values">
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
     </string-array>
 
     <string-array name="pref_general_move_to_unique_id_entries">

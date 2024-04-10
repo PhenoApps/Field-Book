@@ -45,6 +45,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">导出</string>
     <!-- Delete -->
     <string name="fields_delete">删除</string>
     <string name="fields_delete_study">删除地块</string>
@@ -64,7 +66,8 @@
     <string name="act_field_editor_file_open_failed">打开文件失败。</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">排序</string>
@@ -140,6 +143,7 @@
     <string name="main_toolbar_search">搜索</string>
     <string name="search_dialog_add">添加</string>
     <string name="search_dialog_clear">清除</string>
+    <string name="search_dialog_search">搜索</string>
     <string name="search_dialog_query_is_equal_to">等于</string>
     <string name="search_dialog_query_is_not_equal_to">不等于</string>
     <string name="search_dialog_query_contains">包含</string>
@@ -179,6 +183,7 @@
     <string name="dialog_multi_measure_delete">删除</string>
     <!--- GeoNav -->
     <!--- Content Descriptions -->
+    <!-- Observation Info -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">本地</string>
@@ -258,6 +263,7 @@
     <string name="preferences_general_skip_entries_with_data">跳过有数据的记录</string>
     <string name="preferences_general_skip_entries_with_data_description">跳过当前性状已有数据的记录</string>
     <!-- GeoNav -->
+    <string name="pref_geonav_log_both">都是</string>
     <!-- Sounds -->
     <string name="preferences_sounds">声音</string>
     <string name="preferences_sound_primary_order_sound">主顺序通知音</string>
@@ -415,4 +421,5 @@
     <string name="tutorial_traits_format_description">不同的性状格式通过图标来标识。</string>
     <string name="tutorial_traits_visibility_title">性状可见性</string>
     <string name="tutorial_traits_visibility_description">通过点击检查框来禁止性状采集数据。</string>
+    <string name="tutorial_main_datagrid_title">数据表格</string>
 </resources>

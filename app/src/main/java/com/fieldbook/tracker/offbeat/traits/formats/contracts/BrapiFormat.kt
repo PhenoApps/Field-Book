@@ -10,6 +10,7 @@ class BrapiFormat : TraitFormat(
     format = Formats.BRAPI,
     defaultLayoutId = -1,
     layoutView = null,
+    databaseName = "brapi",
     nameStringResourceId = R.string.brapi_display_name,
     iconDrawableResourceId = R.drawable.ic_adv_brapi,
     stringNameAux = { context ->
