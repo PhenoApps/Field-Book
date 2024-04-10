@@ -282,9 +282,9 @@ class PhotoTraitLayout : CameraTrait {
 
     override fun onSettingsChanged() {
 
-        val systemEnabled = preferences.getBoolean(GeneralKeys.CAMERA_SYSTEM, false)
+        val systemEnabled = preferences.getInt(GeneralKeys.CAMERA_SYSTEM, R.id.view_trait_photo_settings_camera_system_rb)
 
-        if (systemEnabled) {
+        if (systemEnabled == R.id.view_trait_photo_settings_camera_system_rb) {
 
             setupSystemCameraMode()
 

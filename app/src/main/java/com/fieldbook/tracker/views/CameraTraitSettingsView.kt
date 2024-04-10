@@ -8,6 +8,7 @@ import android.widget.CheckBox
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
+import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
@@ -23,7 +24,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
     }
 
     private var supportedResolutions: List<Size>? = null
-    private val systemCb: CheckBox
+    private val systemCameraRg: RadioGroup
     private val previewCb: CheckBox
     private val resolutionGroup: RadioGroup
     private val resolutionTitle: TextView
@@ -31,7 +32,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
     init {
 
         val view = inflate(context, R.layout.view_trait_photo_settings, this)
-        systemCb = view.findViewById(R.id.view_trait_photo_system_cb)
+        systemCameraRg = view.findViewById(R.id.view_trait_photo_settings_camera_rg)
         previewCb = view.findViewById(R.id.view_trait_photo_preview_cb)
         resolutionGroup = view.findViewById(R.id.view_trait_photo_settings_resolution_rg)
         resolutionTitle = view.findViewById(R.id.view_trait_photo_settings_resolution_tv)
@@ -82,9 +83,9 @@ open class CameraTraitSettingsView: ConstraintLayout {
 
     }
 
-    private fun setupSettingsModeBasedOnPreference(isSystem: Boolean) {
+    private fun setupSettingsModeBasedOnPreference(checkedRadioButtonId: Int) {
 
-        if (isSystem) {
+        if (checkedRadioButtonId == R.id.view_trait_photo_settings_camera_system_rb) {
 
             setupSystemCameraSettings()
 
@@ -97,16 +98,16 @@ open class CameraTraitSettingsView: ConstraintLayout {
 
     private fun setupSystemCheckBox() {
 
-        systemCb.setOnCheckedChangeListener { _, isChecked ->
+        systemCameraRg.setOnCheckedChangeListener { _, checkedId ->
 
-            prefs.edit().putBoolean(GeneralKeys.CAMERA_SYSTEM, isChecked).apply()
+            prefs.edit().putInt(GeneralKeys.CAMERA_SYSTEM, checkedId).apply()
 
-            setupSettingsModeBasedOnPreference(isChecked)
+            setupSettingsModeBasedOnPreference(systemCameraRg.checkedRadioButtonId)
         }
 
-        systemCb.isChecked = prefs.getBoolean(GeneralKeys.CAMERA_SYSTEM, false)
+        systemCameraRg.check(prefs.getInt(GeneralKeys.CAMERA_SYSTEM, R.id.view_trait_photo_settings_camera_system_rb))
 
-        setupSettingsModeBasedOnPreference(systemCb.isChecked)
+        setupSettingsModeBasedOnPreference(systemCameraRg.checkedRadioButtonId)
     }
 
     private fun setupPreviewCheckBox() {

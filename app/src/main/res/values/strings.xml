@@ -1056,5 +1056,7 @@
     <string name="view_trait_photo_settings_system_title">System Camera</string>
     <string name="trait_name_alt_photo_system">System</string>
     <string name="trait_name_alt_usb">USB</string>
+    <string name="view_trait_photo_settings_camera_custom">Custom Camera</string>
+    <string name="view_trait_photo_settings_camera_system">System Camera App</string>
 
 </resources>
