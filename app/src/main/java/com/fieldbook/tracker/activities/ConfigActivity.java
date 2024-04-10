@@ -157,11 +157,11 @@ public class ConfigActivity extends ThemedActivity {
     public void onCreate(Bundle savedInstanceState) {
 
         FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
+
+        instance.setCrashlyticsCollectionEnabled(true);
+
         if (BuildConfig.DEBUG) {
-            instance.deleteUnsentReports();
-            instance.setCrashlyticsCollectionEnabled(false);
-        } else {
-            instance.setCrashlyticsCollectionEnabled(true);
+            instance.setCustomKey("debug", true);
         }
 
         //important: this must be called before super.onCreate or else you get a black flicker
