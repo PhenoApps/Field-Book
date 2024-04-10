@@ -90,6 +90,8 @@
             tools:visibility="visible"
             android:src="@drawable/camera_24px"
             app:layout_constraintTop_toBottomOf="@id/trait_camera_pv"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:contentDescription="@string/trait_camera_capture_content_description" />
