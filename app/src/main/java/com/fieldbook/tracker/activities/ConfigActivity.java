@@ -162,7 +162,7 @@ public class ConfigActivity extends ThemedActivity {
 
         if (BuildConfig.DEBUG) {
             instance.setCustomKey("debug", true);
-        }
+        } else instance.setCustomKey("release", true);
 
         //important: this must be called before super.onCreate or else you get a black flicker
         AppLanguageUtil.Companion.refreshAppText(this);
