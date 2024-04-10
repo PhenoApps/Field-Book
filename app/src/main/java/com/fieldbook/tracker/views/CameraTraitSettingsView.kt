@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.util.Size
 import android.view.View
 import android.widget.CheckBox
+import android.widget.FrameLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -28,6 +29,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
     private val previewCb: CheckBox
     private val resolutionGroup: RadioGroup
     private val resolutionTitle: TextView
+    private val resolutionFrameLayout: FrameLayout
 
     init {
 
@@ -36,6 +38,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
         previewCb = view.findViewById(R.id.view_trait_photo_preview_cb)
         resolutionGroup = view.findViewById(R.id.view_trait_photo_settings_resolution_rg)
         resolutionTitle = view.findViewById(R.id.view_trait_photo_settings_resolution_tv)
+        resolutionFrameLayout = view.findViewById(R.id.view_trait_photo_settings_resolution_fl)
     }
 
     constructor(ctx: Context, supportedResolutions: List<Size>) : super(ctx) {
@@ -139,6 +142,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
         previewCb.visibility = View.VISIBLE
         resolutionGroup.visibility = View.VISIBLE
         resolutionTitle.visibility = View.VISIBLE
+        resolutionFrameLayout.visibility = View.VISIBLE
 
         setupPreviewCheckBox()
         setupResolutionGroup()
@@ -149,5 +153,6 @@ open class CameraTraitSettingsView: ConstraintLayout {
         previewCb.visibility = View.GONE
         resolutionGroup.visibility = View.GONE
         resolutionTitle.visibility = View.GONE
+        resolutionFrameLayout.visibility = View.GONE
     }
 }
