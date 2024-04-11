@@ -62,6 +62,7 @@ abstract class AbstractCameraTrait :
     protected var previewView: PreviewView? = null
     protected var imageView: ImageView? = null
     protected var recyclerView: RecyclerView? = null
+    protected var expandBtn: FloatingActionButton? = null
 
     protected val background = CoroutineScope(Dispatchers.IO)
     protected val ui = CoroutineScope(Dispatchers.Main)
@@ -103,7 +104,7 @@ abstract class AbstractCameraTrait :
         recyclerView = act.findViewById(R.id.camera_fragment_rv)
         settingsBtn = act.findViewById(R.id.camera_fragment_settings_btn)
         previewView = act.findViewById(R.id.trait_camera_pv)
-
+        expandBtn = act.findViewById(R.id.trait_camera_expand_btn)
         recyclerView?.adapter = ImageAdapter(this)
 
         activity = act

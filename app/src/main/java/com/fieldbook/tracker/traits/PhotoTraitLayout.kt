@@ -155,6 +155,7 @@ class PhotoTraitLayout : CameraTrait {
     private fun bindNoPreviewLifecycle(cameraProvider: ProcessCameraProvider) {
 
         previewView?.visibility = View.GONE
+        expandBtn?.visibility = View.GONE
 
         val cameraSelector = CameraSelector.Builder()
             .requireLensFacing(CameraSelector.LENS_FACING_BACK)
@@ -173,7 +174,7 @@ class PhotoTraitLayout : CameraTrait {
                 imageCapture
             )
 
-            Log.d(CameraActivity.TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
+            Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
 
             setupCaptureButton {
 
@@ -197,6 +198,13 @@ class PhotoTraitLayout : CameraTrait {
     private fun bindPreviewLifecycle(cameraProvider: ProcessCameraProvider) {
 
         previewView?.visibility = View.VISIBLE
+
+        expandBtn?.visibility = View.VISIBLE
+
+        expandBtn?.setOnClickListener {
+
+            launchCameraX()
+        }
 
         val preview = Preview.Builder()
             .setTargetResolution(DEFAULT_CAMERAX_PREVIEW_SIZE)
@@ -242,7 +250,7 @@ class PhotoTraitLayout : CameraTrait {
                 imageCapture
             )
 
-            Log.d(CameraActivity.TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
+            Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
 
             setupCaptureButton {
 
@@ -299,6 +307,8 @@ class PhotoTraitLayout : CameraTrait {
 
         previewView?.visibility = View.GONE
 
+        expandBtn?.visibility = View.GONE
+
         cameraProviderFuture.get().unbindAll()
 
         setupCaptureButton {
@@ -351,7 +361,6 @@ class PhotoTraitLayout : CameraTrait {
             GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", file)
 
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        val cameraxIntent = Intent(activity, CameraActivity::class.java)
 
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(context.packageManager) != null) {
@@ -361,11 +370,13 @@ class PhotoTraitLayout : CameraTrait {
                 PICTURE_REQUEST_CODE
             )
         } else {
-            (context as CollectActivity).startActivityForResult(
-                cameraxIntent,
-                PICTURE_REQUEST_CODE
-            )
+            launchCameraX()
         }
+    }
+
+    private fun launchCameraX() {
+        val intent = Intent(context, CameraActivity::class.java)
+        activity?.startActivityForResult(intent, PICTURE_REQUEST_CODE)
     }
 
     override fun refreshLock() {

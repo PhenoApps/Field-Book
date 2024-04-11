@@ -9,7 +9,6 @@ import android.widget.FrameLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
-import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
@@ -24,12 +23,12 @@ open class CameraTraitSettingsView: ConstraintLayout {
         PreferenceManager.getDefaultSharedPreferences(context)
     }
 
-    private var supportedResolutions: List<Size>? = null
-    private val systemCameraRg: RadioGroup
-    private val previewCb: CheckBox
-    private val resolutionGroup: RadioGroup
-    private val resolutionTitle: TextView
-    private val resolutionFrameLayout: FrameLayout
+    protected var cameraSupportedResolutions: List<Size>? = null
+    protected val systemCameraRg: RadioGroup
+    protected val previewCb: CheckBox
+    protected val resolutionGroup: RadioGroup
+    protected val resolutionTitle: TextView
+    protected val resolutionFrameLayout: FrameLayout
 
     init {
 
@@ -42,7 +41,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
     }
 
     constructor(ctx: Context, supportedResolutions: List<Size>) : super(ctx) {
-        this.supportedResolutions = supportedResolutions
+        this.cameraSupportedResolutions = supportedResolutions
         setup()
     }
 
@@ -132,7 +131,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
 
         }
 
-        supportedResolutions?.let {
+        cameraSupportedResolutions?.let {
             setSupportedResolutions(it)
         }
     }

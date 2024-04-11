@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -20,14 +21,29 @@
         android:layout_height="match_parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/act_camera_shutter_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/FloatingActionButtonStyle.SmallTraitButtons"
+        android:id="@+id/camerax_settings_btn"
+        android:layout_width="@dimen/fb_trait_fab_size_small"
+        android:layout_height="@dimen/fb_trait_fab_size_small"
         android:layout_margin="8dp"
-        android:contentDescription="@string/trait_photo_capture_button_content_description"
-        android:src="@drawable/ic_trait_camera"
+        android:src="@drawable/ic_nav_drawer_settings"
+        app:layout_constraintTop_toTopOf="@id/camerax_capture_btn"
+        app:layout_constraintEnd_toStartOf="@id/camerax_capture_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/camerax_capture_btn"
+        android:contentDescription="@string/trait_camera_capture_content_description" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        style="@style/FloatingActionButtonStyle.TraitButtons"
+        android:id="@+id/camerax_capture_btn"
+        android:layout_width="@dimen/fb_trait_fab_size"
+        android:layout_height="@dimen/fb_trait_fab_size"
+        android:layout_margin="8dp"
+        android:src="@drawable/camera_24px"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:contentDescription="@string/trait_camera_capture_content_description" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
