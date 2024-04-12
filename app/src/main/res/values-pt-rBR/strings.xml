@@ -120,8 +120,32 @@
     <string name="dialog_field_creator_review_image_content_desc">Imagem mostrando orientação e padrão de parcelas.</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Selecione campo mais próximo</string>
+    <string name="activity_field_editor_no_field_found">Coordenadas não podem ser encontrada.</string>
+    <string name="activity_field_editor_switch_field">"Alterar para o campo %s"</string>
+    <string name="activity_field_editor_switch_field_action">Alternar</string>
+    <string name="activity_field_editor_no_location_yet">Nenhuma localização encontrada ainda.</string>
+    <string name="activity_field_editor_switch_field_same">O campo mais próximo já está selecionado.</string>
     <!-- Field details -->
+    <string name="field_detail_title">Detalhes do Campo</string>
+    <string name="field_edit_display_name">Editar Nome de Exibição do Campo</string>
+    <string name="name_cannot_be_empty">Nome não pode estar vazio.</string>
+    <string name="name_conflict_import_name">nome da importação</string>
+    <string name="name_conflict_display_name">nome de exibição</string>
+    <string name="field_import_string">Importado de</string>
+    <string name="field_create_string">Criado dentro</string>
+    <string name="field_detail_narrative">"%1$s\"%2$s\" com o nome \"%3$s\". Contém \"%4$s\" entradas e \"%5$s\" atributos. Classificado por \"%6$s"</string>
+    <string name="field_default_sort_order">classificação de importação</string>
+    <string name="field_data_title">Dados</string>
+    <string name="field_trait_observation_total">\"%d\"observações</string>
     <!-- Semantic dates -->
+    <string name="today">Hoje</string>
+    <string name="yesterday">Ontem</string>
+    <plurals name="years_ago">
+        <item quantity="one">%d ano atrás</item>
+        <item quantity="other">%d anos atrás</item>
+    </plurals>
+    <string name="no_activity">Sem atividades</string>
+    <string name="invalid_date">Data inválida</string>
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Classificar</string>
