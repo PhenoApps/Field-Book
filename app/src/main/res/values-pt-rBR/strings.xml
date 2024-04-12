@@ -180,10 +180,18 @@
     <string name="traits_format_categorical">Categórico</string>
     <string name="traits_format_date">Data</string>
     <string name="traits_format_percent">Percentagem</string>
+    <string name="traits_format_counter">Contador</string>
+    <string name="traits_format_disease_rating">Avaliação da Doença</string>
     <string name="traits_format_boolean">Booliano</string>
     <string name="traits_format_text">Texto</string>
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_audio">Áudio</string>
+    <string name="traits_format_location">Localização</string>
+    <string name="traits_format_gnss">GNSS</string>
+    <string name="traits_format_barcode">Código de Barras</string>
+    <string name="traits_format_labelprint">Impressão nas etiquetas Zebra</string>
+    <string name="traits_format_usb_camera">Câmera USB</string>
+    <string name="traits_format_go_pro_camera">GoPro</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_create_name">Nome</string>
     <string name="traits_create_format">Formato</string>
@@ -315,6 +323,7 @@
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <string name="brapi_study_name">Nome</string>
+    <string name="brapi_study_location">Localização</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Exportar</string>
     <!-- Pagination -->
