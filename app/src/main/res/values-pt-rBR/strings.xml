@@ -32,7 +32,9 @@
     <string name="settings_collect">Coletar</string>
     <string name="settings_export">Exportar</string>
     <string name="settings_advanced">Configurações avançadas</string>
+    <string name="settings_profile">Perfil</string>
     <!-- Config Activity Fuzzy Search  -->
+    <string name="act_config_fuzzy_search_failed">Base de Dados não pode recuperar um campo ou parcela com o código: %s</string>
     <!-- File manager  -->
     <string name="import_dialog_importing">Por favor aguarde...</string>
     <string name="import_error_general">Erro na importação</string>
