@@ -35,9 +35,15 @@
     <string name="settings_profile">Perfil</string>
     <!-- Config Activity Fuzzy Search  -->
     <string name="act_config_fuzzy_search_failed">Base de Dados não pode recuperar um campo ou parcela com o código: %s</string>
+    <string name="act_config_fuzzy_search_error">Algo deu errado ao pesquisar por %s</string>
+    <string name="act_config_search_fab_content_description">Pesquisar em todas as parcelas e campos para carregar/navegar até o item codificado.</string>
     <!-- File manager  -->
+    <string name="import_source_local">Armazenamento local</string>
+    <string name="import_source_cloud">Armazenamento em nuvem</string>
+    <string name="import_source_ask">Perguntar sempre</string>
     <string name="import_dialog_importing">Por favor aguarde...</string>
     <string name="import_error_general">Erro na importação</string>
+    <string name="act_file_explorer_no_file_error">Não foram encontrados diretórios de Caderno de Campo.</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">Nenhum campo está atualmente carregado. Por favor, coloque um campo antes de coletar dados.</string>
     <string name="warning_traits_missing">Não existem caracteres. Por favor, crie caracteres antes de coletar dados.</string>
@@ -45,7 +51,18 @@
     <string name="changelog_title">Alterar registro</string>
     <!-- FIELDS -->
     <!-- General -->
+    <string name="list_item_field_popup_menu_content_description">Abre um menu para o campo selecionado.</string>
+    <string name="selected_count">%1$d selecionado</string>
+    <string name="fields_select_all">Selecionar Tudo</string>
+    <string name="field_generic_observation_level">itens</string>
+    <string name="field_observation_count_format">%1$s %2$s</string>
     <!-- Sort -->
+    <string name="fields_sort_update">Classificar</string>
+    <string name="sort_dialog_saved">Classificação atualizada</string>
+    <string name="sort_dialog_error_saving">Erro ao atualizar classificação</string>
+    <string name="list_item_field_sort_delete_content_description">Excluir o atributo classificado.</string>
+    <string name="dialog_field_sort_title">Classificar Entradas</string>
+    <string name="list_item_field_sort_drag_content_description">Arraste para mover item.</string>
     <!-- Modify -->
     <string name="fields_export">Exportar</string>
     <!-- Delete -->
@@ -60,6 +77,8 @@
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
+    <string name="traits_toolbar_sort">Classificar</string>
+    <string name="traits_sort_title">Classificar</string>
     <!-- Trait import/export -->
     <string name="traits_dialog_import">Importar</string>
     <string name="traits_dialog_export">Exportar</string>
