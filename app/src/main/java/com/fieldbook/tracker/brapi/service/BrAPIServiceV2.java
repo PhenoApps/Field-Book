@@ -93,6 +93,8 @@ import java.util.Comparator;
 import java.util.function.BiConsumer;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -550,15 +552,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
     private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data, Map<String, BrAPIGermplasm> germplasmDetailsMap) {
 
-        Map<String, Map<String, String>> unitAttributes = new HashMap<>(); // Map to store attributes for each unit
+        Map<String, Map<String, String>> unitAttributes = new LinkedHashMap<>(); // Map to store attributes for each unit
         Log.d("BrAPIServiceV2","Mapping attribute values");
 
         for (BrAPIObservationUnit unit : data) {
 
             String unitDbId = unit.getObservationUnitDbId();
             // Create the unit's attributes hashmap
-            unitAttributes.putIfAbsent(unitDbId, new HashMap<>());
-            Map<String, String> attributesMap = unitAttributes.get(unitDbId);
+            Map<String, String> attributesMap = unitAttributes.computeIfAbsent(unitDbId, k -> new LinkedHashMap<>());
+
+            if (unit.getGermplasmName() != null) {
+                attributesMap.put("Germplasm", unit.getGermplasmName());
+            }
 
             BrAPIObservationUnitPosition pos = unit.getObservationUnitPosition();
             if (pos != null) {
@@ -594,9 +599,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     attributesMap.put("EntryType", pos.getEntryType().getBrapiValue());
                 }
             }
-            if (unit.getGermplasmName() != null) {
-                attributesMap.put("Germplasm", unit.getGermplasmName());
-            }
+
             if (unit.getGermplasmDbId() != null) {
                 // find matching germplasm in germplasmDetailsMap and extract synonyms and pedigree
                 BrAPIGermplasm matchingGermplasm = germplasmDetailsMap.get(unit.getGermplasmDbId());
@@ -634,7 +637,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
 
         // Extract a list of unique attribute names from the unitAttributes
-        Set<String> uniqueAttributes = new HashSet<>();
+        Set<String> uniqueAttributes = new LinkedHashSet<>();
         for (Map<String, String> attributesMap : unitAttributes.values()) {
             uniqueAttributes.addAll(attributesMap.keySet());
         }
@@ -1409,7 +1412,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId) {
+    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId, String sortOrder) {
 
         DataHelper dataHelper = new DataHelper(context);
 
@@ -1437,6 +1440,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setUnique_id("ObservationUnitDbId");
             field.setPrimary_id(primaryId);
             field.setSecondary_id(secondaryId);
+            field.setExp_sort(sortOrder);
 
             // Do a pre-check to see if the field exists so we can show an error
             int FieldUniqueStatus = dataHelper.checkFieldNameAndObsLvl(field.getExp_name(), field.getObservation_level());

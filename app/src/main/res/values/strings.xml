@@ -107,6 +107,7 @@
     <string name="import_dialog_unique">Unique identifier</string>
     <string name="import_dialog_primary">Primary identifier</string>
     <string name="import_dialog_secondary">Secondary identifier</string>
+    <string name="import_dialog_sort">Sort Order</string>
     <string name="import_error_unsupported">This file type is not currently supported</string>
     <string name="import_error_columns_replaced">Column names contain illegal characters that will be replaced during import.</string>
     <string name="import_error_column_name">Column name in imported file cannot be: </string>

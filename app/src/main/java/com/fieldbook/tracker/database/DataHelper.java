@@ -969,27 +969,25 @@ public class DataHelper {
     }
 
     /**
-     * Retrieves the columns needed for export using a join statement
+     * Retrieves the columns needed for database export with all imported attributes
      */
     public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits, int fieldId) {
 
         open();
         return ObservationUnitPropertyDao.Companion.getExportDbData(
-                fieldId, fieldList, traits);
+                context, fieldId, fieldList, traits);
 
-//        String fields = arrayToString("range", fieldList);
-//        String activeTraits = arrayToLikeString(traits);
-//
-//        String query = "select " + fields + ", traits.trait, user_traits.userValue, " +
-//                "user_traits.timeTaken, user_traits.person, user_traits.location, user_traits.rep" +
-//                " from user_traits, range, traits where " +
-//                "user_traits.rid = range." + TICK + ep.getString("ImportUniqueName", "") + TICK +
-//                " and user_traits.parent = traits.trait and " +
-//                "user_traits.trait = traits.format and user_traits.userValue is not null and " + activeTraits;
-//
-//        Log.i("Field Book", query);
-//
-//        return db.rawQuery(query, null);
+    }
+
+    /**
+     * Retrieves the columns needed for database export with only unique identifier
+     */
+    public Cursor getExportDBDataShort(String[] fieldList, String uniqueId, ArrayList<TraitObject> traits, int fieldId) {
+
+        open();
+        return ObservationUnitPropertyDao.Companion.getExportDbDataShort(
+                context, fieldId, fieldList, uniqueId, traits);
+
     }
 
     private String arrayToLikeString(String[] visibleTrait) {
@@ -1030,14 +1028,14 @@ public class DataHelper {
     public Cursor getExportTableDataShort(int fieldId,  String uniqueId, ArrayList<TraitObject> traits) {
 
         open();
-        return ObservationUnitPropertyDao.Companion.getExportTableDataShort(fieldId, uniqueId, traits);
+        return ObservationUnitPropertyDao.Companion.getExportTableDataShort(context, fieldId, uniqueId, traits);
 
     }
 
-    public Cursor getExportTableDataLong(int fieldId, ArrayList<TraitObject> traits) {
+    public Cursor getExportTableData(int fieldId, ArrayList<TraitObject> traits) {
 
         open();
-        return ObservationUnitPropertyDao.Companion.getExportTableDataLong(fieldId, traits);
+        return ObservationUnitPropertyDao.Companion.getExportTableData(context, fieldId, traits);
 
     }
 
