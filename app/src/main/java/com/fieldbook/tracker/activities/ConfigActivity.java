@@ -30,7 +30,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
-import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.database.DataHelper;
@@ -41,7 +40,6 @@ import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
-import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.ManufacturerUtil;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -52,7 +50,6 @@ import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -155,14 +152,6 @@ public class ConfigActivity extends ThemedActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
-        FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
-
-        instance.setCrashlyticsCollectionEnabled(true);
-
-        if (BuildConfig.DEBUG) {
-            instance.setCustomKey("debug", true);
-        } else instance.setCustomKey("release", true);
 
         //important: this must be called before super.onCreate or else you get a black flicker
         AppLanguageUtil.Companion.refreshAppText(this);

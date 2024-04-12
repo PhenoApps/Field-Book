@@ -73,13 +73,14 @@ android {
         release {
             minifyEnabled false
             debuggable false
+            signingConfig signingConfigs.debug
             //signingConfig signingConfigs.playStoreConfig //Add your own signing config
         }
 
         debug {
             clean
             debuggable true
-            manifestPlaceholders = [crashlyticsCollectionEnabled: "false"]
+            applicationIdSuffix ".debug"
             //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
