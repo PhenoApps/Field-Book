@@ -54,7 +54,7 @@
     <string name="list_item_field_popup_menu_content_description">Abre um menu para o campo selecionado.</string>
     <string name="selected_count">%1$d selecionado</string>
     <string name="fields_select_all">Selecionar Tudo</string>
-    <string name="field_generic_observation_level">itens</string>
+    <string name="field_generic_observation_level">entradas</string>
     <string name="field_observation_count_format">%1$s %2$s</string>
     <!-- Sort -->
     <string name="fields_sort_update">Classificar</string>
