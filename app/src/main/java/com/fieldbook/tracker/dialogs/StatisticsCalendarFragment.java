@@ -28,11 +28,13 @@ import com.kizitonwose.calendar.view.MonthDayBinder;
 import com.kizitonwose.calendar.view.MonthHeaderFooterBinder;
 import com.kizitonwose.calendar.view.ViewContainer;
 
+import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -40,17 +42,26 @@ import java.util.Map;
 
 import static com.kizitonwose.calendar.core.ExtensionsKt.daysOfWeek;
 
-public class StatisticsCalendarFragment extends Fragment {
+public class StatisticsCalendarFragment extends Fragment implements DateRangePickerDialog.onDateRangeSelectedListener {
     DataHelper database;
     StatisticsActivity originActivity;
     Toolbar toolbar;
     CalendarView monthCalendarView;
-    YearMonth firstMonth;
-    YearMonth lastMonth;
-    int dateToggle = 0;
+    int dateToggle;
+    YearMonth firstMonth, lastMonth;
+    LocalDate heatMapStartDate, heatMapEndDate;
+    Calendar dateSelectorStartRange, dateSelectorEndRange;
+    DateTimeFormatter timeStampFormat;
+    private static final String TIME_STAMP_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
+    private static final String MONTH_HEADER_PATTERN ="MMMM yyyy";
+
 
     public StatisticsCalendarFragment(StatisticsActivity statisticsActivity) {
         this.originActivity = statisticsActivity;
+        this.dateToggle = 0;
+        this.dateSelectorStartRange = Calendar.getInstance();
+        this.dateSelectorEndRange = Calendar.getInstance();
+        this.timeStampFormat = DateTimeFormatter.ofPattern(TIME_STAMP_PATTERN);
     }
 
     @Nullable
@@ -76,6 +87,8 @@ public class StatisticsCalendarFragment extends Fragment {
             @Override
             public void bind(@NonNull DayViewContainer container, CalendarDay day) {
                 int count = observationCount.getOrDefault(day.getDate(), 0);
+
+                // Displays the date or the number of observations collected on the date based on the toggle
                 if (dateToggle == 0)
                     container.calendarDayText.setText(String.valueOf(day.getDate().getDayOfMonth()));
                 else container.calendarDayText.setText(String.valueOf(count));
@@ -85,9 +98,15 @@ public class StatisticsCalendarFragment extends Fragment {
                 container.circleBackground.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
 
                 if (day.getPosition() == DayPosition.MonthDate) {
-                    // Setting the background color for the date
-                    container.calendarDayText.setTextColor(Color.BLACK);
-                    if (count > 0) container.circleBackground.setBackgroundTintList(ColorStateList.valueOf(getColorForObservations(count)));
+                    // Setting the color if the date is out of the selected range
+                    if (day.getDate().isBefore(heatMapStartDate) || day.getDate().isAfter(heatMapEndDate)) {
+                        container.calendarDayText.setTextColor(Color.GRAY);
+                    } else {
+                        // Setting the text and background color for the date
+                        container.calendarDayText.setTextColor(Color.BLACK);
+                        if (count > 0)
+                            container.circleBackground.setBackgroundTintList(ColorStateList.valueOf(getColorForObservations(count)));
+                    }
                 }
             }
         });
@@ -101,7 +120,7 @@ public class StatisticsCalendarFragment extends Fragment {
 
             @Override
             public void bind(@NonNull MonthViewContainer container, @NonNull CalendarMonth month) {
-                container.calendarMonthTitle.setText(month.getYearMonth().format(DateTimeFormatter.ofPattern("MMMM yyyy")));
+                container.calendarMonthTitle.setText(month.getYearMonth().format(DateTimeFormatter.ofPattern(MONTH_HEADER_PATTERN)));
             }
         });
 
@@ -157,6 +176,9 @@ public class StatisticsCalendarFragment extends Fragment {
             monthCalendarView.scrollToMonth(this.firstMonth);
         } else if (itemId == lastDay) {
             monthCalendarView.scrollToMonth(this.lastMonth);
+        } else if (itemId == calendarRange) {
+            DateRangePickerDialog dialog = new DateRangePickerDialog(originActivity, dateSelectorStartRange, dateSelectorEndRange, this);
+            dialog.show(originActivity.getSupportFragmentManager(), "StatisticsActivity");
         } else if (itemId == counter) {
             dateToggle = 1 - dateToggle;
             monthCalendarView.notifyCalendarChanged();
@@ -171,18 +193,62 @@ public class StatisticsCalendarFragment extends Fragment {
         ObservationModel[] observations = database.getAllObservations();
 
         Map<LocalDate, Integer> observationCount = new HashMap<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
 
-        if (observations.length > 0) {
-            firstMonth = YearMonth.from(LocalDate.parse(observations[0].getObservation_time_stamp(), formatter));
-            lastMonth = YearMonth.from(LocalDate.parse(observations[observations.length - 1].getObservation_time_stamp(), formatter));
+        // Sets the heatmap date range when the page loads for the first time
+        heatMapStartDate = LocalDate.parse(observations[0].getObservation_time_stamp(), timeStampFormat);
+        heatMapEndDate = LocalDate.now();
+
+        setFirstAndLastDates();
+
+        SimpleDateFormat sdf = new SimpleDateFormat(TIME_STAMP_PATTERN, Locale.getDefault());
+
+        // Sets the limits for the date range selection calendar
+        try {
+            dateSelectorStartRange.setTime(sdf.parse(observations[0].getObservation_time_stamp()));
+            dateSelectorEndRange.setTime(sdf.parse(observations[observations.length - 1].getObservation_time_stamp()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         for (ObservationModel observation : observations) {
-            LocalDate date = LocalDate.parse(observation.getObservation_time_stamp(), formatter);
+            LocalDate date = LocalDate.parse(observation.getObservation_time_stamp(), timeStampFormat);
             observationCount.put(date, observationCount.getOrDefault(date, 0) + 1);
         }
         return observationCount;
+    }
+
+    @Override
+    public void onDateRangeSelected(LocalDate start, LocalDate end) {
+
+        heatMapStartDate = start;
+        heatMapEndDate = end;
+        setFirstAndLastDates();
+        monthCalendarView.updateMonthData(YearMonth.from(heatMapStartDate), YearMonth.from(heatMapEndDate));
+    }
+
+    /**
+     * Sets the first and last dates with an observation within the heatmap date range.
+     */
+    public void setFirstAndLastDates() {
+
+        ObservationModel[] observations = database.getAllObservations();
+
+        for (ObservationModel observation : observations) {
+            LocalDate date = LocalDate.parse(observation.getObservation_time_stamp(), timeStampFormat);
+            if (date.isEqual(heatMapStartDate) || (date.isAfter(heatMapStartDate) && date.isBefore(heatMapEndDate))) {
+                firstMonth = YearMonth.from(date);
+                break;
+            }
+        }
+
+        for (int i = observations.length - 1; i >= 0; i--) {
+            ObservationModel observation = observations[i];
+            LocalDate date = LocalDate.parse(observation.getObservation_time_stamp(), timeStampFormat);
+            if (date.isEqual(heatMapEndDate) || (date.isAfter(heatMapStartDate) && date.isBefore(heatMapEndDate))) {
+                lastMonth = YearMonth.from(date);
+                break;
+            }
+        }
     }
 
     public class DayViewContainer extends ViewContainer {

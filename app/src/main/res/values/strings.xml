@@ -772,6 +772,7 @@
     <string name="stats_last_day">Scroll to the last day with a collected observation</string>
     <string name="stats_calendar_range">Select a date range to filter the displayed dates</string>
     <string name="stats_counter">Swap the date with the number of observations collected that day</string>
+    <string name="stats_date_range_picker_title">Select a date range</string>
 
     <string name="stat_title_fields">Fields</string>
     <string name="stat_title_entries">Entries</string>
