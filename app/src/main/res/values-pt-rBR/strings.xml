@@ -86,6 +86,7 @@
     <string name="import_dialog_unique">Identificador único</string>
     <string name="import_dialog_primary">Ordem primária</string>
     <string name="import_dialog_secondary">ordem secundária</string>
+    <string name="import_dialog_sort">Ordem de Classificação</string>
     <string name="import_error_unsupported">Este tipo de arquivo não é suportado atualmente</string>
     <string name="import_error_columns_replaced">Nomes de coluna contêm caracteres ilegais que serão substituídos durante a importação.</string>
     <string name="import_error_column_name">Nome da coluna no arquivo importado não pode ser: </string>
@@ -100,6 +101,8 @@
     <string name="fields_study_exists_message">Este campo já existe.</string>
     <string name="fields_study_and_obs_exists_message">Este campo já está importado neste nível de observação.</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book não pôde carregar o arquivo.</string>
+    <string name="act_field_editor_load_file_failed">Ocorreu um erro durante o carregamento do arquivo.</string>
+    <string name="act_field_editor_file_open_failed">Arquivo falhou ao abrir.</string>
     <!-- Field Creator  -->
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">Linhas</string>
