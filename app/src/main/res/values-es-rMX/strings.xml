@@ -86,6 +86,7 @@
     <string name="import_dialog_unique">Identificador único</string>
     <string name="import_dialog_primary">Orden primario</string>
     <string name="import_dialog_secondary">Orden secundario</string>
+    <string name="import_dialog_sort">Orden de Ordenación</string>
     <string name="import_error_unsupported">Este tipo de archivo no es compatible actualmente</string>
     <string name="import_error_columns_replaced">Los nombres de columnas contienen caracteres no válidos que se reemplazarán durante la importación.</string>
     <string name="import_error_column_name">El nombre de la columna en el archivo importado no puede ser:</string>
