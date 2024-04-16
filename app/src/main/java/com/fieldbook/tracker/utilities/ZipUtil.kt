@@ -23,17 +23,13 @@ class ZipUtil {
         @Throws(IOException::class)
         fun zip(ctx: Context, files: Array<DocumentFile>, zipFile: OutputStream?) {
 
-            val parents = arrayListOf<String>()
-
-            parents.add("Output")
-
             ZipOutputStream(BufferedOutputStream(zipFile)).use { output ->
-
-                output.putNextEntry(ZipEntry("Output/"))
 
                 files.forEach { f ->
 
-                    addZipEntry(ctx, output, f, parents)
+                    // no parents for files or directories present in root of the zip file
+                    // send an empty list for parents
+                    addZipEntry(ctx, output, f, arrayListOf())
 
                 }
             }
@@ -81,7 +77,15 @@ class ZipUtil {
 
                     ctx.contentResolver?.openInputStream(file.uri)?.let { inputStream ->
 
-                        val entry = ZipEntry("$parentDir/${file.name}")
+                        var entry : ZipEntry
+
+                        // if no parent directory, add the current file to the root of the zip
+                        // if there was a parent directory, add the current file inside parent directory
+                        if (parentDir.isEmpty()){
+                            entry = ZipEntry("${file.name}")
+                        }else{
+                            entry = ZipEntry("$parentDir/${file.name}")
+                        }
 
                         output.putNextEntry(entry)
 
@@ -111,7 +115,15 @@ class ZipUtil {
 
                     val path = file.name
 
-                    val entry = ZipEntry("$parentDir/$path/")
+                    var entry : ZipEntry
+
+                    // if no parent directory, add the current directory to the root of the zip
+                    // if there was a parent directory, add the current directory inside parent directory
+                    if (parentDir.isEmpty()){
+                        entry = ZipEntry("$path/")
+                    }else{
+                        entry = ZipEntry("$parentDir/$path/")
+                    }
 
                     output.putNextEntry(entry)
 
