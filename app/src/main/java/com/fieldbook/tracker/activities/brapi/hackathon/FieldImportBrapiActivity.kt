@@ -2,31 +2,88 @@ package com.fieldbook.tracker.activities.brapi.hackathon
 
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.activities.brapi.hackathon.cropontology.tables.BrapiStudy
+import com.fieldbook.tracker.brapi.service.BrAPIServiceV2.BrAPISearchCallback
 import com.fieldbook.tracker.adapters.SimpleListAdapter
-import com.fieldbook.tracker.brapi.service.BrAPIServiceV2.GenericSearchCallFunction
-import com.fieldbook.tracker.brapi.service.BrAPIServiceV2.GenericSearchCallWithDbIdFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.brapi.v2.model.core.BrAPIStudy
-import org.brapi.v2.model.core.request.BrAPIStudySearchRequest
-import org.brapi.v2.model.core.response.BrAPIStudyListResponse
-import org.brapi.v2.model.germ.BrAPIGermplasm
-import org.brapi.v2.model.germ.request.BrAPIGermplasmSearchRequest
-import org.brapi.v2.model.germ.response.BrAPIGermplasmListResponse
+import androidx.lifecycle.lifecycleScope
+
 
 class FieldImportBrapiActivity: AbstractImportBrapiActivity() {
 
     override val brapiObjectListAdapter: RecyclerView.Adapter<*>
         get() = SimpleListAdapter(this)
 
-
     override fun fetchBrapiData() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val callback = object : BrAPISearchCallback<Map<String, BrAPIStudy>> {
+                override fun onSuccess(result: Map<String, BrAPIStudy>) {
+                    launch(Dispatchers.Main) {
+                        result.entries.forEach {
+                            val study = it.value
+                            println(study.locationName)
+                            println(study.seasons)
+                            try {
+                                ftsDatabase.studyDao().insert(
+                                    BrapiStudy(
+                                        studyName = study.studyName,
+                                        studyDbId = study.studyDbId,
+                                        active = study.isActive.toString(),
+                                        culturalPractices = study.culturalPractices,
+                                        documentationUrl = study.documentationURL,
+                                        license = study.license,
+                                        locationDbId = study.locationDbId,
+                                        locationName = study.locationName,
+                                        obsUnitDescription = study.observationUnitsDescription,
+                                        seasons = study.seasons.joinToString(",") { it },
+                                        studyCode = study.studyCode,
+                                        studyPUI = study.studyPUI,
+                                        studyType = study.studyType,
+                                        trialDbId = study.trialDbId,
+                                        trialName = study.trialName,
+                                        description = study.studyDescription,
+                                        commonCropName = study.commonCropName
+                                    )
+                                )
+                            } catch (e: Exception) {
+                                println("Database insert error: ${e.message}")
+                            }
+                        }
+                        updateUIAfterDataFetched()
+                    }
+                }
 
-        launch(Dispatchers.IO) {
+                override fun onFailure(throwable: Throwable?) {
+                    launch(Dispatchers.Main) {
+                        println("Error fetching studies: ${throwable?.message}")
+                    }
+                }
+            }
 
-            val studies = brapiService.searchStudies(lastPage, 50, listOf()) { null }
+            try {
+                brapiService.searchStudiesAsync(lastPage, 50, listOf(), callback)
+            } catch (e: Exception) {
+                println("Service call failed: ${e.message}")
+            }
+        }
+    }
 
-            println(studies.size)
+    private fun updateUIAfterDataFetched() {
+        //resultCountTv.text = (checkableItemRecyclerView.adapter as SimpleListAdapter).currentList.size.toString()
+        startSearch(lastQuery)
+        startSearchViews()
+    }
+}
+
+
+//    override fun fetchBrapiData() {
+//
+//        launch(Dispatchers.IO) {
+
+//            val studies = brapiService.searchStudies(lastPage, 50, listOf()) { null }
+//
+//            println(studies.size)
 
 //            val fakeModels = listOf(
 //                BrapiStudy(
@@ -72,41 +129,41 @@ class FieldImportBrapiActivity: AbstractImportBrapiActivity() {
 //                )
 //            }
 
-            (studies.entries).forEach {
-                val study = it.value
-                println(study.locationName)
-                println(study.seasons)
-                //study.program
-                ftsDatabase.studyDao().insert(BrapiStudy(
-                    studyName = study.studyName,
-                    studyDbId = study.studyDbId,
-                    active = study.isActive.toString(),
-                    culturalPractices = study.culturalPractices,
-                    documentationUrl = study.documentationURL,
-                    license = study.license,
-                    locationDbId = study.locationDbId,
-                    locationName = study.locationName,
-                    obsUnitDescription = study.observationUnitsDescription,
-                    seasons = study.seasons.joinToString(",") { it },
-                    studyCode = study.studyCode,
-                    studyPUI = study.studyPUI,
-                    studyType = study.studyType,
-                    trialDbId = study.trialDbId,
-                    trialName = study.trialName,
-                    description = study.studyDescription,
-                    commonCropName = study.commonCropName
-                ))
-            }
 
-            runOnUiThread {
+    //            (studies.entries).forEach {
+//                val study = it.value
+//                println(study.locationName)
+//                println(study.seasons)
+//                //study.program
+//                ftsDatabase.studyDao().insert(BrapiStudy(
+//                    studyName = study.studyName,
+//                    studyDbId = study.studyDbId,
+//                    active = study.isActive.toString(),
+//                    culturalPractices = study.culturalPractices,
+//                    documentationUrl = study.documentationURL,
+//                    license = study.license,
+//                    locationDbId = study.locationDbId,
+//                    locationName = study.locationName,
+//                    obsUnitDescription = study.observationUnitsDescription,
+//                    seasons = study.seasons.joinToString(",") { it },
+//                    studyCode = study.studyCode,
+//                    studyPUI = study.studyPUI,
+//                    studyType = study.studyType,
+//                    trialDbId = study.trialDbId,
+//                    trialName = study.trialName,
+//                    description = study.studyDescription,
+//                    commonCropName = study.commonCropName
+//                ))
+//            }
 
-                //resultCountTv.text = (checkableItemRecyclerView.adapter as SimpleListAdapter).currentList.size.toString()
-
-                startSearch(lastQuery)
-
-                startSearchViews()
-
-            }
-        }
-    }
-}
+//        runOnUiThread {
+//
+//            //resultCountTv.text = (checkableItemRecyclerView.adapter as SimpleListAdapter).currentList.size.toString()
+//
+//            startSearch(lastQuery)
+//
+//            startSearchViews()
+//
+//        }
+//    }
+//}

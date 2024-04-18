@@ -697,17 +697,22 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         );
     }
 
-    public Map<String, BrAPIStudy> searchStudies(int lastPage, int pages, List<String> allStudyIds, final Function<Integer, Void> failFunction) {
-//        final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
-//                .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
+    public void searchStudiesAsync(
+            int lastPage,
+            int pageSize,
+            List<String> allStudyIds,
+            BrAPISearchCallback<Map<String, BrAPIStudy>> callback) {
 
+        // Create a search request body
         BrAPIStudySearchRequest studyBody = new BrAPIStudySearchRequest();
         studyBody.setStudyDbIds(allStudyIds);
-        studyBody.page(lastPage).pageSize(pages);
-        Log.d("BrAPIServiceV2", "Retrieving germplasm details for " + allStudyIds.size() + " DB IDs");
+        studyBody.page(lastPage).pageSize(pageSize);
 
-        BiConsumer<List<?>, Map<String, BrAPIStudy>> studyMapper = (data, map) -> {
-            data.forEach(item -> {
+        Log.d("BrAPIServiceV2", "Initiating async retrieval of study details for " + allStudyIds.size() + " study IDs");
+
+        BiConsumer<BrAPIResponse, Map<String, BrAPIStudy>> studyMapper = (response, map) -> {
+            BrAPIResponseResult result = (BrAPIResponseResult) response.getResult();
+            result.getData().forEach(item -> {
                 if (item instanceof BrAPIStudy) {
                     BrAPIStudy study = (BrAPIStudy) item;
                     map.put(study.getStudyDbId(), study);
@@ -715,15 +720,44 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             });
         };
 
-        return executeBrapiSearch(
-                studiesApi::searchStudiesPost, // Using lambda for explicit type
-                studiesApi::searchStudiesSearchResultsDbIdGet, // Using lambda for explicit type
+        searchAsync(
                 studyBody,
+                studiesApi::searchStudiesPostAsync,
+                studiesApi::searchStudiesSearchResultsDbIdGetAsync,
                 studyMapper,
-                failFunction,
-                pages
+                callback,
+                true
         );
     }
+
+
+//    public Map<String, BrAPIStudy> searchStudies(int lastPage, int pages, List<String> allStudyIds, final Function<Integer, Void> failFunction) {
+////        final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
+////                .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
+//
+//        BrAPIStudySearchRequest studyBody = new BrAPIStudySearchRequest();
+//        studyBody.setStudyDbIds(allStudyIds);
+//        studyBody.page(lastPage).pageSize(pages);
+//        Log.d("BrAPIServiceV2", "Retrieving germplasm details for " + allStudyIds.size() + " DB IDs");
+//
+//        BiConsumer<List<?>, Map<String, BrAPIStudy>> studyMapper = (data, map) -> {
+//            data.forEach(item -> {
+//                if (item instanceof BrAPIStudy) {
+//                    BrAPIStudy study = (BrAPIStudy) item;
+//                    map.put(study.getStudyDbId(), study);
+//                }
+//            });
+//        };
+//
+//        return executeBrapiSearch(
+//                studiesApi::searchStudiesPost, // Using lambda for explicit type
+//                studiesApi::searchStudiesSearchResultsDbIdGet, // Using lambda for explicit type
+//                studyBody,
+//                studyMapper,
+//                failFunction,
+//                pages
+//        );
+//    }
 
     @FunctionalInterface
     public interface AsyncSearchCallFunction<T, R> {
