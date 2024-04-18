@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
 import androidx.preference.PreferenceManager;
 
@@ -550,10 +551,10 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data, Map<String, BrAPIGermplasm> germplasmDetailsMap) {
+    private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data, @Nullable Map<String, BrAPIGermplasm> germplasmDetailsMap) {
 
         Map<String, Map<String, String>> unitAttributes = new LinkedHashMap<>(); // Map to store attributes for each unit
-        Log.d("BrAPIServiceV2","Mapping attribute values");
+        Log.d("BrAPIServiceV2", "Mapping attribute values for " + data.size() + " observation units.");
 
         for (BrAPIObservationUnit unit : data) {
 
@@ -600,11 +601,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 }
             }
 
-            if (unit.getGermplasmDbId() != null) {
+            if (germplasmDetailsMap != null && unit.getGermplasmDbId() != null) {
                 // find matching germplasm in germplasmDetailsMap and extract synonyms and pedigree
                 BrAPIGermplasm matchingGermplasm = germplasmDetailsMap.get(unit.getGermplasmDbId());
 
                 if (matchingGermplasm != null) {
+                    Log.d("BrAPIServiceV2", "Processing germplasm ID: " + unit.getGermplasmDbId());
                     if (matchingGermplasm.getPedigree() != null) {
                         attributesMap.put("Pedigree", matchingGermplasm.getPedigree());
                     }
@@ -656,7 +658,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 dataRow.add(attributesMap.getOrDefault(attr, ""));
             }
             attributesTable.add(dataRow);
-//            Log.d("BrAPIServiceV2","Added new data row to attributes table: " + dataRow);
+            Log.d("BrAPIServiceV2","Added new data row to attributes table: " + dataRow);
         }
 
         // Save the attributesTable to the study
