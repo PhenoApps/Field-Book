@@ -1110,5 +1110,8 @@
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="tutorial_main_geonav_description">This will open a configuration dialog to help with field navigation.</string>
     <string name="oauth_configured_incorrectly">Authorization request failed, please check your BrAPI settings.</string>
+    <string name="brapi_importer_id_header">ID</string>
+    <string name="brapi_importer_name_header">Name</string>
+    <string name="brapi_importer_location_header">Location</string>
 
 </resources>
