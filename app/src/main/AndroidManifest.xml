@@ -16,6 +16,11 @@
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:label">
 
+        <activity android:name=".activities.brapi.hackathon.FieldImportBrapiActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"/>
+
         <activity
             android:name=".activities.ScannerActivity"
             android:exported="false" />

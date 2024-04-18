@@ -62,6 +62,7 @@ import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
 import org.brapi.v2.model.core.BrAPITrial;
+import org.brapi.v2.model.core.request.BrAPIStudySearchRequest;
 import org.brapi.v2.model.germ.BrAPIGermplasm;
 import org.brapi.v2.model.germ.response.BrAPIGermplasmListResponse;
 import org.brapi.v2.model.core.response.BrAPIListResponse;
@@ -693,6 +694,34 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 germplasmMapper,
                 callback,
                 true
+        );
+    }
+
+    public Map<String, BrAPIStudy> searchStudies(int lastPage, int pages, List<String> allStudyIds, final Function<Integer, Void> failFunction) {
+//        final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
+//                .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
+
+        BrAPIStudySearchRequest studyBody = new BrAPIStudySearchRequest();
+        studyBody.setStudyDbIds(allStudyIds);
+        studyBody.page(lastPage).pageSize(pages);
+        Log.d("BrAPIServiceV2", "Retrieving germplasm details for " + allStudyIds.size() + " DB IDs");
+
+        BiConsumer<List<?>, Map<String, BrAPIStudy>> studyMapper = (data, map) -> {
+            data.forEach(item -> {
+                if (item instanceof BrAPIStudy) {
+                    BrAPIStudy study = (BrAPIStudy) item;
+                    map.put(study.getStudyDbId(), study);
+                }
+            });
+        };
+
+        return executeBrapiSearch(
+                studiesApi::searchStudiesPost, // Using lambda for explicit type
+                studiesApi::searchStudiesSearchResultsDbIdGet, // Using lambda for explicit type
+                studyBody,
+                studyMapper,
+                failFunction,
+                pages
         );
     }
 

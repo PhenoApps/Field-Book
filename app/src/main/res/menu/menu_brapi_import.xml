@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_add_filter"
+        android:icon="@drawable/ic_tb_toggle_all"
+        android:title="@string/fields_select_all"
+        android:showAsAction="ifRoom|withText"/>
+    <item
+        android:id="@+id/menu_add_search"
+        android:icon="@drawable/ic_tb_search"
+        android:title="@string/fields_export"
+        android:showAsAction="ifRoom|withText"/>
+</menu>

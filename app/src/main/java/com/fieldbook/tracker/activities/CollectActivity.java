@@ -43,6 +43,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.brapi.hackathon.FieldImportBrapiActivity;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
@@ -321,6 +322,9 @@ public class CollectActivity extends ThemedActivity
         checkForInitialBarcodeSearch();
 
         verifyPersonHelper.checkLastOpened();
+
+        startActivity(new Intent(this, FieldImportBrapiActivity.class));
+
     }
 
     public void triggerTts(String text) {
