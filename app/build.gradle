@@ -158,7 +158,7 @@ dependencies {
     implementation("com.serenegiant:common:2.12.4")
 
     //brapi and required dependencies
-    implementation 'org.brapi:brapi-java-client:2.1.0'
+//    implementation 'org.brapi:brapi-java-client:2.1.0'
     //necessary when building phenolib locally
     implementation "com.squareup.okhttp:okhttp:2.7.5"
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
@@ -182,6 +182,8 @@ dependencies {
     implementation 'net.openid:appauth:0.11.1'
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
     //google messed up some packages, this package is temporary until the issue is fixed (Feb 2021)
+
+    implementation 'org.apache.commons:commons-lang3:3.12.0' // Check for the latest version on Maven Central
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
 
