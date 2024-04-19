@@ -233,7 +233,7 @@ public class ConfigActivity extends ThemedActivity {
                 recreate();
 
                 // request permissions
-                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+//                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
 
                 return null;
             });
@@ -582,7 +582,7 @@ public class ConfigActivity extends ThemedActivity {
             if (resultCode != Activity.RESULT_OK) finish();
             else {
                 // request permissions
-                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+//                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
             }
         } else if (requestCode == REQUEST_BARCODE) {
             if (resultCode == RESULT_OK) {

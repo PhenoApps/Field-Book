@@ -47,6 +47,14 @@
             android:defaultValue="false"
             android:icon="@drawable/ic_page_next_outline"/>
 
+        <Preference
+            android:key="launch_app_intro"
+            android:title="App Intro"
+            android:icon="@drawable/ic_about_info"
+            android:summary="Checkout the app intro"
+            app:iconSpaceReserved="false">
+        </Preference>
+
     </PreferenceCategory>
 
 </PreferenceScreen>

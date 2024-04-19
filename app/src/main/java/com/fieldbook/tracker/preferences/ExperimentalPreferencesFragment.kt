@@ -1,11 +1,14 @@
 package com.fieldbook.tracker.preferences
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import androidx.preference.CheckBoxPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.AppIntroActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
 
 class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
@@ -37,6 +40,13 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
 
         val barcode = findPreference<CheckBoxPreference>(GeneralKeys.MLKIT_PREFERENCE_KEY)
         barcode?.setOnPreferenceChangeListener { _, newValue ->
+            true
+        }
+
+        val appIntro = findPreference<Preference>("launch_app_intro")
+        appIntro?.setOnPreferenceClickListener {
+            val intent = Intent(activity, AppIntroActivity::class.java)
+            startActivity(intent)
             true
         }
     }
