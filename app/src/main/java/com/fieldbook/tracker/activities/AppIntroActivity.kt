@@ -18,12 +18,14 @@ class AppIntroActivity : AppIntro() {
 
         addSlide(AppIntroFragment.createInstance(
             "Welcome!",
-            "This is a demo of the Field Book app"))
+            "This is a demo of the Field Book app",
+            backgroundColorRes = R.color.main_primary))
 
         addSlide(AppIntroFragment.createInstance(
             "Permission Request",
             "In order to access your camera, you must give permissions.",
-            imageDrawable = R.drawable.ic_experimental))
+            imageDrawable = R.drawable.ic_experimental,
+            backgroundColorRes = R.color.main_primary))
 
         // Here we ask for camera permission on slide 2
         askForPermissions(
