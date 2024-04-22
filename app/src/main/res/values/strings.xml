@@ -1032,7 +1032,12 @@
     <string name="brapi_na">NA</string>
 
 
-
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_title">Would you like to enable the tutorial?</string>
+    <string name="intro_tutorial_description">This setting can be changed in the Settings</string>
+    <string name="intro_tutorial_radio_item_yes">Yes</string>
+    <string name="intro_tutorial_radio_item_no">No</string>
+    <string name="intro_tutorial_warning">Please make a choice</string>
 
 
     <!-- TUTORIAL -->

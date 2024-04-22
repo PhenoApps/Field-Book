@@ -1,10 +1,10 @@
 package com.fieldbook.tracker.activities
 
-import android.Manifest
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.utilities.Constants
+import com.fieldbook.tracker.adapters.RadioButtonAdapter
+import com.fieldbook.tracker.fragments.RadioButtonSlidePolicyFragment
 import com.github.appintro.AppIntro
 import com.github.appintro.AppIntroFragment
 
@@ -27,12 +27,18 @@ class AppIntroActivity : AppIntro() {
             imageDrawable = R.drawable.ic_experimental,
             backgroundColorRes = R.color.main_primary))
 
-        // Here we ask for camera permission on slide 2
-        askForPermissions(
-            permissions = Constants.permissions,
-            slideNumber = 2,
-            required = true
+        val tutorialRadioButtonItems = arrayListOf(
+            RadioButtonAdapter.RadioButtonModel("Yes", false),
+            RadioButtonAdapter.RadioButtonModel("No", false),
         )
+        addSlide(RadioButtonSlidePolicyFragment.newInstance(tutorialRadioButtonItems))
+
+        // Here we ask for camera permission on slide 2
+//        askForPermissions(
+//            permissions = Constants.permissions,
+//            slideNumber = 2,
+//            required = true
+//        )
 
     }
 
