@@ -191,7 +191,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
-        }
+        } else if (cardTitle.length() == 0) cardTitle = originActivity.getString(R.string.stats_tab_layout_total); // For Total Statistics, an empty string is sent
 
         holder.year_text_view.setText(cardTitle);
         holder.statValue1.setText(String.valueOf(fields.size()));

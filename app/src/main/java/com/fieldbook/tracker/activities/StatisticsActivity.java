@@ -17,6 +17,7 @@ import com.fieldbook.tracker.adapters.StatisticsAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.dialogs.StatisticsCalendarFragment;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,7 +36,7 @@ public class StatisticsActivity extends ThemedActivity {
     DataHelper database;
     List<String> seasons = new ArrayList<>();
     RecyclerView rvStatisticsCard;
-    private int toggleVariable = 0;
+    private int toggleVariable = 0; // 0: Total, 1: Year, 2: Month
     AlertDialog loadingDialog;
 
     @Override
@@ -55,6 +56,34 @@ public class StatisticsActivity extends ThemedActivity {
         rvStatisticsCard = findViewById(R.id.statistics_card_rv);
         rvStatisticsCard.setLayoutManager(new LinearLayoutManager(this));
 
+        TabLayout tabLayout = findViewById(R.id.tab_layout);
+
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.stats_tab_layout_total)));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.stats_tab_layout_year)));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.stats_tab_layout_month)));
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getPosition()) {
+                    case 0: toggleVariable = 0; break;
+                    case 1: toggleVariable = 1; break;
+                    case 2: toggleVariable = 2; break;
+                }
+                loadData();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
         builder.setView(getLayoutInflater().inflate(R.layout.dialog_loading, null));
         loadingDialog = builder.create();
@@ -72,16 +101,11 @@ public class StatisticsActivity extends ThemedActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        final int toggleViewId = R.id.stats_toggle_view;
         final int heatmapId = R.id.stats_heatmap;
 
         int itemId = item.getItemId();
 
-        if (itemId == toggleViewId) {
-            toggleVariable = 1 - toggleVariable;
-            loadData();
-            return true;
-        } else if (itemId == heatmapId) {
+        if (itemId == heatmapId) {
             StatisticsCalendarFragment calendarFragment = new StatisticsCalendarFragment(this);
             getSupportFragmentManager().beginTransaction().replace(android.R.id.content, calendarFragment).addToBackStack(null).commit();
         } else if (itemId == android.R.id.home) {
@@ -106,18 +130,24 @@ public class StatisticsActivity extends ThemedActivity {
     }
 
     public void setSeasons() {
-        Set<String> uniqueSeasons = new TreeSet<>(Comparator.reverseOrder());
 
-        ObservationModel[] observations = database.getAllObservations();
-        for (ObservationModel observation : observations) {
-            String timeStamp = observation.getObservation_time_stamp();
-            if (toggleVariable == 0)
-                uniqueSeasons.add(timeStamp.substring(0, 4));
-            else
-                uniqueSeasons.add(timeStamp.substring(0, 7));
+        if (toggleVariable == 0) {
+            seasons.clear();
+            seasons.add("");
+        } else {
+            Set<String> uniqueSeasons = new TreeSet<>(Comparator.reverseOrder());
+
+            ObservationModel[] observations = database.getAllObservations();
+            for (ObservationModel observation : observations) {
+                String timeStamp = observation.getObservation_time_stamp();
+                if (toggleVariable == 1)
+                    uniqueSeasons.add(timeStamp.substring(0, 4));
+                else
+                    uniqueSeasons.add(timeStamp.substring(0, 7));
+            }
+
+            seasons = new ArrayList<>(uniqueSeasons);
         }
-
-        seasons = new ArrayList<>(uniqueSeasons);
         rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons));
 
         // Dismiss the dialog after the recycler view loads all its children

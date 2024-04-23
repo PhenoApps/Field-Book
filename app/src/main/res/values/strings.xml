@@ -763,7 +763,6 @@
 
     <string name="warning_no_observations">No observations have been collected</string>
     <string name="warning_no_data">No data to display</string>
-    <string name="stats_toggle_view">Toggle between year and month view</string>
     <string name="stats_heatmap_title">Heatmap</string>
     <string name="stats_heatmap">View a heatmap of the collected observations</string>
     <string name="stats_export">Long press on a card to export</string>
@@ -773,6 +772,10 @@
     <string name="stats_calendar_range">Select a date range to filter the displayed dates</string>
     <string name="stats_counter">Swap the date with the number of observations collected that day</string>
     <string name="stats_date_range_picker_title">Select a date range</string>
+
+    <string name="stats_tab_layout_total">Total</string>
+    <string name="stats_tab_layout_year">Year</string>
+    <string name="stats_tab_layout_month">Month</string>
 
     <string name="stat_title_fields">Fields</string>
     <string name="stat_title_entries">Entries</string>
