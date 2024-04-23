@@ -146,7 +146,7 @@ class ObservationDao {
                 obs.rep,
                 
                 study.${Study.PK} AS ${Study.FK},
-                study.study_alias,
+                study.study_db_id,
                 
                 vars.external_db_id AS external_db_id,
                 vars.observation_variable_name as observation_variable_name,
@@ -203,7 +203,7 @@ class ObservationDao {
                     obs.collector,
                     obs.rep,
                     study.${Study.PK} AS ${Study.FK},
-                    study.study_alias, 
+                    study.study_db_id, 
                     vars.external_db_id AS external_db_id,
                     vars.observation_variable_name as observation_variable_name, 
                     vars.observation_variable_details,
@@ -230,8 +230,7 @@ class ObservationDao {
                         setTimestamp(getStringVal(row, "observation_time_stamp"))
                         setLastSyncedTime(getStringVal(row, "last_synced_time"))
                         collector = getStringVal(row, "collector")
-                        //study alias is the actual brapi private key
-                        studyId = getStringVal(row, "study_alias")
+                        studyId = getStringVal(row, "study_db_id")
                     } }
 
         } ?: emptyList()

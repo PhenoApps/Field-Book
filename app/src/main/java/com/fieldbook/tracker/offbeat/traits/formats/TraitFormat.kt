@@ -32,6 +32,7 @@ open class TraitFormat @Inject constructor(
     open val format: Formats,
     open var defaultLayoutId: Int,
     open var layoutView: View? = null,
+    open var databaseName: String,
     open var nameStringResourceId: Int,
     open var iconDrawableResourceId: Int,
     open var stringNameAux: ((Context) -> String?)? = null,

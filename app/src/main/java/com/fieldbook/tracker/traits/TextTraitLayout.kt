@@ -82,6 +82,11 @@ class TextTraitLayout : BaseTraitLayout {
 
         inputEditText = act.findViewById(R.id.trait_text_edit_text)
 
+        inputEditText?.setOnLongClickListener{
+            (context as CollectActivity).showObservationMetadataDialog()
+            true
+        }
+
         inputEditText?.setOnKeyListener { _, code, event ->
 
             if (inputEditText?.text?.toString() != scan) {

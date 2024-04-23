@@ -1,291 +1,221 @@
 package com.fieldbook.tracker.adapters;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
-import android.widget.RadioButton;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
+import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
-import com.fieldbook.tracker.brapi.BrapiInfoDialog;
-import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
-import com.fieldbook.tracker.interfaces.FieldAdapterController;
-import com.fieldbook.tracker.interfaces.FieldSortController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 
 /**
  * Loads data on field manager screen
  */
 
-public class FieldAdapter extends BaseAdapter {
-
+public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHolder> {
+    private Set<Integer> selectedIds = new HashSet<>();
+    private boolean isInSelectionMode = false;
     private static final String TAG = "FieldAdapter";
-
     private final LayoutInflater mLayoutInflater;
-    private final ArrayList<FieldObject> list;
     private final Context context;
     private final FieldSwitcher fieldSwitcher;
-    public FieldAdapter(Context context, ArrayList<FieldObject> list, FieldSwitcher switcher) {
+    private AdapterCallback callback;
+    private OnFieldSelectedListener listener;
+
+    public interface OnFieldSelectedListener {
+        void onFieldSelected(int itemId);
+    }
+
+    public interface AdapterCallback {
+        void onItemSelected(int count);
+        void onItemClear();
+    }
+
+    public FieldAdapter(Context context, FieldSwitcher switcher, AdapterCallback callback) {
+        super(new DiffUtil.ItemCallback<FieldObject>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull FieldObject oldItem, @NonNull FieldObject newItem) {
+                return oldItem.getExp_id() == newItem.getExp_id();
+            }
+            @Override
+            public boolean areContentsTheSame(@NonNull FieldObject oldItem, @NonNull FieldObject newItem) {
+                return oldItem.getExp_alias().equals(newItem.getExp_alias());
+            }
+        });
         this.context = context;
         mLayoutInflater = LayoutInflater.from(context);
-        this.list = list;
         this.fieldSwitcher = switcher;
+        this.callback = callback;
     }
 
-    public int getCount() {
-        return list.size();
+    public void setOnFieldSelectedListener(OnFieldSelectedListener listener) {
+        this.listener = listener;
     }
 
-    public FieldObject getItem(int position) {
-        return list.get(position);
+    public List<Integer> getSelectedItems() {
+        return new ArrayList<>(selectedIds);
     }
 
-    public long getItemId(int position) {
-
-        if (position < 0) {
-            return -1;
-        }
-
-        return position;
+    public int getSelectedItemCount() {
+        return selectedIds.size();
     }
 
-    private SharedPreferences getPreferences() {
-
-        return ((FieldEditorActivity) context).getPreferences();
-
-    }
-
-    private void setEditorItem(SharedPreferences preferences, FieldObject item) {
-        SharedPreferences.Editor ed = preferences.edit();
-        boolean has_contents = item != null;
-        if (has_contents) {
-            ed.putString(GeneralKeys.FIELD_FILE, item.getExp_name());
-            ed.putString(GeneralKeys.FIELD_OBS_LEVEL, item.getObservation_level());
-            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, item.getExp_id());
-            ed.putString(GeneralKeys.UNIQUE_NAME, item.getUnique_id());
-            ed.putString(GeneralKeys.PRIMARY_NAME, item.getPrimary_id());
-            ed.putString(GeneralKeys.SECONDARY_NAME, item.getSecondary_id());
+    public void toggleSelection(int itemId) {
+        if (selectedIds.contains(itemId)) {
+            selectedIds.remove(itemId);
         } else {
-            ed.putString(GeneralKeys.FIELD_FILE, null);
-            ed.putString(GeneralKeys.FIELD_OBS_LEVEL, null);
-            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-            ed.putString(GeneralKeys.UNIQUE_NAME, null);
-            ed.putString(GeneralKeys.PRIMARY_NAME, null);
-            ed.putString(GeneralKeys.SECONDARY_NAME, null);
+            selectedIds.add(itemId);
         }
-        ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, has_contents);
-        ed.putString(GeneralKeys.LAST_PLOT, null);
-        ed.apply();
+        notifyDataSetChanged();
+        if (callback != null) {
+            callback.onItemSelected(selectedIds.size());
+        }
+    }
+
+    public void selectItem(int itemId) {
+        listener.onFieldSelected(itemId);
+    }
+
+    public void selectAll() {
+        List<FieldObject> currentList = getCurrentList();
+        for (FieldObject item : currentList) {
+            selectedIds.add(item.getExp_id());
+        }
+        notifyDataSetChanged();
+        isInSelectionMode = true;
+        if (callback != null) {
+            callback.onItemSelected(selectedIds.size());
+        }
+    }
+
+    public void exitSelectionMode() {
+        selectedIds.clear();
+        isInSelectionMode = false;
+        notifyDataSetChanged();
+        if (callback != null) {
+            callback.onItemClear();
+        }
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView sourceIcon;
+        TextView name, count;
+
+        ViewHolder(View itemView) {
+            super(itemView);
+            sourceIcon = itemView.findViewById(R.id.fieldSourceIcon);
+            name = itemView.findViewById(R.id.fieldName);
+            count = itemView.findViewById(R.id.fieldCount);
+
+            // Short click on source icon sets active field (unless in selectionMode)
+            sourceIcon.setOnClickListener(v -> {
+                int position = getBindingAdapterPosition();
+                FieldObject field = getItem(position);
+                if (field != null && isInSelectionMode) {
+                    toggleSelection(field.getExp_id());
+                } else if (field != null && context instanceof FieldEditorActivity) {
+                    ((FieldEditorActivity) context).setActiveField(field.getExp_id());
+                }
+            });
+
+            // Short click elsewhere opens detail fragment (unless in selectionMode)
+            itemView.setOnClickListener(v -> {
+                if (v != sourceIcon) { // Check if the click is not on the icon
+                    FieldObject field = getItem(getBindingAdapterPosition());
+                    if (field != null && isInSelectionMode) {
+                        toggleSelection(field.getExp_id());
+                    } else if (field != null && listener != null) {
+                        listener.onFieldSelected(field.getExp_id());
+                    }
+                }
+            });
+
+            // Long click enters and toggles selections in selection mode
+            itemView.setOnLongClickListener(v -> {
+                FieldObject field = getItem(getBindingAdapterPosition());
+                if (field != null) {
+                    toggleSelection(field.getExp_id());
+                    isInSelectionMode = true;
+                    return true;
+                }
+                return false;
+            });
+        }
     }
 
     @Override
-    public View getView(final int position, View convertView, final ViewGroup parent) {
-
-        ViewHolder holder;
-        if (convertView == null) {
-            holder = new ViewHolder();
-            convertView = mLayoutInflater.inflate(R.layout.list_item_field, null);
-
-            holder.fieldName = convertView.findViewById(R.id.list_item_trait_trait_name);
-            holder.count = convertView.findViewById(R.id.field_count);
-            holder.importDate = convertView.findViewById(R.id.field_import_date);
-            holder.editDate = convertView.findViewById(R.id.field_edit_date);
-            holder.exportDate = convertView.findViewById(R.id.field_export_date);
-            holder.active = convertView.findViewById(R.id.fieldRadio);
-            holder.menuPopup = convertView.findViewById(R.id.popupMenu);
-            holder.observationLevel = convertView.findViewById(R.id.observationLevelLbl);
-
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-
-        convertView.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                fieldClick(getItem(position));
-            }
-        });
-
-        String importDate = getItem(position).getDate_import();
-        String editDate = getItem(position).getDate_edit();
-        String exportDate = getItem(position).getDate_export();
-        String observationLevel = getItem(position).getObservation_level();
-
-        if (importDate != null) {
-            importDate = importDate.split(" ")[0];
-        }
-
-        if (editDate != null) {
-            editDate = editDate.split(" ")[0];
-        }
-
-        if (exportDate != null) {
-            exportDate = exportDate.split(" ")[0];
-        }
-
-        if (observationLevel == null) {
-            holder.observationLevel.setVisibility(View.GONE);//make invisible
-        } else {
-            holder.observationLevel.setVisibility(View.VISIBLE);
-        }
-
-        holder.fieldName.setText(getItem(position).getExp_name());
-        holder.count.setText(getItem(position).getCount());
-        holder.importDate.setText(importDate);
-        holder.editDate.setText(editDate);
-        holder.exportDate.setText(exportDate);
-        holder.observationLevel.setText(observationLevel);
-
-        holder.active.setOnClickListener(v -> fieldClick(getItem(position)));
-
-        //Check both file name and observation level
-        if (getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, -1) != -1) {
-            FieldObject field = getItem(position);
-
-            if (field.getExp_source() == null) {
-                holder.active.setChecked((getPreferences().getString(GeneralKeys.FIELD_FILE, "")
-                        .contentEquals(holder.fieldName.getText())) &&
-                        (getPreferences().getString(GeneralKeys.FIELD_OBS_LEVEL, "")
-                                .contentEquals(holder.observationLevel.getText())));
-            } else if (field.getExp_alias() != null) {
-                String alias = getPreferences().getString(GeneralKeys.FIELD_ALIAS, "");
-                String level = getPreferences().getString(GeneralKeys.FIELD_OBS_LEVEL, "");
-                holder.active.setChecked(alias.contentEquals(field.getExp_alias())
-                        && level.contentEquals(holder.observationLevel.getText()));
-            }
-
-        } else holder.active.setChecked(false);
-
-        holder.menuPopup.setOnClickListener(makeMenuPopListener(position));
-
-        return convertView;
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_field_recycler, parent, false);
+        return new ViewHolder(view);
     }
 
-    private View.OnClickListener makeMenuPopListener(final int position) {
-        return new View.OnClickListener() {
-            // Do it when clicking ":"
-            @Override
-            public void onClick(final View view) {
-                PopupMenu popup = new PopupMenu(context, view);
-                //Inflating the Popup using xml file
-                popup.getMenuInflater().inflate(R.menu.menu_field_listitem, popup.getMenu());
-
-                //registering popup with OnMenuItemClickListener
-                popup.setOnMenuItemClickListener(makeSelectMenuListener(position));
-                popup.show();//showing popup menu
-            }
-        };
-    }
-
-    private PopupMenu.OnMenuItemClickListener makeSelectMenuListener(final int position) {
-        return new PopupMenu.OnMenuItemClickListener() {
-            // Do it when selecting Delete or Statistics
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.delete) {
-                    createDeleteItemAlertDialog(position).show();
-                } else if (item.getItemId() == R.id.sort) {
-                    showSortDialog(position);
-                    //DialogUtils.styleDialogs(alert);
-                }
-                else if (item.getItemId() == R.id.syncObs) {
-                    BrapiSyncObsDialog alert = new BrapiSyncObsDialog(context);
-                    alert.setFieldObject(getItem(position));
-                    alert.show();
-                }
-
-                return false;
-            }
-        };
-    }
-
-    private DialogInterface.OnClickListener makeConfirmDeleteListener(final int position) {
-        return new DialogInterface.OnClickListener() {
-            // Do it when clicking Yes or No
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-
-                ((FieldAdapterController) context).getDatabase().deleteField(getItem(position).getExp_id());
-
-                if (getItem(position).getExp_id() == getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
-                    setEditorItem(getPreferences(), null);
-                }
-
-                ((FieldAdapterController) context).queryAndLoadFields();
-
-                CollectActivity.reloadData = true;
-            }
-        };
-    }
-
-    private void showSortDialog(final int position) {
-
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
         FieldObject field = getItem(position);
+        holder.itemView.setActivated(selectedIds.contains(field.getExp_id()));
+        String name = field.getExp_alias();
+        holder.name.setText(name);
+        String count = field.getCount();
+        String genericLevel = context.getString(R.string.field_generic_observation_level);
+        String specificLevel = field.getObservation_level();
 
-        ((FieldSortController) context).showSortDialog(field);
-    }
+        // Include the specific observation level if defined, otherwise, fallback to just the generic level
+        String level = !TextUtils.isEmpty(specificLevel) ? specificLevel + " " + genericLevel : genericLevel;
 
-    private AlertDialog createDeleteItemAlertDialog(final int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
+        String formattedCount = String.format(context.getString(R.string.field_observation_count_format), count, level);
+        holder.count.setText(formattedCount);
 
-        builder.setTitle(context.getString(R.string.fields_delete_study));
-        builder.setMessage(context.getString(R.string.fields_delete_study_confirmation));
-        builder.setPositiveButton(context.getString(R.string.dialog_yes), makeConfirmDeleteListener(position));
-        builder.setNegativeButton(context.getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-
-        });
-
-        AlertDialog alert = builder.create();
-        return alert;
-    }
-
-    private void fieldClick(FieldObject selectedField) {
-
-        setEditorItem(getPreferences(), selectedField);
-
-        fieldSwitcher.switchField(selectedField);
-
-        CollectActivity.reloadData = true;
-        notifyDataSetChanged();
-
-        // Check if this is a BrAPI field and show BrAPI info dialog if so
-        if (selectedField.getExp_source() != null &&
-                !selectedField.getExp_source().equals("") &&
-                !selectedField.getExp_source().equals("local")) {
-
-            BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context,
-                    context.getResources().getString(R.string.brapi_info_message));
-            brapiInfo.show();
+        // Set source icon
+        ImportFormat importFormat = field.getImport_format();
+        Log.d("FieldAdapter", "Import format for field " + name + ": " + importFormat);
+        switch (importFormat) {
+            case CSV:
+                holder.sourceIcon.setImageResource(R.drawable.ic_file_csv);
+                break;
+            case BRAPI:
+                holder.sourceIcon.setImageResource(R.drawable.ic_adv_brapi);
+                break;
+            case XLS:
+            case XLSX:
+                holder.sourceIcon.setImageResource(R.drawable.ic_file_xls);
+                break;
+            case INTERNAL:
+                holder.sourceIcon.setImageResource(R.drawable.ic_field);
+                break;
+            default:
+                holder.sourceIcon.setImageResource(R.drawable.ic_file_csv);
+                break;
         }
-    }
 
-    private class ViewHolder {
-        ImageView menuPopup;
-        TextView fieldName;
-        TextView count;
-        TextView importDate;
-        TextView editDate;
-        TextView exportDate;
-        RadioButton active;
-        TextView observationLevel;
+        // Determine if this field is active
+        int activeStudyId = ((FieldEditorActivity) context).getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+        Log.d("FieldAdapter", "Field is is " + field.getExp_id() + " and active field is is "+activeStudyId);
+        if (field.getExp_id() == activeStudyId) {
+            // Indicate active state
+            Log.d("FieldAdapter", "Setting icon background for active field " + name);
+//            holder.sourceIcon.setBackgroundResource(R.drawable.custom_round_button);
+            holder.sourceIcon.setBackgroundResource(R.drawable.round_outline_button);
+
+        } else {
+            // Clear any modifications for non-active fields
+            holder.sourceIcon.setBackground(null);
+        }
     }
 }

@@ -41,6 +41,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">exporter</string>
     <!-- Delete -->
     <string name="fields_delete">Effacer</string>
     <string name="fields_delete_study">Effacer cet essai</string>
@@ -59,12 +61,8 @@
     <string name="fields_study_exists_message">Cet essai existe déjà.</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
-    <string name="fields_study_statistics">Statistiques</string>
-    <string name="fields_date_imported">Importer la date</string>
-    <string name="fields_date_edited">Modifier la date</string>
-    <string name="fields_date_exported">Exporter la date</string>
-    <string name="fields_summary">Résumé sur l\'essai</string>
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Trier</string>
@@ -176,6 +174,7 @@
     <string name="dialog_multi_measure_delete">Effacer</string>
     <!--- GeoNav -->
     <!--- Content Descriptions -->
+    <!-- Observation Info -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_dialog_title">Export Données</string>
@@ -251,6 +250,7 @@
     <string name="preferences_general_skip_entries_with_data">cacher les données déjà existantes</string>
     <string name="preferences_general_skip_entries_with_data_description">Exclure les entrées qui ont des données existantes pour ce caractère</string>
     <!-- GeoNav -->
+    <string name="pref_geonav_log_both">Les deux</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Sons</string>
     <string name="preferences_sound_primary_order_sound">Son pour prévenir d\'un changement de premier ordre.</string>

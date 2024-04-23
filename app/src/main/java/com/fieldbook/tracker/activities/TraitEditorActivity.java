@@ -50,6 +50,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.ArrayIndexComparator;
@@ -199,7 +200,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
             FieldObject field = database.getFieldObject(studyId);
 
-            if (!field.getExp_name().equals("") && !field.getExp_source().equals("local") && !field.getExp_source().equals("")) {
+            if (!field.getExp_name().equals("") && field.getImport_format() == ImportFormat.BRAPI) {
 
                 // noCheckTrait is used when the trait should not be checked, but the dialog
                 // should be shown.

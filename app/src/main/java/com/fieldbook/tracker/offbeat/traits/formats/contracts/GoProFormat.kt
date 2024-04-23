@@ -10,6 +10,7 @@ class GoProFormat : TraitFormat(
     format = Formats.GO_PRO,
     defaultLayoutId = R.layout.trait_go_pro,
     layoutView = null,
+    databaseName = "gopro",
     nameStringResourceId = R.string.traits_format_go_pro_camera,
     iconDrawableResourceId = R.drawable.ic_trait_gopro,
     stringNameAux = null,

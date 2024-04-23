@@ -23,6 +23,7 @@ import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
@@ -1130,7 +1131,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId) {
+    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId, String sortOrder) {
 
         DataHelper dataHelper = new DataHelper(context);
 
@@ -1142,10 +1143,12 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
 
         try {
             FieldObject field = new FieldObject();
+            field.setStudy_db_id(studyDetails.getStudyDbId());
             field.setExp_name(studyDetails.getStudyName());
-            field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
+            field.setExp_alias(studyDetails.getStudyName());
             field.setExp_species(studyDetails.getCommonCropName());
             field.setCount(studyDetails.getNumberOfPlots().toString());
+            field.setImport_format(ImportFormat.BRAPI);
 
             // Get our host url
             if (BrAPIService.getHostUrl(context) != null) {
@@ -1158,6 +1161,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             field.setUnique_id("observationUnitDbId");
             field.setPrimary_id(primaryId);
             field.setSecondary_id(secondaryId);
+            field.setExp_sort(sortOrder);
 
             // Do a pre-check to see if the field exists so we can show an error
             int FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
@@ -1186,6 +1190,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             DataHelper.db.beginTransaction();
             // All checks finished, insert our data.
             int expId = dataHelper.createField(field, studyDetails.getAttributes());
+            field.setExp_id(expId);
 
             boolean fail = false;
             String failMessage = "";
@@ -1236,7 +1241,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             if (fail) {
                 return new BrapiControllerResponse(false, failMessage);
             } else {
-                return new BrapiControllerResponse(true, "");
+                return new BrapiControllerResponse(true, "", field);
             }
 
 

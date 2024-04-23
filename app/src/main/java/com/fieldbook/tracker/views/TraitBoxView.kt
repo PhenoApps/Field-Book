@@ -315,6 +315,10 @@ class TraitBoxView : ConstraintLayout {
         // if pos is -1, default back to first element
         // pos = -1 if the last used trait was disabled
         traitTypeTv.text =  visibleTraitsList?.get(if (pos == -1) 0 else pos)
+        currentTrait = controller.getDatabase().getDetail(
+            traitTypeTv.text
+                .toString()
+        )
     }
 
     private fun getSelectedItemPosition(): Int {

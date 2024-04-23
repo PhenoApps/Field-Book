@@ -3,7 +3,6 @@ package com.fieldbook.tracker.dialogs
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -102,9 +101,8 @@ class NewTraitDialog(
         params?.height = LinearLayout.LayoutParams.WRAP_CONTENT
         dialog?.window?.attributes = params
 
-        context?.let { ctx ->
-            show(ctx)
-        }
+        show()
+
     }
 
     private fun showFormatLayouts() {
@@ -125,7 +123,7 @@ class NewTraitDialog(
         positiveBtn?.setText(R.string.next)
         positiveBtn?.setOnClickListener {
             showFormatParameters()
-            if (context?.let { ctx -> getSelectedFormat(ctx) } == null) {
+            if (getSelectedFormat() == null) {
                 Toast.makeText(
                     context,
                     R.string.dialog_new_trait_error_must_select_a_layout,
@@ -136,11 +134,8 @@ class NewTraitDialog(
 
         if (traitFormatsRv.adapter == null) {
 
-            context?.let { ctx ->
+            setupTraitFormatsRv()
 
-                setupTraitFormatsRv()
-
-            }
         }
     }
 
@@ -226,34 +221,31 @@ class NewTraitDialog(
         return builder.create()
     }
 
-    private fun show(ctx: Context) {
+    private fun show() {
         if (initialTraitObject == null) showFormatLayouts() else showFormatParameters(
-            Formats.values().first {
-                initialTraitObject?.format == it.getDatabaseName(ctx)
+            Formats.entries.first {
+                initialTraitObject?.format == it.getDatabaseName()
             }
         )
     }
 
-    private fun getSelectedFormat(ctx: Context): Formats? =
-        Formats.values().find { it.getDatabaseName(ctx) == initialTraitObject?.format }
+    private fun getSelectedFormat(): Formats? =
+        Formats.entries.find { it.getDatabaseName() == initialTraitObject?.format }
             ?: (traitFormatsRv.adapter as? TraitFormatAdapter)?.selectedFormat
 
     private fun setupParametersLinearLayout() {
 
         parametersSv.clear()
 
-        context?.let { ctx ->
+        val format = getSelectedFormat()
 
-            val format = getSelectedFormat(ctx)
+        format?.getTraitFormatDefinition()?.parameters?.forEach { parameter ->
 
-            format?.getTraitFormatDefinition()?.parameters?.forEach { parameter ->
+            parameter.createViewHolder(parametersSv)?.let { holder ->
 
-                parameter.createViewHolder(parametersSv)?.let { holder ->
+                holder.bind(parameter, initialTraitObject)
 
-                    holder.bind(parameter, initialTraitObject)
-
-                    parametersSv.addViewHolder(holder)
-                }
+                parametersSv.addViewHolder(holder)
             }
         }
     }
@@ -268,7 +260,7 @@ class NewTraitDialog(
 
             traitFormatsRv.adapter = formatsAdapter
 
-            formatsAdapter.submitList(Formats.values().toList())
+            formatsAdapter.submitList(Formats.entries)
 
         }
     }
@@ -412,9 +404,9 @@ class NewTraitDialog(
 
         val index = (traitFormatsRv.adapter as TraitFormatAdapter).selectedFormat?.ordinal
             ?: Formats.TEXT.ordinal
-        val format = Formats.values()[index]
+        val format = Formats.entries[index]
         var t = TraitObject()
-        t.format = format.getDatabaseName(activity)
+        t.format = format.getDatabaseName()
 
         t = parametersSv.merge(t)
 
@@ -444,10 +436,8 @@ class NewTraitDialog(
 
     private fun validateFormat(): ValidationResult {
 
-        context?.let { ctx ->
-            getSelectedFormat(ctx)?.let { selectedFormat ->
-                return parametersSv.validateFormat(selectedFormat)
-            }
+        getSelectedFormat()?.let { selectedFormat ->
+            return parametersSv.validateFormat(selectedFormat)
         }
 
         return ValidationResult()
@@ -474,13 +464,9 @@ class NewTraitDialog(
 
         if (adapter?.selectedFormat != null) {
 
-            context?.let { ctx ->
+            initialTraitObject?.format = adapter.selectedFormat?.getDatabaseName()
 
-                initialTraitObject?.format = adapter.selectedFormat?.getDatabaseName(ctx)
-
-                showFormatParameters(adapter.selectedFormat ?: Formats.TEXT)
-
-            }
+            showFormatParameters(adapter.selectedFormat ?: Formats.TEXT)
         }
     }
 

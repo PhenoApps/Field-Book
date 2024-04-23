@@ -11,6 +11,7 @@ class BooleanFormat : TraitFormat(
     format = Formats.BOOLEAN,
     defaultLayoutId = R.layout.trait_boolean,
     layoutView = null,
+    databaseName = "boolean",
     nameStringResourceId = R.string.traits_format_boolean,
     iconDrawableResourceId = R.drawable.ic_trait_boolean,
     stringNameAux = null,

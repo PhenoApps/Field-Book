@@ -23,6 +23,7 @@ import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
@@ -92,6 +93,8 @@ import java.util.Comparator;
 import java.util.function.BiConsumer;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -549,15 +552,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
     private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data, Map<String, BrAPIGermplasm> germplasmDetailsMap) {
 
-        Map<String, Map<String, String>> unitAttributes = new HashMap<>(); // Map to store attributes for each unit
+        Map<String, Map<String, String>> unitAttributes = new LinkedHashMap<>(); // Map to store attributes for each unit
         Log.d("BrAPIServiceV2","Mapping attribute values");
 
         for (BrAPIObservationUnit unit : data) {
 
             String unitDbId = unit.getObservationUnitDbId();
             // Create the unit's attributes hashmap
-            unitAttributes.putIfAbsent(unitDbId, new HashMap<>());
-            Map<String, String> attributesMap = unitAttributes.get(unitDbId);
+            Map<String, String> attributesMap = unitAttributes.computeIfAbsent(unitDbId, k -> new LinkedHashMap<>());
+
+            if (unit.getGermplasmName() != null) {
+                attributesMap.put("Germplasm", unit.getGermplasmName());
+            }
 
             BrAPIObservationUnitPosition pos = unit.getObservationUnitPosition();
             if (pos != null) {
@@ -593,9 +599,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     attributesMap.put("EntryType", pos.getEntryType().getBrapiValue());
                 }
             }
-            if (unit.getGermplasmName() != null) {
-                attributesMap.put("Germplasm", unit.getGermplasmName());
-            }
+
             if (unit.getGermplasmDbId() != null) {
                 // find matching germplasm in germplasmDetailsMap and extract synonyms and pedigree
                 BrAPIGermplasm matchingGermplasm = germplasmDetailsMap.get(unit.getGermplasmDbId());
@@ -633,7 +637,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
 
         // Extract a list of unique attribute names from the unitAttributes
-        Set<String> uniqueAttributes = new HashSet<>();
+        Set<String> uniqueAttributes = new LinkedHashSet<>();
         for (Map<String, String> attributesMap : unitAttributes.values()) {
             uniqueAttributes.addAll(attributesMap.keySet());
         }
@@ -1248,7 +1252,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         trait.setMaximum("");
                     }
 
-                    trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                    if (var.getScale().getValidValues().getCategories() != null) {
+                        trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                        //For categorical traits, include label value pairs in details
+                        String details = trait.getDetails() + "\nCategories: ";
+                        details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
+                        trait.setDetails(details);
+                    }
+
                 }
                 if (var.getScale().getDataType() != null) {
                     trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getBrapiValue()));
@@ -1257,17 +1268,23 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 }
                 //For categorical traits, include label value pairs in details
                 if (trait.getFormat().equals("categorical")) {
-                    String details = trait.getDetails() + "\nCategories: ";
-                    details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
-                    trait.setDetails(details);
+                    String details = trait.getDetails();
 
+                    if (var.getScale() != null &&
+                            var.getScale().getValidValues() != null &&
+                            var.getScale().getValidValues().getCategories() != null &&
+                            !var.getScale().getValidValues().getCategories().isEmpty()) {
+
+                        List<BrAPIScaleValidValuesCategories> categories = var.getScale().getValidValues().getCategories();
+                        details += "\nCategories: " + buildCategoryDescriptionString(categories);
+                    }
+                    trait.setDetails(details);
 //                    try {
 //                        trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
 //                    } catch (Exception e) {
 //                        Log.d("FieldBookError", "Error parsing trait label/value.");
 //                    }
                 }
-
             }
 
             // The BMS implementation of BrAPI 2.x Variables includes an Observation Variable with observationLevelNames metadata in the additionalInfo field.
@@ -1395,20 +1412,22 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId) {
+    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId, String sortOrder) {
 
         DataHelper dataHelper = new DataHelper(context);
 
         String observationLevel;
-        if (selectedObservationLevel == null) observationLevel = "Plot";
-        else observationLevel = selectedObservationLevel.getObservationLevelName().substring(0, 1).toUpperCase() + selectedObservationLevel.getObservationLevelName().substring(1);
+        if (selectedObservationLevel == null) observationLevel = "plot";
+        else observationLevel = selectedObservationLevel.getObservationLevelName();
         try {
             FieldObject field = new FieldObject();
+            field.setStudy_db_id(studyDetails.getStudyDbId());
             field.setExp_name(studyDetails.getStudyName());
-            field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
+            field.setExp_alias(studyDetails.getStudyName());
             field.setExp_species(studyDetails.getCommonCropName());
             field.setCount(studyDetails.getNumberOfPlots().toString());
             field.setObservation_level(observationLevel);
+            field.setImport_format(ImportFormat.BRAPI);
 
             // Get our host url
             if (BrAPIService.getHostUrl(context) != null) {
@@ -1421,6 +1440,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setUnique_id("ObservationUnitDbId");
             field.setPrimary_id(primaryId);
             field.setSecondary_id(secondaryId);
+            field.setExp_sort(sortOrder);
 
             // Do a pre-check to see if the field exists so we can show an error
             int FieldUniqueStatus = dataHelper.checkFieldNameAndObsLvl(field.getExp_name(), field.getObservation_level());
@@ -1437,7 +1457,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             // Construct our map to check for uniques
             for (List<String> dataRow : studyDetails.getValues()) {
-                Integer idColumn = studyDetails.getAttributes().indexOf(observationLevel);
+                Integer idColumn = studyDetails.getAttributes().indexOf("ObservationUnitName");
                 checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
             }
 
@@ -1449,6 +1469,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             DataHelper.db.beginTransaction();
             // All checks finished, insert our data.
             int expId = dataHelper.createField(field, studyDetails.getAttributes());
+            field.setExp_id(expId);
 
             boolean fail = false;
             String failMessage = "";
@@ -1502,7 +1523,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             if (fail) {
                 return new BrapiControllerResponse(false, failMessage);
             } else {
-                return new BrapiControllerResponse(true, "");
+                return new BrapiControllerResponse(true, "", field);
             }
 
 

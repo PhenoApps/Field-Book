@@ -107,8 +107,15 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
                 )
             }
 
-            val geoNavLogWriter = context.getGeoNavHelper().getGeoNavLogWriterUri()
-            val geoNavFile = geoNavLogWriter?.let {
+            var geoNavLogWriter = context.getGeoNavHelper().getGeoNavLogLimitedUri()
+            val limitedGeoNavFile = geoNavLogWriter?.let {
+                DocumentFile.fromSingleUri(context,
+                    it
+                )
+            }
+
+            geoNavLogWriter = context.getGeoNavHelper().getGeoNavLogFullUri()
+            val fullGeoNavFile = geoNavLogWriter?.let {
                 DocumentFile.fromSingleUri(context,
                     it
                 )
@@ -116,7 +123,10 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
 
             val paths = ArrayList<DocumentFile?>()
             paths.add(audioDocumentFile)
-            paths.add(geoNavFile)
+            if(limitedGeoNavFile != null)
+                paths.add(limitedGeoNavFile)
+            if(fullGeoNavFile != null)
+                paths.add(fullGeoNavFile)
             paths.add(traitsDocumentFile)
 
             val mGeneratedName = "field_audio_log" + context.cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(c.time)    + ".zip"

@@ -283,4 +283,7 @@
     <!-- geonav snackbar view reference -->
     <attr name="fb_geonav_snackbar_view" format="reference" />
 
+    <!-- within-dialog error message color -->
+    <attr name="fb_error_message_color" format="color" />
+
 </resources>

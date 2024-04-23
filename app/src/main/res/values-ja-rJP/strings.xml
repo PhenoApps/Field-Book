@@ -43,6 +43,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">エクスポート</string>
     <!-- Delete -->
     <string name="fields_delete">削除</string>
     <string name="fields_delete_study">圃場を削除</string>
@@ -61,7 +63,8 @@
     <string name="fields_study_exists_message">この圃場は既に存在しています。</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Unimplemented -->
+    <!-- Field details -->
+    <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">並べ替え</string>
@@ -176,6 +179,7 @@
     <string name="dialog_multi_measure_delete">削除</string>
     <!--- GeoNav -->
     <!--- Content Descriptions -->
+    <!-- Observation Info -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">ローカル</string>
@@ -255,6 +259,7 @@
     <string name="preferences_general_skip_entries_with_data">入力済エントリーのスキップ</string>
     <string name="preferences_general_skip_entries_with_data_description">調査中形質のデータ入力済エントリーをスキップ</string>
     <!-- GeoNav -->
+    <string name="pref_geonav_log_both">両方</string>
     <!-- Sounds -->
     <string name="preferences_sounds">音声</string>
     <string name="preferences_sound_primary_order_sound">第1オーダーの音</string>

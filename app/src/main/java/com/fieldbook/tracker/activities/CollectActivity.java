@@ -23,7 +23,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -37,6 +36,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -49,6 +49,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
+import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
 import com.fieldbook.tracker.dialogs.SearchDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
@@ -87,6 +88,7 @@ import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -203,6 +205,7 @@ public class CollectActivity extends ThemedActivity
      * Main screen elements
      */
     private Menu systemMenu;
+    private Toolbar toolbar;
     private InfoBarAdapter infoBarAdapter;
     private TraitBoxView traitBox;
     private RangeBoxView rangeBox;
@@ -632,7 +635,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     private void initToolbars() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         Toolbar toolbarBottom = findViewById(R.id.toolbarBottom);
@@ -869,8 +872,10 @@ public class CollectActivity extends ThemedActivity
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         traitBox.setSelection(traitIndex);
+        if (traitBox.getCurrentTrait() != null)
+            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
 
-        Log.d(TAG, "Move to result core: " + j);
+        Log.d(TAG, "Move to result core: " + j + "with trait index "+ traitIndex);
 
         initWidgets(false);
     }
@@ -882,6 +887,8 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void onPause() {
+
+        database.updateEditDate(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         guiThread.quit();
 
@@ -920,6 +927,8 @@ public class CollectActivity extends ThemedActivity
         geoNavHelper.stopAverageHandler();
 
         preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
+
+        traitLayouts.unregisterAllReceivers();
 
         super.onPause();
     }
@@ -1035,6 +1044,8 @@ public class CollectActivity extends ThemedActivity
         }
 
         dataLocked = preferences.getInt(GeneralKeys.DATA_LOCK_STATE, UNLOCKED);
+
+        traitLayouts.registerAllReceivers();
 
         refreshLock();
     }
@@ -1244,6 +1255,44 @@ public class CollectActivity extends ThemedActivity
         customizeToolbarIcons();
 
         return true;
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) { // Ensure the menu item view is already created before setting longpress listener
+            toolbar.post(() -> setupLongPressListener());
+        }
+    }
+
+    private void setupLongPressListener() {
+        final View menuItemView = toolbar.findViewById(R.id.resources);
+        if (menuItemView != null) {
+            menuItemView.setOnLongClickListener(v -> {
+                openSavedResourceFile();
+                return true;
+            });
+        }
+    }
+
+    private void openSavedResourceFile() {
+        String fileString = preferences.getString(GeneralKeys.LAST_USED_RESOURCE_FILE, "");
+        if (!fileString.isEmpty()) {
+            try {
+                Uri resultUri = Uri.parse(fileString);
+                String suffix = fileString.substring(fileString.lastIndexOf('.') + 1).toLowerCase();
+                String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+
+                Intent open = new Intent(Intent.ACTION_VIEW);
+                open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                open.setDataAndType(resultUri, mime);
+                startActivity(open);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            Toast.makeText(this, "No file preference saved, select a file with a short press", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -1781,17 +1830,17 @@ public class CollectActivity extends ThemedActivity
             case REQUEST_FILE_EXPLORER_CODE:
                 if (resultCode == RESULT_OK) {
                     try {
-
                         String resultString = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
+                        //save most recently used resource file
+                        preferences.edit().putString(GeneralKeys.LAST_USED_RESOURCE_FILE, resultString).apply();
+
                         Uri resultUri = Uri.parse(resultString);
-
                         String suffix = resultString.substring(resultString.lastIndexOf('.') + 1).toLowerCase();
-
                         String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+
                         Intent open = new Intent(Intent.ACTION_VIEW);
                         open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         open.setDataAndType(resultUri, mime);
-
                         startActivity(open);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -1853,7 +1902,7 @@ public class CollectActivity extends ThemedActivity
                         if (found && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
 
                             int studyId = studyObj.getExp_id();
-                            String fieldName = studyObj.getExp_name();
+                            String fieldName = studyObj.getExp_alias();
 
                             String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
 
@@ -2166,15 +2215,15 @@ public class CollectActivity extends ThemedActivity
     /**
      * Inserts a user observation whenever a label is printed.
      * See ResultReceiver onReceiveResult in LabelPrintLayout
-     * @param size: The size of the label. e.g "2 x 4 detailed"
+     * @param labelNumber: The number of labels printed.
      */
-    public void insertPrintObservation(String size) {
+    public void insertPrintObservation(String labelNumber) {
 
         TraitObject trait = getCurrentTrait();
 
         String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertObservation(rangeBox.getPlotID(), trait.getId(), trait.getFormat(), size,
+        database.insertObservation(rangeBox.getPlotID(), trait.getId(), trait.getFormat(), labelNumber,
                 getPerson(),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);
@@ -2240,6 +2289,7 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void inflateTrait(@NonNull BaseTraitLayout layout) {
+        Log.d(TAG, "inflateTrait: ");
         getTraitLayout().onExit();
         View v = LayoutInflater.from(this).inflate(layout.layoutId(), null);
         LinearLayout holder = findViewById(R.id.traitHolder);
@@ -2303,7 +2353,7 @@ public class CollectActivity extends ThemedActivity
         if (isAttribute) {
 
             if (label.equals(context.getString(R.string.field_name_attribute))) {
-                String fieldName = ((CollectActivity) context).getPreferences().getString(GeneralKeys.FIELD_FILE, "");
+                String fieldName = ((CollectActivity) context).getPreferences().getString(GeneralKeys.FIELD_ALIAS, "");
                 return (fieldName == null || fieldName.isEmpty()) ? dataMissingString : fieldName;
             }
 
@@ -2453,6 +2503,25 @@ public class CollectActivity extends ThemedActivity
         if (gps == null) return null;
 
         return gps.getLocation(0, 0);
+    }
+
+    public void showObservationMetadataDialog(){
+        ObservationModel currentObservationObject = getCurrentObservation();
+        if (currentObservationObject != null){
+            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(currentObservationObject);
+            dialogFragment.show(this.getSupportFragmentManager(), "observationMetadata");
+        }
+    }
+
+    private ObservationModel getCurrentObservation() {
+        String rep = getCollectInputView().getRep();
+        List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
+            for (ObservationModel m : models) {
+            if (rep.equals(m.getRep())) {
+                return m;
+            }
+        }
+        return null;
     }
 
     @Override

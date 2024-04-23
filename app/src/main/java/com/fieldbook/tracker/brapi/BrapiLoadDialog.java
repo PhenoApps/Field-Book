@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,6 +30,7 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
+import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 
 import java.util.ArrayList;
@@ -56,6 +58,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     private BrapiObservationLevel selectedObservationLevel;
     private String selectedPrimary;
     private String selectedSecondary;
+    private String selectedSort;
 
     public BrapiLoadDialog(@NonNull Context context) {
         super(context);
@@ -353,9 +356,28 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 }
             });
 
-            if(studyDetails.getAttributes().contains("Row") || studyDetails.getAttributes().contains("Column")) {
+            Spinner sort = findViewById(R.id.studySortOrder);
+            sort.setAdapter(keyOptions);
+            sort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
+                    selectedSort = studyDetails.getAttributes().get(index);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
+
+            if(studyDetails.getAttributes().contains("Row")) {
                 primary.setSelection(studyDetails.getAttributes().indexOf("Row"));
+            }
+            if(studyDetails.getAttributes().contains("Column")) {
                 secondary.setSelection(studyDetails.getAttributes().indexOf("Column"));
+            }
+            if(studyDetails.getAttributes().contains("Plot")) {
+                sort.setSelection(studyDetails.getAttributes().indexOf("Plot"));
             }
         }
     }
@@ -419,7 +441,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         protected Integer doInBackground(Integer... params) {
             try {
 
-                brapiControllerResponse = brAPIService.saveStudyDetails(studyDetails, selectedObservationLevel, selectedPrimary, selectedSecondary);
+                brapiControllerResponse = brAPIService.saveStudyDetails(studyDetails, selectedObservationLevel, selectedPrimary, selectedSecondary, selectedSort);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -476,6 +498,10 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
             if(alertDialogBuilder == null) {
                 // Finish our BrAPI import activity
+                FieldObject field = (FieldObject) brapiControllerResponse.getData();
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("fieldId", field.getExp_id());
+                ((Activity) context).setResult(Activity.RESULT_OK, returnIntent);
                 ((Activity) context).finish();
             } else {
                 AlertDialog alertDialog = alertDialogBuilder.create();

@@ -39,6 +39,14 @@
     <PreferenceCategory
     android:key="experimental_settings_alpha"
     android:title="@string/preferences_experimental_alpha_title"
-    app:iconSpaceReserved="false"/>
+    app:iconSpaceReserved="false">
+
+        <CheckBoxPreference android:key="com.tracker.fieldbook.preferences.keys.enable_individual_field_page"
+            android:title="@string/pref_beta_enable_individual_field_page_title"
+            android:summary="@string/pref_beta_enable_individual_field_page_summary"
+            android:defaultValue="false"
+            android:icon="@drawable/ic_page_next_outline"/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>
