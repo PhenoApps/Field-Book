@@ -7,7 +7,8 @@
     app:cardBackgroundColor="@color/main_color_background"
     android:layout_margin="10dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/statistics_card">
 
@@ -16,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/stats_container">
+            app:layout_constraintBottom_toTopOf="@id/rv_stats_container">
 
             <TextView
                 android:id="@+id/year_text_view"
@@ -34,287 +35,19 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:padding="5dp"
-                android:src="@drawable/ic_stats_export">
-            </ImageView>
+                android:src="@drawable/ic_stats_export" />
 
         </LinearLayout>
 
-        <RelativeLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_stats_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/stats_container"
-            app:layout_constraintTop_toBottomOf="@id/card_header">
-
-            <LinearLayout
-                android:id="@+id/first_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp">
-
-                <LinearLayout
-                    android:id="@+id/stat_1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/stat_title_fields"
-                        android:layout_gravity="center_horizontal"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_stats_field"
-                        android:layout_gravity="center_horizontal" />
-
-                    <TextView
-                        android:id="@+id/stat_value_1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="data"
-                        android:layout_gravity="center_horizontal" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/stat_2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/stat_title_entries"
-                        android:layout_gravity="center_horizontal"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_stats_plot"
-                        android:layout_gravity="center_horizontal" />
-
-                    <TextView
-                        android:id="@+id/stat_value_2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="data"
-                        android:layout_gravity="center_horizontal" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/stat_3"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/stat_title_data"
-                        android:layout_gravity="center_horizontal"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_stats_observation"
-                        android:layout_gravity="center_horizontal" />
-
-                    <TextView
-                        android:id="@+id/stat_value_3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="data"
-                        android:layout_gravity="center_horizontal" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/stat_4"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/stat_title_hours"
-                        android:layout_gravity="center_horizontal"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_stats_time"
-                        android:layout_gravity="center_horizontal" />
-
-                    <TextView
-                        android:id="@+id/stat_value_4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="data"
-                        android:layout_gravity="center_horizontal" />
-
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/second_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_below="@id/first_row"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp">
-
-                <LinearLayout
-                    android:id="@+id/stat_5"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/stat_title_people"
-                        android:layout_gravity="center_horizontal"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_stats_people"
-                        android:layout_gravity="center_horizontal" />
-
-                    <TextView
-                        android:id="@+id/stat_value_5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="data"
-                        android:layout_gravity="center_horizontal" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/stat_6"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/stat_title_photos"
-                        android:layout_gravity="center_horizontal"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_stats_photo"
-                        android:layout_gravity="center_horizontal" />
-
-                    <TextView
-                        android:id="@+id/stat_value_6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="data"
-                        android:layout_gravity="center_horizontal" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/stat_7"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/stat_title_busiest"
-                        android:layout_gravity="center_horizontal"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_stats_busiest"
-                        android:layout_gravity="center_horizontal" />
-
-                    <TextView
-                        android:id="@+id/stat_value_7"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="data"
-                        android:layout_gravity="center_horizontal" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/stat_8"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/stat_title_most"
-                        android:layout_gravity="center_horizontal"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_stats_most_obs"
-                        android:layout_gravity="center_horizontal" />
-
-                    <TextView
-                        android:id="@+id/stat_value_8"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="data"
-                        android:layout_gravity="center_horizontal" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </RelativeLayout>
-
+            app:layout_constraintTop_toBottomOf="@id/card_header"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="4"
+            tools:listitem="@layout/statistics_card_individual_stats"
+            tools:itemCount="8" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>
