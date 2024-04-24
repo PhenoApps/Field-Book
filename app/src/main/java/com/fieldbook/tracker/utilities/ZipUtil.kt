@@ -153,11 +153,21 @@ class ZipUtil {
 
                     while (zin.nextEntry.also { ze = it } != null) {
 
+                        // Earlier, for creating a zip file, Field Book created an
+                        // Output folder which was placed at the root of the zip file.
+                        // Files and folders were stored inside of this Output folder
+
+                        // For fixing Issue 878, the zip file stopped including
+                        // `Output` folder from being in the zip file.
+                        // But the code below still involves "Output" to keep the
+                        // unzip functionality working with files that contained
+                        // both, the presence or the absence of the Output folder at the root
+
                         when (ze?.name) {
 
                             "Output/" -> continue
 
-                            "Output/$DATABASE_NAME" -> {
+                            "Output/$DATABASE_NAME", DATABASE_NAME -> {
 
                                 databaseStream.use { output ->
 
