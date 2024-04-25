@@ -10,6 +10,8 @@ open class FullscreenCameraSettingsView: CameraTraitSettingsView {
     init {
 
         systemCameraRg.visibility = View.GONE
+
+        previewCb.visibility = View.GONE
     }
 
     constructor(ctx: Context, supportedResolutions: List<Size>) : super(ctx, supportedResolutions)

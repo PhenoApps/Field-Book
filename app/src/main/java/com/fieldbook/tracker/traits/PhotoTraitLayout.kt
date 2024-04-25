@@ -4,23 +4,16 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.graphics.ImageFormat
-import android.hardware.camera2.CameraCharacteristics
 import android.provider.MediaStore
 import android.util.AttributeSet
-import android.util.Log
 import android.util.Size
 import android.view.View
 import androidx.annotation.OptIn
-import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
-import androidx.camera.core.CameraSelector
+import androidx.camera.core.Camera
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
+import androidx.camera.view.PreviewView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CameraActivity
 import com.fieldbook.tracker.activities.CollectActivity
@@ -29,9 +22,8 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.views.CameraTraitSettingsView
-import com.google.common.util.concurrent.ListenableFuture
 import java.io.File
-import java.util.concurrent.Executors
+import java.util.concurrent.ExecutorService
 
 class PhotoTraitLayout : CameraTrait {
 
@@ -39,16 +31,12 @@ class PhotoTraitLayout : CameraTrait {
         const val TAG = "PhotoTrait"
         const val type = "photo"
         const val PICTURE_REQUEST_CODE = 252
-        val DEFAULT_CAMERAX_PREVIEW_SIZE = Size(640, 480)
     }
 
     enum class Mode {
         PREVIEW,
         NO_PREVIEW
     }
-
-    private lateinit var cameraSelector: CameraSelector
-    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
 
     private var supportedResolutions: List<Size> = listOf()
 
@@ -64,19 +52,11 @@ class PhotoTraitLayout : CameraTrait {
 
     private fun displayPreviewMode(mode: Mode) {
 
-        cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-
-        cameraSelector =
-            CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
-
-        cameraProviderFuture.get().unbindAll()
-
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
+        controller.getCameraXFacade().await(context) {
             if (mode == Mode.NO_PREVIEW) {
-                bindNoPreviewLifecycle(cameraProvider)
-            } else bindPreviewLifecycle(cameraProvider)
-        }, ContextCompat.getMainExecutor(context))
+                bindNoPreviewLifecycle()
+            } else bindPreviewLifecycle()
+        }
     }
 
     private fun setupCaptureButton(takePictureCallback: () -> Unit) {
@@ -114,80 +94,37 @@ class PhotoTraitLayout : CameraTrait {
 
         settingsBtn?.isEnabled = false
 
-        cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+        bindCameraForInformation()
 
-        cameraSelector =
-            CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
-
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            bindCameraForInformation(cameraProvider)
-        }, ContextCompat.getMainExecutor(context))
     }
 
     @OptIn(ExperimentalCamera2Interop::class)
-    private fun bindCameraForInformation(cameraProvider: ProcessCameraProvider) {
+    private fun bindCameraForInformation() {
 
-        cameraProvider.unbindAll()
+        controller.getCameraXFacade().bindIdentity { _, sizes ->
 
-        val cameraSelector = CameraSelector.Builder()
-            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-            .build()
+            supportedResolutions = sizes
 
-        val camera = cameraProvider.bindToLifecycle(
-            context as LifecycleOwner,
-            cameraSelector,
-        )
+            settingsBtn?.isEnabled = true
 
-        val info = Camera2CameraInfo.from(camera.cameraInfo)
-        val configs =
-            info.getCameraCharacteristic(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-        supportedResolutions = (configs?.getOutputSizes(ImageFormat.JPEG) ?: arrayOf()).toList()
-
-        settingsBtn?.isEnabled = true
-
-        cameraProvider.unbindAll()
+        }
 
         //trigger ui update based on preferences
         onSettingsChanged()
     }
 
-    private fun bindNoPreviewLifecycle(cameraProvider: ProcessCameraProvider) {
+    private fun bindNoPreviewLifecycle() {
 
         previewView?.visibility = View.GONE
         expandBtn?.visibility = View.GONE
 
-        val cameraSelector = CameraSelector.Builder()
-            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-            .build()
-
-        val imageCapture = ImageCapture.Builder()
-            .build()
-
-        val cameraExecutor = Executors.newSingleThreadExecutor()
-
         try {
 
-            val camera = cameraProvider.bindToLifecycle(
-                context as LifecycleOwner,
-                cameraSelector,
-                imageCapture
-            )
+            val resolution = getSupportedResolutionByPreferences()
 
-            Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
+            controller.getCameraXFacade().bindFrontCapture(resolution) { camera, executor, capture ->
 
-            setupCaptureButton {
-
-                val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
-
-                val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
-                imageCapture.takePicture(outputFileOptions, cameraExecutor,
-                    object : ImageCapture.OnImageSavedCallback {
-                        override fun onError(error: ImageCaptureException) {}
-                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                            makeImage(currentTrait)
-                        }
-                    })
+                setupCaptureUi(camera, executor, capture)
             }
 
         } catch (_: IllegalArgumentException) {
@@ -195,80 +132,70 @@ class PhotoTraitLayout : CameraTrait {
         }
     }
 
-    private fun bindPreviewLifecycle(cameraProvider: ProcessCameraProvider) {
+    private fun setupCaptureUi(camera: Camera, executorService: ExecutorService, capture: ImageCapture) {
+
+        setupCaptureButton {
+
+            val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
+
+            val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
+            capture.takePicture(outputFileOptions, executorService,
+                object : ImageCapture.OnImageSavedCallback {
+                    override fun onError(error: ImageCaptureException) {}
+                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                        makeImage(currentTrait)
+                    }
+                })
+        }
+    }
+
+    /**
+     * @param orientation this is orientation from Surface class, not to be confused with Exif Orientation
+     */
+    private fun bindPreviewLifecycle() {
 
         previewView?.visibility = View.VISIBLE
+
+        previewView?.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
 
         expandBtn?.visibility = View.VISIBLE
 
         expandBtn?.setOnClickListener {
 
             launchCameraX()
+
         }
 
-        val preview = Preview.Builder()
-            .setTargetResolution(DEFAULT_CAMERAX_PREVIEW_SIZE)
-            .setTargetRotation(previewView?.display?.rotation ?: 0)
-            .build()
+        try {
 
-        val cameraSelector = CameraSelector.Builder()
-            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-            .build()
+            val resolution = getSupportedResolutionByPreferences()
+
+            controller.getCameraXFacade().bindPreview(previewView, resolution) { camera, executor, capture ->
+
+                setupCaptureUi(camera, executor, capture)
+            }
+
+        } catch (_: IllegalArgumentException) {
+
+        }
+    }
+
+    private fun getSupportedResolutionByPreferences(): Size? {
 
         val supportedResolutionPreferredIndex = prefs.getInt(
             GeneralKeys.CAMERA_RESOLUTION,
             0
         )
 
-        val builder = ImageCapture.Builder()
+        var resolution: Size? = null
 
         if (supportedResolutions.isNotEmpty() && supportedResolutionPreferredIndex < supportedResolutions.size) {
 
-            val supportedResolution = supportedResolutions[supportedResolutionPreferredIndex]
-
-            builder.setTargetResolution(Size(supportedResolution.height, supportedResolution.width))
-                .build()
+            resolution = supportedResolutions[supportedResolutionPreferredIndex]
 
         }
 
-        previewView?.display?.rotation?.let { rot ->
-            builder.setTargetRotation(rot)
-        }
-
-        val imageCapture = builder.build()
-
-        val cameraExecutor = Executors.newSingleThreadExecutor()
-
-        preview.setSurfaceProvider(previewView?.surfaceProvider)
-
-        try {
-
-            val camera = cameraProvider.bindToLifecycle(
-                context as LifecycleOwner,
-                cameraSelector,
-                preview,
-                imageCapture
-            )
-
-            Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
-
-            setupCaptureButton {
-
-                val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
-
-                val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
-                imageCapture.takePicture(outputFileOptions, cameraExecutor,
-                    object : ImageCapture.OnImageSavedCallback {
-                        override fun onError(error: ImageCaptureException) {}
-                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                            makeImage(currentTrait)
-                        }
-                    })
-            }
-
-        } catch (_: IllegalArgumentException) {
-
-        }
+        return resolution
     }
 
     override fun loadLayout() {
@@ -309,7 +236,7 @@ class PhotoTraitLayout : CameraTrait {
 
         expandBtn?.visibility = View.GONE
 
-        cameraProviderFuture.get().unbindAll()
+        controller.getCameraXFacade().unbind()
 
         setupCaptureButton {
 

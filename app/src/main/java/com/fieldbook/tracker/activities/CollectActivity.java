@@ -23,7 +23,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -65,6 +64,7 @@ import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
+import com.fieldbook.tracker.utilities.CameraXFacade;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
@@ -175,6 +175,9 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     GoProWrapper goProWrapper;
+
+    @Inject
+    CameraXFacade cameraXFacade;
 
     private GPSTracker gps;
 
@@ -2542,4 +2545,9 @@ public class CollectActivity extends ThemedActivity
         usbCameraConnected = connected;
     }
 
+    @NonNull
+    @Override
+    public CameraXFacade getCameraXFacade() {
+        return cameraXFacade;
+    }
 }

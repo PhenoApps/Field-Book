@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.Location
 import android.os.Handler
 import com.fieldbook.tracker.location.GPSTracker
+import com.fieldbook.tracker.utilities.CameraXFacade
 import com.fieldbook.tracker.utilities.GeoNavHelper
 import com.fieldbook.tracker.utilities.GnssThreadHelper
 import com.fieldbook.tracker.utilities.SoundHelperImpl
@@ -39,4 +40,5 @@ interface CollectController: FieldController {
     ) : String
     fun getGeoNavPopupSpinnerItems(): ArrayList<String>
     fun logNmeaMessage(nmea: String)
+    fun getCameraXFacade(): CameraXFacade
 }

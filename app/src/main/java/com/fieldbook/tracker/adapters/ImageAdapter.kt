@@ -59,8 +59,8 @@ class ImageAdapter(private val listener: ImageItemHandler) :
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         with(currentList[position]) {
-            viewHolder.imageView.setImageBitmap(bmp)
             viewHolder.itemView.tag = this
+            viewHolder.imageView.setImageBitmap(bmp)
         }
     }
 

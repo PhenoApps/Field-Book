@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
@@ -67,6 +66,9 @@ abstract class AbstractCameraTrait :
     protected val background = CoroutineScope(Dispatchers.IO)
     protected val ui = CoroutineScope(Dispatchers.Main)
 
+    open val deletePreviewWidth = 512
+    open val deletePreviewHeight = 512
+
     open val thumbnailWidth = 256
     open val thumbnailHeight = 256
 
@@ -118,6 +120,8 @@ abstract class AbstractCameraTrait :
 
     abstract fun onSettingsChanged()
 
+    open fun getDeletePreviewSize() = Point(deletePreviewWidth, deletePreviewHeight)
+
     open fun getThumbnailSize() = Point(thumbnailWidth, thumbnailHeight)
 
     protected fun saveJpegToStorage(
@@ -150,15 +154,19 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    private fun writeExif(file: DocumentFile) {
+    private fun writeExif(file: DocumentFile, studyId: String, timestamp: String) {
 
         //if sdk > 24, can write exif information to the image
         //goal is to encode observation variable model into the user comments
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
-            ExifUtil.saveJsonToExif(
+            ExifUtil.saveVariableUnitModelToExif(
                 context,
-                currentTrait,
+                (controller.getContext() as CollectActivity).person,
+                timestamp,
+                database.getStudyById(studyId),
+                database.getObservationUnitById(currentRange.plot_id),
+                database.getObservationVariableById(currentTrait.id),
                 file.uri
             )
         }
@@ -209,7 +217,7 @@ abstract class AbstractCameraTrait :
 
                             if (saveState == SaveState.SINGLE_SHOT) {
 
-                                writeExif(file)
+                                writeExif(file, studyId, saveTime)
 
                                 notifyItemInserted()
                             }
@@ -221,7 +229,7 @@ abstract class AbstractCameraTrait :
 
                             if (saveState == SaveState.COMPLETE) {
 
-                                writeExif(file)
+                                writeExif(file, studyId, saveTime)
 
                                 notifyItemInserted()
 
@@ -268,10 +276,14 @@ abstract class AbstractCameraTrait :
     private fun showDeleteImageDialog(model: ImageAdapter.Model) {
 
         if (!isLocked) {
-            context.contentResolver.openInputStream(Uri.parse(model.uri)).use { input ->
+
+            DocumentsContract.getDocumentThumbnail(
+                context.contentResolver,
+                Uri.parse(model.uri), getDeletePreviewSize(), null
+            )?.let { bmp ->
 
                 val imageView = ImageView(context)
-                imageView.setImageBitmap(BitmapFactory.decodeStream(input))
+                imageView.setImageBitmap(bmp)
 
                 AlertDialog.Builder(context, R.style.AppAlertDialog)
                     .setTitle(R.string.delete_local_photo)
@@ -331,23 +343,7 @@ abstract class AbstractCameraTrait :
                         Uri.parse(it.value), getThumbnailSize(), null
                     )?.let { bmp ->
 
-                        model = ImageAdapter.Model(it.value, if (bmp.height > bmp.width) {
-
-                            val matrix = Matrix()
-
-                            matrix.postRotate(90f)
-
-                            Bitmap.createBitmap(
-                                bmp,
-                                0,
-                                0,
-                                bmp.width,
-                                bmp.height,
-                                matrix,
-                                true
-                            )
-
-                        } else bmp, brapiSynced)
+                        model = ImageAdapter.Model(it.value, bmp, brapiSynced)
 
                     }
 
