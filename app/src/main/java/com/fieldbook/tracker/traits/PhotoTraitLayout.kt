@@ -17,11 +17,13 @@ import androidx.camera.view.PreviewView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CameraActivity
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.views.CameraTraitSettingsView
+import org.threeten.bp.OffsetDateTime
 import java.io.File
 import java.util.concurrent.ExecutorService
 
@@ -267,7 +269,7 @@ class PhotoTraitLayout : CameraTrait {
                 currentTrait.format,
                 data,
                 currentRange,
-                org.phenoapps.androidlibrary.Utils.getDateTime(),
+                OffsetDateTime.now().format(internalTimeFormatter),
                 SaveState.SINGLE_SHOT
             )
         }
