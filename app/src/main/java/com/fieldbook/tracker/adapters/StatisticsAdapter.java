@@ -223,6 +223,12 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
      */
     public void exportCard(ViewHolder holder) {
 
+        CharSequence originalText = holder.year_text_view.getText();
+        if (originalText.equals(originActivity.getString(R.string.stats_tab_layout_total)))
+            holder.year_text_view.setText(originActivity.getString(R.string.stat_card_export_title_total));
+        else
+            holder.year_text_view.setText(String.format("%s %s", originActivity.getString(R.string.stat_card_export_title), originalText));
+
         Bitmap cardBitmap = Bitmap.createBitmap(holder.statisticsCard.getWidth(), holder.statisticsCard.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas cardCanvas = new Canvas(cardBitmap);
         cardCanvas.drawColor(Color.WHITE);
@@ -234,7 +240,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         Canvas logoCanvas = new Canvas(logoBitmap);
         drawable.setBounds(0, 0, logoCanvas.getWidth(), logoCanvas.getHeight());
         drawable.draw(logoCanvas);
-        cardCanvas.drawBitmap(logoBitmap, cardBitmap.getWidth() - logoBitmap.getWidth() - 10, 10, null); // setting the co-ordinates for the logo with a padding of 10dp
+        cardCanvas.drawBitmap(logoBitmap, cardBitmap.getWidth() - logoBitmap.getWidth() - 12, 12, null); // setting the co-ordinates for the logo with a padding of 10dp
 
         try {
             DocumentFile imagesDir = BaseDocumentTreeUtil.Companion.getDirectory(originActivity, R.string.dir_media_photos);
@@ -251,6 +257,8 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            holder.year_text_view.setText(originalText);
         }
     }
 

@@ -821,8 +821,7 @@
     <string name="warning_no_data">No data to display</string>
     <string name="stats_heatmap_title">Heatmap</string>
     <string name="stats_heatmap">View a heatmap of the collected observations</string>
-    <string name="stats_export">Long press on a card to export</string>
-    <string name="stats_loading">Loading stats...</string>
+    <string name="stats_loading">Loading…</string>
     <string name="stats_first_day">Scroll to the first day with a collected observation</string>
     <string name="stats_last_day">Scroll to the last day with a collected observation</string>
     <string name="stats_calendar_range">Select a date range to filter the displayed dates</string>
@@ -832,6 +831,9 @@
     <string name="stats_tab_layout_total">Total</string>
     <string name="stats_tab_layout_year">Year</string>
     <string name="stats_tab_layout_month">Month</string>
+
+    <string name="stat_card_export_title_total">Total Field Book Stats</string>
+    <string name="stat_card_export_title">Field Book Stats for</string>
 
     <string name="stat_title_fields">Fields</string>
     <string name="stat_title_entries">Entries</string>
