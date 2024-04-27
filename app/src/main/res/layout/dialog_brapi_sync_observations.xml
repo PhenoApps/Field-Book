@@ -10,21 +10,6 @@
     android:paddingRight="20dp"
     android:paddingBottom="5dp">
 
-
-
-
-    <TextView
-        android:id="@+id/studyNameLbl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="10dp"
-        android:text="@string/brapi_obs_header_name"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_medium"
-        android:textStyle="bold" />
-
     <TextView
         android:id="@+id/studyNameValue"
         android:layout_width="wrap_content"

@@ -7,14 +7,10 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.content.ContextWrapper
 import android.os.AsyncTask
-import android.os.Bundle
 import android.os.Handler
 import android.text.Html
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.Window
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import androidx.preference.PreferenceManager
@@ -55,13 +51,11 @@ class BrapiSyncObsDialog(context: Context, private val syncController: FieldSync
     private val importRunnable =
         Runnable { ImportRunnableTask(context, studyObservations, syncController).execute(0) }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
+    override fun show() {
         showDialog()
         setupUI()
+        modifyLayoutElements()
     }
-
     private fun showDialog() {
         val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(R.string.brapi_obs_header_name)
@@ -91,7 +85,7 @@ class BrapiSyncObsDialog(context: Context, private val syncController: FieldSync
         fieldNameLbl = dialogBrAPISyncObs?.findViewById(R.id.studyNameValue)
     }
 
-    override fun onStart() {
+    private fun modifyLayoutElements() {
         // Set our OK button to be disabled until we are finished loading
         saveBtn?.visibility = View.GONE
         //Hide the error message in case no observations are downloaded.

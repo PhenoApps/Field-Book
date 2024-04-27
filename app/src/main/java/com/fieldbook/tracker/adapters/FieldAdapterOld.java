@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.adapters;
 
 import android.app.AlertDialog;
-import android.util.Log;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -19,13 +18,11 @@ import android.widget.TextView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.FieldEditorActivityOld;
-import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
 import com.fieldbook.tracker.interfaces.FieldSyncController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
-import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.util.ArrayList;
