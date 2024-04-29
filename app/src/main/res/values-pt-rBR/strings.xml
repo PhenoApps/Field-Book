@@ -104,6 +104,9 @@
     <string name="act_field_editor_load_file_failed">Ocorreu um erro durante o carregamento do arquivo.</string>
     <string name="act_field_editor_file_open_failed">Arquivo falhou ao abrir.</string>
     <!-- Field Creator  -->
+    <string name="dialog_field_creator_ask_size">Por favor, escolha o nome e tamanho do campo.</string>
+    <string name="dialog_field_creator_ask_start_point">Por favor, escolha um ponto de partida de campo.</string>
+    <string name="dialog_field_creator_ask_pattern">Por favor, escolha um padrão de campo.</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">Linhas</string>
     <string name="dialog_field_creator_ask_columns_hint">Colunas</string>
@@ -189,6 +192,7 @@
     <string name="traits_format_text">Texto</string>
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_audio">Áudio</string>
+    <string name="traits_format_multicategorical">Multicat</string>
     <string name="traits_format_location">Localização</string>
     <string name="traits_format_gnss">GNSS</string>
     <string name="traits_format_barcode">Código de Barras</string>
@@ -196,6 +200,7 @@
     <string name="traits_format_usb_camera">Câmera USB</string>
     <string name="traits_format_go_pro_camera">GoPro</string>
     <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">Formato de Caractere</string>
     <string name="traits_create_name">Nome</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Padrão</string>
@@ -264,6 +269,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <string name="observation_info_trait_format">Formato de Caractere</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">Base de dados</string>
