@@ -3,6 +3,7 @@ package com.fieldbook.tracker.dialogs;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,7 +45,9 @@ public class DateRangePickerDialog extends DialogFragment {
 
         calendar.setCalendarListener(new CalendarListener() {
             @Override
-            public void onFirstDateSelected(@NonNull Calendar calendar) {
+            public void onFirstDateSelected(@NonNull Calendar start) {
+                heatmapStartRange = start;
+                heatmapEndRange = null;
             }
 
             @Override
@@ -57,13 +60,16 @@ public class DateRangePickerDialog extends DialogFragment {
         calendar.setSelectableDateRange(dateSelectorStartRange, dateSelectorEndRange);
 
         builder.setPositiveButton(R.string.dialog_ok, (dialogInterface1, id1) -> {
-            LocalDate start = LocalDate.of(heatmapStartRange.get(Calendar.YEAR), heatmapStartRange.get(Calendar.MONTH) + 1, heatmapStartRange.get(Calendar.DAY_OF_MONTH));
-            LocalDate end = LocalDate.of(heatmapEndRange.get(Calendar.YEAR), heatmapEndRange.get(Calendar.MONTH) + 1, heatmapEndRange.get(Calendar.DAY_OF_MONTH));
-            listener.onDateRangeSelected(start, end);
+            if (heatmapStartRange == null || heatmapEndRange == null) {
+                Toast.makeText(originActivity, R.string.warning_invalid_date_range, Toast.LENGTH_SHORT).show();
+            } else {
+                LocalDate start = LocalDate.of(heatmapStartRange.get(Calendar.YEAR), heatmapStartRange.get(Calendar.MONTH) + 1, heatmapStartRange.get(Calendar.DAY_OF_MONTH));
+                LocalDate end = LocalDate.of(heatmapEndRange.get(Calendar.YEAR), heatmapEndRange.get(Calendar.MONTH) + 1, heatmapEndRange.get(Calendar.DAY_OF_MONTH));
+                listener.onDateRangeSelected(start, end);
+            }
         });
 
-        final AlertDialog dialog = builder.create();
-        return dialog;
+        return builder.create();
     }
 
     public interface onDateRangeSelectedListener {
