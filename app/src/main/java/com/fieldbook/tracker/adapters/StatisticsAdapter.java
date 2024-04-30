@@ -54,16 +54,18 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
     private static final String MONTH_VIEW_CARD_TITLE_PATTERN ="MMMM yyyy";
     private final SimpleDateFormat yearMonthFormat;
     private final SimpleDateFormat monthViewCardTitle;
-    private final int intervalThreshold = 30;
+    private static final int intervalThreshold = 30;
     private Toast toast;
+    StatisticsActivity.ToggleVariable cardType;
 
-    public StatisticsAdapter(StatisticsActivity context, List<String> seasons) {
+    public StatisticsAdapter(StatisticsActivity context, List<String> seasons, StatisticsActivity.ToggleVariable cardType) {
         this.originActivity = context;
         this.database = originActivity.getDatabase();
         this.seasons = seasons;
         this.timeStampFormat = new SimpleDateFormat(TIME_STAMP_PATTERN, Locale.getDefault());
         this.yearMonthFormat = new SimpleDateFormat(YEAR_MONTH_PATTERN, Locale.getDefault());
         this.monthViewCardTitle = new SimpleDateFormat(MONTH_VIEW_CARD_TITLE_PATTERN, Locale.getDefault());
+        this.cardType = cardType;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -160,18 +162,20 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             }
         }
 
-        String cardTitle = seasons.get(position);
+        String cardTitle = "";
         Date date;
 
-        // e.g. '2024-03'
-        if (cardTitle.length() == 7) {
-            try {
-                date = yearMonthFormat.parse(cardTitle);
-                cardTitle = monthViewCardTitle.format(date);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-        } else if (cardTitle.length() == 0) cardTitle = originActivity.getString(R.string.stats_tab_layout_total); // For Total Statistics, an empty string is sent
+        switch (cardType) {
+            case TOTAL: cardTitle = originActivity.getString(R.string.stats_tab_layout_total); break;
+            case YEAR: cardTitle = seasons.get(position); break;
+            case MONTH:
+                try {
+                    date = yearMonthFormat.parse(seasons.get(position));
+                    cardTitle = monthViewCardTitle.format(date);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+        }
 
         holder.year_text_view.setText(cardTitle);
 
@@ -224,7 +228,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
     public void exportCard(ViewHolder holder) {
 
         CharSequence originalText = holder.year_text_view.getText();
-        if (originalText.equals(originActivity.getString(R.string.stats_tab_layout_total)))
+        if (cardType == StatisticsActivity.ToggleVariable.TOTAL)
             holder.year_text_view.setText(originActivity.getString(R.string.stat_card_export_title_total));
         else
             holder.year_text_view.setText(String.format("%s %s", originActivity.getString(R.string.stat_card_export_title), originalText));

@@ -54,7 +54,9 @@ public class StatisticsCalendarFragment extends Fragment implements DateRangePic
     DateTimeFormatter timeStampFormat;
     private static final String TIME_STAMP_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
     private static final String MONTH_HEADER_PATTERN ="MMMM yyyy";
-
+    private static final int THRESHOLD_LOW = 1;
+    private static final int THRESHOLD_MEDIUM = 5;
+    private static final int THRESHOLD_HIGH = 8;
 
     public StatisticsCalendarFragment(StatisticsActivity statisticsActivity) {
         this.originActivity = statisticsActivity;
@@ -273,18 +275,18 @@ public class StatisticsCalendarFragment extends Fragment implements DateRangePic
 
     /**
      * Returns the color for the heatmap based on the number of observations
-     * TODO: Change the logic of assigning colors
+     * TODO: Change the threshold values (and possibly colors)
      * @return ID of the color
      */
     private int getColorForObservations(int observations) {
-        if (observations == 1) {
-            return 0xFFb2f2bb;
-        } else if (observations < 5) {
-            return 0xFF69db7c;
-        } else if (observations < 8) {
-            return 0xFF40c057;
+        if (observations == THRESHOLD_LOW) {
+            return R.color.heatmap_color_low;
+        } else if (observations < THRESHOLD_MEDIUM) {
+            return R.color.heatmap_color_medium;
+        } else if (observations < THRESHOLD_HIGH) {
+            return R.color.heatmap_color_high;
         } else {
-            return 0xFF2f9e44;
+            return R.color.heatmap_color_max;
         }
     }
 }

@@ -36,8 +36,13 @@ public class StatisticsActivity extends ThemedActivity {
     DataHelper database;
     List<String> seasons = new ArrayList<>();
     RecyclerView rvStatisticsCard;
-    private int toggleVariable = 0; // 0: Total, 1: Year, 2: Month
+    private ToggleVariable toggleVariable = ToggleVariable.TOTAL;
     AlertDialog loadingDialog;
+    public enum ToggleVariable {
+        TOTAL,
+        YEAR,
+        MONTH
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +71,9 @@ public class StatisticsActivity extends ThemedActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 switch (tab.getPosition()) {
-                    case 0: toggleVariable = 0; break;
-                    case 1: toggleVariable = 1; break;
-                    case 2: toggleVariable = 2; break;
+                    case 0: toggleVariable = ToggleVariable.TOTAL; break;
+                    case 1: toggleVariable = ToggleVariable.YEAR; break;
+                    case 2: toggleVariable = ToggleVariable.MONTH; break;
                 }
                 loadData();
             }
@@ -131,7 +136,7 @@ public class StatisticsActivity extends ThemedActivity {
 
     public void setSeasons() {
 
-        if (toggleVariable == 0) {
+        if (toggleVariable == ToggleVariable.TOTAL) {
             seasons.clear();
             seasons.add("");
         } else {
@@ -140,7 +145,7 @@ public class StatisticsActivity extends ThemedActivity {
             ObservationModel[] observations = database.getAllObservations();
             for (ObservationModel observation : observations) {
                 String timeStamp = observation.getObservation_time_stamp();
-                if (toggleVariable == 1)
+                if (toggleVariable == ToggleVariable.YEAR)
                     uniqueSeasons.add(timeStamp.substring(0, 4));
                 else
                     uniqueSeasons.add(timeStamp.substring(0, 7));
@@ -148,7 +153,7 @@ public class StatisticsActivity extends ThemedActivity {
 
             seasons = new ArrayList<>(uniqueSeasons);
         }
-        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons));
+        rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons, toggleVariable));
 
         // Dismiss the dialog after the recycler view loads all its children
         rvStatisticsCard.post(() -> loadingDialog.dismiss());
