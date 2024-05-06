@@ -408,20 +408,12 @@ class RangeBoxView : ConstraintLayout {
         if (firstName.isNotEmpty() && secondName.isNotEmpty() && uniqueName.isNotEmpty()) {
             cRange = controller.getDatabase().getRange(firstName, secondName, uniqueName, id)
 
-            // update progress bar
+            // RangeID is a sorted list of obs unit ids for the current field.
+            // Set bar maximum to number of obs units in the field
+            // Set bar progress to position of current obs unit within the sorted list
             plotsProgressBar.max = rangeID.size
-            // if there are two fields each having 200 plots
-            // the argument passed to this method would range from
-            // [1, 200] for field1
-            // [201, 400] for field2
-            // rangeID[0] would represent the id of the first plot for a field
-            // therefore, subtracted rangeID[0] from id
-            plotsProgressBar.progress = id - rangeID[0]
+            plotsProgressBar.progress = rangeID.indexOf(id)
 
-            // did not do id % rangeID.size for the progress above
-            // to handle the case where sizes of field1 and field2 are different
-            // eg. [1, 200], [201, 500]
-            // using % would return a wrong value
         } else {
             //TODO switch to Utils
             Toast.makeText(
