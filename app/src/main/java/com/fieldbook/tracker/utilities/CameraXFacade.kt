@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.utilities
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCharacteristics
 import android.util.Log
@@ -12,6 +13,8 @@ import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
@@ -46,8 +49,14 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
     }
 
     val preview by lazy {
-        Preview.Builder()
-            .setTargetResolution(DEFAULT_CAMERAX_PREVIEW_SIZE)
+
+        val resolutionStrategy = ResolutionStrategy(DEFAULT_CAMERAX_PREVIEW_SIZE, ResolutionStrategy.FALLBACK_RULE_NONE)
+
+        val resolutionSelector = ResolutionSelector.Builder()
+            .setResolutionStrategy(resolutionStrategy)
+            .build()
+
+        Preview.Builder().setResolutionSelector(resolutionSelector)
             .build()
     }
 
@@ -93,8 +102,13 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
 
             if (targetResolution != null) {
 
-                builder.setTargetResolution(targetResolution)
+                val resolutionStrategy = ResolutionStrategy(targetResolution, ResolutionStrategy.FALLBACK_RULE_NONE)
+
+                val resolutionSelector = ResolutionSelector.Builder()
+                    .setResolutionStrategy(resolutionStrategy)
                     .build()
+
+                builder.setResolutionSelector(resolutionSelector)
 
             }
 
@@ -124,22 +138,30 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
         unbind()
 
         val builder = ImageCapture.Builder()
+        val prevBuilder = Preview.Builder()
 
         if (targetResolution != null) {
 
-            builder.setTargetResolution(targetResolution)
+            val resolutionStrategy = ResolutionStrategy(targetResolution, ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER)
+
+            val resolutionSelector = ResolutionSelector.Builder()
+                .setResolutionStrategy(resolutionStrategy)
                 .build()
 
+            builder.setResolutionSelector(resolutionSelector)
+            prevBuilder.setResolutionSelector(resolutionSelector)
         }
 
         val imageCapture = builder.build()
 
-        preview.setSurfaceProvider(previewView?.surfaceProvider)
+        val p = prevBuilder.build()
+
+        p.setSurfaceProvider(previewView?.surfaceProvider)
 
         val camera = cameraXInstance.get().bindToLifecycle(
             context as LifecycleOwner,
             frontSelector,
-            preview,
+            p,
             imageCapture
         )
 

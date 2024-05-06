@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
@@ -15,7 +14,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.camera.view.PreviewView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -56,12 +55,7 @@ abstract class AbstractCameraTrait :
 
     protected var activity: Activity? = null
     protected var connectBtn: FloatingActionButton? = null
-    protected var captureBtn: FloatingActionButton? = null
-    protected var settingsBtn: FloatingActionButton? = null
-    protected var previewView: PreviewView? = null
-    protected var imageView: ImageView? = null
     protected var recyclerView: RecyclerView? = null
-    protected var expandBtn: FloatingActionButton? = null
 
     protected val background = CoroutineScope(Dispatchers.IO)
     protected val ui = CoroutineScope(Dispatchers.Main)
@@ -69,8 +63,8 @@ abstract class AbstractCameraTrait :
     open val deletePreviewWidth = 512
     open val deletePreviewHeight = 512
 
-    open val thumbnailWidth = 256
-    open val thumbnailHeight = 256
+    open val thumbnailWidth = 480
+    open val thumbnailHeight = 640
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -101,19 +95,10 @@ abstract class AbstractCameraTrait :
     override fun init(act: Activity) {
 
         connectBtn = act.findViewById(R.id.camera_fragment_connect_btn)
-        captureBtn = act.findViewById(R.id.camera_fragment_capture_btn)
-        imageView = act.findViewById(R.id.trait_camera_iv)
         recyclerView = act.findViewById(R.id.camera_fragment_rv)
-        settingsBtn = act.findViewById(R.id.camera_fragment_settings_btn)
-        previewView = act.findViewById(R.id.trait_camera_pv)
-        expandBtn = act.findViewById(R.id.trait_camera_expand_btn)
         recyclerView?.adapter = ImageAdapter(this)
 
         activity = act
-
-        settingsBtn?.setOnClickListener {
-            showSettings()
-        }
     }
 
     abstract fun showSettings()
@@ -223,6 +208,12 @@ abstract class AbstractCameraTrait :
                             }
                         }
 
+                        ui.launch {
+
+                            (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+
+                        }
+
                     } else if (saveState in setOf(SaveState.SAVING, SaveState.COMPLETE)) {
 
                         dir.findFile(name)?.let { file ->
@@ -302,7 +293,7 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    private fun scrollToLast() {
+    fun scrollToLast() {
 
         try {
 
@@ -343,7 +334,11 @@ abstract class AbstractCameraTrait :
                         Uri.parse(it.value), getThumbnailSize(), null
                     )?.let { bmp ->
 
-                        model = ImageAdapter.Model(it.value, bmp, brapiSynced)
+                        model = ImageAdapter.Model(
+                            type = ImageAdapter.Type.IMAGE,
+                            uri = it.value,
+                            bmp = bmp,
+                            brapiSynced = brapiSynced)
 
                     }
 
@@ -355,14 +350,57 @@ abstract class AbstractCameraTrait :
                 }
 
                 model
-            }
+
+            }.toMutableList()
+
+            //add preview image adapter item
+            thumbnailModels.add(
+                ImageAdapter.Model(
+                    type = ImageAdapter.Type.PREVIEW
+                )
+            )
 
             ui.launch {
 
                 (recyclerView?.adapter as? ImageAdapter)?.submitList(thumbnailModels)
 
+                setRecyclerViewToEndOfScreen()
+//                if (thumbnailModels.size == 1) {
+//
+//                    centerRecyclerView()
+//
+//                } else {
+//
+//                    setRecyclerViewToEndOfScreen()
+//                }
+
                 scrollToLast()
             }
+        }
+    }
+
+    //use constraint layout params to center recycler view on the screen
+    private fun centerRecyclerView() {
+
+        recyclerView?.layoutParams = (recyclerView?.layoutParams as? ConstraintLayout.LayoutParams)?.apply {
+            this.width = ConstraintLayout.LayoutParams.WRAP_CONTENT
+            topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+            bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+        }
+    }
+
+    //use constraint layout params to attach recycler view to end of the screen
+    private fun setRecyclerViewToEndOfScreen() {
+
+        recyclerView?.layoutParams = (recyclerView?.layoutParams as? ConstraintLayout.LayoutParams)?.apply {
+            this.width = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT
+            topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+            bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            horizontalBias = 1.0f
         }
     }
 
@@ -453,7 +491,7 @@ abstract class AbstractCameraTrait :
                 DocumentFile.fromSingleUri(context, Uri.parse(observation.value))
                     ?.let { image ->
 
-                        if (model.brapiSynced) {
+                        if (model.brapiSynced == true) {
 
                             image.delete()
 

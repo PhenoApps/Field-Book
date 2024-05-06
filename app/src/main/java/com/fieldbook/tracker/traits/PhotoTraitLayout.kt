@@ -4,8 +4,11 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.AttributeSet
+import android.util.Log
 import android.util.Size
 import android.view.View
 import androidx.annotation.OptIn
@@ -17,6 +20,7 @@ import androidx.camera.view.PreviewView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CameraActivity
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.adapters.ImageAdapter
 import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -41,6 +45,7 @@ class PhotoTraitLayout : CameraTrait {
     }
 
     private var supportedResolutions: List<Size> = listOf()
+    private var previewViewHolder: ImageAdapter.PreviewViewHolder? = null
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -63,7 +68,7 @@ class PhotoTraitLayout : CameraTrait {
 
     private fun setupCaptureButton(takePictureCallback: () -> Unit) {
 
-        captureBtn?.setOnClickListener {
+        previewViewHolder?.shutterButton?.setOnClickListener {
 
             if (!isLocked) {
 
@@ -84,17 +89,40 @@ class PhotoTraitLayout : CameraTrait {
 
     private fun setup() {
 
-        captureBtn?.visibility = View.VISIBLE
+        previewViewHolder = getPreviewViewHolder()
+
+        //we are limited to having everything extend linear layout, there are some cases
+        //where the background thread has not loaded all the views and may be null,
+        //so reload until we have the preview model
+        if (previewViewHolder == null) {
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                setup()
+            }, 500)
+
+            return
+
+        } else {
+
+            scrollToLast()
+        }
+
+        Log.d(TAG, "setup: $previewViewHolder")
+
+        previewViewHolder?.shutterButton?.visibility = View.VISIBLE
+        previewViewHolder?.settingsButton?.visibility = View.VISIBLE
+        previewViewHolder?.settingsButton?.isEnabled = true
+        previewViewHolder?.settingsButton?.setOnClickListener {
+            showSettings()
+        }
+
         connectBtn?.visibility = View.GONE
-        settingsBtn?.visibility = View.VISIBLE
 
         setupCaptureButton {
 
             takePicture()
 
         }
-
-        settingsBtn?.isEnabled = false
 
         bindCameraForInformation()
 
@@ -107,7 +135,7 @@ class PhotoTraitLayout : CameraTrait {
 
             supportedResolutions = sizes
 
-            settingsBtn?.isEnabled = true
+            previewViewHolder?.settingsButton?.isEnabled = true
 
         }
 
@@ -117,8 +145,8 @@ class PhotoTraitLayout : CameraTrait {
 
     private fun bindNoPreviewLifecycle() {
 
-        previewView?.visibility = View.GONE
-        expandBtn?.visibility = View.GONE
+        previewViewHolder?.previewView?.visibility = View.GONE
+        previewViewHolder?.embiggenButton?.visibility = View.GONE
 
         try {
 
@@ -156,13 +184,13 @@ class PhotoTraitLayout : CameraTrait {
      */
     private fun bindPreviewLifecycle() {
 
-        previewView?.visibility = View.VISIBLE
+        previewViewHolder?.previewView?.visibility = View.VISIBLE
 
-        previewView?.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+        previewViewHolder?.previewView?.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
 
-        expandBtn?.visibility = View.VISIBLE
+        previewViewHolder?.embiggenButton?.visibility = View.VISIBLE
 
-        expandBtn?.setOnClickListener {
+        previewViewHolder?.embiggenButton?.setOnClickListener {
 
             launchCameraX()
 
@@ -172,7 +200,10 @@ class PhotoTraitLayout : CameraTrait {
 
             val resolution = getSupportedResolutionByPreferences()
 
-            controller.getCameraXFacade().bindPreview(previewView, resolution) { camera, executor, capture ->
+            controller.getCameraXFacade().bindPreview(
+                previewViewHolder?.previewView,
+                resolution
+            ) { camera, executor, capture ->
 
                 setupCaptureUi(camera, executor, capture)
             }
@@ -234,9 +265,9 @@ class PhotoTraitLayout : CameraTrait {
 
     private fun setupSystemCameraMode() {
 
-        previewView?.visibility = View.GONE
+        previewViewHolder?.previewView?.visibility = View.GONE
 
-        expandBtn?.visibility = View.GONE
+        previewViewHolder?.embiggenButton?.visibility = View.GONE
 
         controller.getCameraXFacade().unbind()
 

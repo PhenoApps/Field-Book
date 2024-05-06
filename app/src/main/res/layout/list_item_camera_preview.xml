@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="4dp"
+    android:background="@drawable/cell"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <androidx.camera.view.PreviewView
+        tools:visibility="visible"
+        android:visibility="gone"
+        android:id="@+id/trait_camera_pv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintDimensionRatio="H,3:4"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/camera_fragment_capture_btn"/>
+
+    <!-- todo on child camera branch merges, hook this into implementations -->
+    <ImageView
+        android:visibility="gone"
+        android:id="@+id/trait_camera_iv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        tools:src="@raw/chip"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/camera_fragment_capture_btn"
+        android:contentDescription="@string/trait_camera_preview_content_description" />
+
+    <!-- Trevor's 'embiggen' button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        style="@style/FloatingActionButtonStyle.SmallTraitButtons"
+        android:id="@+id/trait_camera_expand_btn"
+        android:layout_width="@dimen/fb_trait_fab_size_small"
+        android:layout_height="@dimen/fb_trait_fab_size_small"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:src="@drawable/arrow_expand"
+        app:layout_constraintTop_toTopOf="@id/trait_camera_pv"
+        app:layout_constraintBottom_toBottomOf="@id/trait_camera_pv"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintEnd_toEndOf="@id/trait_camera_pv"
+        android:contentDescription="@string/trait_camera_capture_content_description" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        style="@style/FloatingActionButtonStyle.SmallTraitButtons"
+        android:id="@+id/camera_fragment_settings_btn"
+        android:layout_width="@dimen/fb_trait_fab_size_small"
+        android:layout_height="@dimen/fb_trait_fab_size_small"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:src="@drawable/ic_nav_drawer_settings"
+        app:layout_constraintTop_toTopOf="@id/camera_fragment_capture_btn"
+        app:layout_constraintEnd_toStartOf="@id/camera_fragment_capture_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/camera_fragment_capture_btn"
+        android:contentDescription="@string/trait_camera_capture_content_description" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        style="@style/FloatingActionButtonStyle.TraitButtons"
+        android:id="@+id/camera_fragment_capture_btn"
+        android:layout_width="@dimen/fb_trait_fab_size"
+        android:layout_height="@dimen/fb_trait_fab_size"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:src="@drawable/camera_24px"
+        app:layout_constraintTop_toBottomOf="@id/trait_camera_pv"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:contentDescription="@string/trait_camera_capture_content_description" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

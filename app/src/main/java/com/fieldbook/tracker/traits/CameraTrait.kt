@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.Toast
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.adapters.ImageAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.RuntimeException
 
@@ -26,6 +27,20 @@ open class CameraTrait : AbstractCameraTrait {
 
     override fun type(): String {
         throw RuntimeException()
+    }
+
+    fun getPreviewViewHolder(): ImageAdapter.PreviewViewHolder? {
+
+        var returnHolder: ImageAdapter.PreviewViewHolder? = null
+
+        (recyclerView?.adapter as? ImageAdapter)?.currentList?.let { list ->
+
+            returnHolder =
+                recyclerView?.findViewHolderForAdapterPosition(list.size - 1) as? ImageAdapter.PreviewViewHolder
+
+        }
+
+        return returnHolder
     }
 }
 

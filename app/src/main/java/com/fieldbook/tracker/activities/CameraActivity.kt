@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities
 
 import android.app.AlertDialog
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Size
 import android.widget.ImageButton
@@ -47,6 +48,9 @@ class CameraActivity : ThemedActivity() {
         setContentView(R.layout.activity_camera)
 
         previewView = findViewById(R.id.act_camera_pv)
+
+        previewView.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+
         titleTextView = findViewById(R.id.act_camera_title_tv)
         shutterButton = findViewById(R.id.camerax_capture_btn)
         settingsBtn = findViewById(R.id.camerax_settings_btn)
@@ -129,7 +133,9 @@ class CameraActivity : ThemedActivity() {
 
             val resolution = getSupportedResolutionByPreferences()
 
-            cameraXFacade.bindPreview(previewView, resolution) { camera, executor, capture ->
+            cameraXFacade.bindPreview(
+                previewView, resolution
+            ) { camera, executor, capture ->
 
                 setupCaptureUi(camera, executor, capture)
             }

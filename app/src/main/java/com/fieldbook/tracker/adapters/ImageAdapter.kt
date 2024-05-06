@@ -6,20 +6,37 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import androidx.camera.view.PreviewView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import org.phenoapps.androidlibrary.R
+import com.fieldbook.tracker.R
 
 
 /**
  * Reference:
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
+ *
+ * The ImageAdapter is used in the abstract camera trait view. It is used to display a horizontal
+ * scrolling list of images, each with a close button to delete the image. The last viewable list item
+ * is a camerax preview view or an image view, depending on the actual implementation. By default, for system/camerax
+ * the preview view is used, which has a shutter button, a settings button, and an 'embiggen' button that
+ * starts a fullscreen capture.
  */
 class ImageAdapter(private val listener: ImageItemHandler) :
         ListAdapter<ImageAdapter.Model, ImageAdapter.ViewHolder>(DiffCallback()) {
 
-    data class Model(var uri: String, var bmp: Bitmap, var brapiSynced: Boolean)
+    enum class Type {
+        IMAGE,
+        PREVIEW
+    }
+
+    data class Model(
+        val type: Type = Type.IMAGE,
+        var uri: String? = null,
+        var bmp: Bitmap? = null,
+        var brapiSynced: Boolean? = null
+    )
 
     interface ImageItemHandler {
 
@@ -29,9 +46,15 @@ class ImageAdapter(private val listener: ImageItemHandler) :
 
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    abstract inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        abstract fun bind(model: Model)
+    }
+
+    inner class ImageViewHolder(view: View) : ViewHolder(view) {
+
         val imageView: ImageView = view.findViewById(R.id.list_item_image_iv)
-        private val closeButton: ImageButton = view.findViewById(R.id.list_item_image_close_btn)
+        val closeButton: ImageButton = view.findViewById(R.id.list_item_image_close_btn)
+
         init {
             // Define click listener for the ViewHolder's View.
             view.setOnClickListener {
@@ -42,15 +65,54 @@ class ImageAdapter(private val listener: ImageItemHandler) :
                 listener.onItemDeleted(view.tag as Model)
             }
         }
+
+        override fun bind(model: Model) {
+
+            itemView.tag = model
+            imageView.setImageBitmap(model.bmp)
+        }
+    }
+
+    inner class PreviewViewHolder(view: View) : ViewHolder(view) {
+
+        val previewView: PreviewView = view.findViewById(R.id.trait_camera_pv)
+        val embiggenButton: ImageButton = view.findViewById(R.id.trait_camera_expand_btn)
+        val settingsButton: ImageButton = view.findViewById(R.id.camera_fragment_settings_btn)
+        val shutterButton: ImageButton = view.findViewById(R.id.camera_fragment_capture_btn)
+
+        override fun bind(model: Model) {
+
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return currentList[position].type.ordinal
     }
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        // Create a new view, which defines the UI of the list item
-        val view = LayoutInflater.from(viewGroup.context)
-                .inflate(R.layout.list_item_image, viewGroup, false)
 
-        return ViewHolder(view)
+        // Create a new view, which defines the UI of the list item
+        return when (viewType) {
+
+            //inflate and create the preview view list item
+            Type.PREVIEW.ordinal -> {
+
+                val view = LayoutInflater.from(viewGroup.context)
+                    .inflate(R.layout.list_item_camera_preview, viewGroup, false)
+
+                PreviewViewHolder(view)
+            }
+
+            else -> {
+
+                //inflate and create the image view list item
+                val view = LayoutInflater.from(viewGroup.context)
+                    .inflate(R.layout.list_item_image, viewGroup, false)
+
+                ImageViewHolder(view)
+            }
+        }
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -59,8 +121,7 @@ class ImageAdapter(private val listener: ImageItemHandler) :
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         with(currentList[position]) {
-            viewHolder.itemView.tag = this
-            viewHolder.imageView.setImageBitmap(bmp)
+            viewHolder.bind(this)
         }
     }
 
@@ -70,11 +131,11 @@ class ImageAdapter(private val listener: ImageItemHandler) :
     class DiffCallback : DiffUtil.ItemCallback<Model>() {
 
         override fun areItemsTheSame(oldItem: Model, newItem: Model): Boolean {
-            return oldItem == newItem && oldItem == oldItem
+            return oldItem == newItem
         }
 
         override fun areContentsTheSame(oldItem: Model, newItem: Model): Boolean {
-            return oldItem == newItem && oldItem == oldItem
+            return oldItem == newItem
         }
     }
 }
