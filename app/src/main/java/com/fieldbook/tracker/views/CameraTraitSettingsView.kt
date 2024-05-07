@@ -107,7 +107,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
             setupSettingsModeBasedOnPreference(systemCameraRg.checkedRadioButtonId)
         }
 
-        systemCameraRg.check(prefs.getInt(GeneralKeys.CAMERA_SYSTEM, R.id.view_trait_photo_settings_camera_system_rb))
+        systemCameraRg.check(prefs.getInt(GeneralKeys.CAMERA_SYSTEM, R.id.view_trait_photo_settings_camera_custom_rb))
 
         setupSettingsModeBasedOnPreference(systemCameraRg.checkedRadioButtonId)
     }
@@ -119,14 +119,13 @@ open class CameraTraitSettingsView: ConstraintLayout {
             prefs.edit().putBoolean(GeneralKeys.CAMERA_SYSTEM_PREVIEW, isChecked).apply()
         }
 
-        previewCb.isChecked = prefs.getBoolean(GeneralKeys.CAMERA_SYSTEM_PREVIEW, false)
+        previewCb.isChecked = prefs.getBoolean(GeneralKeys.CAMERA_SYSTEM_PREVIEW, true)
     }
 
     private fun setupResolutionGroup() {
 
         resolutionGroup.setOnCheckedChangeListener { group, checkedId ->
 
-            println(checkedId)
             prefs.edit().putInt(GeneralKeys.CAMERA_RESOLUTION, checkedId).apply()
 
         }

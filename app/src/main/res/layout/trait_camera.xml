@@ -15,7 +15,7 @@
         android:id="@+id/camera_fragment_cv">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:orientation="horizontal"
@@ -25,9 +25,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/camera_fragment_capture_btn"
             app:layout_constraintVertical_bias="0"
-            app:layout_constraintHorizontal_bias="1.0"/>
+            app:layout_constraintHorizontal_bias="0.5"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             style="@style/FloatingActionButtonStyle.TraitButtons"
@@ -41,6 +41,36 @@
             app:layout_constraintTop_toBottomOf="@id/camera_fragment_rv"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.SmallTraitButtons"
+            android:id="@+id/camera_fragment_settings_btn"
+            android:layout_width="@dimen/fb_trait_fab_size_small"
+            android:layout_height="@dimen/fb_trait_fab_size_small"
+            android:layout_margin="8dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:src="@drawable/ic_nav_drawer_settings"
+            app:layout_constraintTop_toTopOf="@id/camera_fragment_capture_btn"
+            app:layout_constraintEnd_toStartOf="@id/camera_fragment_capture_btn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/camera_fragment_capture_btn"
+            android:contentDescription="@string/trait_camera_capture_content_description" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
+            android:id="@+id/camera_fragment_capture_btn"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
+            android:layout_margin="8dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:src="@drawable/camera_24px"
+            app:layout_constraintTop_toBottomOf="@id/camera_fragment_rv"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:contentDescription="@string/trait_camera_capture_content_description" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

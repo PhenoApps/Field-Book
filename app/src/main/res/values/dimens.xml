@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- portrait-relative image preview sizes for camera trait recycler view, these should be 4:3-->
+    <dimen name="camera_preview_width">230dp</dimen>
+    <dimen name="camera_preview_height">300dp</dimen>
+
     <!-- text sizes -->
     <!-- regular text -->
     <dimen name="text_size_small">14sp</dimen>

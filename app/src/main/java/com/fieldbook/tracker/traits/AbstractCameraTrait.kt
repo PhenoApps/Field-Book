@@ -12,9 +12,9 @@ import android.os.Build
 import android.provider.DocumentsContract
 import android.util.AttributeSet
 import android.util.Log
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,9 +31,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import org.phenoapps.androidlibrary.Utils
-import java.io.FileNotFoundException
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -53,18 +54,22 @@ abstract class AbstractCameraTrait :
         SINGLE_SHOT, NEW, SAVING, COMPLETE
     }
 
+    class RightToLeftReversedLinearLayoutManager(context: Context) :
+        LinearLayoutManager(context, HORIZONTAL, true) {
+        override fun isLayoutRTL(): Boolean {
+            return true // This will start the layout from the right
+        }
+    }
+
     protected var activity: Activity? = null
     protected var connectBtn: FloatingActionButton? = null
     protected var recyclerView: RecyclerView? = null
+    protected var settingsButton: ImageButton? = null
+    protected var shutterButton: ImageButton? = null
 
+    private var loader = CoroutineScope(Dispatchers.IO)
     protected val background = CoroutineScope(Dispatchers.IO)
     protected val ui = CoroutineScope(Dispatchers.Main)
-
-    open val deletePreviewWidth = 512
-    open val deletePreviewHeight = 512
-
-    open val thumbnailWidth = 480
-    open val thumbnailHeight = 640
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -96,7 +101,12 @@ abstract class AbstractCameraTrait :
 
         connectBtn = act.findViewById(R.id.camera_fragment_connect_btn)
         recyclerView = act.findViewById(R.id.camera_fragment_rv)
-        recyclerView?.adapter = ImageAdapter(this)
+        settingsButton = act.findViewById(R.id.camera_fragment_settings_btn)
+        shutterButton = act.findViewById(R.id.camera_fragment_capture_btn)
+
+        recyclerView?.adapter = ImageAdapter(this, getThumbnailSize())
+
+        recyclerView?.layoutManager = RightToLeftReversedLinearLayoutManager(context)
 
         activity = act
     }
@@ -105,9 +115,14 @@ abstract class AbstractCameraTrait :
 
     abstract fun onSettingsChanged()
 
-    open fun getDeletePreviewSize() = Point(deletePreviewWidth, deletePreviewHeight)
+    open fun getThumbnailSize(): Point {
 
-    open fun getThumbnailSize() = Point(thumbnailWidth, thumbnailHeight)
+        //get thumbnail size from camera dimension resources
+        val thumbnailWidth = resources.getDimensionPixelSize(R.dimen.camera_preview_width)
+        val thumbnailHeight = resources.getDimensionPixelSize(R.dimen.camera_preview_height)
+
+        return Point(thumbnailWidth, thumbnailHeight)
+    }
 
     protected fun saveJpegToStorage(
         format: String,
@@ -248,19 +263,27 @@ abstract class AbstractCameraTrait :
 
         if (!isLocked) {
 
-            (recyclerView?.layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()
-                ?.let { index ->
+            val size = (recyclerView?.adapter as? ImageAdapter)?.currentList?.size ?: 0
+            val lm = recyclerView?.layoutManager as? LinearLayoutManager
 
-                    if (index > -1) {
+            val firstVisible = lm?.findFirstVisibleItemPosition()
+            val firstFullVisible = lm?.findFirstCompletelyVisibleItemPosition()
 
-                        (recyclerView?.adapter as? ImageAdapter)?.currentList?.get(index)
-                            ?.let { model ->
+            var position = if (firstFullVisible == -1) firstVisible else firstFullVisible
 
-                                showDeleteImageDialog(model)
+            //get previous position if the first visible is preview
+            position = if (position == size - 1) position - 1 else position
 
-                            }
+            //ensure position is within array bounds
+            if (position != null && position in 0 until size - 1) {
+
+                (recyclerView?.adapter as? ImageAdapter)?.currentList?.get(position)
+                    ?.let { model ->
+
+                        showDeleteImageDialog(model)
+
                     }
-                }
+            }
         }
     }
 
@@ -270,7 +293,7 @@ abstract class AbstractCameraTrait :
 
             DocumentsContract.getDocumentThumbnail(
                 context.contentResolver,
-                Uri.parse(model.uri), getDeletePreviewSize(), null
+                Uri.parse(model.uri), getThumbnailSize(), null
             )?.let { bmp ->
 
                 val imageView = ImageView(context)
@@ -312,95 +335,53 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    private fun loadAdapterItems() {
+    protected fun loadAdapterItems() {
 
         val studyId = collectActivity.studyId
         val plot = collectActivity.observationUnit
         val traitId = currentTrait.id
         val rep = collectActivity.rep
 
-        background.launch {
+        loader.cancel()
+        loader = CoroutineScope(Dispatchers.IO)
+
+        loader.launch {
 
             val thumbnailModels = getImageObservations().mapNotNull {
 
+                //check if coroutine has canceled
+                yield()
+
                 val brapiSynced = database.isBrapiSynced(studyId, plot, traitId, rep)
 
-                var model: ImageAdapter.Model? = null
-
-                try {
-
-                    DocumentsContract.getDocumentThumbnail(
-                        context.contentResolver,
-                        Uri.parse(it.value), getThumbnailSize(), null
-                    )?.let { bmp ->
-
-                        model = ImageAdapter.Model(
-                            type = ImageAdapter.Type.IMAGE,
-                            uri = it.value,
-                            bmp = bmp,
-                            brapiSynced = brapiSynced)
-
-                    }
-
-                } catch (f: FileNotFoundException) {
-
-                    f.printStackTrace()
-
-                    model = null
-                }
-
-                model
+                ImageAdapter.Model(
+                    type = ImageAdapter.Type.IMAGE,
+                    uri = it.value,
+                    brapiSynced = brapiSynced)
 
             }.toMutableList()
 
-            //add preview image adapter item
-            thumbnailModels.add(
-                ImageAdapter.Model(
-                    type = ImageAdapter.Type.PREVIEW
+            //check that the current preferences is set to default and add the preview
+            if (preferences.getInt(
+                    GeneralKeys.CAMERA_SYSTEM,
+                    R.id.view_trait_photo_settings_camera_custom_rb
+                ) != R.id.view_trait_photo_settings_camera_system_rb
+            ) {
+
+                //add preview image adapter item
+                thumbnailModels.add(
+                    ImageAdapter.Model(
+                        type = ImageAdapter.Type.PREVIEW
+                    )
                 )
-            )
+            }
 
             ui.launch {
 
                 (recyclerView?.adapter as? ImageAdapter)?.submitList(thumbnailModels)
 
-                setRecyclerViewToEndOfScreen()
-//                if (thumbnailModels.size == 1) {
-//
-//                    centerRecyclerView()
-//
-//                } else {
-//
-//                    setRecyclerViewToEndOfScreen()
-//                }
-
                 scrollToLast()
             }
-        }
-    }
-
-    //use constraint layout params to center recycler view on the screen
-    private fun centerRecyclerView() {
-
-        recyclerView?.layoutParams = (recyclerView?.layoutParams as? ConstraintLayout.LayoutParams)?.apply {
-            this.width = ConstraintLayout.LayoutParams.WRAP_CONTENT
-            topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-            bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
-            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-        }
-    }
-
-    //use constraint layout params to attach recycler view to end of the screen
-    private fun setRecyclerViewToEndOfScreen() {
-
-        recyclerView?.layoutParams = (recyclerView?.layoutParams as? ConstraintLayout.LayoutParams)?.apply {
-            this.width = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT
-            topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-            bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
-            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-            horizontalBias = 1.0f
         }
     }
 

@@ -8,7 +8,6 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.util.AttributeSet
-import android.util.Log
 import android.util.Size
 import android.view.View
 import androidx.annotation.OptIn
@@ -68,7 +67,7 @@ class PhotoTraitLayout : CameraTrait {
 
     private fun setupCaptureButton(takePictureCallback: () -> Unit) {
 
-        previewViewHolder?.shutterButton?.setOnClickListener {
+        shutterButton?.setOnClickListener {
 
             if (!isLocked) {
 
@@ -107,12 +106,10 @@ class PhotoTraitLayout : CameraTrait {
             scrollToLast()
         }
 
-        Log.d(TAG, "setup: $previewViewHolder")
-
-        previewViewHolder?.shutterButton?.visibility = View.VISIBLE
-        previewViewHolder?.settingsButton?.visibility = View.VISIBLE
-        previewViewHolder?.settingsButton?.isEnabled = true
-        previewViewHolder?.settingsButton?.setOnClickListener {
+        shutterButton?.visibility = View.VISIBLE
+        settingsButton?.visibility = View.VISIBLE
+        settingsButton?.isEnabled = true
+        settingsButton?.setOnClickListener {
             showSettings()
         }
 
@@ -125,7 +122,6 @@ class PhotoTraitLayout : CameraTrait {
         }
 
         bindCameraForInformation()
-
     }
 
     @OptIn(ExperimentalCamera2Interop::class)
@@ -135,7 +131,7 @@ class PhotoTraitLayout : CameraTrait {
 
             supportedResolutions = sizes
 
-            previewViewHolder?.settingsButton?.isEnabled = true
+            settingsButton?.isEnabled = true
 
         }
 
@@ -250,7 +246,7 @@ class PhotoTraitLayout : CameraTrait {
 
     override fun onSettingsChanged() {
 
-        val systemEnabled = preferences.getInt(GeneralKeys.CAMERA_SYSTEM, R.id.view_trait_photo_settings_camera_system_rb)
+        val systemEnabled = preferences.getInt(GeneralKeys.CAMERA_SYSTEM, R.id.view_trait_photo_settings_camera_custom_rb)
 
         if (systemEnabled == R.id.view_trait_photo_settings_camera_system_rb) {
 
@@ -261,6 +257,8 @@ class PhotoTraitLayout : CameraTrait {
             setupCameraXMode()
 
         }
+
+        loadAdapterItems()
     }
 
     private fun setupSystemCameraMode() {
@@ -282,7 +280,7 @@ class PhotoTraitLayout : CameraTrait {
         displayPreviewMode(
             if (prefs.getBoolean(
                     GeneralKeys.CAMERA_SYSTEM_PREVIEW,
-                    false
+                    true
                 )
             ) Mode.PREVIEW else Mode.NO_PREVIEW
         )

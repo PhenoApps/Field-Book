@@ -9,10 +9,12 @@ import android.util.Size
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -29,7 +31,6 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
 
     companion object {
         val TAG = CameraXFacade::class.java.simpleName
-        val DEFAULT_CAMERAX_PREVIEW_SIZE = Size(640, 480)
     }
 
     val cameraXInstance by lazy {
@@ -46,18 +47,6 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
 
     val executor by lazy {
         Executors.newSingleThreadExecutor()
-    }
-
-    val preview by lazy {
-
-        val resolutionStrategy = ResolutionStrategy(DEFAULT_CAMERAX_PREVIEW_SIZE, ResolutionStrategy.FALLBACK_RULE_NONE)
-
-        val resolutionSelector = ResolutionSelector.Builder()
-            .setResolutionStrategy(resolutionStrategy)
-            .build()
-
-        Preview.Builder().setResolutionSelector(resolutionSelector)
-            .build()
     }
 
     fun await(context: Context, onBindReady: () -> Unit) {
@@ -86,7 +75,14 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
         val configs =
             info.getCameraCharacteristic(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
 
-        onBind(camera, (configs?.getOutputSizes(ImageFormat.JPEG) ?: arrayOf()).toList())
+        val allSizes = (configs?.getOutputSizes(ImageFormat.JPEG) ?: arrayOf()).toList()
+
+        //get all sizes that are 4:3 aspect ratio
+        val aspectRatioSizes = allSizes.filter {
+            it.width.toFloat() / it.height.toFloat() == 4f / 3f
+        }
+
+        onBind(camera, aspectRatioSizes)
     }
 
     fun bindFrontCapture(
@@ -102,14 +98,19 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
 
             if (targetResolution != null) {
 
-                val resolutionStrategy = ResolutionStrategy(targetResolution, ResolutionStrategy.FALLBACK_RULE_NONE)
+                val resolutionStrategy = ResolutionStrategy(targetResolution, ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER)
+
+                val aspectRatioStrategy = AspectRatioStrategy(
+                    AspectRatio.RATIO_4_3,
+                    AspectRatioStrategy.FALLBACK_RULE_NONE
+                )
 
                 val resolutionSelector = ResolutionSelector.Builder()
                     .setResolutionStrategy(resolutionStrategy)
+                    .setAspectRatioStrategy(aspectRatioStrategy)
                     .build()
 
                 builder.setResolutionSelector(resolutionSelector)
-
             }
 
             val imageCapture = builder.build()
@@ -144,8 +145,14 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
 
             val resolutionStrategy = ResolutionStrategy(targetResolution, ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER)
 
+            val aspectRatioStrategy = AspectRatioStrategy(
+                AspectRatio.RATIO_4_3,
+                AspectRatioStrategy.FALLBACK_RULE_NONE
+            )
+
             val resolutionSelector = ResolutionSelector.Builder()
                 .setResolutionStrategy(resolutionStrategy)
+                .setAspectRatioStrategy(aspectRatioStrategy)
                 .build()
 
             builder.setResolutionSelector(resolutionSelector)

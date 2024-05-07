@@ -1,7 +1,5 @@
 package com.fieldbook.tracker.activities
 
-import android.app.AlertDialog
-import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Size
 import android.widget.ImageButton
@@ -16,7 +14,6 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.AbstractCameraTrait
 import com.fieldbook.tracker.utilities.CameraXFacade
-import com.fieldbook.tracker.views.FullscreenCameraSettingsView
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -31,7 +28,6 @@ class CameraActivity : ThemedActivity() {
     private lateinit var previewView: PreviewView
     private lateinit var titleTextView: TextView
     private lateinit var shutterButton: ImageButton
-    private lateinit var settingsBtn: ImageButton
 
     private var supportedResolutions: List<Size> = listOf()
 
@@ -53,7 +49,6 @@ class CameraActivity : ThemedActivity() {
 
         titleTextView = findViewById(R.id.act_camera_title_tv)
         shutterButton = findViewById(R.id.camerax_capture_btn)
-        settingsBtn = findViewById(R.id.camerax_settings_btn)
 
         cameraXFacade.await(this) {
             bindCameraForInformation()
@@ -71,18 +66,6 @@ class CameraActivity : ThemedActivity() {
         }
     }
 
-    private fun showSettings() {
-
-        AlertDialog.Builder(this)
-            .setTitle(R.string.trait_system_photo_settings_title)
-            .setPositiveButton(R.string.dialog_ok) { dialog, _ ->
-                onSettingsChanged()
-                dialog.dismiss()
-            }
-            .setView(FullscreenCameraSettingsView(this, supportedResolutions))
-            .show()
-    }
-
     private fun setupCameraTitleView() {
 
         intent?.getStringExtra(EXTRA_TITLE)?.let { title ->
@@ -98,8 +81,6 @@ class CameraActivity : ThemedActivity() {
         cameraXFacade.bindIdentity { _, sizes ->
 
             supportedResolutions = sizes
-
-            settingsBtn.isEnabled = true
 
         }
 
@@ -148,12 +129,6 @@ class CameraActivity : ThemedActivity() {
     private fun setupCaptureUi(camera: Camera, executor: ExecutorService, capture: ImageCapture) {
 
         try {
-
-            settingsBtn.isEnabled = true
-
-            settingsBtn.setOnClickListener {
-                showSettings()
-            }
 
             shutterButton.setOnClickListener {
 

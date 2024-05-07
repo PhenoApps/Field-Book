@@ -5,24 +5,34 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <TextView
+        android:id="@+id/view_trait_photo_settings_camera_choice_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/view_trait_photo_settings_camera_choice_description"
+        android:layout_margin="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <RadioGroup
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/view_trait_photo_settings_camera_rg"
         android:layout_margin="16dp"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-        <RadioButton
-            android:id="@+id/view_trait_photo_settings_camera_system_rb"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/view_trait_photo_settings_camera_system"/>
+        app:layout_constraintTop_toBottomOf="@id/view_trait_photo_settings_camera_choice_tv">
         <RadioButton
             android:id="@+id/view_trait_photo_settings_camera_custom_rb"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/view_trait_photo_settings_camera_custom"/>
+        <RadioButton
+            android:id="@+id/view_trait_photo_settings_camera_system_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/view_trait_photo_settings_camera_system"/>
     </RadioGroup>
 
     <CheckBox
