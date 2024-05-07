@@ -644,6 +644,7 @@
     <string name="preferences_appearance_language">Language</string>
     <string name="preferences_appearance_language_description">Language set by system</string>
     <string name="preference_language_default">System Language</string>
+    <string name="preference_language_warning">Translations are crowd-sourced and may not be entirely accurate or complete</string>
     <string name="language_en" translatable="false">English</string>
     <string name="language_am" translatable="false">አማርኛ</string>
     <string name="language_ar" translatable="false">اَلْعَرَبِيَّةُ</string>
