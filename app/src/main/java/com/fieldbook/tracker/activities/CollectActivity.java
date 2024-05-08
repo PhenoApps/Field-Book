@@ -321,6 +321,9 @@ public class CollectActivity extends ThemedActivity
         checkForInitialBarcodeSearch();
 
         verifyPersonHelper.checkLastOpened();
+
+        View overlay = findViewById(R.id.lockOverlay);
+        overlay.setOnClickListener(v -> Toast.makeText(this, R.string.activity_collect_locked_state, Toast.LENGTH_SHORT).show());
     }
 
     public void triggerTts(String text) {
@@ -1402,9 +1405,18 @@ public class CollectActivity extends ThemedActivity
             i.putExtra("trait", traitBox.getCurrentTrait().getRealPosition());
             startActivityForResult(i, 2);
         } else if (itemId == lockDataId) {
-            if (dataLocked == UNLOCKED) dataLocked = LOCKED;
-            else if (dataLocked == LOCKED) dataLocked = FROZEN;
-            else dataLocked = UNLOCKED;
+            if (dataLocked == UNLOCKED) {
+                dataLocked = LOCKED;
+                Toast.makeText(this, R.string.activity_collect_locked_state, Toast.LENGTH_SHORT).show();
+            }
+            else if (dataLocked == LOCKED) {
+                dataLocked = FROZEN;
+                Toast.makeText(this, R.string.activity_collect_frozen_state, Toast.LENGTH_SHORT).show();
+            }
+            else {
+                dataLocked = UNLOCKED;
+                Toast.makeText(this, R.string.activity_collect_unlocked_state, Toast.LENGTH_SHORT).show();
+            }
             preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
             lockData();
         } else if (itemId == android.R.id.home) {
@@ -1687,6 +1699,7 @@ public class CollectActivity extends ThemedActivity
         deleteValue.setEnabled(true);
         barcodeInput.setEnabled(true);
         traitLayouts.enableViews();
+        findViewById(R.id.lockOverlay).setVisibility(View.GONE);
     }
 
     private void disableDataEntry() {
@@ -1694,6 +1707,7 @@ public class CollectActivity extends ThemedActivity
         deleteValue.setEnabled(false);
         barcodeInput.setEnabled(false);
         traitLayouts.disableViews();
+        findViewById(R.id.lockOverlay).setVisibility(View.VISIBLE);
     }
 
     private void moveToPlotID() {
