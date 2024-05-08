@@ -55,6 +55,9 @@ import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.offbeat.traits.formats.Formats;
+import com.fieldbook.tracker.offbeat.traits.formats.coders.StringCoder;
+import com.fieldbook.tracker.offbeat.traits.formats.TraitFormat;
+import com.fieldbook.tracker.offbeat.traits.formats.presenters.ValuePresenter;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
@@ -1246,6 +1249,8 @@ public class CollectActivity extends ThemedActivity
 
         customizeToolbarIcons();
 
+        refreshRepeatedValuesToolbarIndicator();
+
         return true;
     }
 
@@ -1439,24 +1444,47 @@ public class CollectActivity extends ThemedActivity
 
             return true;
         } else if (itemId == R.id.action_act_collect_repeated_values_indicator) {
-            showMultiMeasureDeleteDialog();
+            showRepeatedMeasuresDeleteDialog();
 
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void showMultiMeasureDeleteDialog() {
-
-        String labelValPref = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value");
+    private void showRepeatedMeasuresDeleteDialog() {
 
         ObservationModel[] values = database.getRepeatedValues(
                 getStudyId(), getObservationUnit(), getTraitDbId());
 
         ArrayList<String> is = new ArrayList<>();
+        ArrayList<ObservationModel> observations = new ArrayList<>();
+
         for (ObservationModel m: values) {
             if (!m.getValue().isEmpty()) {
-                is.add(m.getValue());
+                String format = m.getObservation_variable_field_book_format();
+                if (format != null) {
+
+                    TraitFormat traitFormat = Formats.Companion.findTrait(this, format);
+
+                    Object valueModel = m.getValue();
+
+                    if (traitFormat instanceof StringCoder) {
+
+                        valueModel = ((StringCoder) traitFormat).decode(m.getValue());
+
+                    }
+
+                    if (traitFormat instanceof ValuePresenter) {
+
+                        is.add(((ValuePresenter) traitFormat).represent(this, valueModel));
+                        observations.add(m);
+
+                    } else {
+
+                        is.add(valueModel.toString());
+                        observations.add(m);
+                    }
+                }
             }
         }
 
@@ -1469,23 +1497,8 @@ public class CollectActivity extends ThemedActivity
 
             for (int n = 0; n < size; n++) {
 
-                ObservationModel model = values[n];
-
-                String value = model.getValue();
-
-                if (!value.isEmpty()) {
-
-                    try {
-
-                        ArrayList<BrAPIScaleValidValuesCategories> c = CategoryJsonUtil.Companion.decode(value);
-
-                        value = CategoryJsonUtil.Companion.flattenMultiCategoryValue(c, labelValPref.equals("label"));
-
-                    } catch (Exception ignore) {}
-
-                    items[n] = value;
-                    checked[n] = false;
-                }
+                items[n] = is.get(n);
+                checked[n] = false;
             }
 
             dialogMultiMeasureDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
@@ -1498,7 +1511,7 @@ public class CollectActivity extends ThemedActivity
                         int checkSize = checked.length;
                         for (int j = 0; j < checkSize; j++) {
                             if (checked[j]) {
-                                deleteItems.add(values[j]);
+                                deleteItems.add(observations.get(j));
                             }
                         }
 

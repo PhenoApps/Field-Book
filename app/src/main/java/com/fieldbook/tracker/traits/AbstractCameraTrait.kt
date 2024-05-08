@@ -184,6 +184,7 @@ abstract class AbstractCameraTrait :
         val studyId = collectActivity.studyId
         val person = (activity as? CollectActivity)?.person
         val location = (activity as? CollectActivity)?.locationByPreferences
+        val rep = database.getNextRep(studyId, plot, currentTrait.id)
 
         background.launch {
 
@@ -212,7 +213,7 @@ abstract class AbstractCameraTrait :
                                 location, "", studyId,
                                 null,
                                 null,
-                                null
+                                rep
                             )
 
                             if (saveState == SaveState.SINGLE_SHOT) {
@@ -347,7 +348,7 @@ abstract class AbstractCameraTrait :
 
         loader.launch {
 
-            val thumbnailModels = getImageObservations().mapNotNull {
+            val thumbnailModels = getImageObservations().map {
 
                 //check if coroutine has canceled
                 yield()
@@ -520,5 +521,10 @@ abstract class AbstractCameraTrait :
     override fun refreshLock() {
         super.refreshLock()
         (context as CollectActivity).traitLockData()
+    }
+
+    override fun refreshLayout(onNew: Boolean?) {
+        super.refreshLayout(onNew)
+        loadAdapterItems()
     }
 }

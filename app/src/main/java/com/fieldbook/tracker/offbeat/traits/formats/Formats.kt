@@ -35,6 +35,9 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
         fun getCameraFormats() = entries.filter { it.isCamera }
 
         fun getMainFormats() = entries - listOf(CAMERA, USB_CAMERA, GO_PRO)
+
+        fun findTrait(context: Context, format: String) = entries.find { it.getDatabaseName(context) == format }?.getTraitFormatDefinition()
+
     }
 
     fun getTraitFormatDefinition() = when (this) {

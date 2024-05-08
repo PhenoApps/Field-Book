@@ -5,8 +5,10 @@ import android.view.View
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.offbeat.traits.formats.TraitFormat
+import com.fieldbook.tracker.offbeat.traits.formats.presenters.ValuePresenter
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.offbeat.traits.formats.presenters.UriPresenter
 
 open class BasePhotoFormat(
     override var format: Formats = Formats.CAMERA,
@@ -24,4 +26,4 @@ open class BasePhotoFormat(
     stringNameAux = stringNameAux,
     NameParameter(),
     DetailsParameter(),
-)
+), ValuePresenter by UriPresenter()

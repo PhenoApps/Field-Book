@@ -156,6 +156,8 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
                 // record each print event
                 ((CollectActivity) getContext()).insertPrintObservation(size);
+
+                ((CollectActivity) getContext()).refreshRepeatedValuesToolbarIndicator();
             }
         }
         }
@@ -221,6 +223,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
 
         try {
 
