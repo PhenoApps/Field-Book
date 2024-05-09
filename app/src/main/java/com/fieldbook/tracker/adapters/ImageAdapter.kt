@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.adapters
 
-import android.graphics.Bitmap
-import android.graphics.Outline
+import android.content.res.Configuration
 import android.graphics.Point
 import android.net.Uri
 import android.provider.DocumentsContract
@@ -11,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.camera.view.PreviewView
+import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -38,6 +39,7 @@ class ImageAdapter(private val listener: ImageItemHandler, private val thumbnail
 
     data class Model(
         val type: Type = Type.IMAGE,
+        val orientation: Int = Configuration.ORIENTATION_PORTRAIT,
         var uri: String? = null,
         var brapiSynced: Boolean? = null
     )
@@ -56,6 +58,7 @@ class ImageAdapter(private val listener: ImageItemHandler, private val thumbnail
 
     inner class ImageViewHolder(private val view: View) : ViewHolder(view) {
 
+        val cardView: CardView = view.findViewById(R.id.list_item_image_cv)
         val imageView: ImageView = view.findViewById(R.id.list_item_image_iv)
         val closeButton: ImageButton = view.findViewById(R.id.list_item_image_close_btn)
 
@@ -75,6 +78,25 @@ class ImageAdapter(private val listener: ImageItemHandler, private val thumbnail
             itemView.tag = model
 
             try {
+
+                //get preview image dimensions from resources
+                val previewWidth = view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_width)
+                val previewHeight = view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_height)
+
+                (cardView.layoutParams as ConstraintLayout.LayoutParams).apply {
+
+                    if (model.orientation == Configuration.ORIENTATION_PORTRAIT) {
+
+                        width = previewWidth
+                        height = previewHeight
+
+                    } else {
+
+                        width = previewHeight
+                        height = previewWidth
+
+                    }
+                }
 
                 DocumentsContract.getDocumentThumbnail(
                     view.context.contentResolver,

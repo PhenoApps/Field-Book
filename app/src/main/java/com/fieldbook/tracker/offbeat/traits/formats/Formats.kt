@@ -32,6 +32,8 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
     companion object {
         fun isCameraTrait(format: String) = format in setOf("photo", "usb camera", "gopro", "canon")
 
+        fun isExternalCameraTrait(format: String) = format in setOf("usb camera", "gopro", "canon")
+
         fun getCameraFormats() = entries.filter { it.isCamera }
 
         fun getMainFormats() = entries - listOf(CAMERA, USB_CAMERA, GO_PRO)

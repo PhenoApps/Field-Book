@@ -44,4 +44,5 @@ interface CollectController: FieldController {
     fun logNmeaMessage(nmea: String)
     fun getUsbApi(): UsbCameraApi
     fun getUvcView(): UVCCameraTextureView
+    fun getCameraXFacade(): CameraXFacade
 }

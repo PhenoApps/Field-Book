@@ -29,6 +29,35 @@
             app:layout_constraintVertical_bias="0"
             app:layout_constraintHorizontal_bias="0.5"/>
 
+        <!-- flip width/height for external cameras, which feed to this image view -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="@dimen/camera_preview_height"
+            android:layout_height="@dimen/camera_preview_width"
+            android:id="@+id/trait_camera_cv"
+            android:visibility="gone"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/camera_fragment_rv"
+            app:layout_constraintBottom_toTopOf="@id/camera_fragment_capture_btn">
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/trait_camera_iv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                tools:src="@raw/chip"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:contentDescription="@string/trait_camera_preview_content_description" />
+
+        </androidx.cardview.widget.CardView>
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             style="@style/FloatingActionButtonStyle.TraitButtons"
             android:contentDescription="@string/trait_camera_connect_content_description"

@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.net.Uri
@@ -15,6 +16,7 @@ import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +25,7 @@ import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.ImageAdapter
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.RangeObject
+import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
 import com.fieldbook.tracker.utilities.ExifUtil
@@ -66,6 +69,8 @@ abstract class AbstractCameraTrait :
     protected var recyclerView: RecyclerView? = null
     protected var settingsButton: ImageButton? = null
     protected var shutterButton: ImageButton? = null
+    protected var imageView: ImageView? = null
+    protected var previewCardView: CardView? = null
 
     private var loader = CoroutineScope(Dispatchers.IO)
     protected val background = CoroutineScope(Dispatchers.IO)
@@ -103,6 +108,8 @@ abstract class AbstractCameraTrait :
         recyclerView = act.findViewById(R.id.camera_fragment_rv)
         settingsButton = act.findViewById(R.id.camera_fragment_settings_btn)
         shutterButton = act.findViewById(R.id.camera_fragment_capture_btn)
+        imageView = act.findViewById(R.id.trait_camera_iv)
+        previewCardView = act.findViewById(R.id.trait_camera_cv)
 
         recyclerView?.adapter = ImageAdapter(this, getThumbnailSize())
 
@@ -264,6 +271,9 @@ abstract class AbstractCameraTrait :
 
         if (!isLocked) {
 
+            //check if its external or no preview
+            val skipPreview = isPreviewable()
+
             val size = (recyclerView?.adapter as? ImageAdapter)?.currentList?.size ?: 0
             val lm = recyclerView?.layoutManager as? LinearLayoutManager
 
@@ -273,10 +283,12 @@ abstract class AbstractCameraTrait :
             var position = if (firstFullVisible == -1) firstVisible else firstFullVisible
 
             //get previous position if the first visible is preview
-            position = if (position == size - 1) position - 1 else position
+            if (skipPreview) {
+                position = if (position == size - 1) position - 1 else position
+            }
 
             //ensure position is within array bounds
-            if (position != null && position in 0 until size - 1) {
+            if (position != null && position in 0 until size) {
 
                 (recyclerView?.adapter as? ImageAdapter)?.currentList?.get(position)
                     ?.let { model ->
@@ -343,6 +355,8 @@ abstract class AbstractCameraTrait :
         val traitId = currentTrait.id
         val rep = collectActivity.rep
 
+        val isExternalCamera = Formats.isExternalCameraTrait(currentTrait.format)
+
         loader.cancel()
         loader = CoroutineScope(Dispatchers.IO)
 
@@ -357,22 +371,20 @@ abstract class AbstractCameraTrait :
 
                 ImageAdapter.Model(
                     type = ImageAdapter.Type.IMAGE,
+                    orientation = if (isExternalCamera) Configuration.ORIENTATION_LANDSCAPE else Configuration.ORIENTATION_PORTRAIT,
                     uri = it.value,
-                    brapiSynced = brapiSynced)
+                    brapiSynced = brapiSynced
+                )
 
             }.toMutableList()
 
-            //check that the current preferences is set to default and add the preview
-            if (preferences.getInt(
-                    GeneralKeys.CAMERA_SYSTEM,
-                    R.id.view_trait_photo_settings_camera_custom_rb
-                ) != R.id.view_trait_photo_settings_camera_system_rb
-            ) {
+            //skip adding the inline-preview if the camera is external
+            if (isPreviewable()) {
 
                 //add preview image adapter item
                 thumbnailModels.add(
                     ImageAdapter.Model(
-                        type = ImageAdapter.Type.PREVIEW
+                        type = ImageAdapter.Type.PREVIEW,
                     )
                 )
             }
@@ -393,6 +405,33 @@ abstract class AbstractCameraTrait :
         val studyId = collectActivity.studyId
 
         return database.getAllObservations(studyId, plot, traitDbId)
+    }
+
+    protected fun isPreviewable(): Boolean {
+
+        val isExternalCamera = Formats.isExternalCameraTrait(currentTrait.format)
+
+        //skip adding the inline-preview if the camera is external
+        if (!isExternalCamera) {
+
+            //skip adding the preview if the camera is Android system
+            if (preferences.getInt(
+                    GeneralKeys.CAMERA_SYSTEM,
+                    R.id.view_trait_photo_settings_camera_custom_rb
+                ) != R.id.view_trait_photo_settings_camera_system_rb
+            ) {
+
+                //finally skip the preview if the user has disabled it
+                if (preferences.getBoolean(GeneralKeys.CAMERA_SYSTEM_PREVIEW, true)) {
+
+                    //add preview image adapter item
+                    return true
+
+                }
+            }
+        }
+
+        return false
     }
 
     /**

@@ -88,22 +88,13 @@ class PhotoTraitLayout : CameraTrait {
 
     private fun setup() {
 
-        previewViewHolder = getPreviewViewHolder()
-
         //we are limited to having everything extend linear layout, there are some cases
         //where the background thread has not loaded all the views and may be null,
         //so reload until we have the preview model
-        if (previewViewHolder == null) {
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                setup()
-            }, 500)
-
-            return
-
-        } else {
+        awaitPreviewHolder {
 
             scrollToLast()
+
         }
 
         shutterButton?.visibility = View.VISIBLE
@@ -121,7 +112,7 @@ class PhotoTraitLayout : CameraTrait {
 
         }
 
-        bindCameraForInformation()
+        onSettingsChanged()
     }
 
     @OptIn(ExperimentalCamera2Interop::class)
@@ -134,9 +125,6 @@ class PhotoTraitLayout : CameraTrait {
             settingsButton?.isEnabled = true
 
         }
-
-        //trigger ui update based on preferences
-        onSettingsChanged()
     }
 
     private fun bindNoPreviewLifecycle() {
@@ -254,11 +242,32 @@ class PhotoTraitLayout : CameraTrait {
 
         } else {
 
-            setupCameraXMode()
+            previewViewHolder = null
 
+            loadAdapterItems()
+
+            awaitPreviewHolder {
+
+                setupCameraXMode()
+
+            }
         }
+    }
 
-        loadAdapterItems()
+    private fun awaitPreviewHolder(callback: () -> Unit) {
+
+        previewViewHolder = getPreviewViewHolder()
+
+        if (previewViewHolder == null && isPreviewable()) {
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                awaitPreviewHolder(callback)
+            }, 500)
+
+        } else {
+
+            callback.invoke()
+        }
     }
 
     private fun setupSystemCameraMode() {
@@ -273,6 +282,9 @@ class PhotoTraitLayout : CameraTrait {
 
             takePicture()
         }
+
+        loadAdapterItems()
+
     }
 
     private fun setupCameraXMode() {
@@ -284,6 +296,8 @@ class PhotoTraitLayout : CameraTrait {
                 )
             ) Mode.PREVIEW else Mode.NO_PREVIEW
         )
+
+        bindCameraForInformation()
     }
 
     fun makeImage(currentTrait: TraitObject) {

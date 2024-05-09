@@ -29,21 +29,6 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!-- todo on child camera branch merges, hook this into implementations -->
-    <ImageView
-        android:visibility="gone"
-        android:id="@+id/trait_camera_iv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        tools:src="@raw/chip"
-        app:layout_constraintVertical_bias="0"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:contentDescription="@string/trait_camera_preview_content_description" />
-
     <!-- Trevor's 'embiggen' button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         style="@style/FloatingActionButtonStyle.SmallTraitButtons"

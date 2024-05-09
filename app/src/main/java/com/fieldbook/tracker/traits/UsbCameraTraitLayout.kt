@@ -76,7 +76,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
     override fun onSettingsChanged() {
 
-        imageView?.visibility = if (prefs.getBoolean(GeneralKeys.USB_CAMERA_PREVIEW, true))
+        previewCardView?.visibility = if (prefs.getBoolean(GeneralKeys.USB_CAMERA_PREVIEW, true))
             View.VISIBLE else View.GONE
 
         val camera = controller.getUsbApi().camera
@@ -100,11 +100,11 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
         imageView?.visibility = View.VISIBLE
 
-        (imageView?.layoutParams as ConstraintLayout.LayoutParams)
+        (previewCardView?.layoutParams as ConstraintLayout.LayoutParams)
             .width = ConstraintLayout.LayoutParams.WRAP_CONTENT
 
-        (captureBtn?.layoutParams as ConstraintLayout.LayoutParams)
-            .topToBottom = imageView?.id ?: ConstraintLayout.LayoutParams.PARENT_ID
+        (shutterButton?.layoutParams as ConstraintLayout.LayoutParams)
+            .topToBottom = previewCardView?.id ?: ConstraintLayout.LayoutParams.PARENT_ID
 
         if (controller.getUsbApi().isConnected()) {
             
@@ -114,7 +114,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
         controller.getUsbApi().attach(this)
 
-        settingsBtn?.setOnClickListener {
+        settingsButton?.setOnClickListener {
 
             showResolutionChoiceDialog()
         }
@@ -124,9 +124,11 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
     private fun initUi() {
 
-        captureBtn?.visibility = View.INVISIBLE
+        shutterButton?.visibility = View.INVISIBLE
 
-        settingsBtn?.visibility = View.INVISIBLE
+        settingsButton?.visibility = View.INVISIBLE
+
+        previewCardView?.visibility = View.GONE
 
         connectBtn?.visibility = View.VISIBLE
 
@@ -178,13 +180,14 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
         ui.launch {
 
-            captureBtn?.visibility = View.VISIBLE
+            shutterButton?.visibility = View.VISIBLE
             connectBtn?.visibility = View.INVISIBLE
-            settingsBtn?.visibility = View.VISIBLE
+            settingsButton?.visibility = View.VISIBLE
+            previewCardView?.visibility = View.VISIBLE
 
-            captureBtn?.setOnClickListener {
+            shutterButton?.setOnClickListener {
 
-                captureBtn?.isEnabled = false
+                shutterButton?.isEnabled = false
 
                 lastBitmap?.let { bmp ->
 
@@ -192,7 +195,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
                     activity?.runOnUiThread {
 
-                        captureBtn?.isEnabled = true
+                        shutterButton?.isEnabled = true
                     }
                 }
             }
