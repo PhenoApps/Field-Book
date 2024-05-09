@@ -1659,7 +1659,7 @@ public class CollectActivity extends ThemedActivity
 
         if (state == LOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
-            disableDataEntry();
+            disableDataEntry(R.string.activity_collect_locked_state);
         } else if (state == UNLOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
             enableDataEntry();
@@ -1667,7 +1667,7 @@ public class CollectActivity extends ThemedActivity
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
             if (collectInputView.getText().isEmpty()) {
                 enableDataEntry();
-            } else freezeDataEntry();
+            } else disableDataEntry(R.string.activity_collect_frozen_state);
         }
 
         TraitObject trait = getCurrentTrait();
@@ -1679,7 +1679,7 @@ public class CollectActivity extends ThemedActivity
     public void traitLockData() {
         if (dataLocked == LOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
-            disableDataEntry();
+            disableDataEntry(R.string.activity_collect_locked_state);
         } else if (dataLocked == UNLOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
             enableDataEntry();
@@ -1687,7 +1687,7 @@ public class CollectActivity extends ThemedActivity
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
             if (collectInputView.getText().isEmpty()) {
                 enableDataEntry();
-            } else freezeDataEntry();
+            } else disableDataEntry(R.string.activity_collect_frozen_state);
         }
     }
 
@@ -1699,19 +1699,16 @@ public class CollectActivity extends ThemedActivity
         findViewById(R.id.lockOverlay).setVisibility(View.GONE);
     }
 
-    private void disableDataEntry() {
+    private void disableDataEntry(int toastMessageId) {
 //        missingValue.setEnabled(false);
 //        deleteValue.setEnabled(false);
 //        barcodeInput.setEnabled(false);
 //        traitLayouts.disableViews();
         View overlay = findViewById(R.id.lockOverlay);
-        overlay.setOnClickListener(v -> Toast.makeText(this, R.string.activity_collect_locked_state, Toast.LENGTH_SHORT).show());
-        overlay.setVisibility(View.VISIBLE);
-    }
-
-    private void freezeDataEntry() {
-        View overlay = findViewById(R.id.lockOverlay);
-        overlay.setOnClickListener(v -> Toast.makeText(this, R.string.activity_collect_frozen_state, Toast.LENGTH_SHORT).show());
+        overlay.setOnClickListener((v) -> {
+            getSoundHelper().playError();
+            Toast.makeText(this, toastMessageId, Toast.LENGTH_SHORT).show();
+        });
         overlay.setVisibility(View.VISIBLE);
     }
 
