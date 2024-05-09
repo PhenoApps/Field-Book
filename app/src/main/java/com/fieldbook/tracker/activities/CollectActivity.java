@@ -321,9 +321,6 @@ public class CollectActivity extends ThemedActivity
         checkForInitialBarcodeSearch();
 
         verifyPersonHelper.checkLastOpened();
-
-        View overlay = findViewById(R.id.lockOverlay);
-        overlay.setOnClickListener(v -> Toast.makeText(this, R.string.activity_collect_locked_state, Toast.LENGTH_SHORT).show());
     }
 
     public void triggerTts(String text) {
@@ -1670,7 +1667,7 @@ public class CollectActivity extends ThemedActivity
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
             if (collectInputView.getText().isEmpty()) {
                 enableDataEntry();
-            } else disableDataEntry();
+            } else freezeDataEntry();
         }
 
         TraitObject trait = getCurrentTrait();
@@ -1690,24 +1687,32 @@ public class CollectActivity extends ThemedActivity
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
             if (collectInputView.getText().isEmpty()) {
                 enableDataEntry();
-            } else disableDataEntry();
+            } else freezeDataEntry();
         }
     }
 
     private void enableDataEntry() {
-        missingValue.setEnabled(true);
-        deleteValue.setEnabled(true);
-        barcodeInput.setEnabled(true);
-        traitLayouts.enableViews();
+//        missingValue.setEnabled(true);
+//        deleteValue.setEnabled(true);
+//        barcodeInput.setEnabled(true);
+//        traitLayouts.enableViews();
         findViewById(R.id.lockOverlay).setVisibility(View.GONE);
     }
 
     private void disableDataEntry() {
-        missingValue.setEnabled(false);
-        deleteValue.setEnabled(false);
-        barcodeInput.setEnabled(false);
-        traitLayouts.disableViews();
-        findViewById(R.id.lockOverlay).setVisibility(View.VISIBLE);
+//        missingValue.setEnabled(false);
+//        deleteValue.setEnabled(false);
+//        barcodeInput.setEnabled(false);
+//        traitLayouts.disableViews();
+        View overlay = findViewById(R.id.lockOverlay);
+        overlay.setOnClickListener(v -> Toast.makeText(this, R.string.activity_collect_locked_state, Toast.LENGTH_SHORT).show());
+        overlay.setVisibility(View.VISIBLE);
+    }
+
+    private void freezeDataEntry() {
+        View overlay = findViewById(R.id.lockOverlay);
+        overlay.setOnClickListener(v -> Toast.makeText(this, R.string.activity_collect_frozen_state, Toast.LENGTH_SHORT).show());
+        overlay.setVisibility(View.VISIBLE);
     }
 
     private void moveToPlotID() {
