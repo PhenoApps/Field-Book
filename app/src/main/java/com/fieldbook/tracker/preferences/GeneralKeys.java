@@ -216,6 +216,14 @@ public class GeneralKeys {
 
     public static final String CAMERA_RESOLUTION = "com.fieldbook.tracker.traits.camera.RESOLUTION";
 
+    public static final String USB_CAMERA_PREVIEW = "com.fieldbook.tracker.traits.camera.usb.PREVIEW";
+
+    public static final String USB_CAMERA_RESOLUTION_INDEX = "com.fieldbook.tracker.traits.camera.USB_RESOLUTION_INDEX";
+
+    public static final String USB_CAMERA_AUTO_WHITE_BALANCE = "com.fieldbook.tracker.traits.camera.usb.AUTO_WHITE_BALANCE";
+
+    public static final String USB_CAMERA_AUTO_FOCUS = "com.fieldbook.tracker.traits.camera.usb.AUTO_FOCUS";
+
     //tts
     public static final String TTS_LANGUAGE_ENABLED = "TTS_LANGUAGE_ENABLED";
     public static final String TTS_LANGUAGE = "TTS_LANGUAGE";
