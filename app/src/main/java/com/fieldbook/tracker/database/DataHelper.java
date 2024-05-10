@@ -2703,11 +2703,11 @@ public class DataHelper {
         return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
     }
 
-    public String getObservationUnitPropertyByPlotId(String column, String plot_id) {
+    public String getObservationUnitPropertyByPlotId(String uniqueName, String column, String uniqueId) {
 
         open();
 
-        return ObservationUnitPropertyDao.Companion.getObservationUnitPropertyByPlotId(column, plot_id);
+        return ObservationUnitPropertyDao.Companion.getObservationUnitPropertyByUniqueId(uniqueName, column, uniqueId);
     }
 
     /**
