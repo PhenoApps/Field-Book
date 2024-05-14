@@ -1066,4 +1066,7 @@
     <string name="view_trait_photo_settings_white_balance_title">Auto White Balance</string>
     <string name="view_trait_photo_settings_auto_focus_title">Auto Focus</string>
 
+    <!-- gopro -->
+    <string name="dialog_go_pro_wait_stream_title">Waiting for live preview</string>
+    <string name="dialog_go_pro_wait_stream_message">This may take a minute.</string>
 </resources>

@@ -1,81 +1,39 @@
 package com.fieldbook.tracker.traits
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.Toast
-import androidx.core.graphics.scale
-import androidx.documentfile.provider.DocumentFile
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.media3.common.util.UnstableApi
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.adapters.ImageTraitAdapter
-import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.utilities.DocumentTreeUtil
-import com.fieldbook.tracker.utilities.ExifUtil
-import com.fieldbook.tracker.utilities.FileUtil
-import com.fieldbook.tracker.utilities.GoProWrapper
-import com.google.android.exoplayer2.DefaultLoadControl
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.trackselection.TrackSelector
-import com.google.android.exoplayer2.ui.StyledPlayerView
-import com.google.android.exoplayer2.upstream.DefaultDataSource
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.phenoapps.androidlibrary.Utils
-import org.phenoapps.fragments.gopro.GoProGatt
-import org.phenoapps.fragments.gopro.GoProGattInterface
-import org.phenoapps.fragments.gopro.GoProHelper
-import org.phenoapps.interfaces.gatt.GattCallbackInterface
-import org.phenoapps.interfaces.security.SecureBluetooth
+import org.phenoapps.fragments.gopro.GoProFragment
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
-//TODO close connenction on collect activity finsishes onDestroy
-//TODO leave stream at top of layout -> capture overlayed on the preview bottom or corner -> gallery below the preview -> connect button at bottom -> hide everything if not connected other than gallery   (DONE)
 //todo gopro different versions
 ////todo aim for hero 11 -> if not 11 then say a message with a link to an email
 //TODO improve time between taking a picture and it showing in match list items with timestamp when doing media query
-//TODO : add animated progress bar to dummy image after it is shuttered'                                                                                                                                    (DONE)
 //TODO: shutter on the gopro detected in FB
 //TODO test usb camera trait with UVC.
-//TODO: reopening preview after going back to config
 
+@UnstableApi @AndroidEntryPoint
 class GoProTraitLayout :
-    BaseTraitLayout,
-    ImageTraitAdapter.ImageItemHandler,
-    GattCallbackInterface,
-    GoProGattInterface,
-    GoProGatt.GoProGattController,
-    GoProHelper.OnGoProStreamReady {
-
-    //go pro specific collector interface
-    interface GoProCollector {
-        fun wrapper(): GoProWrapper
-        fun advisor(): SecureBluetooth
-    }
+    CameraTrait,
+    GoProApi.Callbacks {
 
     companion object {
         const val TAG = "GoProTrait"
@@ -83,55 +41,11 @@ class GoProTraitLayout :
         private const val CAMERA_DELAY_MS = 10000L
     }
 
-    private var activity: Activity? = null
+    private var dialogWaitForStream: AlertDialog? = null
 
-    //ui components
-    private lateinit var playerView: StyledPlayerView
-    private lateinit var imageRecyclerView: RecyclerView
+    private var cameraBusy: Boolean = false
 
-    //buttons
-    private lateinit var connectButton: FloatingActionButton
-    private lateinit var shutterButton: FloatingActionButton
-
-    //exoplayer instance
-    private var player: ExoPlayer? = null
-    private var streamStarted = false
-
-    //collect activity controller
-    private lateinit var collector: GoProCollector
-
-    private val scope by lazy { CoroutineScope(Dispatchers.IO) }
-
-    private val wrapper by lazy { collector.wrapper() }
-
-    private val helper by lazy { wrapper.helper }
-
-    private val gatt by lazy { wrapper.gatt }
-
-    private val playerListener: Player.Listener = object : Player.Listener {
-        override fun onPlaybackStateChanged(playbackState: Int) {
-            super.onPlaybackStateChanged(playbackState)
-            when (playbackState) {
-                Player.STATE_IDLE, Player.STATE_ENDED -> Log.d(
-                    TAG, "Player Idle/Ended"
-                )
-                Player.STATE_BUFFERING -> if (!streamStarted) {
-                    Log.d(TAG, "Player Buffering")
-                    Log.d(TAG, "Requesting start stream.")
-                    streamStarted = true
-                    helper?.requestStream()
-                }
-
-                Player.STATE_READY -> {
-                    Log.d(TAG, "Player Ready")
-                    initializeCameraShutterButton()
-                    initializeDisconnectButton()
-                    playerView.visibility = View.VISIBLE
-                    shutterButton.visibility = View.VISIBLE
-                }
-            }
-        }
-    }
+    private var currentPlotId: String? = null
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -141,287 +55,193 @@ class GoProTraitLayout :
         defStyleAttr
     )
 
-    override fun layoutId(): Int {
-        return R.layout.trait_go_pro
-    }
-
-    override fun setNaTraitsText() {}
     override fun type(): String {
         return type
     }
 
-    private fun initWork(act: Activity) {
+    private fun setup() {
 
-        collector = (act as GoProCollector)
+        setupWaitForStreamDialog()
 
-        playerView = act.findViewById(R.id.go_pro_pv)
-        connectButton = act.findViewById(R.id.go_pro_connect_btn)
-        shutterButton = act.findViewById(R.id.go_pro_capture_btn)
-        imageRecyclerView = act.findViewById(R.id.go_pro_rv)
+        styledPlayerView?.visibility = View.VISIBLE
+        imageView?.visibility = View.INVISIBLE
 
-        activity = act
+        styledPlayerView?.layoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.MATCH_CONSTRAINT,
+            ConstraintLayout.LayoutParams.WRAP_CONTENT
+        ).also {
+            it.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            it.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            it.topToBottom = recyclerView?.id ?: 0
+            it.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+        }
 
-        //set control buttons gone
-        shutterButton.visibility = View.GONE
+        val started = controller.getGoProApi().isStreamStarted()
+        Log.d(TAG, "Connected: $started")
 
-        //set player gone
-        playerView.visibility = View.GONE
+        if (started) {
 
-        //set images gone
-        //imageRecyclerView.visibility = View.GONE
+            createPlayer()
 
-        connectButton.visibility = View.VISIBLE
+        } else {
 
-        initializeConnectButton()
-        loadAdapterItems()
+            initializeConnectButton()
 
-        detectActiveConnection()
-
+        }
     }
 
-    override fun init(act: Activity) {
+    private fun setupWaitForStreamDialog() {
 
-        initWork(act)
+        dialogWaitForStream = AlertDialog.Builder(context)
+            .setTitle(R.string.dialog_go_pro_wait_stream_title)
+            .setMessage(R.string.dialog_go_pro_wait_stream_message)
+            .setPositiveButton(android.R.string.cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
 
+        dialogWaitForStream?.setView(ProgressBar(context).also {
+            it.isIndeterminate = true
+            it.layoutParams = LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT
+            )
+            it.layout(16, 16, 16, 16)
+        })
     }
 
-    private fun detectActiveConnection() {
-
-        createPlayer()
-
+    override fun loadLayout() {
+        super.loadLayout()
+        setup()
+        currentPlotId = currentRange.plot_id
     }
 
     private fun initializeConnectButton() {
 
-        //reset ui component states
-        player?.stop()
-        player?.release()
-        player?.clearMediaItems()
-        player?.clearVideoSurface()
-        player = null
-        playerView.player = null
+        connectBtn?.visibility = View.VISIBLE
+        captureBtn?.visibility = View.GONE
+        styledPlayerView?.visibility = View.GONE
 
-        //buttons other than connect are gone until feature is available
-        shutterButton.visibility = View.GONE
-
-        //reset global flags
-        this.streamStarted = false
-
-        //start connection flow when button is pressed
-        connectButton.setOnClickListener {
-
+        connectBtn?.setOnClickListener {
             connect()
         }
     }
 
-    private fun initializeDisconnectButton() {
+    private fun getImageRequestData(): GoProApi.ImageRequestData {
 
-        connectButton.setOnClickListener {
-
-            clearResources()
-
-            initializeConnectButton()
-        }
-    }
-
-    private fun awaitNetworkConnectionDialog() {
-
-        if (activity?.window?.isActive == true) {
-
-            var skipBssid = false
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                skipBssid = true
-            }
-
-            if (skipBssid || gatt.bssid != null) {
-
-                enableAp()
-
-                gatt.ssid?.let { s ->
-
-                    gatt.password?.let { p ->
-
-                        val dialog = androidx.appcompat.app.AlertDialog.Builder(
-                            context,
-                            R.style.AppAlertDialog
-                        )
-                            .setTitle(context.getString(R.string.trait_go_pro_await_ap_title))
-                            .setMessage(context.getString(R.string.trait_go_pro_await_ap_message, s, p))
-                            .setCancelable(true)
-                            .setNegativeButton(android.R.string.cancel) { dialog, _ ->
-                                dialog.dismiss()
-                            }
-                            .setNeutralButton(context.getString(R.string.trait_go_pro_await_ap_neutral)) { _, _ ->
-                                helper?.openWifiSettings()
-                            }
-                            .setOnDismissListener {
-                                Log.d(TAG, "$s connection attempting...")
-                            }
-                            .create()
-
-                        dialog.setView(ProgressBar(context).also {
-                            it.isIndeterminate = true
-                            it.layoutParams = LayoutParams(
-                                LayoutParams.WRAP_CONTENT,
-                                LayoutParams.WRAP_CONTENT
-                            )
-                            it.layout(16, 16, 16, 16)
-                        })
-
-                        dialog.show()
-
-                        helper?.connectToGoProWifi(dialog, s, p, gatt.bssid) {
-
-                            activity?.runOnUiThread {
-
-
-                                helper?.requestStream()
-
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun onShutter() {
-
-        shutterButton.isEnabled = false
-
-        val plot = currentRange.plot_id
+        //val plot = currentRange.plot_id
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        val traitName = currentTrait.name
-        val traitFormat = type
-        val traitDbId = currentTrait.id
-        val time = Utils.getDateTime()
-        val name = "${traitName}_${plot}_$time.png"
+        //val traitName = currentTrait.name
+        val timestamp = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.US)
+            .format(Calendar.getInstance().time)
+        //val name = "${traitName}_${plot}_$timestamp.png"
 
-        //load data here
-        val data = hashMapOf(
-            "studyId" to studyId,
-            "plot" to plot,
-            "traitName" to traitName,
-            "traitFormat" to traitFormat,
-            "traitDbId" to traitDbId,
-            "name" to name
+        return GoProApi.ImageRequestData(
+            studyId,
+            currentRange,
+            currentTrait,
+            timestamp
         )
-
-        saveDummyObservation(data)
-
-        Handler(Looper.getMainLooper()).postDelayed({
-
-            shutterButton.isEnabled = true
-
-            helper?.queryMedia(data)
-
-        }, CAMERA_DELAY_MS)
     }
 
     private fun initializeCameraShutterButton() {
 
-        shutterButton.visibility = View.VISIBLE
+        connectBtn?.visibility = View.GONE
+        styledPlayerView?.visibility = View.VISIBLE
 
-        shutterButton.setOnClickListener {
+        captureBtn?.visibility = View.VISIBLE
 
-            shutterOn()
+        (captureBtn?.layoutParams as ConstraintLayout.LayoutParams)
+            .bottomToBottom = styledPlayerView?.id ?: 0
 
-            onShutter()
+        captureBtn?.setOnClickListener {
+
+            captureBtn?.isEnabled = false
+
+            controller.getGoProApi().range.add(getImageRequestData())
+
+            controller.getGoProApi().shutterOn()
+
+            captureBtn?.isEnabled = false
+        }
+
+        background.launch {
+
+            val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+            var currentStudyId = studyId
+            while (currentStudyId == studyId) {
+
+                controller.getGoProApi().getBusyState()
+
+                delay(2000)
+
+                currentStudyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+            }
         }
     }
 
-    override fun onExit() {
-        super.onExit()
-        player?.stop()
-        player?.release()
-        player = null
+    override fun onImageRequestReady(bytes: ByteArray, data: GoProApi.ImageRequestData) {
+
+        ui.launch {
+
+            saveJpegToStorage(type(), bytes, data.range)
+
+            captureBtn?.isEnabled = true
+
+        }
+    }
+
+    override fun onBusyStateChanged(state: Int) {
+
+        Log.d(TAG, "Busy state changed: $state")
+
+        val old = cameraBusy
+
+        cameraBusy = state == 1
+
+        if (cameraBusy) {
+
+            //capturing photo
+
+        } else {
+
+            //waiting for capture
+            //check if capture is done
+            if (old) {
+                //capture is done
+                controller.getGoProApi().queryMedia()
+            }
+
+            controller.getGoProApi().lastMoved = getImageRequestData()
+
+        }
+    }
+
+    override fun onStreamRequested() {
+        ui.launch {
+            styledPlayerView?.player = controller.getGoProApi().createPlayer()
+            styledPlayerView?.requestFocus()
+        }
+    }
+
+    override fun onStreamReady() {
+        dialogWaitForStream?.dismiss()
+        initializeCameraShutterButton()
+        captureBtn?.visibility = View.VISIBLE
     }
 
     private fun createPlayer() {
 
-        context?.let { ctx ->
+        styledPlayerView?.player = controller.getGoProApi().createPlayer()
 
-            val ffmpegOutputUri = "udp://0.0.0.0:8555"
-
-            //Max. Buffer: The maximum duration, in milliseconds, of the media the player is attempting to buffer. Once the buffer reaches Max Buffer, it will stop filling it up.
-            //min Buffer: The minimum length of media that the player will ensure is buffered at all times, in milliseconds.
-            //Playback Buffer: The default amount of time, in milliseconds, of media that needs to be buffered in order for playback to start or resume after a user action such as a seek.
-            //Buffer for playback after rebuffer: The duration of the media that needs to be buffered in order for playback to continue after a rebuffer, in milliseconds.
-
-            val loadControl: DefaultLoadControl = DefaultLoadControl.Builder()
-                .setPrioritizeTimeOverSizeThresholds(true)
-                .setBufferDurationsMs(500, 1000, 500, 500)
-                .build()
-
-            val trackSelector: TrackSelector = DefaultTrackSelector(ctx)
-            val mediaSource: MediaSource =
-                ProgressiveMediaSource.Factory(DefaultDataSource.Factory(ctx)).createMediaSource(
-                    MediaItem.fromUri(
-                        Uri.parse(ffmpegOutputUri)
-                    )
-                )
-
-            player?.stop()
-            player?.release()
-            player = null
-
-            player = ExoPlayer.Builder(ctx)
-                .setTrackSelector(trackSelector)
-                .setLoadControl(loadControl)
-                .build()
-
-            playerView.player = player.also {
-                it?.addListener(playerListener)
-                it?.setMediaSource(mediaSource)
-                it?.playWhenReady = true
-                it?.prepare()
-            }
-
-            playerView.requestFocus()
-
-            Log.i(TAG, "Player created")
-        }
-    }
-
-    private var credentialsDialog: AlertDialog? = null
-
-    private fun awaitCredentialsDialog() {
-
-        if (activity?.window?.isActive == true) {
-
-            if (credentialsDialog?.isShowing == true) credentialsDialog?.dismiss()
-
-            credentialsDialog = AlertDialog.Builder(
-                context,
-                R.style.AppAlertDialog
-            )
-                .setTitle(context.getString(R.string.trait_go_pro_await_ble_title))
-                .setMessage(context.getString(R.string.trait_go_pro_await_ble_message))
-                .setCancelable(true)
-                .setNegativeButton(android.R.string.cancel) { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .create()
-
-            credentialsDialog?.setView(ProgressBar(context).also {
-                it.isIndeterminate = true
-                it.layoutParams = LayoutParams(
-                    LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT
-                )
-                it.layout(16, 16, 16, 16)
-            })
-
-            credentialsDialog?.show()
-        }
+        Log.i(GoProFragment.TAG, "Player created")
     }
 
     private fun connect() {
 
-        //ensure bluetooth is enabled
-        collector.advisor().withNearby { adapter ->
+        controller.advisor().withNearby { adapter ->
 
-            if (helper?.isBluetoothEnabled(adapter) != true) {
+            if (!adapter.isEnabled) {
 
                 //if not enabled, start intent for settings
                 context?.startActivity(
@@ -430,496 +250,44 @@ class GoProTraitLayout :
 
             } else {
 
-                helper?.registerReceivers()
-
-                activity?.let { act ->
-
-                    //start discovering and find a go pro device
-                    adapter.startDiscovery()
-
-                    fun onSelected(device: BluetoothDevice?) {
-
-                        if (device != null) {
-
-                            helper?.connectToGoPro(
-                                device,
-                                wrapper.gatt.callback
-                            )
-
-                            adapter.cancelDiscovery()
-
-                            //show progress bar dialog until credentials are established
-                            awaitCredentialsDialog()
-                        }
-                    }
-
-                    val dialog = androidx.appcompat.app.AlertDialog.Builder(
-                        context,
-                        R.style.AppAlertDialog
-                    )
-                        .setTitle(context.getString(R.string.trait_go_pro_await_device_title))
-                        .setCancelable(true)
-                        .setSingleChoiceItems(
-                            helper?.goProDevices?.map { it.name }?.distinct()?.toTypedArray() ?: arrayOf(),
-                            -1
-                        ) { dialog, which ->
-                            onSelected(helper?.goProDevices?.get(which))
-                            dialog.dismiss()
-                        }
-                        .setNegativeButton(android.R.string.cancel) { dialog, _ ->
-                            onSelected(null)
-                            dialog.dismiss()
-                        }
-                        .setOnDismissListener {
-                            helper?.bluetoothSearchJob?.cancel()
-                        }
-                        .create()
-
-                    dialog.show()
-
-                    helper?.searchForBluetoothGoPro(act, dialog)
-                }
-            }
-        }
-    }
-
-    private fun scrollToLast() {
-
-        try {
-
-            imageRecyclerView.postDelayed({
-
-                val pos = imageRecyclerView.adapter?.itemCount ?: 1
-
-                imageRecyclerView.scrollToPosition(pos - 1)
-
-            }, 500L)
-
-        } catch (e: Exception) {
-
-            e.printStackTrace()
-
-        }
-    }
-
-    override fun loadLayout() {
-
-        //slight delay to make navigation a bit faster
-        Handler(Looper.getMainLooper()).postDelayed({
-
-            loadAdapterItems()
-
-        }, 500)
-
-        super.loadLayout()
-    }
-
-    override fun deleteTraitListener() {
-
-        if (!isLocked) {
-
-            (imageRecyclerView.layoutManager as? LinearLayoutManager)
-                ?.findFirstCompletelyVisibleItemPosition()?.let { index ->
-
-                    if (index > -1) {
-
-                        (imageRecyclerView.adapter as? ImageTraitAdapter)
-                            ?.currentList?.get(index)?.let { model ->
-
-                                showDeleteImageDialog(model)
-
-                            }
-                    }
-                }
-        }
-    }
-
-    private fun showDeleteImageDialog(model: ImageTraitAdapter.Model) {
-
-        if (!isLocked) {
-
-            context.contentResolver.openInputStream(Uri.parse(model.uri)).use { input ->
-
-                val imageView = ImageView(context)
-
-                val bmp = BitmapFactory.decodeStream(input)
-
-                val scaled = bmp.scale(512, 512, true)
-
-                imageView.setImageBitmap(scaled)
-
-                AlertDialog.Builder(context, R.style.AppAlertDialog)
-                    .setTitle(R.string.trait_go_pro_camera_delete_photo_title)
-                    .setOnCancelListener { dialog -> dialog.dismiss() }
-                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
-
-                        dialog.dismiss()
-
-                        deleteItem(model)
-
-                    }
-                    .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
-                    .setView(imageView)
-                    .show()
-            }
-        }
-    }
-
-    private fun saveDummyObservation(data: Map<String, String>) {
-
-        scope.launch {
-
-            withContext(Dispatchers.IO) {
-
-                //get current trait's trait name, use it as a plot_media directory
-
-                val plot = data["plot"]
-                val studyId = data["studyId"]
-                val name = data["name"]
-
-                database.insertObservation(
-                    plot,
-                    data["traitDbId"],
-                    data["traitFormat"],
-                    name,
-                    prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
-                            + prefs.getString(GeneralKeys.LAST_NAME, ""),
-                    (activity as? CollectActivity)?.locationByPreferences,
-                    "",
-                    studyId,
-                    null,
-                    null,
-                    null
-                )
-
-                activity?.runOnUiThread {
-
-                    loadAdapterItems()
-
-                    scrollToLast()
-                }
-            }
-        }
-    }
-
-    private fun saveBitmapToStorage(bmp: Bitmap, data: Map<String, String>) {
-
-        scope.launch {
-
-            withContext(Dispatchers.IO) {
-
-                //get current trait's trait name, use it as a plot_media directory
-                currentTrait.name?.let { traitName ->
-
-                    val traitDbId = currentTrait.id
-
-                    val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
-
-                    DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)
-                        ?.let { usbPhotosDir ->
-
-                            val plot = data["plot"]
-
-                            val studyId = data["studyId"] ?: String()
-
-                            val name = data["name"] ?: String()
-
-                            val timestamp = Utils.getDateTime()
-
-                            usbPhotosDir.createFile("*/*", name)?.let { file ->
-
-                                context.contentResolver.openOutputStream(file.uri)?.let { output ->
-
-                                    bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
-
-                                    database.deleteTraitByValue(studyId, plot, traitDbId, name)
-
-                                    database.insertObservation(
-                                        plot,
-                                        data["traitDbId"],
-                                        data["traitFormat"],
-                                        file.uri.toString(),
-                                        (activity as? CollectActivity)?.person,
-                                        (activity as? CollectActivity)?.locationByPreferences,
-                                        "",
-                                        studyId,
-                                        null,
-                                        null,
-                                        null
-                                    )
-
-                                    //if sdk > 24, can write exif information to the image
-                                    //goal is to encode observation variable model into the user comments
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-
-                                        ExifUtil.saveVariableUnitModelToExif(
-                                            context,
-                                            (controller.getContext() as CollectActivity).person,
-                                            timestamp,
-                                            database.getStudyById(studyId),
-                                            database.getObservationUnitById(currentRange.plot_id),
-                                            database.getObservationVariableById(currentTrait.id),
-                                            file.uri
-                                        )
-
-                                    }
-
-                                    activity?.runOnUiThread {
-
-                                        loadAdapterItems()
-
-                                        scrollToLast()
-                                    }
-                                }
-                            }
-                        }
-                }
-            }
-        }
-    }
-
-    private fun loadAdapterItems() {
-
-        Log.d(TAG, "loadAdapterItems")
-
-        val studyId = (context as CollectActivity).studyId
-
-        imageRecyclerView.adapter = ImageTraitAdapter(context, this, hasProgressBar = true)
-
-        currentTrait.name?.let { traitName ->
-
-            try {
-
-                val traitDbId = currentTrait.id
-
-                val plot = currentRange.plot_id
-                val toc = System.currentTimeMillis()
-                val uris = database.getAllObservations(studyId, plot, traitDbId)
-                val tic = System.currentTimeMillis()
-
-                Log.d(TAG, "Photo trait query time ${uris.size} photos: ${(tic - toc) * 1e-3}")
-
-                val models =
-                    uris.mapIndexed { index, model -> ImageTraitAdapter.Model(model.value, index) }
-
-                activity?.runOnUiThread {
-                    if (models.isNotEmpty()) {
-                        imageRecyclerView.visibility = View.VISIBLE
-                        (imageRecyclerView.adapter as ImageTraitAdapter).submitList(models)
-                        imageRecyclerView.adapter?.notifyItemRangeChanged(0, models.size)
-                    } else imageRecyclerView.visibility = View.GONE
-                }
-
-            } catch (e: Exception) {
-
-                e.printStackTrace()
+                connectToBluetoothDevice(adapter)
 
             }
         }
     }
 
-    private fun getImageObservations(): Array<ObservationModel> {
+    private fun connectToBluetoothDevice(adapter: BluetoothAdapter) {
 
-        val traitDbId = collectActivity.traitDbId.toInt()
-        val plot = collectActivity.observationUnit
-        val studyId = collectActivity.studyId
-
-        return database.getAllObservations(studyId).filter {
-            it.observation_variable_db_id == traitDbId && it.observation_unit_id == plot
-        }.toTypedArray()
-    }
-
-    private fun deleteItem(model: ImageTraitAdapter.Model) {
-
-        val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-
-        //get current trait's trait name, use it as a plot_media directory
-        currentTrait?.name?.let { traitName ->
-
-            val plot = currentRange.plot_id
-
-            getImageObservations().firstOrNull { it.value == model.uri }?.let { observation ->
-
-                try {
-
-                    DocumentFile.fromSingleUri(context, Uri.parse(observation.value))?.let { image ->
-
-                        val result = image.delete()
-
-                        if (result) {
-
-                            database.deleteTraitByValue(
-                                studyId,
-                                plot,
-                                currentTrait.id,
-                                image.uri.toString()
-                            )
-
-                            loadAdapterItems()
-
-                        } else {
-
-                            collectActivity.runOnUiThread {
-
-                                Toast.makeText(context, R.string.photo_failed_to_delete, Toast.LENGTH_SHORT).show()
-
-                            }
-                        }
-                    }
-
-                } catch (e: Exception) {
-
-                    Log.e(TAG, "Failed to delete images.", e)
-
-                }
+        val devices = adapter.bondedDevices.toTypedArray()
+        val displayList = devices.map { it.name }.toTypedArray()
+        var selected = 0
+        val dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+            .setTitle(R.string.trait_go_pro_await_device_title)
+            .setCancelable(true)
+            .setSingleChoiceItems(displayList, 0) { _, which ->
+                selected = which
             }
-        }
-    }
-
-    override fun refreshLock() {
-        super.refreshLock()
-        (context as CollectActivity).traitLockData()
-    }
-
-    override fun onApRequested() {}
-
-    override fun onBoardType(boardType: String) {}
-
-    override fun onBssid(wifiBSSID: String) {}
-
-    /**
-     * Collect activity callback region
-     */
-    override fun onCredentialsAcquired() {
-
-        try {
-
-            Log.d(TAG, "onCredentialsAcquired")
-
-            credentialsDialog?.dismiss()
-
-            awaitNetworkConnectionDialog()
-
-        } catch (e: Exception) {
-
-            e.printStackTrace()
-
-        }
-    }
-
-    override fun onFirmware(firmware: String) {}
-
-    override fun onModelId(modelID: Int) {}
-
-    override fun onModelName(modelName: String) {
-        if ("HERO11 Black" !in modelName) {
-            activity?.runOnUiThread {
-                Toast.makeText(context,
-                    activity?.getString(R.string.go_pro_layout_black_11_not_detected),
-                    Toast.LENGTH_LONG).show()
+            .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                dialog.dismiss()
             }
+            .setPositiveButton(android.R.string.ok) { dialog, which ->
+                Log.d(TAG, which.toString())
+                controller.getGoProApi().onConnect(devices[selected], this)
+            }.create()
+
+        dialog.show()
+    }
+
+    override fun onConnected() {
+
+        controller.getGoProApi().requestStream()
+
+    }
+
+    override fun onInitializeGatt() {
+
+        ui.launch {
+            dialogWaitForStream?.show()
         }
-    }
-
-    override fun onSerialNumber(serialNumber: String) {}
-
-    override fun onSsid(wifiSSID: String) {}
-
-    override fun onStreamReady() {
-
-        try {
-
-            Log.d(TAG, "onStreamReady")
-
-            createPlayer()
-
-        } catch (e: Exception) {
-
-            e.printStackTrace()
-
-        }
-    }
-
-    override fun onImageRequestReady(bitmap: Bitmap, data: Map<String, String>) {
-
-        try {
-
-            saveBitmapToStorage(bitmap, data)
-
-        } catch (e: Exception) {
-
-            e.printStackTrace()
-
-        }
-    }
-
-    override fun onItemClicked(model: ImageTraitAdapter.Model) {
-
-        if (!isLocked) {
-
-            getImageObservations().firstOrNull { it.value == model.uri }?.let { observation ->
-
-                DocumentFile.fromSingleUri(context, Uri.parse(observation.value))?.let { image ->
-
-                    activity?.startActivity(Intent(Intent.ACTION_VIEW, image.uri).also {
-                        it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    })
-                }
-            }
-        }
-    }
-
-    override fun onItemDeleted(model: ImageTraitAdapter.Model) {
-
-        try {
-
-            showDeleteImageDialog(model)
-
-        } catch (e: Exception) {
-
-            e.printStackTrace()
-
-        }
-    }
-
-    private fun stopAp() {
-
-        helper?.stopStream()
-
-        playerView.player?.stop()
-        playerView.player?.release()
-
-        disableAp()
-    }
-
-    private fun clearResources() {
-
-        stopAp()
-
-        activity?.runOnUiThread {
-            if (player != null) {
-                player!!.stop()
-                player!!.release()
-            }
-        }
-
-        gatt.clear()
-    }
-
-
-    override fun disableAp() {
-        gatt.disableAp()
-    }
-
-    override fun enableAp() {
-        gatt.enableAp()
-    }
-
-    override fun shutterOff() {
-        gatt.shutterOff()
-    }
-
-    override fun shutterOn() {
-        gatt.shutterOn()
     }
 }

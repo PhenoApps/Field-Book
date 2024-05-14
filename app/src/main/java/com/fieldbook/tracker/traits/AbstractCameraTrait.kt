@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
+import android.os.CancellationSignal
 import android.provider.DocumentsContract
 import android.util.AttributeSet
 import android.util.Log
@@ -18,6 +19,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.documentfile.provider.DocumentFile
+import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -66,6 +68,8 @@ abstract class AbstractCameraTrait :
 
     protected var activity: Activity? = null
     protected var connectBtn: FloatingActionButton? = null
+    protected var captureBtn: FloatingActionButton? = null
+    protected var styledPlayerView: PlayerView? = null
     protected var recyclerView: RecyclerView? = null
     protected var settingsButton: ImageButton? = null
     protected var shutterButton: ImageButton? = null
@@ -105,6 +109,9 @@ abstract class AbstractCameraTrait :
     override fun init(act: Activity) {
 
         connectBtn = act.findViewById(R.id.camera_fragment_connect_btn)
+        captureBtn = act.findViewById(R.id.camera_fragment_capture_btn)
+        imageView = act.findViewById(R.id.trait_camera_iv)
+        styledPlayerView = act.findViewById(R.id.trait_camera_spv)
         recyclerView = act.findViewById(R.id.camera_fragment_rv)
         settingsButton = act.findViewById(R.id.camera_fragment_settings_btn)
         shutterButton = act.findViewById(R.id.camera_fragment_capture_btn)
