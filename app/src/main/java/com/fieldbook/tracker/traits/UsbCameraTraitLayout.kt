@@ -100,11 +100,23 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
         imageView?.visibility = View.VISIBLE
 
-        (previewCardView?.layoutParams as ConstraintLayout.LayoutParams)
-            .width = ConstraintLayout.LayoutParams.WRAP_CONTENT
+        previewCardView?.layoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+            ConstraintLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            topToBottom = recyclerView?.id ?: ConstraintLayout.LayoutParams.PARENT_ID
+        }
 
-        (shutterButton?.layoutParams as ConstraintLayout.LayoutParams)
-            .topToBottom = previewCardView?.id ?: ConstraintLayout.LayoutParams.PARENT_ID
+        shutterButton?.layoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+            ConstraintLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            bottomToBottom = previewCardView?.id ?: ConstraintLayout.LayoutParams.PARENT_ID
+        }
 
         if (controller.getUsbApi().isConnected()) {
             

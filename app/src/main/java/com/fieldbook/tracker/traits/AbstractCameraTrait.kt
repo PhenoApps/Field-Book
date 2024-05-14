@@ -109,7 +109,6 @@ abstract class AbstractCameraTrait :
     override fun init(act: Activity) {
 
         connectBtn = act.findViewById(R.id.camera_fragment_connect_btn)
-        captureBtn = act.findViewById(R.id.camera_fragment_capture_btn)
         imageView = act.findViewById(R.id.trait_camera_iv)
         styledPlayerView = act.findViewById(R.id.trait_camera_spv)
         recyclerView = act.findViewById(R.id.camera_fragment_rv)
@@ -307,17 +306,29 @@ abstract class AbstractCameraTrait :
         }
     }
 
+    private fun resizeBitmap(bitmap: Bitmap, width: Int, height: Int): Bitmap {
+        return Bitmap.createScaledBitmap(bitmap, width, height, false)
+    }
+
     private fun showDeleteImageDialog(model: ImageAdapter.Model) {
 
         if (!isLocked) {
 
+            val thumbSize = getThumbnailSize()
+
             DocumentsContract.getDocumentThumbnail(
                 context.contentResolver,
-                Uri.parse(model.uri), getThumbnailSize(), null
+                Uri.parse(model.uri), thumbSize, null
             )?.let { bmp ->
 
+                val resizedBmp = if (Formats.isExternalCameraTrait(currentTrait.format)) {
+                    resizeBitmap(bmp, thumbSize.y, thumbSize.x)
+                } else {
+                    resizeBitmap(bmp, thumbSize.x, thumbSize.y)
+                }
+
                 val imageView = ImageView(context)
-                imageView.setImageBitmap(bmp)
+                imageView.setImageBitmap(resizedBmp)
 
                 AlertDialog.Builder(context, R.style.AppAlertDialog)
                     .setTitle(R.string.delete_local_photo)

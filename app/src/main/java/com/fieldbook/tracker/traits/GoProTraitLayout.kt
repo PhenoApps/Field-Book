@@ -24,13 +24,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-//todo gopro different versions
-////todo aim for hero 11 -> if not 11 then say a message with a link to an email
-//TODO improve time between taking a picture and it showing in match list items with timestamp when doing media query
-//TODO: shutter on the gopro detected in FB
-//TODO test usb camera trait with UVC.
-
-@UnstableApi @AndroidEntryPoint
+@UnstableApi
+@AndroidEntryPoint
 class GoProTraitLayout :
     CameraTrait,
     GoProApi.Callbacks {
@@ -63,10 +58,11 @@ class GoProTraitLayout :
 
         setupWaitForStreamDialog()
 
+        previewCardView?.visibility = View.VISIBLE
         styledPlayerView?.visibility = View.VISIBLE
         imageView?.visibility = View.INVISIBLE
 
-        styledPlayerView?.layoutParams = ConstraintLayout.LayoutParams(
+        previewCardView?.layoutParams = ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.MATCH_CONSTRAINT,
             ConstraintLayout.LayoutParams.WRAP_CONTENT
         ).also {
@@ -119,8 +115,9 @@ class GoProTraitLayout :
     private fun initializeConnectButton() {
 
         connectBtn?.visibility = View.VISIBLE
-        captureBtn?.visibility = View.GONE
+        shutterButton?.visibility = View.GONE
         styledPlayerView?.visibility = View.GONE
+        previewCardView?.visibility = View.GONE
 
         connectBtn?.setOnClickListener {
             connect()
@@ -146,23 +143,28 @@ class GoProTraitLayout :
 
     private fun initializeCameraShutterButton() {
 
+        previewCardView?.visibility = View.VISIBLE
         connectBtn?.visibility = View.GONE
         styledPlayerView?.visibility = View.VISIBLE
 
-        captureBtn?.visibility = View.VISIBLE
+        shutterButton?.layoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+            ConstraintLayout.LayoutParams.WRAP_CONTENT)
+            .apply {
+                startToStart = previewCardView?.id ?: 0
+                endToEnd = previewCardView?.id ?: 0
+                bottomToBottom = previewCardView?.id ?: 0
+            }
 
-        (captureBtn?.layoutParams as ConstraintLayout.LayoutParams)
-            .bottomToBottom = styledPlayerView?.id ?: 0
+        shutterButton?.setOnClickListener {
 
-        captureBtn?.setOnClickListener {
-
-            captureBtn?.isEnabled = false
+            shutterButton?.isEnabled = false
 
             controller.getGoProApi().range.add(getImageRequestData())
 
             controller.getGoProApi().shutterOn()
 
-            captureBtn?.isEnabled = false
+            shutterButton?.isEnabled = false
         }
 
         background.launch {
@@ -184,9 +186,9 @@ class GoProTraitLayout :
 
         ui.launch {
 
-            saveJpegToStorage(type(), bytes, data.range)
+            saveJpegToStorage(type(), bytes, data.range, data.time, SaveState.SINGLE_SHOT)
 
-            captureBtn?.isEnabled = true
+            shutterButton?.isEnabled = true
 
         }
     }
@@ -227,7 +229,7 @@ class GoProTraitLayout :
     override fun onStreamReady() {
         dialogWaitForStream?.dismiss()
         initializeCameraShutterButton()
-        captureBtn?.visibility = View.VISIBLE
+        shutterButton?.visibility = View.VISIBLE
     }
 
     private fun createPlayer() {
