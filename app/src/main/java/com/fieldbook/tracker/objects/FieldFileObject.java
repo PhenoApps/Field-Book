@@ -1,27 +1,22 @@
 package com.fieldbook.tracker.objects;
 
-import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BOOLEAN;
-import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
-import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.CSVReader;
+import com.fieldbook.tracker.utilities.StringUtil;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,9 +25,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
-
-import jxl.Workbook;
-import jxl.WorkbookSettings;
 
 //TODO when merged with xlsx edit getColumnSet
 public class FieldFileObject {
@@ -64,6 +56,7 @@ public class FieldFileObject {
     public abstract static class FieldFileBase {
         boolean openFail;
         boolean specialCharactersFail;
+        private String lastErrorMessage = "";
         private final Uri path_;
         private final Context ctx;
 
@@ -72,6 +65,38 @@ public class FieldFileObject {
             path_ = path;
             openFail = false;
             specialCharactersFail = false;
+        }
+
+        protected void setLastError(String message) {
+            this.lastErrorMessage = message;
+            Log.e("FieldFileBase", message);
+        }
+
+        public String getLastError() {
+            return this.lastErrorMessage;
+        }
+
+        // Helper method to check unique values
+        protected boolean checkUnique(HashMap<String, String> check, String value, String columnLabel, int rowIndex) {
+
+            if (value == null || value.isEmpty()) {
+                setLastError(ctx.getString(R.string.import_runnable_create_field_missing_unique, columnLabel, rowIndex + 1));
+                return false;
+            }
+
+            if (check.containsKey(value)) {
+                setLastError(ctx.getString(R.string.import_runnable_create_field_duplicate_unique, value, rowIndex + 1));
+                return false;
+            }
+
+            if (value.contains("/") || value.contains("\\")) {
+                specialCharactersFail = true;
+                setLastError(ctx.getString(R.string.import_runnable_create_field_special_characters, value, rowIndex + 1));
+                return false;
+            }
+
+            check.put(value, value);
+            return true;
         }
 
         public final InputStream getInputStream() {
@@ -165,9 +190,7 @@ public class FieldFileObject {
 
         abstract public String[] getColumns();
 
-        // return {column name: column name}
-        // if columns are duplicated, return an empty HshMap
-        abstract public HashMap<String, String> getColumnSet(int idColPosition);
+        abstract public HashMap<String, String> getColumnSet(String unique, int idColPosition);
 
         // read file
         abstract public void open();
@@ -208,39 +231,34 @@ public class FieldFileObject {
             }
         }
 
-        public HashMap<String, String> getColumnSet(int idColPosition) {
+        public HashMap<String, String> getColumnSet(String columnLabel, int idColPosition) {
+            HashMap<String, String> check = new HashMap<>();
             try {
                 openFail = false;
-                HashMap<String, String> check = new HashMap<>();
                 InputStreamReader isr = new InputStreamReader(super.getInputStream());
                 CSVReader cr = new CSVReader(isr);
                 String[] columns = cr.readNext();
+                int rowIndex = 0;
 
                 while (columns != null) {
                     columns = cr.readNext();
-
+                    rowIndex++;
                     if (columns != null) {
-                        String unique = columns[idColPosition];
-                        if (!unique.isEmpty()) {
-                            if (check.containsKey(unique)) {
-                                cr.close();
-                                return new HashMap<>();
-                            } else {
-                                check.put(unique, unique);
-                            }
-
-                            if (unique.contains("/") || unique.contains("\\")) {
-                                specialCharactersFail = true;
-                            }
+                        if (!checkUnique(check, columns[idColPosition], columnLabel, rowIndex)) {
+                            close();
+                            return null; // Return null to indicate an error has occurred
                         }
                     }
                 }
-                return check;
-            } catch (Exception n) {
+            } catch (Exception e) {
                 openFail = true;
-                n.printStackTrace();
-                return new HashMap<>();
+                e.printStackTrace();
+                setLastError("Failed to process file: " + e.getMessage());
+                return null;
+            } finally {
+                close();
             }
+            return check;
         }
 
         public void open() {
@@ -278,6 +296,8 @@ public class FieldFileObject {
         private Workbook wb;
         private int current_row;
 
+        DataFormatter formatter = new DataFormatter();
+
         FieldFileExcel(final Context ctx, final Uri path) {
             super(ctx, path);
         }
@@ -297,47 +317,65 @@ public class FieldFileObject {
         public String[] getColumns() {
             try {
                 openFail = false;
-                WorkbookSettings wbSettings = new WorkbookSettings();
-                wbSettings.setUseTemporaryFileDuringWrite(true);
-
                 InputStream is = super.getInputStream();
                 if (is != null) {
-                    wb = Workbook.getWorkbook(super.getInputStream(), wbSettings);
-                    String[] importColumns = new String[wb.getSheet(0).getColumns()];
+                    wb = new XSSFWorkbook(is);
+                    Sheet sheet = wb.getSheetAt(0);
+                    Row headerRow = sheet.getRow(0);
+                    if (headerRow == null) return new String[0];
 
-                    for (int s = 0; s < wb.getSheet(0).getColumns(); s++) {
-                        importColumns[s] = wb.getSheet(0).getCell(s, 0).getContents();
+                    String[] importColumns = new String[headerRow.getLastCellNum()];
+                    for (int cn = 0; cn < headerRow.getLastCellNum(); cn++) {
+                        Cell cell = headerRow.getCell(cn, Row.RETURN_BLANK_AS_NULL);
+                        importColumns[cn] = (cell == null) ? "" : formatter.formatCellValue(cell);
                     }
                     return importColumns;
                 }
-
             } catch (Exception ignore) {
                 openFail = true;
-                return new String[0];
             }
-
             return new String[0];
         }
 
-        public HashMap<String, String> getColumnSet(int idColPosition) {
+        @Override
+        public HashMap<String, String> getColumnSet(String columnLabel, int idColPosition) {
             HashMap<String, String> check = new HashMap<>();
+            try {
+                open();
+                Sheet sheet = wb.getSheetAt(0);
+                int totalRows = sheet.getLastRowNum();
 
-            for (int s = 0; s < wb.getSheet(0).getRows(); s++) {
-                String value = wb.getSheet(0).getCell(idColPosition, s).getContents();
+                for (int rowIndex = 0; rowIndex <= totalRows; rowIndex++) {
+                    Row row = sheet.getRow(rowIndex);
+                    Cell cell = row.getCell(idColPosition, Row.RETURN_BLANK_AS_NULL);
+                    String value = cell == null ? "" : formatter.formatCellValue(cell);
 
-                if (!value.isEmpty()) {
-                    if (check.containsKey(value)) {
-                        return new HashMap<>();
-                    } else {
-                        check.put(value, value);
+                    if (value.isEmpty() && isRowEmpty(row)) {
+                        continue; // Skip the row if the specific cell is empty and the whole row is empty
                     }
 
-                    if (value.contains("/") || value.contains("\\")) {
-                        specialCharactersFail = true;
+                    if (!checkUnique(check, value, columnLabel, rowIndex)) {
+                        return null;
                     }
                 }
+            } catch (Exception e) {
+                setLastError("Failed to process Excel file: " + e.getMessage());
+                return null;
+            } finally {
+                close();
             }
             return check;
+        }
+
+        private boolean isRowEmpty(Row row) {
+            if (row == null) return true;
+            for (int cellNum = row.getFirstCellNum(); cellNum < row.getLastCellNum(); cellNum++) {
+                Cell cell = row.getCell(cellNum, Row.RETURN_BLANK_AS_NULL);
+                if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void open() {
@@ -345,15 +383,26 @@ public class FieldFileObject {
         }
 
         public String[] readNext() {
-            if (current_row >= wb.getSheet(0).getRows()) {
+            Sheet sheet = wb.getSheetAt(0);
+            if (current_row > sheet.getLastRowNum()) {
                 return null;
             }
 
-            String[] data = new String[wb.getSheet(0).getColumns()];
-            for (int s = 0; s < wb.getSheet(0).getColumns(); s++) {
-                data[s] = wb.getSheet(0).getCell(s, current_row).getContents();
+            Row row = sheet.getRow(current_row);
+            if (row == null) {
+                current_row++;
+                return new String[0];
             }
-            current_row += 1;
+
+            int numCells = row.getLastCellNum();
+            String[] data = new String[numCells];
+
+            for (int cellIndex = 0; cellIndex < numCells; cellIndex++) {
+                Cell cell = row.getCell(cellIndex, Row.RETURN_BLANK_AS_NULL);
+                data[cellIndex] = (cell == null) ? "" : formatter.formatCellValue(cell);
+            }
+
+            current_row++;
             return data;
         }
 
@@ -374,6 +423,8 @@ public class FieldFileObject {
     public static class FieldFileXlsx extends FieldFileBase {
         private XSSFWorkbook wb;
         private int currentRow;
+
+        DataFormatter formatter = new DataFormatter();
 
         FieldFileXlsx(final Context ctx, final Uri path) {
             super(ctx, path);
@@ -428,29 +479,44 @@ public class FieldFileObject {
             return new String[0];
         }
 
-        public HashMap<String, String> getColumnSet(int idColPosition) {
+        @Override
+        public HashMap<String, String> getColumnSet(String columnLabel, int idColPosition) {
             HashMap<String, String> check = new HashMap<>();
+            try {
+                open();
+                XSSFSheet sheet = wb.getSheetAt(0);
 
-            XSSFSheet sheet = wb.getSheetAt(0);
+                for (Iterator<Row> it = sheet.rowIterator(); it.hasNext(); ) {
+                    XSSFRow row = (XSSFRow) it.next();
+                    String value = getCellStringValue(row.getCell(idColPosition));
 
-            for (Iterator<Row> it = sheet.rowIterator(); it.hasNext(); ) {
-                XSSFRow row = (XSSFRow) it.next();
+                    if (value.isEmpty() && isRowEmpty(row)) {
+                        continue; // Skip the row if the specific cell is empty and the whole row is empty
+                    }
 
-                String value = getCellStringValue(row.getCell(idColPosition));
-
-                if (check.containsKey(value)) {
-                    return new HashMap<>();
-                } else {
-                    check.put(value, value);
+                    if (!checkUnique(check, value, columnLabel, row.getRowNum())) {
+                        return null;
+                    }
                 }
-
-                if (value.contains("/") || value.contains("\\")) {
-                    specialCharactersFail = true;
-                }
-
+            } catch (Exception e) {
+                setLastError("Failed to process XLSX file: " + e.getMessage());
+                return null;
+            } finally {
+                close();
             }
-
             return check;
+        }
+
+        private boolean isRowEmpty(XSSFRow row) {
+            if (row == null || row.getLastCellNum() <= 0) {
+                return true;
+            }
+            for (Cell cell : row) {
+                if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void open() {
@@ -458,44 +524,28 @@ public class FieldFileObject {
         }
 
         public String[] readNext() {
-
-            DataFormatter fmt = new DataFormatter();
-            ArrayList<XSSFRow> rows = new ArrayList<>();
             XSSFSheet sheet = wb.getSheetAt(0);
-
-            XSSFFormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
-
-            for (Iterator<Row> it = sheet.rowIterator(); it.hasNext();) {
-                rows.add((XSSFRow) it.next());
-            }
-
-            if (currentRow >= rows.size()) {
+            if (currentRow > sheet.getLastRowNum()) {
                 return null;
             }
 
-            ArrayList<String> data = new ArrayList<>();
-            for (Iterator<Cell> it = rows.get(currentRow).cellIterator(); it.hasNext();) {
-                XSSFCell cell = (XSSFCell) it.next();
-                if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {//formula
-                    int type = evaluator.evaluateFormulaCell(cell);
-                    switch (type) {
-                        case CELL_TYPE_BOOLEAN:
-                            data.add(String.valueOf(cell.getBooleanCellValue()));
-                            break;
-                        case CELL_TYPE_NUMERIC:
-                            data.add(String.valueOf(cell.getNumericCellValue()));
-                            break;
-                        default:
-                            data.add(cell.getStringCellValue());
-                            break;
-                    }
-                } else {
-                    data.add(fmt.formatCellValue(cell));
-                }
+            XSSFRow row = sheet.getRow(currentRow);
+            if (row == null) {
+                currentRow++;
+                return new String[0];
             }
 
-            currentRow += 1;
-            return data.toArray(new String[] {});
+
+            int numCells = row.getLastCellNum();
+            String[] data = new String[numCells];
+
+            for (int cellIndex = 0; cellIndex < numCells; cellIndex++) {
+                XSSFCell cell = row.getCell(cellIndex, Row.RETURN_BLANK_AS_NULL);
+                data[cellIndex] = (cell == null) ? "" : formatter.formatCellValue(cell);
+            }
+
+            currentRow++;
+            return data;
         }
 
         public void close() {
@@ -513,38 +563,20 @@ public class FieldFileObject {
     }
 
     /**
-     * Helper function that reads the cell value and parses to string from xlsx sheets.
-     * @param cell the xssf cell object
-     * @return attempt to parse the string value of the cell
+     * Helper function that reads the cell value and formats it as a string, handling different cell types including formulas.
+     * @param cell the XSSFCell object from an Apache POI XSSFWorkbook.
+     * @return the formatted string value of the cell.
      */
     private static String getCellStringValue(XSSFCell cell) {
-
         if (cell == null) return "";
 
-        FormulaEvaluator evaluator = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
-
-        switch (cell.getCellType()) {
-            case 0: { //numeric
-                return String.valueOf(cell.getNumericCellValue());
-            }
-            case 1: { //text
-                return cell.getStringCellValue();
-            }
-            case Cell.CELL_TYPE_FORMULA: { //formula
-                switch (evaluator.evaluateFormulaCell(cell)) {
-                    case CELL_TYPE_BOOLEAN:
-                        return String.valueOf(cell.getBooleanCellValue());
-                    case CELL_TYPE_NUMERIC:
-                        return String.valueOf(cell.getNumericCellValue());
-                    case CELL_TYPE_STRING:
-                        return cell.getStringCellValue();
-                }
-            }
-            case 3: { //boolean
-                return String.valueOf(cell.getBooleanCellValue());
-            }
-            default:
-                return "";
+        DataFormatter formatter = new DataFormatter();
+        try {
+            // Use the DataFormatter to handle different data types uniformly
+            return formatter.formatCellValue(cell, cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator());
+        } catch (Exception e) {
+            Log.e("FieldFileBase", "Error parsing cell value: " + e.getMessage());
+            return "";
         }
     }
 
@@ -569,7 +601,7 @@ public class FieldFileObject {
             return new String[0];
         }
 
-        public HashMap<String, String> getColumnSet(int idColPosition) {
+        public HashMap<String, String> getColumnSet(String columnLabel, int idColPosition) {
             return new HashMap<>();
         }
 

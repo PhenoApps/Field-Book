@@ -1,10 +1,13 @@
 package com.fieldbook.tracker.async;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.text.Html;
+import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
@@ -33,8 +36,10 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
     int lineFail = -1;
     boolean fail;
+    String failMessage;
     boolean uniqueFail;
     boolean containsDuplicates = false;
+    private static final String TAG = "ImportRunnableTask";
 
     public ImportRunnableTask(Context context, FieldFileObject.FieldFileBase fieldFile,
                               int idColPosition, String unique, String primary, String secondary) {
@@ -82,8 +87,10 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             }
 
             if (mFieldFile.hasSpecialCharacters()) {
+                Log.d(TAG, "doInBackground: Special characters found in file column names");
                 return 0;
             }
+
 
             mFieldFile.open();
             String[] data;
@@ -107,7 +114,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                 //populate an array of indices that have a non empty column
                 //later we will only add data rows with the non empty columns
                 //also find the unique/primary/secondary indices
-                //later we will skip the rows if these are not present
+                //later we will return an error if these are not present
                 if (!columns[i].isEmpty()) {
 
                     if (!nonEmptyColumns.contains(columns[i])) {
@@ -136,9 +143,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
             //start iterating over all the rows of the csv file only if we found the u/p/s indices
             if (uniqueIndex > -1 && primaryIndex > -1 && secondaryIndex > -1) {
-
                 int line = 0;
-
                 try {
                     while (true) {
                         data = mFieldFile.readNext();
@@ -164,6 +169,15 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                                 controller.getDatabase().createFieldData(studyId, nonEmptyColumns, nonEmptyData);
 
+                            } else {
+                                fail = true;
+                                if (data[uniqueIndex].isEmpty()) {
+                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_unique, unique, line);
+                                } else if (data[primaryIndex].isEmpty()) {
+                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_primary, primary, line);
+                                } else if (data[secondaryIndex].isEmpty()) {
+                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_secondary, secondary, line);
+                                }
                             }
                         }
 
@@ -171,8 +185,10 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                     }
 
                     controller.getDatabase().setTransactionSuccessfull();
+                    Log.d(TAG, "doInBackground: Field data created successfully for study ID: " + studyId);
 
                 } catch (Exception e) {
+                    Log.e(TAG, "doInBackground: Exception at line " + line + ", Error: " + e.getMessage(), e);
 
                     lineFail = line;
 
@@ -185,6 +201,8 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                     controller.getDatabase().endTransaction();
 
                 }
+            } else {
+                Log.d(TAG, "doInBackground: Required indices not found. UniqueIndex: " + uniqueIndex + ", PrimaryIndex: " + primaryIndex + ", SecondaryIndex: " + secondaryIndex);
             }
 
 
@@ -198,7 +216,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         } catch (Exception e) {
             e.printStackTrace();
             fail = true;
-
+            failMessage = mContext.get().getString(R.string.import_runnable_create_field_data_failed);
             controller.getDatabase().close();
             controller.getDatabase().open();
         }
@@ -215,24 +233,25 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         if (dialog.isShowing())
             dialog.dismiss();
 
-        if (fail | uniqueFail | mFieldFile.hasSpecialCharacters()) {
+        // Display user feedback in an alert dialog
+        if (context != null && (uniqueFail || mFieldFile.hasSpecialCharacters())) {
+            String errorMessage = mFieldFile.getLastError();
+            showAlertDialog(context, "Unable to Import", errorMessage);
+        } else if (context != null && fail ) {
+            showAlertDialog(context, "Unable to Import", failMessage);
+        } else if (containsDuplicates) {
+            showAlertDialog(context, "Import Warning", context.getString(R.string.import_runnable_duplicates_skipped));
+        }
+
+        if (fail || uniqueFail || mFieldFile.hasSpecialCharacters()) {
             controller.getDatabase().deleteField(result);
             SharedPreferences.Editor ed = preferences.edit();
             ed.putString(GeneralKeys.FIELD_FILE, null);
             ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
             ed.apply();
-        }
-        if (containsDuplicates) {
-            Utils.makeToast(context, context.getString(R.string.import_runnable_duplicates_skipped));
-        }
-        if (fail) {
-            Utils.makeToast(context, context.getString(R.string.import_runnable_create_field_data_failed, lineFail));
-            //makeToast(getString(R.string.import_error_general));
-        } else if (uniqueFail && context != null) {
-            Utils.makeToast(context,context.getString(R.string.import_error_unique));
-        } else if (mFieldFile.hasSpecialCharacters()) {
-            Utils.makeToast(context,context.getString(R.string.import_error_unique_characters_illegal));
         } else {
+            Log.d(TAG, "onPostExecute: Import successful. Field setup for ID: " + result);
+
             SharedPreferences.Editor ed = preferences.edit();
 
             CollectActivity.reloadData = true;
@@ -262,11 +281,26 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
     }
 
     private boolean verifyUniqueColumn(FieldFileObject.FieldFileBase fieldFile) {
-        HashMap<String, String> check = fieldFile.getColumnSet(idColPosition);
-        if (check.isEmpty()) {
+        HashMap<String, String> result = fieldFile.getColumnSet(unique, idColPosition);
+        if (result == null) {
             return false;
         } else {
-            return controller.getDatabase().checkUnique(check);
+            return controller.getDatabase().checkUnique(result);
         }
     }
+
+    private void showAlertDialog(Context context, String title, String message) {
+        new AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
 }
