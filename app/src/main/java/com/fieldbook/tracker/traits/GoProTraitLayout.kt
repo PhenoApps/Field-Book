@@ -4,15 +4,11 @@ import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.os.Handler
-import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.media3.common.util.UnstableApi
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -24,7 +20,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-@UnstableApi
 @AndroidEntryPoint
 class GoProTraitLayout :
     CameraTrait,
@@ -33,7 +28,6 @@ class GoProTraitLayout :
     companion object {
         const val TAG = "GoProTrait"
         const val type = "gopro"
-        private const val CAMERA_DELAY_MS = 10000L
     }
 
     private var dialogWaitForStream: AlertDialog? = null
@@ -272,7 +266,7 @@ class GoProTraitLayout :
             .setNegativeButton(android.R.string.cancel) { dialog, _ ->
                 dialog.dismiss()
             }
-            .setPositiveButton(android.R.string.ok) { dialog, which ->
+            .setPositiveButton(android.R.string.ok) { _, which ->
                 Log.d(TAG, which.toString())
                 controller.getGoProApi().onConnect(devices[selected], this)
             }.create()

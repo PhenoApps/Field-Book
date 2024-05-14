@@ -10,7 +10,6 @@ import android.graphics.Bitmap
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
-import android.os.CancellationSignal
 import android.provider.DocumentsContract
 import android.util.AttributeSet
 import android.util.Log
