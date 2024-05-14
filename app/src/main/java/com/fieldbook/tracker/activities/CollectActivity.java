@@ -49,6 +49,7 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.devices.camera.UsbCameraApi;
 import com.fieldbook.tracker.devices.camera.GoProApi;
+import com.fieldbook.tracker.devices.camera.CanonApi;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
@@ -64,6 +65,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
+import com.fieldbook.tracker.traits.CanonTrait;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
@@ -163,6 +165,9 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     BluetoothHelper bluetoothHelper;
+
+    @Inject
+    CanonApi canonApi;
 
     @Inject
     KeyboardListenerHelper keyboardListenerHelper;
@@ -2061,13 +2066,21 @@ public class CollectActivity extends ThemedActivity
         FragmentManager m = getSupportFragmentManager();
         int count = getSupportFragmentManager().getBackStackEntryCount();
 
+        String format = traitBox.getCurrentFormat();
+
         if (count == 0) {
 
             if (isNavigatingFromSummary) {
 
                 isNavigatingFromSummary = false;
 
-            } else {
+            } else if (format.equals(CanonTrait.type)) {
+
+                canonApi.stopSession();
+
+                wifiHelper.disconnect();
+
+            }else {
 
                 finish();
 
@@ -2594,5 +2607,11 @@ public class CollectActivity extends ThemedActivity
     @Override
     public CameraXFacade getCameraXFacade() {
         return cameraXFacade;
+    }
+
+    @NonNull
+    @Override
+    public CanonApi getCanonApi() {
+        return canonApi;
     }
 }

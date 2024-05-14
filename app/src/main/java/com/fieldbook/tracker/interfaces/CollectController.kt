@@ -5,6 +5,7 @@ import android.location.Location
 import android.os.Handler
 import com.fieldbook.tracker.devices.camera.UsbCameraApi
 import com.fieldbook.tracker.devices.camera.GoProApi
+import com.fieldbook.tracker.devices.camera.CanonApi
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.utilities.CameraXFacade
 import com.fieldbook.tracker.utilities.BluetoothHelper
@@ -55,4 +56,5 @@ interface CollectController: FieldController {
     fun getGoProApi(): GoProApi
     fun advisor(): SecureBluetooth
     fun getFfmpegHelper(): FfmpegHelper
+    fun getCanonApi(): CanonApi
 }
