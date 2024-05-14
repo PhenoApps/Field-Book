@@ -7,6 +7,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
@@ -158,6 +159,8 @@ class TextTraitLayout : BaseTraitLayout {
         inputEditText?.removeTextChangedListener(textWatcher)
         super.loadLayout()
         inputEditText?.isEnabled = !isLocked
+        inputEditText?.inputType = if (isLocked) EditorInfo.TYPE_NULL else EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+        if (!isLocked) inputEditText?.requestFocus()
     }
 
     override fun afterLoadExists(act: CollectActivity, value: String?) {
@@ -227,5 +230,10 @@ class TextTraitLayout : BaseTraitLayout {
             input.addTextChangedListener(textWatcher)
             input.requestFocus()
         }
+    }
+
+    override fun refreshLock() {
+        super.refreshLock()
+        loadLayout()
     }
 }
