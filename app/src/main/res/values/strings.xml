@@ -102,7 +102,7 @@
     </plurals>
 
     <!-- Import -->
-    <string name="fields_toolbar_add_field">Import Field</string>
+    <string name="fields_new_button_content_description">Add a new field.</string>
     <string name="import_dialog_title_fields">Import field</string>
     <string name="import_dialog_unique">Unique identifier</string>
     <string name="import_dialog_primary">Primary identifier</string>
@@ -239,7 +239,7 @@
     <string name="trait_creator_title_layout">Trait Layout</string>
     <string name="trait_creator_parameters_title">%s Parameters</string>
 
-    <string name="activity_traits_new_button_content_description">Create a new trait.</string>
+    <string name="activity_traits_new_button_content_description">Add a new trait.</string>
 
     <string name="traits_create_name">Name</string>
     <string name="traits_create_format">Format</string>

@@ -340,8 +340,8 @@ public class FieldEditorActivityOld extends ThemedActivity
         int itemId = item.getItemId();
         if (itemId == R.id.help) {
             TapTargetSequence sequence = new TapTargetSequence(this)
-                    .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
-                            fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
+                    .targets(fieldsTapTargetMenu(R.id.newField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
+                            fieldsTapTargetMenu(R.id.newField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
                     );
 
             if (fieldExists()) {
@@ -350,7 +350,7 @@ public class FieldEditorActivityOld extends ThemedActivity
             }
 
             sequence.start();
-        } else if (itemId == R.id.importField) {
+        } else if (itemId == R.id.newField) {
             String importer = preferences.getString("IMPORT_SOURCE_DEFAULT", "ask");
 
             switch (importer) {

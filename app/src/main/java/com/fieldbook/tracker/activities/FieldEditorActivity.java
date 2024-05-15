@@ -505,8 +505,8 @@ public class FieldEditorActivity extends ThemedActivity
         int itemId = item.getItemId();
         if (itemId == R.id.help) {
             TapTargetSequence sequence = new TapTargetSequence(this)
-                .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
-                        fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
+                .targets(fieldsTapTargetMenu(R.id.newField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
+                        fieldsTapTargetMenu(R.id.newField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
                 );
             if (fieldExists()) {
                 sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_select_title), getString(R.string.tutorial_fields_select_description)));
@@ -514,7 +514,7 @@ public class FieldEditorActivity extends ThemedActivity
             }
 
             sequence.start();
-        } else if (itemId == R.id.importField) {
+        } else if (itemId == R.id.newField) {
             handleImportAction();
         } else if (itemId == R.id.menu_field_editor_item_creator) {
             FieldCreatorDialog dialog = new FieldCreatorDialog(this);
