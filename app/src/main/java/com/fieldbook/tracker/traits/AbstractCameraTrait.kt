@@ -28,6 +28,7 @@ import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.BitmapLoader
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
 import com.fieldbook.tracker.utilities.ExifUtil
 import com.fieldbook.tracker.utilities.FileUtil
@@ -67,7 +68,6 @@ abstract class AbstractCameraTrait :
 
     protected var activity: Activity? = null
     protected var connectBtn: FloatingActionButton? = null
-    protected var captureBtn: FloatingActionButton? = null
     protected var styledPlayerView: PlayerView? = null
     protected var recyclerView: RecyclerView? = null
     protected var settingsButton: ImageButton? = null
@@ -113,10 +113,9 @@ abstract class AbstractCameraTrait :
         recyclerView = act.findViewById(R.id.camera_fragment_rv)
         settingsButton = act.findViewById(R.id.camera_fragment_settings_btn)
         shutterButton = act.findViewById(R.id.camera_fragment_capture_btn)
-        imageView = act.findViewById(R.id.trait_camera_iv)
         previewCardView = act.findViewById(R.id.trait_camera_cv)
 
-        recyclerView?.adapter = ImageAdapter(this, getThumbnailSize())
+        recyclerView?.adapter = ImageAdapter(this)
 
         recyclerView?.layoutManager = RightToLeftReversedLinearLayoutManager(context)
 
@@ -126,15 +125,6 @@ abstract class AbstractCameraTrait :
     abstract fun showSettings()
 
     abstract fun onSettingsChanged()
-
-    open fun getThumbnailSize(): Point {
-
-        //get thumbnail size from camera dimension resources
-        val thumbnailWidth = resources.getDimensionPixelSize(R.dimen.camera_preview_width)
-        val thumbnailHeight = resources.getDimensionPixelSize(R.dimen.camera_preview_height)
-
-        return Point(thumbnailWidth, thumbnailHeight)
-    }
 
     protected fun saveJpegToStorage(
         format: String,
@@ -305,44 +295,28 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    private fun resizeBitmap(bitmap: Bitmap, width: Int, height: Int): Bitmap {
-        return Bitmap.createScaledBitmap(bitmap, width, height, false)
-    }
-
     private fun showDeleteImageDialog(model: ImageAdapter.Model) {
 
         if (!isLocked) {
 
-            val thumbSize = getThumbnailSize()
+            val preview = BitmapLoader.getPreview(context, model.uri, model.orientation)
 
-            DocumentsContract.getDocumentThumbnail(
-                context.contentResolver,
-                Uri.parse(model.uri), thumbSize, null
-            )?.let { bmp ->
+            val imageView = ImageView(context)
+            imageView.setImageBitmap(preview)
 
-                val resizedBmp = if (Formats.isExternalCameraTrait(currentTrait.format)) {
-                    resizeBitmap(bmp, thumbSize.y, thumbSize.x)
-                } else {
-                    resizeBitmap(bmp, thumbSize.x, thumbSize.y)
+            AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(R.string.delete_local_photo)
+                .setOnCancelListener { dialog -> dialog.dismiss() }
+                .setPositiveButton(android.R.string.ok) { dialog, _ ->
+
+                    dialog.dismiss()
+
+                    deleteItem(model)
+
                 }
-
-                val imageView = ImageView(context)
-                imageView.setImageBitmap(resizedBmp)
-
-                AlertDialog.Builder(context, R.style.AppAlertDialog)
-                    .setTitle(R.string.delete_local_photo)
-                    .setOnCancelListener { dialog -> dialog.dismiss() }
-                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
-
-                        dialog.dismiss()
-
-                        deleteItem(model)
-
-                    }
-                    .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
-                    .setView(imageView)
-                    .show()
-            }
+                .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
+                .setView(imageView)
+                .show()
         }
     }
 

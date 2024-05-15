@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.utilities.BitmapLoader
 import java.io.FileNotFoundException
 
 
@@ -29,7 +30,7 @@ import java.io.FileNotFoundException
  * the preview view is used, which has a shutter button, a settings button, and an 'embiggen' button that
  * starts a fullscreen capture.
  */
-class ImageAdapter(private val listener: ImageItemHandler, private val thumbnailSize: Point) :
+class ImageAdapter(private val listener: ImageItemHandler) :
         ListAdapter<ImageAdapter.Model, ImageAdapter.ViewHolder>(DiffCallback()) {
 
     enum class Type {
@@ -83,29 +84,20 @@ class ImageAdapter(private val listener: ImageItemHandler, private val thumbnail
                 val previewWidth = view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_width)
                 val previewHeight = view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_height)
 
+                val (actualWidth, actualHeight) =
+                    if (model.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        (previewHeight to previewWidth)
+                    } else (previewWidth to previewHeight)
+
                 (cardView.layoutParams as ConstraintLayout.LayoutParams).apply {
-
-                    if (model.orientation == Configuration.ORIENTATION_PORTRAIT) {
-
-                        width = previewWidth
-                        height = previewHeight
-
-                    } else {
-
-                        width = previewHeight
-                        height = previewWidth
-
-                    }
+                    width = actualWidth
+                    height = actualHeight
                 }
 
-                DocumentsContract.getDocumentThumbnail(
-                    view.context.contentResolver,
-                    Uri.parse(model.uri), thumbnailSize, null
-                )?.let { bmp ->
+                val preview = BitmapLoader.getPreview(view.context, model.uri, model.orientation)
 
-                    imageView.setImageBitmap(bmp)
+                imageView.setImageBitmap(preview)
 
-                }
 
             } catch (f: FileNotFoundException) {
 

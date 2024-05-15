@@ -7,10 +7,7 @@ import com.fieldbook.tracker.offbeat.traits.formats.TraitFormat
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.NameParameter
 
-class CanonFormat : PhotoFormat(
+class CanonFormat : BasePhotoFormat(
     format = Formats.CANON,
-    defaultLayoutId = R.layout.trait_camera,
-    layoutView = null,
     nameStringResourceId = R.string.traits_format_canon,
-    iconDrawableResourceId = R.drawable.camera_24px,
-    stringNameAux = null)
+    iconDrawableResourceId = R.drawable.camera_24px)

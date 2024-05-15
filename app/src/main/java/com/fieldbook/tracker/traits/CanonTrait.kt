@@ -55,12 +55,10 @@ class CanonTrait :
 
         activity?.runOnUiThread {
 
-            captureBtn?.visibility = View.INVISIBLE
+            shutterButton?.visibility = View.INVISIBLE
 
             imageView?.visibility = View.INVISIBLE
-
-            (imageView?.layoutParams as ConstraintLayout.LayoutParams)
-                .width = ConstraintLayout.LayoutParams.MATCH_PARENT
+            previewCardView?.visibility = View.INVISIBLE
 
             connectBtn?.visibility = View.VISIBLE
 
@@ -115,12 +113,31 @@ class CanonTrait :
         uiScope.launch {
 
             connectBtn?.visibility = View.INVISIBLE
-
             imageView?.visibility = View.VISIBLE
+            previewCardView?.visibility = View.VISIBLE
 
-            captureBtn?.setOnClickListener {
+            previewCardView?.layoutParams = ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.MATCH_CONSTRAINT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT
+            ).also {
+                it.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+                it.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+                it.topToBottom = recyclerView?.id ?: 0
+                it.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            }
 
-                captureBtn?.isEnabled = false
+            shutterButton?.layoutParams = ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT)
+                .apply {
+                    startToStart = previewCardView?.id ?: 0
+                    endToEnd = previewCardView?.id ?: 0
+                    bottomToBottom = previewCardView?.id ?: 0
+                }
+
+            shutterButton?.setOnClickListener {
+
+                shutterButton?.isEnabled = false
 
                 controller.getCanonApi().startSingleShotCapture(currentRange, Utils.getDateTime())
 
@@ -128,7 +145,7 @@ class CanonTrait :
 
                 Handler(Looper.getMainLooper()).postDelayed({
 
-                    captureBtn?.isEnabled = true
+                    shutterButton?.isEnabled = true
 
                     controller.getRangeBox().toggleNavigation(true)
 
@@ -143,12 +160,13 @@ class CanonTrait :
         uiScope.launch {
 
             imageView?.visibility = View.INVISIBLE
+            previewCardView?.visibility = View.INVISIBLE
 
-            captureBtn?.visibility = View.INVISIBLE
+            shutterButton?.visibility = View.INVISIBLE
 
             connectBtn?.visibility = View.VISIBLE
 
-            captureBtn?.setOnClickListener(null)
+            shutterButton?.setOnClickListener(null)
         }
     }
 
@@ -156,7 +174,7 @@ class CanonTrait :
 
         uiScope.launch(Dispatchers.Main) {
 
-            captureBtn?.visibility = View.VISIBLE
+            shutterButton?.visibility = View.VISIBLE
 
             imageView?.setImageBitmap(bmp)
 
