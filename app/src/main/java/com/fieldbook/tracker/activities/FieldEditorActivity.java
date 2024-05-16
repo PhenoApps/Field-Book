@@ -375,13 +375,14 @@ public class FieldEditorActivity extends ThemedActivity
         View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
 
         ListView importSourceList = layout.findViewById(R.id.myList);
-        String[] importArray = new String[2];
-        importArray[0] = getString(R.string.import_source_local);
-        importArray[1] = getString(R.string.import_source_cloud);
+        String[] importArray = new String[3];
+        importArray[0] = getString(R.string.fields_new_create_field);
+        importArray[1] = getString(R.string.import_source_local);
+        importArray[2] = getString(R.string.import_source_cloud);
         if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
             String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
             importArray = Arrays.copyOf(importArray, importArray.length + 1);
-            importArray[2] = displayName;
+            importArray[3] = displayName;
         }
 
 
@@ -389,7 +390,7 @@ public class FieldEditorActivity extends ThemedActivity
         importSourceList.setAdapter(adapter);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.import_dialog_title_fields)
+        builder.setTitle(R.string.fields_new_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -411,12 +412,23 @@ public class FieldEditorActivity extends ThemedActivity
         importSourceList.setOnItemClickListener((av, arg1, which, arg3) -> {
             switch (which) {
                 case 0:
-                    loadLocalPermission();
+                    FieldCreatorDialog dialog = new FieldCreatorDialog(this);
+                    dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
+                        @Override
+                        public void onFieldCreated(int studyDbId) {
+                            fieldSwitcher.switchField(studyDbId);
+                            updateFieldsList();
+                        }
+                    });
+                    dialog.show();
                     break;
                 case 1:
-                    loadCloud();
+                    loadLocalPermission();
                     break;
                 case 2:
+                    loadCloud();
+                    break;
+                case 3:
                     loadBrAPI();
                     break;
 
@@ -434,7 +446,7 @@ public class FieldEditorActivity extends ThemedActivity
                 intent.setClassName(FieldEditorActivity.this, FileExploreActivity.class.getName());
                 intent.putExtra("path", importDir.getUri().toString());
                 intent.putExtra("include", new String[]{"csv", "xls", "xlsx"});
-                intent.putExtra("title", getString(R.string.import_dialog_title_fields));
+                intent.putExtra("title", getString(R.string.fields_new_dialog_title));
                 startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
             }
         } catch (Exception e) {
@@ -519,16 +531,6 @@ public class FieldEditorActivity extends ThemedActivity
             }
 
             sequence.start();
-        } else if (itemId == R.id.menu_field_editor_item_creator) {
-            FieldCreatorDialog dialog = new FieldCreatorDialog(this);
-            dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
-                @Override
-                public void onFieldCreated(int studyDbId) {
-                    fieldSwitcher.switchField(studyDbId);
-                    updateFieldsList();
-                }
-            });
-            dialog.show();
         } else if (itemId == android.R.id.home) {
             CollectActivity.reloadData = true;
             finish();
@@ -907,7 +909,7 @@ public class FieldEditorActivity extends ThemedActivity
         setSpinner(secondary, columns, GeneralKeys.SECONDARY_NAME);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.import_dialog_title_fields)
+        builder.setTitle(R.string.fields_new_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 

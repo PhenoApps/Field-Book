@@ -103,7 +103,8 @@
 
     <!-- Import -->
     <string name="fields_new_button_content_description">Add a new field.</string>
-    <string name="import_dialog_title_fields">Import field</string>
+    <string name="fields_new_dialog_title">New field</string>
+    <string name="fields_new_create_field">Create new</string>
     <string name="import_dialog_unique">Unique identifier</string>
     <string name="import_dialog_primary">Primary identifier</string>
     <string name="import_dialog_secondary">Secondary identifier</string>
