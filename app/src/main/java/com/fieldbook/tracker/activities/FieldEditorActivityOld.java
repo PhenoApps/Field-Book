@@ -60,6 +60,7 @@ import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -180,6 +181,9 @@ public class FieldEditorActivityOld extends ThemedActivity
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapterOld(thisActivity, database.getAllFieldObjects(), fieldSwitcher, this);
         fieldList.setAdapter(mAdapter);
+
+        FloatingActionButton fab = findViewById(R.id.newField);
+        fab.setOnClickListener(v -> handleImportAction());
     }
 
     private void showFileDialog() {
@@ -350,25 +354,6 @@ public class FieldEditorActivityOld extends ThemedActivity
             }
 
             sequence.start();
-        } else if (itemId == R.id.newField) {
-            String importer = preferences.getString("IMPORT_SOURCE_DEFAULT", "ask");
-
-            switch (importer) {
-                case "ask":
-                    showFileDialog();
-                    break;
-                case "local":
-                    loadLocal();
-                    break;
-                case "brapi":
-                    loadBrAPI();
-                    break;
-                case "cloud":
-                    loadCloud();
-                    break;
-                default:
-                    showFileDialog();
-            }
         } else if (itemId == R.id.menu_field_editor_item_creator) {
             FieldCreatorDialog dialog = new FieldCreatorDialog(this);
             dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
@@ -394,6 +379,26 @@ public class FieldEditorActivityOld extends ThemedActivity
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void handleImportAction() {
+        String importer = preferences.getString("IMPORT_SOURCE_DEFAULT", "ask");
+        switch (importer) {
+            case "ask":
+                showFileDialog();
+                break;
+            case "local":
+                loadLocal();
+                break;
+            case "brapi":
+                loadBrAPI();
+                break;
+            case "cloud":
+                loadCloud();
+                break;
+            default:
+                showFileDialog();
+        }
     }
 
     /**

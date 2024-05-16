@@ -66,6 +66,8 @@ import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.io.IOException;
@@ -165,6 +167,9 @@ public class FieldEditorActivity extends ThemedActivity
             }
         });
         recyclerView.setAdapter(mAdapter);
+
+        FloatingActionButton fab = findViewById(R.id.newField);
+        fab.setOnClickListener(v -> handleImportAction());
 
         updateFieldsList();
 
@@ -514,8 +519,6 @@ public class FieldEditorActivity extends ThemedActivity
             }
 
             sequence.start();
-        } else if (itemId == R.id.newField) {
-            handleImportAction();
         } else if (itemId == R.id.menu_field_editor_item_creator) {
             FieldCreatorDialog dialog = new FieldCreatorDialog(this);
             dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
