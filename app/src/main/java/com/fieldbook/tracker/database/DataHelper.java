@@ -1256,7 +1256,9 @@ public class DataHelper {
 
         open();
 
-        return StudyDao.Companion.getAllFieldObjects();
+        return StudyDao.Companion.getAllFieldObjects(
+                preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+        );
 
 //        ArrayList<FieldObject> list = new ArrayList<>();
 //
@@ -1561,7 +1563,9 @@ public class DataHelper {
 
         if (!isTableExists("ObservationUnitProperty")) {
 
-            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects(
+                    preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+            );
 
             if (!fields.isEmpty()) {
 
@@ -1793,7 +1797,9 @@ public class DataHelper {
 //        if (db == null || !db.isOpen()) db = openHelper.getWritableDatabase();
         if (!isTableExists("ObservationUnitProperty")) {
 
-            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects(
+                    preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+            );
 
             if (!fields.isEmpty()) {
 

@@ -51,6 +51,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
 import com.fieldbook.tracker.dialogs.FieldSortDialog;
+import com.fieldbook.tracker.dialogs.ListSortDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
@@ -59,6 +60,7 @@ import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.ArrayIndexComparator;
 import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
@@ -76,7 +78,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -540,13 +544,28 @@ public class FieldEditorActivity extends ThemedActivity
             } else {
                 Toast.makeText(this, R.string.activity_field_editor_no_location_yet, Toast.LENGTH_SHORT).show();
             }
+        } else if (itemId == R.id.sortFields) {
+            showFieldsSortDialog();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void refreshFieldList() {
-        fieldList = database.getAllFieldObjects();
-        mAdapter.submitList(new ArrayList<>(fieldList));
+    private void showFieldsSortDialog() {
+        Map<String, String> sortOptions = new LinkedHashMap<>();
+
+        sortOptions.put(getString(R.string.fields_sort_by_name), "study_alias");
+        sortOptions.put(getString(R.string.fields_sort_by_import_format), "import_format");
+        sortOptions.put(getString(R.string.fields_sort_by_import_date), "date_import");
+        sortOptions.put(getString(R.string.fields_sort_by_edit_date), "date_edit");
+        sortOptions.put(getString(R.string.fields_sort_by_sync_date), "date_sync");
+        sortOptions.put(getString(R.string.fields_sort_by_export_date), "date_export");
+
+        ListSortDialog dialog = new ListSortDialog(this, sortOptions, criteria -> {
+            Log.d(TAG, "Updating fields list sort order to : " + criteria);
+            preferences.edit().putString(GeneralKeys.FIELDS_LIST_SORT_ORDER, criteria).apply();
+            queryAndLoadFields();
+        });
+        dialog.show();
     }
 
     private void handleImportAction() {

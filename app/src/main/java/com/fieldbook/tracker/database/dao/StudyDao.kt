@@ -185,7 +185,7 @@ class StudyDao {
             it.observation_count = this["observation_count"]?.toString()
         }
 
-        fun getAllFieldObjects(): ArrayList<FieldObject> = withDatabase { db ->
+        fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
 
             val studies = ArrayList<FieldObject>()
 
@@ -202,6 +202,7 @@ class StudyDao {
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
+                ORDER BY $sortOrder DESC
             """
             db.rawQuery(query, null).use { cursor ->
                 while (cursor.moveToNext()) {
@@ -213,28 +214,29 @@ class StudyDao {
                 }
             }
 
-            // Sort fields by most recent import/edit activity
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            fun parseDate(date: String): Date? {
-                return if (date.isBlank()) null
-                else {
-                    try {
-                        dateFormat.parse(date.substring(0, 19)) // Truncate to "yyyy-MM-dd HH:mm:ss"
-                    } catch (e: ParseException) {
-                        Log.e("StudyDao", "Error parsing date: $date", e)
-                        null
-                    }
-                }
-            }
-
-            val sortedStudies = studies.sortedWith(compareByDescending<FieldObject> { fieldObject ->
-                listOfNotNull(
-                        parseDate(fieldObject.date_edit),
-                        parseDate(fieldObject.date_import)
-                ).maxOrNull() ?: Date(0)
-            })
-
-            ArrayList(sortedStudies)
+//            // Sort fields by most recent import/edit activity
+//            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+//            fun parseDate(date: String): Date? {
+//                return if (date.isBlank()) null
+//                else {
+//                    try {
+//                        dateFormat.parse(date.substring(0, 19)) // Truncate to "yyyy-MM-dd HH:mm:ss"
+//                    } catch (e: ParseException) {
+//                        Log.e("StudyDao", "Error parsing date: $date", e)
+//                        null
+//                    }
+//                }
+//            }
+//
+//            val sortedStudies = studies.sortedWith(compareByDescending<FieldObject> { fieldObject ->
+//                listOfNotNull(
+//                        parseDate(fieldObject.date_edit),
+//                        parseDate(fieldObject.date_import)
+//                ).maxOrNull() ?: Date(0)
+//            })
+//
+//            ArrayList(sortedStudies)
+            ArrayList(studies)
 
         } ?: ArrayList()
 

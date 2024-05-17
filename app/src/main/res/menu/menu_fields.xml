@@ -12,4 +12,9 @@
         android:icon="@drawable/ic_explore_black_24dp"
         android:showAsAction="ifRoom"
         android:title="@string/menu_fields_plot_by_distance_title" />
+    <item
+        android:id="@+id/sortFields"
+        android:icon="@drawable/ic_tb_sort"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_fields_sort_list" />
 </menu>

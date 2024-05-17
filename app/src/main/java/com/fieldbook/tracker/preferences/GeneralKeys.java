@@ -226,6 +226,9 @@ public class GeneralKeys {
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
 
+    @NotNull
+    public static final String FIELDS_LIST_SORT_ORDER = "com.fieldbook.tracker.fields_list_sort_order";
+
     private GeneralKeys() {
 
     }

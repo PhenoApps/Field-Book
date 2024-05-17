@@ -12,7 +12,7 @@
         android:id="@+id/sort"
         android:icon="@drawable/ic_field_sort"
         app:showAsAction="always"
-        android:title="@string/fields_sort_update" />
+        android:title="@string/field_sort_entries" />
 
     <item
         android:id="@+id/delete"
