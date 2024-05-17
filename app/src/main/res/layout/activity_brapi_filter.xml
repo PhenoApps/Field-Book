@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Top Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/act_brapi_filter_tb"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/act_brapi_filter_server_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@id/act_brapi_filter_title_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/act_brapi_filter_tb"
+        tools:text="https://www.cassavabase.org/brapi/v2" />
+
+    <TextView
+        android:id="@+id/act_brapi_filter_title_tv"
+        style="@style/TextViewStyle.Bold.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/fb_color_primary_dark"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/act_brapi_filter_server_tv"
+        tools:text="Programs" />
+
+    <!-- Middle RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/act_brapi_filter_rv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toTopOf="@id/act_brapi_filter_next_tv"
+        app:layout_constraintTop_toBottomOf="@id/act_brapi_filter_title_tv"
+        tools:listitem="@layout/list_item_label_checkbox" />
+
+    <!-- hidden pagination ui that brapi service is coupled to -->
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom|center"
+        android:orientation="vertical">
+
+        <include
+            layout="@layout/brapi_pagination_buttons"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom|center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:onClick="buttonClicked"
+                android:text="@string/brapi_save_data_button" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Bottom TextView -->
+    <TextView
+        android:id="@+id/act_brapi_filter_next_tv"
+        style="@style/TextViewStyle.Bold.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/fb_color_primary_dark"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Trials" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

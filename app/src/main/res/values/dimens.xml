@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <dimen name="brapi_importer_filter_height">40dp</dimen>
+
     <!-- text sizes -->
     <!-- regular text -->
     <dimen name="text_size_small">14sp</dimen>
