@@ -944,6 +944,9 @@ public class DataHelper {
 
         try {
             db = openHelper.getWritableDatabase();
+            if (DATABASE_VERSION == 11) {
+                openHelper.onUpgrade(db, 10, 11);
+            }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -2962,7 +2965,7 @@ public class DataHelper {
 
             }
 
-            if (oldVersion <= 10 & newVersion >= 11) {
+            if (oldVersion <= 10 && newVersion >= 11) {
 
                 // modify studies table for better handling of brapi study attributes
                 db.execSQL("ALTER TABLE studies ADD COLUMN import_format TEXT");
