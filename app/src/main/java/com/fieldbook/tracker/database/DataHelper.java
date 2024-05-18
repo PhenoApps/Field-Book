@@ -944,9 +944,6 @@ public class DataHelper {
 
         try {
             db = openHelper.getWritableDatabase();
-            if (DATABASE_VERSION == 11) {
-                openHelper.onUpgrade(db, 10, 11);
-            }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -2775,7 +2772,11 @@ public class DataHelper {
                 Log.e(TAG, e.getMessage());
             }
 
+            //migrate handles database upgrade from 8 -> 9
             Migrator.Companion.createTables(db, getAllTraitObjects(db));
+
+            //this will force new databases to have full updates, otherwise sqliteopenhelper will not upgrade
+            onUpgrade(db, 9, DATABASE_VERSION);
         }
 
         /**
