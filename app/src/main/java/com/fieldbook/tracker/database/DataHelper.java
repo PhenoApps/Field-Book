@@ -2772,7 +2772,11 @@ public class DataHelper {
                 Log.e(TAG, e.getMessage());
             }
 
+            //migrate handles database upgrade from 8 -> 9
             Migrator.Companion.createTables(db, getAllTraitObjects(db));
+
+            //this will force new databases to have full updates, otherwise sqliteopenhelper will not upgrade
+            onUpgrade(db, 9, DATABASE_VERSION);
         }
 
         /**
@@ -2962,7 +2966,7 @@ public class DataHelper {
 
             }
 
-            if (oldVersion <= 10 & newVersion >= 11) {
+            if (oldVersion <= 10 && newVersion >= 11) {
 
                 // modify studies table for better handling of brapi study attributes
                 db.execSQL("ALTER TABLE studies ADD COLUMN import_format TEXT");
