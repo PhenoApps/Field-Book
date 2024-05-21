@@ -110,6 +110,9 @@
 
         <item name="fb_error_message_color">@color/RED</item>
 
+        <item name="colorSecondary">?attr/fb_color_accent</item>
+        <item name="android:windowBackground">?attr/fb_icon_tint</item>
+
     </style>
 
     <!-- Blue Theme -->

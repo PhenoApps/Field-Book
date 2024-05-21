@@ -266,11 +266,21 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 val iconRes = Formats.entries
                     .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
 
+                val observations = traitDetail.getObservations().mapNotNull {
+                    try {
+                        it.toFloat()
+                    } catch (e: NumberFormatException) {
+                        null
+                    }
+                }
+
                 FieldDetailItem(
                     traitDetail.getTraitName(),
                     getString(R.string.field_trait_observation_total, traitDetail.getCount()),
-                    ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical)
+                    ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical),
+                    observations
                 )
+
             }
         }
         return emptyList()  // Return an empty list if traitDetails is null

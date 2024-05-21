@@ -290,18 +290,20 @@ class StudyDao {
          * data class TraitDetail(
          *         val traitName: String,
          *         val format: String,
-         *         val count: Int
+         *         val count: Int,
+         *         val observations: List<String>
          * )
          */
+
         fun getTraitDetailsForStudy(studyId: Int): List<FieldObject.TraitDetail> {
             return withDatabase { db ->
                 val traitDetails = mutableListOf<FieldObject.TraitDetail>()
 
                 val cursor = db.rawQuery("""
-            SELECT observation_variable_name, observation_variable_field_book_format, COUNT(*) as count
+            SELECT observation_variable_name, observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(value) as observations
             FROM observations
             WHERE study_id = ? AND observation_variable_db_id > 0
-            GROUP BY observation_variable_name
+            GROUP BY observation_variable_name, observation_variable_field_book_format
         """, arrayOf(studyId.toString()))
 
                 if (cursor.moveToFirst()) {
@@ -309,7 +311,10 @@ class StudyDao {
                         val traitName = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name"))
                         val format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format"))
                         val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
-                        traitDetails.add(FieldObject.TraitDetail(traitName, format, count))
+                        val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
+                        val observations = observationsString?.split(",") ?: emptyList()
+
+                        traitDetails.add(FieldObject.TraitDetail(traitName, format, count, observations))
                     } while (cursor.moveToNext())
                 }
 
@@ -317,6 +322,7 @@ class StudyDao {
                 traitDetails
             } ?: emptyList()
         }
+
 
 
         /**

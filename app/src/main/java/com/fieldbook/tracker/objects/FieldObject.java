@@ -33,17 +33,20 @@ public class FieldObject {
         private final String traitName;
         private final String format;
         private final int count;
+        private final List<String> observations;
 
-        public TraitDetail(String traitName, String format, int count) {
+        public TraitDetail(String traitName, String format, int count, List<String> observations) {
             this.traitName = traitName;
             this.format = format;
             this.count = count;
+            this.observations = observations;
         }
 
         // Getters
         public String getTraitName() { return traitName; }
         public String getFormat() { return format; }
         public int getCount() { return count; }
+        public List<String> getObservations() { return observations; }
     }
 
     private List<TraitDetail> traitDetails;
