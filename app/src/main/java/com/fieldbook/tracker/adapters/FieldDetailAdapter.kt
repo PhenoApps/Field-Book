@@ -2,10 +2,13 @@ package com.fieldbook.tracker.adapters
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +21,9 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.ValueFormatter
+import java.math.BigDecimal
+import kotlin.math.ceil
 
 class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : RecyclerView.Adapter<FieldDetailAdapter.ViewHolder>() {
 
@@ -26,6 +32,10 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         val traitCountTextView: TextView = view.findViewById(R.id.traitCountTextView)
         val traitIconImageView: ImageView = view.findViewById(R.id.traitIconImageView)
         val histogramChart: BarChart = view.findViewById(R.id.histogramChart)
+        val nonNumericMessageTextView: TextView = view.findViewById(R.id.nonNumericMessageTextView)
+        val collapsibleHeader: LinearLayout = view.findViewById(R.id.collapsible_header)
+        val collapsibleContent: LinearLayout = view.findViewById(R.id.collapsible_content)
+        val expandCollapseIcon: ImageView = view.findViewById(R.id.expand_collapse_icon)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -40,17 +50,77 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         holder.traitCountTextView.text = item.subtitle
         holder.traitIconImageView.setImageDrawable(item.icon)
 
+        // Collapsible card mechanism
+        holder.collapsibleHeader.setOnClickListener {
+            if (holder.collapsibleContent.visibility == View.GONE) {
+                holder.collapsibleContent.visibility = View.VISIBLE
+                holder.expandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
+            } else {
+                holder.collapsibleContent.visibility = View.GONE
+                holder.expandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
+            }
+        }
+
         if (item.observations != null && item.observations!!.isNotEmpty() && item.observations!!.all { it is Number }) {
             holder.histogramChart.visibility = View.VISIBLE
-            val entries = item.observations!!.mapIndexed { index, value ->
-                BarEntry(index.toFloat(), (value as Number).toFloat())
+            holder.nonNumericMessageTextView.visibility = View.GONE
+
+            // Log original observations
+            Log.d("FieldDetailAdapter", "Original observations for ${item.title}: ${item.observations}")
+
+            // Determine the range and bin size
+            val observations = item.observations!!.map { BigDecimal(it.toString()) }
+            val minValue = observations.minOrNull() ?: BigDecimal.ZERO
+            val maxValue = observations.maxOrNull() ?: BigDecimal.ZERO
+            val range = maxValue.subtract(minValue)
+            val distinctValuesCount = observations.distinct().size
+            val binCount = minOf(10, distinctValuesCount) // No more than 10 bins
+            val binSize = range.divide(BigDecimal(binCount), BigDecimal.ROUND_UP)
+
+            Log.d("FieldDetailAdapter", "Range: $range, Bin Size: $binSize, Bin Count: $binCount")
+
+            // Bin the data
+            val binnedObservations = mutableMapOf<Int, Int>()
+            for (observation in observations) {
+                val binIndex = observation.subtract(minValue).divide(binSize, BigDecimal.ROUND_DOWN).toInt()
+                binnedObservations[binIndex] = (binnedObservations[binIndex] ?: 0) + 1
             }
+
+//            Log.d("FieldDetailAdapter", "Binned Observations: $binnedObservations")
+
+            val entries = binnedObservations.map { (binIndex, count) ->
+                val binStart = minValue.add(binSize.multiply(BigDecimal(binIndex)))
+                val binCenter = binStart.add(binSize.divide(BigDecimal(2)))
+                BarEntry(binCenter.toFloat(), count.toFloat())
+            }
+
+//            Log.d("FieldDetailAdapter", "Bar Entries: $entries")
+
             val dataSet = BarDataSet(entries, "Observations")
-            dataSet.color = ContextCompat.getColor(holder.itemView.context, R.color.main_primary) // Use main_primary for bar color
+            val theme = holder.itemView.context.theme
+            val fb_color_primary_value = TypedValue()
+            theme.resolveAttribute(R.attr.fb_color_primary, fb_color_primary_value, true)
+            val fb_trait_button_background_tint_value = TypedValue()
+            theme.resolveAttribute(R.attr.fb_trait_button_background_tint, fb_trait_button_background_tint_value, true)
+
+            dataSet.color = fb_color_primary_value.data // Use fb_color_primary_dark for bar color
+            holder.histogramChart.setBackgroundColor(fb_trait_button_background_tint_value.data) // Light gray background
             dataSet.valueTextColor = Color.WHITE // Value text color
+            dataSet.setDrawValues(false) // Remove labels on individual bars
+
+            // Add black outline to bars
+            dataSet.setDrawIcons(false)
+            dataSet.setDrawValues(false)
+            dataSet.barBorderColor = Color.BLACK
+            dataSet.barBorderWidth = 1f
 
             val barData = BarData(dataSet)
+            barData.barWidth = binSize.toFloat() // Ensure bars fill the bin width
             holder.histogramChart.data = barData
+
+            // Check if bins represent ranges
+            val isRangeBins = observations.any { it.remainder(binSize).compareTo(BigDecimal.ZERO) != 0 }
+            Log.d("FieldDetailAdapter", "isRangeBins: $isRangeBins")
 
             // Customize X axis
             val xAxis: XAxis = holder.histogramChart.xAxis
@@ -58,30 +128,54 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
             xAxis.setDrawGridLines(false)
             xAxis.setDrawAxisLine(false)
             xAxis.textColor = Color.BLACK
+            xAxis.axisMinimum = minValue.toFloat()
+            xAxis.axisMaximum = maxValue.toFloat() + binSize.toFloat()
+
+            if (isRangeBins) { // Bins represent ranges of values
+                xAxis.setCenterAxisLabels(false)
+                xAxis.setLabelCount(binCount + 1, true)
+            } else { // Bins correspond directly to observation values
+                xAxis.setCenterAxisLabels(true)
+                xAxis.setLabelCount(binCount, true)
+            }
 
             // Customize Y axis
             val leftAxis: YAxis = holder.histogramChart.axisLeft
             leftAxis.setDrawGridLines(false)
             leftAxis.setDrawAxisLine(false)
             leftAxis.textColor = Color.BLACK
+            leftAxis.axisMinimum = 0f // Start y-axis from 0
+            val maxY = entries.maxOfOrNull { it.y.toInt() } ?: 1
+            leftAxis.granularity = ceil(maxY / 6f) // Ensure the axis increments are integers and don't exceed 6 labels
+//            Log.d("FieldDetailAdapter", "Granularity is: " + leftAxis.granularity)
+            leftAxis.axisMaximum = if (maxY < 5) maxY.toFloat() + 1 else leftAxis.granularity * 5
+            leftAxis.valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString()
+                }
+            }
+
             holder.histogramChart.axisRight.isEnabled = false
 
-            // Customize legend
+            // Disable zoom, drag behavior, touch interactions, legend and description
+            holder.histogramChart.setScaleEnabled(false)
+            holder.histogramChart.setDragEnabled(false)
+            holder.histogramChart.setHighlightPerTapEnabled(false)
+
             val legend = holder.histogramChart.legend
             legend.isEnabled = false
 
-            // Customize description
             val description = Description()
             description.text = ""
             holder.histogramChart.description = description
-
             holder.histogramChart.setNoDataText("No data available")
             holder.histogramChart.setNoDataTextColor(Color.BLACK)
-            holder.histogramChart.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, R.color.light_gray)) // Light gray background
 
             holder.histogramChart.invalidate() // Refresh chart
+
         } else {
             holder.histogramChart.visibility = View.GONE
+            holder.nonNumericMessageTextView.visibility = View.VISIBLE
         }
     }
 
@@ -92,13 +186,15 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         items.addAll(newItems)
         notifyDataSetChanged()
     }
+
 }
 
 data class FieldDetailItem(
     val title: String,
+    val format: String,
     val subtitle: String,
     val icon: Drawable?,
-    val observations: List<Any>? = null // Add observations list
+    val observations: List<Any>? = null
 )
 
 

@@ -41,6 +41,7 @@ import com.fieldbook.tracker.utilities.SemanticDateUtil
 import com.fieldbook.tracker.utilities.StringUtil
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
+import java.math.BigDecimal
 import javax.inject.Inject
 
 
@@ -268,7 +269,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
                 val observations = traitDetail.getObservations().mapNotNull {
                     try {
-                        it.toFloat()
+//                        it.toFloat()
+                        BigDecimal(it)
                     } catch (e: NumberFormatException) {
                         null
                     }
@@ -276,6 +278,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
                 FieldDetailItem(
                     traitDetail.getTraitName(),
+                    traitDetail.getFormat(),
                     getString(R.string.field_trait_observation_total, traitDetail.getCount()),
                     ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical),
                     observations

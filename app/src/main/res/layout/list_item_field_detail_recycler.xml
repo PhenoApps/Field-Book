@@ -5,65 +5,107 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:paddingTop="12dp"
     android:paddingBottom="12dp">
 
-    <ImageView
-        android:id="@+id/traitIconImageView"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:src="@drawable/ic_trait_categorical"/>
-
-    <LinearLayout
-        android:id="@+id/container_inner_item"
-        android:layout_width="0dp"
+    <!-- Collapsible CardView -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_centerVertical="true">
+        android:layout_margin="8dp">
 
-        <TextView
-            style="@style/TextViewStyle.Bold.Title"
-            android:id="@+id/traitNameTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="start"
-            android:singleLine="true"
-            android:textSize="@dimen/text_size_large"
-            tools:text="field_section"/>
-
-        <TextView
-            style="@style/TextViewStyle.Sub"
-            android:id="@+id/traitCountTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="start"
-            android:minWidth="40dp"
-            android:singleLine="true"
-            android:textSize="@dimen/text_size_small" />
-
-        <!-- CardView for Material Design look -->
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            app:cardElevation="4dp"
-            app:cardCornerRadius="8dp"
-            android:background="@color/light_gray">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/histogramChart"
+            <!-- Header for collapsible area -->
+            <LinearLayout
+                android:id="@+id/collapsible_header"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"/>
-        </androidx.cardview.widget.CardView>
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true">
 
-    </LinearLayout>
+                <ImageView
+                    android:id="@+id/traitIconImageView"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="8dp"
+                    android:src="@drawable/ic_trait_categorical"/>
 
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextViewStyle.Bold.Title"
+                        android:id="@+id/traitNameTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textSize="@dimen/text_size_large"
+                        tools:text="field_section"/>
+
+                    <TextView
+                        style="@style/TextViewStyle.Sub"
+                        android:id="@+id/traitCountTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textSize="@dimen/text_size_small" />
+                </LinearLayout>
+
+                <!-- Collapse/Expand Icon -->
+                <ImageView
+                    android:id="@+id/expand_collapse_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_chevron_down" />
+            </LinearLayout>
+
+            <!-- Collapsible Content -->
+            <LinearLayout
+                android:id="@+id/collapsible_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <!-- Non-numeric Data Message -->
+                <TextView
+                    android:id="@+id/nonNumericMessageTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:text="Non-numeric data, no histogram available"
+                    android:textColor="@color/main_color_text_dark"
+                    android:padding="8dp"/>
+
+                <!-- CardView for Material Design look -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    app:cardElevation="4dp"
+                    app:cardCornerRadius="8dp"
+                    android:background="@color/light_gray">
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/histogramChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 </LinearLayout>
