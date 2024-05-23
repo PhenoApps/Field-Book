@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import org.phenoapps.androidlibrary.Utils
 
 @AndroidEntryPoint
-class CanonTrait :
+class CanonTraitLayout :
     CameraTrait,
     PtpSessionCallback,
     WifiHelper.WifiRequester {
@@ -93,11 +93,11 @@ class CanonTrait :
 
         val scope = CoroutineScope(Dispatchers.IO)
 
-        scope.launch(Dispatchers.IO) {
+        scope.launch {
 
             try {
 
-                controller.getCanonApi().initiateSession(this@CanonTrait, rangeObject)
+                controller.getCanonApi().initiateSession(this@CanonTraitLayout, rangeObject)
 
             } catch (e: Exception) {
 
@@ -117,23 +117,11 @@ class CanonTrait :
             previewCardView?.visibility = View.VISIBLE
 
             previewCardView?.layoutParams = ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.MATCH_CONSTRAINT,
+                ConstraintLayout.LayoutParams.MATCH_PARENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
             ).also {
-                it.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-                it.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
                 it.topToBottom = recyclerView?.id ?: 0
-                it.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
             }
-
-            shutterButton?.layoutParams = ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                ConstraintLayout.LayoutParams.WRAP_CONTENT)
-                .apply {
-                    startToStart = previewCardView?.id ?: 0
-                    endToEnd = previewCardView?.id ?: 0
-                    bottomToBottom = previewCardView?.id ?: 0
-                }
 
             shutterButton?.setOnClickListener {
 

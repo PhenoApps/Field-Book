@@ -29,10 +29,9 @@
             app:layout_constraintVertical_bias="0"
             app:layout_constraintHorizontal_bias="0.5"/>
 
-        <!-- flip width/height for external cameras, which feed to this image view -->
         <androidx.cardview.widget.CardView
-            android:layout_width="@dimen/camera_preview_height"
-            android:layout_height="@dimen/camera_preview_width"
+            android:layout_width="@dimen/camera_preview_landscape_width"
+            android:layout_height="@dimen/camera_preview_landscape_height"
             android:id="@+id/trait_camera_cv"
             android:visibility="gone"
             app:cardCornerRadius="8dp"
@@ -50,10 +49,6 @@
                 android:scaleType="fitCenter"
                 android:adjustViewBounds="true"
                 tools:src="@raw/chip"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 android:contentDescription="@string/trait_camera_preview_content_description" />
 
             <androidx.media3.ui.PlayerView
@@ -66,11 +61,7 @@
                 app:resize_mode="zoom"
                 app:show_buffering="when_playing"
                 app:show_shuffle_button="true"
-                app:use_controller="false"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:use_controller="false"/>
 
         </androidx.cardview.widget.CardView>
 
@@ -111,7 +102,7 @@
             android:visibility="gone"
             tools:visibility="visible"
             android:src="@drawable/camera_24px"
-            app:layout_constraintTop_toBottomOf="@id/camera_fragment_rv"
+            app:layout_constraintTop_toBottomOf="@id/trait_camera_cv"
             app:layout_constraintVertical_bias="0"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

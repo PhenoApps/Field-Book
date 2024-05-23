@@ -95,7 +95,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
                 || isTraitType(LabelPrintTraitLayout.type)
                 || type().equals(AudioTraitLayout.type)
                 || type().equals(GoProTraitLayout.type)
-                || type().equals(CanonTrait.type)) {
+                || type().equals(CanonTraitLayout.type)) {
             toggleVisibility(View.GONE);
         } else {
             toggleVisibility(View.VISIBLE);

@@ -57,13 +57,10 @@ class GoProTraitLayout :
         imageView?.visibility = View.INVISIBLE
 
         previewCardView?.layoutParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.MATCH_CONSTRAINT,
+            ConstraintLayout.LayoutParams.MATCH_PARENT,
             ConstraintLayout.LayoutParams.WRAP_CONTENT
         ).also {
-            it.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            it.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
             it.topToBottom = recyclerView?.id ?: 0
-            it.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
         }
 
         val started = controller.getGoProApi().isStreamStarted()
@@ -140,15 +137,6 @@ class GoProTraitLayout :
         previewCardView?.visibility = View.VISIBLE
         connectBtn?.visibility = View.GONE
         styledPlayerView?.visibility = View.VISIBLE
-
-        shutterButton?.layoutParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-            ConstraintLayout.LayoutParams.WRAP_CONTENT)
-            .apply {
-                startToStart = previewCardView?.id ?: 0
-                endToEnd = previewCardView?.id ?: 0
-                bottomToBottom = previewCardView?.id ?: 0
-            }
 
         shutterButton?.setOnClickListener {
 

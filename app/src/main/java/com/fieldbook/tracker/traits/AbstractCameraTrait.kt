@@ -272,10 +272,10 @@ abstract class AbstractCameraTrait :
             val size = (recyclerView?.adapter as? ImageAdapter)?.currentList?.size ?: 0
             val lm = recyclerView?.layoutManager as? LinearLayoutManager
 
-            val firstVisible = lm?.findFirstVisibleItemPosition()
-            val firstFullVisible = lm?.findFirstCompletelyVisibleItemPosition()
+            val lastVisible = lm?.findLastVisibleItemPosition()
+            val lastFullVisible = lm?.findLastCompletelyVisibleItemPosition()
 
-            var position = if (firstFullVisible == -1) firstVisible else firstFullVisible
+            var position = if (lastFullVisible == -1) lastVisible else lastFullVisible
 
             //get previous position if the first visible is preview
             if (skipPreview) {

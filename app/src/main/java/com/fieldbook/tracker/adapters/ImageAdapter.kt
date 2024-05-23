@@ -80,14 +80,12 @@ class ImageAdapter(private val listener: ImageItemHandler) :
 
             try {
 
-                //get preview image dimensions from resources
-                val previewWidth = view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_width)
-                val previewHeight = view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_height)
-
                 val (actualWidth, actualHeight) =
                     if (model.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                        (previewHeight to previewWidth)
-                    } else (previewWidth to previewHeight)
+                        (view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_landscape_width)
+                                to view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_landscape_height))
+                    } else (view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_portrait_height)
+                            to view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_portrait_height))
 
                 (cardView.layoutParams as ConstraintLayout.LayoutParams).apply {
                     width = actualWidth

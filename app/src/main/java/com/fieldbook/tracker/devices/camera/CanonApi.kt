@@ -395,7 +395,8 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
         saveTime: String
     ) {
 
-        val length = byteArrayOf(0x0, 0x0, 0x08, 0x0).toInt()
+        //todo change this based on selected image size
+        val length = byteArrayOf(0x0, 0x0, 0x04, 0x0).toInt()
 
         log("Requesting get image")
 

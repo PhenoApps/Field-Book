@@ -48,18 +48,24 @@ class BitmapLoader {
 
         fun getPreview(context: Context, uri: String?, orientation: Int = Configuration.ORIENTATION_PORTRAIT): Bitmap? {
 
-            //get thumbnail size from camera dimension resources
-            val thumbnailWidth = context.resources.getDimensionPixelSize(R.dimen.camera_preview_width)
-            val thumbnailHeight = context.resources.getDimensionPixelSize(R.dimen.camera_preview_height)
-
-            val (reqWidth: Int, reqHeight: Int) = (thumbnailWidth to thumbnailHeight)
 
             return if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                getSampledPreview(context, uri, reqWidth, reqHeight)
+
+                //get thumbnail size from camera dimension resources
+                val thumbnailWidth = context.resources.getDimensionPixelSize(R.dimen.camera_preview_landscape_width)
+                val thumbnailHeight = context.resources.getDimensionPixelSize(R.dimen.camera_preview_landscape_height)
+
+                getSampledPreview(context, uri, thumbnailWidth, thumbnailHeight)
+
             } else {
+
+                //get thumbnail size from camera dimension resources
+                val thumbnailWidth = context.resources.getDimensionPixelSize(R.dimen.camera_preview_portrait_width)
+                val thumbnailHeight = context.resources.getDimensionPixelSize(R.dimen.camera_preview_portrait_height)
+
                 DocumentsContract.getDocumentThumbnail(
                     context.contentResolver,
-                    Uri.parse(uri), Point(reqWidth, reqHeight), null
+                    Uri.parse(uri), Point(thumbnailWidth, thumbnailHeight), null
                 )
             }
         }
@@ -75,7 +81,7 @@ class BitmapLoader {
                     BitmapFactory.decodeStream(inputStream, null, this)
                 }
 
-                inSampleSize = calculateInSampleSize(this, reqHeight, reqWidth)
+                inSampleSize = calculateInSampleSize(this, reqWidth, reqHeight)
 
                 inJustDecodeBounds = false
 

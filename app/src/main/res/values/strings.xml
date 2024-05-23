@@ -1084,4 +1084,5 @@
     <string name="pref_canon_help_summary">This will open a URL to the FieldBook Canon manual.</string>
     <string name="pref_canon_debug_title">Debug</string>
     <string name="pref_canon_debug_summary">A preferences for developers to monitor device output.</string>
+    <string name="trait_usb_photo_settings_title">USB Photo Settings</string>
 </resources>

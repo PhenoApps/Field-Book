@@ -8,8 +8,8 @@
     android:layout_height="wrap_content">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="@dimen/camera_preview_width"
-        android:layout_height="@dimen/camera_preview_height"
+        android:layout_width="@dimen/camera_preview_portrait_width"
+        android:layout_height="@dimen/camera_preview_portrait_height"
         android:id="@+id/list_item_image_cv"
         app:cardCornerRadius="8dp"
         app:cardElevation="0dp"

@@ -65,7 +65,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
-import com.fieldbook.tracker.traits.CanonTrait;
+import com.fieldbook.tracker.traits.CanonTraitLayout;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
@@ -2074,7 +2074,7 @@ public class CollectActivity extends ThemedActivity
 
                 isNavigatingFromSummary = false;
 
-            } else if (format.equals(CanonTrait.type)) {
+            } else if (format.equals(CanonTraitLayout.type)) {
 
                 canonApi.stopSession();
 

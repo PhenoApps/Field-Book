@@ -23,11 +23,18 @@ open class UsbCameraTraitSettingsView: ConstraintLayout {
     }
 
     private var supportedResolutions: List<Size>? = null
+    private var initialMaxIndexSelection: Int = 0
+
     private val previewCb: CheckBox
     private val autoFocusCb: CheckBox
     private val autoWhiteBalance: CheckBox
     private val resolutionGroup: RadioGroup
     private val resolutionTitle: TextView
+
+    private var lastAutoFocus: Boolean? = null
+    private var lastWhiteBalance: Boolean? = null
+    private var lastPreview: Boolean? = null
+    private var lastResolutionIndex: Int? = null
 
     init {
 
@@ -39,8 +46,9 @@ open class UsbCameraTraitSettingsView: ConstraintLayout {
         resolutionTitle = view.findViewById(R.id.view_trait_usb_photo_settings_resolution_tv)
     }
 
-    constructor(ctx: Context, supportedResolutions: List<Size>) : super(ctx) {
+    constructor(ctx: Context, supportedResolutions: List<Size>, initialMaxIndexSelection: Int) : super(ctx) {
         this.supportedResolutions = supportedResolutions
+        this.initialMaxIndexSelection = initialMaxIndexSelection
         setup()
     }
 
@@ -59,9 +67,36 @@ open class UsbCameraTraitSettingsView: ConstraintLayout {
         defStyleRes
     )
 
+    fun commitChanges() {
+
+        lastAutoFocus?.let { flag ->
+
+            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_AUTO_FOCUS, flag).apply()
+
+        }
+
+        lastWhiteBalance?.let { flag ->
+
+            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_AUTO_WHITE_BALANCE, flag).apply()
+
+        }
+
+        lastPreview?.let { flag ->
+
+            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_PREVIEW, flag).apply()
+
+        }
+
+        lastResolutionIndex?.let { index ->
+
+            prefs.edit().putInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, index).apply()
+
+        }
+    }
+
     private fun setSupportedResolutions(resolutions: List<Size>) {
 
-        val savedResolutionIndex = prefs.getInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, 0)
+        val savedResolutionIndex = prefs.getInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, initialMaxIndexSelection)
 
         resolutionGroup.removeAllViews()
 
@@ -90,7 +125,8 @@ open class UsbCameraTraitSettingsView: ConstraintLayout {
 
         autoFocusCb.setOnCheckedChangeListener { _, isChecked ->
 
-            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_AUTO_FOCUS, isChecked).apply()
+            lastAutoFocus = isChecked
+
         }
 
         autoFocusCb.isChecked = prefs.getBoolean(GeneralKeys.USB_CAMERA_AUTO_FOCUS, true)
@@ -100,7 +136,7 @@ open class UsbCameraTraitSettingsView: ConstraintLayout {
 
         autoWhiteBalance.setOnCheckedChangeListener { _, isChecked ->
 
-            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_AUTO_WHITE_BALANCE, isChecked).apply()
+            lastWhiteBalance = isChecked
         }
 
         autoWhiteBalance.isChecked = prefs.getBoolean(GeneralKeys.USB_CAMERA_AUTO_WHITE_BALANCE, true)
@@ -110,7 +146,7 @@ open class UsbCameraTraitSettingsView: ConstraintLayout {
 
         previewCb.setOnCheckedChangeListener { _, isChecked ->
 
-            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_PREVIEW, isChecked).apply()
+            lastPreview = isChecked
         }
 
         previewCb.isChecked = prefs.getBoolean(GeneralKeys.USB_CAMERA_PREVIEW, true)
@@ -120,8 +156,7 @@ open class UsbCameraTraitSettingsView: ConstraintLayout {
 
         resolutionGroup.setOnCheckedChangeListener { group, checkedId ->
 
-            prefs.edit().putInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, checkedId).apply()
-
+            lastResolutionIndex = checkedId
         }
 
         supportedResolutions?.let {

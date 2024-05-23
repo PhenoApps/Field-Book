@@ -30,6 +30,10 @@ open class CameraTraitSettingsView: ConstraintLayout {
     protected val resolutionTitle: TextView
     protected val resolutionFrameLayout: FrameLayout
 
+    private var lastCameraId: Int? = null
+    private var lastPreview: Boolean? = null
+    private var lastResolutionIndex: Int? = null
+
     init {
 
         val view = inflate(context, R.layout.view_trait_photo_settings, this)
@@ -59,6 +63,27 @@ open class CameraTraitSettingsView: ConstraintLayout {
         defStyle,
         defStyleRes
     )
+
+    fun commitChanges() {
+
+        lastCameraId?.let {
+
+            prefs.edit().putInt(GeneralKeys.CAMERA_SYSTEM, it).apply()
+
+        }
+
+        lastPreview?.let {
+
+            prefs.edit().putBoolean(GeneralKeys.CAMERA_SYSTEM_PREVIEW, it).apply()
+
+        }
+
+        lastResolutionIndex?.let {
+
+            prefs.edit().putInt(GeneralKeys.CAMERA_RESOLUTION, it).apply()
+
+        }
+    }
 
     private fun setSupportedResolutions(resolutions: List<Size>) {
 
@@ -102,7 +127,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
 
         systemCameraRg.setOnCheckedChangeListener { _, checkedId ->
 
-            prefs.edit().putInt(GeneralKeys.CAMERA_SYSTEM, checkedId).apply()
+            lastCameraId = checkedId
 
             setupSettingsModeBasedOnPreference(systemCameraRg.checkedRadioButtonId)
         }
@@ -116,7 +141,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
 
         previewCb.setOnCheckedChangeListener { _, isChecked ->
 
-            prefs.edit().putBoolean(GeneralKeys.CAMERA_SYSTEM_PREVIEW, isChecked).apply()
+            lastPreview = isChecked
         }
 
         previewCb.isChecked = prefs.getBoolean(GeneralKeys.CAMERA_SYSTEM_PREVIEW, true)
@@ -126,8 +151,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
 
         resolutionGroup.setOnCheckedChangeListener { group, checkedId ->
 
-            prefs.edit().putInt(GeneralKeys.CAMERA_RESOLUTION, checkedId).apply()
-
+            lastResolutionIndex = checkedId
         }
 
         cameraSupportedResolutions?.let {
