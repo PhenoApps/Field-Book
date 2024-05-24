@@ -269,7 +269,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
                 val observations = traitDetail.getObservations().mapNotNull {
                     try {
-//                        it.toFloat()
                         BigDecimal(it)
                     } catch (e: NumberFormatException) {
                         null
@@ -281,13 +280,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     traitDetail.getFormat(),
                     getString(R.string.field_trait_observation_total, traitDetail.getCount()),
                     ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical),
-                    observations
+                    observations,
+                    traitDetail.completeness // Pass the completeness stat
                 )
-
             }
         }
         return emptyList()  // Return an empty list if traitDetails is null
     }
+
 
     private fun setupToolbar(field: FieldObject) {
 

@@ -295,16 +295,46 @@ class StudyDao {
          * )
          */
 
+//        fun getTraitDetailsForStudy(studyId: Int): List<FieldObject.TraitDetail> {
+//            return withDatabase { db ->
+//                val traitDetails = mutableListOf<FieldObject.TraitDetail>()
+//
+//                val cursor = db.rawQuery("""
+//            SELECT observation_variable_name, observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(value) as observations
+//            FROM observations
+//            WHERE study_id = ? AND observation_variable_db_id > 0
+//            GROUP BY observation_variable_name, observation_variable_field_book_format
+//        """, arrayOf(studyId.toString()))
+//
+//                if (cursor.moveToFirst()) {
+//                    do {
+//                        val traitName = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name"))
+//                        val format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format"))
+//                        val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
+//                        val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
+//                        val observations = observationsString?.split(",") ?: emptyList()
+//
+//                        traitDetails.add(FieldObject.TraitDetail(traitName, format, count, observations))
+//                    } while (cursor.moveToNext())
+//                }
+//
+//                cursor.close()
+//                traitDetails
+//            } ?: emptyList()
+//        }
+
         fun getTraitDetailsForStudy(studyId: Int): List<FieldObject.TraitDetail> {
             return withDatabase { db ->
                 val traitDetails = mutableListOf<FieldObject.TraitDetail>()
 
                 val cursor = db.rawQuery("""
-            SELECT observation_variable_name, observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(value) as observations
-            FROM observations
-            WHERE study_id = ? AND observation_variable_db_id > 0
-            GROUP BY observation_variable_name, observation_variable_field_book_format
-        """, arrayOf(studyId.toString()))
+            SELECT o.observation_variable_name, o.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value) as observations, 
+            (SELECT COUNT(DISTINCT observation_unit_id) FROM observations WHERE study_id = ? AND observation_variable_name = o.observation_variable_name) AS distinct_obs_units,
+            (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units
+            FROM observations o
+            WHERE o.study_id = ? AND o.observation_variable_db_id > 0
+            GROUP BY o.observation_variable_name, o.observation_variable_field_book_format
+        """, arrayOf(studyId.toString(), studyId.toString(), studyId.toString()))
 
                 if (cursor.moveToFirst()) {
                     do {
@@ -313,8 +343,11 @@ class StudyDao {
                         val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
                         val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
                         val observations = observationsString?.split(",") ?: emptyList()
+                        val distinctObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("distinct_obs_units"))
+                        val totalObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("total_obs_units"))
+                        val completeness = distinctObsUnits.toFloat() / totalObsUnits.toFloat()
 
-                        traitDetails.add(FieldObject.TraitDetail(traitName, format, count, observations))
+                        traitDetails.add(FieldObject.TraitDetail(traitName, format, count, observations, completeness))
                     } while (cursor.moveToNext())
                 }
 
@@ -322,7 +355,6 @@ class StudyDao {
                 traitDetails
             } ?: emptyList()
         }
-
 
 
         /**

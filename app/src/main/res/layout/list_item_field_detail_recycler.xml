@@ -6,8 +6,8 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:paddingTop="12dp"
-    android:paddingBottom="12dp">
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
     <!-- Collapsible CardView -->
     <androidx.cardview.widget.CardView
@@ -63,6 +63,14 @@
                         android:singleLine="true"
                         android:textSize="@dimen/text_size_small" />
                 </LinearLayout>
+
+                <!-- Trait Completeness Pie Chart -->
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/traitCompletenessChart"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="1dp"
+                    android:layout_marginRight="1dp"/>
 
                 <!-- Collapse/Expand Icon -->
                 <ImageView
