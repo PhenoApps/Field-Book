@@ -28,8 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.LinearLayout.LayoutParams;
-import android.widget.ListView;
+import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,6 +50,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
 import com.fieldbook.tracker.dialogs.FieldSortDialog;
+import com.fieldbook.tracker.dialogs.ListAddDialog;
 import com.fieldbook.tracker.dialogs.ListSortDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
@@ -375,10 +375,6 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     private void showFileDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
-
-        ListView importSourceList = layout.findViewById(R.id.myList);
         String[] importArray = new String[3];
         importArray[0] = getString(R.string.fields_new_create_field);
         importArray[1] = getString(R.string.import_source_local);
@@ -389,56 +385,44 @@ public class FieldEditorActivity extends ThemedActivity
             importArray[3] = displayName;
         }
 
+        int[] icons = new int[importArray.length];
+        icons[0] = R.drawable.ic_field;
+        icons[1] = R.drawable.ic_file_generic;
+        icons[2] = R.drawable.ic_file_cloud;
+        if (importArray.length > 3) {
+            icons[3] = R.drawable.ic_adv_brapi;
+        }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, importArray);
-        importSourceList.setAdapter(adapter);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.fields_new_dialog_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setPositiveButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+        AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                        FieldCreatorDialog dialog = new FieldCreatorDialog((ThemedActivity) FieldEditorActivity.this);
+                        dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
+                            @Override
+                            public void onFieldCreated(int studyDbId) {
+                                fieldSwitcher.switchField(studyDbId);
+                                updateFieldsList();
+                            }
+                        });
+                        dialog.show();
+                        break;
+                    case 1:
+                        loadLocalPermission();
+                        break;
+                    case 2:
+                        loadCloud();
+                        break;
+                    case 3:
+                        loadBrAPI();
+                        break;
+                }
             }
-        });
+        };
 
-        final AlertDialog importDialog = builder.create();
-        importDialog.show();
-
-        android.view.WindowManager.LayoutParams params = importDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        importDialog.getWindow().setAttributes(params);
-
-        importSourceList.setOnItemClickListener((av, arg1, which, arg3) -> {
-            switch (which) {
-                case 0:
-                    FieldCreatorDialog dialog = new FieldCreatorDialog(this);
-                    dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
-                        @Override
-                        public void onFieldCreated(int studyDbId) {
-                            fieldSwitcher.switchField(studyDbId);
-                            updateFieldsList();
-                        }
-                    });
-                    dialog.show();
-                    break;
-                case 1:
-                    loadLocalPermission();
-                    break;
-                case 2:
-                    loadCloud();
-                    break;
-                case 3:
-                    loadBrAPI();
-                    break;
-
-            }
-            importDialog.dismiss();
-        });
+        ListAddDialog dialog = new ListAddDialog(this, importArray, icons, onItemClickListener);
+        dialog.show(getSupportFragmentManager(), "ListAddDialog");
     }
 
     public void loadLocal() {
