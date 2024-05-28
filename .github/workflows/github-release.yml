@@ -158,10 +158,10 @@ jobs:
             ${{ steps.matching_release.outputs.body }}
             ${{ env.COMMIT_MSG }}
     
-#      - name: Release APK to Play Store
-#        uses: r0adkll/upload-google-play@v1
-#        with:
-#          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-#          packageName: com.fieldbook.tracker
-#          releaseFiles: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-#          track: alpha
+      - name: Release APK to Play Store
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.fieldbook.tracker
+          releaseFiles: app/build/outputs/apk/release/app-release-unsigned-signed.apk
+          track: alpha
