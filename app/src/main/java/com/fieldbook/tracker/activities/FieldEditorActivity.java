@@ -376,9 +376,9 @@ public class FieldEditorActivity extends ThemedActivity
 
     private void showFileDialog() {
         String[] importArray = new String[3];
-        importArray[0] = getString(R.string.fields_new_create_field);
-        importArray[1] = getString(R.string.import_source_local);
-        importArray[2] = getString(R.string.import_source_cloud);
+        importArray[0] = getString(R.string.import_source_local);
+        importArray[1] = getString(R.string.import_source_cloud);
+        importArray[2] = getString(R.string.fields_new_create_field);
         if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
             String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
             importArray = Arrays.copyOf(importArray, importArray.length + 1);
@@ -386,9 +386,9 @@ public class FieldEditorActivity extends ThemedActivity
         }
 
         int[] icons = new int[importArray.length];
-        icons[0] = R.drawable.ic_field;
-        icons[1] = R.drawable.ic_file_generic;
-        icons[2] = R.drawable.ic_file_cloud;
+        icons[0] = R.drawable.ic_file_generic;
+        icons[1] = R.drawable.ic_file_cloud;
+        icons[2] = R.drawable.ic_field;
         if (importArray.length > 3) {
             icons[3] = R.drawable.ic_adv_brapi;
         }
@@ -398,6 +398,12 @@ public class FieldEditorActivity extends ThemedActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
+                        loadLocalPermission();
+                        break;
+                    case 1:
+                        loadCloud();
+                        break;
+                    case 2:
                         FieldCreatorDialog dialog = new FieldCreatorDialog((ThemedActivity) FieldEditorActivity.this);
                         dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
                             @Override
@@ -407,12 +413,6 @@ public class FieldEditorActivity extends ThemedActivity
                             }
                         });
                         dialog.show();
-                        break;
-                    case 1:
-                        loadLocalPermission();
-                        break;
-                    case 2:
-                        loadCloud();
                         break;
                     case 3:
                         loadBrAPI();
