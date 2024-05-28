@@ -147,18 +147,18 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                     xAxis.setLabelCount(binCount + 1, true)
                 } else { // Bins correspond directly to observation values
                     xAxis.setCenterAxisLabels(true)
-                    xAxis.setLabelCount(binCount, true)
+                    xAxis.setLabelCount(binCount, false)
                 }
 
                 // Customize Y axis
                 val leftAxis: YAxis = holder.histogramChart.axisLeft
                 leftAxis.setDrawGridLines(false)
-                leftAxis.setDrawAxisLine(true)
+                leftAxis.setDrawAxisLine(false)
                 leftAxis.textColor = Color.BLACK
                 leftAxis.axisMinimum = 0f // Start y-axis from 0
                 val maxY = entries.maxOfOrNull { it.y.toInt() } ?: 1
                 leftAxis.granularity = ceil(maxY / 6f) // Ensure the axis increments are integers and don't exceed 6 labels
-                Log.d("FieldDetailAdapter", "Granularity is: " + leftAxis.granularity)
+                Log.d("FieldDetailAdapter", "Y axis granularity is: " + leftAxis.granularity)
                 leftAxis.axisMaximum = if (maxY < 5) maxY.toFloat() + 1 else leftAxis.granularity * 5
                 leftAxis.valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {
