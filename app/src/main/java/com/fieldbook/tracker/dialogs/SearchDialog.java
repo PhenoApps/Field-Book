@@ -37,12 +37,19 @@ import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SearchDialog extends DialogFragment implements AttributeChooserDialog.OnAttributeSelectedListener, OperatorDialog.OnOperatorClickedListener, SearchAdapter.onEditTextChangedListener, SearchAdapter.onDeleteClickedListener {
+
+    @Inject
+    SharedPreferences ep;
 
     private static final String TAG = "SearchDialog";
     private static CollectActivity originActivity;
     private SearchAdapter searchAdapter;
-    private SharedPreferences ep;
     private static List<SearchDialogDataModel> dataSet;
     public static boolean openResults;
     private final onSearchResultsClickedListener onSearchResultsClickedListener;
@@ -55,8 +62,6 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-
-        ep = requireContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
 
@@ -164,6 +169,8 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
 
         if (data != null) {
 
+            String uniqueName = ep.getString(GeneralKeys.UNIQUE_NAME, "");
+
             //Array to store all the columns to be displayed in the search results dialog
             ArrayList<String> columnsList = new ArrayList<>();
             columnsList.add(ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)));
@@ -208,7 +215,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
                     }
                     // If column is an attribute
                     else {
-                        temp.add(originActivity.getDatabase().getObservationUnitPropertyByPlotId(column, searchdata.unique));
+                        temp.add(originActivity.getDatabase().getObservationUnitPropertyByPlotId(uniqueName, column, searchdata.unique));
                     }
                 }
                 traitData.add(temp);
