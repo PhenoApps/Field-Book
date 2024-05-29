@@ -1331,7 +1331,9 @@ public class DataHelper {
 
         open();
 
-        return ObservationVariableDao.Companion.getAllTraitObjects();
+        return ObservationVariableDao.Companion.getAllTraitObjects(
+                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
+        );
 
 //        ArrayList<TraitObject> list = new ArrayList<>();
 //

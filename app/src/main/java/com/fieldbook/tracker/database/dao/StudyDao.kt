@@ -189,12 +189,6 @@ class StudyDao {
 
             val studies = ArrayList<FieldObject>()
 
-//            db.query(Study.tableName)
-//                    .toTable()
-//                    .forEach { model ->
-//                        studies.add(model.toFieldObject())
-//                    }
-
             val query = """
                 SELECT 
                     Studies.*,
@@ -213,29 +207,6 @@ class StudyDao {
                     studies.add(model.toFieldObject())
                 }
             }
-
-//            // Sort fields by most recent import/edit activity
-//            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-//            fun parseDate(date: String): Date? {
-//                return if (date.isBlank()) null
-//                else {
-//                    try {
-//                        dateFormat.parse(date.substring(0, 19)) // Truncate to "yyyy-MM-dd HH:mm:ss"
-//                    } catch (e: ParseException) {
-//                        Log.e("StudyDao", "Error parsing date: $date", e)
-//                        null
-//                    }
-//                }
-//            }
-//
-//            val sortedStudies = studies.sortedWith(compareByDescending<FieldObject> { fieldObject ->
-//                listOfNotNull(
-//                        parseDate(fieldObject.date_edit),
-//                        parseDate(fieldObject.date_import)
-//                ).maxOrNull() ?: Date(0)
-//            })
-//
-//            ArrayList(sortedStudies)
             ArrayList(studies)
 
         } ?: ArrayList()

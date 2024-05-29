@@ -69,6 +69,7 @@
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Sort Fields List</string>
+    <string name="fields_sort_reset">Reset</string>
     <string name="fields_sort_by_name">Name</string>
     <string name="fields_sort_by_import_format">Import Format</string>
     <string name="fields_sort_by_import_date">Import Date</string>
@@ -197,6 +198,7 @@
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sort Traits</string>
     <string name="traits_sort_name">Name</string>
+    <string name="traits_sort_import_order">Import Order</string>
     <string name="traits_sort_visibility">Visibility</string>
     <string name="traits_sort_format">Format</string>
     <string name="warning_traits_missing_modify">Create traits before modifying them.</string>

@@ -536,6 +536,8 @@ public class FieldEditorActivity extends ThemedActivity
 
     private void showFieldsSortDialog() {
         Map<String, String> sortOptions = new LinkedHashMap<>();
+        final String defaultSortOrder = "date_import";
+        String currentSortOrder = preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, defaultSortOrder);
 
         sortOptions.put(getString(R.string.fields_sort_by_name), "study_alias");
         sortOptions.put(getString(R.string.fields_sort_by_import_format), "import_format");
@@ -544,7 +546,7 @@ public class FieldEditorActivity extends ThemedActivity
         sortOptions.put(getString(R.string.fields_sort_by_sync_date), "date_sync");
         sortOptions.put(getString(R.string.fields_sort_by_export_date), "date_export");
 
-        ListSortDialog dialog = new ListSortDialog(this, sortOptions, criteria -> {
+        ListSortDialog dialog = new ListSortDialog(this, sortOptions, currentSortOrder, defaultSortOrder, criteria -> {
             Log.d(TAG, "Updating fields list sort order to : " + criteria);
             preferences.edit().putString(GeneralKeys.FIELDS_LIST_SORT_ORDER, criteria).apply();
             queryAndLoadFields();

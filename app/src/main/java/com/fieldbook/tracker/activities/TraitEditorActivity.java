@@ -624,45 +624,23 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         alert.show();
     }
 
-//    private void showTraitSortDialog() {
-//        String[] sortOptions = {
-//                getString(R.string.traits_sort_name),
-//                getString(R.string.traits_sort_format),
-//                getString(R.string.traits_sort_visibility)
-//        };
-//
-//        ListSortDialog dialog = new ListSortDialog(this, sortOptions, criteria -> sortTraitList(criteria));
-//        dialog.show();
-//    }
     private void showTraitSortDialog() {
         Map<String, String> sortOptions = new LinkedHashMap<>();
+        final String defaultSortOrder = "internal_id_observation_variable";
+        String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, defaultSortOrder);
+
+
         sortOptions.put(getString(R.string.traits_sort_name), "observation_variable_name");
         sortOptions.put(getString(R.string.traits_sort_format), "observation_variable_field_book_format");
+        sortOptions.put(getString(R.string.traits_sort_import_order), "internal_id_observation_variable");
         sortOptions.put(getString(R.string.traits_sort_visibility), "visible");
 
-        ListSortDialog dialog = new ListSortDialog(this, sortOptions, criteria -> sortTraitList(criteria));
+        ListSortDialog dialog = new ListSortDialog(this, sortOptions, currentSortOrder, defaultSortOrder, criteria -> {
+            Log.d(TAG, "Updating traits list sort order to : " + criteria);
+            preferences.edit().putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, criteria).apply();
+            queryAndLoadTraits();
+        });
         dialog.show();
-    }
-
-    private void sortTraitList(String colName) {
-
-        String[] sortList = database.getTraitColumnData(colName);
-        Log.d(TAG, "Using column " + colName + " to sort list: " + Arrays.toString(sortList));
-
-        ArrayIndexComparator comparator = new ArrayIndexComparator(sortList);
-        Integer[] indexes = comparator.createIndexArray();
-        Arrays.sort(indexes, comparator);
-
-        if (colName.equals("visible")) {
-            Arrays.sort(indexes, Collections.reverseOrder());
-        }
-
-        for (int j = 0; j < indexes.length; j++) {
-            database.writeNewPosition(colName, sortList[j], Integer.toString(indexes[j]));
-            Log.d(TAG, "Updated position: " + sortList[j] + " -> " + indexes[j].toString());
-        }
-
-        queryAndLoadTraits();
     }
 
     private void showExportDialog() {
