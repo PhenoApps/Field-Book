@@ -121,6 +121,7 @@ public class GeneralKeys {
 
     public static final String CANON_DEBUG = "com.tracker.fieldbook.preferences.keys.canon.debug";
     public static final String CANON_HELP = "com.tracker.fieldbook.preferences.keys.canon.help";
+    public static final String CANON_CAMERA_PREVIEW = "com.fieldbook.tracker.traits.camera.canon.PREVIEW";
 
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";

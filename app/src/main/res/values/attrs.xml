@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- custom attributes for TItledEditText View -->
+    <declare-styleable name="TitledEditView">
+        <attr name="title" format="string"/>
+        <attr name="android:hint" format="string"/>
+        <attr name="android:inputType" format="integer"/>
+    </declare-styleable>
+
     <!-- Give ourselves access to MarginLayout's styleables -->
     <declare-styleable name="ViewGroup_MarginLayout">
         <attr name="android:layout_margin" />

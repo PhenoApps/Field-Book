@@ -14,6 +14,7 @@ interface PtpSessionCallback {
         data: ByteArray,
         obsUnit: RangeObject,
         saveTime: String,
-        saveState: AbstractCameraTrait.SaveState
+        saveState: AbstractCameraTrait.SaveState,
+        offset: Int? = null
     ) = Unit
 }

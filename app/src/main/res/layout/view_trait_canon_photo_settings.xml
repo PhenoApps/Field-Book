@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <CheckBox
+            android:layout_margin="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/view_trait_canon_photo_settings_preview_cb"
+            android:text="@string/view_trait_photo_settings_preview_title"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <com.fieldbook.tracker.views.TitledEditView
+            android:visibility="gone"
+            android:layout_margin="16dp"
+            android:id="@+id/view_trait_canon_photo_settings_ssid_tev"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title="Test"
+            android:inputType="text"
+            android:hint=""
+            app:layout_constraintTop_toBottomOf="@id/view_trait_canon_photo_settings_preview_cb"/>
+
+        <com.fieldbook.tracker.views.TitledEditView
+            android:visibility="gone"
+            android:layout_margin="16dp"
+            android:id="@+id/view_trait_canon_photo_settings_ip_tev"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title="Test"
+            android:inputType="text"
+            android:hint=""
+            app:layout_constraintTop_toBottomOf="@id/view_trait_canon_photo_settings_ssid_tev"/>
+
+        <com.fieldbook.tracker.views.TitledEditView
+            android:visibility="gone"
+            android:layout_margin="16dp"
+            android:id="@+id/view_trait_canon_photo_settings_port_tev"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title="Test"
+            android:inputType="text"
+            android:hint=""
+            app:layout_constraintTop_toBottomOf="@id/view_trait_canon_photo_settings_ip_tev"/>
+
+        <CheckBox
+            android:visibility="gone"
+            android:layout_margin="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/view_trait_canon_photo_settings_debug_cb"
+            android:text="@string/pref_canon_debug_title"
+            app:layout_constraintTop_toBottomOf="@id/view_trait_canon_photo_settings_port_tev"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
+

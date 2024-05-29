@@ -24,6 +24,7 @@ import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.provider.GenericFileProvider
+import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.views.CameraTraitSettingsView
 import org.threeten.bp.OffsetDateTime
@@ -314,7 +315,7 @@ class PhotoTraitLayout : CameraTrait {
                 currentTrait.format,
                 data,
                 currentRange,
-                OffsetDateTime.now().format(internalTimeFormatter),
+                FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter)),
                 SaveState.SINGLE_SHOT
             )
         }

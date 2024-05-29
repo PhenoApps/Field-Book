@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits
 
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
@@ -8,15 +9,19 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.fieldbook.tracker.R
+import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.devices.ptpip.PtpSessionCallback
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.WifiHelper
+import com.fieldbook.tracker.views.CanonCameraTraitSettingsView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.phenoapps.androidlibrary.Utils
+import org.threeten.bp.OffsetDateTime
 
 @AndroidEntryPoint
 class CanonTraitLayout :
@@ -114,8 +119,8 @@ class CanonTraitLayout :
 
             connectBtn?.visibility = View.INVISIBLE
             imageView?.visibility = View.VISIBLE
-            previewCardView?.visibility = View.VISIBLE
-
+            previewCardView?.visibility = if (prefs.getBoolean(GeneralKeys.CANON_CAMERA_PREVIEW, true))
+                View.VISIBLE else View.GONE
             previewCardView?.layoutParams = ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.MATCH_PARENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
@@ -127,7 +132,9 @@ class CanonTraitLayout :
 
                 shutterButton?.isEnabled = false
 
-                controller.getCanonApi().startSingleShotCapture(currentRange, Utils.getDateTime())
+                controller.getCanonApi().startSingleShotCapture(currentRange,
+                    FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter))
+                )
 
                 controller.getRangeBox().toggleNavigation(false)
 
@@ -140,7 +147,34 @@ class CanonTraitLayout :
                 }, CAMERA_SHUTTER_DELAY_MS)
 
             }
+
+            settingsButton?.setOnClickListener {
+
+                showSettings()
+            }
         }
+    }
+
+    override fun onSettingsChanged() {
+        previewCardView?.visibility = if (prefs.getBoolean(GeneralKeys.CANON_CAMERA_PREVIEW, true))
+            View.VISIBLE else View.GONE
+    }
+
+    override fun showSettings() {
+
+        val settingsView = CanonCameraTraitSettingsView(context)
+
+        AlertDialog.Builder(context)
+            .setTitle(R.string.canon_trait_settings_title)
+            .setView(settingsView)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                settingsView.commitChanges()
+                onSettingsChanged()
+                dialog.dismiss()
+            }
+            .setView(settingsView)
+            .create()
+            .show()
     }
 
     override fun onSessionStop() {
@@ -163,6 +197,7 @@ class CanonTraitLayout :
         uiScope.launch(Dispatchers.Main) {
 
             shutterButton?.visibility = View.VISIBLE
+            settingsButton?.visibility = View.VISIBLE
 
             imageView?.setImageBitmap(bmp)
 
@@ -173,12 +208,13 @@ class CanonTraitLayout :
         data: ByteArray,
         obsUnit: RangeObject,
         saveTime: String,
-        saveState: SaveState
+        saveState: SaveState,
+        offset: Int?
     ) {
 
         uiScope.launch(Dispatchers.Main) {
 
-            saveJpegToStorage(type(), data, obsUnit, saveTime, saveState)
+            saveJpegToStorage(type(), data, obsUnit, saveTime, saveState, offset)
 
         }
     }

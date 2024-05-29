@@ -7,10 +7,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Point
 import android.net.Uri
 import android.os.Build
-import android.provider.DocumentsContract
 import android.util.AttributeSet
 import android.util.Log
 import android.widget.ImageButton
@@ -24,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.ImageAdapter
+import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
@@ -39,7 +38,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
-import org.phenoapps.androidlibrary.Utils
+import org.threeten.bp.OffsetDateTime
+import java.io.File
+import java.io.IOException
+import java.io.RandomAccessFile
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -131,22 +133,79 @@ abstract class AbstractCameraTrait :
         data: ByteArray,
         obsUnit: RangeObject,
         saveTime: String,
-        saveState: SaveState
+        saveState: SaveState,
+        offset: Int? = null
     ) {
 
         saveToStorage(format, obsUnit, saveTime, saveState) { uri ->
 
-            context.contentResolver.openOutputStream(uri, "wa")?.use { output ->
+            if (saveState != SaveState.SINGLE_SHOT) {
 
-                output.write(data)
+                context.externalCacheDir?.let { dir ->
+
+                    RandomAccessFile(File(dir, TEMPORARY_IMAGE_NAME), "rw").use { raf ->
+
+                        if (saveState != SaveState.COMPLETE) {
+
+                            saveBufferedData(raf, data, offset)
+
+                        } else {
+
+                            saveTempFileToStorage(uri, raf)
+                        }
+                    }
+                }
+
+            } else {
+
+                saveSingleShot(uri, data)
 
             }
         }
     }
 
+    private fun saveTempFileToStorage(uri: Uri, raf: RandomAccessFile) {
+
+        context.contentResolver.openOutputStream(uri, "wa")?.use { output ->
+            try {
+                val buffer = ByteArray(1024)
+                var bytesRead = raf.read(buffer)
+                while (bytesRead != -1) {
+                    output.write(buffer, 0, bytesRead)
+                    bytesRead = raf.read(buffer)
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                Log.e(TAG, e.message ?: "Failed to save image.")
+            }
+        }
+    }
+
+    private fun saveBufferedData(raf: RandomAccessFile, data: ByteArray, offset: Int?) {
+
+        raf.seek((offset ?: 0).toLong())
+
+        raf.write(data)
+    }
+
+    private fun saveSingleShot(uri: Uri, data: ByteArray) {
+
+        context.contentResolver.openOutputStream(uri, "wa")?.use { output ->
+
+            output.write(data)
+
+        }
+    }
+
     protected fun saveBitmapToStorage(format: String, bmp: Bitmap, obsUnit: RangeObject) {
 
-        saveToStorage(format, obsUnit, saveTime = Utils.getDateTime(), saveState = SaveState.SINGLE_SHOT) { uri ->
+        saveToStorage(
+            format, obsUnit, saveTime = FileUtil.sanitizeFileName(
+                OffsetDateTime.now().format(
+                    internalTimeFormatter
+                )
+            ), saveState = SaveState.SINGLE_SHOT
+        ) { uri ->
 
             context.contentResolver.openOutputStream(uri)?.let { output ->
 
@@ -237,6 +296,8 @@ abstract class AbstractCameraTrait :
                         dir.findFile(name)?.let { file ->
 
                             if (saveState == SaveState.COMPLETE) {
+
+                                saver.invoke(file.uri)
 
                                 writeExif(file, studyId, saveTime)
 

@@ -10,15 +10,15 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.FileUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.phenoapps.fragments.gopro.GoProFragment
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import org.threeten.bp.OffsetDateTime
 
 @AndroidEntryPoint
 class GoProTraitLayout :
@@ -120,8 +120,7 @@ class GoProTraitLayout :
         //val plot = currentRange.plot_id
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
         //val traitName = currentTrait.name
-        val timestamp = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.US)
-            .format(Calendar.getInstance().time)
+        val timestamp = FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter))
         //val name = "${traitName}_${plot}_$timestamp.png"
 
         return GoProApi.ImageRequestData(

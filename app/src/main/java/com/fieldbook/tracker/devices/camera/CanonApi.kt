@@ -28,7 +28,6 @@ import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.phenoapps.androidlibrary.Utils
 import java.io.ByteArrayInputStream
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -426,19 +425,19 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
         }) { response ->
 
-            log("Response get image $offset $payloadSize $response")
+            log("Response get image $offset $payloadSize $response $saveTime")
 
             if (payloadSize == length) {
 
                 session.callbacks?.onJpegCaptured(nextData, unit, saveTime,
-                    saveState = if (offset == 0) AbstractCameraTrait.SaveState.NEW else AbstractCameraTrait.SaveState.SAVING)
+                    saveState = if (offset == 0) AbstractCameraTrait.SaveState.NEW else AbstractCameraTrait.SaveState.SAVING,
+                    offset = offset ?: 0)
 
+                Log.d(TAG, "Getting offset: ${offset ?: 0} for ${unit.plot_id}")
                 requestGetImage(session, handle, unit, (offset ?: 0) + length, saveTime)
 
             }
         }
-
-        session.callbacks?.onJpegCaptured(byteArrayOf(), unit, saveTime, AbstractCameraTrait.SaveState.COMPLETE)
     }
 
     private fun startMainLoop(
@@ -523,6 +522,14 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
                             //requestUiLock(true, session, storageId, unit)
 
                             requestGetImage(session, handle, unit, saveTime = time)
+
+                            session.callbacks?.onJpegCaptured(
+                                byteArrayOf(),
+                                unit,
+                                time,
+                                AbstractCameraTrait.SaveState.COMPLETE,
+                                offset = 0
+                            )
                         }
                     }
                 }

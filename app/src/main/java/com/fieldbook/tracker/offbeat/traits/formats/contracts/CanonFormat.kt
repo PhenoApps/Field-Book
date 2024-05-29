@@ -10,4 +10,6 @@ import com.fieldbook.tracker.offbeat.traits.formats.parameters.NameParameter
 class CanonFormat : BasePhotoFormat(
     format = Formats.CANON,
     nameStringResourceId = R.string.traits_format_canon,
-    iconDrawableResourceId = R.drawable.camera_24px)
+    iconDrawableResourceId = R.drawable.camera_24px,
+    stringNameAux = { ctx -> "${ctx.getString(R.string.traits_format_canon)} (Beta)" }
+)

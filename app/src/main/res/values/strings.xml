@@ -1085,4 +1085,5 @@
     <string name="pref_canon_debug_title">Debug</string>
     <string name="pref_canon_debug_summary">A preferences for developers to monitor device output.</string>
     <string name="trait_usb_photo_settings_title">USB Photo Settings</string>
+    <string name="canon_trait_settings_title">Canon Settings</string>
 </resources>
