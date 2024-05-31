@@ -267,26 +267,19 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 val iconRes = Formats.entries
                     .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
 
-                val observations = traitDetail.getObservations().mapNotNull {
-                    try {
-                        BigDecimal(it)
-                    } catch (e: NumberFormatException) {
-                        null
-                    }
-                }
-
                 FieldDetailItem(
                     traitDetail.getTraitName(),
                     traitDetail.getFormat(),
                     getString(R.string.field_trait_observation_total, traitDetail.getCount()),
                     ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical),
-                    observations,
-                    traitDetail.completeness // Pass the completeness stat
+                    traitDetail.getObservations(),
+                    traitDetail.completeness
                 )
             }
         }
-        return emptyList()  // Return an empty list if traitDetails is null
+        return emptyList()
     }
+
 
 
     private fun setupToolbar(field: FieldObject) {

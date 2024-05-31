@@ -72,7 +72,6 @@
                     android:layout_marginLeft="1dp"
                     android:layout_marginRight="1dp"/>
 
-                <!-- Collapse/Expand Icon -->
                 <ImageView
                     android:id="@+id/expand_collapse_icon"
                     android:layout_width="30dp"
@@ -80,7 +79,15 @@
                     android:src="@drawable/ic_chevron_down" />
             </LinearLayout>
 
-            <!-- Collapsible Content -->
+            <TextView
+                android:id="@+id/noChartAvailableTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:textColor="@color/main_color_text_dark"
+                android:padding="8dp"/>
+
+            <!-- Collapsible Chart -->
             <LinearLayout
                 android:id="@+id/collapsible_content"
                 android:layout_width="match_parent"
@@ -88,17 +95,6 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <!-- Non-numeric Data Message -->
-                <TextView
-                    android:id="@+id/nonNumericMessageTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:text="Non-numeric data, no histogram available"
-                    android:textColor="@color/main_color_text_dark"
-                    android:padding="8dp"/>
-
-                <!-- CardView for Material Design look -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -109,7 +105,7 @@
                     android:background="@color/light_gray">
 
                     <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/histogramChart"
+                        android:id="@+id/countChart"
                         android:layout_width="match_parent"
                         android:layout_height="200dp"/>
                 </androidx.cardview.widget.CardView>
