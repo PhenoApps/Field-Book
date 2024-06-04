@@ -1,7 +1,9 @@
 package com.fieldbook.tracker.preferences
 
+import android.app.AlertDialog
 import android.content.res.Resources
 import android.os.Bundle
+import android.util.Log
 import androidx.core.os.ConfigurationCompat
 import androidx.fragment.app.FragmentManager
 import androidx.preference.Preference
@@ -33,35 +35,34 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
      * Also update the app language using app compat.
      */
     override fun onPreferenceClick(preference: Preference): Boolean {
-
         try {
-
             context?.let { ctx ->
-
                 var id = preference.key
-
+                if (preference.key == "com.fieldbook.tracker.preference.language.default") {
+                    id = ConfigurationCompat.getLocales(Resources.getSystem().configuration)[0]?.language ?: "en-US"
+                }
+                Log.d("LanguagePrefFragment", "Switching language to: $id")
                 with (PreferenceManager.getDefaultSharedPreferences(ctx)) {
-
-                    if (preference.key == "com.fieldbook.tracker.preference.language.default") {
-
-                        id = ConfigurationCompat.getLocales(Resources.getSystem().configuration).get(0)?.language
-
-                    }
-
                     edit().putString(GeneralKeys.LANGUAGE_LOCALE_ID, id).apply()
                     edit().putString(GeneralKeys.LANGUAGE_LOCALE_SUMMARY, preference.title.toString()).apply()
+                }
 
-                    AppLanguageUtil.refreshAppText(context)
+                AlertDialog.Builder(ctx, R.style.AppAlertDialog).apply {
+                    setTitle(context.getString(R.string.dialog_warning))
+                    setMessage(context.getString(R.string.preference_language_warning))
+                    setPositiveButton(context.getString(android.R.string.ok)) { dialog, _ ->
+                        AppLanguageUtil.refreshAppText(ctx)
+                        dialog.dismiss()
+                        parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                    }
+                    setCancelable(false)
+                    show()
                 }
             }
-
         } catch (e: Exception) {
-
             e.printStackTrace()
-
+            Log.e("LanguagePreference", "Error in onPreferenceClick: ${e.message}")
         }
-
-        parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
 
         return true
     }
