@@ -153,6 +153,7 @@
     <string name="activity_collect_dialog_verify_no_button">لا</string>
     <string name="activity_collect_dialog_verify_yes_button">نعم</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">لا يتضمن جهازك العتاد الضروري لهذه الميزة</string>
     <string name="trait_delete_warning_photo">هل أنت متأكد من رغبتك بحذف هذه الصورة؟</string>
