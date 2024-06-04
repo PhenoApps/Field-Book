@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 public class Utils extends Application {
 
+    private static Toast currentToast;
+
     public static void scanFile(Context context, String path, String mimeType) {
         MediaScannerConnection.scanFile(context, new String[] { path }, new String[] { mimeType }, null);
     }
@@ -59,10 +61,12 @@ public class Utils extends Application {
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnected();
     }
-
     public static void makeToast(Context context, String message) {
-        Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.TOP,0,0);
-        toast.show();
+        if (currentToast != null) {
+            currentToast.cancel();
+        }
+        currentToast = Toast.makeText(context, message, Toast.LENGTH_LONG);
+        currentToast.setGravity(Gravity.TOP, 0, 0);
+        currentToast.show();
     }
 }
