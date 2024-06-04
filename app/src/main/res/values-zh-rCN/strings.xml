@@ -158,6 +158,7 @@
     <string name="activity_collect_dialog_verify_no_button">否</string>
     <string name="activity_collect_dialog_verify_yes_button">是</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">您的设备不包含此功能所必需的硬件</string>
     <string name="trait_delete_warning_photo">确定要删除这张照片吗？</string>
