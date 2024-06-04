@@ -56,7 +56,7 @@ object BarChartHelper {
         leftAxis.axisMinimum = 0f
         val maxY = entries.maxOfOrNull { it.y.toInt() } ?: 1
         leftAxis.granularity = ceil(maxY / 6f)
-        leftAxis.axisMaximum = if (maxY < 5) maxY.toFloat() + 1 else leftAxis.granularity * 5
+        leftAxis.axisMaximum = ceil(maxY / leftAxis.granularity) * leftAxis.granularity
         leftAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
                 return value.toInt().toString()

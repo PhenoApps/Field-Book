@@ -182,6 +182,13 @@
     <string name="field_trait_total">"&lt;b>%1$s&lt;/b>" traits</string>
     <string name="field_observation_total">"&lt;b>%1$s&lt;/b>" observations</string>
     <string name="field_trait_observation_total">"%d" observations</string>
+    <string name="field_trait_chart_no_data">No data to chart</string>
+    <string name="field_trait_chart_incompatible_format">This trait format cannot be charted</string>
+    <string name="field_trait_chart_excess_data">Too many distinct values to chart</string>
+
+
+
+
 
     <!-- Semantic dates -->
     <string name="today">Today</string>

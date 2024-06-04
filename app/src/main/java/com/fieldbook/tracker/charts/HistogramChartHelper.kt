@@ -2,6 +2,7 @@ package com.fieldbook.tracker.charts
 
 import android.content.Context
 import android.graphics.Color
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import com.fieldbook.tracker.R
@@ -23,10 +24,10 @@ object HistogramChartHelper {
         val maxValue = observations.maxOrNull() ?: BigDecimal.ZERO
         val range = maxValue.subtract(minValue)
 
-        if (range.compareTo(BigDecimal.ZERO) == 0) {
-            chart.visibility = View.GONE
-            return
-        }
+//        if (range.compareTo(BigDecimal.ZERO) == 0) {
+//            chart.visibility = View.GONE
+//            return
+//        }
 
         chart.visibility = View.VISIBLE
 
@@ -78,7 +79,7 @@ object HistogramChartHelper {
         leftAxis.axisMinimum = 0f
         val maxY = entries.maxOfOrNull { it.y.toInt() } ?: 1
         leftAxis.granularity = ceil(maxY / 6f)
-        leftAxis.axisMaximum = if (maxY < 5) maxY.toFloat() + 1 else leftAxis.granularity * 5
+        leftAxis.axisMaximum = ceil(maxY / leftAxis.granularity) * leftAxis.granularity
         leftAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
                 return value.toInt().toString()

@@ -43,40 +43,45 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         holder.traitNameTextView.text = item.title
         holder.traitCountTextView.text = item.subtitle
         holder.traitIconImageView.setImageDrawable(item.icon)
-        PieChartHelper.setupPieChart(holder.itemView.context, holder.traitCompletenessChart, item.completeness)
+        PieChartHelper.setupPieChart(
+            holder.itemView.context,
+            holder.traitCompletenessChart,
+            item.completeness
+        )
 
-        if (item.observations == null || item.observations.isEmpty()) {
-            Log.d("FieldDetailAdapter", "No data to chart for ${item.title}")
-            noChartAvailableMessage(holder, "No data to chart.")
-            return
-        }
-
-        val observations = item.observations
-        Log.d("FieldDetailAdapter", "Observations for ${item.title}: $observations")
+        val nonChartableFormats =
+            setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
 
         holder.collapsibleHeader.setOnClickListener {
             toggleCollapse(holder)
         }
 
-        if (observations.distinct().size == 1) {
-            Log.d("FieldDetailAdapter", "All observations have the same value for ${item.title}")
-            BarChartHelper.setupBarChart(holder.itemView.context, holder.countChart, observations)
+        if (item.observations == null || item.observations.isEmpty()) {
+            noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_no_data))
             return
-        }
-
-        try {
-            val numericObservations = observations.map { BigDecimal(it) }
-            Log.d("FieldDetailAdapter", "Numeric observations for ${item.title}: $numericObservations")
-            Log.d("FieldDetailAdapter", "Setting up histogram for ${item.title}")
-            HistogramChartHelper.setupHistogram(holder.itemView.context, holder.countChart, numericObservations)
-        } catch (e: NumberFormatException) {
-            Log.d("FieldDetailAdapter", "Non-numeric data detected for ${item.title}")
-            if (observations.distinct().size <= 10) {
-                Log.d("FieldDetailAdapter", "Setting up bar chart for ${item.title}")
-                BarChartHelper.setupBarChart(holder.itemView.context, holder.countChart, observations)
-            } else {
-                Log.d("FieldDetailAdapter", "This data type cannot be charted for ${item.title}")
-                noChartAvailableMessage(holder, "This data type cannot be charted.")
+        } else if (item.format in nonChartableFormats) {
+            noChartAvailableMessage(holder,  holder.itemView.context.getString(R.string.field_trait_chart_incompatible_format))
+        } else {
+            try {
+                val numericObservations = item.observations.map { BigDecimal(it) }
+                if (numericObservations.distinct().size < 2) {
+                    throw NumberFormatException("Not enough distinct numeric values")
+                }
+                HistogramChartHelper.setupHistogram(
+                    holder.itemView.context,
+                    holder.countChart,
+                    numericObservations
+                )
+            } catch (e: NumberFormatException) {
+                if (item.observations.distinct().size <= 10) {
+                    BarChartHelper.setupBarChart(
+                        holder.itemView.context,
+                        holder.countChart,
+                        item.observations
+                    )
+                } else {
+                    noChartAvailableMessage(holder,  holder.itemView.context.getString(R.string.field_trait_chart_excess_data))
+                }
             }
         }
     }
@@ -101,7 +106,6 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
 
     private fun noChartAvailableMessage(holder: ViewHolder, message: String) {
         holder.countChart.visibility = View.GONE
-        holder.collapsibleContent.visibility = View.GONE
         holder.noChartAvailableTextView.visibility = View.VISIBLE
         holder.noChartAvailableTextView.text = message
     }
