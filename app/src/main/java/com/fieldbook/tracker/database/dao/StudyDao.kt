@@ -19,6 +19,7 @@ import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
+import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -266,76 +267,16 @@ class StudyDao {
          *         val format: String,
          *         val count: Int,
          *         val observations: List<String>
+         *         val completeness: Float
          * )
          */
-
-//        fun getTraitDetailsForStudy(studyId: Int): List<FieldObject.TraitDetail> {
-//            return withDatabase { db ->
-//                val traitDetails = mutableListOf<FieldObject.TraitDetail>()
-//
-//                val cursor = db.rawQuery("""
-//            SELECT observation_variable_name, observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(value) as observations
-//            FROM observations
-//            WHERE study_id = ? AND observation_variable_db_id > 0
-//            GROUP BY observation_variable_name, observation_variable_field_book_format
-//        """, arrayOf(studyId.toString()))
-//
-//                if (cursor.moveToFirst()) {
-//                    do {
-//                        val traitName = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name"))
-//                        val format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format"))
-//                        val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
-//                        val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
-//                        val observations = observationsString?.split(",") ?: emptyList()
-//
-//                        traitDetails.add(FieldObject.TraitDetail(traitName, format, count, observations))
-//                    } while (cursor.moveToNext())
-//                }
-//
-//                cursor.close()
-//                traitDetails
-//            } ?: emptyList()
-//        }
-
-//        fun getTraitDetailsForStudy(studyId: Int): List<FieldObject.TraitDetail> {
-//            return withDatabase { db ->
-//                val traitDetails = mutableListOf<FieldObject.TraitDetail>()
-//
-//                val cursor = db.rawQuery("""
-//            SELECT o.observation_variable_name, o.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value) as observations,
-//            (SELECT COUNT(DISTINCT observation_unit_id) FROM observations WHERE study_id = ? AND observation_variable_name = o.observation_variable_name) AS distinct_obs_units,
-//            (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units
-//            FROM observations o
-//            WHERE o.study_id = ? AND o.observation_variable_db_id > 0
-//            GROUP BY o.observation_variable_name, o.observation_variable_field_book_format
-//        """, arrayOf(studyId.toString(), studyId.toString(), studyId.toString()))
-//
-//                if (cursor.moveToFirst()) {
-//                    do {
-//                        val traitName = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name"))
-//                        val format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format"))
-//                        val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
-//                        val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
-//                        val observations = observationsString?.split(",") ?: emptyList()
-//                        val distinctObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("distinct_obs_units"))
-//                        val totalObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("total_obs_units"))
-//                        val completeness = distinctObsUnits.toFloat() / totalObsUnits.toFloat()
-//
-//                        traitDetails.add(FieldObject.TraitDetail(traitName, format, count, observations, completeness))
-//                    } while (cursor.moveToNext())
-//                }
-//
-//                cursor.close()
-//                traitDetails
-//            } ?: emptyList()
-//        }
 
         fun getTraitDetailsForStudy(studyId: Int): List<FieldObject.TraitDetail> {
             return withDatabase { db ->
                 val traitDetails = mutableListOf<FieldObject.TraitDetail>()
 
                 val cursor = db.rawQuery("""
-            SELECT o.observation_variable_name, o.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value) as observations, 
+            SELECT o.observation_variable_name, o.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
             (SELECT COUNT(DISTINCT observation_unit_id) FROM observations WHERE study_id = ? AND observation_variable_name = o.observation_variable_name) AS distinct_obs_units,
             (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units
             FROM observations o
@@ -349,62 +290,17 @@ class StudyDao {
                         val format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format"))
                         val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
                         val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
-                        val observations = mutableListOf<String>()
-
-                        Log.d("getTraitDetailsForStudy", "Trait: $traitName, Format: $format, Count: $count, ObservationsString: $observationsString")
-
-                        // Parse and flatten the observations
-                        if (observationsString != null) {
-                            if (format == "categorical") {
-                                val rawObservations = observationsString.split("],")
-                                rawObservations.forEach { rawObservation ->
-                                    try {
-                                        val fixedRawObservation = if (rawObservation.endsWith("]")) rawObservation else "$rawObservation]"
-                                        val jsonArray = JSONArray(fixedRawObservation)
-                                        Log.d("getTraitDetailsForStudy", "Parsed as JSONArray: $jsonArray")
-                                        for (i in 0 until jsonArray.length()) {
-                                            val jsonObject = jsonArray.getJSONObject(i)
-                                            if (jsonObject.has("value")) {
-                                                val value = jsonObject.getString("value")
-                                                observations.add(value)
-                                                Log.d("getTraitDetailsForStudy", "Added value from JSONArray: $value")
-                                            }
-                                        }
-                                    } catch (e: JSONException) {
-                                        // Not a JSON array, try parsing as a JSON object
-                                        try {
-                                            val jsonObject = JSONObject(rawObservation)
-                                            Log.d("getTraitDetailsForStudy", "Parsed as JSONObject: $jsonObject")
-                                            if (jsonObject.has("value")) {
-                                                val value = jsonObject.getString("value")
-                                                observations.add(value)
-                                                Log.d("getTraitDetailsForStudy", "Added value from JSONObject: $value")
-                                            } else {
-                                                observations.add(rawObservation)
-                                                Log.d("getTraitDetailsForStudy", "Added raw observation: $rawObservation")
-                                            }
-                                        } catch (e: JSONException) {
-                                            // Not a JSON object, add raw value
-                                            observations.add(rawObservation)
-                                            Log.d("getTraitDetailsForStudy", "Added raw observation: $rawObservation")
-                                        }
-                                    }
-                                }
-                            } else {
-                                val rawObservations = observationsString.split(",")
-                                rawObservations.forEach { rawObservation ->
-                                    observations.add(rawObservation.trim())
-                                    Log.d("getTraitDetailsForStudy", "Added raw observation: $rawObservation")
-                                }
-                            }
-                        }
-
+                        val rawObservations = observationsString?.split("|") ?: emptyList()
+                        val observations = rawObservations.map { obs -> CategoryJsonUtil.processValue(
+                            buildMap {
+                                put("observation_variable_field_book_format", format)
+                                put("value", obs)
+                            }) }
                         val distinctObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("distinct_obs_units"))
                         val totalObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("total_obs_units"))
                         val completeness = distinctObsUnits.toFloat() / totalObsUnits.toFloat()
 
                         traitDetails.add(FieldObject.TraitDetail(traitName, format, count, observations, completeness))
-                        Log.d("getTraitDetailsForStudy", "TraitDetail added: ${FieldObject.TraitDetail(traitName, format, count, observations, completeness)}")
                     } while (cursor.moveToNext())
                 }
 
