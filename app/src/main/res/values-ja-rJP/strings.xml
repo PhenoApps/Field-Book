@@ -154,6 +154,7 @@
     <string name="activity_collect_dialog_verify_no_button">いいえ</string>
     <string name="activity_collect_dialog_verify_yes_button">はい</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">この機能にハードウェアーが対応していません</string>
     <string name="trait_delete_warning_photo">この写真を削除してもよろしいでしょうか？</string>
