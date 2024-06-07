@@ -24,6 +24,7 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.BrapiExportUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -45,9 +46,10 @@ public class BrapiExportActivity extends ThemedActivity {
 
     @Inject
     SharedPreferences preferences;
+    @Inject
+    DataHelper dataHelper;
 
     private BrAPIService brAPIService;
-    private DataHelper dataHelper;
     private List<Observation> newObservations;
     private List<Observation> editedObservations;
     private List<FieldBookImage> imagesNew;
@@ -77,11 +79,6 @@ public class BrapiExportActivity extends ThemedActivity {
 
     }
 
-    //testing constructor
-    public BrapiExportActivity(DataHelper dataHelper) {
-        this.dataHelper = dataHelper;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,10 +88,6 @@ public class BrapiExportActivity extends ThemedActivity {
 
                 requestWindowFeature(Window.FEATURE_NO_TITLE);
                 setContentView(R.layout.dialog_brapi_export);
-
-                if(this.dataHelper == null) {
-                    this.dataHelper = new DataHelper(this);
-                }
 
                 // Extract the fieldId from the intent
                 Intent intent = getIntent();
@@ -695,6 +688,7 @@ public class BrapiExportActivity extends ThemedActivity {
         }
     }
 
+
     private void loadStatistics() {
 
         numNewObservations = 0;
@@ -706,7 +700,7 @@ public class BrapiExportActivity extends ThemedActivity {
         numIncompleteImages = 0;
 
         String hostURL = BrAPIService.getHostUrl(this);
-        List<Observation> observations = dataHelper.getObservations(hostURL);
+        List<Observation> observations = dataHelper.getObservations(fieldId, hostURL);
         List<Observation> userCreatedTraitObservations = dataHelper.getUserTraitObservations(fieldId);
         List<Observation> wrongSourceObservations = dataHelper.getWrongSourceObservations(hostURL);
 
@@ -752,10 +746,10 @@ public class BrapiExportActivity extends ThemedActivity {
             }
         }
 
-        String field = preferences.getString(GeneralKeys.FIELD_FILE, "");
+        FieldObject field = dataHelper.getFieldObject(fieldId);
 
         runOnUiThread(() -> {
-            ((TextView) findViewById(R.id.brapistudyValue)).setText(field);
+            ((TextView) findViewById(R.id.brapistudyValue)).setText(field.getExp_alias());
             ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));
             ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
             ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(numEditedObservations));

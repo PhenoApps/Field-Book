@@ -677,11 +677,11 @@ public class DataHelper {
     /**
      * Get the data for brapi export to external system
      */
-    public List<Observation> getObservations(String hostUrl) {
+    public List<Observation> getObservations(int fieldId, String hostUrl) {
 
         open();
 
-        return ObservationDao.Companion.getObservations(hostUrl);
+        return ObservationDao.Companion.getObservations(fieldId, hostUrl);
 
 //        List<Observation> observations = new ArrayList<Observation>();
 //
