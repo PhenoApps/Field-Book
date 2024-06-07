@@ -13,6 +13,7 @@
         <item name="windowNoTitle">true</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeBackground">@color/main_primary</item>
+        <item name="selectedItemBackground">@color/main_primary_transparent</item>
         <item name="fb_color_primary">@color/main_primary</item>
         <item name="fb_color_primary_dark">@color/main_primary_dark</item>
         <item name="fb_color_accent">@color/main_color_accent</item>
@@ -116,6 +117,8 @@
 
     <!-- Blue Theme -->
     <style name="BaseAppTheme.Blue">
+        <item name="actionModeBackground">@color/blue_primary</item>
+        <item name="selectedItemBackground">@color/blue_primary_transparent</item>
         <item name="fb_color_primary">@color/blue_primary</item>
         <item name="fb_color_primary_dark">@color/blue_primary_dark</item>
         <item name="fb_color_accent">@color/blue_color_accent</item>
@@ -148,6 +151,8 @@
 
     <!-- High Contrast Theme -->
     <style name="BaseAppTheme.HighContrast">
+        <item name="actionModeBackground">@color/high_contrast_primary</item>
+        <item name="selectedItemBackground">@color/light_gray</item>
         <item name="fb_color_primary">@color/high_contrast_primary</item>
         <item name="fb_color_primary_dark">@color/high_contrast_primary_dark</item>
         <item name="fb_color_accent">@color/high_contrast_color_accent</item>
