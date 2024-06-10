@@ -89,7 +89,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             // use local export if any fields aren't all brapi, if brapi is disabled, or if local pref is set
             exportPermission()
         } else if (exporter == "brapi") {
-            fieldIds.forEach { fieldId -> exportBrAPI(fieldId) }
+            exportBrAPI(fieldIds)
         } else {
             showExportDialog() // provide export type choice if fields are all brapi but pref is not set
         }
@@ -140,29 +140,27 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         builder.setTitle(R.string.export_dialog_title)
             .setView(layout)
             .setPositiveButton(context.getString(R.string.dialog_cancel)) { dialog, _ -> dialog.dismiss() }
-            .create()
-            .show()
 
+        val dialog = builder.create()
+        dialog.show()
         exportSourceList.setOnItemClickListener { _, _, which, _ ->
             when (which) {
                 0 -> exportPermission()
-                1 -> fieldIds.forEach { fieldId -> exportBrAPI(fieldId) }
+                1 -> exportBrAPI(fieldIds)
             }
+            dialog.dismiss()
         }
     }
 
-    fun exportBrAPI(fieldId: Int) {
-        val activeField = database.getFieldObject(fieldId)
-        if (activeField.getImport_format() != ImportFormat.BRAPI) {
-            Toast.makeText(context, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show()
-            return
-        }
+    fun exportBrAPI(fieldIds: List<Int>) {
+        val activeFields = fieldIds.map { fieldId -> database.getFieldObject(fieldId) }
+        val nonMatchingSourceFields = activeFields.filter { !BrAPIService.checkMatchBrapiUrl(context, it.getExp_source()) }
 
-        if (!BrAPIService.checkMatchBrapiUrl(context, activeField.getExp_source())) {
+        if (nonMatchingSourceFields.isNotEmpty()) {
             val hostURL = BrAPIService.getHostUrl(context)
             val badSourceMsg = context.resources.getString(
                 R.string.brapi_field_non_matching_sources,
-                activeField.getExp_source(),
+                nonMatchingSourceFields.joinToString(", ") { it.getExp_source() },
                 hostURL
             )
             Toast.makeText(context, badSourceMsg, Toast.LENGTH_LONG).show()
@@ -171,7 +169,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
         if (BrAPIService.isLoggedIn(context)) {
             val exportIntent = Intent(context, BrapiExportActivity::class.java)
-            exportIntent.putExtra(BrapiExportActivity.FIELD_ID, fieldId)
+            exportIntent.putIntegerArrayListExtra(BrapiExportActivity.FIELD_IDS, ArrayList(fieldIds))
             context.startActivity(exportIntent)
         } else {
             val brapiAuth = BrapiAuthDialog(context)

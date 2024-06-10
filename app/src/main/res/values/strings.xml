@@ -1022,6 +1022,8 @@
     <!-- BrAPI Export -->
     <string name="act_brapi_export_title">BrAPI Export</string>
     <string name="brapi_export_button">Export</string>
+    <string name="brapi_next_field_button">Next Field</string>
+    <string name="brapi_close_button">Close</string>
     <string name="brapi_export_title">BrAPI Export Statistics</string>
     <string name="brapi_export_observations">Observations</string>
     <string name="brapi_export_num_new_obs"> New Observations</string>
