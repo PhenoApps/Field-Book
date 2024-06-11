@@ -7,10 +7,10 @@
     <EditTextPreference android:layout="@layout/view_preferences_horizontal_break" />
 
     <Preference
-        android:icon="@drawable/ic_pref_general"
-        android:key="pref_key_general_settings"
-        android:title="@string/preferences_general_title"
-        app:fragment="com.fieldbook.tracker.preferences.GeneralPreferencesFragment" />
+        android:icon="@drawable/ic_pref_system"
+        android:key="pref_key_system_settings"
+        android:title="@string/preferences_system_title"
+        app:fragment="com.fieldbook.tracker.preferences.SystemPreferencesFragment" />
 
     <Preference
         android:icon="@drawable/ic_pref_profile_person"
@@ -32,9 +32,9 @@
 
     <Preference
         android:icon="@drawable/ic_map_search"
-        android:key="pref_key_geonav_settings"
-        android:title="@string/preferences_geonav_title"
-        app:fragment="com.fieldbook.tracker.preferences.GeoNavPreferencesFragment" />
+        android:key="pref_key_location_settings"
+        android:title="@string/preferences_location_title"
+        app:fragment="com.fieldbook.tracker.preferences.LocationPreferencesFragment" />
 
     <Preference
         android:icon="@drawable/ic_pref_sounds"

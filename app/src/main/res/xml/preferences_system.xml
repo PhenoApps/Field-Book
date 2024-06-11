@@ -4,14 +4,14 @@
 
     <PreferenceCategory
         android:key="transfer_defaults"
-        android:title="@string/preferences_general_system_title"
+        android:title="@string/preferences_system_defaults_title"
         app:iconSpaceReserved="false">
 
         <Preference
             android:icon="@drawable/ic_pref_general_root_directory"
             android:key="DEFAULT_STORAGE_LOCATION_PREFERENCE"
-            android:summary="@string/preferences_general_files_base_directory_description"
-            android:title="@string/preferences_general_files_base_directory_title" />
+            android:summary="@string/preferences_system_files_base_directory_description"
+            android:title="@string/preferences_system_files_base_directory_title" />
 
         <ListPreference
             android:defaultValue="1"

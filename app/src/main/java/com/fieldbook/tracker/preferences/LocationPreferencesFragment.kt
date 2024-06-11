@@ -25,7 +25,7 @@ import org.phenoapps.security.Security
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
+class LocationPreferencesFragment : PreferenceFragmentCompat(),
     Preference.OnPreferenceChangeListener {
 
     private var mPairDevicePref: Preference? = null
@@ -52,7 +52,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
         advisor.initialize()
 
-        setPreferencesFromResource(R.xml.preferences_geonav, rootKey)
+        setPreferencesFromResource(R.xml.preferences_location, rootKey)
 
         preferences.registerOnSharedPreferenceChangeListener(listener)
 
@@ -69,7 +69,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             updatePreferencesVisibility(geonavEnabledPref.isChecked)
         }
 
-        (this.activity as PreferencesActivity?)!!.supportActionBar!!.title = getString(R.string.preferences_geonav_title)
+        (this.activity as PreferencesActivity?)!!.supportActionBar!!.title = getString(R.string.preferences_location_title)
 
         //add click action on pair rover device to search for bt devices
         mPairDevicePref = findPreference(GeneralKeys.PAIR_BLUETOOTH)

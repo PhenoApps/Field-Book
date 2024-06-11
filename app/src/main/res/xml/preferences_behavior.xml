@@ -70,7 +70,7 @@
         android:defaultValue="false"
         android:icon="@drawable/ic_gesture_tap"
         android:key="FLIP_FLOP_ARROWS"
-        android:summary="@string/preferences_general_flip_flop_arrows_description"
-        android:title="@string/preferences_general_flip_flop_arrows" />
+        android:summary="@string/preferences_general_swap_navigation_description"
+        android:title="@string/preferences_general_swap_navigation" />
 
 </PreferenceScreen>

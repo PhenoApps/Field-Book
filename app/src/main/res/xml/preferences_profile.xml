@@ -16,7 +16,7 @@
 
     <PreferenceCategory
         android:key="transfer_defaults"
-        android:title="@string/preferences_profile_settings"
+        android:title="@string/preferences_profile_title"
         app:iconSpaceReserved="false">
 
         <CheckBoxPreference

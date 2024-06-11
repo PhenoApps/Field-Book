@@ -565,11 +565,11 @@
 
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_title">General</string>
+    <string name="preferences_system_title">System</string>
 
-    <string name="preferences_general_system_title">System Defaults</string>
-    <string name="preferences_general_files_base_directory_title">Define storage location</string>
-    <string name="preferences_general_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
+    <string name="preferences_system_defaults_title">Defaults</string>
+    <string name="preferences_system_files_base_directory_title">Define storage location</string>
+    <string name="preferences_system_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
     <string name="preferences_source_default_import">Default import source</string>
     <string name="preferences_source_default_export">Default export source</string>
 
@@ -612,7 +612,7 @@
     <string name="profile_name_last">Last name</string>
     <string name="profile_reset">Reset Profile</string>
 
-    <string name="preferences_profile_settings">Profile Settings</string>
+    <string name="preferences_profile_title">Profile</string>
     <string name="pref_profile_title">Require Person</string>
     <string name="pref_profile_require_interval_title">Time between verification</string>
 
@@ -669,7 +669,7 @@
 
     <string name="preferences_appearance_tutorial_description">Adds a tutorial icon to the collect, settings, fields, and traits screens</string>
 
-    <string name="preferences_appearance_collection_category_title">Collect Screen</string>
+    <string name="preferences_appearance_collection_category_title">Collect</string>
     <string name="preferences_appearance_toolbar_customize">Customize toolbar icons</string>
     <string name="preferences_appearance_toolbar_customize_description">Modify default icons on the collect screen</string>
     <string name="preferences_appearance_toolbar_customize_search">Search</string>
@@ -688,7 +688,7 @@
     <string name="preferences_behavior_cycle_traits">Cycling traits advances entry</string>
     <string name="preferences_behavior_cycle_traits_description">After going through all traits, Field Book goes to the next entry</string>
 
-    <string name="preferences_behavior_volume_buttons_navigate">Map volume keys to trait or entry arrows</string>
+    <string name="preferences_behavior_volume_buttons_navigate">Use volume keys to advance</string>
     <string name="preferences_behavior_volume_buttons_navigate_description">Volume keys duplicate selected navigation type</string>
     <string name="preferences_behavior_volume_buttons_navigate_traits_description">Volume keys duplicate trait navigation arrows</string>
     <string name="preferences_behavior_volume_buttons_navigate_entries_description">Volume keys duplicate entry navigation arrows</string>
@@ -700,7 +700,7 @@
     <string name="preferences_behavior_return_to_first_trait">Advancing entry returns to first trait</string>
     <string name="preferences_behavior_return_to_first_trait_description">When moving to the next entry, Field Book also returns to the first trait</string>
 
-    <string name="preferences_behavior_return_character">Return key signal</string>
+    <string name="preferences_behavior_return_character">Carriage return action</string>
     <string name="preferences_behavior_return_character_next_plot">Next plot</string>
     <string name="preferences_behavior_return_character_next_trait">Next trait</string>
     <string name="preferences_behavior_return_character_do_nothing">Do nothing</string>
@@ -721,11 +721,11 @@
     <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the active trait</string>
     <string name="preferences_general_skip_entries_across_all_traits">Skip entries across all traits</string>
 
-    <string name="preferences_general_flip_flop_arrows">Flip Flop Arrows</string>
-    <string name="preferences_general_flip_flop_arrows_description">Swaps the trait and plot arrow functions</string>
+    <string name="preferences_general_swap_navigation">Swap navigation</string>
+    <string name="preferences_general_swap_navigation_description">Swaps the behavior of the entry and trait arrows</string>
 
     <!-- GeoNav -->
-    <string name="preferences_geonav_title">GeoNav</string>
+    <string name="preferences_location_title">Location</string>
     <string name="pref_geonav_enable_title">Enable GeoNav</string>
     <string name="pref_geonav_enable_summary">Enables usage of device location to navigate fields.</string>
 

@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class GeneralPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class SystemPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     @Inject
     SharedPreferences preferences;
@@ -39,9 +39,9 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
-        setPreferencesFromResource(R.xml.preferences_general, rootKey);
+        setPreferencesFromResource(R.xml.preferences_system, rootKey);
 
-        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_general_title));
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_system_title));
 
         defaultStorageLocation = findPreference("DEFAULT_STORAGE_LOCATION_PREFERENCE");
 
@@ -156,7 +156,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
         super.onAttach(context);
 
         // Occurs before the on create function. We get the context this way.
-        GeneralPreferencesFragment.this.context = context;
+        SystemPreferencesFragment.this.context = context;
 
     }
 
@@ -207,11 +207,11 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
                                     preferences.edit().putString(GeneralKeys.GENERAL_LOCATION_COLLECTION, "0").apply();
 
-                                    pref.setValueIndex(GeneralPreferencesFragment.LOCATION_COLLECTION_OFF);
+                                    pref.setValueIndex(SystemPreferencesFragment.LOCATION_COLLECTION_OFF);
 
                                     dialog.dismiss();
 
-                                    updateLocationCollectionSummary(GeneralPreferencesFragment.LOCATION_COLLECTION_OFF);
+                                    updateLocationCollectionSummary(SystemPreferencesFragment.LOCATION_COLLECTION_OFF);
 
                                 }).show();
 
