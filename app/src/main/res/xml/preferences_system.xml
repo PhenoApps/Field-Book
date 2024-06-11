@@ -34,15 +34,28 @@
             app:title="@string/preferences_source_default_export"
             app:useSimpleSummaryProvider="true" />
 
-        <ListPreference
-            android:icon="@drawable/ic_pref_profile_location"
-            android:key="com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION"
-            android:summary="@string/pref_general_location_collection_summary"
-            android:title="@string/pref_general_location_collection_title"
-            android:entries="@array/pref_general_location_acquisition_level_entries"
-            android:entryValues="@array/pref_general_location_acquisition_level_values"
-            android:defaultValue="-1"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="database_operations"
+        android:title="@string/preferences_system_database_title"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:icon="@drawable/ic_pref_database_import"
+            android:key="pref_database_import"
+            android:summary=""
+            android:title="@string/database_import" />
 
+        <Preference
+            android:icon="@drawable/ic_pref_database_export"
+            android:key="pref_database_export"
+            android:summary=""
+            android:title="@string/database_export" />
+
+        <Preference
+            android:icon="@drawable/ic_pref_database_delete"
+            android:key="pref_database_delete"
+            android:summary=""
+            android:title="@string/database_reset" />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="collect_tools"

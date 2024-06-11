@@ -49,12 +49,6 @@
         app:fragment="com.fieldbook.tracker.preferences.BrapiPreferencesFragment" />
 
     <Preference
-        android:icon="@drawable/ic_pref_database"
-        android:key="pref_key_database_settings"
-        android:title="@string/database_dialog_title"
-        app:fragment="com.fieldbook.tracker.preferences.DatabasePreferencesFragment" />
-
-    <Preference
         android:icon="@drawable/ic_experimental"
         android:key="pref_key_experimental_settings"
         android:title="@string/preferences_experimental_title"

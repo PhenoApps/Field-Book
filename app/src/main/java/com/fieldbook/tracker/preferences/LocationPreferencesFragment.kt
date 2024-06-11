@@ -39,6 +39,12 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
             updateUi()
         }
+    companion object {
+        const val LOCATION_COLLECTION_OFF = 0
+        const val LOCATION_COLLECTION_OBS_UNIT = 1
+        const val LOCATION_COLLECTION_OBS = 2
+        const val LOCATION_COLLECTION_STUDY = 3
+    }
 
     private fun updateUi() {
         updateMethodSummaryText()
@@ -46,6 +52,7 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
         changeGeoNavLoggingModeView()
         updateParametersSummaryText()
         updateDeviceAddressSummary()
+        updateLocationCollectionSummary(preferences.getString("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION", "-1")?.toInt() ?: -1)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -159,6 +166,54 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
 
             true
         }
+        updateLocationCollectionPreference()
+    }
+
+    private fun updateLocationCollectionPreference() {
+        try {
+            val pref = findPreference<ListPreference>("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION")
+            if (pref != null) {
+                val obsModeDialogTitle = getString(R.string.pref_general_location_collection_obs_dialog_title)
+                pref.setOnPreferenceChangeListener { preference, newValue ->
+                    val newStringValue = newValue as String
+                    val value = Integer.parseInt(newStringValue)
+                    if (value == LOCATION_COLLECTION_OBS) {
+                        AlertDialog.Builder(context, R.style.AppAlertDialog)
+                            .setTitle(obsModeDialogTitle)
+                            .setPositiveButton(android.R.string.ok) { dialog, which -> dialog.dismiss() }
+                            .setNegativeButton(android.R.string.cancel) { dialog, which ->
+                                preferences.edit().putString("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION", "0").apply()
+                                pref.setValueIndex(LOCATION_COLLECTION_OFF)
+                                dialog.dismiss()
+                                updateLocationCollectionSummary(LOCATION_COLLECTION_OFF)
+                            }.show()
+                    }
+                    updateLocationCollectionSummary(value)
+                    true
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun updateLocationCollectionSummary(mode: Int) {
+        val pref = findPreference<ListPreference>("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION")
+        if (pref != null) {
+            val obsUnitModeSummary = getString(R.string.pref_general_location_collection_summary_obs_units)
+            val obsModeOffSummary = getString(R.string.pref_general_location_collection_off_summary)
+            val obsModeSummary = getString(R.string.pref_general_location_collection_summary_obs)
+            val defaultSummary = getString(R.string.pref_general_location_collection_summary)
+            val studySummary = getString(R.string.pref_general_location_collection_study_summary)
+
+            pref.summary = when (mode) {
+                LOCATION_COLLECTION_OFF -> obsModeOffSummary
+                LOCATION_COLLECTION_OBS_UNIT -> obsUnitModeSummary
+                LOCATION_COLLECTION_OBS -> obsModeSummary
+                LOCATION_COLLECTION_STUDY -> studySummary
+                else -> defaultSummary
+            }
+        }
     }
 
     private fun checkRequiredSensors() {
@@ -225,26 +280,26 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
         trapAngle?.summary = getString(R.string.pref_geonav_search_angle_summary, theta)
         updateInterval?.summary = getString(R.string.pref_geonav_update_interval_summary, interval)
     }
-
     private fun updatePreferencesVisibility(isChecked: Boolean) {
-        val preferenceScreen = preferenceScreen
+        val geonavCategory = findPreference<PreferenceCategory>("com.fieldbook.tracker.geonav.CATEGORY")
         val searchMethodPref = findPreference<ListPreference>("com.fieldbook.tracker.geonav.SEARCH_METHOD")
+        val parameterCategory = findPreference<PreferenceCategory>("com.fieldbook.tracker.geonav.parameters.CATEGORY_KEY")
 
-        for (i in 0 until preferenceScreen.preferenceCount) {
-            val preferenceItem = preferenceScreen.getPreference(i)
-
-            // Skip the checkbox preference itself
-            if (preferenceItem.key == "com.fieldbook.tracker.geonav.ENABLE_GEONAV") {
-                continue
-            }
-
-            val isParameter = preferenceItem.key.startsWith("com.fieldbook.tracker.geonav.parameters.")
-            if (isParameter && searchMethodPref?.value == "0") { // Set parameter visibility to false if search method is distance
-                preferenceItem.isVisible = false
-            } else {
-                preferenceItem.isVisible = isChecked
+        geonavCategory?.let { category ->
+            for (i in 0 until category.preferenceCount) {
+                val preferenceItem = category.getPreference(i)
+                if (preferenceItem.key == "com.fieldbook.tracker.geonav.ENABLE_GEONAV") {
+                    continue
+                }
+                if (preferenceItem.key?.startsWith("com.fieldbook.tracker.geonav.parameters.") == true && searchMethodPref?.value == "0") {
+                    preferenceItem.isVisible = false
+                } else {
+                    preferenceItem.isVisible = isChecked
+                }
             }
         }
+
+        parameterCategory?.isVisible = isChecked
     }
 
     private fun updateMethodSummaryText() {

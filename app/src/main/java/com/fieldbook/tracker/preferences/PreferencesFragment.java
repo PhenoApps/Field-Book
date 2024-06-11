@@ -29,7 +29,6 @@ public class PreferencesFragment extends BasePreferenceFragment {
         config.index(R.xml.preferences_theme);
         config.index(R.xml.preferences_behavior);
         config.index(R.xml.preferences_brapi);
-        config.index(R.xml.preferences_database);
         config.index(R.xml.preferences_system);
         config.index(R.xml.preferences_profile);
         config.index(R.xml.preferences_sounds);
