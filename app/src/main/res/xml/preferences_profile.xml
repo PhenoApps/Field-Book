@@ -2,22 +2,16 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <Preference
-        android:icon="@drawable/ic_pref_profile_person"
-        android:key="pref_profile_person"
-        android:summary=""
-        android:title="@string/profile_person" />
-
-    <Preference
-        android:icon="@drawable/ic_pref_profile_delete"
-        android:key="pref_profile_reset"
-        android:summary=""
-        android:title="@string/profile_reset" />
-
     <PreferenceCategory
         android:key="transfer_defaults"
         android:title="@string/preferences_profile_title"
         app:iconSpaceReserved="false">
+
+        <Preference
+            android:icon="@drawable/ic_pref_profile_person"
+            android:key="pref_profile_person"
+            android:summary=""
+            android:title="@string/profile_person" />
 
         <CheckBoxPreference
             android:defaultValue="true"
@@ -32,6 +26,12 @@
             android:icon="@drawable/hours_24"
             android:key="com.tracker.fieldbook.preference.require_user_interval"
             android:title="@string/pref_profile_require_interval_title" />
+
+        <Preference
+            android:icon="@drawable/ic_pref_profile_delete"
+            android:key="pref_profile_reset"
+            android:summary=""
+            android:title="@string/profile_reset" />
 
     </PreferenceCategory>
 

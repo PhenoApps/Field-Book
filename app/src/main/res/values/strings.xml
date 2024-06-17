@@ -570,8 +570,8 @@
     <string name="preferences_system_defaults_title">Defaults</string>
     <string name="preferences_system_files_base_directory_title">Define storage location</string>
     <string name="preferences_system_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
-    <string name="preferences_source_default_import">Default import source</string>
-    <string name="preferences_source_default_export">Default export source</string>
+    <string name="preferences_source_default_import">Import source</string>
+    <string name="preferences_source_default_export">Export source</string>
 
     <string name="preferences_system_database_title">Database</string>
 
