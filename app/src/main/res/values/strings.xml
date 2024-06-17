@@ -587,8 +587,6 @@
     <string name="pref_general_location_collection_summary_obs">A location will be collected for every phenotype that is collected.</string>
     <string name="pref_general_location_collection_obs_dialog_title">This setting may substantially increase battery consumption.</string>
 
-    <string name="preferences_general_collect_tools">Collect Toolbar</string>
-
     <string name="preferences_general_feature_next_missing">Next entry with no data</string>
     <string name="preferences_general_feature_next_missing_description">Adds a button to the toolbar that jumps to the next entry with no data depending on settings.</string>
     <string name="preferences_general_skip_entries_disabled">Disabled</string>
@@ -627,6 +625,7 @@
     <!-- Appearance -->
     <string name="preferences_appearance_title">Appearance</string>
     <string name="preferences_appearance_system_category_title">Application</string>
+    <string name="preferences_appearance_features_category_title">Features</string>
 
     <string name="preferences_appearance_theme_title">Theme</string>
     <string name="preferences_appearance_theme_summary">Modify specific colors or the entire theme of Field Book</string>
