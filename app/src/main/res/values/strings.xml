@@ -866,7 +866,7 @@
 
     <string name="preferences_brapi_enable_title">Enable BrAPI</string>
     <string name="preferences_brapi_enable_summary">The Breeding API allows simple data transfer to compatible databases.</string>
-    <string name="preferences_brapi_core_title">Configuration</string>
+    <string name="preferences_brapi_server_title">Server</string>
     <string name="preferences_brapi_barcode_config_title">Auto-configure</string>
     <string name="preferences_brapi_barcode_config_summary">Manage settings with QR codes</string>
     <string name="preferences_brapi_barcode_config_scan">Import new settings</string>
@@ -900,7 +900,8 @@
     <string name="brapi_timeout">Server Timeout</string>
     <string name="brapi_chunk_size">Chunk Size</string>
 
-    <string name="preferences_brapi_advanced_title">Auth Settings</string>
+    <string name="preferences_brapi_authorization_title">Authorization</string>
+    <string name="preferences_brapi_advanced_title">Advanced</string>
 
     <string name="preferences_brapi_oidc_flow" translatable="false">OIDC Flow</string>
     <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
@@ -919,7 +920,7 @@
     <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
     <string name="brapi_oidc_scope_default" translatable="false"></string>
 
-    <string name="preferences_brapi_traits_title">BrAPI Variables</string>
+    <string name="preferences_brapi_traits_title">Preferences</string>
     <string name="preferences_appearance_collect_labelval_customize">Value vs Label Display</string>
     <string name="preferences_appearance_collect_labelval_customize_description">Display values or labels on the collect screen</string>
     <string name="preferences_appearance_collect_labelval_customize_value">Value</string>

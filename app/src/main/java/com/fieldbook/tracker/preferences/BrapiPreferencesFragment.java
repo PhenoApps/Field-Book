@@ -80,7 +80,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private static final String DIALOG_FRAGMENT_TAG = "com.tracker.fieldbook.preferences.BRAPI_DIALOG_FRAGMENT";
 
     private Context context;
-    private PreferenceCategory brapiPrefCategory;
+    private PreferenceCategory brapiServerPrefCategory;
     private Preference brapiLogoutButton;
     private Menu mMenu;
     private NeutralButtonEditTextDialog brapiURLPreference;
@@ -151,7 +151,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         setupToolbar();
         setHasOptionsMenu(true);
 
-        brapiPrefCategory = findPreference("brapi_category");
+        brapiServerPrefCategory = findPreference("brapi_server");
         brapiLogoutButton = findPreference("revokeBrapiAuth");
 
         brapiURLPreference = findPreference(GeneralKeys.BRAPI_BASE_URL);
@@ -628,13 +628,13 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
             if (brapiToken != null) {
                 // Show if our logout button if it is not shown already
-                brapiPrefCategory.addPreference(brapiLogoutButton);
+                brapiServerPrefCategory.addPreference(brapiLogoutButton);
             } else {
-                brapiPrefCategory.removePreference(brapiLogoutButton);
+                brapiServerPrefCategory.removePreference(brapiLogoutButton);
             }
 
         } else {
-            brapiPrefCategory.removePreference(brapiLogoutButton);
+            brapiServerPrefCategory.removePreference(brapiLogoutButton);
         }
     }
 

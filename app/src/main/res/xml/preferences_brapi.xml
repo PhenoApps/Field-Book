@@ -10,8 +10,8 @@
         android:title="@string/preferences_brapi_enable_title" />
 
     <PreferenceCategory
-        android:key="brapi_category"
-        android:title="@string/preferences_brapi_core_title"
+        android:key="brapi_server"
+        android:title="@string/preferences_brapi_server_title"
         app:iconSpaceReserved="false">
 
         <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
@@ -42,46 +42,11 @@
             android:key="revokeBrapiAuth"
             android:title="@string/brapi_revoke_auth" />
 
-        <ListPreference
-            android:defaultValue="@string/preferences_brapi_version_v2"
-            android:entries="@array/pref_brapi_version"
-            android:entryValues="@array/pref_brapi_version"
-            android:icon="@drawable/ic_pref_brapi_version"
-            android:key="BRAPI_VERSION"
-            android:summary="%s"
-            android:title="@string/preferences_brapi_version" />
-
-        <com.fieldbook.tracker.preferences.BetterEditTextPreference
-            android:defaultValue="50"
-            android:icon="@drawable/ic_pref_brapi_pagination"
-            android:inputType="number"
-            android:key="BRAPI_PAGE_SIZE"
-            android:selectAllOnFocus="true"
-            android:summary="%s"
-            android:title="@string/brapi_pagination" />
-
-        <com.fieldbook.tracker.preferences.BetterEditTextPreference
-            android:defaultValue="500"
-            android:icon="@drawable/ic_transfer"
-            android:inputType="number"
-            android:key="BRAPI_CHUNK_SIZE"
-            android:selectAllOnFocus="true"
-            android:summary="%s"
-            android:title="@string/brapi_chunk_size" />
-
-        <com.fieldbook.tracker.preferences.BetterEditTextPreference
-            android:defaultValue="120"
-            android:icon="@drawable/ic_pref_brapi_timeout"
-            android:inputType="number"
-            android:key="BRAPI_TIMEOUT"
-            android:selectAllOnFocus="true"
-            android:summary="%s"
-            android:title="@string/brapi_timeout" />
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="brapi_oidc_settings"
-        android:title="@string/preferences_brapi_advanced_title"
+        android:title="@string/preferences_brapi_authorization_title"
         app:iconSpaceReserved="false">
 
         <ListPreference
@@ -126,6 +91,49 @@
             android:title="@string/brapi_oidc_scope"
             app:negativeButtonText="@android:string/cancel"
             app:positiveButtonText="@android:string/ok" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="brapi_advanced"
+        android:title="@string/preferences_brapi_advanced_title"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:defaultValue="@string/preferences_brapi_version_v2"
+            android:entries="@array/pref_brapi_version"
+            android:entryValues="@array/pref_brapi_version"
+            android:icon="@drawable/ic_pref_brapi_version"
+            android:key="BRAPI_VERSION"
+            android:summary="%s"
+            android:title="@string/preferences_brapi_version" />
+
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="50"
+            android:icon="@drawable/ic_pref_brapi_pagination"
+            android:inputType="number"
+            android:key="BRAPI_PAGE_SIZE"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/brapi_pagination" />
+
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="500"
+            android:icon="@drawable/ic_transfer"
+            android:inputType="number"
+            android:key="BRAPI_CHUNK_SIZE"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/brapi_chunk_size" />
+
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="120"
+            android:icon="@drawable/ic_pref_brapi_timeout"
+            android:inputType="number"
+            android:key="BRAPI_TIMEOUT"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/brapi_timeout" />
 
     </PreferenceCategory>
 
