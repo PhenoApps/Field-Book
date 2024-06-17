@@ -21,13 +21,6 @@
             android:title="@string/preferences_appearance_language"
             app:fragment="com.fieldbook.tracker.preferences.LanguagePreferenceFragment"/>
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_tb_help"
-            android:key="Tips"
-            android:summary="@string/preferences_appearance_tutorial_description"
-            android:title="@string/tutorial_dialog_title"
-            app:allowDividerBelow="true" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -35,6 +28,14 @@
         android:title="@string/preferences_appearance_features_category_title"
         app:allowDividerAbove="true"
         app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_tb_help"
+            android:key="Tips"
+            android:summary="@string/preferences_appearance_tutorial_description"
+            android:title="@string/tutorial_dialog_title"
+            app:allowDividerBelow="true" />
 
         <ListPreference
             android:icon="@drawable/ic_tb_forward"

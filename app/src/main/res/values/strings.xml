@@ -686,6 +686,10 @@
 
     <!-- Behavior -->
     <string name="preferences_behavior_title">Behavior</string>
+    <string name="preferences_behavior_movement_title">Movement</string>
+    <string name="preferences_behavior_hardware_title">Hardware</string>
+    <string name="preferences_behavior_data_title">Data</string>
+
     <string name="preferences_behavior_cycle_traits">Cycling traits advances entry</string>
     <string name="preferences_behavior_cycle_traits_description">After going through all traits, Field Book goes to the next entry</string>
 

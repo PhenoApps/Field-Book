@@ -34,6 +34,13 @@
             app:title="@string/preferences_source_default_export"
             app:useSimpleSummaryProvider="true" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_disable_file_sharing"
+            android:key="DisableShare"
+            android:summary="@string/preferences_general_share_disable_description"
+            android:title="@string/preferences_general_share_disable" />
+
     </PreferenceCategory>
     <PreferenceCategory
         android:key="database_operations"
