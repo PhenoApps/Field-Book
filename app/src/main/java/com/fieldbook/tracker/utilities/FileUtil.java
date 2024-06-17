@@ -65,7 +65,7 @@ public final class FileUtil {
      */
     public static void shareFile(Context context, SharedPreferences preferences, DocumentFile docFile) {
         if (docFile != null && docFile.exists()) {
-            if (!preferences.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
+            if (preferences.getBoolean(GeneralKeys.ENABLE_SHARE, true)) {
                 Intent intent = new Intent();
                 intent.setAction(android.content.Intent.ACTION_SEND);
                 intent.setType("text/plain");

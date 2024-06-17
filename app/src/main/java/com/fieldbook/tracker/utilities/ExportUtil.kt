@@ -613,7 +613,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
      * Scan file to update file list and share exported file
      */
     private fun shareFile(docFile: DocumentFile) {
-        if (!preferences.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
+        if (preferences.getBoolean(GeneralKeys.ENABLE_SHARE, true)) {
             val intent = Intent()
             intent.action = Intent.ACTION_SEND
             intent.type = "text/plain"

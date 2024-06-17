@@ -712,8 +712,8 @@
     <string name="preferences_behavior_disable_entry_arrow_right">Right</string>
     <string name="preferences_behavior_disable_entry_arrow_both">Both</string>
 
-    <string name="preferences_general_share_disable">Disable file sharing</string>
-    <string name="preferences_general_share_disable_description">When files are exported, the share dialog will not be displayed</string>
+    <string name="preferences_general_share_enable">Enable file sharing</string>
+    <string name="preferences_general_share_enable_description">When files are exported, a share dialog will be displayed</string>
 
     <string name="preferences_general_use_day_number">Use day of year</string>
     <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
