@@ -2,14 +2,21 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ListPreference
-        android:icon="@drawable/ic_pref_profile_location"
-        android:key="com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION"
-        android:summary="@string/pref_general_location_collection_summary"
-        android:title="@string/pref_general_location_collection_title"
-        android:entries="@array/pref_general_location_acquisition_level_entries"
-        android:entryValues="@array/pref_general_location_acquisition_level_values"
-        android:defaultValue="-1"/>
+    <PreferenceCategory
+        android:key="preferences_location_defaults"
+        android:title="@string/preferences_location_defaults_title"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:icon="@drawable/ic_pref_profile_location"
+            android:key="com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION"
+            android:summary="@string/pref_general_location_collection_summary"
+            android:title="@string/pref_general_location_collection_title"
+            android:entries="@array/pref_general_location_acquisition_level_entries"
+            android:entryValues="@array/pref_general_location_acquisition_level_values"
+            android:defaultValue="-1"/>
+
+    </PreferenceCategory>
 
     <PreferenceCategory
         android:key="com.fieldbook.tracker.geonav.CATEGORY"

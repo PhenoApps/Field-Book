@@ -727,6 +727,7 @@
 
     <!-- Location -->
     <string name="preferences_location_title">Location</string>
+    <string name="preferences_location_defaults_title">Location</string>
     <string name="pref_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_enable_title">Enable GeoNav</string>
     <string name="pref_geonav_enable_summary">Enables usage of device location to navigate fields.</string>
@@ -763,16 +764,16 @@
 
     <!-- Sounds -->
     <string name="preferences_sounds">Sounds</string>
-    <string name="preferences_sound_primary_order_sound">Primary order sound</string>
-    <string name="preferences_sound_primary_order_sound_description">Notification sound when the primary order changes</string>
+    <string name="preferences_sound_primary_order_title">Primary order change</string>
+    <string name="preferences_sound_primary_order_description">Notification sound when the primary order changes</string>
 
-    <string name="preferences_sound_entry_title">Entry navigation sound</string>
+    <string name="preferences_sound_entry_title">Entries change</string>
     <string name="preferences_sound_entry_description">Notification sound when moving between entries</string>
 
-    <string name="preferences_sound_cycle_traits_title">Cycle traits sound</string>
+    <string name="preferences_sound_cycle_traits_title">Traits cycle</string>
     <string name="preferences_sound_cycle_traits_description">Notification sound when traits are completely cycled through</string>
 
-    <string name="preferences_sound_delete_obs_title">Delete Observation Sound</string>
+    <string name="preferences_sound_delete_obs_title">Deletion</string>
     <string name="preferences_sound_delete_obs_description">Notification sound when observation is deleted in Collect activity.</string>
 
     <string name="preferences_category_audio_tts_title">Text to Speech</string>
