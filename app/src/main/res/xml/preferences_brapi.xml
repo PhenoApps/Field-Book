@@ -27,7 +27,7 @@
             app:positiveButtonText="@string/brapi_save_authorize" />
 
         <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
-            android:defaultValue="@string/preferences_brapi_server_test"
+            android:defaultValue="@string/brapi_edit_display_name_default"
             android:dialogTitle="@string/brapi_edit_display_name"
             android:icon="@drawable/ic_pref_brapi_name"
             android:key="BRAPI_DISPLAY_NAME"
@@ -144,50 +144,4 @@
             android:title="@string/preferences_appearance_collect_labelval_customize" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="brapi_server_list"
-        android:title="@string/preferences_brapi_servers_title"
-        app:iconSpaceReserved="false"
-        app:initialExpandedChildrenCount="1">
-
-        <Preference
-            android:icon="@drawable/ic_trait_barcode"
-            android:key="brapi_server_barcode"
-            android:title="@string/preferences_brapi_server_barcode" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server"
-            android:key="brapi_server_cassavabase"
-            android:title="@string/preferences_brapi_server_cassavabase" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server"
-            android:key="brapi_server_t3_wheat"
-            android:title="@string/preferences_brapi_server_t3_wheat" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server"
-            android:key="brapi_server_t3_oat"
-            android:title="@string/preferences_brapi_server_t3_oat" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server"
-            android:key="brapi_server_t3_barley"
-            android:title="@string/preferences_brapi_server_t3_barley" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server"
-            android:key="brapi_server_default"
-            android:title="@string/preferences_brapi_server_test" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server_add"
-            android:key="brapi_server_add"
-            android:title="@string/preferences_brapi_server_add">
-
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="https://github.com/PhenoApps/Field-Book/issues/new?assignees=&amp;labels=enhancement%2C+feature+request&amp;template=feature_request.md&amp;title=%5BREQUEST%5D" />
-        </Preference>
-    </PreferenceCategory>
 </PreferenceScreen>

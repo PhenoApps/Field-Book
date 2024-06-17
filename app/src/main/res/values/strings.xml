@@ -890,6 +890,7 @@
 
     <string name="brapi_edit_display_name">Edit Display Name</string>
     <string name="brapi_edit_display_name_server">Server Name</string>
+    <string name="brapi_edit_display_name_default">BrAPI Test Server</string>
 
     <string name="preferences_brapi_version">BrAPI Version</string>
     <string name="preferences_brapi_version_v1" translatable="false">V1</string>
@@ -927,12 +928,37 @@
     <string name="preferences_brapi_servers_title">Community Servers</string>
     <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
     <string name="preferences_brapi_server_scan_error">Scan Error</string>
-    <string name="preferences_brapi_server_cassavabase" translatable="false">CassavaBase</string>
-    <string name="preferences_brapi_server_t3_wheat" translatable="false">T3 Wheat Sandbox</string>
-    <string name="preferences_brapi_server_t3_oat" translatable="false">T3 Oat Sandbox</string>
-    <string name="preferences_brapi_server_t3_barley" translatable="false">T3 Barley Sandbox</string>
-    <string name="preferences_brapi_server_test">BrAPI Test Server</string>
     <string name="preferences_brapi_server_add">Submit a server</string>
+
+    <!-- Community Servers -->
+    <string-array name="community_servers_names">
+        <item>CassavaBase</item>
+        <item>T3/Wheat</item>
+        <item>T3/Oat</item>
+        <item>T3/Barley</item>
+        <item>Default Test Server</item>
+    </string-array>
+    <string-array name="community_servers_urls">
+        <item>https://www.cassavabase.org</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org</item>
+        <item>https://test-server.brapi.org</item>
+    </string-array>
+    <string-array name="community_servers_oidc_urls">
+        <item>https://www.cassavabase.org/.well-known/openid-configuration</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
+    </string-array>
+    <string-array name="community_servers_grant_types">
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+    </string-array>
 
     <!-- Authorization -->
     <string name="brapi_save_authorize">Authorize</string>

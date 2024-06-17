@@ -133,7 +133,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
         val exportArray = arrayOf(
             context.getString(R.string.export_source_local),
-            preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.preferences_brapi_server_test))
+            preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.brapi_edit_display_name_default))
         )
 
         val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)

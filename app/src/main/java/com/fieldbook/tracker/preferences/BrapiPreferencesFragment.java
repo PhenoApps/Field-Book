@@ -9,12 +9,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -169,7 +171,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         //set saved urls, default to the test server
         String url = preferences.getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
-        String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
+        String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
         String oidcUrl = preferences.getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
         oldBaseUrl = url;
         brapiURLPreference.setText(url);
@@ -265,7 +267,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         try {
             BrAPIConfig config = new BrAPIConfig();
             config.setUrl(preferences.getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default)));
-            config.setName(preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test)));
+            config.setName(preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default)));
             config.setVersion(preferences.getString(GeneralKeys.BRAPI_VERSION, "V2"));
             config.setPageSize(preferences.getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
             config.setChunkSize(preferences.getString(GeneralKeys.BRAPI_CHUNK_SIZE, "500"));
@@ -313,7 +315,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
     }
 
-
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         menu.clear();
@@ -323,6 +324,49 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         updatePreferencesVisibility(brapiEnabledPref.isChecked());
         super.onCreateOptionsMenu(menu, inflater);
     }
+
+    private void setupLongPressListener() {
+        final View menuItemView = getActivity().findViewById(R.id.action_menu_brapi_auto_configure);
+        if (menuItemView != null) {
+            menuItemView.setOnLongClickListener(v -> {
+                showCommunityServerListDialog();
+                return true;
+            });
+        }
+    }
+
+    private void showCommunityServerListDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
+        builder.setTitle(R.string.preferences_brapi_servers_title);
+
+        String[] serverNames = getResources().getStringArray(R.array.community_servers_names);
+        String[] serverUrls = getResources().getStringArray(R.array.community_servers_urls);
+        String[] serverOidcUrls = getResources().getStringArray(R.array.community_servers_oidc_urls);
+        String[] serverGrantTypes = getResources().getStringArray(R.array.community_servers_grant_types);
+
+        // Add "Submit a server" option
+        String[] extendedServerNames = new String[serverNames.length + 1];
+        System.arraycopy(serverNames, 0, extendedServerNames, 0, serverNames.length);
+        extendedServerNames[serverNames.length] = getString(R.string.preferences_brapi_server_add);
+
+        builder.setItems(extendedServerNames, (dialog, which) -> {
+            if (which == serverNames.length) {
+                // Handle the "Submit a server" option
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/PhenoApps/Field-Book/issues/new?assignees=&labels=enhancement,feature+request&template=feature_request.md&title=[REQUEST]"));
+                startActivity(browserIntent);
+            } else {
+                String selectedServerUrl = serverUrls[which];
+                String selectedServerName = serverNames[which];
+                String selectedOidcUrl = serverOidcUrls[which];
+                String selectedGrantType = serverGrantTypes[which];
+                setServer(selectedServerUrl, selectedServerName, selectedOidcUrl, selectedGrantType);
+            }
+        });
+
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.create().show();
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -342,6 +386,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         super.onResume();
         setBaseURLSummary();
         setButtonView();
+        getView().post(() -> setupLongPressListener());
     }
 
     @Override
@@ -369,44 +414,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
 
         return true;
-    }
-
-    @Override
-    public boolean onPreferenceTreeClick(Preference preference) {
-        switch (preference.getKey()){
-            case "brapi_server_cassavabase":
-                setServer("https://www.cassavabase.org",
-                        getString(R.string.preferences_brapi_server_cassavabase),
-                        "https://www.cassavabase.org/.well-known/openid-configuration",
-                        getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
-                break;
-            case "brapi_server_t3_wheat":
-                setServer("https://wheat-sandbox.triticeaetoolbox.org",
-                        getString(R.string.preferences_brapi_server_t3_wheat),
-                        "https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
-                        getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
-                break;
-            case "brapi_server_t3_oat":
-                setServer("https://oat-sandbox.triticeaetoolbox.org",
-                        getString(R.string.preferences_brapi_server_t3_oat),
-                        "https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
-                        getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
-                break;
-            case "brapi_server_t3_barley":
-                setServer("https://barley-sandbox.triticeaetoolbox.org",
-                        getString(R.string.preferences_brapi_server_t3_barley),
-                        "https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
-                        getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
-                break;
-            case "brapi_server_default":
-                setServer(getString(R.string.brapi_base_url_default),
-                        getString(R.string.preferences_brapi_server_test),
-                        getString(R.string.brapi_oidc_url_default),
-                        getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
-                break;
-        }
-
-        return super.onPreferenceTreeClick(preference);
     }
 
     /**
@@ -503,7 +510,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     private void setBaseURLSummary() {
         String url = preferences.getString(GeneralKeys.BRAPI_BASE_URL, "https://test-server.brapi.org");
-        String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
+        String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
         brapiURLPreference.setSummary(url);
         brapiDisplayName.setSummary(displayName);
     }
