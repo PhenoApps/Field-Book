@@ -54,20 +54,6 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
         }
 
-        Preference switchVolumePref = this.findPreference(GeneralKeys.VOLUME_NAVIGATION);
-
-        if (switchVolumePref != null) {
-
-            //set preference change listener to change summary when needed
-            switchVolumePref.setOnPreferenceChangeListener(this);
-
-            //also initialize the summary whenever the fragment is opened, or else it defaults to "disabled"
-            String switchMode = preferences.getString(GeneralKeys.VOLUME_NAVIGATION, "0");
-
-            switchVolumePreferenceMode(switchMode, switchVolumePref);
-
-        }
-
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_behavior_title));
 
         //add click action on pair rover device to search for bt devices
@@ -119,10 +105,6 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
                 switchSkipPreferenceMode((String) newValue, preference);
 
-            } else if (preference.getKey().equals(GeneralKeys.VOLUME_NAVIGATION)) {
-
-                switchVolumePreferenceMode((String) newValue, preference);
-
             }
 
         }
@@ -153,34 +135,6 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
             default: {
 
                 preference.setSummary(R.string.preferences_general_skip_entries_disabled);
-
-                break;
-
-            }
-        }
-    }
-
-    private void switchVolumePreferenceMode(String mode, Preference preference) {
-
-        switch (mode) {
-
-            case "1": {
-                preference.setSummary(R.string.preferences_behavior_volume_buttons_navigate_traits_description);
-
-                break;
-
-            }
-
-            case "2": {
-                preference.setSummary(R.string.preferences_behavior_volume_buttons_navigate_entries_description);
-
-                break;
-
-            }
-
-            default: {
-
-                preference.setSummary(R.string.preferences_behavior_volume_buttons_navigate_description);
 
                 break;
 
