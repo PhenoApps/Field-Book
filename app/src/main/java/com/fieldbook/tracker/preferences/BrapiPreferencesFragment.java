@@ -202,31 +202,26 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             });
         }
 
-        //set barcode click listener to start zxing intent
-        Preference brapiConfigBarcode = findPreference("brapi_config_barcode");
-        if (brapiConfigBarcode != null) {
-            brapiConfigBarcode.setOnPreferenceClickListener(preference -> {
-                String title = getString(R.string.qr_code_share_choose_action_title);
-                new AlertDialog.Builder(getContext())
-                        .setTitle(title)
-                        .setItems(new String[]{getString(R.string.preferences_brapi_barcode_config_scan), getString(R.string.preferences_brapi_barcode_config_share)}, (dialog, which) -> {
-                            switch (which) {
-                                case 0: // Scan QR Code to import settings
-                                    startBarcodeScan(REQUEST_BARCODE_SCAN_BRAPI_CONFIG);
-                                    break;
-                                case 1: // Generate QR Code for sharing settings
-                                    if (getActivity() != null) {
-                                        generateQRCodeFromPreferences(getActivity());
-                                    }
-                                    break;
-                            }
-                        })
-                        .show();
-                return true;
-            });
-        }
-
         setOidcFlowUi();
+    }
+
+    private void barcodeAutoConfigure() {
+        String title = getString(R.string.qr_code_share_choose_action_title);
+        new AlertDialog.Builder(getContext())
+            .setTitle(title)
+            .setItems(new String[]{getString(R.string.preferences_brapi_barcode_config_scan), getString(R.string.preferences_brapi_barcode_config_share)}, (dialog, which) -> {
+                switch (which) {
+                    case 0: // Scan QR Code to import settings
+                        startBarcodeScan(REQUEST_BARCODE_SCAN_BRAPI_CONFIG);
+                        break;
+                    case 1: // Generate QR Code for sharing settings
+                        if (getActivity() != null) {
+                            generateQRCodeFromPreferences(getActivity());
+                        }
+                        break;
+                }
+            })
+            .show();
     }
 
     private void updatePreferencesVisibility(boolean isChecked) {
@@ -241,6 +236,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         // Also show/hide the BrAPI toolbar authentication option
         if (mMenu != null) {
+            MenuItem brapiAutoConfigureItem = mMenu.findItem(R.id.action_menu_brapi_auto_configure);
+            if (brapiAutoConfigureItem != null) {
+                brapiAutoConfigureItem.setVisible(isChecked);
+            }
             MenuItem brapiPrefAuthItem = mMenu.findItem(R.id.action_menu_brapi_pref_auth);
             if (brapiPrefAuthItem != null) {
                 brapiPrefAuthItem.setVisible(isChecked);
@@ -327,6 +326,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_menu_brapi_auto_configure) {
+            barcodeAutoConfigure();
+            return true;
+        }
         if (item.getItemId() == R.id.action_menu_brapi_pref_auth) {
             brapiAuth();
             return true;
