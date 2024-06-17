@@ -209,7 +209,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     private void barcodeAutoConfigure() {
         String title = getString(R.string.qr_code_share_choose_action_title);
-        new AlertDialog.Builder(getContext())
+        new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
             .setTitle(title)
             .setItems(new String[]{getString(R.string.preferences_brapi_barcode_config_scan), getString(R.string.preferences_brapi_barcode_config_share)}, (dialog, which) -> {
                 switch (which) {
@@ -717,7 +717,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     }
 
     private void showErrorDialog(String message) {
-        new AlertDialog.Builder(this.getActivity())
+        new AlertDialog.Builder(this.getActivity(), R.style.AppAlertDialog)
                 .setTitle(R.string.preferences_brapi_server_scan_error)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, null)
