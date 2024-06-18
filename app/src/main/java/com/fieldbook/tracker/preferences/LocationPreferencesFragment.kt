@@ -52,7 +52,7 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
         changeGeoNavLoggingModeView()
         updateParametersSummaryText()
         updateDeviceAddressSummary()
-        updateLocationCollectionSummary(preferences.getString("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION", "-1")?.toInt() ?: -1)
+        updateCoordinateFormatVisibility()
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -62,6 +62,12 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
         setPreferencesFromResource(R.xml.preferences_location, rootKey)
 
         preferences.registerOnSharedPreferenceChangeListener(listener)
+
+        val locationCollectionPref = findPreference<ListPreference>("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION")
+        locationCollectionPref?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+            updateCoordinateFormatVisibility((newValue as String).toInt())
+            true
+        }
 
         // Show/hide preferences and category titles based on the ENABLE_GEONAV value
         val geonavEnabledPref: CheckBoxPreference? =
@@ -166,54 +172,13 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
 
             true
         }
-        updateLocationCollectionPreference()
+        updateCoordinateFormatVisibility(locationCollectionPref?.value?.toIntOrNull() ?: LOCATION_COLLECTION_OFF)
     }
 
-    private fun updateLocationCollectionPreference() {
-        try {
-            val pref = findPreference<ListPreference>("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION")
-            if (pref != null) {
-                val obsModeDialogTitle = getString(R.string.pref_general_location_collection_obs_dialog_title)
-                pref.setOnPreferenceChangeListener { preference, newValue ->
-                    val newStringValue = newValue as String
-                    val value = Integer.parseInt(newStringValue)
-                    if (value == LOCATION_COLLECTION_OBS) {
-                        AlertDialog.Builder(context, R.style.AppAlertDialog)
-                            .setTitle(obsModeDialogTitle)
-                            .setPositiveButton(android.R.string.ok) { dialog, which -> dialog.dismiss() }
-                            .setNegativeButton(android.R.string.cancel) { dialog, which ->
-                                preferences.edit().putString("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION", "0").apply()
-                                pref.setValueIndex(LOCATION_COLLECTION_OFF)
-                                dialog.dismiss()
-                                updateLocationCollectionSummary(LOCATION_COLLECTION_OFF)
-                            }.show()
-                    }
-                    updateLocationCollectionSummary(value)
-                    true
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun updateLocationCollectionSummary(mode: Int) {
-        val pref = findPreference<ListPreference>("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION")
-        if (pref != null) {
-            val obsUnitModeSummary = getString(R.string.pref_general_location_collection_summary_obs_units)
-            val obsModeOffSummary = getString(R.string.pref_general_location_collection_off_summary)
-            val obsModeSummary = getString(R.string.pref_general_location_collection_summary_obs)
-            val defaultSummary = getString(R.string.pref_general_location_collection_summary)
-            val studySummary = getString(R.string.pref_general_location_collection_study_summary)
-
-            pref.summary = when (mode) {
-                LOCATION_COLLECTION_OFF -> obsModeOffSummary
-                LOCATION_COLLECTION_OBS_UNIT -> obsUnitModeSummary
-                LOCATION_COLLECTION_OBS -> obsModeSummary
-                LOCATION_COLLECTION_STUDY -> studySummary
-                else -> defaultSummary
-            }
-        }
+    private fun updateCoordinateFormatVisibility(selectedValue: Int? = null) {
+        val currentValue = selectedValue ?: preferences.getString("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION", "0")?.toIntOrNull() ?: LOCATION_COLLECTION_OFF
+        val coordinateFormatPref = findPreference<Preference>("com.fieldbook.tracker.COORDINATE_FORMAT")
+        coordinateFormatPref?.isVisible = currentValue != LOCATION_COLLECTION_OFF
     }
 
     private fun checkRequiredSensors() {

@@ -147,8 +147,8 @@
     </string-array>
 
     <string-array name="pref_coordinate_format_entries">
-        <item>ISO 6709</item>
-        <item>GeoJSON</item>
+        <item>@string/location_format_iso</item>
+        <item>@string/location_format_geojson</item>
     </string-array>
 
     <string-array name="pref_coordinate_format_values">

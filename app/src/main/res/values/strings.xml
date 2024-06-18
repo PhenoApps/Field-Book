@@ -575,18 +575,6 @@
 
     <string name="preferences_system_database_title">Database</string>
 
-    <string name="pref_general_location_collection_title">Location collected</string>
-    <string name="pref_general_location_collection_summary">Select a method for collecting location while using Field Book.</string>
-    <string name="location_level_off">Off</string>
-    <string name="pref_general_location_collection_off_summary">No location data will be collected for any phenotypes.</string>
-    <string name="location_level_study">Field / Study</string>
-    <string name="pref_general_location_collection_study_summary">A location will be collected for the first the phenotype within a field.</string>
-    <string name="location_level_observation_unit">Plot / Observation Unit</string>
-    <string name="pref_general_location_collection_summary_obs_units">A location will be collected for the first phenotype in a plot.</string>
-    <string name="location_level_observation">Phenotype / Observation</string>
-    <string name="pref_general_location_collection_summary_obs">A location will be collected for every phenotype that is collected.</string>
-    <string name="pref_general_location_collection_obs_dialog_title">This setting may substantially increase battery consumption.</string>
-
     <string name="preferences_general_feature_next_missing">Next entry with no data</string>
     <string name="preferences_general_feature_next_missing_description">Adds a button to the toolbar that jumps to the next entry with no data depending on settings.</string>
     <string name="preferences_general_skip_entries_disabled">Disabled</string>
@@ -729,8 +717,17 @@
 
     <!-- Location -->
     <string name="preferences_location_title">Location</string>
-    <string name="preferences_location_defaults_title">Location</string>
-    <string name="pref_coordinate_format_title">Coordinate Format</string>
+    <string name="preferences_location_defaults_title">GeoCoordinates</string>
+
+    <string name="pref_general_location_collection_title">Collection Level</string>
+    <string name="location_level_off">Off</string>
+    <string name="location_level_study">Field</string>
+    <string name="location_level_observation_unit">Entry</string>
+    <string name="location_level_observation">Observation</string>
+
+    <string name="pref_coordinate_format_title">Collection Format</string>
+    <string name="location_format_iso">ISO 6709</string>
+    <string name="location_format_geojson">GeoJSON</string>
 
     <string name="pref_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_enable_title">Enable GeoNav</string>
