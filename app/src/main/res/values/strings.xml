@@ -692,6 +692,8 @@
 
     <string name="preferences_behavior_cycle_traits">Cycling traits advances entry</string>
     <string name="preferences_behavior_cycle_traits_description">After going through all traits, Field Book goes to the next entry</string>
+    <string name="preferences_behavior_cycle_sound_title">Enable sound effect?</string>
+    <string name="preferences_behavior_cycle_sound_description">Press OK to enable sound effect when traits are cycled (recommended).</string>
 
     <string name="preferences_behavior_volume_buttons_advance">Use volume keys to advance</string>
     <string name="preferences_behavior_volume_buttons_advance_disabled">Disabled</string>

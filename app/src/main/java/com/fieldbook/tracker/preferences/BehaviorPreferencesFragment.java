@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -41,6 +42,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
         setPreferencesFromResource(R.xml.preferences_behavior, rootKey);
 
         Preference skipEntriesPref = this.findPreference(GeneralKeys.HIDE_ENTRIES_WITH_DATA);
+        CheckBoxPreference cycleTraitsPref = findPreference("CycleTraits");
 
         if (skipEntriesPref != null) {
 
@@ -52,6 +54,18 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
             switchSkipPreferenceMode(skipMode, skipEntriesPref);
 
+        }
+
+        if (cycleTraitsPref != null) {
+            cycleTraitsPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                boolean isChecked = (Boolean) newValue;
+                if (isChecked) {
+                    if (!preferences.getBoolean("CYCLE_TRAITS_SOUND", false)) {
+                        promptEnableCycleTraitsSound();
+                    }
+                }
+                return true;
+            });
         }
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_behavior_title));
@@ -200,4 +214,18 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
         } else context.startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
     }
+
+    private void promptEnableCycleTraitsSound() {
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.preferences_behavior_cycle_sound_title)
+                .setMessage(R.string.preferences_behavior_cycle_sound_description)
+                .setPositiveButton(R.string.dialog_ok, (dialog, which) -> {
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean("CYCLE_TRAITS_SOUND", true);
+                    editor.apply();
+                })
+                .setNegativeButton(R.string.dialog_no, null)
+                .show();
+    }
+
 }
