@@ -39,7 +39,9 @@ import com.fieldbook.tracker.objects.SearchDialogDataModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
+import com.fieldbook.tracker.utilities.ZipUtil;
 
+import org.phenoapps.androidlibrary.Utils;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
@@ -2464,6 +2466,7 @@ public class DataHelper {
 
                 String dbFileName = filename + ".db";
                 String prefFileName = filename + ".db_sharedpref.xml";
+                String zipFileName = Utils.getDateTime() + "_backup.zip";
 
                 DocumentFile dbDoc = databaseDir.findFile(dbFileName);
                 DocumentFile prefDoc = databaseDir.findFile(prefFileName);
@@ -2477,11 +2480,17 @@ public class DataHelper {
 
                 DocumentFile backupDatabaseFile = databaseDir.createFile("*/*", dbFileName);
                 DocumentFile backupPreferenceFile = databaseDir.createFile("*/*", prefFileName);
+                DocumentFile zipFile = databaseDir.createFile("*/*", zipFileName);
+                OutputStream outputStream = context.getContentResolver().openOutputStream(zipFile.getUri());
 
                 if (backupDatabaseFile != null && backupPreferenceFile != null) {
 
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldSp), backupPreferenceFile);
+                    if (outputStream != null){
+                        ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, backupPreferenceFile }, outputStream);
+                    }
+
                 }
             }
 
