@@ -34,10 +34,10 @@
             android:icon="@drawable/ic_adv_hide_entries"
             android:key="com.fieldbook.tracker.HIDE_ENTRIES"
             android:summary="@string/preferences_general_skip_entries_disabled"
-            android:title="@string/preferences_general_skip_entries_with_data"
+            android:title="@string/preferences_behavior_skip_entries_title"
             android:entries="@array/pref_behavior_skip_entries_entries"
             android:entryValues="@array/pref_behavior_skip_entries_values"
-            android:defaultValue="1"/>
+            android:defaultValue="0"/>
 
         <CheckBoxPreference
             android:defaultValue="false"

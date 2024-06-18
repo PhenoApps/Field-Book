@@ -7,6 +7,11 @@
         android:title="@string/preferences_location_defaults_title"
         app:iconSpaceReserved="false">
 
+        <Preference
+            android:icon="@drawable/ic_bluetooth_black_24dp"
+            android:key="com.fieldbook.tracker.geonav.PAIR_BLUETOOTH"
+            android:title="@string/pref_geonav_pair" />
+
         <ListPreference
             android:icon="@drawable/ic_selection_marker"
             android:key="com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION"
@@ -47,8 +52,7 @@
             android:icon="@drawable/ic_function_variant"
             android:key="com.fieldbook.tracker.geonav.SEARCH_METHOD"
             android:summary="@string/pref_geonav_search_method_summary"
-            android:title="@string/pref_geonav_search_method_title"
-            app:allowDividerAbove="true" />
+            android:title="@string/pref_geonav_search_method_title"/>
 
         <ListPreference
             android:defaultValue="0"
@@ -65,11 +69,6 @@
             android:key="com.fieldbook.tracker.geonav.UPDATE_INTERVAL"
             android:summary="@string/pref_geonav_update_interval_summary"
             android:title="@string/pref_geonav_update_interval_title" />
-
-        <Preference
-            android:icon="@drawable/ic_bluetooth_black_24dp"
-            android:key="com.fieldbook.tracker.geonav.PAIR_BLUETOOTH"
-            android:title="@string/pref_geonav_pair" />
 
         <PreferenceCategory
             android:key="com.fieldbook.tracker.geonav.parameters.CATEGORY_KEY"
