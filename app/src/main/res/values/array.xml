@@ -133,10 +133,10 @@
     </string-array>
 
     <string-array name="pref_general_location_acquisition_level_values">
-        <item>3</item>
+        <item>0</item>
         <item>1</item>
         <item>2</item>
-        <item>0</item>
+        <item>3</item>
     </string-array>
 
     <string-array name="pref_general_location_acquisition_level_entries">
@@ -144,6 +144,16 @@
         <item>@string/location_level_observation_unit</item>
         <item>@string/location_level_observation</item>
         <item>@string/location_level_off</item>
+    </string-array>
+
+    <string-array name="pref_coordinate_format_entries">
+        <item>ISO 6709</item>
+        <item>GeoJSON</item>
+    </string-array>
+
+    <string-array name="pref_coordinate_format_values">
+        <item>0</item>
+        <item>1</item>
     </string-array>
 
     <string-array name="pref_geonav_logging_modes">

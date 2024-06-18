@@ -14,7 +14,16 @@
             android:title="@string/pref_general_location_collection_title"
             android:entries="@array/pref_general_location_acquisition_level_entries"
             android:entryValues="@array/pref_general_location_acquisition_level_values"
-            android:defaultValue="-1"/>
+            android:defaultValue="0"/>
+
+        <ListPreference
+            android:icon="@drawable/ic_crosshairs_question"
+            android:key="com.fieldbook.tracker.COORDINATE_FORMAT"
+            android:summary="%s"
+            android:title="@string/pref_coordinate_format_title"
+            android:entries="@array/pref_coordinate_format_entries"
+            android:entryValues="@array/pref_coordinate_format_values"
+            android:defaultValue="0"/>
 
     </PreferenceCategory>
 
