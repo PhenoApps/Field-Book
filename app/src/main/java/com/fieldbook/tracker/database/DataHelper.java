@@ -2466,7 +2466,7 @@ public class DataHelper {
 
                 String dbFileName = filename + ".db";
                 String prefFileName = filename + ".db_sharedpref.xml";
-                String zipFileName = Utils.getDateTime() + "_backup.zip";
+                String zipFileName = filename + ".zip";
 
                 DocumentFile dbDoc = databaseDir.findFile(dbFileName);
                 DocumentFile prefDoc = databaseDir.findFile(prefFileName);
@@ -2480,7 +2480,10 @@ public class DataHelper {
 
                 DocumentFile backupDatabaseFile = databaseDir.createFile("*/*", dbFileName);
                 DocumentFile backupPreferenceFile = databaseDir.createFile("*/*", prefFileName);
-                DocumentFile zipFile = databaseDir.createFile("*/*", zipFileName);
+                DocumentFile zipFile = databaseDir.findFile(zipFileName);
+                if (zipFile == null){
+                    zipFile = databaseDir.createFile("*/*", zipFileName);
+                }
                 OutputStream outputStream = context.getContentResolver().openOutputStream(zipFile.getUri());
 
                 if (backupDatabaseFile != null && backupPreferenceFile != null) {
