@@ -62,7 +62,4 @@
         <item>2</item>
         <item>3</item>
     </string-array>
-    <string name="ask_user_interval_every_open">Every time app opens</string>
-    <string name="ask_user_interval_every_12">Every 12 hours</string>
-    <string name="ask_user_interval_every_24">Every 24 hours</string>
 </resources>

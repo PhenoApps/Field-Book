@@ -11,8 +11,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import androidx.annotation.Nullable;
 import androidx.preference.CheckBoxPreference;
+import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -36,8 +36,9 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     private static final String TAG = ProfilePreferencesFragment.class.getSimpleName();
 
     Context context;
+    private CheckBoxPreference requireUserToCollect;
     private Preference profilePerson;
-    private Preference profileReset;
+    private ListPreference requireUserInterval;
     private AlertDialog personDialog;
 
     @Override
@@ -48,18 +49,29 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_profile));
 
         profilePerson = findPreference("pref_profile_person");
+        profilePerson.setSummary(personSummary());
+        requireUserInterval = findPreference("com.tracker.fieldbook.preference.require_user_interval");
+        requireUserToCollect = findPreference("com.tracker.fieldbook.preference.require_user_to_collect");
 
-        updateSummaries();
-
-        profileReset = findPreference("pref_profile_reset");
+        updatePersonVisibility(requireUserToCollect.isChecked());
 
         profilePerson.setOnPreferenceClickListener(preference -> {
             showPersonDialog();
             return true;
         });
 
-        profileReset.setOnPreferenceClickListener(preference -> {
-            showClearSettingsDialog();
+        requireUserToCollect.setOnPreferenceClickListener(preference -> {
+            boolean isChecked = ((CheckBoxPreference) preference).isChecked();
+            Log.d(TAG, "onPreferenceClick: isChecked is " + isChecked);
+            updatePersonVisibility(isChecked);
+            if (isChecked) {
+                showPersonDialog();
+            } else {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(GeneralKeys.FIRST_NAME, "");
+                ed.putString(GeneralKeys.LAST_NAME, "");
+                ed.apply();
+            }
             return true;
         });
 
@@ -78,44 +90,11 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         preferences.edit().putLong(GeneralKeys.LAST_TIME_OPENED, System.nanoTime()).apply();
 
-        Preference requirePersonPref = findPreference(GeneralKeys.REQUIRE_USER_TO_COLLECT);
-        if (requirePersonPref != null) {
-            requirePersonPref.setOnPreferenceChangeListener((pref, value) -> {
-                setupPersonUpdateUi((Boolean) value);
-                return true;
-            });
-        }
-
-        setupPersonUpdateUi(null);
     }
 
-    private void showClearSettingsDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
-        builder.setTitle(getString(R.string.profile_reset));
-        builder.setMessage(getString(R.string.dialog_confirm));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(GeneralKeys.FIRST_NAME, "");
-                ed.putString(GeneralKeys.LAST_NAME, "");
-                ed.apply();
-
-                updateSummaries();
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
+    private void updatePersonVisibility(boolean isChecked) {
+        profilePerson.setVisible(isChecked);
+        requireUserInterval.setVisible(isChecked);
     }
 
     private void showPersonDialog() {
@@ -131,39 +110,46 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         lastName.setSelectAllOnFocus(true);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
-        builder.setTitle(R.string.profile_person_title)
+        builder.setTitle(R.string.preferences_profile_person_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 
-        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                SharedPreferences.Editor e = preferences.edit();
-
-                e.putString(GeneralKeys.FIRST_NAME, firstName.getText().toString());
-                e.putString(GeneralKeys.LAST_NAME, lastName.getText().toString());
-
-                e.apply();
-                updateSummaries();
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                dialog.dismiss();
-            }
-        });
+        builder.setPositiveButton(getString(R.string.dialog_save), null);
+        builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, i) -> dialog.dismiss());
+        builder.setNeutralButton(getString(R.string.dialog_clear), null);
 
         personDialog = builder.create();
+        personDialog.setOnShowListener(dialog -> {
+            AlertDialog alertDialog = (AlertDialog) dialog;
+            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String firstNameStr = firstName.getText().toString().trim();
+                String lastNameStr = lastName.getText().toString().trim();
+                if (firstNameStr.isEmpty() && lastNameStr.isEmpty()) {
+                    // Display an error message
+                    firstName.setError(getString(R.string.preferences_profile_name_error));
+                    lastName.setError(getString(R.string.preferences_profile_name_error));
+                } else {
+                    // Save the names
+                    SharedPreferences.Editor e = preferences.edit();
+                    e.putString(GeneralKeys.FIRST_NAME, firstNameStr);
+                    e.putString(GeneralKeys.LAST_NAME, lastNameStr);
+                    e.apply();
+                    profilePerson.setSummary(personSummary());
+                    alertDialog.dismiss();
+                }
+            });
+            // Set click listener for neutral button
+            alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
+                firstName.setText("");
+                lastName.setText("");
+            });
+        });
+
         personDialog.show();
 
         android.view.WindowManager.LayoutParams langParams = personDialog.getWindow().getAttributes();
         langParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
         personDialog.getWindow().setAttributes(langParams);
-    }
-
-    private void updateSummaries() {
-        profilePerson.setSummary(personSummary());
     }
 
     private String personSummary() {
@@ -267,22 +253,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         }
     }
 
-    private void setupPersonUpdateUi(@Nullable Boolean explicitUpdate) {
-
-        Boolean updateFlag = explicitUpdate;
-
-        //set visibility of update choices only if enabled
-        if (explicitUpdate == null) {
-            updateFlag = preferences.getBoolean(GeneralKeys.REQUIRE_USER_TO_COLLECT, false);
-        }
-
-        Preference updateInterval = findPreference(GeneralKeys.REQUIRE_USER_INTERVAL);
-
-        if (updateInterval != null) {
-            updateInterval.setVisible(updateFlag);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -299,8 +269,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     @Override
     public void onResume() {
         super.onResume();
-
         setupCrashlyticsPreference();
-        setupPersonUpdateUi(null);
     }
 }

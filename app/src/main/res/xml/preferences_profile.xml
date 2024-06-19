@@ -4,20 +4,20 @@
 
     <PreferenceCategory
         android:key="transfer_defaults"
-        android:title="@string/preferences_profile_title"
+        android:title="@string/preferences_profile_person_title"
         app:iconSpaceReserved="false">
-
-        <Preference
-            android:icon="@drawable/ic_pref_profile_person"
-            android:key="pref_profile_person"
-            android:summary=""
-            android:title="@string/profile_person" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:icon="@drawable/ic_pref_profile_verify"
             android:key="com.tracker.fieldbook.preference.require_user_to_collect"
-            android:title="@string/pref_profile_title" />
+            android:summary="@string/preferences_profile_require_person_summary"
+            android:title="@string/preferences_profile_require_person" />
+
+        <Preference
+            android:icon="@drawable/ic_pref_profile_person"
+            android:key="pref_profile_person"
+            android:title="@string/preferences_profile_set_person" />
 
         <ListPreference
             android:defaultValue="1"
@@ -25,13 +25,8 @@
             android:entryValues="@array/preferences_profile_ask_user_interval_values"
             android:icon="@drawable/hours_24"
             android:key="com.tracker.fieldbook.preference.require_user_interval"
-            android:title="@string/pref_profile_require_interval_title" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_profile_delete"
-            android:key="pref_profile_reset"
-            android:summary=""
-            android:title="@string/profile_reset" />
+            android:summary="%s"
+            android:title="@string/preferences_profile_require_interval_title" />
 
     </PreferenceCategory>
 

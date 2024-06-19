@@ -10,6 +10,7 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
+    <string name="dialog_clear">Clear</string>
     <string name="dialog_close">Close</string>
     <string name="dialog_confirm">Are you sure?</string>
     <string name="dialog_import">Import</string>
@@ -588,19 +589,25 @@
     <string name="share_file_title">Sending file…</string>
 
     <!-- Profile -->
-    <string name="profile_person">Person</string>
-    <string name="profile_person_title">Set person</string>
-    <string name="profile_name_first">First name</string>
-    <string name="profile_name_last">Last name</string>
-    <string name="profile_reset">Reset Profile</string>
-
     <string name="preferences_profile_title">Profile</string>
-    <string name="pref_profile_title">Require Person</string>
-    <string name="pref_profile_require_interval_title">Time Between Verification</string>
+    <string name="preferences_profile_person_title">Person</string>
+    <string name="preferences_profile_require_person">Require Person</string>
+    <string name="preferences_profile_require_person_summary">Track name of the person collecting data</string>
+
+    <string name="preferences_profile_set_person">Person Name</string>
+    <string name="preferences_profile_person_dialog_title">Set Person</string>
+    <string name="preferences_profile_name_first">First Name</string>
+    <string name="preferences_profile_name_last">Last Name</string>
+    <string name="preferences_profile_name_error">Both fields cannot be blank</string>
+
+    <string name="preferences_profile_require_interval_title">Verification Interval</string>
+    <string name="ask_user_interval_every_open">Verify name every time app opens</string>
+    <string name="ask_user_interval_every_12">Verify name every 12 hours</string>
+    <string name="ask_user_interval_every_24">Verify name every 24 hours</string>
 
     <string name="preferences_profile_crashlytics" translatable="false">Crashlytics</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
-    <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">Include an anonymous, unique ID in crash logs to help the development team fix bugs</string>
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
     <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID</string>
 
