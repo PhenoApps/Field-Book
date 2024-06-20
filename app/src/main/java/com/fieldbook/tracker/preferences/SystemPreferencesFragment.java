@@ -111,53 +111,6 @@ public class SystemPreferencesFragment extends PreferenceFragmentCompat implemen
             showDatabaseResetDialog1();
             return true;
         });
-
-        Preference skipEntriesPref = findPreference(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR);
-
-        if (skipEntriesPref != null) {
-            skipEntriesPref.setOnPreferenceChangeListener(this);
-            String skipMode = preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1");
-            switchSkipPreferenceMode(skipMode, skipEntriesPref);
-        }
-
-        Preference moveToUniqueIdPref = findPreference(GeneralKeys.MOVE_TO_UNIQUE_ID);
-
-        if (moveToUniqueIdPref != null) {
-            moveToUniqueIdPref.setOnPreferenceChangeListener(this);
-            String moveMode = preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "1");
-            switchMovePreferenceMode(moveMode, moveToUniqueIdPref);
-        }
-    }
-
-    private void switchSkipPreferenceMode(String mode, Preference preference) {
-        switch (mode) {
-            case "2":
-                preference.setSummary(R.string.preferences_general_skip_entries_with_data_description);
-                break;
-            case "3":
-                preference.setSummary(R.string.preferences_general_skip_entries_across_all_traits_description);
-                break;
-            case "4":
-                preference.setSummary(R.string.preferences_general_skip_entries_default_description);
-                break;
-            default:
-                preference.setSummary(R.string.preferences_general_feature_next_missing_description);
-                break;
-        }
-    }
-
-    private void switchMovePreferenceMode(String mode, Preference preference) {
-        switch (mode) {
-            case "2":
-                preference.setSummary(R.string.move_to_unique_id_text_or_scan_description);
-                break;
-            case "3":
-                preference.setSummary(R.string.move_to_unique_id_direct_camera_scan_description);
-                break;
-            default:
-                preference.setSummary(R.string.preferences_general_feature_barcode_text_description);
-                break;
-        }
     }
 
     @Override
@@ -168,13 +121,6 @@ public class SystemPreferencesFragment extends PreferenceFragmentCompat implemen
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        if (preference.hasKey()) {
-            if (preference.getKey().equals(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR)) {
-                switchSkipPreferenceMode((String) newValue, preference);
-            } else if (preference.getKey().equals(GeneralKeys.MOVE_TO_UNIQUE_ID)) {
-                switchMovePreferenceMode((String) newValue, preference);
-            }
-        }
         return true;
     }
 

@@ -102,14 +102,12 @@
         <item>@string/preferences_general_skip_entries_disabled</item>
         <item>@string/preferences_general_skip_entries_with_data</item>
         <item>@string/preferences_general_skip_entries_across_all_traits</item>
-        <item>@string/preferences_general_skip_entries_default</item>
     </string-array>
 
     <string-array name="pref_general_skip_entries_values">
         <item>1</item>
         <item>2</item>
         <item>3</item>
-        <item>4</item>
     </string-array>
 
     <string-array name="pref_brapi_version">

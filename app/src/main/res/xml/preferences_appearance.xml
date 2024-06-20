@@ -4,7 +4,7 @@
 
     <PreferenceCategory
         android:key="category_appearance_system"
-        android:title="@string/preferences_appearance_system_category_title"
+        android:title="@string/preferences_appearance_application_title"
         app:iconSpaceReserved="false">
 
         <Preference
@@ -21,14 +21,6 @@
             android:title="@string/preferences_appearance_language"
             app:fragment="com.fieldbook.tracker.preferences.LanguagePreferenceFragment"/>
 
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="category_appearance_features"
-        android:title="@string/preferences_appearance_features_category_title"
-        app:allowDividerAbove="true"
-        app:iconSpaceReserved="false">
-
         <CheckBoxPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_tb_help"
@@ -36,6 +28,31 @@
             android:summary="@string/preferences_appearance_tutorial_description"
             android:title="@string/tutorial_dialog_title"
             app:allowDividerBelow="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="category_appearance_toolbar"
+        android:title="@string/preferences_appearance_collect_toolbar_title"
+        app:allowDividerAbove="true"
+        app:iconSpaceReserved="false">
+
+        <MultiSelectListPreference
+            android:defaultValue="@array/pref_toolbar_customize_default"
+            android:dialogTitle="@string/preferences_appearance_toolbar_customize"
+            android:entries="@array/pref_toolbar_customize_title"
+            android:entryValues="@array/pref_toolbar_customize_values"
+            android:icon="@drawable/ic_pref_appearance_toolbar"
+            android:key="TOOLBAR_CUSTOMIZE"
+            android:summary="@string/preferences_appearance_toolbar_customize_description"
+            android:title="@string/preferences_appearance_toolbar_customize" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_tb_datagrid"
+            android:key="DataGrid"
+            android:summary="@string/preferences_general_feature_datagrid_description"
+            android:title="@string/preferences_general_feature_datagrid" />
 
         <ListPreference
             android:icon="@drawable/ic_tb_forward"
@@ -55,30 +72,13 @@
             android:entryValues="@array/pref_general_move_to_unique_id_values"
             android:defaultValue="1"/>
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_tb_datagrid"
-            android:key="DataGrid"
-            android:summary="@string/preferences_general_feature_datagrid_description"
-            android:title="@string/preferences_general_feature_datagrid" />
-
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="category_appearance_collect"
-        android:title="@string/preferences_appearance_collection_category_title"
+        android:title="@string/preferences_appearance_collect_screen_title"
         app:allowDividerAbove="true"
         app:iconSpaceReserved="false">
-
-        <MultiSelectListPreference
-            android:defaultValue="@array/pref_toolbar_customize_default"
-            android:dialogTitle="@string/preferences_appearance_toolbar_customize"
-            android:entries="@array/pref_toolbar_customize_title"
-            android:entryValues="@array/pref_toolbar_customize_values"
-            android:icon="@drawable/ic_pref_appearance_toolbar"
-            android:key="TOOLBAR_CUSTOMIZE"
-            android:summary="@string/preferences_appearance_toolbar_customize_description"
-            android:title="@string/preferences_appearance_toolbar_customize" />
 
         <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
             android:icon="@drawable/ic_adv_infobar_count"
