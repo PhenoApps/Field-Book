@@ -41,16 +41,20 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.ZipUtil;
 
-import org.phenoapps.androidlibrary.Utils;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
@@ -58,13 +62,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import dagger.hilt.android.qualifiers.ActivityContext;
 
@@ -2464,7 +2473,7 @@ public class DataHelper {
 
             if (databaseDir != null) {
 
-                String dbFileName = filename + ".db";
+                String dbFileName = "fieldbook.db";
                 String prefFileName = filename + ".db_sharedpref.xml";
                 String zipFileName = filename + ".zip";
 
@@ -2490,10 +2499,31 @@ public class DataHelper {
 
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldSp), backupPreferenceFile);
+
+                    // instead of adding preferences xml to zip (unzip functionality doesn't support .xml parsing)
+                    // make a separate file for storing the preferences
+                    // similar to the one in ExportDBTask class
+                    String tempName = UUID.randomUUID().toString();
+                    DocumentFile tempOutput = databaseDir.createFile("*/*", tempName);
+                    OutputStream tempStream = BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_database, tempName);
+
+                    ObjectOutputStream objectStream = new ObjectOutputStream(tempStream);
+                    objectStream.writeObject(readXML(prefDoc));
+
+                    objectStream.close();
+
                     if (outputStream != null){
-                        ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, backupPreferenceFile }, outputStream);
+                        // add the .db file and preferences file to the zip
+                        ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, tempOutput }, outputStream);
                     }
 
+                    if (tempStream != null) {
+                        tempStream.close();
+                    }
+
+                    if (tempOutput != null && !tempOutput.delete()) {
+                        throw new IOException();
+                    }
                 }
             }
 
@@ -2506,6 +2536,75 @@ public class DataHelper {
             open();
 
         }
+    }
+
+    /**
+     * returns xml file as a map
+     * @param prefDoc: DocumentFile object of preference.xml
+     * @return Map<String, ?>
+     */
+    Map<String, ?>  readXML(DocumentFile prefDoc){
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            InputStream inputStream = context.getContentResolver().openInputStream(prefDoc.getUri());
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(inputStream);
+            document.getDocumentElement().normalize();
+
+            inputStream.close();
+
+            return traverseNodes(document.getDocumentElement());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    /**
+     * traverses the xml file to return the map
+     */
+    public static Map<String, ?> traverseNodes(Element node) {
+        Map<String, Object> map = new HashMap<>();
+
+        NodeList childNodes = node.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node childNode = childNodes.item(i);
+            if (childNode instanceof Element) {
+                Element childElement = (Element) childNode;
+
+                // the expected xml file has a maximum of four types of tags
+                // i.e. string, boolean, int, set
+                // handle each case
+                if (childElement.getTagName().equals("string") && childElement.hasAttribute("name")) {
+                    String name = childElement.getAttribute("name");
+                    String value = childElement.getTextContent().trim();
+                    map.put(name, value);
+                } else if (childElement.getTagName().equals("boolean") && childElement.hasAttribute("name") && childElement.hasAttribute("value")) {
+                    String name = childElement.getAttribute("name");
+                    Boolean value = Boolean.parseBoolean(childElement.getAttribute("value"));
+                    map.put(name, value);
+                } else if (childElement.getTagName().equals("int") && childElement.hasAttribute("name") && childElement.hasAttribute("value")) {
+                    String name = childElement.getAttribute("name");
+                    Integer value = Integer.parseInt(childElement.getAttribute("value"));
+                    map.put(name, value);
+                } else if (childElement.getTagName().equals("set") && childElement.hasAttribute("name")) {
+                    String name = childElement.getAttribute("name");
+                    Set<String> set = new HashSet<>();
+                    
+                    NodeList setChildNodes = childElement.getChildNodes();
+                    
+                    for (int j = 0; j < setChildNodes.getLength(); j++) {
+                        Node setChildNode = setChildNodes.item(j);
+                        if (setChildNode instanceof Element && ((Element) setChildNode).getTagName().equals("string")) {
+                            set.add(setChildNode.getTextContent().trim());
+                        }
+                    }
+                    map.put(name, set);
+                }
+            }
+        }
+
+        return map;
     }
 
     /**
