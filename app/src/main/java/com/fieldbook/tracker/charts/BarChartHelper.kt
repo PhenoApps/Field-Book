@@ -19,8 +19,9 @@ object BarChartHelper {
     fun setupBarChart(context: Context, chart: BarChart, observations: List<Any>) {
         val categoryCounts = observations.groupingBy { it }.eachCount()
 
-        val entries = categoryCounts.entries.mapIndexed { index, entry ->
-            BarEntry(index.toFloat(), entry.value.toFloat())
+        val sortedCategories = categoryCounts.keys.map { it.toString() }.sorted()
+        val entries = sortedCategories.mapIndexed { index, category ->
+            BarEntry(index.toFloat(), categoryCounts[category]?.toFloat() ?: 0f)
         }
 
         val dataSet = BarDataSet(entries, "Categories")
@@ -45,7 +46,7 @@ object BarChartHelper {
         xAxis.granularity = 1f
         xAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
-                return categoryCounts.keys.elementAt(value.toInt()).toString()
+                return sortedCategories.getOrNull(value.toInt()) ?: ""
             }
         }
 
@@ -72,7 +73,7 @@ object BarChartHelper {
         val description = Description()
         description.text = ""
         chart.description = description
-        chart.setNoDataText("No data available")
+        chart.setNoDataText(context.getString(R.string.field_trait_chart_no_data))
         chart.setNoDataTextColor(Color.BLACK)
 
         chart.invalidate()

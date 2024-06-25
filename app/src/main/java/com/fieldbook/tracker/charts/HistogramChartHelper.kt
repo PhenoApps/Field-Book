@@ -2,7 +2,6 @@ package com.fieldbook.tracker.charts
 
 import android.content.Context
 import android.graphics.Color
-import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import com.fieldbook.tracker.R
@@ -15,6 +14,7 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import java.math.BigDecimal
+import java.math.RoundingMode
 import kotlin.math.ceil
 
 object HistogramChartHelper {
@@ -24,30 +24,25 @@ object HistogramChartHelper {
         val maxValue = observations.maxOrNull() ?: BigDecimal.ZERO
         val range = maxValue.subtract(minValue)
 
-//        if (range.compareTo(BigDecimal.ZERO) == 0) {
-//            chart.visibility = View.GONE
-//            return
-//        }
-
         chart.visibility = View.VISIBLE
 
         val distinctValuesCount = observations.distinct().size
-        val binCount = minOf(10, distinctValuesCount)
-        val binSize = range.divide(BigDecimal(binCount), BigDecimal.ROUND_UP)
+        val binCount = minOf(8, distinctValuesCount)
+        val binSize = range.divide(BigDecimal(binCount), 0, RoundingMode.UP)
 
         val binnedObservations = mutableMapOf<Int, Int>()
         for (observation in observations) {
-            val binIndex = observation.subtract(minValue).divide(binSize, BigDecimal.ROUND_DOWN).toInt()
+            val binIndex = observation.subtract(minValue).divide(binSize, 0, RoundingMode.DOWN).toInt()
             binnedObservations[binIndex] = (binnedObservations[binIndex] ?: 0) + 1
         }
 
         val entries = binnedObservations.map { (binIndex, count) ->
             val binStart = minValue.add(binSize.multiply(BigDecimal(binIndex)))
-            val binCenter = binStart.add(binSize.divide(BigDecimal(2)))
+            val binCenter = binStart.add(binSize.divide(BigDecimal(2), RoundingMode.HALF_UP))
             BarEntry(binCenter.toFloat(), count.toFloat())
         }
 
-        val dataSet = BarDataSet(entries, "Observations")
+        val dataSet = BarDataSet(entries, null)
         val theme = context.theme
         val fbColorPrimaryValue = TypedValue()
         theme.resolveAttribute(R.attr.fb_color_primary, fbColorPrimaryValue, true)
@@ -95,7 +90,7 @@ object HistogramChartHelper {
         val description = Description()
         description.text = ""
         chart.description = description
-        chart.setNoDataText("No data available")
+        chart.setNoDataText(context.getString(R.string.field_trait_chart_no_data))
         chart.setNoDataTextColor(Color.BLACK)
 
         chart.invalidate()

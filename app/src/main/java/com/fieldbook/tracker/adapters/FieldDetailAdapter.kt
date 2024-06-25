@@ -67,20 +67,26 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                 if (numericObservations.distinct().size < 2) {
                     throw NumberFormatException("Not enough distinct numeric values")
                 }
+                if (item.format == "categorical") {
+                    throw NumberFormatException("Categorical traits must use bar chart")
+                }
                 HistogramChartHelper.setupHistogram(
                     holder.itemView.context,
                     holder.countChart,
                     numericObservations
                 )
             } catch (e: NumberFormatException) {
-                if (item.observations.distinct().size <= 10) {
+                if (item.observations.distinct().size <= 8) {
                     BarChartHelper.setupBarChart(
                         holder.itemView.context,
                         holder.countChart,
                         item.observations
                     )
                 } else {
-                    noChartAvailableMessage(holder,  holder.itemView.context.getString(R.string.field_trait_chart_excess_data))
+                    noChartAvailableMessage(
+                        holder,
+                        holder.itemView.context.getString(R.string.field_trait_chart_excess_data)
+                    )
                 }
             }
         }
