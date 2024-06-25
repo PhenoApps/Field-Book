@@ -2434,7 +2434,23 @@ public class DataHelper {
 
             }
 
-            open();
+            // for zip file, call the unzip function
+            if (fileName.endsWith(".zip")){
+                try (InputStream input = context.getContentResolver().openInputStream(file.getUri())) {
+
+                    try (OutputStream output = new FileOutputStream(internalDbPath)) {
+                        ZipUtil.Companion.unzip(context, input, output);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else{
+                // for .db file
+                open();
+            }
 
             if (!isTableExists(Migrator.Study.tableName)) {
 
@@ -2500,29 +2516,9 @@ public class DataHelper {
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldSp), backupPreferenceFile);
 
-                    // instead of adding preferences xml to zip (unzip functionality doesn't support .xml parsing)
-                    // make a separate file for storing the preferences
-                    // similar to the one in ExportDBTask class
-                    String tempName = UUID.randomUUID().toString();
-                    DocumentFile tempOutput = databaseDir.createFile("*/*", tempName);
-                    OutputStream tempStream = BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_database, tempName);
-
-                    ObjectOutputStream objectStream = new ObjectOutputStream(tempStream);
-                    objectStream.writeObject(readXML(prefDoc));
-
-                    objectStream.close();
-
                     if (outputStream != null){
                         // add the .db file and preferences file to the zip
-                        ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, tempOutput }, outputStream);
-                    }
-
-                    if (tempStream != null) {
-                        tempStream.close();
-                    }
-
-                    if (tempOutput != null && !tempOutput.delete()) {
-                        throw new IOException();
+                        ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, backupPreferenceFile }, outputStream);
                     }
                 }
             }
@@ -2536,75 +2532,6 @@ public class DataHelper {
             open();
 
         }
-    }
-
-    /**
-     * returns xml file as a map
-     * @param prefDoc: DocumentFile object of preference.xml
-     * @return Map<String, ?>
-     */
-    Map<String, ?>  readXML(DocumentFile prefDoc){
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        try {
-            InputStream inputStream = context.getContentResolver().openInputStream(prefDoc.getUri());
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(inputStream);
-            document.getDocumentElement().normalize();
-
-            inputStream.close();
-
-            return traverseNodes(document.getDocumentElement());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    /**
-     * traverses the xml file to return the map
-     */
-    public static Map<String, ?> traverseNodes(Element node) {
-        Map<String, Object> map = new HashMap<>();
-
-        NodeList childNodes = node.getChildNodes();
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node childNode = childNodes.item(i);
-            if (childNode instanceof Element) {
-                Element childElement = (Element) childNode;
-
-                // the expected xml file has a maximum of four types of tags
-                // i.e. string, boolean, int, set
-                // handle each case
-                if (childElement.getTagName().equals("string") && childElement.hasAttribute("name")) {
-                    String name = childElement.getAttribute("name");
-                    String value = childElement.getTextContent().trim();
-                    map.put(name, value);
-                } else if (childElement.getTagName().equals("boolean") && childElement.hasAttribute("name") && childElement.hasAttribute("value")) {
-                    String name = childElement.getAttribute("name");
-                    Boolean value = Boolean.parseBoolean(childElement.getAttribute("value"));
-                    map.put(name, value);
-                } else if (childElement.getTagName().equals("int") && childElement.hasAttribute("name") && childElement.hasAttribute("value")) {
-                    String name = childElement.getAttribute("name");
-                    Integer value = Integer.parseInt(childElement.getAttribute("value"));
-                    map.put(name, value);
-                } else if (childElement.getTagName().equals("set") && childElement.hasAttribute("name")) {
-                    String name = childElement.getAttribute("name");
-                    Set<String> set = new HashSet<>();
-                    
-                    NodeList setChildNodes = childElement.getChildNodes();
-                    
-                    for (int j = 0; j < setChildNodes.getLength(); j++) {
-                        Node setChildNode = setChildNodes.item(j);
-                        if (setChildNode instanceof Element && ((Element) setChildNode).getTagName().equals("string")) {
-                            set.add(setChildNode.getTextContent().trim());
-                        }
-                    }
-                    map.put(name, set);
-                }
-            }
-        }
-
-        return map;
     }
 
     /**
