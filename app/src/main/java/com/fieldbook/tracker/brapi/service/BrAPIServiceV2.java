@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
 import androidx.preference.PreferenceManager;
 
@@ -93,6 +94,8 @@ import java.util.Comparator;
 import java.util.function.BiConsumer;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -548,17 +551,20 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data, Map<String, BrAPIGermplasm> germplasmDetailsMap) {
+    private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data, @Nullable Map<String, BrAPIGermplasm> germplasmDetailsMap) {
 
-        Map<String, Map<String, String>> unitAttributes = new HashMap<>(); // Map to store attributes for each unit
-        Log.d("BrAPIServiceV2","Mapping attribute values");
+        Map<String, Map<String, String>> unitAttributes = new LinkedHashMap<>(); // Map to store attributes for each unit
+        Log.d("BrAPIServiceV2", "Mapping attribute values for " + data.size() + " observation units.");
 
         for (BrAPIObservationUnit unit : data) {
 
             String unitDbId = unit.getObservationUnitDbId();
             // Create the unit's attributes hashmap
-            unitAttributes.putIfAbsent(unitDbId, new HashMap<>());
-            Map<String, String> attributesMap = unitAttributes.get(unitDbId);
+            Map<String, String> attributesMap = unitAttributes.computeIfAbsent(unitDbId, k -> new LinkedHashMap<>());
+
+            if (unit.getGermplasmName() != null) {
+                attributesMap.put("Germplasm", unit.getGermplasmName());
+            }
 
             BrAPIObservationUnitPosition pos = unit.getObservationUnitPosition();
             if (pos != null) {
@@ -594,14 +600,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     attributesMap.put("EntryType", pos.getEntryType().getBrapiValue());
                 }
             }
-            if (unit.getGermplasmName() != null) {
-                attributesMap.put("Germplasm", unit.getGermplasmName());
-            }
-            if (unit.getGermplasmDbId() != null) {
+
+            if (germplasmDetailsMap != null && unit.getGermplasmDbId() != null) {
                 // find matching germplasm in germplasmDetailsMap and extract synonyms and pedigree
                 BrAPIGermplasm matchingGermplasm = germplasmDetailsMap.get(unit.getGermplasmDbId());
 
                 if (matchingGermplasm != null) {
+                    Log.d("BrAPIServiceV2", "Processing germplasm ID: " + unit.getGermplasmDbId());
                     if (matchingGermplasm.getPedigree() != null) {
                         attributesMap.put("Pedigree", matchingGermplasm.getPedigree());
                     }
@@ -634,7 +639,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
 
         // Extract a list of unique attribute names from the unitAttributes
-        Set<String> uniqueAttributes = new HashSet<>();
+        Set<String> uniqueAttributes = new LinkedHashSet<>();
         for (Map<String, String> attributesMap : unitAttributes.values()) {
             uniqueAttributes.addAll(attributesMap.keySet());
         }
@@ -653,7 +658,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 dataRow.add(attributesMap.getOrDefault(attr, ""));
             }
             attributesTable.add(dataRow);
-//            Log.d("BrAPIServiceV2","Added new data row to attributes table: " + dataRow);
+            Log.d("BrAPIServiceV2","Added new data row to attributes table: " + dataRow);
         }
 
         // Save the attributesTable to the study
@@ -662,10 +667,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
-        final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
-                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
+        final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
         BrAPIGermplasmSearchRequest germplasmBody = new BrAPIGermplasmSearchRequest();
-        germplasmBody.setGermplasmDbIds(allGermplasmDbIds);
+        List<String> doubledGermplasmDbIds = new ArrayList<>(allGermplasmDbIds);
+        doubledGermplasmDbIds.addAll(allGermplasmDbIds);
+        germplasmBody.setGermplasmDbIds(doubledGermplasmDbIds);
         germplasmBody.page(0).pageSize(pageSize);
         Log.d("BrAPIServiceV2", "Retrieving germplasm details for " + allGermplasmDbIds.size() + " DB IDs");
 
@@ -708,7 +715,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     ) {
         Map<String, U> resultMap = new HashMap<>();
         String searchResultsDbId = null;
-        int currentPage = 0;
+        Integer currentPage = 0;
 
         try {
             ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> response = searchCallFunction.apply(searchRequestBody);
@@ -719,7 +726,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             Optional<BrAPIAcceptedSearchResponse> searchResponseOpt = response.getBody().getRight();
 
             if (listResultOpt.isPresent()) {
-                processResponse(response, mapper, resultMap);
+                processResponse(response, currentPage, mapper, resultMap);
                 currentPage++;
             } else if (searchResponseOpt.isPresent()) {
                 searchResultsDbId = searchResponseOpt.get().getResult().getSearchResultsDbId();
@@ -737,7 +744,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                 validateResponse(response);
 
-                boolean hasMore = processResponse(response, mapper, resultMap);
+                boolean hasMore = processResponse(response, currentPage, mapper, resultMap);
                 if (!hasMore) break;
                 currentPage++;
             }
@@ -760,20 +767,21 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    private <R, U> boolean processResponse(ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> response, BiConsumer<List<?>, Map<String, U>> mapper, Map<String, U> resultMap) {
+    private <R, U> boolean processResponse(ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> response, Integer currentPage, BiConsumer<List<?>, Map<String, U>> mapper, Map<String, U> resultMap) {
         if (response.getBody().getLeft().isPresent()) {
             resultMap.putAll(getListResultAsMap(response, mapper));
             BrAPIResponse listResponse = (BrAPIResponse) response.getBody().getLeft().get();
-            return hasMorePages(listResponse);
+            return hasMorePages(listResponse, currentPage);
         } else {
             return false;
         }
     }
 
-    private boolean hasMorePages(BrAPIResponse listResponse) {
+    private boolean hasMorePages(BrAPIResponse listResponse, Integer currentPage) {
         return listResponse.getMetadata() != null
                 && listResponse.getMetadata().getPagination() != null
-                && listResponse.getMetadata().getPagination().getCurrentPage() < listResponse.getMetadata().getPagination().getTotalPages() - 1;
+                && listResponse.getMetadata().getPagination().getCurrentPage() < listResponse.getMetadata().getPagination().getTotalPages() - 1
+                && currentPage < listResponse.getMetadata().getPagination().getTotalPages() - 1; // additional check for when server pagination is wrong
     }
 
     private <R, U> Map<String, U> getListResultAsMap(
@@ -1409,7 +1417,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId) {
+    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId, String sortOrder) {
 
         DataHelper dataHelper = new DataHelper(context);
 
@@ -1437,6 +1445,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setUnique_id("ObservationUnitDbId");
             field.setPrimary_id(primaryId);
             field.setSecondary_id(secondaryId);
+            field.setExp_sort(sortOrder);
 
             // Do a pre-check to see if the field exists so we can show an error
             int FieldUniqueStatus = dataHelper.checkFieldNameAndObsLvl(field.getExp_name(), field.getObservation_level());

@@ -13,6 +13,7 @@ import android.view.View
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.fieldbook.tracker.BuildConfig
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CameraActivity
 import com.fieldbook.tracker.activities.CollectActivity
@@ -171,7 +172,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
 
                         val uri = GenericFileProvider.getUriForFile(
                             context,
-                            "com.fieldbook.tracker.fileprovider",
+                            GenericFileProvider.AUTHORITY,
                             cache
                         )
 
@@ -402,7 +403,7 @@ class PhotoTraitLayout : BaseTraitLayout, ImageTraitAdapter.ImageItemHandler {
         file.createNewFile()
 
         val uri =
-            GenericFileProvider.getUriForFile(context, "com.fieldbook.tracker.fileprovider", file)
+            GenericFileProvider.getUriForFile(context, GenericFileProvider.AUTHORITY, file)
 
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         val cameraxIntent = Intent(activity, CameraActivity::class.java)

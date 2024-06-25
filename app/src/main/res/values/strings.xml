@@ -107,6 +107,7 @@
     <string name="import_dialog_unique">Unique identifier</string>
     <string name="import_dialog_primary">Primary identifier</string>
     <string name="import_dialog_secondary">Secondary identifier</string>
+    <string name="import_dialog_sort">Sort Order</string>
     <string name="import_error_unsupported">This file type is not currently supported</string>
     <string name="import_error_columns_replaced">Column names contain illegal characters that will be replaced during import.</string>
     <string name="import_error_column_name">Column name in imported file cannot be: </string>
@@ -345,6 +346,11 @@
     <string name="dialog_data_grid_header_picker_title">Choose Row Headers</string>
     <string name="dialog_data_grid_repeated_measures_title">Choose Observation</string>
     <string name="menu_action_header_view_data_grid_title">Update Row Headers</string>
+
+    <!--- Lock -->
+    <string name="activity_collect_locked_state">Locked - data entry, modification and deletion are disabled</string>
+    <string name="activity_collect_frozen_state">Frozen - once data is saved it cannot be modified or deleted</string>
+    <string name="activity_collect_unlocked_state">Unlocked - no restrictions on data entry, modification, or deletion</string>
 
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Your device does not have a camera that can be used to take a photo.</string>
@@ -643,6 +649,7 @@
     <string name="preferences_appearance_language">Language</string>
     <string name="preferences_appearance_language_description">Language set by system</string>
     <string name="preference_language_default">System Language</string>
+    <string name="preference_language_warning" translatable="false">Translations are crowd-sourced and may not be entirely accurate or complete</string>
     <string name="language_en" translatable="false">English</string>
     <string name="language_am" translatable="false">አማርኛ</string>
     <string name="language_ar" translatable="false">اَلْعَرَبِيَّةُ</string>
@@ -900,6 +907,14 @@
     <string name="brapi_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
     <string name="brapi_oidc_url_default" translatable="false">https://test-server.brapi.org/.well-known/openid-configuration</string>
 
+    <string name="brapi_oidc_clientid">OIDC Client ID</string>
+    <string name="brapi_oidc_clientid_desc">The Client Id to be used in the authentication provider</string>
+    <string name="brapi_oidc_clientid_default" translatable="false">fieldbook</string>
+
+    <string name="brapi_oidc_scope">OIDC Scope</string>
+    <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
+    <string name="brapi_oidc_scope_default" translatable="false"></string>
+
     <string name="preferences_brapi_traits_title">BrAPI Variables</string>
     <string name="preferences_appearance_collect_labelval_customize">Value vs Label Display</string>
     <string name="preferences_appearance_collect_labelval_customize_description">Display values or labels on the collect screen</string>
@@ -1100,5 +1115,6 @@
     <string name="tutorial_main_repeated_values_description">This will open a dialog to manage the repeated values for the current observation unit.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="tutorial_main_geonav_description">This will open a configuration dialog to help with field navigation.</string>
+    <string name="oauth_configured_incorrectly">Authorization request failed, please check your BrAPI settings.</string>
 
 </resources>

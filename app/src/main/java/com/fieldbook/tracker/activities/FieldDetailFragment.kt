@@ -263,8 +263,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
         field.getTraitDetails()?.let { traitDetails ->
             return traitDetails.map { traitDetail ->
-                val iconRes = Formats.values()
-                    .find { it.getDatabaseName(requireActivity()) == traitDetail.getFormat() }?.getIcon()
+                val iconRes = Formats.entries
+                    .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
 
                 FieldDetailItem(
                     traitDetail.getTraitName(),

@@ -10,6 +10,7 @@ class LocationFormat : TraitFormat(
     format = Formats.LOCATION,
     defaultLayoutId = R.layout.trait_location,
     layoutView = null,
+    databaseName = "location",
     nameStringResourceId = R.string.traits_format_location,
     iconDrawableResourceId = R.drawable.ic_trait_location,
     stringNameAux = null,

@@ -58,6 +58,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     private BrapiObservationLevel selectedObservationLevel;
     private String selectedPrimary;
     private String selectedSecondary;
+    private String selectedSort;
 
     public BrapiLoadDialog(@NonNull Context context) {
         super(context);
@@ -355,9 +356,28 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 }
             });
 
-            if(studyDetails.getAttributes().contains("Row") || studyDetails.getAttributes().contains("Column")) {
+            Spinner sort = findViewById(R.id.studySortOrder);
+            sort.setAdapter(keyOptions);
+            sort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
+                    selectedSort = studyDetails.getAttributes().get(index);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
+
+            if(studyDetails.getAttributes().contains("Row")) {
                 primary.setSelection(studyDetails.getAttributes().indexOf("Row"));
+            }
+            if(studyDetails.getAttributes().contains("Column")) {
                 secondary.setSelection(studyDetails.getAttributes().indexOf("Column"));
+            }
+            if(studyDetails.getAttributes().contains("Plot")) {
+                sort.setSelection(studyDetails.getAttributes().indexOf("Plot"));
             }
         }
     }
@@ -421,7 +441,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         protected Integer doInBackground(Integer... params) {
             try {
 
-                brapiControllerResponse = brAPIService.saveStudyDetails(studyDetails, selectedObservationLevel, selectedPrimary, selectedSecondary);
+                brapiControllerResponse = brAPIService.saveStudyDetails(studyDetails, selectedObservationLevel, selectedPrimary, selectedSecondary, selectedSort);
 
             } catch (Exception e) {
                 e.printStackTrace();

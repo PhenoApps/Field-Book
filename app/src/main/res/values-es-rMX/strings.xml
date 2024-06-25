@@ -52,6 +52,10 @@
     <!-- FIELDS -->
     <!-- General -->
     <string name="list_item_field_popup_menu_content_description">Abre un menú para el campo seleccionado.</string>
+    <string name="selected_count">%1$d seleccionado</string>
+    <string name="fields_select_all">Seleccionar Todo</string>
+    <string name="field_generic_observation_level">entradas</string>
+    <string name="field_observation_count_format">%1$s %2$s</string>
     <!-- Sort -->
     <string name="fields_sort_update">Ordenar</string>
     <string name="sort_dialog_saved">Orden actualizado</string>
@@ -65,17 +69,24 @@
     <string name="dialog_field_sort_toggle_order_content_description">Invierte el orden.</string>
     <string name="dialog_field_sort_add_content_description">Abre un diálogo para agregar un nuevo atributo para ordenar por.</string>
     <!-- Modify -->
+    <string name="fields_rename_study">Renombrar</string>
     <string name="fields_export">Exportar</string>
+    <string name="fields_archive">Archivar</string>
     <!-- Delete -->
     <string name="fields_delete">Eliminar</string>
     <string name="fields_delete_study">Eliminar campo</string>
     <string name="fields_delete_study_confirmation">¿Estás seguro(a) de que quieres eliminar este campo? Esto eliminará todos los datos de este campo.</string>
+    <plurals name="fields_delete_confirmation">
+        <item quantity="one">¿Estás seguro(a) de que quieres eliminar los campos: \"%s\"?</item>
+        <item quantity="other">¿Estás seguro de que deseas eliminar los campos: \"%s\"?</item>
+    </plurals>
     <!-- Import -->
     <string name="fields_toolbar_add_field">Importar Campo</string>
     <string name="import_dialog_title_fields">Importar campo</string>
     <string name="import_dialog_unique">Identificador único</string>
     <string name="import_dialog_primary">Orden primario</string>
     <string name="import_dialog_secondary">Orden secundario</string>
+    <string name="import_dialog_sort">Orden de Ordenación</string>
     <string name="import_error_unsupported">Este tipo de archivo no es compatible actualmente</string>
     <string name="import_error_columns_replaced">Los nombres de columnas contienen caracteres no válidos que se reemplazarán durante la importación.</string>
     <string name="import_error_column_name">El nombre de la columna en el archivo importado no puede ser:</string>
@@ -121,8 +132,30 @@
     <string name="activity_field_editor_no_location_yet">No se ha encontrado ninguna ubicación.</string>
     <string name="activity_field_editor_switch_field_same">El Campo más cercano ya ha sido seleccionado.</string>
     <!-- Field details -->
+    <string name="field_detail_title">Detalle del Campo</string>
+    <string name="field_edit_display_name">Editar Nombre de Campo</string>
+    <string name="name_cannot_be_empty">El nombre no puede estar en blanco.</string>
+    <string name="illegal_characters_message">Caracteres no válidos encontrados: %1$s</string>
+    <string name="name_conflict_message">\"%1$s\" ya se usó como %2$s para otro campo.</string>
+    <string name="name_conflict_import_name">nombre de importación</string>
+    <string name="name_conflict_display_name">nombre a mostrar</string>
+    <string name="field_import_string">Importado desde</string>
+    <string name="field_create_string">Creado dentro de</string>
+    <string name="field_detail_narrative">"%1$s\" \"%2$s\" con el nombre \"%3$s\". Contiene entradas \"%4$s\" y atributos \"%5$s. Ordenado por \"%6$s"</string>
+    <string name="field_default_sort_order">ordenamiento de importación</string>
+    <string name="field_data_title">Datos</string>
+    <string name="field_trait_total">\"&lt;b&gt;%1$s&lt;/b&gt;\" variables</string>
+    <string name="field_observation_total">\"&lt;b&gt;%1$s&lt;/b&gt;\" observaciones</string>
+    <string name="field_trait_observation_total">\"%d\" observaciones</string>
     <!-- Semantic dates -->
     <string name="today">Hoy</string>
+    <string name="yesterday">Ayer</string>
+    <plurals name="years_ago">
+        <item quantity="one">Hace %d año</item>
+        <item quantity="other">Hace %d años</item>
+    </plurals>
+    <string name="no_activity">No hay actividad</string>
+    <string name="invalid_date">Fecha inválida</string>
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Ordenar</string>
@@ -401,8 +434,18 @@
     <string name="act_collect_barcode_button_content_description">Iniciar escáner de código de barras.</string>
     <string name="act_collect_na_value_button_content_description">Rellenar el valor con no disponible.</string>
     <!-- Observation Info -->
+    <string name="observation_metadata_title">Metadatos de Observación</string>
+    <string name="observation_info_study_name">Nombre del Estudio</string>
+    <string name="observation_info_entry_id">Id de la entrada</string>
     <string name="observation_info_trait_format">Formato de Variable</string>
+    <string name="observation_info_trait_name">Nombre de Variable</string>
     <string name="observation_info_value">Valor</string>
+    <string name="observation_info_timestamp">Timestamp de la Observación</string>
+    <string name="observation_info_collector">Colector</string>
+    <string name="observations_info_geo_coordinates">Geo Coordenadas</string>
+    <string name="observation_info_last_synced_time">Última sincronización</string>
+    <string name="observation_info_additional_info">Información adicional</string>
+    <string name="observation_info_rep">Rep</string>
     <string name="observation_info_other">Otro</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
@@ -426,6 +469,8 @@
     <string name="export_error_missing_trait">Se debe seleccionar el tipo de variable</string>
     <string name="export_overwrite">Sobrescribir exportación anterior</string>
     <string name="dialog_export_bundle_data_cb_text">Empaquetar datos multimedia con archivo de exportación.</string>
+    <string name="export_multiple_fields_name">campos_múltiples</string>
+    <string name="export_multiple_fields_message">Nota: Múltiples exportaciones de campos se incluyen en un archivo ZIP</string>
     <!-- Citation -->
     <string name="citation_title">Cita</string>
     <string name="citation_string">Si utiliza Field Book para la investigación, cite la siguiente publicación:</string>
@@ -564,6 +609,7 @@
     <string name="pref_geonav_log_full">Completo</string>
     <string name="pref_geonav_log_full_description">Completo: Registrando todas las actualizaciones de ubicación y los pasos del algoritmo en almacenamiento/geonav/log.txt</string>
     <string name="pref_geonav_log_both">Ambos</string>
+    <string name="pref_geonav_log_both_description">Ambos: Registrando todas las actualizaciones de ubicación y los pasos del algoritmo para storage/geonav/log.txt, la entrada más cercana al storage/geonav/limited_log.txt</string>
     <string name="pref_geonav_update_interval_title">Intervalo de Actualización (s)</string>
     <string name="pref_geonav_update_interval_summary">El tiempo entre actualizaciones de ubicación es %ss.</string>
     <string name="pref_geonav_pair">Vincular Dispositivo</string>
@@ -613,6 +659,8 @@
     <string name="trait_audio_recording_warning">El audio a nivel de variable ya se está grabando. Deténgalo primero.</string>
     <string name="trait_audio_playing_warning">El audio a nivel de variable se está reproduciendo. Deténgalo primero.</string>
     <string name="field_audio_zip_error">Error al crear archivo zip</string>
+    <string name="pref_beta_enable_individual_field_page_title">Habilitar Páginas de Campos Individuales</string>
+    <string name="pref_beta_enable_individual_field_page_summary">Seleccionar un campo en la lista de campos abre una página de detalles</string>
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
     <string name="pref_beta_mlkit_summary">Esta opción utiliza la biblioteca MLKit en lugar de la biblioteca ZXing para escanear códigos de barras</string>
     <string name="pref_beta_mlkit_enabled_title">Escaneo de código de barras usando MLKit activado</string>
@@ -672,6 +720,10 @@
     <string name="preferences_brapi_oidc_flow_old_custom">Field Book Original Personalizado</string>
     <string name="brapi_oidc_url">URL de Descubrimiento OIDC</string>
     <string name="brapi_oidc_url_desc">La ubicación del documento JSON de Descubrimiento OIDC</string>
+    <string name="brapi_oidc_clientid">ID de Cliente OIDC</string>
+    <string name="brapi_oidc_clientid_desc">El ID de Cliente a ser usado en el proveedor de autenticación</string>
+    <string name="brapi_oidc_scope">Alcance OIDC</string>
+    <string name="brapi_oidc_scope_desc">El Alcance a ser utilizado en el proveedor de autenticación</string>
     <string name="preferences_brapi_traits_title">Variables BrAPI</string>
     <string name="preferences_appearance_collect_labelval_customize">Mostrar Categoria Valor vs Etiqueta</string>
     <string name="preferences_appearance_collect_labelval_customize_description">Mostrar valores o etiquetas de categorias en la pantalla de captura</string>
@@ -679,6 +731,7 @@
     <string name="preferences_appearance_collect_labelval_customize_label">Etiqueta</string>
     <string name="preferences_brapi_servers_title">Servidores Comunitarios</string>
     <string name="preferences_brapi_server_barcode">Escanear código de barras del servidor</string>
+    <string name="preferences_brapi_server_scan_error">Error al Escanear</string>
     <string name="preferences_brapi_server_test">Servidor de Pruebas BrAPI</string>
     <string name="preferences_brapi_server_add">Enviar un servidor</string>
     <!-- Authorization -->
@@ -736,6 +789,7 @@ para sincronizar tus datos.
     <string name="brapi_export_successful">Exportación por BrAPI exitosa</string>
     <string name="brapi_saving_indicator">Guardando Observaciones...</string>
     <string name="brapi_field_non_matching_sources">No se pueden sincronizar datos. Los datos de campo se originan en %1$s, la url de BrAPI  establecida actualmente en %2$s. Los origenes deben coincidir.</string>
+    <string name="brapi_enable_before_sync">BRAPI está desactivado. Por favor, actívalo en la configuración antes de usar la sincronización.</string>
     <string name="brapi_trait_already_exists">La variable ya existe: %1$s. No guardado</string>
     <string name="brapi_error_saving_all_traits">Error al guardar las variables. No se guardaron variables.</string>
     <string name="brapi_error_saving_some_traits">Error al guardar algunas variables. Algunas variables no se guardaron</string>
@@ -847,4 +901,5 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_main_repeated_values_description">Esto abrirá un diálogo para administrar los valores repetidos para la unidad de observación actual.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="tutorial_main_geonav_description">Esto abrirá un diálogo de configuración para ayudar con la navegación del campo.</string>
+    <string name="oauth_configured_incorrectly">Falló la solicitud de autorización, por favor compruebe la configuración de BrAPI.</string>
 </resources>

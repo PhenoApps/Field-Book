@@ -32,10 +32,18 @@
     <string name="settings_collect">Coletar</string>
     <string name="settings_export">Exportar</string>
     <string name="settings_advanced">Configurações avançadas</string>
+    <string name="settings_profile">Perfil</string>
     <!-- Config Activity Fuzzy Search  -->
+    <string name="act_config_fuzzy_search_failed">Base de Dados não pode recuperar um campo ou parcela com o código: %s</string>
+    <string name="act_config_fuzzy_search_error">Algo deu errado ao pesquisar por %s</string>
+    <string name="act_config_search_fab_content_description">Pesquisar em todas as parcelas e campos para carregar/navegar até o item codificado.</string>
     <!-- File manager  -->
+    <string name="import_source_local">Armazenamento local</string>
+    <string name="import_source_cloud">Armazenamento em nuvem</string>
+    <string name="import_source_ask">Perguntar sempre</string>
     <string name="import_dialog_importing">Por favor aguarde...</string>
     <string name="import_error_general">Erro na importação</string>
+    <string name="act_file_explorer_no_file_error">Não foram encontrados diretórios de Field Book.</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">Nenhum campo está atualmente carregado. Por favor, coloque um campo antes de coletar dados.</string>
     <string name="warning_traits_missing">Não existem caracteres. Por favor, crie caracteres antes de coletar dados.</string>
@@ -43,39 +51,157 @@
     <string name="changelog_title">Alterar registro</string>
     <!-- FIELDS -->
     <!-- General -->
+    <string name="list_item_field_popup_menu_content_description">Abre um menu para o campo selecionado.</string>
+    <string name="selected_count">%1$d selecionado</string>
+    <string name="fields_select_all">Selecionar Tudo</string>
+    <string name="field_generic_observation_level">entradas</string>
+    <string name="field_observation_count_format">%1$s %2$s</string>
     <!-- Sort -->
+    <string name="fields_sort_update">Classificar</string>
+    <string name="sort_dialog_saved">Classificação atualizada</string>
+    <string name="sort_dialog_error_saving">Erro ao atualizar classificação</string>
+    <string name="list_item_field_sort_delete_content_description">Excluir o atributo classificado.</string>
+    <string name="dialog_field_sort_title">Classificar Entradas</string>
+    <string name="list_item_field_sort_drag_content_description">Arraste para mover item.</string>
+    <string name="dialog_field_sort_no_attributes_found">Não foram encontrados atributos.</string>
+    <string name="dialog_field_sort_no_more_attributes_found">Todos os atributos têm sido usados.</string>
+    <string name="dialog_field_sort_delete_all_content_description">Exclui todas as entradas de classificação.</string>
+    <string name="dialog_field_sort_toggle_order_content_description">Inverte a ordem de classificação.</string>
+    <string name="dialog_field_sort_add_content_description">Abre uma caixa de diálogo para adicionar um novo atributo para classificação.</string>
     <!-- Modify -->
+    <string name="fields_rename_study">Renomear</string>
     <string name="fields_export">Exportar</string>
+    <string name="fields_archive">Arquivar</string>
     <!-- Delete -->
+    <string name="fields_delete">Excluir</string>
+    <string name="fields_delete_study">Excluir campo</string>
+    <string name="fields_delete_study_confirmation">Tem certeza que deseja excluir este campo? Isto irá excluir todos os dados deste campo.</string>
+    <plurals name="fields_delete_confirmation">
+        <item quantity="one">Tem certeza que deseja excluir este campo \"%s\"?</item>
+        <item quantity="other">Tem certeza que deseja excluir estes campos: %s?</item>
+    </plurals>
     <!-- Import -->
+    <string name="fields_toolbar_add_field">Importar Campo</string>
+    <string name="import_dialog_title_fields">Importar campo</string>
     <string name="import_dialog_unique">Identificador único</string>
     <string name="import_dialog_primary">Ordem primária</string>
     <string name="import_dialog_secondary">ordem secundária</string>
+    <string name="import_dialog_sort">Ordem de Classificação</string>
+    <string name="import_error_unsupported">Este tipo de arquivo não é suportado atualmente</string>
+    <string name="import_error_columns_replaced">Nomes de coluna contêm caracteres ilegais que serão substituídos durante a importação.</string>
+    <string name="import_error_column_name">Nome da coluna no arquivo importado não pode ser: </string>
+    <string name="import_error_unique_characters_illegal">A coluna selecionada contém caracteres que não podem ser usados no identificador único</string>
+    <string name="import_error_column_choice">As colunas não podem ser usadas para a mesma tarefa</string>
     <string name="import_error_unique">Identificador único contém duplicatas</string>
+    <string name="import_error_format_field">Somente arquivos CSV e XLS podem ser importados como um campo</string>
+    <string name="act_field_editor_no_suitable_columns_error">Arquivo de importação não tem colunas adequadas para escolher.</string>
+    <string name="import_runnable_db_failed_to_switch">A base de dados falhou ao alternar campos.</string>
+    <string name="import_runnable_create_field_data_failed">Falha ao criar dados de campo para a linha %d no arquivo.</string>
+    <string name="import_runnable_duplicates_skipped">Colunas duplicadas encontradas, somente a primeira instância será usada.</string>
+    <string name="fields_study_exists_message">Este campo já existe.</string>
+    <string name="fields_study_and_obs_exists_message">Este campo já está importado neste nível de observação.</string>
+    <string name="act_field_editor_failed_to_read_columns">Field Book não pôde carregar o arquivo.</string>
+    <string name="act_field_editor_load_file_failed">Ocorreu um erro durante o carregamento do arquivo.</string>
+    <string name="act_field_editor_file_open_failed">Arquivo falhou ao abrir.</string>
     <!-- Field Creator  -->
+    <string name="dialog_field_creator_ask_size">Por favor, escolha o nome e tamanho do campo.</string>
+    <string name="dialog_field_creator_ask_start_point">Por favor, escolha um ponto de partida de campo.</string>
+    <string name="dialog_field_creator_ask_pattern">Por favor, escolha um padrão de campo.</string>
+    <string name="dialog_field_creator_ask_name_hint">Nome</string>
+    <string name="dialog_field_creator_ask_row_hint">Linhas</string>
+    <string name="dialog_field_creator_ask_columns_hint">Colunas</string>
+    <string name="dialog_field_creator_top_left">Superior Esquerdo</string>
+    <string name="dialog_field_creator_bottom_left">Inferior Esquerdo</string>
+    <string name="dialog_field_creator_top_right">Superior Direito</string>
+    <string name="dialog_field_creator_bottom_right">Inferior Direito</string>
+    <string name="dialog_field_creator_insert_field">Criando linhas no campo: %1$s por colunas: %2$s</string>
+    <string name="dialog_field_creator_insert_field_complete">Criando linhas no campo: %1$s por colunas: %2$s …completo.</string>
+    <string name="dialog_field_creator_insert_plot">Inserindo parcela %1$s na linha %2$s coluna %3$s</string>
+    <string name="dialog_field_creator_review_title">Revisar</string>
+    <string name="dialog_field_creator_size_group_error">Por favor, insira um nome e formato válidos.</string>
+    <string name="dialog_field_creator_field_name_not_unique">Nome do campo já está em uso.</string>
+    <string name="dialog_field_creator_large_field">Campo grande detectado, a transação pode levar muito tempo.</string>
+    <string name="dialog_field_creator_linear_button_content_desc">Botão para escolher o padrão linear as parcelas.</string>
+    <string name="dialog_field_creator_zig_button_content_desc">Botão para escolher o padrão em zigue-zague as parcelas.</string>
+    <string name="dialog_field_creator_review_image_content_desc">Imagem mostrando orientação e padrão de parcelas.</string>
     <!-- Geo-Navigate to Field -->
+    <string name="menu_fields_plot_by_distance_title">Selecione campo mais próximo</string>
+    <string name="activity_field_editor_no_field_found">Coordenadas não podem ser encontrada.</string>
+    <string name="activity_field_editor_switch_field">"Alterar para o campo %s"</string>
+    <string name="activity_field_editor_switch_field_action">Alternar</string>
+    <string name="activity_field_editor_no_location_yet">Nenhuma localização encontrada ainda.</string>
+    <string name="activity_field_editor_switch_field_same">O campo mais próximo já está selecionado.</string>
     <!-- Field details -->
+    <string name="field_detail_title">Detalhes do Campo</string>
+    <string name="field_edit_display_name">Editar Nome de Exibição do Campo</string>
+    <string name="name_cannot_be_empty">Nome não pode estar vazio.</string>
+    <string name="illegal_characters_message">Caracteres ilegais encontrados: %1$s</string>
+    <string name="name_conflict_message">\"%1$s\" já está sendo usado como um %2$s para outro campo.</string>
+    <string name="name_conflict_import_name">nome da importação</string>
+    <string name="name_conflict_display_name">nome de exibição</string>
+    <string name="field_import_string">Importado de</string>
+    <string name="field_create_string">Criado dentro</string>
+    <string name="field_detail_narrative">"%1$s\"%2$s\" com o nome \"%3$s\". Contém \"%4$s\" entradas e \"%5$s\" atributos. Classificado por \"%6$s"</string>
+    <string name="field_default_sort_order">classificação de importação</string>
+    <string name="field_data_title">Dados</string>
+    <string name="field_trait_total">\"&lt;b&gt;%1$s&lt;/b&gt;\" caracteres</string>
+    <string name="field_observation_total">\"&lt;b&gt;%1$s&lt;/b&gt;\" observações</string>
+    <string name="field_trait_observation_total">\"%d\"observações</string>
     <!-- Semantic dates -->
+    <string name="today">Hoje</string>
+    <string name="yesterday">Ontem</string>
+    <plurals name="years_ago">
+        <item quantity="one">%d ano atrás</item>
+        <item quantity="other">%d anos atrás</item>
+    </plurals>
+    <string name="no_activity">Sem atividades</string>
+    <string name="invalid_date">Data inválida</string>
     <!-- TRAITS -->
     <!-- Sort -->
+    <string name="traits_toolbar_sort">Classificar</string>
+    <string name="traits_sort_title">Classificar</string>
+    <string name="traits_sort_name">Nome</string>
+    <string name="traits_sort_visibility">Visibilidade</string>
+    <string name="traits_sort_format">Formato</string>
+    <string name="warning_traits_missing_modify">Crie caracteres antes de modificá-las.</string>
     <!-- Trait import/export -->
+    <string name="traits_toolbar_import_export">Importar/Exportar</string>
     <string name="traits_dialog_import">Importar</string>
+    <string name="traits_export_check">Exportar lista de caracteres atual?</string>
     <string name="traits_dialog_export">Exportar</string>
+    <string name="dialog_delete_traits_message">Gostaria de excluir todos as caracteres atuais?</string>
+    <string name="import_error_format_trait">Somente arquivos TRT podem ser importados como uma lista de caracteres</string>
+    <string name="import_dialog_title_traits">Importar caracteres</string>
     <string name="traits_toolbar_delete_all">Excluir todos os caracteres</string>
+    <string name="act_trait_editor_no_traits_exist">Não existem caracteres.</string>
     <!-- Trait item menu -->
+    <string name="list_item_trait_popup_content_description">Abra um menu específico para este caractere.</string>
     <string name="traits_options_copy">Copiar</string>
+    <string name="traits_options_edit">Editar</string>
     <string name="traits_options_delete">Excluir</string>
     <string name="traits_options_delete_title">Excluir caractere</string>
+    <string name="traits_warning_delete">Excluindo um caractere também exclui dados que foram coletados para esse caractere. Tem certeza que deseja excluir esse caractere?</string>
     <!-- Trait formats -->
     <string name="traits_format_numeric">Numérico</string>
     <string name="traits_format_categorical">Categórico</string>
     <string name="traits_format_date">Data</string>
     <string name="traits_format_percent">Percentagem</string>
+    <string name="traits_format_counter">Contador</string>
+    <string name="traits_format_disease_rating">Avaliação da Doença</string>
     <string name="traits_format_boolean">Booliano</string>
     <string name="traits_format_text">Texto</string>
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_audio">Áudio</string>
+    <string name="traits_format_multicategorical">Multicat</string>
+    <string name="traits_format_location">Localização</string>
+    <string name="traits_format_gnss">GNSS</string>
+    <string name="traits_format_barcode">Código de Barras</string>
+    <string name="traits_format_labelprint">Impressão nas etiquetas Zebra</string>
+    <string name="traits_format_usb_camera">Câmera USB</string>
+    <string name="traits_format_go_pro_camera">GoPro</string>
     <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">Formato de Caractere</string>
+    <string name="traits_create_name">Nome</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Padrão</string>
     <string name="traits_create_value_minimum">Mínimo</string>
@@ -90,6 +216,7 @@
     <string name="traits_create_warning_name_blank">Nome do caractere não pode ser vazio</string>
     <string name="traits_create_warning_duplicate">Esse caractere já existe</string>
     <string name="traits_create_warning_numeric_required">Padrão, mínimo e máximo devem ser numéricos</string>
+    <string name="edit_traits">Editar</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">O valor é menor do que o conjunto mínimo</string>
@@ -138,9 +265,11 @@
     <!--- Text to Speech Strings -->
     <!--- Summary -->
     <!--- Repeated measures -->
+    <string name="dialog_multi_measure_delete">Excluir</string>
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <string name="observation_info_trait_format">Formato de Caractere</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">Base de dados</string>
@@ -202,6 +331,8 @@
     <string name="brapi_choice_to_make_default_positive">Salvar</string>
     <!-- Authorization -->
     <!-- BrAPI Import -->
+    <string name="brapi_study_name">Nome</string>
+    <string name="brapi_study_location">Localização</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Exportar</string>
     <!-- Pagination -->

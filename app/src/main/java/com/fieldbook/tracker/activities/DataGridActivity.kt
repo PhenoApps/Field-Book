@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -29,6 +30,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -186,14 +188,16 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
     }
 
     /**
-     * Uses the convertDatabaseToTable query to create a spreadsheet of values.
+     * Uses the getExportTableData query to create a spreadsheet of values.
      * Columns returned are plot_id followed by all traits.
      */
     private fun loadGridData(prefixTrait: String? = null,
                              plotId: Int? = null,
                              trait: Int? = null) {
 
-        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+
+        val study = database.getFieldObject(studyId)
 
         val showLabel = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") == "value"
 
@@ -229,14 +233,11 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                 val traits = database.allTraitObjects
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
-                val cursor =
-                    database.getExportTableDataShort(
-                        preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
-                        preferences.getString(GeneralKeys.UNIQUE_NAME, ""),
-                        mTraits
-                    )
+                val cursor = database.getExportTableData(studyId, mTraits)
 
                 if (cursor.moveToFirst()) {
+
+                    Log.d("DataGridActivity", "Query executed. Row count: ${cursor.count}")
 
                     mRowHeaders = arrayListOf()
 
@@ -251,7 +252,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                             val rowHeaderIndex = cursor.getColumnIndex(rowHeader)
 
                             //unique name column is always the first column
-                            val uniqueIndex = cursor.getColumnIndex(cursor.getColumnName(0))
+                            val uniqueIndex = cursor.getColumnIndex(study.unique_id)
 
                             if (uniqueIndex > -1) { //if it doesn't exist skip this row
 
@@ -276,7 +277,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                                         val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
 
                                         val repeatedValues =
-                                            database.getRepeatedValues(studyId, id, variable.id)
+                                            database.getRepeatedValues(studyId.toString(), id, variable.id)
                                         if (repeatedValues.size > 1) {
                                             println("$studyId $id $variable has repeated values...!")
                                         }
@@ -322,7 +323,9 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                     } catch (e: java.lang.IllegalStateException) {
 
-                        Utils.makeToast(this@DataGridActivity, getString(R.string.act_data_grid_cursor_failed))
+                        withContext(Dispatchers.Main) {
+                            Utils.makeToast(this@DataGridActivity, getString(R.string.act_data_grid_cursor_failed))
+                        }
 
                         e.printStackTrace()
 

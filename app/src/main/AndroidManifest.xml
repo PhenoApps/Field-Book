@@ -196,13 +196,14 @@
 
         <provider
             android:name=".provider.GenericFileProvider"
-            android:authorities="com.fieldbook.tracker.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+
     </application>
 
     <queries>

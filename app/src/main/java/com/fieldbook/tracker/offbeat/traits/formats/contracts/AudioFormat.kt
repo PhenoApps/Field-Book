@@ -10,6 +10,7 @@ class AudioFormat : TraitFormat(
     format = Formats.AUDIO,
     defaultLayoutId = R.layout.trait_audio,
     layoutView = null,
+    databaseName = "audio",
     nameStringResourceId = R.string.traits_format_audio,
     iconDrawableResourceId = R.drawable.trait_audio,
     stringNameAux = null,

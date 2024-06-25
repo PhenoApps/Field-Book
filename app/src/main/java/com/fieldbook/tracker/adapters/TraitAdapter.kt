@@ -107,8 +107,8 @@ class TraitAdapter(private val sorter: TraitSorter):
             viewHolder.itemView.tag = this
             viewHolder.nameTextView.text = this.name
 
-            val icon = Formats.values()
-                .find { it.getDatabaseName(viewHolder.itemView.context) == this.format }?.getIcon()
+            val icon = Formats.entries
+                .find { it.getDatabaseName() == this.format }?.getIcon()
 
             viewHolder.formatImageView.setBackgroundResource(icon ?: R.drawable.ic_reorder)
 

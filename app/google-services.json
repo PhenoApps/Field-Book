@@ -34,6 +34,35 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:407864291370:android:00d10aeacca3b8e004d353",
+        "android_client_info": {
+          "package_name": "com.fieldbook.tracker.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "407864291370-0n5v6mamga5jij20v31e3r2675ud5knd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_KTkodQtpbMZoYrTZh_G9AvaO8Uxaknk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "407864291370-0n5v6mamga5jij20v31e3r2675ud5knd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

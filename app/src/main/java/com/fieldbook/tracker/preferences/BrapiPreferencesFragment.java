@@ -274,6 +274,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             config.setAuthFlow(preferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)));
             config.setOidcUrl(preferences.getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default)));
             config.setCatDisplay(preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value"));
+            config.setClientId(preferences.getString(GeneralKeys.BRAPI_OIDC_CLIENT_ID, getString(R.string.brapi_oidc_clientid_default)));
+            config.setScope(preferences.getString(GeneralKeys.BRAPI_OIDC_SCOPE, getString(R.string.brapi_oidc_scope_default)));
 
             Gson gson = new Gson();
             String jsonConfig = gson.toJson(config);
@@ -678,6 +680,16 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli());
             ((ListPreference)findPreference(GeneralKeys.LABELVAL_CUSTOMIZE)).setValue(brAPIConfig.getCatDisplay());
 
+            String clientId = brAPIConfig.getClientId();
+            String scope = brAPIConfig.getScope();
+
+            if (clientId != null) {
+                ((NeutralButtonEditTextDialog)findPreference(GeneralKeys.BRAPI_OIDC_CLIENT_ID)).setText(clientId);
+            }
+
+            if (scope != null) {
+                ((NeutralButtonEditTextDialog)findPreference(GeneralKeys.BRAPI_OIDC_SCOPE)).setText(scope);
+            }
             String oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_implicit);
             String codeFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);
             if(codeFlow.equalsIgnoreCase(brAPIConfig.getAuthFlow())) {
