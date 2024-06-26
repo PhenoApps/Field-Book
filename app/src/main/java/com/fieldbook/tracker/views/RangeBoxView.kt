@@ -741,7 +741,7 @@ class RangeBoxView : ConstraintLayout {
                     //otherwise, set the selection to the missing trait and return the current pos
                 } else if (nextTrait > -1) {
                     controller.getTraitBox().setSelection(nextTrait)
-                    return localPrev
+                    return pos
                 }
             }
         }

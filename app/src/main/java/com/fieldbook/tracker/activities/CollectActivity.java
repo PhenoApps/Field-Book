@@ -2119,7 +2119,7 @@ public class CollectActivity extends ThemedActivity
      */
     @Override
     public int existsAllTraits(final int traitIndex, final int plotId) {
-        final ArrayList<TraitObject> traits = database.getAllTraitObjects();
+        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
         for (int i = 0; i < traits.size(); i++) {
             if (i != traitIndex
                     && !database.getTraitExists(plotId, traits.get(i).getId())) return i;
@@ -2130,7 +2130,7 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public List<Integer> getNonExistingTraits(final int plotId) {
-        final ArrayList<TraitObject> traits = database.getAllTraitObjects();
+        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
         final ArrayList<Integer> indices = new ArrayList<>();
         for (int i = 0; i < traits.size(); i++) {
             if (!database.getTraitExists(plotId, traits.get(i).getId()))
