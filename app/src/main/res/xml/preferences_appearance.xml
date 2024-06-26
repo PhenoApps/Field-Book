@@ -57,7 +57,7 @@
         <ListPreference
             android:icon="@drawable/ic_tb_forward"
             android:key="com.fieldbook.tracker.HIDE_ENTRIES_WITH_DATA_TOOLBAR"
-            android:summary="@string/preferences_general_feature_next_missing_description"
+            android:summary="%s"
             android:title="@string/preferences_general_feature_next_missing"
             android:entries="@array/pref_general_skip_entries_entries"
             android:entryValues="@array/pref_general_skip_entries_values"
@@ -66,7 +66,7 @@
         <ListPreference
             android:icon="@drawable/ic_tb_barcode_scan"
             android:key="com.fieldbook.tracker.MOVE_TO_UNIQUE_ID"
-            android:summary="@string/preferences_general_feature_barcode_text_description"
+            android:summary="%s"
             android:title="@string/preferences_general_feature_barcode_text"
             android:entries="@array/pref_general_move_to_unique_id_entries"
             android:entryValues="@array/pref_general_move_to_unique_id_values"

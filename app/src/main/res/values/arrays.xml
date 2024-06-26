@@ -47,10 +47,10 @@
         <item>@string/text_size_xl</item>
     </string-array>
     <string-array name="preferences_text_size_entry_values">
+        <item>0</item>
         <item>1</item>
         <item>2</item>
         <item>3</item>
-        <item>4</item>
     </string-array>
     <string-array name="preferences_profile_ask_user_interval_entries">
         <item>@string/ask_user_interval_every_open</item>
@@ -58,8 +58,8 @@
         <item>@string/ask_user_interval_every_24</item>
     </string-array>
     <string-array name="preferences_profile_ask_user_interval_values">
+        <item>0</item>
         <item>1</item>
         <item>2</item>
-        <item>3</item>
     </string-array>
 </resources>

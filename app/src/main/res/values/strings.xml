@@ -671,16 +671,15 @@
     <string name="preferences_general_feature_datagrid_description">Add a button to display a grid of collected data</string>
 
     <string name="preferences_general_feature_next_missing">Next Entry With No Data</string>
-    <string name="preferences_general_feature_next_missing_description">Button set to: %s</string>
     <string name="preferences_general_skip_entries_disabled">Disabled</string>
-    <string name="preferences_general_skip_entries_with_data">Skip entries that have data for the current trait</string>
-    <string name="preferences_general_skip_entries_across_all_traits">Skip entries that have data for all traits</string>
+    <string name="preferences_general_skip_entries_with_data">Button skips entries that have data for the current trait</string>
+    <string name="preferences_general_skip_entries_across_all_traits">Button skips entries that have data for all traits</string>
 
     <string name="preferences_general_feature_barcode_text">Move To Unique ID</string>
-    <string name="preferences_general_feature_barcode_text_description">Button set to: %s</string>
     <string name="move_to_unique_id_disabled">Disabled</string>
-    <string name="move_to_unique_id_text_or_scan">Text entry with optional camera scan</string>
-    <string name="move_to_unique_id_direct_camera_scan">Direct camera scan</string>
+    <string name="move_to_unique_id_text_or_scan">Button uses text entry with optional camera scan</string>
+    <string name="move_to_unique_id_direct_camera_scan">Button uses direct camera scan</string>
+
     <string name="preferences_appearance_collect_screen_title">Collect Screen</string>
 
     <string name="preferences_appearance_infobar_number">Number Of InfoBars</string>
