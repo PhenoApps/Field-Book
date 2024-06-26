@@ -61,7 +61,7 @@
             android:title="@string/preferences_general_feature_next_missing"
             android:entries="@array/pref_general_skip_entries_entries"
             android:entryValues="@array/pref_general_skip_entries_values"
-            android:defaultValue="1"/>
+            android:defaultValue="0"/>
 
         <ListPreference
             android:icon="@drawable/ic_tb_barcode_scan"
@@ -70,7 +70,7 @@
             android:title="@string/preferences_general_feature_barcode_text"
             android:entries="@array/pref_general_move_to_unique_id_entries"
             android:entryValues="@array/pref_general_move_to_unique_id_values"
-            android:defaultValue="1"/>
+            android:defaultValue="0"/>
 
     </PreferenceCategory>
 

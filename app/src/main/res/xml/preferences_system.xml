@@ -14,7 +14,7 @@
             android:title="@string/preferences_system_files_base_directory_title" />
 
         <ListPreference
-            android:defaultValue="1"
+            android:defaultValue="0"
             android:icon="@drawable/ic_pref_source_import_default"
             app:dialogTitle="@string/preferences_source_default_import"
             app:entries="@array/pref_import_source_entries"
@@ -24,7 +24,7 @@
             app:useSimpleSummaryProvider="true" />
 
         <ListPreference
-            android:defaultValue="1"
+            android:defaultValue="0"
             android:icon="@drawable/ic_pref_source_export_default"
             app:allowDividerBelow="true"
             app:dialogTitle="@string/preferences_source_default_export"
