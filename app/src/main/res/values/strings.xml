@@ -720,9 +720,9 @@
     <string name="preferences_behavior_volume_buttons_advance_entries">Volume keys advance entries</string>
 
     <string name="preferences_behavior_return_character">Carriage Return Action</string>
-    <string name="preferences_behavior_return_character_next_plot">Advance plot</string>
-    <string name="preferences_behavior_return_character_next_trait">Advance trait</string>
     <string name="preferences_behavior_return_character_do_nothing">Do nothing</string>
+    <string name="preferences_behavior_return_character_next_plot">Carriage return advances plot</string>
+    <string name="preferences_behavior_return_character_next_trait">Carriage return advances trait</string>
 
     <string name="preferences_general_use_day_number">Use Day Of Year</string>
     <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
@@ -778,16 +778,16 @@
     <!-- Sounds -->
     <string name="preferences_sounds">Sounds</string>
     <string name="preferences_sound_primary_order_title">Change Primary Order</string>
-    <string name="preferences_sound_primary_order_description">Notification sound when the primary order changes</string>
+    <string name="preferences_sound_primary_order_description">Play plonk sound when the primary order changes</string>
 
     <string name="preferences_sound_entry_title">Change Entry</string>
-    <string name="preferences_sound_entry_description">Notification sound when moving between entries</string>
+    <string name="preferences_sound_entry_description">Play advance sound when moving between entries</string>
 
     <string name="preferences_sound_cycle_traits_title">Cycle Traits</string>
-    <string name="preferences_sound_cycle_traits_description">Notification sound when traits are completely cycled through</string>
+    <string name="preferences_sound_cycle_traits_description">Play cycle sound when traits are completely cycled through</string>
 
     <string name="preferences_sound_delete_obs_title">Delete Observation</string>
-    <string name="preferences_sound_delete_obs_description">Notification sound when observation is deleted</string>
+    <string name="preferences_sound_delete_obs_description">Play delete sound when observation is deleted</string>
 
     <string name="preferences_category_audio_tts_title">Text to Speech</string>
     <string name="preferences_general_tts_title">Text to Speech</string>
