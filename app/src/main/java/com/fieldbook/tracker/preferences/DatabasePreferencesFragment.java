@@ -31,6 +31,7 @@ import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
@@ -44,6 +45,7 @@ import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
@@ -183,11 +185,11 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                             SharedPreferences.Editor edit = preferences.edit();
 
-                            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-                            edit.putString(GeneralKeys.UNIQUE_NAME, "");
-                            edit.putString(GeneralKeys.PRIMARY_NAME, "");
-                            edit.putString(GeneralKeys.SECONDARY_NAME, "");
-                            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+                            SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+                            String field_file = mPrefs.getString(GeneralKeys.FIELD_FILE, "");
+
+                            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, getSelectedFieldId(field_file));
+                            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true);
                             edit.apply();
 
                             database.open();
@@ -223,6 +225,22 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
             CollectActivity.reloadData = true;
         }
+    }
+
+    private int getSelectedFieldId(String field_file) {
+        ArrayList<FieldObject> fields = database.getAllFieldObjects();
+
+        //try and match study alias
+        for (FieldObject f : fields) {
+
+            if (f != null && f.getExp_alias() != null && f.getExp_alias().equals(field_file)) {
+
+                return f.getExp_id();
+
+            }
+        }
+        // if no match found, return -1
+        return -1;
     }
 
     private void showDatabaseExportDialog() {

@@ -39,16 +39,22 @@ import com.fieldbook.tracker.objects.SearchDialogDataModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
+import com.fieldbook.tracker.utilities.ZipUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
@@ -56,13 +62,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import dagger.hilt.android.qualifiers.ActivityContext;
 
@@ -2421,7 +2432,23 @@ public class DataHelper {
 
             }
 
-            open();
+            // for zip file, call the unzip function
+            if (fileName.endsWith(".zip")){
+                try (InputStream input = context.getContentResolver().openInputStream(file.getUri())) {
+
+                    try (OutputStream output = new FileOutputStream(internalDbPath)) {
+                        ZipUtil.Companion.unzip(context, input, output);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else{
+                // for .db file
+                open();
+            }
 
             if (!isTableExists(Migrator.Study.tableName)) {
 
@@ -2460,8 +2487,9 @@ public class DataHelper {
 
             if (databaseDir != null) {
 
-                String dbFileName = filename + ".db";
+                String dbFileName = "fieldbook.db";
                 String prefFileName = filename + ".db_sharedpref.xml";
+                String zipFileName = filename + ".zip";
 
                 DocumentFile dbDoc = databaseDir.findFile(dbFileName);
                 DocumentFile prefDoc = databaseDir.findFile(prefFileName);
@@ -2475,11 +2503,21 @@ public class DataHelper {
 
                 DocumentFile backupDatabaseFile = databaseDir.createFile("*/*", dbFileName);
                 DocumentFile backupPreferenceFile = databaseDir.createFile("*/*", prefFileName);
+                DocumentFile zipFile = databaseDir.findFile(zipFileName);
+                if (zipFile == null){
+                    zipFile = databaseDir.createFile("*/*", zipFileName);
+                }
+                OutputStream outputStream = context.getContentResolver().openOutputStream(zipFile.getUri());
 
                 if (backupDatabaseFile != null && backupPreferenceFile != null) {
 
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldSp), backupPreferenceFile);
+
+                    if (outputStream != null){
+                        // add the .db file and preferences file to the zip
+                        ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, backupPreferenceFile }, outputStream);
+                    }
                 }
             }
 

@@ -453,7 +453,7 @@ public class ConfigActivity extends ThemedActivity {
         builder.setPositiveButton(getString(R.string.dialog_yes), (dialog, which) -> {
             // Load database with sample data
             DocumentFile sampleDatabase = BaseDocumentTreeUtil.Companion.getFile(ConfigActivity.this,
-                    R.string.dir_database, "sample.db");
+                    R.string.dir_database, "sample_db.zip");
             if (sampleDatabase != null && sampleDatabase.exists()) {
                 invokeDatabaseImport(sampleDatabase);
             }
