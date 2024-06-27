@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +18,8 @@ class RadioButtonSlidePolicyFragment : Fragment(), SlidePolicy {
 
     private var recyclerView: RecyclerView? = null
     private var radioButtonItems: List<RadioButtonModel>? = null
+    private var slideTitle: String? = null
+    private var slideSummary: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,6 +29,13 @@ class RadioButtonSlidePolicyFragment : Fragment(), SlidePolicy {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val slideTitle = view.findViewById<TextView>(R.id.slideTitle)
+        val slideSummary = view.findViewById<TextView>(R.id.slideSummary)
+
+        slideTitle.text = this.slideTitle
+        slideSummary.text = this.slideSummary
+
 
         recyclerView = view.findViewById(R.id.radioButtonsRecyclerView)
         recyclerView?.adapter = RadioButtonAdapter()
@@ -47,9 +57,15 @@ class RadioButtonSlidePolicyFragment : Fragment(), SlidePolicy {
     }
 
     companion object {
-        fun newInstance(radioButtonItems: ArrayList<RadioButtonModel>): RadioButtonSlidePolicyFragment {
+        fun newInstance(
+            radioButtonItems: ArrayList<RadioButtonModel>,
+            slideTitle: String,
+            slideSummary: String
+        ): RadioButtonSlidePolicyFragment {
             val fragment = RadioButtonSlidePolicyFragment()
             fragment.radioButtonItems = radioButtonItems
+            fragment.slideTitle = slideTitle
+            fragment.slideSummary = slideSummary
             return fragment
         }
     }

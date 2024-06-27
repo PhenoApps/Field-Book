@@ -26,6 +26,24 @@
     <string name="startup_sample_data_title">Sample data</string>
     <string name="startup_sample_data_message">Load sample data?</string>
 
+    <!-- App Intro -->
+    <string name="app_intro_intro_title_slide1">This is a Field Book intro1</string>
+    <string name="app_intro_intro_summary_slide1">This is a Field Book intro summary1</string>
+    <string name="app_intro_intro_title_slide2">This is a Field Book intro2</string>
+    <string name="app_intro_intro_summary_slide2">This is a Field Book intro summary2</string>
+    <string name="app_intro_request_permissions_title">Permissions Request</string>
+    <string name="app_intro_request_permissions_summary">Field Book requires a few permissions</string>
+    <string name="app_intro_permissions_granted_summary">Permissions already granted</string>
+    <string name="app_intro_load_sample_data_title">Do you want to load sample data</string>
+    <string name="app_intro_load_sample_data_summary">A sample database will be imported</string>
+    <string name="app_intro_load_sample_data_positive">Yes</string>
+    <string name="app_intro_load_sample_data_negative">No</string>
+    <string name="app_intro_tutorial_title">Would you like to enable the tutorial?</string>
+    <string name="app_intro_tutorial_summary">This setting can be changed in the Settings</string>
+    <string name="app_intro_tutorial_positive">Yes</string>
+    <string name="app_intro_tutorial_negative">No</string>
+
+
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
     <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>

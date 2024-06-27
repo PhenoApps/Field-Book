@@ -3,29 +3,33 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:background="@color/main_primary"
+    android:orientation="vertical"
+    android:gravity="center">
 
     <TextView
         style="@style/AppIntroDefaultHeading"
+        android:id="@+id/slideTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="16dp"
-        android:text="@string/intro_tutorial_title" />
+        android:text="" />
 
     <TextView
         style="@style/AppIntroDefaultText"
+        android:id="@+id/slideSummary"
         android:layout_margin="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/intro_tutorial_description" />
+        android:text="" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/radioButtonsRecyclerView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        android:layout_gravity="center"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
 </LinearLayout>

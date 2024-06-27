@@ -20,7 +20,11 @@ class RadioButtonAdapter :
 
     private var selectedPosition = -1
 
-    data class RadioButtonModel(val text: String, var isSelected: Boolean = false)
+    data class RadioButtonModel(
+        val text: String,
+        val callback: (() -> Unit)?,
+        var isSelected: Boolean = false
+    )
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val radioButton: RadioButton = itemView.findViewById(R.id.radio_button)
@@ -53,6 +57,9 @@ class RadioButtonAdapter :
                 // select the current position
                 item.isSelected = true
                 selectedPosition = currentPosition
+
+                item.callback?.invoke()
+
                 notifyItemChanged(currentPosition)
             }
         }

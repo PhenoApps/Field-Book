@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.preferences
 
+import com.fieldbook.tracker.fragments.ImportDBFragment
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
@@ -7,11 +8,16 @@ import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.AppIntroActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
 
 class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
+
+    companion object {
+        private const val REQUEST_CODE_APP_INTRO = 1
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 
@@ -46,7 +52,7 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
         val appIntro = findPreference<Preference>("launch_app_intro")
         appIntro?.setOnPreferenceClickListener {
             val intent = Intent(activity, AppIntroActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, REQUEST_CODE_APP_INTRO)
             true
         }
     }
@@ -58,6 +64,29 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
             if (preference is PreferenceCategory && preference.preferenceCount == 0) {
                 preference.isVisible = false
             }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_APP_INTRO) {
+
+            val prefs = (this.activity as PreferencesActivity).let { PreferenceManager.getDefaultSharedPreferences(it) }
+
+            val loadSampleData = prefs?.getBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)
+
+            if (context != null && loadSampleData == true){
+                val importDBFragment = ImportDBFragment()
+
+                childFragmentManager.beginTransaction()
+                    .add(importDBFragment, "com.fieldbook.tracker.fragments.ImportDBFragment")
+                    .addToBackStack(null)
+                    .commit()
+
+            }
+
+
+            val showTutorial = prefs?.getBoolean(GeneralKeys.SHOW_TUTORIAL, false)
         }
     }
 

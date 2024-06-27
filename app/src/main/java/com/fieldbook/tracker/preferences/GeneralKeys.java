@@ -226,6 +226,11 @@ public class GeneralKeys {
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
 
+    // app intro
+    public static final String LOAD_SAMPLE_DATA = "com.fieldbook.tracker.load_sample_data";
+
+    public static final String SHOW_TUTORIAL = "com.fieldbook.tracker.show_tutorial";
+
     private GeneralKeys() {
 
     }
