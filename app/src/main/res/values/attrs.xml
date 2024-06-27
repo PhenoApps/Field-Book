@@ -286,4 +286,7 @@
     <!-- within-dialog error message color -->
     <attr name="fb_error_message_color" format="color" />
 
+    <!-- action mode selected item color -->
+    <attr name="selectedItemBackground" format="color"/>
+
 </resources>

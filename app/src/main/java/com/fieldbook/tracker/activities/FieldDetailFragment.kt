@@ -41,6 +41,7 @@ import com.fieldbook.tracker.utilities.SemanticDateUtil
 import com.fieldbook.tracker.utilities.StringUtil
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
+import java.math.BigDecimal
 import javax.inject.Inject
 
 
@@ -268,13 +269,18 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
                 FieldDetailItem(
                     traitDetail.getTraitName(),
+                    traitDetail.getFormat(),
                     getString(R.string.field_trait_observation_total, traitDetail.getCount()),
-                    ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical)
+                    ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical),
+                    traitDetail.getObservations(),
+                    traitDetail.completeness
                 )
             }
         }
-        return emptyList()  // Return an empty list if traitDetails is null
+        return emptyList()
     }
+
+
 
     private fun setupToolbar(field: FieldObject) {
 

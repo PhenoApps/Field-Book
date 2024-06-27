@@ -677,11 +677,11 @@ public class DataHelper {
     /**
      * Get the data for brapi export to external system
      */
-    public List<Observation> getObservations(String hostUrl) {
+    public List<Observation> getObservations(int fieldId, String hostUrl) {
 
         open();
 
-        return ObservationDao.Companion.getObservations(hostUrl);
+        return ObservationDao.Companion.getObservations(fieldId, hostUrl);
 
 //        List<Observation> observations = new ArrayList<Observation>();
 //
@@ -1256,7 +1256,9 @@ public class DataHelper {
 
         open();
 
-        return StudyDao.Companion.getAllFieldObjects();
+        return StudyDao.Companion.getAllFieldObjects(
+                preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+        );
 
 //        ArrayList<FieldObject> list = new ArrayList<>();
 //
@@ -1329,7 +1331,9 @@ public class DataHelper {
 
         open();
 
-        return ObservationVariableDao.Companion.getAllTraitObjects();
+        return ObservationVariableDao.Companion.getAllTraitObjects(
+                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
+        );
 
 //        ArrayList<TraitObject> list = new ArrayList<>();
 //
@@ -1561,7 +1565,9 @@ public class DataHelper {
 
         if (!isTableExists("ObservationUnitProperty")) {
 
-            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects(
+                    preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+            );
 
             if (!fields.isEmpty()) {
 
@@ -1793,7 +1799,9 @@ public class DataHelper {
 //        if (db == null || !db.isOpen()) db = openHelper.getWritableDatabase();
         if (!isTableExists("ObservationUnitProperty")) {
 
-            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects(
+                    preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+            );
 
             if (!fields.isEmpty()) {
 
