@@ -99,4 +99,10 @@
     <color name="circleBackgroundMiddleColorPressed">#20FEFEFE</color>
     <color name="circleBackgroundOuterColor">#FFFFFF</color>
 
+    <!-- statistics activity heatmap observations colors -->
+    <color name="heatmap_color_low">#b2f2bb</color>
+    <color name="heatmap_color_medium">#69db7c</color>
+    <color name="heatmap_color_high">#40c057</color>
+    <color name="heatmap_color_max">#2f9e44</color>
+
 </resources>
