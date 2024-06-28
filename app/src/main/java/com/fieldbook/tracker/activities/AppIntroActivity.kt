@@ -14,6 +14,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Constants
 import com.fieldbook.tracker.utilities.Utils
 import com.github.appintro.AppIntro
+import com.github.appintro.AppIntroCustomLayoutFragment
 import com.github.appintro.AppIntroFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,7 +67,7 @@ class AppIntroActivity : AppIntro() {
             AppIntroFragment.createInstance(
                 context.getString(R.string.app_intro_intro_title_slide1),
                 context.getString(R.string.app_intro_intro_summary_slide1),
-                imageDrawable = R.drawable.other_ic_field_book,
+                imageDrawable = R.drawable.field_book_intro,
                 backgroundColorRes = R.color.main_primary
             )
         )
@@ -76,7 +77,7 @@ class AppIntroActivity : AppIntro() {
             AppIntroFragment.createInstance(
                 context.getString(R.string.app_intro_intro_title_slide2),
                 context.getString(R.string.app_intro_intro_summary_slide2),
-                imageDrawable = R.drawable.other_ic_field_book,
+                imageDrawable = R.drawable.field_book_intro,
                 backgroundColorRes = R.color.main_primary
             )
         )
