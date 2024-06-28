@@ -1374,7 +1374,7 @@ public class CollectActivity extends ThemedActivity
                 startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
             }
         } else if (itemId == nextEmptyPlotId) {
-            rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, false, true));
+            rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, true));
             refreshMain();
         } else if (itemId == jumpToPlotId) {
             String moveToUniqueIdValue = preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "");
