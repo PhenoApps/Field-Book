@@ -1073,6 +1073,13 @@ public class DataHelper {
 //        return data;
     }
 
+    public ArrayList<TraitObject> getVisibleTraitObjects() {
+
+        open();
+
+        return VisibleObservationVariableDao.Companion.getVisibleTraitObjects();
+    }
+
     /**
      * Used by application to loops through formats which are visible
      */
