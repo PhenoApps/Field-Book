@@ -1,9 +1,10 @@
 package com.fieldbook.tracker.preferences
 
-import com.fieldbook.tracker.fragments.ImportDBFragment
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
@@ -11,7 +12,9 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.AppIntroActivity
+import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
+import com.fieldbook.tracker.fragments.ImportDBFragment
 
 class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
 
@@ -85,8 +88,7 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
 
             }
 
-
-            val showTutorial = prefs?.getBoolean(GeneralKeys.SHOW_TUTORIAL, false)
+            // tutorial preferences are saved in the app intro itself
         }
     }
 

@@ -50,11 +50,13 @@ class AppIntroActivity : AppIntro() {
             RadioButtonAdapter.RadioButtonModel(
                 context.getString(R.string.app_intro_tutorial_positive),
                 {
-                    prefs.edit().putBoolean(GeneralKeys.SHOW_TUTORIAL, true).apply()
+                    prefs.edit().putBoolean(GeneralKeys.TIPS, true).apply()
+                    prefs.edit().putBoolean(GeneralKeys.TIPS_CONFIGURED, true).apply()
                 }),
             RadioButtonAdapter.RadioButtonModel(
                 context.getString(R.string.app_intro_tutorial_negative), {
-                    prefs.edit().putBoolean(GeneralKeys.SHOW_TUTORIAL, false).apply()
+                    prefs.edit().putBoolean(GeneralKeys.TIPS, false).apply()
+                    prefs.edit().putBoolean(GeneralKeys.TIPS_CONFIGURED, true).apply()
                 }),
         )
 
