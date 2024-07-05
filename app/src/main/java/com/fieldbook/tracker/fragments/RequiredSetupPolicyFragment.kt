@@ -9,15 +9,15 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.adapters.RadioButtonAdapter
-import com.fieldbook.tracker.adapters.RadioButtonAdapter.RadioButtonModel
+import com.fieldbook.tracker.adapters.RequiredSetupAdapter
+import com.fieldbook.tracker.adapters.RequiredSetupAdapter.RequiredSetupModel
 import com.github.appintro.SlidePolicy
 
 
-class RadioButtonSlidePolicyFragment : Fragment(), SlidePolicy {
+class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
 
     private var recyclerView: RecyclerView? = null
-    private var radioButtonItems: List<RadioButtonModel>? = null
+    private var setupItems: List<RequiredSetupModel>? = null
     private var slideTitle: String? = null
     private var slideSummary: String? = null
 
@@ -33,40 +33,59 @@ class RadioButtonSlidePolicyFragment : Fragment(), SlidePolicy {
         val slideTitle = view.findViewById<TextView>(R.id.slide_title)
         val slideSummary = view.findViewById<TextView>(R.id.slide_summary)
 
-        slideTitle.text = this.slideTitle
-        slideSummary.text = this.slideSummary
+        slideTitle?.text = this.slideTitle
+        slideSummary?.text = this.slideSummary
 
 
         recyclerView = view.findViewById(R.id.setup_rv)
-        recyclerView?.adapter = RadioButtonAdapter()
+        recyclerView?.adapter = RequiredSetupAdapter()
 
-        radioButtonItems?.let {
-            (recyclerView?.adapter as? RadioButtonAdapter)?.submitList(it)
+        setupItems?.let {
+            (recyclerView?.adapter as? RequiredSetupAdapter)?.submitList(it)
         }
     }
 
+    private fun validateItems(): Boolean {
+        setupItems?.forEach { item ->
+            if (!item.isSet()) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun getFirstInvalidItem(): Int {
+        setupItems?.forEachIndexed { index, item ->
+            if (!item.isSet()) {
+                return index
+            }
+        }
+        return -1
+    }
+
     override val isPolicyRespected: Boolean
-        get() = (recyclerView?.adapter as? RadioButtonAdapter)?.getSelectedPosition() != -1
+        get() = validateItems()
 
     override fun onUserIllegallyRequestedNextPage() {
         Toast.makeText(
             requireContext(),
-            R.string.intro_tutorial_warning,
+            setupItems?.get(getFirstInvalidItem())?.invalidateMessage,
             Toast.LENGTH_SHORT
         ).show()
     }
 
     companion object {
         fun newInstance(
-            radioButtonItems: ArrayList<RadioButtonModel>,
+            setupItems: ArrayList<RequiredSetupModel>,
             slideTitle: String,
             slideSummary: String
-        ): RadioButtonSlidePolicyFragment {
-            val fragment = RadioButtonSlidePolicyFragment()
-            fragment.radioButtonItems = radioButtonItems
+        ): RequiredSetupPolicyFragment {
+            val fragment = RequiredSetupPolicyFragment()
+            fragment.setupItems = setupItems
             fragment.slideTitle = slideTitle
             fragment.slideSummary = slideSummary
             return fragment
         }
+
     }
 }

@@ -1,65 +1,40 @@
 package com.fieldbook.tracker.activities
 
-import android.content.Context
+import android.Manifest
+import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.RadioButtonAdapter
-import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.adapters.RequiredSetupAdapter
 import com.fieldbook.tracker.fragments.RadioButtonSlidePolicyFragment
+import com.fieldbook.tracker.fragments.RequiredSetupPolicyFragment
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Constants
-import com.fieldbook.tracker.utilities.Utils
 import com.github.appintro.AppIntro
-import com.github.appintro.AppIntroCustomLayoutFragment
 import com.github.appintro.AppIntroFragment
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getFile
+import dagger.hilt.android.AndroidEntryPoint
+import pub.devrel.easypermissions.EasyPermissions
 
+@AndroidEntryPoint
 class AppIntroActivity : AppIntro() {
+    var prefs: SharedPreferences? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val context = applicationContext
 
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        prefs = PreferenceManager.getDefaultSharedPreferences(context)
         // Make sure you don't call setContentView!
 
         // Call addSlide passing your Fragments.
         // You can use AppIntroFragment to use a pre-built fragment
-
-        val loadSampleDataRadioButtonItems = arrayListOf(
-            RadioButtonAdapter.RadioButtonModel(
-                context.getString(R.string.app_intro_load_sample_data_positive),
-                {
-                    prefs.edit().putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, true).apply()
-                }),
-            RadioButtonAdapter.RadioButtonModel(
-                context.getString(R.string.app_intro_load_sample_data_negative), {
-                    prefs.edit().putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false).apply()
-                }),
-        )
-
-        val tutorialRadioButtonItems = arrayListOf(
-            RadioButtonAdapter.RadioButtonModel(
-                context.getString(R.string.app_intro_tutorial_positive),
-                {
-                    prefs.edit().putBoolean(GeneralKeys.TIPS, true).apply()
-                    prefs.edit().putBoolean(GeneralKeys.TIPS_CONFIGURED, true).apply()
-                }),
-            RadioButtonAdapter.RadioButtonModel(
-                context.getString(R.string.app_intro_tutorial_negative), {
-                    prefs.edit().putBoolean(GeneralKeys.TIPS, false).apply()
-                    prefs.edit().putBoolean(GeneralKeys.TIPS_CONFIGURED, true).apply()
-                }),
-        )
 
 
         // field book info 1
@@ -82,24 +57,20 @@ class AppIntroActivity : AppIntro() {
             )
         )
 
-        // permissions
+//        addSlide(RadioButtonSlidePolicyFragment)
+
         addSlide(
-            AppIntroFragment.createInstance(
-                context.getString(R.string.app_intro_request_permissions_title),
-                if (isPermissionsGranted()) context.getString(R.string.app_intro_permissions_granted_summary) else context.getString(
-                    R.string.app_intro_request_permissions_summary
-                ),
-                imageDrawable = R.drawable.other_ic_field_book,
-                backgroundColorRes = R.color.main_primary
+            RequiredSetupPolicyFragment.newInstance(
+                getRequiredItems(),
+                context.getString(R.string.app_intro_required_setup_title),
+                context.getString(R.string.app_intro_required_setup_summary)
             )
         )
-
-//        addSlide(RadioButtonSlidePolicyFragment)
 
         // load sample data
         addSlide(
             RadioButtonSlidePolicyFragment.newInstance(
-                loadSampleDataRadioButtonItems,
+                getLoadSample(),
                 context.getString(R.string.app_intro_load_sample_data_title),
                 context.getString(R.string.app_intro_load_sample_data_summary)
             )
@@ -108,15 +79,17 @@ class AppIntroActivity : AppIntro() {
         // tutorial
         addSlide(
             RadioButtonSlidePolicyFragment.newInstance(
-                tutorialRadioButtonItems,
+                getTutorial(),
                 context.getString(R.string.app_intro_tutorial_title),
                 context.getString(R.string.app_intro_tutorial_summary)
             )
         )
 
+        isSkipButtonEnabled = false
+
         // Here we ask for camera permission on slide 2
-        if (!isPermissionsGranted())
-            askForPermissions(Constants.permissionsTemp, 3, true)
+//        if (!isPermissionsGranted())
+//            askForPermissions(Constants.permissionsTemp, 3, true)
     }
 
     private fun isPermissionsGranted(): Boolean {
@@ -140,5 +113,95 @@ class AppIntroActivity : AppIntro() {
         super.onDonePressed(currentFragment)
         // Decide what to do when the user clicks on "Done"
         finish()
+    }
+
+    private fun getRequiredItems(): ArrayList<RequiredSetupAdapter.RequiredSetupModel> {
+        var perms = arrayOf<String?>(
+            Manifest.permission.VIBRATE,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
+        )
+        val finePerms = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarsePerms =
+            arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            perms = arrayOf(
+                Manifest.permission.VIBRATE,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.CAMERA
+            )
+        }
+
+        return arrayListOf(
+            RequiredSetupAdapter.RequiredSetupModel(
+                applicationContext.getString(R.string.app_intro_permissions_title),
+                applicationContext.getString(R.string.permission_rationale_trait_features),
+                resources.getDrawable(R.drawable.configure),
+                {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        Constants.permissions,
+                        Constants.PERM_REQ
+                    )
+                },
+                {
+                    return@RequiredSetupModel (EasyPermissions.hasPermissions(
+                        this,
+                        *perms
+                    )
+                            && (EasyPermissions.hasPermissions(
+                        this,
+                        *finePerms
+                    ) || EasyPermissions.hasPermissions(this, *coarsePerms)))
+                },
+                applicationContext.getString(R.string.app_intro_permissions_warning)
+            ),
+            RequiredSetupAdapter.RequiredSetupModel(
+                applicationContext.getString(R.string.app_intro_storage_title),
+                applicationContext.getString(org.phenoapps.androidlibrary.R.string.frag_storage_definer_summary),
+                resources.getDrawable(R.drawable.storage_lock),
+                {
+                    val intent = Intent(this, DefineStorageActivity::class.java)
+                    startActivity(intent)
+                },
+                {
+                    return@RequiredSetupModel true
+                },
+
+                applicationContext.getString(R.string.app_intro_storage_warning)
+            )
+        )
+    }
+
+    private fun getLoadSample(): ArrayList<RadioButtonAdapter.RadioButtonModel> {
+        return arrayListOf(
+            RadioButtonAdapter.RadioButtonModel(
+                applicationContext.getString(R.string.app_intro_load_sample_data_positive),
+                {
+                    prefs?.edit()?.putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, true)?.apply()
+                }),
+            RadioButtonAdapter.RadioButtonModel(
+                applicationContext.getString(R.string.app_intro_load_sample_data_negative), {
+                    prefs?.edit()?.putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)?.apply()
+                }),
+        )
+    }
+
+    private fun getTutorial(): ArrayList<RadioButtonAdapter.RadioButtonModel> {
+        return arrayListOf(
+            RadioButtonAdapter.RadioButtonModel(
+                applicationContext.getString(R.string.app_intro_tutorial_positive),
+                {
+                    prefs?.edit()?.putBoolean(GeneralKeys.TIPS, true)?.apply()
+                    prefs?.edit()?.putBoolean(GeneralKeys.TIPS_CONFIGURED, true)?.apply()
+                }),
+            RadioButtonAdapter.RadioButtonModel(
+                applicationContext.getString(R.string.app_intro_tutorial_negative), {
+                    prefs?.edit()?.putBoolean(GeneralKeys.TIPS, false)?.apply()
+                    prefs?.edit()?.putBoolean(GeneralKeys.TIPS_CONFIGURED, true)?.apply()
+                }),
+        )
     }
 }

@@ -223,8 +223,8 @@ public class ConfigActivity extends ThemedActivity {
 
         if (!BaseDocumentTreeUtil.Companion.isEnabled(this)) {
 
-            startActivityForResult(new Intent(this, DefineStorageActivity.class),
-                    REQUEST_STORAGE_DEFINER);
+//            startActivityForResult(new Intent(this, DefineStorageActivity.class),
+//                    REQUEST_STORAGE_DEFINER);
         } else {
 
         verifyPersonHelper.updateLastOpenedTime();
