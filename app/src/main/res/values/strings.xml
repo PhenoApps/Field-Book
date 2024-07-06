@@ -34,20 +34,18 @@
     <string name="app_intro_request_permissions_title">Permissions Request</string>
     <string name="app_intro_request_permissions_summary">Field Book requires a few permissions</string>
     <string name="app_intro_permissions_granted_summary">Permissions already granted</string>
-    <string name="app_intro_load_sample_data_title">Do you want to load sample data</string>
-    <string name="app_intro_load_sample_data_summary">A sample database will be imported</string>
-    <string name="app_intro_load_sample_data_positive">Yes</string>
-    <string name="app_intro_load_sample_data_negative">No</string>
-    <string name="app_intro_tutorial_title">Would you like to enable the tutorial?</string>
-    <string name="app_intro_tutorial_summary">This setting can be changed in the Settings</string>
-    <string name="app_intro_tutorial_positive">Yes</string>
-    <string name="app_intro_tutorial_negative">No</string>
     <string name="app_intro_required_setup_title">Set up Field Book</string>
     <string name="app_intro_required_setup_summary">These settings are required for Field Book to function</string>
     <string name="app_intro_permissions_title">Permissions</string>
     <string name="app_intro_permissions_warning">Permissions not granted</string>
     <string name="app_intro_storage_title">Define Storage</string>
     <string name="app_intro_storage_warning">Please set the storage location</string>
+    <string name="app_intro_required_optional_title">Set up Field Book</string>
+    <string name="app_intro_required_optional_summary">These settings can be optionally enabled before startup</string>
+    <string name="app_intro_load_sample_data_title">Do you want to load sample data</string>
+    <string name="app_intro_load_sample_data_summary">A sample database will be imported</string>
+    <string name="app_intro_tutorial_title">Would you like to enable the tutorial?</string>
+    <string name="app_intro_tutorial_summary">This setting can be changed in the Settings</string>
 
 
     <!-- Permissions  -->

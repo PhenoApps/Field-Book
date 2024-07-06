@@ -42,7 +42,7 @@ class RequiredSetupAdapter :
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.required_setup_item, viewGroup, false)
+            .inflate(R.layout.`app_intro_required_setup_item.xml`, viewGroup, false)
 
         return ViewHolder(view)
     }

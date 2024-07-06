@@ -6,13 +6,14 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.adapters.RadioButtonAdapter
+import com.fieldbook.tracker.adapters.OptionalSetupAdapter
 import com.fieldbook.tracker.adapters.RequiredSetupAdapter
-import com.fieldbook.tracker.fragments.RadioButtonSlidePolicyFragment
+import com.fieldbook.tracker.fragments.OptionalSetupPolicyFragment
 import com.fieldbook.tracker.fragments.RequiredSetupPolicyFragment
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Constants
@@ -57,31 +58,21 @@ class AppIntroActivity : AppIntro() {
             )
         )
 
-//        addSlide(RadioButtonSlidePolicyFragment)
-
+        // required setup slide
         addSlide(
             RequiredSetupPolicyFragment.newInstance(
-                getRequiredItems(),
+                requiredSetupModelArrayList(),
                 context.getString(R.string.app_intro_required_setup_title),
                 context.getString(R.string.app_intro_required_setup_summary)
             )
         )
 
-        // load sample data
+        // optional setup slide
         addSlide(
-            RadioButtonSlidePolicyFragment.newInstance(
-                getLoadSample(),
-                context.getString(R.string.app_intro_load_sample_data_title),
-                context.getString(R.string.app_intro_load_sample_data_summary)
-            )
-        )
-
-        // tutorial
-        addSlide(
-            RadioButtonSlidePolicyFragment.newInstance(
-                getTutorial(),
-                context.getString(R.string.app_intro_tutorial_title),
-                context.getString(R.string.app_intro_tutorial_summary)
+            OptionalSetupPolicyFragment.newInstance(
+                optionalSetupModelArrayList(),
+                context.getString(R.string.app_intro_required_optional_title),
+                context.getString(R.string.app_intro_required_optional_summary)
             )
         )
 
@@ -115,7 +106,7 @@ class AppIntroActivity : AppIntro() {
         finish()
     }
 
-    private fun getRequiredItems(): ArrayList<RequiredSetupAdapter.RequiredSetupModel> {
+    private fun requiredSetupModelArrayList(): ArrayList<RequiredSetupAdapter.RequiredSetupModel> {
         var perms = arrayOf<String?>(
             Manifest.permission.VIBRATE,
             Manifest.permission.RECORD_AUDIO,
@@ -175,33 +166,24 @@ class AppIntroActivity : AppIntro() {
         )
     }
 
-    private fun getLoadSample(): ArrayList<RadioButtonAdapter.RadioButtonModel> {
+    private fun optionalSetupModelArrayList(): ArrayList<OptionalSetupAdapter.OptionalSetupModel> {
         return arrayListOf(
-            RadioButtonAdapter.RadioButtonModel(
-                applicationContext.getString(R.string.app_intro_load_sample_data_positive),
+            OptionalSetupAdapter.OptionalSetupModel(
+                applicationContext.getString(R.string.app_intro_load_sample_data_title),
+                applicationContext.getString(R.string.app_intro_load_sample_data_summary),
                 {
                     prefs?.edit()?.putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, true)?.apply()
-                }),
-            RadioButtonAdapter.RadioButtonModel(
-                applicationContext.getString(R.string.app_intro_load_sample_data_negative), {
+                }, {
                     prefs?.edit()?.putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)?.apply()
                 }),
-        )
-    }
-
-    private fun getTutorial(): ArrayList<RadioButtonAdapter.RadioButtonModel> {
-        return arrayListOf(
-            RadioButtonAdapter.RadioButtonModel(
-                applicationContext.getString(R.string.app_intro_tutorial_positive),
+            OptionalSetupAdapter.OptionalSetupModel(
+                applicationContext.getString(R.string.app_intro_tutorial_title),
+                applicationContext.getString(R.string.app_intro_tutorial_summary),
                 {
                     prefs?.edit()?.putBoolean(GeneralKeys.TIPS, true)?.apply()
-                    prefs?.edit()?.putBoolean(GeneralKeys.TIPS_CONFIGURED, true)?.apply()
-                }),
-            RadioButtonAdapter.RadioButtonModel(
-                applicationContext.getString(R.string.app_intro_tutorial_negative), {
+                }, {
                     prefs?.edit()?.putBoolean(GeneralKeys.TIPS, false)?.apply()
-                    prefs?.edit()?.putBoolean(GeneralKeys.TIPS_CONFIGURED, true)?.apply()
-                }),
+                })
         )
     }
 }

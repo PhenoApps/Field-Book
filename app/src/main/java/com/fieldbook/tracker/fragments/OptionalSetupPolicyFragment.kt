@@ -9,15 +9,15 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.adapters.RadioButtonAdapter
-import com.fieldbook.tracker.adapters.RadioButtonAdapter.RadioButtonModel
+import com.fieldbook.tracker.adapters.OptionalSetupAdapter
+import com.fieldbook.tracker.adapters.OptionalSetupAdapter.OptionalSetupModel
 import com.github.appintro.SlidePolicy
 
 
-class RadioButtonSlidePolicyFragment : Fragment(), SlidePolicy {
+class OptionalSetupPolicyFragment : Fragment() {
 
     private var recyclerView: RecyclerView? = null
-    private var radioButtonItems: List<RadioButtonModel>? = null
+    private var radioButtonItems: List<OptionalSetupModel>? = null
     private var slideTitle: String? = null
     private var slideSummary: String? = null
 
@@ -38,31 +38,20 @@ class RadioButtonSlidePolicyFragment : Fragment(), SlidePolicy {
 
 
         recyclerView = view.findViewById(R.id.setup_rv)
-        recyclerView?.adapter = RadioButtonAdapter()
+        recyclerView?.adapter = OptionalSetupAdapter()
 
         radioButtonItems?.let {
-            (recyclerView?.adapter as? RadioButtonAdapter)?.submitList(it)
+            (recyclerView?.adapter as? OptionalSetupAdapter)?.submitList(it)
         }
-    }
-
-    override val isPolicyRespected: Boolean
-        get() = (recyclerView?.adapter as? RadioButtonAdapter)?.getSelectedPosition() != -1
-
-    override fun onUserIllegallyRequestedNextPage() {
-        Toast.makeText(
-            requireContext(),
-            R.string.intro_tutorial_warning,
-            Toast.LENGTH_SHORT
-        ).show()
     }
 
     companion object {
         fun newInstance(
-            radioButtonItems: ArrayList<RadioButtonModel>,
+            radioButtonItems: ArrayList<OptionalSetupModel>,
             slideTitle: String,
             slideSummary: String
-        ): RadioButtonSlidePolicyFragment {
-            val fragment = RadioButtonSlidePolicyFragment()
+        ): OptionalSetupPolicyFragment {
+            val fragment = OptionalSetupPolicyFragment()
             fragment.radioButtonItems = radioButtonItems
             fragment.slideTitle = slideTitle
             fragment.slideSummary = slideSummary
