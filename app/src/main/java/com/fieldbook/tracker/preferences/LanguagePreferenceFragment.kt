@@ -2,9 +2,12 @@ package com.fieldbook.tracker.preferences
 
 import android.app.AlertDialog
 import android.content.res.Resources
+import android.os.Build
 import android.os.Bundle
+import android.os.LocaleList
 import android.util.Log
 import androidx.core.os.ConfigurationCompat
+import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.FragmentManager
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -12,6 +15,7 @@ import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.utilities.AppLanguageUtil
+import java.util.Locale
 
 class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClickListener {
 
@@ -37,14 +41,28 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
     override fun onPreferenceClick(preference: Preference): Boolean {
         try {
             context?.let { ctx ->
+                val currentPrefTag = PreferenceManager.getDefaultSharedPreferences(ctx)
+                    .getString(GeneralKeys.LANGUAGE_LOCALE_ID, "en-US")
+
                 var id = preference.key
+                var languageSummary = preference.title.toString()
                 if (preference.key == "com.fieldbook.tracker.preference.language.default") {
-                    id = ConfigurationCompat.getLocales(Resources.getSystem().configuration)[0]?.language ?: "en-US"
+                    //set id to the default language
+                    val defaultLocales = LocaleListCompat.getAdjustedDefault()
+                    val defaultLocale = defaultLocales[0]
+                    id = if (defaultLocales.size() > 1 && defaultLocale?.toLanguageTag() == currentPrefTag) {
+                        val secondDefault = defaultLocales[1]
+                        languageSummary = secondDefault?.getDisplayLanguage(secondDefault) ?: "English"
+                        secondDefault
+                    } else {
+                        languageSummary = defaultLocale?.getDisplayLanguage(defaultLocale) ?: "English"
+                        defaultLocale
+                    }?.toLanguageTag() ?: currentPrefTag
                 }
                 Log.d("LanguagePrefFragment", "Switching language to: $id")
                 with (PreferenceManager.getDefaultSharedPreferences(ctx)) {
                     edit().putString(GeneralKeys.LANGUAGE_LOCALE_ID, id).apply()
-                    edit().putString(GeneralKeys.LANGUAGE_LOCALE_SUMMARY, preference.title.toString()).apply()
+                    edit().putString(GeneralKeys.LANGUAGE_LOCALE_SUMMARY, languageSummary).apply()
                 }
 
                 AlertDialog.Builder(ctx, R.style.AppAlertDialog).apply {
