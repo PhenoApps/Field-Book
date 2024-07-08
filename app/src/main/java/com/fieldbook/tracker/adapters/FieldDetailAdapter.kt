@@ -76,11 +76,17 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                     numericObservations
                 )
             } catch (e: NumberFormatException) {
-                if (item.observations.distinct().size <= 8) {
+                val context = holder.itemView.context
+                val characterWidth = holder.traitNameTextView.paint.measureText("W")
+                val (maxBars, maxCharacters) = BarChartHelper.getMaxBars(context, characterWidth, item.observations.maxOf { it.length })
+                val labelRotation = if (item.observations.maxOf { it.length } > maxCharacters) 45 else 0
+
+                if (item.observations.distinct().size <= maxBars) {
                     BarChartHelper.setupBarChart(
                         holder.itemView.context,
                         holder.countChart,
-                        item.observations
+                        item.observations,
+                        labelRotation
                     )
                 } else {
                     noChartAvailableMessage(

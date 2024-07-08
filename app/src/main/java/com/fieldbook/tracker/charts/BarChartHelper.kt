@@ -2,6 +2,7 @@ package com.fieldbook.tracker.charts
 
 import android.content.Context
 import android.graphics.Color
+import android.util.DisplayMetrics
 import android.util.TypedValue
 import com.fieldbook.tracker.R
 import com.github.mikephil.charting.charts.BarChart
@@ -16,7 +17,7 @@ import kotlin.math.ceil
 
 object BarChartHelper {
 
-    fun setupBarChart(context: Context, chart: BarChart, observations: List<Any>) {
+    fun setupBarChart(context: Context, chart: BarChart, observations: List<Any>, labelRotation: Int) {
         val categoryCounts = observations.groupingBy { it }.eachCount()
 
         val sortedCategories = categoryCounts.keys.map { it.toString() }.sorted()
@@ -36,6 +37,7 @@ object BarChartHelper {
         dataSet.barBorderWidth = 1f
 
         val barData = BarData(dataSet)
+        barData.barWidth = 0.9f
         chart.data = barData
 
         val xAxis: XAxis = chart.xAxis
@@ -44,11 +46,17 @@ object BarChartHelper {
         xAxis.setDrawAxisLine(false)
         xAxis.textColor = Color.BLACK
         xAxis.granularity = 1f
+        xAxis.labelRotationAngle = labelRotation.toFloat()
+        xAxis.setLabelCount(sortedCategories.size, false)
         xAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
                 return sortedCategories.getOrNull(value.toInt()) ?: ""
             }
         }
+
+        // Ensure bars are not cutoff and labels are properly centered
+        chart.setFitBars(true)
+        xAxis.setAvoidFirstLastClipping(true)
 
         val leftAxis: YAxis = chart.axisLeft
         leftAxis.setDrawGridLines(false)
@@ -78,4 +86,26 @@ object BarChartHelper {
 
         chart.invalidate()
     }
+
+    // Adjust number of bars and label angle according to screen width and label character length
+    fun getMaxBars(context: Context, characterWidth: Float, labelLength: Int): Pair<Int, Int> {
+        val displayMetrics: DisplayMetrics = context.resources.displayMetrics
+        val screenWidth = displayMetrics.widthPixels
+        val referenceScreenWidth = 1080
+        val referenceMaxBars = 8
+        val referenceMaxCharacters = 24
+
+        val scaledMaxBars = (referenceMaxBars * screenWidth) / referenceScreenWidth
+        val scaledMaxCharacters = (referenceMaxCharacters * screenWidth) / referenceScreenWidth
+
+        val maxBars = scaledMaxBars.coerceAtLeast(1)
+        val maxCharacters = scaledMaxCharacters.coerceAtLeast(1)
+
+        return Pair(maxBars, maxCharacters)
+    }
 }
+
+
+
+
+
