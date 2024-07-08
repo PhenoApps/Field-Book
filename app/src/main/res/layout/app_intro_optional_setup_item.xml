@@ -1,24 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/setup_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/main_primary"
-    android:orientation="vertical">
+    android:gravity="center_vertical">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/setup_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/AppIntroDefaultHeading"
+            android:textSize="20sp"
+            android:textAlignment="textStart"
+            android:padding="0dp"/>
+
+        <TextView
+            android:id="@+id/setup_summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/AppIntroDefaultText"
+            android:maxLines="2"
+            android:textAlignment="textStart"
+            android:padding="0dp"/>
+
+    </LinearLayout>
 
     <CheckBox
         android:id="@+id/checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:focusable="false"
         android:clickable="false"
-        android:duplicateParentState="true"
-        style="@style/AppIntroDefaultHeading"
-        />
-
-    <TextView
-        android:id="@+id/setup_summary"
+        android:focusable="false"
         style="@style/AppIntroDefaultText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:paddingEnd="0dp"/>
 
 </LinearLayout>

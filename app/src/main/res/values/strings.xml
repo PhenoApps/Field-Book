@@ -40,7 +40,7 @@
     <string name="app_intro_permissions_warning">Permissions not granted</string>
     <string name="app_intro_storage_title">Define Storage</string>
     <string name="app_intro_storage_warning">Please set the storage location</string>
-    <string name="app_intro_required_optional_title">Set up Field Book</string>
+    <string name="app_intro_required_optional_title">Optional</string>
     <string name="app_intro_required_optional_summary">These settings can be optionally enabled before startup</string>
     <string name="app_intro_load_sample_data_title">Do you want to load sample data</string>
     <string name="app_intro_load_sample_data_summary">A sample database will be imported</string>

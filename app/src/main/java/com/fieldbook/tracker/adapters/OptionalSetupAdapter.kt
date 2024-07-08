@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -29,8 +30,10 @@ class OptionalSetupAdapter :
     )
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val setupItem: LinearLayout = itemView.findViewById(R.id.setup_item)
         val checkbox: CheckBox = itemView.findViewById(R.id.checkbox)
-        val summary: TextView = itemView.findViewById(R.id.setup_summary)
+        val setupTitle: TextView = itemView.findViewById(R.id.setup_title)
+        val setupSummary: TextView = itemView.findViewById(R.id.setup_summary)
     }
 
     // Create new views (invoked by the layout manager)
@@ -44,13 +47,15 @@ class OptionalSetupAdapter :
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val item = currentList[position]
-        viewHolder.checkbox.text = item.setupTitle
+        viewHolder.setupTitle.text = item.setupTitle
+        viewHolder.setupSummary.text = item.setupSummary
         viewHolder.checkbox.isChecked = item.isChecked
+        viewHolder.checkbox.text
 
         // initially the item is unchecked
         item.onUnselectCallback?.invoke()
 
-        viewHolder.checkbox.setOnClickListener {
+        viewHolder.setupItem.setOnClickListener {
             // Toggle the checked state of the item
             item.isChecked = !item.isChecked
             viewHolder.checkbox.isChecked = item.isChecked

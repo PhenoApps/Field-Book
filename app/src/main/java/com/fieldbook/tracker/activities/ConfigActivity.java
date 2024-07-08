@@ -360,8 +360,8 @@ public class ConfigActivity extends ThemedActivity {
         if (!preferences.getBoolean(GeneralKeys.TIPS_CONFIGURED, false)) {
             ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
             ed.apply();
-            showTipsDialog();
-            loadSampleDataDialog();
+//            showTipsDialog();
+//            loadSampleDataDialog();
         }
 
         mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
