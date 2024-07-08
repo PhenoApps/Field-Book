@@ -11,8 +11,11 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.FieldSwitchImpl
 import com.fieldbook.tracker.utilities.Utils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -88,6 +91,13 @@ class ImportDBFragment : Fragment(){
                 prefs?.edit()?.putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)?.apply()
                 val temp = prefs?.getBoolean(GeneralKeys.LOAD_SAMPLE_DATA,true)
 
+                try {
+                    selectFirstField()
+                } catch (e: Exception) {
+                    Log.d("Switch Field", "onCreate: loadSampleData switch Field")
+                    e.printStackTrace()
+                }
+
             }
 
         }
@@ -110,6 +120,30 @@ class ImportDBFragment : Fragment(){
             )
             dialog.show()
         }
+    }
+
+    /**
+     * Queries the database for saved studies and calls switch field for the first one.
+     */
+    private fun selectFirstField() {
+        try {
+            val fs = database.getAllFieldObjects().toTypedArray<FieldObject>()
+            if (fs.isNotEmpty()) {
+                switchField(fs[0].exp_id)
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Calls database switch field on the given studyId.
+     *
+     * @param studyId the study id to switch to
+     */
+    private fun switchField(studyId: Int) {
+        val fieldSwitcher = mContext?.let { FieldSwitchImpl(it) }
+        fieldSwitcher?.switchField(studyId)
     }
 
 }
