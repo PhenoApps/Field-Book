@@ -30,7 +30,6 @@ class ImportDBFragment : Fragment(){
 
     @Inject
     lateinit var database: DataHelper
-    val handler: Handler = Handler(Looper.getMainLooper())
 
     lateinit var dialog: ProgressDialog
     private var fail: Boolean = false

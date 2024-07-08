@@ -1,6 +1,9 @@
 package com.fieldbook.tracker.adapters
 
 import android.graphics.drawable.Drawable
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +15,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
+
 
 /**
  * Reference:
@@ -21,6 +32,9 @@ class RequiredSetupAdapter :
     ListAdapter<RequiredSetupAdapter.RequiredSetupModel, RequiredSetupAdapter.ViewHolder>(
         DiffCallback()
     ) {
+
+    private val scope by lazy { CoroutineScope(Dispatchers.Main) }
+
 
     data class RequiredSetupModel(
         val setupTitle: String,
@@ -59,8 +73,18 @@ class RequiredSetupAdapter :
         checkSetupStatus(viewHolder, item)
 
         viewHolder.setupItem.setOnClickListener {
-            item.callback.invoke()
-            checkSetupStatus(viewHolder, item)
+            scope.launch {
+                item.callback.invoke()
+
+                withContext(Dispatchers.Default) {
+                    while (!item.isSet()) {
+                        // check every 100ms if the item is set up i.e. call back is completed
+                        delay(100)
+                    }
+                }
+
+                checkSetupStatus(viewHolder, item)
+            }
         }
     }
 
