@@ -47,7 +47,10 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
                 var id = preference.key
                 var languageSummary = preference.title.toString()
                 if (preference.key == "com.fieldbook.tracker.preference.language.default") {
-                    //set id to the default language
+
+                    //LocaleListCompat keeps an array of user's preferred languages (including the one set in this app), instead of assuming the system
+                    //default language is the first one in the list, check it explicitly. Technically, users can have
+                    //multiple languages defined, this will pick their first one as the default.
                     val defaultLocales = LocaleListCompat.getAdjustedDefault()
                     val defaultLocale = defaultLocales[0]
                     id = if (defaultLocales.size() > 1 && defaultLocale?.toLanguageTag() == currentPrefTag) {
