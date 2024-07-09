@@ -7,11 +7,9 @@ import android.util.Log
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
-import com.fieldbook.tracker.database.Migrator.Observation
 import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
-import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.query
 import com.fieldbook.tracker.database.toFirst
@@ -30,8 +28,8 @@ class ObservationUnitPropertyDao {
 //            db.query(sObservationUnitPropertyViewName).toTable().toTypedArray()
 //        }
 
-        fun getObservationUnitPropertyByPlotId(column: String, plot_id: String): String = withDatabase { db ->
-            db.query("ObservationUnitProperty", select = arrayOf(column), where = "plot_id = ?", whereArgs = arrayOf(plot_id))
+        fun getObservationUnitPropertyByUniqueId(uniqueName: String, column: String, uniqueId: String): String = withDatabase { db ->
+            db.query(sObservationUnitPropertyViewName, select = arrayOf(column), where = "`${uniqueName}` = ?", whereArgs = arrayOf(uniqueId))
                     .toFirst()[column].toString()
         }?: ""
 

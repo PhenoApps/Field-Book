@@ -143,4 +143,16 @@
 
     </ScrollView>
 
+    <View
+        android:id="@+id/lockOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:visibility="gone"
+        android:clickable="true"
+        app:layout_constraintTop_toTopOf="@id/act_collect_input_view"
+        app:layout_constraintBottom_toBottomOf="@id/toolbarBottom"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

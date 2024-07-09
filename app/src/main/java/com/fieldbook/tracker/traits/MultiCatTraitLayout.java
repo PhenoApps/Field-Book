@@ -112,11 +112,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
         if (value != null && value.equals("NA")) controller.getInputView().setText("NA");
 
-        if (!((CollectActivity) getContext()).isDataLocked()) {
-
-            setAdapter();
-
-        }
+        setAdapter();
 
         refreshLock();
     }

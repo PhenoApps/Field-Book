@@ -184,59 +184,56 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         layoutManager.setAlignItems(AlignItems.STRETCH);
         gridMultiCat.setLayoutManager(layoutManager);
 
-        if (!((CollectActivity) getContext()).isDataLocked()) {
+        gridMultiCat.setAdapter(new CategoryTraitAdapter(getContext()) {
 
-            gridMultiCat.setAdapter(new CategoryTraitAdapter(getContext()) {
+            @Override
+            public void onBindViewHolder(CategoryTraitViewHolder holder, int position) {
+                holder.bindTo();
 
-                @Override
-                public void onBindViewHolder(CategoryTraitViewHolder holder, int position) {
-                    holder.bindTo();
+                //get the label for this position
+                BrAPIScaleValidValuesCategories pair = cats.get(position);
 
-                    //get the label for this position
-                    BrAPIScaleValidValuesCategories pair = cats.get(position);
+                //update button with the preference based text
+                if (labelValPref.equals("value")) {
 
-                    //update button with the preference based text
-                    if (labelValPref.equals("value")) {
+                    holder.mButton.setText(pair.getValue());
 
-                        holder.mButton.setText(pair.getValue());
+                } else {
 
-                    } else {
+                    holder.mButton.setText(pair.getLabel());
 
-                        holder.mButton.setText(pair.getLabel());
-
-                    }
-
-                    //set the buttons tag to the json, when clicked this is updated in db
-                    holder.mButton.setTag(pair);
-                    holder.mButton.setOnClickListener(createClickListener(holder.mButton, position));
-
-                    //update the button's state if this category is selected
-                    String currentText = getCollectInputView().getText();
-
-                    if (labelValPref.equals("value")) {
-
-                        if (currentText.equals(pair.getValue())) {
-
-                            pressOnButton(holder.mButton);
-
-                        } else pressOffButton(holder.mButton);
-
-                    } else {
-
-                        if (currentText.equals(pair.getLabel())) {
-
-                            pressOnButton(holder.mButton);
-
-                        } else pressOffButton(holder.mButton);
-                    }
                 }
 
-                @Override
-                public int getItemCount() {
-                    return cats.size();
+                //set the buttons tag to the json, when clicked this is updated in db
+                holder.mButton.setTag(pair);
+                holder.mButton.setOnClickListener(createClickListener(holder.mButton, position));
+
+                //update the button's state if this category is selected
+                String currentText = getCollectInputView().getText();
+
+                if (labelValPref.equals("value")) {
+
+                    if (currentText.equals(pair.getValue())) {
+
+                        pressOnButton(holder.mButton);
+
+                    } else pressOffButton(holder.mButton);
+
+                } else {
+
+                    if (currentText.equals(pair.getLabel())) {
+
+                        pressOnButton(holder.mButton);
+
+                    } else pressOffButton(holder.mButton);
                 }
-            });
-        }
+            }
+
+            @Override
+            public int getItemCount() {
+                return cats.size();
+            }
+        });
 
         gridMultiCat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
