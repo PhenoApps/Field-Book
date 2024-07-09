@@ -49,9 +49,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
@@ -2474,21 +2476,19 @@ public class DataHelper {
      */
     public void exportDatabase(Context ctx, String filename) throws IOException {
         String internalDbPath = getDatabasePath(this.context);
-        String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/com.fieldbook.tracker_preferences.xml";
 
         close();
 
         try {
 
             File oldDb = new File(internalDbPath);
-            File oldSp = new File(internalSpPath);
 
             DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(ctx, R.string.dir_database);
 
             if (databaseDir != null) {
 
                 String dbFileName = "fieldbook.db";
-                String prefFileName = filename + ".db_sharedpref.xml";
+                String prefFileName = filename + "_db_sharedpref";
                 String zipFileName = filename + ".zip";
 
                 DocumentFile dbDoc = databaseDir.findFile(dbFileName);
@@ -2503,20 +2503,43 @@ public class DataHelper {
 
                 DocumentFile backupDatabaseFile = databaseDir.createFile("*/*", dbFileName);
                 DocumentFile backupPreferenceFile = databaseDir.createFile("*/*", prefFileName);
+
+
                 DocumentFile zipFile = databaseDir.findFile(zipFileName);
                 if (zipFile == null){
                     zipFile = databaseDir.createFile("*/*", zipFileName);
                 }
-                OutputStream outputStream = context.getContentResolver().openOutputStream(zipFile.getUri());
 
+                // copy the preferences in the backupPreferenceFile
+                OutputStream tempStream = BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_database, prefFileName);
+                ObjectOutputStream objectStream = new ObjectOutputStream(tempStream);
+
+                objectStream.writeObject(preferences.getAll());
+
+                objectStream.close();
+
+                if (tempStream != null) {
+                    tempStream.close();
+                }
+
+                // add the .db file and preferences file to the zip file
+                OutputStream outputStream = context.getContentResolver().openOutputStream(zipFile.getUri());
                 if (backupDatabaseFile != null && backupPreferenceFile != null) {
 
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
-                    BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldSp), backupPreferenceFile);
 
                     if (outputStream != null){
-                        // add the .db file and preferences file to the zip
                         ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, backupPreferenceFile }, outputStream);
+
+                    }
+
+                    // delete .db file and preferences file
+                    if (backupDatabaseFile.exists()){
+                        backupDatabaseFile.delete();
+                    }
+
+                    if (backupPreferenceFile.exists()){
+                        backupPreferenceFile.delete();
                     }
                 }
             }
