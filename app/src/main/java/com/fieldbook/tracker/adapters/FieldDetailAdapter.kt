@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.adapters
 
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,8 +48,7 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
             item.completeness
         )
 
-        val nonChartableFormats =
-            setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
+        val nonChartableFormats = setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
 
         holder.collapsibleHeader.setOnClickListener {
             toggleCollapse(holder)
@@ -60,7 +58,7 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
             noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_no_data))
             return
         } else if (item.format in nonChartableFormats) {
-            noChartAvailableMessage(holder,  holder.itemView.context.getString(R.string.field_trait_chart_incompatible_format))
+            noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_incompatible_format))
         } else {
             try {
                 val numericObservations = item.observations.map { BigDecimal(it) }
@@ -77,18 +75,8 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                 )
             } catch (e: NumberFormatException) {
                 val context = holder.itemView.context
-                val characterWidth = holder.traitNameTextView.paint.measureText("W")
-                val (maxBars, maxCharacters) = BarChartHelper.getMaxBars(context, characterWidth, item.observations.maxOf { it.length })
-                val labelRotation = if (item.observations.maxOf { it.length } > maxCharacters) 45 else 0
 
-                if (item.observations.distinct().size <= maxBars) {
-                    BarChartHelper.setupBarChart(
-                        holder.itemView.context,
-                        holder.countChart,
-                        item.observations,
-                        labelRotation
-                    )
-                } else {
+                if (!BarChartHelper.setupBarChart(context, holder.countChart, item.observations)) {
                     noChartAvailableMessage(
                         holder,
                         holder.itemView.context.getString(R.string.field_trait_chart_excess_data)
