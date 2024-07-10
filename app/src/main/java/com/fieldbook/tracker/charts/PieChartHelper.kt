@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.util.TypedValue
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.utilities.ChartUtil
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
@@ -17,15 +18,16 @@ object PieChartHelper {
             PieEntry(1 - completeness, "")
         )
 
-        val dataSet = PieDataSet(entries, "")
-        val theme = context.theme
-        val fbColorPrimaryValue = TypedValue()
-        val fbTraitButtonBackgroundTintValue = TypedValue()
-        theme.resolveAttribute(R.attr.fb_color_primary, fbColorPrimaryValue, true)
-        theme.resolveAttribute(R.attr.fb_trait_button_background_tint, fbTraitButtonBackgroundTintValue, true)
+        val dataSet = PieDataSet(entries, "").apply {
+            val theme = context.theme
+            val fbColorPrimaryValue = TypedValue()
+            val fbTraitButtonBackgroundTintValue = TypedValue()
+            theme.resolveAttribute(R.attr.fb_color_primary, fbColorPrimaryValue, true)
+            theme.resolveAttribute(R.attr.fb_trait_button_background_tint, fbTraitButtonBackgroundTintValue, true)
 
-        dataSet.colors = listOf(fbColorPrimaryValue.data, fbTraitButtonBackgroundTintValue.data)
-        dataSet.setDrawValues(false)
+            colors = listOf(fbColorPrimaryValue.data, fbTraitButtonBackgroundTintValue.data)
+            setDrawValues(false)
+        }
 
         val data = PieData(dataSet)
         chart.data = data
@@ -33,9 +35,12 @@ object PieChartHelper {
         chart.isRotationEnabled = false
         chart.setDrawEntryLabels(false)
         chart.legend.isEnabled = false
+        chart.setTouchEnabled(false)
 
+        // Get the configured text size
+        val chartConfig = ChartUtil.getChartConfig(context)
         chart.setCenterText("${(completeness * 100).toInt()}%")
-        chart.setCenterTextSize(12f)
+        chart.setCenterTextSize(chartConfig.textSize)
         chart.setCenterTextColor(Color.BLACK)
 
         chart.holeRadius = 85f

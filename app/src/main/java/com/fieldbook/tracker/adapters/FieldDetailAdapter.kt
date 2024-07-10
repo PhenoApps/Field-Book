@@ -9,10 +9,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.charts.BarChartHelper
+import com.fieldbook.tracker.charts.HorizontalBarChartHelper
 import com.fieldbook.tracker.charts.HistogramChartHelper
 import com.fieldbook.tracker.charts.PieChartHelper
 import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.charts.PieChart
 import java.math.BigDecimal
 
@@ -23,7 +24,8 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         val traitCountTextView: TextView = view.findViewById(R.id.traitCountTextView)
         val traitIconImageView: ImageView = view.findViewById(R.id.traitIconImageView)
         val traitCompletenessChart: PieChart = view.findViewById(R.id.traitCompletenessChart)
-        val countChart: BarChart = view.findViewById(R.id.countChart)
+        val histogram: BarChart = view.findViewById(R.id.histogram)
+        val barChart: HorizontalBarChart = view.findViewById(R.id.barChart)
         val noChartAvailableTextView: TextView = view.findViewById(R.id.noChartAvailableTextView)
         val collapsibleHeader: LinearLayout = view.findViewById(R.id.collapsible_header)
         val collapsibleContent: LinearLayout = view.findViewById(R.id.collapsible_content)
@@ -68,20 +70,19 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                 if (item.format == "categorical") {
                     throw NumberFormatException("Categorical traits must use bar chart")
                 }
+                holder.barChart.visibility = View.GONE
                 HistogramChartHelper.setupHistogram(
                     holder.itemView.context,
-                    holder.countChart,
+                    holder.histogram,
                     numericObservations
                 )
             } catch (e: NumberFormatException) {
-                val context = holder.itemView.context
-
-                if (!BarChartHelper.setupBarChart(context, holder.countChart, item.observations)) {
-                    noChartAvailableMessage(
-                        holder,
-                        holder.itemView.context.getString(R.string.field_trait_chart_excess_data)
-                    )
-                }
+                holder.histogram.visibility = View.GONE
+                HorizontalBarChartHelper.setupHorizontalBarChart(
+                    holder.itemView.context,
+                    holder.barChart,
+                    item.observations
+                )
             }
         }
     }
@@ -105,7 +106,8 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
     }
 
     private fun noChartAvailableMessage(holder: ViewHolder, message: String) {
-        holder.countChart.visibility = View.GONE
+        holder.barChart.visibility = View.GONE
+        holder.histogram.visibility = View.GONE
         holder.noChartAvailableTextView.visibility = View.VISIBLE
         holder.noChartAvailableTextView.text = message
     }
