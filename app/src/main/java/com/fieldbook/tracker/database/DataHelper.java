@@ -2424,22 +2424,24 @@ public class DataHelper {
 
             File oldDb = new File(internalDbPath);
 
-            try {
+            //first check if the file to import is just a .db file
+            if (fileName.endsWith(".db")) { //if it is import it old-style
+                try {
+                    BaseDocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
 
-                BaseDocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
+                    open();
+                } catch (Exception e) {
 
-            } catch (Exception e) {
+                    Log.d("Database", e.toString());
 
-                Log.d("Database", e.toString());
-
-            }
-
-            // for zip file, call the unzip function
-            if (fileName.endsWith(".zip")){
+                }
+            } else if (fileName.endsWith(".zip")){ // for zip file, call the unzip function
                 try (InputStream input = context.getContentResolver().openInputStream(file.getUri())) {
 
                     try (OutputStream output = new FileOutputStream(internalDbPath)) {
                         ZipUtil.Companion.unzip(context, input, output);
+
+                        open();
                     } catch (Exception e) {
                         e.printStackTrace();
                         throw new Exception();
@@ -2447,9 +2449,6 @@ public class DataHelper {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }else{
-                // for .db file
-                open();
             }
 
             if (!isTableExists(Migrator.Study.tableName)) {

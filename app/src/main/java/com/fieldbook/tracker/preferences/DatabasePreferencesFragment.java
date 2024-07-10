@@ -32,6 +32,7 @@ import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
@@ -158,12 +159,13 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                 database.close();
 
-                //first check if the file to import is just a .db file
-                if (file.getName().endsWith(".db")) { //if it is import it old-style
-
                     try {
 
                         database.importDatabase(file);
+
+                        if (file.getName().equals("sample_db.zip")){
+                            selectFirstField();
+                        }
 
                     } catch (Exception e) {
 
@@ -173,43 +175,32 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                         fail = true;
                     }
-                } else if (file.getName().endsWith(".zip")) { //otherwise unzip and import prefs as well
-
-                    String internalDbPath = DataHelper.getDatabasePath(context);
-
-                    try (InputStream input = context.getContentResolver().openInputStream(file.getUri())) {
-
-                        try (OutputStream output = new FileOutputStream(internalDbPath)) {
-
-                            ZipUtil.Companion.unzip(context, input, output);
-
-                            SharedPreferences.Editor edit = preferences.edit();
-
-                            SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-                            String field_file = mPrefs.getString(GeneralKeys.FIELD_FILE, "");
-
-                            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, getSelectedFieldId(field_file));
-                            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true);
-                            edit.apply();
-
-                            database.open();
-
-                        } catch (Exception e) {
-
-                            e.printStackTrace();
-
-                            throw new Exception();
-                        }
-
-                    } catch (Exception e) {
-
-                        e.printStackTrace();
-
-                    }
-                }
             }
 
             return 0;
+        }
+
+        public void selectFirstField() {
+
+            try {
+
+                FieldObject[] fs = database.getAllFieldObjects().toArray(new FieldObject[0]);
+
+                if (fs.length > 0) {
+
+                    switchField(fs[0].getExp_id());
+                }
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+            }
+        }
+
+        private void switchField(int studyId) {
+            FieldSwitchImpl fieldSwitcher = new FieldSwitchImpl(context.getApplicationContext());
+            fieldSwitcher.switchField(studyId);
         }
 
         @Override
