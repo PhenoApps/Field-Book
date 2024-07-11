@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.database.sqlite.SQLiteException
 import android.location.Location
 import android.os.Handler
 import android.os.Looper
@@ -75,6 +76,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     //flag to track when collect button is disabled
     private var isCollectEnabled = false
+
+    //flag to track if this is the first time user is collecting a location before leaving the entry
+    private var isFirstCollect = true
 
     private lateinit var chipGroup: ChipGroup
     private lateinit var averageSwitch: SwitchCompat
@@ -234,6 +238,39 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         setupChooseBluetoothDevice()
 
+        checkIfFirstConnect()
+    }
+
+    //updates the average warning flag everytime the layout is loaded
+    //if a geo coordinate already exists, we warn the user before they try to update it
+    private fun checkIfFirstConnect() {
+
+        try {
+
+            val studyDbId = (context as CollectActivity).studyId
+
+            val units = database.getAllObservationUnits(studyDbId.toInt())
+                .filter { it.observation_unit_db_id == currentRange.plot_id }
+
+            if (units.isNotEmpty()) {
+
+                val unit = units.first()
+
+                //the saved geo coordinate location
+                val location = GeodeticUtils.parseGeoCoordinate(unit.geo_coordinates)
+
+                isFirstCollect = location == null
+            }
+
+        } catch (e: SQLiteException) {
+
+            isFirstCollect = true
+
+        } catch (e: NoSuchElementException) {
+
+            isFirstCollect = true
+
+        }
     }
 
     /**
@@ -370,7 +407,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                     val info = AverageInfo(unit, location, pointsToAverage, latLength, lngLength, precision)
                     if (avgDuration > -1L) {
 
-                        if (location != null) {
+                        if (!isFirstCollect) {
 
                             //averaging is updating the location, so ask the user
                             alertLocationUpdate {
