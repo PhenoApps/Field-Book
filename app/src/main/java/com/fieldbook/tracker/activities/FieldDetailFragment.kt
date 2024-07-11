@@ -268,11 +268,12 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
 
                 FieldDetailItem(
-                    traitDetail.getTraitName(),
-                    traitDetail.getFormat(),
-                    getString(R.string.field_trait_observation_total, traitDetail.getCount()),
+                    traitDetail.traitName,
+                    traitDetail.format,
+                    traitDetail.categories,
+                    getString(R.string.field_trait_observation_total, traitDetail.count),
                     ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical),
-                    traitDetail.getObservations(),
+                    traitDetail.observations,
                     traitDetail.completeness
                 )
             }

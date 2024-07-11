@@ -265,6 +265,7 @@ class StudyDao {
          * data class TraitDetail(
          *         val traitName: String,
          *         val format: String,
+         *         val categories: String,
          *         val count: Int,
          *         val observations: List<String>
          *         val completeness: Float
@@ -278,7 +279,11 @@ class StudyDao {
                 val cursor = db.rawQuery("""
             SELECT o.observation_variable_name, o.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
             (SELECT COUNT(DISTINCT observation_unit_id) FROM observations WHERE study_id = ? AND observation_variable_name = o.observation_variable_name) AS distinct_obs_units,
-            (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units
+            (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units,
+            (SELECT v.observation_variable_attribute_value 
+             FROM observation_variable_values v
+             JOIN observation_variable_attributes a ON v.observation_variable_attribute_db_id = a.internal_id_observation_variable_attribute
+             WHERE v.observation_variable_db_id = o.observation_variable_db_id AND a.observation_variable_attribute_name = 'category') AS categories
             FROM observations o
             WHERE o.study_id = ? AND o.observation_variable_db_id > 0
             GROUP BY o.observation_variable_name, o.observation_variable_field_book_format
@@ -291,16 +296,20 @@ class StudyDao {
                         val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
                         val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
                         val rawObservations = observationsString?.split("|") ?: emptyList()
-                        val observations = rawObservations.map { obs -> CategoryJsonUtil.processValue(
-                            buildMap {
-                                put("observation_variable_field_book_format", format)
-                                put("value", obs)
-                            }) }
+                        val observations = rawObservations.map { obs ->
+                            CategoryJsonUtil.processValue(
+                                buildMap {
+                                    put("observation_variable_field_book_format", format)
+                                    put("value", obs)
+                                }
+                            )
+                        }
                         val distinctObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("distinct_obs_units"))
                         val totalObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("total_obs_units"))
                         val completeness = distinctObsUnits.toFloat() / totalObsUnits.toFloat()
+                        val categories = cursor.getString(cursor.getColumnIndexOrThrow("categories"))
 
-                        traitDetails.add(FieldObject.TraitDetail(traitName, format, count, observations, completeness))
+                        traitDetails.add(FieldObject.TraitDetail(traitName, format, categories, count, observations, completeness))
                     } while (cursor.moveToNext())
                 }
 
@@ -308,6 +317,7 @@ class StudyDao {
                 traitDetails
             } ?: emptyList()
         }
+
 
         /**
          * This function uses a field object to create a exp/study row in the database.

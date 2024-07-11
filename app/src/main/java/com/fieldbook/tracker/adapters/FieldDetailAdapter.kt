@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.adapters
 
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.charts.HorizontalBarChartHelper
 import com.fieldbook.tracker.charts.HistogramChartHelper
 import com.fieldbook.tracker.charts.PieChartHelper
+import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.charts.PieChart
@@ -78,10 +80,12 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                 )
             } catch (e: NumberFormatException) {
                 holder.histogram.visibility = View.GONE
+                val parsedCategories = parseCategories(item.categories)
                 HorizontalBarChartHelper.setupHorizontalBarChart(
                     holder.itemView.context,
                     holder.barChart,
-                    item.observations
+                    item.observations,
+                    parsedCategories.takeIf { it.isNotEmpty() }
                 )
             }
         }
@@ -111,11 +115,26 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         holder.noChartAvailableTextView.visibility = View.VISIBLE
         holder.noChartAvailableTextView.text = message
     }
+
+    private fun parseCategories(categories: String): List<String> {
+        return try {
+            if (categories.startsWith("[")) {
+                val parsedCategories = CategoryJsonUtil.decode(categories)
+                parsedCategories.map { it.value }
+            } else {
+                categories.split("/").map { it.trim() }
+            }
+        } catch (e: Exception) {
+            Log.e("FieldDetailAdapter", "Failed to parse categories: $categories", e)
+            emptyList()
+        }
+    }
 }
 
 data class FieldDetailItem(
     val title: String,
     val format: String,
+    val categories: String,
     val subtitle: String,
     val icon: Drawable?,
     val observations: List<String>? = null,

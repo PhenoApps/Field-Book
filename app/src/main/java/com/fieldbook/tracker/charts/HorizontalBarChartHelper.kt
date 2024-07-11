@@ -18,15 +18,23 @@ import kotlin.math.ceil
 object HorizontalBarChartHelper {
 
     /**
-     * Sets up the horizontal bar chart with the given observations.
+     * Sets up the horizontal bar chart with the given observations and sorted categories.
      *
      * @param context The context for accessing resources.
      * @param chart The HorizontalBarChart to set up.
      * @param observations The data to display in the horizontal bar chart.
+     * @param parsedCategories The parsed categories to display in the horizontal bar chart.
      */
-    fun setupHorizontalBarChart(context: Context, chart: HorizontalBarChart, observations: List<Any>) {
+    fun setupHorizontalBarChart(context: Context, chart: HorizontalBarChart, observations: List<Any>, parsedCategories: List<String>?) {
         val categoryCounts = observations.groupingBy { it }.eachCount()
-        val sortedCategories = categoryCounts.keys.map { it.toString() }.sorted()
+
+        // Determine sorted categories: use parsedCategories if available and matching, otherwise use default order
+        val sortedCategories = if (!parsedCategories.isNullOrEmpty()) {
+            val matchingCategories = parsedCategories.filter { categoryCounts.containsKey(it) }.reversed()
+            if (matchingCategories.isNotEmpty()) matchingCategories else categoryCounts.keys.map { it.toString() }.sorted()
+        } else {
+            categoryCounts.keys.map { it.toString() }.sorted()
+        }
 
         val entries = sortedCategories.mapIndexed { index, category ->
             BarEntry(index.toFloat(), categoryCounts[category]?.toFloat() ?: 0f)
@@ -107,6 +115,5 @@ object HorizontalBarChartHelper {
         val layoutParams = chart.layoutParams
         layoutParams.height = totalHeight
         chart.layoutParams = layoutParams
-
     }
 }
