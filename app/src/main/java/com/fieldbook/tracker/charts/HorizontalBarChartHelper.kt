@@ -17,12 +17,15 @@ import kotlin.math.ceil
 
 object HorizontalBarChartHelper {
 
+    private const val BASE_HEIGHT = 100 // Base height for the chart
+    private const val HEIGHT_PER_BAR = 100 // Height to add per bar
+
     /**
      * Sets up the horizontal bar chart with the given observations and sorted categories.
      *
      * @param context The context for accessing resources.
-     * @param chart The HorizontalBarChart to set up.
-     * @param observations The data to display in the horizontal bar chart.
+     * @param chart An instance of the MPAndroidChart HorizontalBarChart component.
+     * @param observations The data to display in the horizontal bar chart, represented as a list of BigDecimal values.
      * @param parsedCategories The parsed categories to display in the horizontal bar chart.
      */
     fun setupHorizontalBarChart(context: Context, chart: HorizontalBarChart, observations: List<Any>, parsedCategories: List<String>?) {
@@ -53,7 +56,7 @@ object HorizontalBarChartHelper {
         }
 
         val barData = BarData(dataSet).apply {
-            barWidth = 0.9f
+            barWidth = 1f // Ensure bar width is 1 to match the index spacing
         }
         chart.data = barData
 
@@ -62,7 +65,7 @@ object HorizontalBarChartHelper {
         val xAxis: XAxis = chart.xAxis.apply {
             position = XAxis.XAxisPosition.BOTTOM
             setDrawGridLines(false)
-            setDrawAxisLine(false)
+            setDrawAxisLine(true)
             textColor = Color.BLACK
             textSize = chartConfig.textSize
             granularity = 1f
@@ -74,9 +77,9 @@ object HorizontalBarChartHelper {
             }
         }
 
-        val yAxis: YAxis = chart.axisRight.apply {
+        val yAxisLeft: YAxis = chart.axisLeft.apply {
             setDrawGridLines(false)
-            setDrawAxisLine(false)
+            setDrawAxisLine(true)
             textColor = Color.BLACK
             textSize = chartConfig.textSize
             axisMinimum = 0f
@@ -88,10 +91,27 @@ object HorizontalBarChartHelper {
                     return value.toInt().toString()
                 }
             }
+            isEnabled = false // Disable left axis for visibility, but keep configuration
+        }
+
+        val yAxisRight: YAxis = chart.axisRight.apply {
+            setDrawGridLines(false)
+            setDrawAxisLine(true)
+            textColor = Color.BLACK
+            textSize = chartConfig.textSize
+            axisMinimum = 0f
+            val maxY = entries.maxOfOrNull { it.y.toInt() } ?: 1
+            granularity = ceil(maxY / 6f)
+            axisMaximum = ceil(maxY / granularity) * granularity
+            valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString()
+                }
+            }
+            isEnabled = true
         }
 
         chart.apply {
-            axisLeft.isEnabled = false
             setScaleEnabled(false)
             setDragEnabled(false)
             setHighlightPerTapEnabled(false)
@@ -103,17 +123,15 @@ object HorizontalBarChartHelper {
             setNoDataText(context.getString(R.string.field_trait_chart_no_data))
             setNoDataTextColor(Color.BLACK)
 
-            // Add extra offsets to avoid label cut-off
+            // Avoids label cut-off
             setExtraOffsets(0f, 0f, 0f, 16f)
 
-            invalidate()
-        }
+            // Dynamic height based on the number of bars
+            val totalHeight = BASE_HEIGHT + (sortedCategories.size * HEIGHT_PER_BAR)
+            layoutParams.height = totalHeight
 
-        // Calculate and set the dynamic height based on the number of bars
-        val baseHeightPerBar = 100 // You can adjust this value as needed
-        val totalHeight = sortedCategories.size * baseHeightPerBar
-        val layoutParams = chart.layoutParams
-        layoutParams.height = totalHeight
-        chart.layoutParams = layoutParams
+            invalidate()
+            requestLayout()
+        }
     }
 }

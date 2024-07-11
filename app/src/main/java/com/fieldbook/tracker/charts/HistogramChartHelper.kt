@@ -20,14 +20,12 @@ import kotlin.math.ceil
 
 object HistogramChartHelper {
 
-    private const val TAG = "HistogramChartHelper"
-
     /**
      * Sets up the histogram chart with the given observations.
      *
      * @param context The context for accessing resources.
-     * @param chart The BarChart to set up.
-     * @param observations The data to display in the histogram.
+     * @param chart An instance of the MPAndroidChart BarChart component.
+     * @param observations The data to display in the histogram, represented as a list of BigDecimal values.
      */
     fun setupHistogram(context: Context, chart: BarChart, observations: List<BigDecimal>) {
         // Calculate min, max, and range of observations
@@ -39,7 +37,14 @@ object HistogramChartHelper {
 
         val distinctValuesCount = observations.distinct().size
         val binCount = minOf(ChartUtil.getMaxBars(context, 10), distinctValuesCount)
-        val binSize = range.divide(BigDecimal(binCount), 0, RoundingMode.UP)
+
+        // Ensure binSize is non-zero by checking range
+        val binSize = if (range > BigDecimal.ZERO) {
+            range.divide(BigDecimal(binCount), 0, RoundingMode.UP)
+        } else {
+            BigDecimal.ONE
+        }
+
         val isBinSizeOne = binSize.compareTo(BigDecimal.ONE) == 0
 
         val binnedObservations = mutableMapOf<Int, Int>()
@@ -95,7 +100,7 @@ object HistogramChartHelper {
             axisMinimum = 0f
             axisMaximum = maxBinIndex.toFloat()
             setCenterAxisLabels(true)
-            setLabelCount(labels.size, !isBinSizeOne)
+            setLabelCount(labels.size, !(isBinSizeOne && binCount > 1))
 
             valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
@@ -107,7 +112,7 @@ object HistogramChartHelper {
 
         val yAxis: YAxis = chart.axisLeft.apply {
             setDrawGridLines(false)
-            setDrawAxisLine(false)
+            setDrawAxisLine(true)
             textColor = Color.BLACK
             textSize = chartConfig.textSize
             axisMinimum = 0f

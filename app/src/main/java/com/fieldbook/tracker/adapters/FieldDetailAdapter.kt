@@ -66,20 +66,21 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         } else {
             try {
                 val numericObservations = item.observations.map { BigDecimal(it) }
-                if (numericObservations.distinct().size < 2) {
-                    throw NumberFormatException("Not enough distinct numeric values")
-                }
                 if (item.format == "categorical") {
                     throw NumberFormatException("Categorical traits must use bar chart")
                 }
                 holder.barChart.visibility = View.GONE
+                holder.histogram.visibility = View.VISIBLE
+                holder.noChartAvailableTextView.visibility = View.GONE
                 HistogramChartHelper.setupHistogram(
                     holder.itemView.context,
                     holder.histogram,
                     numericObservations
                 )
             } catch (e: NumberFormatException) {
+                holder.barChart.visibility = View.VISIBLE
                 holder.histogram.visibility = View.GONE
+                holder.noChartAvailableTextView.visibility = View.GONE
                 val parsedCategories = parseCategories(item.categories)
                 HorizontalBarChartHelper.setupHorizontalBarChart(
                     holder.itemView.context,
