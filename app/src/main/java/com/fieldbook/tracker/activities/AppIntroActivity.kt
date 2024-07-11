@@ -3,7 +3,6 @@ package com.fieldbook.tracker.activities
 import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -20,6 +19,7 @@ import com.fieldbook.tracker.utilities.Constants
 import com.github.appintro.AppIntro
 import com.github.appintro.AppIntroFragment
 import dagger.hilt.android.AndroidEntryPoint
+import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getRoot
 import pub.devrel.easypermissions.EasyPermissions
 
 @AndroidEntryPoint
@@ -77,20 +77,6 @@ class AppIntroActivity : AppIntro() {
         )
 
         isSkipButtonEnabled = false
-
-        // Here we ask for camera permission on slide 2
-//        if (!isPermissionsGranted())
-//            askForPermissions(Constants.permissionsTemp, 3, true)
-    }
-
-    private fun isPermissionsGranted(): Boolean {
-        val permissions = Constants.permissionsTemp
-        for (permission in permissions) {
-            val res: Int = applicationContext.checkCallingOrSelfPermission(permission)
-            if (res != PackageManager.PERMISSION_GRANTED)
-                return false
-        }
-        return true
     }
 
 
@@ -158,7 +144,8 @@ class AppIntroActivity : AppIntro() {
                     startActivity(intent)
                 },
                 {
-                    return@RequiredSetupModel true
+                    val root = getRoot(applicationContext)
+                    return@RequiredSetupModel (root != null && root.exists())
                 },
 
                 applicationContext.getString(R.string.app_intro_storage_warning)
