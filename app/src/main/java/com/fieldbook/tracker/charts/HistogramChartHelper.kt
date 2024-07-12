@@ -2,10 +2,10 @@ package com.fieldbook.tracker.charts
 
 import android.content.Context
 import android.graphics.Color
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.utilities.ChartUtil
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
@@ -20,15 +20,18 @@ import kotlin.math.ceil
 
 object HistogramChartHelper {
 
+    private const val TAG = "HistogramChartHelper"
+
     /**
      * Sets up the histogram chart with the given observations.
      *
      * @param context The context for accessing resources.
      * @param chart An instance of the MPAndroidChart BarChart component.
      * @param observations The data to display in the histogram, represented as a list of BigDecimal values.
+     * @param chartTextSize The text size for the chart.
      */
-    fun setupHistogram(context: Context, chart: BarChart, observations: List<BigDecimal>) {
-        // Calculate min, max, and range of observations
+    fun setupHistogram(context: Context, chart: BarChart, observations: List<BigDecimal>, chartTextSize: Float) {
+
         val minValue = observations.minOrNull() ?: BigDecimal.ZERO
         val maxValue = observations.maxOrNull() ?: BigDecimal.ZERO
         val range = maxValue.subtract(minValue)
@@ -36,7 +39,7 @@ object HistogramChartHelper {
         chart.visibility = View.VISIBLE
 
         val distinctValuesCount = observations.distinct().size
-        val binCount = minOf(ChartUtil.getMaxBars(context, 10), distinctValuesCount)
+        val binCount = minOf(getMaxVerticalBars(context, 10), distinctValuesCount)
 
         // Ensure binSize is non-zero by checking range
         val binSize = if (range > BigDecimal.ZERO) {
@@ -89,14 +92,12 @@ object HistogramChartHelper {
         }
         chart.data = barData
 
-        val chartConfig = ChartUtil.getChartConfig(context)
-
         val xAxis: XAxis = chart.xAxis.apply {
             position = XAxis.XAxisPosition.BOTTOM
             setDrawGridLines(false)
             setDrawAxisLine(true)
             textColor = Color.BLACK
-            textSize = chartConfig.textSize
+            textSize = chartTextSize
             axisMinimum = 0f
             axisMaximum = maxBinIndex.toFloat()
             setCenterAxisLabels(true)
@@ -114,7 +115,7 @@ object HistogramChartHelper {
             setDrawGridLines(false)
             setDrawAxisLine(true)
             textColor = Color.BLACK
-            textSize = chartConfig.textSize
+            textSize = chartTextSize
             axisMinimum = 0f
             val maxY = entries.maxOfOrNull { it.y.toInt() } ?: 1
             granularity = ceil(maxY / 6f)
@@ -146,5 +147,15 @@ object HistogramChartHelper {
             notifyDataSetChanged()
             invalidate()
         }
+    }
+
+    private fun getMaxVerticalBars(context: Context, referenceMaxBars: Int): Int {
+        val displayMetrics = context.resources.displayMetrics
+        val screenWidth = displayMetrics.widthPixels
+        val referenceScreenWidth = 1080  // Default smartphone screen width in pixels
+        val maxBarsByScreen = (referenceMaxBars * screenWidth) / referenceScreenWidth.coerceAtLeast(1)
+        val finalMaxBars = maxBarsByScreen.coerceAtMost(referenceMaxBars)
+
+        return finalMaxBars
     }
 }

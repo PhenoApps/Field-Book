@@ -1,7 +1,9 @@
 package com.fieldbook.tracker.adapters
 
+import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,10 +48,13 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         holder.traitNameTextView.text = item.title
         holder.traitCountTextView.text = item.subtitle
         holder.traitIconImageView.setImageDrawable(item.icon)
+
+        val chartTextSize = getChartTextSize(holder.itemView.context)
         PieChartHelper.setupPieChart(
             holder.itemView.context,
             holder.traitCompletenessChart,
-            item.completeness
+            item.completeness,
+            chartTextSize
         )
 
         val nonChartableFormats = setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
@@ -75,7 +80,8 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                 HistogramChartHelper.setupHistogram(
                     holder.itemView.context,
                     holder.histogram,
-                    numericObservations
+                    numericObservations,
+                    chartTextSize
                 )
             } catch (e: NumberFormatException) {
                 holder.barChart.visibility = View.VISIBLE
@@ -86,7 +92,8 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                     holder.itemView.context,
                     holder.barChart,
                     item.observations,
-                    parsedCategories.takeIf { it.isNotEmpty() }
+                    parsedCategories.takeIf { it.isNotEmpty() },
+                    chartTextSize
                 )
             }
         }
@@ -129,6 +136,13 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
             Log.e("FieldDetailAdapter", "Failed to parse categories: $categories", e)
             emptyList()
         }
+    }
+
+    private fun getChartTextSize(context: Context): Float {
+        val typedValue = TypedValue()
+        context.theme.resolveAttribute(R.attr.fb_subheading_text_size, typedValue, true)
+        val textSizePx = context.resources.getDimension(typedValue.resourceId)
+        return textSizePx / context.resources.displayMetrics.scaledDensity
     }
 }
 
