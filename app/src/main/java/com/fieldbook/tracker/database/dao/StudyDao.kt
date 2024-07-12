@@ -216,7 +216,7 @@ class StudyDao {
         } ?: ArrayList()
 
 
-        fun getFieldObject(exp_id: Int): FieldObject? = withDatabase { db ->
+        fun getFieldObject(exp_id: Int, sortOrder: String = "internal_id_observation_variable"): FieldObject? = withDatabase { db ->
             val query = """
                 SELECT 
                     ${Study.PK},
@@ -250,7 +250,7 @@ class StudyDao {
                     }
                     map.toFieldObject().apply {
                         // Set the trait details
-                        this.setTraitDetails(getTraitDetailsForStudy(exp_id))
+                        this.setTraitDetails(getTraitDetailsForStudy(exp_id, sortOrder))
                     }
                 } else {
                     null
@@ -272,22 +272,27 @@ class StudyDao {
          * )
          */
 
-        fun getTraitDetailsForStudy(studyId: Int): List<FieldObject.TraitDetail> {
+        fun getTraitDetailsForStudy(studyId: Int, sortOrder: String = "internal_id_observation_variable"): List<FieldObject.TraitDetail> {
             return withDatabase { db ->
                 val traitDetails = mutableListOf<FieldObject.TraitDetail>()
 
+                // Sort ascending except for visibility, for visibility sort desc to have visible traits first
+                val orderDirection = if (sortOrder == "visible") "DESC" else "ASC"
+
                 val cursor = db.rawQuery("""
-            SELECT o.observation_variable_name, o.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
-            (SELECT COUNT(DISTINCT observation_unit_id) FROM observations WHERE study_id = ? AND observation_variable_name = o.observation_variable_name) AS distinct_obs_units,
-            (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units,
-            (SELECT v.observation_variable_attribute_value 
-             FROM observation_variable_values v
-             JOIN observation_variable_attributes a ON v.observation_variable_attribute_db_id = a.internal_id_observation_variable_attribute
-             WHERE v.observation_variable_db_id = o.observation_variable_db_id AND a.observation_variable_attribute_name = 'category') AS categories
-            FROM observations o
-            WHERE o.study_id = ? AND o.observation_variable_db_id > 0
-            GROUP BY o.observation_variable_name, o.observation_variable_field_book_format
-        """, arrayOf(studyId.toString(), studyId.toString(), studyId.toString()))
+                    SELECT o.observation_variable_name, o.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
+                    (SELECT COUNT(DISTINCT observation_unit_id) FROM observations WHERE study_id = ? AND observation_variable_name = o.observation_variable_name) AS distinct_obs_units,
+                    (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units,
+                    (SELECT v.observation_variable_attribute_value 
+                     FROM observation_variable_values v
+                     JOIN observation_variable_attributes a ON v.observation_variable_attribute_db_id = a.internal_id_observation_variable_attribute
+                     WHERE v.observation_variable_db_id = o.observation_variable_db_id AND a.observation_variable_attribute_name = 'category') AS categories
+                    FROM observations o
+                    JOIN observation_variables ov ON o.observation_variable_db_id = ov.internal_id_observation_variable
+                    WHERE o.study_id = ? AND o.observation_variable_db_id > 0
+                    GROUP BY o.observation_variable_name, o.observation_variable_field_book_format
+                    ORDER BY ov.$sortOrder $orderDirection
+                """, arrayOf(studyId.toString(), studyId.toString(), studyId.toString()))
 
                 if (cursor.moveToFirst()) {
                     do {

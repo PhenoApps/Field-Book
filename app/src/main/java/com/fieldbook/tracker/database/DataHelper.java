@@ -1295,7 +1295,10 @@ public class DataHelper {
 
         open();
 
-        return StudyDao.Companion.getFieldObject(studyId);
+        return StudyDao.Companion.getFieldObject(
+                studyId,
+                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
+        );
 
 //        Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
 //                        "secondary_id", "date_import", "date_edit", "date_export", "count", "exp_source"},
