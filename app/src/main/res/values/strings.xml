@@ -601,9 +601,9 @@
     <string name="preferences_profile_name_error">Both fields cannot be blank</string>
 
     <string name="preferences_profile_require_interval_title">Verification Interval</string>
-    <string name="ask_user_interval_every_open">Verify name every time app opens</string>
-    <string name="ask_user_interval_every_12">Verify name every 12 hours</string>
-    <string name="ask_user_interval_every_24">Verify name every 24 hours</string>
+    <string name="ask_user_interval_every_open">Every time app opens</string>
+    <string name="ask_user_interval_every_12">Every 12 hours</string>
+    <string name="ask_user_interval_every_24">Every 24 hours</string>
 
     <string name="preferences_profile_crashlytics" translatable="false">Crashlytics</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
