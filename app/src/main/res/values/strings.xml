@@ -574,6 +574,9 @@
     <string name="preferences_source_default_import">Import Source</string>
     <string name="preferences_source_default_export">Export Source</string>
 
+    <string name="brapi_disabled_alert_title">BrAPI Disabled</string>
+    <string name="brapi_disabled_alert_message">BrAPI must be enabled first in the BrAPI settings.</string>
+
     <string name="preferences_general_share_enable">Enable File Sharing</string>
     <string name="preferences_general_share_enable_description">When files are exported, a share dialog will be displayed</string>
 

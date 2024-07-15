@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -83,6 +84,9 @@ public class SystemPreferencesFragment extends PreferenceFragmentCompat implemen
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_system_title));
 
         defaultStorageLocation = findPreference("DEFAULT_STORAGE_LOCATION_PREFERENCE");
+        ListPreference importSourceDefaultPref = findPreference("IMPORT_SOURCE_DEFAULT");
+        ListPreference exportSourceDefaultPref = findPreference("EXPORT_SOURCE_DEFAULT");
+
 
         String storageSummary = preferences.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, null);
         defaultStorageLocation.setSummary(storageSummary);
@@ -92,6 +96,18 @@ public class SystemPreferencesFragment extends PreferenceFragmentCompat implemen
             startActivityForResult(intent, REQUEST_STORAGE_DEFINER_CODE);
             return true;
         });
+
+        if (importSourceDefaultPref != null) {
+            importSourceDefaultPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                return validateBrapiEnabledBeforeSetting(newValue.toString());
+            });
+        }
+
+        if (exportSourceDefaultPref != null) {
+            exportSourceDefaultPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                return validateBrapiEnabledBeforeSetting(newValue.toString());
+            });
+        }
 
         Preference databaseImport = findPreference("pref_database_import");
         Preference databaseExport = findPreference("pref_database_export");
@@ -137,6 +153,22 @@ public class SystemPreferencesFragment extends PreferenceFragmentCompat implemen
                 defaultStorageLocation.setSummary(path);
             }
         }
+    }
+
+    private boolean validateBrapiEnabledBeforeSetting(String newValue) {
+        if ("brapi".equals(newValue) && !preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+            showBrapiDisabledAlertDialog();
+            return false;
+        }
+        return true;
+    }
+
+    private void showBrapiDisabledAlertDialog() {
+        new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+                .setTitle(R.string.brapi_disabled_alert_title)
+                .setMessage(R.string.brapi_disabled_alert_message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 
     private void showDatabaseImportDialog() {
