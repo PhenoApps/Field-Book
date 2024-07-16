@@ -923,8 +923,6 @@ public class CollectActivity extends ThemedActivity
         if (traitBox.getCurrentTrait() != null)
             preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
 
-        geoNavHelper.stopAverageHandler();
-
         preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
 
         traitLayouts.unregisterAllReceivers();

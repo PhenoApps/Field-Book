@@ -2,6 +2,8 @@ package com.fieldbook.tracker.dialogs
 
 import android.app.AlertDialog
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
@@ -78,8 +80,11 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
         setNeutralButton(context.getString(R.string.dialog_geonav_collect_neutral_reconnect)) { dialog, which ->
             Utils.makeToast(context, context.getString(R.string.dialog_geonav_collect_reset_start_toast_message))
             activity.getGeoNavHelper().stopGeoNav()
-            activity.getGeoNavHelper().startGeoNav()
-            Utils.makeToast(context, context.getString(R.string.dialog_geonav_collect_reset_end_toast_message))
+            //add a small delay before resetting, creating threads is expensive
+            Handler(Looper.getMainLooper()).postDelayed({
+                activity.getGeoNavHelper().startGeoNav()
+                Utils.makeToast(context, context.getString(R.string.dialog_geonav_collect_reset_end_toast_message))
+            }, 500L)
             dialog.dismiss()
         }
 
