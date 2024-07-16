@@ -750,18 +750,18 @@ class RangeBoxView : ConstraintLayout {
     fun movePaging(pos: Int, step: Int, cyclic: Boolean, fromToolbar: Boolean): Int {
         // If ignore existing data is enabled, then skip accordingly
         val traits = controller.getDatabase().visibleTrait
-        //three options: 1. disabled 2. skip active trait 3. skip but check all traits
+        //three options: 0. disabled 1. skip active trait 2. skip but check all traits
         var skipMode =
-            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1")
+            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "0")
         if (fromToolbar) {
             skipMode = controller.getPreferences()
-                .getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1")
+                .getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0")
         }
         return when (skipMode) {
-            "2" -> {
+            "1" -> {
                 checkSkipTraits(traits, step, pos, cyclic, true)
             }
-            "3" -> {
+            "2" -> {
                 checkSkipTraits(traits, step, pos, cyclic, false)
             }
             else -> moveSimply(pos, step)
