@@ -675,8 +675,8 @@
 
     <string name="preferences_general_feature_next_missing">Next Entry With No Data</string>
     <string name="preferences_general_skip_entries_disabled">Disabled</string>
-    <string name="preferences_general_skip_entries_with_data">Button skips entries that have data for the current trait</string>
-    <string name="preferences_general_skip_entries_across_all_traits">Button skips entries that have data for all traits</string>
+    <string name="preferences_general_skip_entries_with_data">Button skips entries that already have values for the current trait</string>
+    <string name="preferences_general_skip_entries_across_all_traits">Button skips entries that already have values for all traits</string>
 
     <string name="preferences_general_feature_barcode_text">Move To Unique ID</string>
     <string name="move_to_unique_id_disabled">Disabled</string>
@@ -712,6 +712,9 @@
     <string name="preferences_behavior_disable_entry_arrow_both">Require data to move either direction</string>
 
     <string name="preferences_behavior_skip_entries_title">Skip Entries</string>
+    <string name="preferences_behavior_skip_entries_disabled">Disabled</string>
+    <string name="preferences_behavior_skip_entries_with_data">Arrows skip entries that already have values for the current trait</string>
+    <string name="preferences_behavior_skip_entries_across_all_traits">Arrows skip entries that already have values for all traits</string>
 
     <string name="preferences_general_swap_navigation">Swap Navigation</string>
     <string name="preferences_general_swap_navigation_description">Swap the behavior of the entry and trait arrows</string>
