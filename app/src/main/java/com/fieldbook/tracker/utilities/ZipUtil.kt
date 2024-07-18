@@ -145,7 +145,7 @@ class ZipUtil {
         //the expected zip file format contains two files
         //1. fieldbook.db this can be directly copied to the data dir
         //2. preferences_backup needs to:
-        //  a. read and converted to a map <string to any (which is only boolean or string)>
+        //  a. read and converted to a map <string to any (which is int, boolean or string)>
         //  b. preferences should be cleared of the old values
         //  c. iterate over the converted map and populate the preferences
         @Throws(IOException::class)
@@ -246,6 +246,8 @@ class ZipUtil {
                             is Boolean -> putBoolean(key, x)
 
                             is String -> putString(key, x)
+
+                            is Int -> putInt(key, x)
 
                             is Set<*> -> {
 

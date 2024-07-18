@@ -163,7 +163,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                         database.importDatabase(file);
 
-                        if (file.getName().equals("sample_db.zip")){
+                        if (file.getName().equals("sample_db.zip") || file.getName().equals("sample.db")){
                             selectFirstField();
                         }
 

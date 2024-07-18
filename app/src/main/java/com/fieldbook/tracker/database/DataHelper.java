@@ -2457,15 +2457,6 @@ public class DataHelper {
 
             }
 
-            SharedPreferences.Editor edit = preferences.edit();
-
-            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-            edit.putString(GeneralKeys.UNIQUE_NAME, "");
-            edit.putString(GeneralKeys.PRIMARY_NAME, "");
-            edit.putString(GeneralKeys.SECONDARY_NAME, "");
-            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
-            edit.apply();
-
         }
     }
 
