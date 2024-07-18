@@ -271,6 +271,7 @@
     <!--- Content Descriptions -->
     <!-- Observation Info -->
     <string name="observation_info_trait_format">Formato de Caractere</string>
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">Base de dados</string>
