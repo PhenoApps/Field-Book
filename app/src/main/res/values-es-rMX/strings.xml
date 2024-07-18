@@ -450,6 +450,7 @@
     <string name="observation_info_additional_info">Información adicional</string>
     <string name="observation_info_rep">Rep</string>
     <string name="observation_info_other">Otro</string>
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Local</string>
