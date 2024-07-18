@@ -164,7 +164,10 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
                         database.importDatabase(file);
 
                         if (file.getName().equals("sample_db.zip") || file.getName().equals("sample.db")){
+                            clearPreferences();
                             selectFirstField();
+                        } else if (file.getName().endsWith(".db")){ // for a .db file, clear the preferences
+                            clearPreferences();
                         }
 
                     } catch (Exception e) {
@@ -178,6 +181,18 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
             }
 
             return 0;
+        }
+
+        private void clearPreferences() {
+            // clear the previous preferences for a .db import
+            SharedPreferences.Editor edit = preferences.edit();
+
+            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+            edit.putString(GeneralKeys.UNIQUE_NAME, "");
+            edit.putString(GeneralKeys.PRIMARY_NAME, "");
+            edit.putString(GeneralKeys.SECONDARY_NAME, "");
+            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+            edit.apply();
         }
 
         public void selectFirstField() {
@@ -216,22 +231,6 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
             CollectActivity.reloadData = true;
         }
-    }
-
-    private int getSelectedFieldId(String field_file) {
-        ArrayList<FieldObject> fields = database.getAllFieldObjects();
-
-        //try and match study alias
-        for (FieldObject f : fields) {
-
-            if (f != null && f.getExp_alias() != null && f.getExp_alias().equals(field_file)) {
-
-                return f.getExp_id();
-
-            }
-        }
-        // if no match found, return -1
-        return -1;
     }
 
     private void showDatabaseExportDialog() {
