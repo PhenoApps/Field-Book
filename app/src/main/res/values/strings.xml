@@ -1118,5 +1118,7 @@
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="tutorial_main_geonav_description">This will open a configuration dialog to help with field navigation.</string>
     <string name="oauth_configured_incorrectly">Authorization request failed, please check your BrAPI settings.</string>
+    <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
+    <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
 
 </resources>
