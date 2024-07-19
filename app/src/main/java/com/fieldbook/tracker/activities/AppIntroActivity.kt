@@ -79,16 +79,9 @@ class AppIntroActivity : AppIntro() {
         isSkipButtonEnabled = false
     }
 
-
-    override fun onSkipPressed(currentFragment: Fragment?) {
-        super.onSkipPressed(currentFragment)
-        // Decide what to do when the user clicks on "Skip"
-        finish()
-    }
-
     override fun onDonePressed(currentFragment: Fragment?) {
         super.onDonePressed(currentFragment)
-        // Decide what to do when the user clicks on "Done"
+        setResult(RESULT_OK)
         finish()
     }
 

@@ -26,7 +26,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
@@ -34,11 +33,11 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.fragments.ImportDBFragment;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.ExportUtil;
-import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.ManufacturerUtil;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
@@ -92,7 +91,7 @@ public class ConfigActivity extends ThemedActivity {
     private static final int REQUEST_BARCODE = 100;
     private final static String TAG = ConfigActivity.class.getSimpleName();
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
-    private final int REQUEST_STORAGE_DEFINER = 104;
+    private final int REQUEST_APP_INTRO_CODE = 120;
 //    private final Runnable exportData = () -> new ExportDataTask().execute(0);
     @Inject
     public DataHelper database;
@@ -201,6 +200,11 @@ public class ConfigActivity extends ThemedActivity {
             //this will grant FB access to the chosen folder
             //preference and activity is handled through this utility call
 
+            Log.d(TAG, "firstRunSetup: ");
+
+            Intent intent = new Intent(this, AppIntroActivity.class);
+            startActivityForResult(intent, REQUEST_APP_INTRO_CODE);
+
             SharedPreferences.Editor ed = preferences.edit();
 
             Set<String> entries = preferences.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
@@ -210,7 +214,6 @@ public class ConfigActivity extends ThemedActivity {
             entries.add("lockData");
 
             ed.putStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, entries);
-            ed.putBoolean(GeneralKeys.FIRST_RUN, false);
             ed.apply();
         }
     }
@@ -221,27 +224,7 @@ public class ConfigActivity extends ThemedActivity {
 
         firstRunSetup();
 
-        if (!BaseDocumentTreeUtil.Companion.isEnabled(this)) {
-
-//            startActivityForResult(new Intent(this, DefineStorageActivity.class),
-//                    REQUEST_STORAGE_DEFINER);
-        } else {
-
-        verifyPersonHelper.updateLastOpenedTime();
-            ManufacturerUtil.Companion.eInkDeviceSetup(this, prefs, getResources(), () -> {
-
-                recreate();
-
-                // request permissions
-//                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
-
-                return null;
-            });
-        }
-
         migratePreferencesToDefault();
-
-        verifyPersonHelper.updateLastOpenedTime();
     }
 
     /**
@@ -355,15 +338,6 @@ public class ConfigActivity extends ThemedActivity {
         ImageListAdapter adapterImg = new ImageListAdapter(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
 
-        SharedPreferences.Editor ed = preferences.edit();
-
-        if (!preferences.getBoolean(GeneralKeys.TIPS_CONFIGURED, false)) {
-            ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
-            ed.apply();
-//            showTipsDialog();
-//            loadSampleDataDialog();
-        }
-
         mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
 
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
@@ -404,74 +378,6 @@ public class ConfigActivity extends ThemedActivity {
         }
 
         return 1;
-    }
-
-    private void showTipsDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
-
-        builder.setTitle(getString(R.string.tutorial_dialog_title));
-        builder.setMessage(getString(R.string.tutorial_dialog_description));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Editor ed = preferences.edit();
-                ed.putBoolean(GeneralKeys.TIPS, true);
-                ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
-                ed.apply();
-
-                dialog.dismiss();
-
-                invalidateOptionsMenu();
-
-                Intent intent = new Intent();
-                intent.setClassName(ConfigActivity.this,
-                        ConfigActivity.class.getName());
-                startActivity(intent);
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Editor ed = preferences.edit();
-                ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
-                ed.apply();
-
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    private void loadSampleDataDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
-
-        builder.setTitle(getString(R.string.startup_sample_data_title));
-        builder.setMessage(getString(R.string.startup_sample_data_message));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), (dialog, which) -> {
-            // Load database with sample data
-            DocumentFile sampleDatabase = BaseDocumentTreeUtil.Companion.getFile(ConfigActivity.this,
-                    R.string.dir_database, "sample.db");
-            if (sampleDatabase != null && sampleDatabase.exists()) {
-                invokeDatabaseImport(sampleDatabase);
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), (dialog, which) -> dialog.dismiss());
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    // Helper function to merge arrays
-    String[] concat(String[] a1, String[] a2) {
-        String[] n = new String[a1.length + a2.length];
-        System.arraycopy(a1, 0, n, 0, a1.length);
-        System.arraycopy(a2, 0, n, a1.length, a2.length);
-
-        return n;
     }
 
     private void resolveFuzzySearchResult(FieldObject f, @Nullable String plotId) {
@@ -578,11 +484,22 @@ public class ConfigActivity extends ThemedActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_STORAGE_DEFINER) {
+        if (requestCode == REQUEST_APP_INTRO_CODE) {
             if (resultCode != Activity.RESULT_OK) finish();
             else {
-                // request permissions
-//                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+                boolean loadSampleData = preferences.getBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false);
+
+                if (loadSampleData) {
+                    ImportDBFragment importDBFragment = new ImportDBFragment();
+
+                    getSupportFragmentManager().beginTransaction()
+                            .add(importDBFragment, "com.fieldbook.tracker.fragments.ImportDBFragment")
+                            .addToBackStack(null)
+                            .commit();
+                }
+
+                // set FIRST_RUN to false only app intro was finished by the user
+                preferences.edit().putBoolean(GeneralKeys.FIRST_RUN, false).apply();
             }
         } else if (requestCode == REQUEST_BARCODE) {
             if (resultCode == RESULT_OK) {
