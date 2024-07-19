@@ -29,6 +29,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
+import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.database.DataHelper;
@@ -200,10 +201,6 @@ public class ConfigActivity extends ThemedActivity {
             //this will grant FB access to the chosen folder
             //preference and activity is handled through this utility call
 
-            Log.d(TAG, "firstRunSetup: ");
-
-            Intent intent = new Intent(this, AppIntroActivity.class);
-            startActivityForResult(intent, REQUEST_APP_INTRO_CODE);
 
             SharedPreferences.Editor ed = preferences.edit();
 
@@ -215,12 +212,24 @@ public class ConfigActivity extends ThemedActivity {
 
             ed.putStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, entries);
             ed.apply();
+
+            // to disable App Intro for debug mode
+            // uncomment the if-block
+            // and comment the startActivityForResult for AppIntroActivity
+//            if (BuildConfig.DEBUG) {
+//                ed.putBoolean(GeneralKeys.FIRST_RUN, false).apply();
+//            }
+
+            Intent intent = new Intent(this, AppIntroActivity.class);
+            startActivityForResult(intent, REQUEST_APP_INTRO_CODE);
         }
     }
 
     private void preferencesSetup() {
 
         versionBasedSetup();
+
+        Log.d(TAG, "preferencesSetup: " + BuildConfig.DEBUG);
 
         firstRunSetup();
 
