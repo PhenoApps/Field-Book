@@ -143,7 +143,7 @@ class AppIntroActivity : AppIntro() {
             ),
             RequiredSetupAdapter.RequiredSetupModel(
                 applicationContext.getString(R.string.app_intro_storage_title),
-                applicationContext.getString(org.phenoapps.androidlibrary.R.string.frag_storage_definer_summary),
+                applicationContext.getString(R.string.app_intro_storage_summary),
                 resources.getDrawable(R.drawable.storage_lock),
                 {
                     val intent = Intent(this, DefineStorageActivity::class.java)

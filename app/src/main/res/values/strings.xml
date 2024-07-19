@@ -29,23 +29,21 @@
     <!-- App Intro -->
     <string name="app_intro_intro_title_slide1">Welcome to Field Book!</string>
     <string name="app_intro_intro_summary_slide1">Field Book is a simple app for taking phenotypic notes. Collecting data in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity.</string>
-    <string name="app_intro_intro_title_slide2">Field Book features</string>
+    <string name="app_intro_intro_title_slide2">Features</string>
     <string name="app_intro_intro_summary_slide2">Field Book uses custom layouts for different types of data to that allow rapid data collection. Traits being collected are defined by the user and can be exported and transferred between devices. Sample files are provided with the installation. Field Book is part of the broader PhenoApps initiative, an effort to modernize plant breeding and genetics data collection and organization via by developing new strategies and tools for data capture.</string>
-    <string name="app_intro_request_permissions_title">Permissions Request</string>
-    <string name="app_intro_request_permissions_summary">Field Book requires a few permissions</string>
-    <string name="app_intro_permissions_granted_summary">Permissions already granted</string>
     <string name="app_intro_required_setup_title">Set up Field Book</string>
     <string name="app_intro_required_setup_summary">These settings are required for Field Book to function</string>
     <string name="app_intro_permissions_title">Permissions</string>
     <string name="app_intro_permissions_warning">Permissions not granted</string>
     <string name="app_intro_storage_title">Define Storage</string>
+    <string name="app_intro_storage_summary">Define a folder that will contain all field data</string>
     <string name="app_intro_storage_warning">Please set the storage location</string>
     <string name="app_intro_required_optional_title">Optional</string>
     <string name="app_intro_required_optional_summary">These settings can be optionally enabled before startup</string>
-    <string name="app_intro_load_sample_data_title">Do you want to load sample data</string>
+    <string name="app_intro_load_sample_data_title">Load sample data</string>
     <string name="app_intro_load_sample_data_summary">A sample database will be imported</string>
-    <string name="app_intro_tutorial_title">Would you like to enable the tutorial?</string>
-    <string name="app_intro_tutorial_summary">This setting can be changed in the Settings</string>
+    <string name="app_intro_tutorial_title">Tutorial</string>
+    <string name="app_intro_tutorial_summary">Adds a help icon (?) in the toolbar that will show textual description of features throughout the app</string>
 
 
     <!-- Permissions  -->
