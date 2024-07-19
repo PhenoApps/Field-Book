@@ -19,6 +19,7 @@
             style="@style/AppIntroDefaultHeading"
             android:textSize="20sp"
             android:textAlignment="textStart"
+            android:textColor="@color/main_color_text_dark"
             android:padding="0dp"/>
 
         <TextView
@@ -28,6 +29,7 @@
             style="@style/AppIntroDefaultText"
             android:maxLines="2"
             android:textAlignment="textStart"
+            android:textColor="@color/main_color_text_dark"
             android:padding="0dp"/>
 
     </LinearLayout>
@@ -39,6 +41,7 @@
         android:clickable="false"
         android:focusable="false"
         style="@style/AppIntroDefaultText"
+        android:buttonTint="@color/main_color_text_dark"
         android:paddingEnd="0dp"/>
 
 </LinearLayout>
