@@ -677,11 +677,11 @@ public class DataHelper {
     /**
      * Get the data for brapi export to external system
      */
-    public List<Observation> getObservations(String hostUrl) {
+    public List<Observation> getObservations(int fieldId, String hostUrl) {
 
         open();
 
-        return ObservationDao.Companion.getObservations(hostUrl);
+        return ObservationDao.Companion.getObservations(fieldId, hostUrl);
 
 //        List<Observation> observations = new ArrayList<Observation>();
 //
@@ -1256,7 +1256,9 @@ public class DataHelper {
 
         open();
 
-        return StudyDao.Companion.getAllFieldObjects();
+        return StudyDao.Companion.getAllFieldObjects(
+                preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+        );
 
 //        ArrayList<FieldObject> list = new ArrayList<>();
 //
@@ -1293,7 +1295,10 @@ public class DataHelper {
 
         open();
 
-        return StudyDao.Companion.getFieldObject(studyId);
+        return StudyDao.Companion.getFieldObject(
+                studyId,
+                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
+        );
 
 //        Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
 //                        "secondary_id", "date_import", "date_edit", "date_export", "count", "exp_source"},
@@ -1329,7 +1334,9 @@ public class DataHelper {
 
         open();
 
-        return ObservationVariableDao.Companion.getAllTraitObjects();
+        return ObservationVariableDao.Companion.getAllTraitObjects(
+                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
+        );
 
 //        ArrayList<TraitObject> list = new ArrayList<>();
 //
@@ -1561,7 +1568,9 @@ public class DataHelper {
 
         if (!isTableExists("ObservationUnitProperty")) {
 
-            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects(
+                    preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+            );
 
             if (!fields.isEmpty()) {
 
@@ -1793,7 +1802,9 @@ public class DataHelper {
 //        if (db == null || !db.isOpen()) db = openHelper.getWritableDatabase();
         if (!isTableExists("ObservationUnitProperty")) {
 
-            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects(
+                    preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+            );
 
             if (!fields.isEmpty()) {
 
@@ -2703,11 +2714,11 @@ public class DataHelper {
         return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
     }
 
-    public String getObservationUnitPropertyByPlotId(String column, String plot_id) {
+    public String getObservationUnitPropertyByPlotId(String uniqueName, String column, String uniqueId) {
 
         open();
 
-        return ObservationUnitPropertyDao.Companion.getObservationUnitPropertyByPlotId(column, plot_id);
+        return ObservationUnitPropertyDao.Companion.getObservationUnitPropertyByUniqueId(uniqueName, column, uniqueId);
     }
 
     /**
@@ -2772,7 +2783,11 @@ public class DataHelper {
                 Log.e(TAG, e.getMessage());
             }
 
+            //migrate handles database upgrade from 8 -> 9
             Migrator.Companion.createTables(db, getAllTraitObjects(db));
+
+            //this will force new databases to have full updates, otherwise sqliteopenhelper will not upgrade
+            onUpgrade(db, 9, DATABASE_VERSION);
         }
 
         /**
@@ -2962,7 +2977,7 @@ public class DataHelper {
 
             }
 
-            if (oldVersion <= 10 & newVersion >= 11) {
+            if (oldVersion <= 10 && newVersion >= 11) {
 
                 // modify studies table for better handling of brapi study attributes
                 db.execSQL("ALTER TABLE studies ADD COLUMN import_format TEXT");

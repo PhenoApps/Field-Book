@@ -19,6 +19,7 @@
     <string name="dialog_save_error_title">Save Error</string>
     <string name="dialog_back">Back</string>
     <string name="dialog_scan">Scan</string>
+    <string name="dialog_sort_by">Sort By</string>
 
     <string name="barcode_scanner_text">Scan a barcode</string>
 
@@ -87,6 +88,14 @@
 
     <!-- FIELDS -->
     <!-- General -->
+    <string name="menu_fields_sort_list">Sort Fields List</string>
+    <string name="fields_sort_reset">Reset</string>
+    <string name="fields_sort_by_name">Name</string>
+    <string name="fields_sort_by_import_format">Import Format</string>
+    <string name="fields_sort_by_import_date">Import Date</string>
+    <string name="fields_sort_by_edit_date">Edit Date</string>
+    <string name="fields_sort_by_sync_date">Sync Date</string>
+    <string name="fields_sort_by_export_date">Export Date</string>
     <string name="list_item_field_popup_menu_content_description">Opens a menu for the selected field.</string>
     <string name="selected_count">%1$d selected</string>
     <string name="fields_select_all">Select All</string>
@@ -94,11 +103,10 @@
     <string name="field_observation_count_format">%1$s %2$s</string>
 
     <!-- Sort -->
-    <string name="fields_sort_update">Sort</string>
+    <string name="field_sort_entries">Sort Entries</string>
     <string name="sort_dialog_saved">Sorting updated</string>
     <string name="sort_dialog_error_saving">Error updating sorting</string>
     <string name="list_item_field_sort_delete_content_description">Delete the sort attribute.</string>
-    <string name="dialog_field_sort_title">Sort Entries</string>
     <string name="list_item_field_sort_drag_content_description">Drag to move item.</string>
     <string name="dialog_field_sort_no_attributes_found">No attributes found.</string>
     <string name="dialog_field_sort_no_more_attributes_found">All attributes have been used.</string>
@@ -122,8 +130,9 @@
     </plurals>
 
     <!-- Import -->
-    <string name="fields_toolbar_add_field">Import Field</string>
-    <string name="import_dialog_title_fields">Import field</string>
+    <string name="fields_new_button_content_description">Add a new field.</string>
+    <string name="fields_new_dialog_title">New field</string>
+    <string name="fields_new_create_field">Create new</string>
     <string name="import_dialog_unique">Unique identifier</string>
     <string name="import_dialog_primary">Primary identifier</string>
     <string name="import_dialog_secondary">Secondary identifier</string>
@@ -175,7 +184,7 @@
     <string name="activity_field_editor_no_location_yet">No location found yet.</string>
     <string name="activity_field_editor_switch_field_same">Closest field already selected.</string>
 
-    <!-- Field details -->
+    <!-- Field Details -->
     <string name="field_detail_title">Field Detail</string>
     <string name="field_edit_display_name">Edit Field Display Name</string>
     <string name="name_cannot_be_empty">Name cannot be empty.</string>
@@ -194,6 +203,11 @@
     <string name="field_observation_total">"&lt;b>%1$s&lt;/b>" observations</string>
     <string name="field_trait_observation_total">"%d" observations</string>
 
+    <!-- Field Detail Charts -->
+    <string name="field_trait_chart_no_data">No data to chart</string>
+    <string name="field_trait_chart_incompatible_format">This trait format cannot be charted</string>
+    <string name="field_trait_chart_excess_data">Too many distinct values to chart</string>
+
     <!-- Semantic dates -->
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
@@ -207,9 +221,9 @@
 
     <!-- TRAITS -->
     <!-- Sort -->
-    <string name="traits_toolbar_sort">Sort</string>
-    <string name="traits_sort_title">Sort</string>
+    <string name="traits_toolbar_sort">Sort Traits</string>
     <string name="traits_sort_name">Name</string>
+    <string name="traits_sort_import_order">Import Order</string>
     <string name="traits_sort_visibility">Visibility</string>
     <string name="traits_sort_format">Format</string>
     <string name="warning_traits_missing_modify">Create traits before modifying them.</string>
@@ -259,7 +273,7 @@
     <string name="trait_creator_title_layout">Trait Layout</string>
     <string name="trait_creator_parameters_title">%s Parameters</string>
 
-    <string name="activity_traits_new_button_content_description">Create a new trait.</string>
+    <string name="activity_traits_new_button_content_description">Add a new trait.</string>
 
     <string name="traits_create_name">Name</string>
     <string name="traits_create_format">Format</string>
@@ -366,6 +380,11 @@
     <string name="dialog_data_grid_header_picker_title">Choose Row Headers</string>
     <string name="dialog_data_grid_repeated_measures_title">Choose Observation</string>
     <string name="menu_action_header_view_data_grid_title">Update Row Headers</string>
+
+    <!--- Lock -->
+    <string name="activity_collect_locked_state">Locked - data entry, modification and deletion are disabled</string>
+    <string name="activity_collect_frozen_state">Frozen - once data is saved it cannot be modified or deleted</string>
+    <string name="activity_collect_unlocked_state">Unlocked - no restrictions on data entry, modification, or deletion</string>
 
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Your device does not have a camera that can be used to take a photo.</string>
@@ -664,6 +683,7 @@
     <string name="preferences_appearance_language">Language</string>
     <string name="preferences_appearance_language_description">Language set by system</string>
     <string name="preference_language_default">System Language</string>
+    <string name="preference_language_warning" translatable="false">Translations are crowd-sourced and may not be entirely accurate or complete</string>
     <string name="language_en" translatable="false">English</string>
     <string name="language_am" translatable="false">አማርኛ</string>
     <string name="language_ar" translatable="false">اَلْعَرَبِيَّةُ</string>
@@ -1020,6 +1040,8 @@
     <!-- BrAPI Export -->
     <string name="act_brapi_export_title">BrAPI Export</string>
     <string name="brapi_export_button">Export</string>
+    <string name="brapi_next_field_button">Next Field</string>
+    <string name="brapi_close_button">Close</string>
     <string name="brapi_export_title">BrAPI Export Statistics</string>
     <string name="brapi_export_observations">Observations</string>
     <string name="brapi_export_num_new_obs"> New Observations</string>

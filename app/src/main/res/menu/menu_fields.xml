@@ -8,18 +8,13 @@
         android:showAsAction="always"
         android:title="@string/tutorial_dialog_title" />
     <item
-        android:id="@+id/menu_field_editor_item_creator"
-        android:icon="@drawable/ic_fields_creator"
-        android:showAsAction="always"
-        android:title="" />
-    <item
         android:id="@+id/action_select_plot_by_distance"
         android:icon="@drawable/ic_explore_black_24dp"
         android:showAsAction="ifRoom"
         android:title="@string/menu_fields_plot_by_distance_title" />
     <item
-        android:id="@+id/importField"
-        android:icon="@drawable/ic_tb_add_circle"
-        android:showAsAction="always"
-        android:title="@string/fields_toolbar_add_field" />
+        android:id="@+id/sortFields"
+        android:icon="@drawable/ic_tb_sort"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_fields_sort_list" />
 </menu>

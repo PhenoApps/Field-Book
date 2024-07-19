@@ -45,14 +45,6 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity
-            android:name=".activities.FieldEditorActivityOld"
-            android:alwaysRetainTaskState="false"
-            android:configChanges="keyboardHidden|orientation"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-
         <!-- Trait manager, for importing .trt files -->
         <activity
             android:name=".activities.TraitEditorActivity"

@@ -86,6 +86,7 @@
     <string name="import_dialog_unique">Identificador único</string>
     <string name="import_dialog_primary">Ordem primária</string>
     <string name="import_dialog_secondary">ordem secundária</string>
+    <string name="import_dialog_sort">Ordem de Classificação</string>
     <string name="import_error_unsupported">Este tipo de arquivo não é suportado atualmente</string>
     <string name="import_error_columns_replaced">Nomes de coluna contêm caracteres ilegais que serão substituídos durante a importação.</string>
     <string name="import_error_column_name">Nome da coluna no arquivo importado não pode ser: </string>
@@ -100,7 +101,12 @@
     <string name="fields_study_exists_message">Este campo já existe.</string>
     <string name="fields_study_and_obs_exists_message">Este campo já está importado neste nível de observação.</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book não pôde carregar o arquivo.</string>
+    <string name="act_field_editor_load_file_failed">Ocorreu um erro durante o carregamento do arquivo.</string>
+    <string name="act_field_editor_file_open_failed">Arquivo falhou ao abrir.</string>
     <!-- Field Creator  -->
+    <string name="dialog_field_creator_ask_size">Por favor, escolha o nome e tamanho do campo.</string>
+    <string name="dialog_field_creator_ask_start_point">Por favor, escolha um ponto de partida de campo.</string>
+    <string name="dialog_field_creator_ask_pattern">Por favor, escolha um padrão de campo.</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">Linhas</string>
     <string name="dialog_field_creator_ask_columns_hint">Colunas</string>
@@ -129,6 +135,8 @@
     <string name="field_detail_title">Detalhes do Campo</string>
     <string name="field_edit_display_name">Editar Nome de Exibição do Campo</string>
     <string name="name_cannot_be_empty">Nome não pode estar vazio.</string>
+    <string name="illegal_characters_message">Caracteres ilegais encontrados: %1$s</string>
+    <string name="name_conflict_message">\"%1$s\" já está sendo usado como um %2$s para outro campo.</string>
     <string name="name_conflict_import_name">nome da importação</string>
     <string name="name_conflict_display_name">nome de exibição</string>
     <string name="field_import_string">Importado de</string>
@@ -136,6 +144,8 @@
     <string name="field_detail_narrative">"%1$s\"%2$s\" com o nome \"%3$s\". Contém \"%4$s\" entradas e \"%5$s\" atributos. Classificado por \"%6$s"</string>
     <string name="field_default_sort_order">classificação de importação</string>
     <string name="field_data_title">Dados</string>
+    <string name="field_trait_total">\"&lt;b&gt;%1$s&lt;/b&gt;\" caracteres</string>
+    <string name="field_observation_total">\"&lt;b&gt;%1$s&lt;/b&gt;\" observações</string>
     <string name="field_trait_observation_total">\"%d\"observações</string>
     <!-- Semantic dates -->
     <string name="today">Hoje</string>
@@ -170,16 +180,27 @@
     <string name="traits_options_edit">Editar</string>
     <string name="traits_options_delete">Excluir</string>
     <string name="traits_options_delete_title">Excluir caractere</string>
+    <string name="traits_warning_delete">Excluindo um caractere também exclui dados que foram coletados para esse caractere. Tem certeza que deseja excluir esse caractere?</string>
     <!-- Trait formats -->
     <string name="traits_format_numeric">Numérico</string>
     <string name="traits_format_categorical">Categórico</string>
     <string name="traits_format_date">Data</string>
     <string name="traits_format_percent">Percentagem</string>
+    <string name="traits_format_counter">Contador</string>
+    <string name="traits_format_disease_rating">Avaliação da Doença</string>
     <string name="traits_format_boolean">Booliano</string>
     <string name="traits_format_text">Texto</string>
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_audio">Áudio</string>
+    <string name="traits_format_multicategorical">Multicat</string>
+    <string name="traits_format_location">Localização</string>
+    <string name="traits_format_gnss">GNSS</string>
+    <string name="traits_format_barcode">Código de Barras</string>
+    <string name="traits_format_labelprint">Impressão nas etiquetas Zebra</string>
+    <string name="traits_format_usb_camera">Câmera USB</string>
+    <string name="traits_format_go_pro_camera">GoPro</string>
     <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">Formato de Caractere</string>
     <string name="traits_create_name">Nome</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Padrão</string>
@@ -248,6 +269,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <string name="observation_info_trait_format">Formato de Caractere</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">Base de dados</string>
@@ -310,6 +332,7 @@
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <string name="brapi_study_name">Nome</string>
+    <string name="brapi_study_location">Localização</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Exportar</string>
     <!-- Pagination -->

@@ -47,6 +47,7 @@ import com.fieldbook.tracker.adapters.TraitAdapterController;
 import com.fieldbook.tracker.async.ImportCSVTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.dialogs.ListSortDialog;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -74,8 +75,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -371,7 +374,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         } else if (itemId == R.id.deleteTrait) {
             checkShowDeleteDialog();
         } else if (itemId == R.id.sortTrait) {
-            sortDialog();
+            showTraitSortDialog();
         } else if (itemId == R.id.importexport) {
             importExportDialog();
         } else if (itemId == R.id.toggleTrait) {
@@ -621,78 +624,23 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         alert.show();
     }
 
-    private void sortDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
+    private void showTraitSortDialog() {
+        Map<String, String> sortOptions = new LinkedHashMap<>();
+        final String defaultSortOrder = "internal_id_observation_variable";
+        String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, defaultSortOrder);
 
-        String[] allTraits = database.getTraitColumnData("trait");
-        if (allTraits == null) {
-            Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing_modify));
-            return;
-        }
 
-        ListView myList = layout.findViewById(R.id.myList);
+        sortOptions.put(getString(R.string.traits_sort_name), "observation_variable_name");
+        sortOptions.put(getString(R.string.traits_sort_format), "observation_variable_field_book_format");
+        sortOptions.put(getString(R.string.traits_sort_import_order), "internal_id_observation_variable");
+        sortOptions.put(getString(R.string.traits_sort_visibility), "visible");
 
-        String[] sortOptions = new String[3];
-        sortOptions[0] = getString(R.string.traits_sort_name);
-        sortOptions[1] = getString(R.string.traits_sort_format);
-        sortOptions[2] = getString(R.string.traits_sort_visibility);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, sortOptions);
-        myList.setAdapter(adapter);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.traits_sort_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
+        ListSortDialog dialog = new ListSortDialog(this, sortOptions, currentSortOrder, defaultSortOrder, criteria -> {
+            Log.d(TAG, "Updating traits list sort order to : " + criteria);
+            preferences.edit().putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, criteria).apply();
+            queryAndLoadTraits();
         });
-
-        final AlertDialog sortDialog = builder.create();
-        sortDialog.show();
-
-        android.view.WindowManager.LayoutParams params = sortDialog.getWindow().getAttributes();
-        params.width = LayoutParams.WRAP_CONTENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        sortDialog.getWindow().setAttributes(params);
-
-        myList.setOnItemClickListener((av, arg1, which, arg3) -> {
-            switch (which) {
-                case 0:
-                    sortTraitList("trait");
-                    break;
-                case 1:
-                    sortTraitList("format");
-                    break;
-                case 2:
-                    sortTraitList("isVisible");
-                    break;
-            }
-            sortDialog.dismiss();
-        });
-    }
-
-    private void sortTraitList(String colName) {
-        String[] sortList = database.getTraitColumnData(colName);
-
-        ArrayIndexComparator comparator = new ArrayIndexComparator(sortList);
-        Integer[] indexes = comparator.createIndexArray();
-        Arrays.sort(indexes, comparator);
-
-        if (colName.equals("isVisible")) {
-            Arrays.sort(indexes, Collections.reverseOrder());
-        }
-
-        for (int j = 0; j < indexes.length; j++) {
-            database.writeNewPosition(colName, sortList[j], Integer.toString(indexes[j]));
-            Log.e("TRAIT", sortList[j] + " " + indexes[j].toString());
-        }
-
-        queryAndLoadTraits();
+        dialog.show();
     }
 
     private void showExportDialog() {
