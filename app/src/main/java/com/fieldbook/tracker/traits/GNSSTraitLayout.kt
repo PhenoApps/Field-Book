@@ -426,8 +426,19 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
                         if (location != null) {
 
-                            //averaging is updating the location, so ask the user
-                            alertLocationUpdate {
+                            if (!isFirstCollect) {
+
+                                //averaging is updating the location, so ask the user
+                                alertLocationUpdate {
+                                    val original = (location.latitude) to (location.longitude)
+                                    val current = newLat to newLng
+                                    pointsToAverage.add(original)
+                                    pointsToAverage.add(current)
+                                    averagePoints(info)
+                                }
+
+                            } else {
+
                                 val original = (location.latitude) to (location.longitude)
                                 val current = newLat to newLng
                                 pointsToAverage.add(original)
