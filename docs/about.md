@@ -2,7 +2,7 @@ About
 =====
 
 <figure align="center" class="image">
-  <img src="/_static/images/about/about_framed.png" width="350px"> 
+  <img src="_static/images/about/about_framed.png" width="350px"> 
   <figcaption><i>The About screen</i></figcaption> 
 </figure>
 

@@ -7,41 +7,41 @@ Overview
 GeoNav is used to automatically navigate between entries in the field
 based on the location of a high precision GNSS device. This feature
 requires field entries to have high-precision location data collected
-via the <a href="trait-gnss.md"><img style="vertical-align: middle;" src="/_static/icons/formats/satellite-variant.png" width="20px"></a> [GNSS Trait](trait-gnss.md) or included in the field
+via the <a href="trait-gnss.md"><img style="vertical-align: middle;" src="_static/icons/formats/satellite-variant.png" width="20px"></a> [GNSS Trait](trait-gnss.md) or included in the field
 import file. Imported coordinates must be in `Lat;Long` format in a
 single `geo_coordinates` column. Refer to the
 `rtk_sample.csv` file in the `field_import` directory as an example.
 
 To use GeoNav, navigate to the
-<a href="settings-geonav.md"><img style="vertical-align: middle;" src="/_static/icons/settings/main/map-search.png" width="20px"></a> [Geonav Settings](settings-geonav.md) and enable GeoNav. Turn
+<a href="settings-geonav.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/map-search.png" width="20px"></a> [Geonav Settings](settings-geonav.md) and enable GeoNav. Turn
 on Bluetooth, and pair your external reciever. Navigate to the Collect
 screen and look for a confirmation message that says **Rover
 communications estabished**
 
 <figure align="center" class="image">
-  <img src="/_static/images/geonav/connect_cropped.png" width="325px"> 
+  <img src="_static/images/geonav/connect_cropped.png" width="325px"> 
   <figcaption><i>The GeoNav confirmation message</i></figcaption> 
 </figure>
 
 Once the rover is connected, Field Book will automatically display the
 nearest plot in the bottom toolbar. Press the
-<img ref="navigate" style="vertical-align: middle;" src="/_static/icons/collect/send-outline.png" width="20px"> icon on the right to jump to the plot.
+<img ref="navigate" style="vertical-align: middle;" src="_static/icons/collect/send-outline.png" width="20px"> icon on the right to jump to the plot.
 
 <figure align="center" class="image">
-  <img src="/_static/images/geonav/goto_cropped.png" width="325px"> 
+  <img src="_static/images/geonav/goto_cropped.png" width="325px"> 
   <figcaption><i>The bottom toolbar showing the nearest plot for manual
 geonavigation</i></figcaption> 
 </figure>
 
 To enable automatic geonavigation, press the
-<img ref="compass-off" style="vertical-align: middle;" src="/_static/icons/collect/compass-off-outline.png" width="20px"> icon that appears on the right in the top toolbar. It will change to a
-<img ref="compass" style="vertical-align: middle;" src="/_static/icons/fields/compass-outline.png" width="20px"> icon
+<img ref="compass-off" style="vertical-align: middle;" src="_static/icons/collect/compass-off-outline.png" width="20px"> icon that appears on the right in the top toolbar. It will change to a
+<img ref="compass" style="vertical-align: middle;" src="_static/icons/fields/compass-outline.png" width="20px"> icon
 indicating that automatic geonavigation is enabled. Field Book will
 automatically switch to the nearest entry as the device moves around the
 field, displaying the following message on each switch.
 
 <figure align="center" class="image">
-  <img src="/_static/images/geonav/navigated_cropped.png" width="325px"> 
+  <img src="_static/images/geonav/navigated_cropped.png" width="325px"> 
   <figcaption><i>The automatic geonavigation notification</i></figcaption> 
 </figure>
 
@@ -49,7 +49,7 @@ Example
 -------
 
 <figure align="center" class="image">
-  <img src="/_static/gifs/GeoNavDemo.gif" width="1100px"> 
+  <img src="_static/gifs/GeoNavDemo.gif" width="1100px"> 
   <figcaption><i>GeoNav automatic navigation demonstration</i></figcaption> 
 </figure>
 

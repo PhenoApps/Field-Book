@@ -2,17 +2,17 @@ Beta Settings
 =============
 
 <figure align="center" class="image">
-  <img src="/_static/images/settings/beta/settings_beta_framed.png" width="350px"> 
+  <img src="_static/images/settings/beta/settings_beta_framed.png" width="350px"> 
   <figcaption><i>Beta settings screen layout</i></figcaption> 
 </figure>
 
-#### <img ref="flask" style="vertical-align: middle;" src="/_static/icons/settings/beta/flask-outline.png" width="20px"> Repeated Measures
+#### <img ref="flask" style="vertical-align: middle;" src="_static/icons/settings/beta/flask-outline.png" width="20px"> Repeated Measures
 
 Turns on repeated measures. When turned on, a green plus symbol appears
 next to the trait value entry box on the collect screen.
 
 <figure align="center" class="image">
-  <img src="/_static/images/settings/beta/settings_beta_repeated_icon.png" width="325px"> 
+  <img src="_static/images/settings/beta/settings_beta_repeated_icon.png" width="325px"> 
   <figcaption><i>Collect screen value entry with repeated measurements enabled</i></figcaption> 
 </figure>
 

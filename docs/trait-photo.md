@@ -1,4 +1,4 @@
-<img ref="photo" style="vertical-align: middle;" src="/_static/icons/formats/camera.png" width="40px"> Photo Trait
+<img ref="photo" style="vertical-align: middle;" src="_static/icons/formats/camera.png" width="40px"> Photo Trait
 =====================================================================
 
 Overview
@@ -16,7 +16,7 @@ Creation
 --------
 
 <figure align="center" class="image">
-  <img src="/_static/images/traits/formats/create_photo.png" width="325px"> 
+  <img src="_static/images/traits/formats/create_photo.png" width="325px"> 
   <figcaption><i>Photo trait creation dialog</i></figcaption> 
 </figure>
 
@@ -24,6 +24,6 @@ Collect layout
 --------------
 
 <figure align="center" class="image">
-  <img src="/_static/images/traits/formats/collect_photo_framed.png" width="400px"> 
+  <img src="_static/images/traits/formats/collect_photo_framed.png" width="400px"> 
   <figcaption><i>Photo trait collection interface</i></figcaption> 
 </figure>

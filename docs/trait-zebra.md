@@ -1,4 +1,4 @@
-<img ref="print" style="vertical-align: middle;" src="/_static/icons/formats/printer.png" width="40px"> Zebra Label Print Trait
+<img ref="print" style="vertical-align: middle;" src="_static/icons/formats/printer.png" width="40px"> Zebra Label Print Trait
 ==================================================================================
 
 Overview
@@ -20,7 +20,7 @@ Creation
 --------
 
 <figure align="center" class="image">
-  <img src="/_static/images/traits/formats/create_zebra_label_print.png" width="325px"> 
+  <img src="_static/images/traits/formats/create_zebra_label_print.png" width="325px"> 
   <figcaption><i>Zebra Label Print trait creation dialog</i></figcaption> 
 </figure>
 
@@ -28,7 +28,7 @@ Collect layout
 --------------
 
 <figure align="center" class="image">
-  <img src="/_static/images/traits/formats/collect_zebra_label_print_framed.png" width="400px"> 
+  <img src="_static/images/traits/formats/collect_zebra_label_print_framed.png" width="400px"> 
   <figcaption><i>Zebra Label Print trait collection interface</i></figcaption> 
 </figure>
 

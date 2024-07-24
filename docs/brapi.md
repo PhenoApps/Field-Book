@@ -15,13 +15,13 @@ Setup
 -----
 
 BrAPI can be set up in the
-<a href="settings-brapi.md"><img style="vertical-align: middle;" src="/_static/icons/settings/main/server-network.png" width="20px"></a> [Brapi settings](settings-brapi.md). To use BrAPI, set the
+<a href="settings-brapi.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/server-network.png" width="20px"></a> [Brapi settings](settings-brapi.md). To use BrAPI, set the
 base URL to the URL of a valid BrAPI server and authorize it. Once
 authorized, Field Book will be able to communicate with the server to
 import fields and traits and export data.
 
 <figure align="center" class="image">
-  <img src="/_static/images/brapi/brapi_url_joined.png" width="700px"> 
+  <img src="_static/images/brapi/brapi_url_joined.png" width="700px"> 
   <figcaption><i>Example BrAPI URL authorization</i></figcaption> 
 </figure>
 
@@ -29,19 +29,19 @@ Import fields
 -------------
 
 <figure align="center" class="image">
-  <img src="/_static/images/brapi/brapi_field_import_joined.png" width="1100px"> 
+  <img src="_static/images/brapi/brapi_field_import_joined.png" width="1100px"> 
   <figcaption><i>The BrAPI field import process</i></figcaption> 
 </figure>
 
 To import a field using BrAPI, press
-<img ref="add" style="vertical-align: middle;" src="/_static/icons/fields/plus-circle.png" width="20px"> in the top
+<img ref="add" style="vertical-align: middle;" src="_static/icons/fields/plus-circle.png" width="20px"> in the top
 toolbar, select BrAPI as the source, and press the **Load Fields**
 button
 
 Field Book will import a list of possible fields (known as
 `studies` in the BrAPI standard) from the BrAPI Base URL set
 in the
-<a href="settings-brapi.md"><img style="vertical-align: middle;" src="/_static/icons/settings/main/server-network.png" width="20px"></a> [Brapi settings](settings-brapi.md).
+<a href="settings-brapi.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/server-network.png" width="20px"></a> [Brapi settings](settings-brapi.md).
 
 Available fields can be filtered by program and trial using the menu
 options in the top toolbar. The list can be filtered by
@@ -64,14 +64,14 @@ imported with the field. Additional traits can be imported via BrAPI by
 selecting import from the Traits menu, then selecting BrAPI.
 
 <figure align="center" class="image">
-  <img src="/_static/images/brapi/brapi_trait_import_joined.png" width="700px"> 
+  <img src="_static/images/brapi/brapi_trait_import_joined.png" width="700px"> 
   <figcaption><i>The BrAPI trait import process</i></figcaption> 
 </figure>
 
 Field Book will import a list of possible traits (known as
 `observationVariables` in the BrAPI standard) from the BrAPI
 Base URL set in the
-<a href="settings-brapi.md"><img style="vertical-align: middle;" src="/_static/icons/settings/main/server-network.png" width="20px"></a> [Brapi settings](settings-brapi.md).
+<a href="settings-brapi.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/server-network.png" width="20px"></a> [Brapi settings](settings-brapi.md).
 
 Traits are selected and then imported by pressing the **Save Traits**
 button. Traits can be imported individually or in groups.
@@ -91,7 +91,7 @@ vs synced(imported) vs edited observations, as well as skipped
 observations. The same statistics are displayed for images.
 
 <figure align="center" class="image">
-  <img src="/_static/images/brapi/brapi_export_process_joined.png" width="700px"> 
+  <img src="_static/images/brapi/brapi_export_process_joined.png" width="700px"> 
   <figcaption><i>The BrAPI data export process</i></figcaption> 
 </figure>
 

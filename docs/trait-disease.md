@@ -1,4 +1,4 @@
-<img ref="disease" style="vertical-align: middle;" src="/_static/icons/formats/bug.png" width="40px"> Disease Trait
+<img ref="disease" style="vertical-align: middle;" src="_static/icons/formats/bug.png" width="40px"> Disease Trait
 ======================================================================
 
 Overview
@@ -20,7 +20,7 @@ Creation
 --------
 
 <figure align="center" class="image">
-  <img src="/_static/images/traits/formats/create_disease_rating.png" width="325px"> 
+  <img src="_static/images/traits/formats/create_disease_rating.png" width="325px"> 
   <figcaption><i>Disease trait creation dialog</i></figcaption> 
 </figure>
 
@@ -28,6 +28,6 @@ Collect layout
 --------------
 
 <figure align="center" class="image">
-  <img src="/_static/images/traits/formats/collect_disease_1_framed.png" width="400px"> 
+  <img src="_static/images/traits/formats/collect_disease_1_framed.png" width="400px"> 
   <figcaption><i>Disease trait collection interface</i></figcaption> 
 </figure>

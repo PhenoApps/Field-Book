@@ -8,10 +8,10 @@ After installing and opening the app, you will be asked to create a new
 folder and define it as the **Storage location** on the device where
 files will be written. In Field Book this step is required. The selected
 **Storage location** can be changed in the
-<a href="settings-general.md"><img style="vertical-align: middle;" src="/_static/icons/home/cog.png" width="20px"></a> [General Settings](settings-general.md).
+<a href="settings-general.md"><img style="vertical-align: middle;" src="_static/icons/home/cog.png" width="20px"></a> [General Settings](settings-general.md).
 
 <figure align="center" class="image">
-  <img src="/_static/images/storage_definer_framed.png" width="400px"> 
+  <img src="_static/images/storage_definer_framed.png" width="400px"> 
   <figcaption><i>Storage location definer layout</i></figcaption> 
 </figure>
 
@@ -43,7 +43,7 @@ file transfer. Each device manufacturer has slight variations for the
 appearance of this dialog.
 
 <figure align="center" class="image">
-  <img src="/_static/images/fields/fields_transfer.png" width="325px"> 
+  <img src="_static/images/fields/fields_transfer.png" width="325px"> 
   <figcaption><i>Example settings for USB file transfer</i></figcaption> 
 </figure>
 
@@ -56,6 +56,6 @@ is modelled after the Breeding API (BrAPI) standard, and is documented
 in the [Field Book Wiki](https://github.com/PhenoApps/Field-Book/wiki)
 
 The database is automatically backed up to the `database` directory at
-regular intervals. It can also be manually exported and imported in <a href="settings-database.md"><img style="vertical-align: middle;" src="/_static/icons/settings/main/database.png" width="20px"></a> [Database Settings](settings-database.md). This feature can be
+regular intervals. It can also be manually exported and imported in <a href="settings-database.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/database.png" width="20px"></a> [Database Settings](settings-database.md). This feature can be
 used to transfer data to a new device or for recreating issues when
 troubleshooting.

@@ -1,4 +1,4 @@
-<img ref="counter" style="vertical-align: middle;" src="/_static/icons/formats/numeric-positive.png" width="40px"> Counter Trait
+<img ref="counter" style="vertical-align: middle;" src="_static/icons/formats/numeric-positive.png" width="40px"> Counter Trait
 =====================================================================================
 
 Overview
@@ -14,7 +14,7 @@ Creation
 --------
 
 <figure align="center" class="image">
-  <img src="/_static/images/traits/formats/create_counter.png" width="325px"> 
+  <img src="_static/images/traits/formats/create_counter.png" width="325px"> 
   <figcaption><i>Counter trait creation dialog</i></figcaption> 
 </figure>
 
@@ -22,6 +22,6 @@ Collect layout
 --------------
 
 <figure align="center" class="image">
-  <img src="/_static/images/traits/formats/collect_counter_framed.png" width="400px"> 
+  <img src="_static/images/traits/formats/collect_counter_framed.png" width="400px"> 
   <figcaption><i>Counter trait collection interface</i></figcaption> 
 </figure>

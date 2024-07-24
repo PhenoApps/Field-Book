@@ -21,7 +21,7 @@ accurately capture height without having to hold both the height stick
 and the device.
 
 <figure align="center" class="image">
-  <img src="/_static/images/barcodes/barcodes_plant_height.png" width="400px"> 
+  <img src="_static/images/barcodes/barcodes_plant_height.png" width="400px"> 
   <figcaption><i>Plant height measurement via barcoded height
 stick</i></figcaption> 
 </figure>
@@ -29,7 +29,7 @@ stick</i></figcaption>
 #### Leaf length
 
 <figure align="center" class="image">
-  <img src="/_static/images/barcodes/barcodes_leaf_length.png" width="900px"> 
+  <img src="_static/images/barcodes/barcodes_leaf_length.png" width="900px"> 
   <figcaption><i>Example leaf length collection via length
 barcodes</i></figcaption> 
 </figure>
@@ -37,7 +37,7 @@ barcodes</i></figcaption>
 #### Leaf angle
 
 <figure align="center" class="image">
-  <img src="/_static/images/barcodes/barcodes_leaf_angle.png" width="600px"> 
+  <img src="_static/images/barcodes/barcodes_leaf_angle.png" width="600px"> 
   <figcaption><i>Example leaf angle
 barcodes</i></figcaption> 
 </figure>

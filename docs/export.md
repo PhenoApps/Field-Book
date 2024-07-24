@@ -26,7 +26,7 @@ timestamp are excluded. If repeated measures have been collected, only
 the first value will be exported when using the table format.
 
 <figure align="center" class="image">
-  <img src="/_static/images/export/export_file_formats.png" width="1100px"> 
+  <img src="_static/images/export/export_file_formats.png" width="1100px"> 
   <figcaption><i>Sample data exported in both
 formats</i></figcaption> 
 </figure>
@@ -61,4 +61,4 @@ data along with images and audio files that have also been collected.
 **Overwrite previous export** moves old files to `archive` directory.
 
 The default export location can be modified in
-<a href="settings-general.md"><img style="vertical-align: middle;" src="/_static/icons/home/cog.png" width="20px"></a> [General Settings](settings-general.md).
+<a href="settings-general.md"><img style="vertical-align: middle;" src="_static/icons/home/cog.png" width="20px"></a> [General Settings](settings-general.md).

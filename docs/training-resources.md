@@ -14,6 +14,6 @@ The exercises in the the training slides are based on the
 `field_import` directory on install and is imported as part training.
 
 <figure align="center" class="image">
-  <img src="/_static/images/training_field.png" width="1100px"> 
+  <img src="_static/images/training_field.png" width="1100px"> 
   <figcaption><i>The training sample field in exercise 3</i></figcaption> 
 </figure>
