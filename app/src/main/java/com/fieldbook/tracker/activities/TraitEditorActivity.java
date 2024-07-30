@@ -629,7 +629,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         final String defaultSortOrder = "internal_id_observation_variable";
         String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, defaultSortOrder);
 
-
         sortOptions.put(getString(R.string.traits_sort_name), "observation_variable_name");
         sortOptions.put(getString(R.string.traits_sort_format), "observation_variable_field_book_format");
         sortOptions.put(getString(R.string.traits_sort_import_order), "internal_id_observation_variable");

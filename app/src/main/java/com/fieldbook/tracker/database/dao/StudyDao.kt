@@ -200,7 +200,7 @@ class StudyDao {
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
-                ORDER BY $sortOrder DESC
+                ORDER BY $sortOrder COLLATE NOCASE ASC
             """
             db.rawQuery(query, null).use { cursor ->
                 while (cursor.moveToNext()) {
@@ -291,7 +291,7 @@ class StudyDao {
                     JOIN observation_variables ov ON o.observation_variable_db_id = ov.internal_id_observation_variable
                     WHERE o.study_id = ? AND o.observation_variable_db_id > 0
                     GROUP BY o.observation_variable_name, o.observation_variable_field_book_format
-                    ORDER BY ov.$sortOrder $orderDirection
+                    ORDER BY ov.$sortOrder COLLATE NOCASE $orderDirection
                 """, arrayOf(studyId.toString(), studyId.toString(), studyId.toString()))
 
                 if (cursor.moveToFirst()) {

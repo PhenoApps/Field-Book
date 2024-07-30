@@ -248,7 +248,7 @@ class ObservationVariableDao {
 
             val query = """
                 SELECT * FROM ${ObservationVariable.tableName}
-                ORDER BY $sortOrder $orderDirection
+                ORDER BY $sortOrder COLLATE NOCASE $orderDirection
             """
 
             db.rawQuery(query, null).use { cursor ->
