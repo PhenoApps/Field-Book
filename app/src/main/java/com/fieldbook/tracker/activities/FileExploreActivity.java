@@ -186,16 +186,16 @@ public class FileExploreActivity extends ActivityDialog {
             for (DocumentFile file : files) {
                 String name = file.getName();
                 if (name != null) {
+//                    // Skip asset files
+//                    if (name.contains(".fieldbook") || name.contains("severity.txt") || name.contains("sharedpref.xml")) {
+//                        continue;
+//                    }
 
                     if (excludedExtensions.contains(checkExtension(name))) continue;
 
                     if (includedExtensions.contains(checkExtension(name)) || file.isDirectory()) {
                         accepted.add(file);
                         continue;
-                    }
-
-                    if (!(name.contains(".fieldbook") || name.contains("severity.txt") || name.contains("sharedpref.xml"))) {
-                        accepted.add(file);
                     }
                 }
             }
