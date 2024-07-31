@@ -26,6 +26,11 @@
     <string name="startup_sample_data_title">Sample data</string>
     <string name="startup_sample_data_message">Load sample data?</string>
 
+    <!-- Storage Definer -->
+    <string name="storage_definer_title">Storage Location</string>
+    <string name="storage_definer_summary">Please select or create a folder that Field Book can use to store app data.</string>
+    <string name="define_button_text">Choose Folder</string>
+
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
     <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
