@@ -120,7 +120,13 @@ class ObservationVariableDao {
 
         } ?: arrayOf()
 
-        fun getTraitColumnData(queryColumn: String): Array<String> = withDatabase { db ->
+        fun getTraitColumnData(column: String): Array<String> = withDatabase { db ->
+
+            val queryColumn = when(column) {
+                "isVisible" -> "visible"
+                "format" -> "observation_variable_field_book_format"
+                else -> "observation_variable_name"
+            }
 
             db.query(ObservationVariable.tableName,
                     arrayOf(queryColumn)).use {
