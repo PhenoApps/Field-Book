@@ -14,9 +14,16 @@ class CitationDialog(private val context: Context) {
         val citationText = context.getString(R.string.citation_text)
         val citationLink = "http://dx.doi.org/10.2135/cropsci2013.08.0579"
 
+        val htmlMessage = """
+            $citationMessage<br/><br/>
+            <a href="$citationLink">
+                <tt>$citationText</tt>
+            </a>
+        """.trimIndent()
+
         val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
         builder.setTitle(context.getString(R.string.citation_title))
-            .setMessage(Html.fromHtml("$citationMessage<br/><br/><a href=\"$citationLink\">$citationText</a>"))
+            .setMessage(Html.fromHtml(htmlMessage))
             .setCancelable(false)
             .setPositiveButton(context.getString(R.string.dialog_ok)) { dialog, _ ->
                 dialog.dismiss()

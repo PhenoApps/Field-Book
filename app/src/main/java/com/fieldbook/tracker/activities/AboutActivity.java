@@ -95,6 +95,17 @@ public class AboutActivity extends MaterialAboutActivity {
                 false,
                 Uri.parse("https://docs.fieldbook.phenoapps.org/en/latest/field-book.html")));
 
+        appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
+                .text(R.string.citation_card_title)
+                .icon(R.drawable.ic_script_text_outline)
+                .setOnClickAction(new MaterialAboutItemOnClickAction() {
+                    @Override
+                    public void onClick() {
+                        new CitationDialog(AboutActivity.this).show();
+                    }
+                })
+                .build());
+
         appCardBuilder.addItem(ConvenienceBuilder.createRateActionItem(c,
                 getResources().getDrawable(R.drawable.ic_about_rate),
                 getString(R.string.about_rate),
@@ -133,19 +144,6 @@ public class AboutActivity extends MaterialAboutActivity {
                 false,
                 Uri.parse("https://github.com/PhenoApps/Field-Book#-funding")));
 
-        MaterialAboutCard.Builder citationCardBuilder = new MaterialAboutCard.Builder();
-        citationCardBuilder.title(getString(R.string.citation_card_title));
-
-        citationCardBuilder.addItem(new MaterialAboutActionItem.Builder()
-                .text(getString(R.string.citation_title))
-                .icon(R.drawable.ic_file_document)
-                .setOnClickAction(new MaterialAboutItemOnClickAction() {
-                    @Override
-                    public void onClick() {
-                        new CitationDialog(AboutActivity.this).show();
-                    }
-                })
-                .build());
 
         MaterialAboutCard.Builder technicalCardBuilder = new MaterialAboutCard.Builder();
         technicalCardBuilder.title(getString(R.string.about_technical_title));
@@ -212,7 +210,6 @@ public class AboutActivity extends MaterialAboutActivity {
                 appCardBuilder.build(),
                 authorCardBuilder.build(),
                 contributorsCardBuilder.build(),
-                citationCardBuilder.build(),
                 otherAppsCardBuilder.build(),
                 technicalCardBuilder.build()
         );
