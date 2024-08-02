@@ -40,10 +40,10 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
             updateUi()
         }
     companion object {
-        const val LOCATION_COLLECTION_STUDY = 0
-        const val LOCATION_COLLECTION_OBS_UNIT = 1
-        const val LOCATION_COLLECTION_OBS = 2
-        const val LOCATION_COLLECTION_OFF = 3
+        const val LOCATION_COLLECTION_OFF = 0
+        const val LOCATION_COLLECTION_STUDY = 1
+        const val LOCATION_COLLECTION_OBS_UNIT = 2
+        const val LOCATION_COLLECTION_OBS = 3
     }
 
     private fun updateUi() {
