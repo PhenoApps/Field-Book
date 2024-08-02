@@ -10,7 +10,7 @@
 
     <item
         android:id="@+id/sort"
-        android:icon="@drawable/ic_field_sort"
+        android:icon="@drawable/ic_sort"
         app:showAsAction="always"
         android:title="@string/field_sort_entries" />
 
