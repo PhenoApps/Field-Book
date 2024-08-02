@@ -261,7 +261,7 @@ open class SortDialog(
 
         val dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
 
-        dialog.setTitle(R.string.dialog_field_sort_title)
+        dialog.setTitle(R.string.field_sort_entries)
 
         val adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, unused)
 

@@ -19,10 +19,14 @@ import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
+import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 
 
 class StudyDao {
@@ -185,15 +189,9 @@ class StudyDao {
             it.observation_count = this["observation_count"]?.toString()
         }
 
-        fun getAllFieldObjects(): ArrayList<FieldObject> = withDatabase { db ->
+        fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
 
             val studies = ArrayList<FieldObject>()
-
-//            db.query(Study.tableName)
-//                    .toTable()
-//                    .forEach { model ->
-//                        studies.add(model.toFieldObject())
-//                    }
 
             val query = """
                 SELECT 
@@ -202,6 +200,7 @@ class StudyDao {
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
+                ORDER BY $sortOrder COLLATE NOCASE ASC
             """
             db.rawQuery(query, null).use { cursor ->
                 while (cursor.moveToNext()) {
@@ -212,34 +211,12 @@ class StudyDao {
                     studies.add(model.toFieldObject())
                 }
             }
-
-            // Sort fields by most recent import/edit activity
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            fun parseDate(date: String): Date? {
-                return if (date.isBlank()) null
-                else {
-                    try {
-                        dateFormat.parse(date.substring(0, 19)) // Truncate to "yyyy-MM-dd HH:mm:ss"
-                    } catch (e: ParseException) {
-                        Log.e("StudyDao", "Error parsing date: $date", e)
-                        null
-                    }
-                }
-            }
-
-            val sortedStudies = studies.sortedWith(compareByDescending<FieldObject> { fieldObject ->
-                listOfNotNull(
-                        parseDate(fieldObject.date_edit),
-                        parseDate(fieldObject.date_import)
-                ).maxOrNull() ?: Date(0)
-            })
-
-            ArrayList(sortedStudies)
+            ArrayList(studies)
 
         } ?: ArrayList()
 
 
-        fun getFieldObject(exp_id: Int): FieldObject? = withDatabase { db ->
+        fun getFieldObject(exp_id: Int, sortOrder: String = "internal_id_observation_variable"): FieldObject? = withDatabase { db ->
             val query = """
                 SELECT 
                     ${Study.PK},
@@ -273,7 +250,7 @@ class StudyDao {
                     }
                     map.toFieldObject().apply {
                         // Set the trait details
-                        this.setTraitDetails(getTraitDetailsForStudy(exp_id))
+                        this.setTraitDetails(getTraitDetailsForStudy(exp_id, sortOrder))
                     }
                 } else {
                     null
@@ -288,26 +265,56 @@ class StudyDao {
          * data class TraitDetail(
          *         val traitName: String,
          *         val format: String,
-         *         val count: Int
+         *         val categories: String,
+         *         val count: Int,
+         *         val observations: List<String>
+         *         val completeness: Float
          * )
          */
-        fun getTraitDetailsForStudy(studyId: Int): List<FieldObject.TraitDetail> {
+
+        fun getTraitDetailsForStudy(studyId: Int, sortOrder: String = "internal_id_observation_variable"): List<FieldObject.TraitDetail> {
             return withDatabase { db ->
                 val traitDetails = mutableListOf<FieldObject.TraitDetail>()
 
+                // Sort ascending except for visibility, for visibility sort desc to have visible traits first
+                val orderDirection = if (sortOrder == "visible") "DESC" else "ASC"
+
                 val cursor = db.rawQuery("""
-            SELECT observation_variable_name, observation_variable_field_book_format, COUNT(*) as count
-            FROM observations
-            WHERE study_id = ? AND observation_variable_db_id > 0
-            GROUP BY observation_variable_name
-        """, arrayOf(studyId.toString()))
+                    SELECT o.observation_variable_name, o.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
+                    (SELECT COUNT(DISTINCT observation_unit_id) FROM observations WHERE study_id = ? AND observation_variable_name = o.observation_variable_name) AS distinct_obs_units,
+                    (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units,
+                    (SELECT v.observation_variable_attribute_value 
+                     FROM observation_variable_values v
+                     JOIN observation_variable_attributes a ON v.observation_variable_attribute_db_id = a.internal_id_observation_variable_attribute
+                     WHERE v.observation_variable_db_id = o.observation_variable_db_id AND a.observation_variable_attribute_name = 'category') AS categories
+                    FROM observations o
+                    JOIN observation_variables ov ON o.observation_variable_db_id = ov.internal_id_observation_variable
+                    WHERE o.study_id = ? AND o.observation_variable_db_id > 0
+                    GROUP BY o.observation_variable_name, o.observation_variable_field_book_format
+                    ORDER BY ov.$sortOrder COLLATE NOCASE $orderDirection
+                """, arrayOf(studyId.toString(), studyId.toString(), studyId.toString()))
 
                 if (cursor.moveToFirst()) {
                     do {
                         val traitName = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name"))
                         val format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format"))
                         val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
-                        traitDetails.add(FieldObject.TraitDetail(traitName, format, count))
+                        val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
+                        val rawObservations = observationsString?.split("|") ?: emptyList()
+                        val observations = rawObservations.map { obs ->
+                            CategoryJsonUtil.processValue(
+                                buildMap {
+                                    put("observation_variable_field_book_format", format)
+                                    put("value", obs)
+                                }
+                            )
+                        }
+                        val distinctObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("distinct_obs_units"))
+                        val totalObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("total_obs_units"))
+                        val completeness = distinctObsUnits.toFloat() / totalObsUnits.toFloat()
+                        val categories = cursor.getString(cursor.getColumnIndexOrThrow("categories"))
+
+                        traitDetails.add(FieldObject.TraitDetail(traitName, format, categories, count, observations, completeness))
                     } while (cursor.moveToNext())
                 }
 
