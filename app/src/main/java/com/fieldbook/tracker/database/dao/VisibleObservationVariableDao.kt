@@ -23,22 +23,20 @@ class VisibleObservationVariableDao {
 
         } ?: emptyArray<String>()
 
-//        fun getVisibleTraitObjects(): Array<ObservationVariableModel> = withDatabase { db ->
-//
-//            val rows = db.query(sVisibleObservationVariableViewName,
-//                    orderBy = "position").toTable()
-//
-//            val variables: Array<ObservationVariableModel?> = arrayOfNulls(rows.size)
-//
-//            rows.forEachIndexed { index, map ->
-//
-//                variables[index] = ObservationVariableModel(map)
-//
-//            }
-//
-//            variables.mapNotNull { it }.toTypedArray()
-//
-//        } ?: emptyArray()
+        fun getVisibleTraitObjects(): ArrayList<TraitObject> = withDatabase { db ->
+            val rows = db.query(sVisibleObservationVariableViewName, orderBy = "position").toTable()
+
+            val variables: ArrayList<TraitObject> = ArrayList()
+
+            rows.forEach { map ->
+                variables.add(TraitObject().apply {
+                    id = (map[ObservationVariable.PK] as? Int ?: -1).toString()
+                    name = map["observation_variable_name"] as? String ?: ""
+                })
+            }
+
+            variables
+        } ?: ArrayList()
 
         fun getFormat(): Array<String> = withDatabase { db ->
 

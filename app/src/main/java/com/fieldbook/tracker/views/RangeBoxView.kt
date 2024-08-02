@@ -23,6 +23,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.objects.RangeObject
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
 import java.util.*
@@ -379,7 +380,7 @@ class RangeBoxView : ConstraintLayout {
         }
         if (rangeID.isNotEmpty()) {
             val step = if (left) -1 else 1
-            paging = movePaging(paging, step, true, false)
+            paging = movePaging(paging, step, false)
 
             // Refresh onscreen controls
             updateCurrentRange(rangeID[paging - 1])
@@ -591,182 +592,36 @@ class RangeBoxView : ConstraintLayout {
     }
 
     private fun decrementPaging(pos: Int): Int {
-        return movePaging(pos, -1, cyclic = false, fromToolbar = false)
+        return movePaging(pos, -1, fromToolbar = false)
     }
 
     private fun incrementPaging(pos: Int): Int {
-        return movePaging(pos, 1, cyclic = false, fromToolbar = false)
+        return movePaging(pos, 1, fromToolbar = false)
     }
 
-//    private fun chooseNextTrait(pos: Int, step: Int) {
-//        val nextTrait = controller.getNonExistingTraits(rangeID[pos - 1])
-//        if (nextTrait.isNotEmpty()) {
-//            if (step < 0) {
-//                controller.getTraitBox().setSelection(Collections.max(nextTrait))
-//            } else controller.getTraitBox().setSelection(Collections.min(nextTrait))
-//        }
-//    }
+    fun movePaging(pos: Int, step: Int, fromToolbar: Boolean): Int {
+        //three skipMode options: 0. disabled 1. skip active trait 2. skip but check all traits
 
-    private fun getTraitIndex(traits: Array<String>): Int {
-        val currentTraitName: String? = controller.getTraitBox().currentTrait?.name
-        var traitIndex = 0
-        for (i in traits.indices) {
-            if (currentTraitName == traits[i]) {
-                traitIndex = i
-                break
-            }
+        val skipMode = if (fromToolbar) {
+            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1")?.toIntOrNull() ?: 1
+        } else {
+            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1")?.toIntOrNull() ?: 1
         }
-        return traitIndex
-    }
 
-    private fun checkSkipTraits(
-        traits: Array<String>,
-        step: Int,
-        p: Int,
-        cyclic: Boolean,
-        skipMode: Boolean
-    ): Int {
-
-        //edge case where we are on the last position
-        //check for missing traits dependent on step for last position
-        //if all traits are observed or the only unobserved is to the left, move to pos 1
-        var pos = p
-        if (step == 1 && pos == rangeID.size) {
-            if (!skipMode) {
-                val currentTrait = getTraitIndex(traits)
-                val nextTrait = controller.existsAllTraits(currentTrait, rangeID[pos - 1])
-                if (nextTrait != -1) { //check if this trait is "next" if not then move to 1
-                    if (nextTrait > currentTrait) {
-                        controller.getTraitBox().setSelection(nextTrait)
-                        return rangeID.size
-                    } else { //when moving to one, select the non existing trait
-                        val nextTraitOnFirst = controller.getNonExistingTraits(rangeID[0])
-                        if (nextTraitOnFirst.isNotEmpty()) {
-                            controller.getTraitBox().setSelection(Collections.min(nextTraitOnFirst))
-                            return 1
-                        }
-                    } //if all traits exist for 1 then just follow the main loop
-                }
-            }
-        }
-        val prevPos = pos
-        //first loop is used to detect if all observations are completed
-        var firstLoop = true
-        //this keeps track of the previous loops position
-        //while prevPos keeps track of what position this function was called with.
-        var localPrev: Int
-        while (true) {
-
-            //get the index of the currently selected trait
-            val traitIndex = getTraitIndex(traits)
-            localPrev = pos
-            pos = moveSimply(pos, step)
-
-            //if we wrap around the entire range then observations are completed
-            //notify the user and just go to the first range id.
-            if (!firstLoop && prevPos == localPrev) {
-                return 1
-            }
-            firstLoop = false
-
-            // absorb the differece
-            // between single click and repeated clicks
-            if (cyclic) {
-                when (pos) {
-                    prevPos -> {
-                        return pos
-                    }
-                    1 -> {
-                        pos = rangeID.size
-                    }
-                    rangeID.size -> {
-                        pos = 1
-                    }
-                }
-            } else {
-                if (pos == 1 || pos == prevPos) {
-                    if (!skipMode) {
-                        val nextTrait = controller.getNonExistingTraits(rangeID[pos - 1])
-                        if (nextTrait.isNotEmpty()) {
-                            if (step < 0) {
-                                controller.getTraitBox().setSelection(Collections.max(nextTrait))
-                            } else controller.getTraitBox().setSelection(Collections.min(nextTrait))
-                            return pos
-                        }
-                    }
-                }
-            }
-            if (skipMode) {
-                if (!controller.existsTrait(rangeID[pos - 1])) {
-                    return pos
-                }
-            } else {
-
-                //check all traits for the currently selected range id
-                //this returns the missing trait index or -1 if they all are observed
-                val nextTrait = controller.existsAllTraits(traitIndex, rangeID[localPrev - 1])
-                //if we press right, but a trait to the left is missing, go to next plot
-                //similarly if we press left, but a trait to the right is missing, go to previous
-                //check if pressing left/right will skip an unobserved trait
-                //if it does, force it to the next plot and set the traitBox to the first unobserved
-                //boolean skipped = Math.abs(prevPos - localPrev) > 1;
-                if (nextTrait < traitIndex && step > 0) {
-
-                    //check which trait is missing in the next position
-                    val nextPlotTrait = controller.getNonExistingTraits(rangeID[pos - 1])
-
-                    //if no trait is missing, loop
-                    if (nextPlotTrait.isNotEmpty()) { //otherwise set the selection and return position
-
-                        //we are moving to the right, so set the left most trait
-                        controller.getTraitBox().setSelection(
-                            Collections.min(nextPlotTrait)
-                        )
-                        return pos
-                    }
-                } else if ((nextTrait == -1 || nextTrait > traitIndex) && step < 0) {
-
-                    //check which trait is missing in the next position
-                    val nextPlotTrait = controller.getNonExistingTraits(rangeID[pos - 1])
-
-                    //if no trait is missing, loop
-                    if (nextPlotTrait.isNotEmpty()) { //otherwise set the selection and return position
-
-                        //moving to the left so set the right most trait
-                        controller.getTraitBox().setSelection(
-                            Collections.max(nextPlotTrait)
-                        )
-                        return pos
-                    }
-                    //otherwise, set the selection to the missing trait and return the current pos
-                } else if (nextTrait > -1) {
-                    controller.getTraitBox().setSelection(nextTrait)
-                    return localPrev
-                }
-            }
-        }
-    }
-
-    fun movePaging(pos: Int, step: Int, cyclic: Boolean, fromToolbar: Boolean): Int {
-        // If ignore existing data is enabled, then skip accordingly
-        val traits = controller.getDatabase().visibleTrait
-        //three options: 0. disabled 1. skip active trait 2. skip but check all traits
-        var skipMode =
-            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "0")
-        if (fromToolbar) {
-            skipMode = controller.getPreferences()
-                .getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0")
-        }
         return when (skipMode) {
-            "1" -> {
-                checkSkipTraits(traits, step, pos, cyclic, true)
+            1 -> {
+                val currentTraitString = controller.getTraitBox().currentTrait?.name
+                val currentTraitObj = controller.getDatabase().getDetail(currentTraitString)
+                moveToNextUncollectedObs(pos, step, arrayListOf(currentTraitObj))
             }
-            "2" -> {
-                checkSkipTraits(traits, step, pos, cyclic, false)
+            2 -> {
+                val visibleTraits = ArrayList(controller.getDatabase().visibleTraitObjects.filterNotNull())
+                moveToNextUncollectedObs(pos, step, visibleTraits)
             }
             else -> moveSimply(pos, step)
         }
     }
+
 
     private fun moveSimply(pos: Int, step: Int): Int {
         var p = pos
@@ -780,9 +635,59 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
-//    fun resetPaging() {
-//        paging = 1
-//    }
+    private fun moveToNextUncollectedObs(currentPos: Int, direction: Int, traits: ArrayList<TraitObject>): Int {
+        val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val study = controller.getDatabase().getFieldObject(studyId)
+        val cursor = controller.getDatabase().getExportTableDataShort(studyId, study.unique_id, traits)
+
+        cursor?.use {
+            // Convert one-based range position to zero-based cursor position
+            val zeroBasedPos = currentPos - 1
+            cursor.moveToPosition(zeroBasedPos)
+
+            // Track the number of rows seen
+            var rowsSeen = 0
+            val totalRows = cursor.count
+
+            while (rowsSeen < totalRows) {
+                // Move in the specified direction
+                val moved = if (direction > 0) cursor.moveToNext() else cursor.moveToPrevious()
+
+                if (!moved) {
+                    if (direction > 0) {
+                        cursor.moveToFirst()
+                    } else {
+                        cursor.moveToLast()
+                    }
+                }
+
+                val pos = cursor.position + 1 // Convert zero-based cursor position back to one-based range position
+                rowsSeen++
+
+                // Check for uncollected trait observations
+                for (trait in traits) {
+                    val value = cursor.getString(cursor.getColumnIndexOrThrow(trait.name))
+                    if (value == null) {
+                        controller.getPreferences().edit().putString(GeneralKeys.LAST_USED_TRAIT, trait.name).apply()
+                        if (pos == currentPos) {
+                            // we are back where we started, notify that current entry is only one without data
+                            Utils.makeToast(context, context.getString(R.string.collect_sole_entry_without_data))
+                        }
+                        return pos
+                    }
+                }
+            }
+        }
+
+        // Display toast message if no uncollected obs is found after checking all rows
+        if (traits.size == 1) {
+            Utils.makeToast(context, context.getString(R.string.collect_all_entries_complete_for_current_trait))
+        } else {
+            Utils.makeToast(context, context.getString(R.string.collect_all_entries_complete_for_all_traits))
+        }
+
+        return currentPos
+    }
 
     @Throws(Exception::class)
     fun nextEmptyPlot(): Int {

@@ -86,6 +86,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private NeutralButtonEditTextDialog brapiURLPreference;
     private NeutralButtonEditTextDialog brapiDisplayName;
     private NeutralButtonEditTextDialog brapiOIDCURLPreference;
+    private NeutralButtonEditTextDialog brapiClientIdPreference;
+
     private ListPreference brapiOIDCFlow;
 
     //old base url must be in memory now, since NeutralEditText preference updates preferences
@@ -154,6 +156,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiServerPrefCategory = findPreference("brapi_server");
         brapiLogoutButton = findPreference("revokeBrapiAuth");
 
+        brapiClientIdPreference = findPreference(GeneralKeys.BRAPI_OIDC_CLIENT_ID);
         brapiURLPreference = findPreference(GeneralKeys.BRAPI_BASE_URL);
         brapiDisplayName = findPreference(GeneralKeys.BRAPI_DISPLAY_NAME);
         if (brapiURLPreference != null) {
@@ -468,6 +471,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     text = (text == null || text.isEmpty()) ? getString(R.string.export_source_brapi) : text;
                     brapiDisplayName.setText(text);
                     onPreferenceChange(brapiDisplayName, text);
+                } else if (preference.getKey().equals(brapiClientIdPreference.getKey())) {
+                    //pass to ensure oidc isn't updated as well, client id is automatically handled by xml definition
                 } else {
                     preferences.edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
                     brapiOIDCURLPreference.setText(text);

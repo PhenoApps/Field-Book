@@ -1374,7 +1374,7 @@ public class CollectActivity extends ThemedActivity
                 startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
             }
         } else if (itemId == nextEmptyPlotId) {
-            rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, false, true));
+            rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, true));
             refreshMain();
         } else if (itemId == jumpToPlotId) {
             String moveToUniqueIdValue = preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "");
@@ -2119,7 +2119,7 @@ public class CollectActivity extends ThemedActivity
      */
     @Override
     public int existsAllTraits(final int traitIndex, final int plotId) {
-        final ArrayList<TraitObject> traits = database.getAllTraitObjects();
+        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
         for (int i = 0; i < traits.size(); i++) {
             if (i != traitIndex
                     && !database.getTraitExists(plotId, traits.get(i).getId())) return i;
@@ -2130,7 +2130,7 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public List<Integer> getNonExistingTraits(final int plotId) {
-        final ArrayList<TraitObject> traits = database.getAllTraitObjects();
+        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
         final ArrayList<Integer> indices = new ArrayList<>();
         for (int i = 0; i < traits.size(); i++) {
             if (!database.getTraitExists(plotId, traits.get(i).getId()))

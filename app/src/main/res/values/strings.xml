@@ -525,8 +525,10 @@
     <string name="observation_info_rep">Rep</string>
     <string name="observation_info_other">Other</string>
 
-
-
+    <!-- Skip Entries -->
+    <string name="collect_sole_entry_without_data">This is the only entry without data</string>
+    <string name="collect_all_entries_complete_for_current_trait">All entries have data for the current trait</string>
+    <string name="collect_all_entries_complete_for_all_traits">All entries have data for all traits</string>
 
     <!-- EXPORT -->
     <!-- Export dialog -->
@@ -1154,5 +1156,7 @@
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="tutorial_main_geonav_description">This will open a configuration dialog to help with field navigation.</string>
     <string name="oauth_configured_incorrectly">Authorization request failed, please check your BrAPI settings.</string>
+    <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
+    <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
 
 </resources>
