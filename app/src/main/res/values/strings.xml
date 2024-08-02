@@ -735,10 +735,10 @@
     <string name="preferences_general_swap_navigation">Swap Navigation</string>
     <string name="preferences_general_swap_navigation_description">Swap the behavior of the entry and trait arrows</string>
 
-    <string name="preferences_behavior_volume_buttons_advance">Advance With Volume Keys</string>
-    <string name="preferences_behavior_volume_buttons_advance_disabled">Disabled</string>
-    <string name="preferences_behavior_volume_buttons_advance_traits">Volume keys advance traits</string>
-    <string name="preferences_behavior_volume_buttons_advance_entries">Volume keys advance entries</string>
+    <string name="preferences_behavior_volume_buttons_navigate">Navigate With Volume Keys</string>
+    <string name="preferences_behavior_volume_buttons_navigate_disabled">Disabled</string>
+    <string name="preferences_behavior_volume_buttons_navigate_traits">Volume keys navigate traits</string>
+    <string name="preferences_behavior_volume_buttons_navigate_entries">Volume keys navigate entries</string>
 
     <string name="preferences_behavior_return_character">Carriage Return Action</string>
     <string name="preferences_behavior_return_character_do_nothing">Do nothing</string>

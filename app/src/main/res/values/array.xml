@@ -36,9 +36,9 @@
     </string-array>
 
     <string-array name="pref_remap_volume_buttons">
-        <item>@string/preferences_behavior_volume_buttons_advance_disabled</item>
-        <item>@string/preferences_behavior_volume_buttons_advance_traits</item>
-        <item>@string/preferences_behavior_volume_buttons_advance_entries</item>
+        <item>@string/preferences_behavior_volume_buttons_navigate_disabled</item>
+        <item>@string/preferences_behavior_volume_buttons_navigate_traits</item>
+        <item>@string/preferences_behavior_volume_buttons_navigate_entries</item>
     </string-array>
 
     <string-array name="pref_remap_volume_buttons_values">

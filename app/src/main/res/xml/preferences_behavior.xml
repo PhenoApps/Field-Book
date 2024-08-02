@@ -60,7 +60,7 @@
             android:icon="@drawable/ic_remap_volume_buttons"
             android:key="VOLUME_NAVIGATION"
             android:summary="%s"
-            android:title="@string/preferences_behavior_volume_buttons_advance" />
+            android:title="@string/preferences_behavior_volume_buttons_navigate" />
 
         <ListPreference
             android:defaultValue="0"
