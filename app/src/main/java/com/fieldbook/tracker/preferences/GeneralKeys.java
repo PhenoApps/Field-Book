@@ -193,7 +193,8 @@ public class GeneralKeys {
     public static final String EXPORT_OVERWRITE = "Overwrite";
 
     // Field detail
-    public static final String FIELD_DETAIL_COLLAPSED = "FIELD_DETAIL_COLLAPSED";
+    public static final String FIELD_DETAIL_OVERVIEW_COLLAPSED = "FIELD_DETAIL_OVERVIEW_COLLAPSED";
+    public static final String FIELD_DETAIL_DATA_COLLAPSED = "FIELD_DETAIL_DATA_COLLAPSED";
 
     //Data grid
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";

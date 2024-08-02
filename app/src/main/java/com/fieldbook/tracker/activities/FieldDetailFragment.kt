@@ -95,24 +95,24 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         fieldId = arguments?.getInt("fieldId")
         loadFieldDetails()
 
-        val expandCollapseIcon: ImageView = rootView.findViewById(R.id.expand_collapse_icon)
-        val collapsibleContent: LinearLayout = rootView.findViewById(R.id.collapsible_content)
-        val collapsibleHeader: LinearLayout = rootView.findViewById(R.id.collapsible_header)
+        val overviewExpandCollapseIcon: ImageView = rootView.findViewById(R.id.overview_expand_collapse_icon)
+        val overviewCollapsibleContent: LinearLayout = rootView.findViewById(R.id.overview_collapsible_content)
+        val overviewCollapsibleHeader: LinearLayout = rootView.findViewById(R.id.overview_collapsible_header)
 
         // Set collapse state based on saved pref
-        val isCollapsed = preferences.getBoolean(GeneralKeys.FIELD_DETAIL_COLLAPSED, false)
-        collapsibleContent.visibility = if (isCollapsed) View.GONE else View.VISIBLE
-        expandCollapseIcon.setImageResource(if (isCollapsed) R.drawable.ic_chevron_down else R.drawable.ic_chevron_up)
+        val overviewIsCollapsed = preferences.getBoolean(GeneralKeys.FIELD_DETAIL_OVERVIEW_COLLAPSED, false)
+        overviewCollapsibleContent.visibility = if (overviewIsCollapsed) View.GONE else View.VISIBLE
+        overviewExpandCollapseIcon.setImageResource(if (overviewIsCollapsed) R.drawable.ic_chevron_down else R.drawable.ic_chevron_up)
 
-        collapsibleHeader.setOnClickListener { v: View? ->
-            if (collapsibleContent.visibility == View.GONE) {
-                collapsibleContent.visibility = View.VISIBLE
-                expandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
-                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_COLLAPSED, false).apply()
+        overviewCollapsibleHeader.setOnClickListener { v: View? ->
+            if (overviewCollapsibleContent.visibility == View.GONE) {
+                overviewCollapsibleContent.visibility = View.VISIBLE
+                overviewExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
+                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_OVERVIEW_COLLAPSED, false).apply()
             } else {
-                collapsibleContent.visibility = View.GONE
-                expandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
-                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_COLLAPSED, true).apply()
+                overviewCollapsibleContent.visibility = View.GONE
+                overviewExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
+                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_OVERVIEW_COLLAPSED, true).apply()
             }
         }
 
@@ -131,11 +131,30 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         cardViewExport.setOnClickListener {
             fieldId?.let { id ->
                 if (checkTraitsExist() >= 0) {
-//                    (activity as? FieldEditorActivity)?.setActiveField(id)
-//                    exportUtil.exportActiveField()
                     exportUtil.exportMultipleFields(listOf(id))
                 }
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot export data")
+        }
+
+        val dataExpandCollapseIcon: ImageView = rootView.findViewById(R.id.data_expand_collapse_icon)
+        val dataCollapsibleContent: LinearLayout = rootView.findViewById(R.id.data_collapsible_content)
+        val dataCollapsibleHeader: LinearLayout = rootView.findViewById(R.id.data_collapsible_header)
+
+        // Set collapse state based on saved pref
+        val dataIsCollapsed = preferences.getBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, false)
+        dataCollapsibleContent.visibility = if (dataIsCollapsed) View.GONE else View.VISIBLE
+        dataExpandCollapseIcon.setImageResource(if (dataIsCollapsed) R.drawable.ic_chevron_down else R.drawable.ic_chevron_up)
+
+        dataCollapsibleHeader.setOnClickListener { v: View? ->
+            if (dataCollapsibleContent.visibility == View.GONE) {
+                dataCollapsibleContent.visibility = View.VISIBLE
+                dataExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
+                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, false).apply()
+            } else {
+                dataCollapsibleContent.visibility = View.GONE
+                dataExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
+                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, true).apply()
+            }
         }
 
         Log.d("FieldDetailFragment", "onCreateView End")
