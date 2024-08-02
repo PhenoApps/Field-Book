@@ -239,10 +239,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         params?.width = WindowManager.LayoutParams.MATCH_PARENT
         saveDialog.window?.attributes = params
 
-        // Override positive button so it doesn't automatically dismiss dialog
-        val positiveButton: Button = saveDialog.getButton(AlertDialog.BUTTON_POSITIVE)
-        positiveButton.setOnClickListener {
-
+        fun onOkExportClicked() {
             val isOnlyUniqueChecked = onlyUnique?.isChecked == true
             val isAllColumnsChecked = allColumns?.isChecked == true
             val isActiveTraitsChecked = activeTraits?.isChecked == true
@@ -250,17 +247,17 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
             if (!checkDB.isChecked && !checkTable.isChecked) {
                 Toast.makeText(context, context.getString(R.string.export_error_missing_format), Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+                return
             }
 
             if (!isOnlyUniqueChecked && !isAllColumnsChecked) {
                 Toast.makeText(context, context.getString(R.string.export_error_missing_column), Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+                return
             }
 
             if (!isActiveTraitsChecked && !isAllTraitsChecked) {
                 Toast.makeText(context, context.getString(R.string.export_error_missing_trait), Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+                return
             }
 
             with(preferences.edit()) {
@@ -297,7 +294,26 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
             startExportTasks()
             saveDialog.dismiss()
+        }
 
+        // Override positive button so it doesn't automatically dismiss dialog
+        val positiveButton: Button = saveDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+        positiveButton.setOnClickListener {
+
+            val repeatedMeasuresEnabled = preferences.getBoolean(GeneralKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
+
+            //show a warning if table is selected and repeated measures is enabled
+            if (checkTable.isChecked && repeatedMeasuresEnabled) {
+
+                AlertDialog.Builder(context)
+                    .setTitle(R.string.export_util_repeated_measures_table_warning_title)
+                    .setMessage(R.string.export_util_repeated_measures_table_warning_message)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        onOkExportClicked()
+                    }
+                    .show()
+
+            } else onOkExportClicked()
         }
     }
 
