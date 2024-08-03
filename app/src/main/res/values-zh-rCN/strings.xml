@@ -19,6 +19,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">示例数据</string>
     <string name="startup_sample_data_message">加载示例数据？</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">导入文件需要访问设备上的文件</string>
     <string name="permission_rationale_storage_export">导出数据需要访问设备上的文件。</string>
@@ -284,7 +285,6 @@
     <!-- App  -->
     <string name="about_title">关于</string>
     <string name="about_version_title">版本</string>
-    <string name="about_rate">评价这个软件</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">项目指挥</string>
     <!-- Support  -->
