@@ -21,6 +21,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dados de amostra</string>
     <string name="startup_sample_data_message">Carregar dados de amostra?</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">A importação de arquivos requer acesso aos arquivos do dispositivo.</string>
     <string name="permission_rationale_storage_export">A exportação de dados requer acesso aos arquivos do dispositivo.</string>
