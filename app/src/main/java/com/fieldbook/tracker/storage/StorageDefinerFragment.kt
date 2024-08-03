@@ -38,8 +38,7 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
         AssetSample("resources", "stem_rust_sample.jpg") to R.string.dir_resources,
         AssetSample("trait", "trait_sample.trt") to R.string.dir_trait,
         AssetSample("trait", "severity.txt") to R.string.dir_trait,
-        AssetSample("database", "sample.db") to R.string.dir_database,
-        AssetSample("database", "sample.db_sharedpref.xml") to R.string.dir_database)
+        AssetSample("database", "sample_db.zip") to R.string.dir_database)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
