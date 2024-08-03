@@ -16,6 +16,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dữ liệu mẫu</string>
     <string name="startup_sample_data_message">Nạp dữ liệu mẫu</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">Chức năng nhập liệu từ tập tin yêu cầu quyền truy cập các tập tin của thiết bị.</string>
     <string name="permission_rationale_storage_export">Chức năng xuất dữ liệu yêu cầu quyền truy cập các tập tin của thiết bị.</string>
@@ -278,7 +279,6 @@
     <!-- App  -->
     <string name="about_title">Thông tin phần mềm</string>
     <string name="about_version_title">Phiên bản</string>
-    <string name="about_rate">Đánh giá phần mềm</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Người đứng đầu dự án</string>
     <!-- Support  -->
