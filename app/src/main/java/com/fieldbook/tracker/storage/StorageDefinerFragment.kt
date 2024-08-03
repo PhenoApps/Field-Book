@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.TextView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.DefineStorageActivity
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils
@@ -58,6 +59,11 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
                 geonav, plotData, resources, trait, updates
             )
         }
+
+        // Set the title and summary text
+        view.findViewById<TextView>(R.id.frag_storage_definer_title_tv).text = getString(R.string.storage_definer_title)
+        view.findViewById<TextView>(R.id.frag_storage_definer_summary_tv).text = getString(R.string.storage_definer_summary)
+
     }
 
     override fun onTreeDefined(treeUri: Uri) {
