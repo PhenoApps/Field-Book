@@ -19,6 +19,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">示例数据</string>
     <string name="startup_sample_data_message">加载示例数据？</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">导入文件需要访问设备上的文件</string>
     <string name="permission_rationale_storage_export">导出数据需要访问设备上的文件。</string>
@@ -158,6 +159,7 @@
     <string name="activity_collect_dialog_verify_no_button">否</string>
     <string name="activity_collect_dialog_verify_yes_button">是</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">您的设备不包含此功能所必需的硬件</string>
     <string name="trait_delete_warning_photo">确定要删除这张照片吗？</string>
@@ -184,6 +186,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">本地</string>
@@ -282,7 +285,6 @@
     <!-- App  -->
     <string name="about_title">关于</string>
     <string name="about_version_title">版本</string>
-    <string name="about_rate">评价这个软件</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">项目指挥</string>
     <!-- Support  -->
