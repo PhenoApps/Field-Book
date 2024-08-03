@@ -378,14 +378,14 @@ class ObservationDao {
 
         fun insertObservation(studyId: Int, model: BrapiObservation, traitIdToTypeMap:Map<String,String>): Int = withDatabase { db ->
 
-            if (getObservation("$studyId", model.unitDbId, model.variableDbId, "1")?.dbId != null) {
+            if (getObservation("$studyId", model.unitDbId, model.variableDbId, model.rep ?: "1")?.dbId != null) {
                 println(
                     "DbId: ${
                         getObservation(
                             "$studyId",
                             model.unitDbId,
                             model.variableDbId,
-                            "1"
+                            model.rep ?: "1"
                         )?.dbId
                     }"
                 )
@@ -406,7 +406,7 @@ class ObservationDao {
 //                "additional_info" to model.additional_info,
                     "additional_info" to null,
                     "observation_db_id" to model.dbId,
-                    "rep" to "1",
+                    "rep" to model.rep,
                     Study.FK to studyId,
                     ObservationUnit.FK to model.unitDbId,
                     ObservationVariable.FK to model.variableDbId
