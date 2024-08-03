@@ -16,6 +16,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">بيانات نموذجية</string>
     <string name="startup_sample_data_message">تحميل البيانات النموذجية</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">استيراد الملفات يتطلب الوصول إلى ملفات الجهاز.</string>
     <string name="permission_rationale_storage_export">تصدير الملفات يتطلب الوصول إلى ملفات الجهاز.</string>
@@ -278,7 +279,6 @@
     <!-- App  -->
     <string name="about_title">حول</string>
     <string name="about_version_title">الإصدار</string>
-    <string name="about_rate">قيم هذا التطبيق</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">مدير المشروع</string>
     <!-- Support  -->
