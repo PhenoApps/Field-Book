@@ -915,7 +915,7 @@
 
     <string name="brapi_oidc_scope">OIDC Scope</string>
     <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
-    <string name="brapi_oidc_scope_default" translatable="false"></string>
+    <string name="brapi_oidc_scope_default" translatable="false" />
 
     <string name="preferences_brapi_traits_title">BrAPI Variables</string>
     <string name="preferences_appearance_collect_labelval_customize">Value vs Label Display</string>
@@ -1118,6 +1118,9 @@
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="tutorial_main_geonav_description">This will open a configuration dialog to help with field navigation.</string>
     <string name="oauth_configured_incorrectly">Authorization request failed, please check your BrAPI settings.</string>
+    <string name="repeated_values_pager_content_description">repeated values</string>
+    <string name="repeated_values_right_button_content_description">right</string>
+    <string name="repeated_values_left_button_content_description">left</string>
     <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
     <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
 

@@ -5,18 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/view_repeated_values_group"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:constraint_referenced_ids="repeated_values_view_add_btn, repeated_values_view_left_btn,
-            repeated_values_view_pager, repeated_values_view_right_btn" />
-
     <Button
+        android:visibility="invisible"
         android:id="@+id/repeated_values_view_left_btn"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:background="@drawable/ic_chevron_left"
+        android:contentDescription="@string/repeated_values_left_button_content_description"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -31,6 +26,7 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:textSize="@dimen/text_size_xlarge"
+        android:contentDescription="@string/repeated_values_pager_content_description"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/repeated_values_view_add_btn"
         app:layout_constraintStart_toEndOf="@id/repeated_values_view_left_btn"
@@ -63,6 +59,7 @@
         android:layout_height="64dp"
         android:background="@drawable/ic_chevron_right"
         android:visibility="invisible"
+        android:contentDescription="@string/repeated_values_right_button_content_description"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

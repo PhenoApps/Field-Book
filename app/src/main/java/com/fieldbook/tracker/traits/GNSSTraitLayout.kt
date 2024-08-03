@@ -711,19 +711,27 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                 val latitude = latTextView.text.toString()
                 val longitude = lngTextView.text.toString()
                 val elevation = altTextView.text.toString()
-                val precision = accTextView.text.toString()
+                val uiPrecision = accTextView.text.toString()
 
                 val isFloat = try {
-                    precision.toDouble()
+                    uiPrecision.toDouble()
                     true
                 } catch (e: NumberFormatException) {
                     false
                 }
 
-                submitGnss(latitude, longitude, elevation, if (isFloat) "GPS" else precision)
+                val precisionName = if (isFloat) "GPS" else uiPrecision
 
-                triggerTts(context.getString(R.string.trait_location_saved_tts))
+                if (NmeaParser().compareFix(precisionName, precision ?: "Any")) {
 
+                    submitGnss(latitude, longitude, elevation, precisionName)
+
+                    triggerTts(context.getString(R.string.trait_location_saved_tts))
+
+                } else {
+
+                    soundWarning()
+                }
             }
         }
 
