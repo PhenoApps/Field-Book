@@ -17,6 +17,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">サンプルデータ</string>
     <string name="startup_sample_data_message">サンプルデータをロードしますか？</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">ファイルのインポートにはデバイスのファイルへのアクセスが必要です。</string>
     <string name="permission_rationale_storage_export">データのエクスポートにはデバイスのファイルへのアクセスが必要です。</string>
@@ -280,7 +281,6 @@
     <!-- App  -->
     <string name="about_title">バージョン情報</string>
     <string name="about_version_title">バージョン</string>
-    <string name="about_rate">このアプリを評価</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">プロジェクトリーダー</string>
     <!-- Support  -->
