@@ -16,6 +16,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">নমুনা উপাত্ত</string>
     <string name="startup_sample_data_message">সরবরাহকৃত নমুনা উপাত্ত কি লোড করতে চান ?</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
     <string name="settings_fields">ক্ষেত্রসমূহ</string>
