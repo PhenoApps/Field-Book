@@ -17,7 +17,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/AppIntroDefaultHeading"
-            android:textSize="20sp"
             android:textAlignment="textStart"
             android:textColor="@color/main_color_text_dark"
             android:padding="0dp"/>
@@ -27,7 +26,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/AppIntroDefaultText"
-            android:maxLines="2"
             android:textAlignment="textStart"
             android:textColor="@color/main_color_text_dark"
             android:padding="0dp"/>

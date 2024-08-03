@@ -29,22 +29,22 @@
 
     <!-- App Intro -->
     <string name="app_intro_intro_title_slide1">Welcome to Field Book!</string>
-    <string name="app_intro_intro_summary_slide1">Field Book is a simple app for taking phenotypic notes. Collecting data in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity.</string>
-    <string name="app_intro_intro_title_slide2">Features</string>
-    <string name="app_intro_intro_summary_slide2">Field Book uses custom layouts for different types of data to that allow rapid data collection. Traits being collected are defined by the user and can be exported and transferred between devices. Sample files are provided with the installation. Field Book is part of the broader PhenoApps initiative, an effort to modernize plant breeding and genetics data collection and organization via by developing new strategies and tools for data capture.</string>
-    <string name="app_intro_required_setup_title">Set up Field Book</string>
-    <string name="app_intro_required_setup_summary">These settings are required for Field Book to function</string>
+    <string name="app_intro_intro_summary_slide1">Collecting data in the field has traditionally required manually writing and transcribing data. Field Book was created to replace the paper field books and enable increased collection speed with greater data integrity.</string>
+    <string name="app_intro_intro_title_slide2">Features and Customization</string>
+    <string name="app_intro_intro_summary_slide2">Data is collected in Field Book with different layouts that can be mixed and matched to meet your specific needs.\n\n By default, collected data is stored locally, but Field Book supports BrAPI, simplifying data transfer between BrAPI-compatible systems.</string>
+    <string name="app_intro_required_setup_title">Required Setup</string>
+    <string name="app_intro_required_setup_summary">To get started using Field Book, grant the necessary permissions for the app and define a folder where your data will be stored.</string>
     <string name="app_intro_permissions_title">Permissions</string>
-    <string name="app_intro_permissions_warning">Permissions not granted</string>
+    <string name="app_intro_permissions_warning">Please grant permissions</string>
     <string name="app_intro_storage_title">Define Storage</string>
-    <string name="app_intro_storage_summary">Define a folder that will contain all field data</string>
+    <string name="app_intro_storage_summary">Define a folder that to store and manage your data</string>
     <string name="app_intro_storage_warning">Please set the storage location</string>
-    <string name="app_intro_required_optional_title">Optional</string>
-    <string name="app_intro_required_optional_summary">These settings can be optionally enabled before startup</string>
+    <string name="app_intro_required_optional_title">Optional Setup</string>
+    <string name="app_intro_required_optional_summary">These are a few of the many optional settings that allow you to customize how Field Book operates.</string>
     <string name="app_intro_load_sample_data_title">Load sample data</string>
-    <string name="app_intro_load_sample_data_summary">A sample database will be imported</string>
+    <string name="app_intro_load_sample_data_summary">Import a sample database with example fields and traits</string>
     <string name="app_intro_tutorial_title">Tutorial</string>
-    <string name="app_intro_tutorial_summary">Adds a help icon (?) in the toolbar that will show textual description of features throughout the app</string>
+    <string name="app_intro_tutorial_summary">Add a help icon in the toolbar that describes features throughout the app.</string>
 
 
     <!-- Permissions  -->
