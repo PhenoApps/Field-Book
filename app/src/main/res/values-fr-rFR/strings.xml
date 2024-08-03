@@ -16,6 +16,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">Données tests</string>
     <string name="startup_sample_data_message">Charger les données tests ?</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">L\'importation de nouveaux fichiers requiert le droit d\'accès aux fichiers de votre appareil.</string>
     <string name="permission_rationale_storage_export">L\'exportation des données requiert le droit d\'accès aux fichiers de votre appareil.</string>
@@ -271,7 +272,6 @@
     <!-- App  -->
     <string name="about_title">à propos</string>
     <string name="about_version_title">version</string>
-    <string name="about_rate">Evaluer cette application</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Chef de projet</string>
     <!-- Support  -->
