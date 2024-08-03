@@ -554,16 +554,11 @@
     <string name="export_multiple_fields_name">multiple_fields</string>
     <string name="export_multiple_fields_message">Note: Multiple field exports are bundled in a ZIP file</string>
 
-
     <!-- Citation -->
+    <string name="citation_card_title">Cite Field Book</string>
     <string name="citation_title">Citation</string>
     <string name="citation_string">If you utilize Field Book for research, please cite the following journal article:</string>
     <string name="citation_text" translatable="false">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
-
-
-
-
-
 
     <!-- SETTINGS -->
     <!-- General -->
@@ -826,7 +821,7 @@
     <string name="about_title">About</string>
     <string name="about_version_title">Version</string>
     <string name="about_manual_title">Manual</string>
-    <string name="about_rate">Rate this app</string>
+    <string name="about_rate">Rate Field Book</string>
 
     <!-- Lead  -->
     <string name="about_project_lead_title">Project Lead</string>
