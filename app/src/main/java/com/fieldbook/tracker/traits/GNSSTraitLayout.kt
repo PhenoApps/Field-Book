@@ -216,21 +216,10 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             .setCancelable(false)
             .create()
 
+        precision = prefs.getString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, "Any") ?: "Any"
+
         //initialize lbm and create a filter to broadcast nmea strings
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(context)
-        val filter = IntentFilter()
-        filter.addAction(ACTION_BROADCAST_GNSS_TRAIT)
-
-        unregisterGnssReceiver()
-
-        /**
-         * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
-         * The parser parameter is a model for the parsed message, and is used to populate the
-         * trait layout UI.
-         */
-        mLocalBroadcastManager.registerReceiver(receiver, filter)
-
-        precision = prefs.getString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, "Any") ?: "Any"
 
         setupChooseBluetoothDevice()
 
@@ -602,11 +591,60 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     /**
      * Starts connect thread and sets up the UI.
      */
+    var isRegistered = false
     private fun setupCommunicationsUi(value: BluetoothDevice? = null) {
 
         if (value != null) {
+
+            unregisterGnssReceiver()
+
             mLastDevice = value
-            if (!getThreadHelper().isAlive) getThreadHelper().start(value, mHandler)
+
+            var startNewCommThread = true
+
+            if (prefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
+
+                val geoNavAddress = prefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, null)
+
+                if (geoNavAddress == value.address) {
+
+                    if (!controller.getGeoNavHelper().initialized) {
+                        controller.getGeoNavHelper().startGeoNav()
+                    }
+
+                    startNewCommThread = false
+
+                    //if (!isRegistered) {
+                      //  mLocalBroadcastManager.unregisterReceiver(receiver)
+
+                        val filter = IntentFilter()
+                        filter.addAction(GNSSResponseReceiver.ACTION_BROADCAST_GNSS_ROVER)
+                        mLocalBroadcastManager.registerReceiver(receiver, filter)
+
+                        isRegistered = true
+                    //}
+
+
+                }
+            }
+
+            if (startNewCommThread) {
+
+                if (!getThreadHelper().isAlive) {
+
+                    getThreadHelper().start(value, mHandler)
+
+                    val filter = IntentFilter()
+                    filter.addAction(ACTION_BROADCAST_GNSS_TRAIT)
+
+                    /**
+                     * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
+                     * The parser parameter is a model for the parsed message, and is used to populate the
+                     * trait layout UI.
+                     */
+                    mLocalBroadcastManager.registerReceiver(receiver, filter)
+                }
+            }
         }
 
         //make connected UI visible
