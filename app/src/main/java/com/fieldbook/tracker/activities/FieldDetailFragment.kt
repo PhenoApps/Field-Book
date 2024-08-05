@@ -6,9 +6,9 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
-import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -19,7 +19,6 @@ import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
-import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -38,10 +37,10 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
-import com.fieldbook.tracker.utilities.StringUtil
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
-import java.math.BigDecimal
 import javax.inject.Inject
 
 
@@ -62,15 +61,19 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var rootView: View
     private lateinit var fieldDisplayNameTextView: TextView
     private lateinit var importDateTextView: TextView
-    private lateinit var fieldNarrativeTextView: TextView
     private lateinit var lastEditTextView: TextView
     private lateinit var lastExportTextView: TextView
-    private lateinit var traitCountTextView: TextView
-    private lateinit var observationCountTextView: TextView
     private lateinit var lastSyncTextView: TextView
     private lateinit var cardViewCollect: CardView
     private lateinit var cardViewExport: CardView
     private lateinit var cardViewSync: CardView
+    private lateinit var sourceChip: Chip
+    private lateinit var originalNameChip: Chip
+    private lateinit var entryCountChip: Chip
+    private lateinit var attributeCountChip: Chip
+    private lateinit var sortOrderChip: Chip
+    private lateinit var traitCountChip: Chip
+    private lateinit var observationCountChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
 
@@ -83,13 +86,17 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         exportUtil = ExportUtil(requireActivity(), database)
         fieldDisplayNameTextView = rootView.findViewById(R.id.fieldDisplayName)
         importDateTextView = rootView.findViewById(R.id.importDateTextView)
-        fieldNarrativeTextView = rootView.findViewById(R.id.fieldNarrativeTextView)
         lastEditTextView = rootView.findViewById(R.id.lastEditTextView)
         lastExportTextView = rootView.findViewById(R.id.lastExportTextView)
-        traitCountTextView = rootView.findViewById(R.id.traitCountTextView)
-        observationCountTextView = rootView.findViewById(R.id.observationCountTextView)
         cardViewSync = rootView.findViewById(R.id.cardViewSync)
         lastSyncTextView = rootView.findViewById(R.id.lastSyncTextView)
+        sourceChip = rootView.findViewById(R.id.sourceChip)
+        originalNameChip = rootView.findViewById(R.id.originalNameChip)
+        entryCountChip = rootView.findViewById(R.id.entryCountChip)
+        attributeCountChip = rootView.findViewById(R.id.attributeCountChip)
+        sortOrderChip = rootView.findViewById(R.id.sortOrderChip)
+        traitCountChip = rootView.findViewById(R.id.traitCountChip)
+        observationCountChip = rootView.findViewById(R.id.observationCountChip)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
 
         fieldId = arguments?.getInt("fieldId")
@@ -157,6 +164,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             }
         }
 
+        disableDataChipRipples()
+
         Log.d("FieldDetailFragment", "onCreateView End")
         return rootView
     }
@@ -173,6 +182,25 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     override fun startSync(field: FieldObject) {
         val syncDialog = BrapiSyncObsDialog(requireActivity(), this, field)
         syncDialog.show()
+    }
+
+    private fun disableDataChipRipples() {
+        // Intercept data card touch events to prevent chip ripple but still trigger expand/collapse
+
+        val chipGroup: ChipGroup = rootView.findViewById(R.id.dataChipGroup)
+        chipGroup.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                rootView.findViewById<View>(R.id.data_collapsible_header).performClick()
+            }
+            true
+        }
+
+        rootView.findViewById<View>(R.id.data_collapsible_header).setOnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                v.performClick()
+            }
+            true
+        }
     }
 
     fun loadFieldDetails() {
@@ -203,16 +231,10 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             importDateTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), importDate)
         }
 
-        var source_prefix = getString(R.string.field_import_string)
-        var exp_source: String? = field.exp_source
-        if (exp_source == getString(R.string.field_book)) {
-            source_prefix = getString(R.string.field_create_string)
-        } else if (exp_source.isNullOrEmpty()) { // Sample file import
-            exp_source = field.exp_name + ".csv"
-        }
-
+        val expSource = field.exp_source ?: "${field.exp_name}.csv"
         var importFormat: ImportFormat? = field.import_format
         var entryCount = field.count.toString()
+        val attributeCount = field.attribute_count.toString()
 
         if (importFormat == ImportFormat.BRAPI) {
             cardViewSync.visibility = View.VISIBLE
@@ -226,31 +248,15 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             entryCount = "${entryCount} ${field.observation_level}"
         }
 
-        val sortOrder =
-            if (field.exp_sort.isNullOrEmpty()) getString(R.string.field_default_sort_order) else field.exp_sort
+        val sortOrder = field.exp_sort ?: getString(R.string.field_default_sort_order)
 
-        val narrativeTemplate = getString(
-            R.string.field_detail_narrative,
-            source_prefix,
-            exp_source,
-            field.exp_name,
-            entryCount,
-            field.attribute_count.toString(),
-            sortOrder
-        )
-        val narrativeSpannable = StringUtil.applyBoldStyleToString(
-            narrativeTemplate,
-            source_prefix,
-            exp_source,
-            field.exp_name,
-            entryCount,
-            field.attribute_count.toString(),
-            sortOrder
-        )
-        fieldNarrativeTextView.text = narrativeSpannable
+        sourceChip.text = expSource
+        originalNameChip.text = field.exp_name
+        entryCountChip.text = entryCount
+        attributeCountChip.text = attributeCount
+        sortOrderChip.text = sortOrder
 
         val lastEdit = field.date_edit
-        
         if (!lastEdit.isNullOrEmpty()) {
             lastEditTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastEdit)
         } else {
@@ -271,13 +277,9 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             getString(R.string.no_activity)
         }
 
-        val traitString = getString(R.string.field_trait_total, field.trait_count)
-        val observationString =
-            getString(R.string.field_observation_total, field.observation_count)
-        traitCountTextView.text =
-            HtmlCompat.fromHtml(traitString, HtmlCompat.FROM_HTML_MODE_LEGACY)
-        observationCountTextView.text =
-            HtmlCompat.fromHtml(observationString, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        traitCountChip.text = field.trait_count.toString()
+        observationCountChip.text = field.observation_count.toString()
+
     }
 
     private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
@@ -299,7 +301,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         }
         return emptyList()
     }
-
 
 
     private fun setupToolbar(field: FieldObject) {

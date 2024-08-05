@@ -175,7 +175,9 @@
 
     <string name="field_import_string">Imported from</string>
     <string name="field_create_string">Created within</string>
-    <string name="field_detail_narrative">"%1$s" "%2$s" with name "%3$s". Contains "%4$s" entries and "%5$s" attributes. Sorted by "%6$s"</string>
+    <string name="field_detail_import_details">"%1$s" "%2$s" with name "%3$s"</string>
+    <string name="field_detail_entry_attribute_counts">Contains "%1$s" entries and "%2$s" attributes</string>
+    <string name="field_detail_sort_attribute">Sorted by "%1$s"</string>
     <string name="field_default_sort_order">import order</string>
 
     <string name="field_data_title">Data</string>
