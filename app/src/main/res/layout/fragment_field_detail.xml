@@ -38,8 +38,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
 
                 <!-- Header for collapsible area -->
                 <LinearLayout
@@ -92,9 +92,9 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:visibility="gone"
-                    android:paddingTop="8dp"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp">
+                    android:paddingTop="12dp"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp">
 
                     <!-- Field Detail Chips -->
                     <com.google.android.material.chip.ChipGroup
@@ -128,17 +128,6 @@
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
                             style="@style/Widget.MaterialComponents.Chip.Entry"/>
-
-                    </com.google.android.material.chip.ChipGroup>
-
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/fieldNarrativeChipGroup2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:singleLine="false"
-                        android:paddingTop="8dp"
-                        app:chipSpacingHorizontal="8dp"
-                        app:chipSpacingVertical="8dp">
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/entryCountChip"
@@ -203,8 +192,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
 
                 <!-- Collect Item -->
                 <LinearLayout
@@ -224,7 +213,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:layout_marginEnd="8dp">
+                        android:layout_marginEnd="16dp">
 
                         <TextView
                             style="@style/TextViewStyle.Bold.Title"
@@ -269,8 +258,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
 
                 <!-- Export Item -->
                 <LinearLayout
@@ -290,7 +279,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:layout_marginEnd="8dp">
+                        android:layout_marginEnd="16dp">
 
                         <TextView
                             style="@style/TextViewStyle.Bold.Title"
@@ -335,8 +324,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
 
                 <!-- Sync Item -->
                 <LinearLayout
@@ -356,7 +345,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:layout_marginEnd="8dp">
+                        android:layout_marginEnd="16dp">
 
                         <TextView
                             style="@style/TextViewStyle.Bold.Title"
@@ -393,8 +382,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
 
                 <!-- Header for collapsible area -->
                 <LinearLayout
