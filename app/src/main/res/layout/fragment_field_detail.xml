@@ -115,7 +115,7 @@
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            style="@style/Widget.MaterialComponents.Chip.Entry"/>
+                            app:chipBackgroundColor="?attr/selectedItemBackground" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/originalNameChip"
@@ -127,7 +127,7 @@
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            style="@style/Widget.MaterialComponents.Chip.Entry"/>
+                            app:chipBackgroundColor="?attr/selectedItemBackground" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/entryCountChip"
@@ -139,7 +139,7 @@
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            style="@style/Widget.MaterialComponents.Chip.Entry"/>
+                            app:chipBackgroundColor="?attr/selectedItemBackground" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/attributeCountChip"
@@ -151,7 +151,7 @@
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            style="@style/Widget.MaterialComponents.Chip.Entry"/>
+                            app:chipBackgroundColor="?attr/selectedItemBackground" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/sortOrderChip"
@@ -163,7 +163,7 @@
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            style="@style/Widget.MaterialComponents.Chip.Entry"/>
+                            app:chipBackgroundColor="?attr/selectedItemBackground" />
 
                     </com.google.android.material.chip.ChipGroup>
 
@@ -435,7 +435,7 @@
                                 app:chipIconSize="24dp"
                                 app:ensureMinTouchTargetSize="false"
                                 app:closeIconVisible="false"
-                                style="@style/Widget.MaterialComponents.Chip.Entry" />
+                                app:chipBackgroundColor="?attr/selectedItemBackground" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/observationCountChip"
@@ -447,7 +447,7 @@
                                 app:chipIconSize="24dp"
                                 app:ensureMinTouchTargetSize="false"
                                 app:closeIconVisible="false"
-                                style="@style/Widget.MaterialComponents.Chip.Entry" />
+                                app:chipBackgroundColor="?attr/selectedItemBackground" />
                         </com.google.android.material.chip.ChipGroup>
                     </LinearLayout>
 
