@@ -63,6 +63,10 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
             toggleCollapse(holder)
         }
 
+        // Set initial state to expanded
+        holder.collapsibleContent.visibility = View.VISIBLE
+        holder.expandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
+
         if (item.observations == null || item.observations.isEmpty()) {
             noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_no_data))
             return

@@ -278,7 +278,12 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         }
 
         traitCountChip.text = field.trait_count.toString()
-        observationCountChip.text = field.observation_count.toString()
+        if (field.observation_count.toInt() > 0) {
+            observationCountChip.visibility = View.VISIBLE
+            observationCountChip.text = field.observation_count.toString()
+        } else {
+            observationCountChip.visibility = View.GONE
+        }
 
     }
 
