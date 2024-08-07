@@ -164,6 +164,25 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             }
         }
 
+        // Add click listeners for rename and sort chips
+        originalNameChip.setOnClickListener {
+            fieldId?.let { id ->
+                val field = database.getFieldObject(id)
+                field?.let {
+                    showEditDisplayNameDialog(it)
+                }
+            }
+        }
+
+        sortOrderChip.setOnClickListener {
+            fieldId?.let { id ->
+                val field = database.getFieldObject(id)
+                field?.let {
+                    (activity as? FieldSortController)?.showSortDialog(it)
+                }
+            }
+        }
+
         disableDataChipRipples()
 
         Log.d("FieldDetailFragment", "onCreateView End")
@@ -248,7 +267,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             entryCount = "${entryCount} ${field.observation_level}"
         }
 
-        val sortOrder = field.exp_sort ?: getString(R.string.field_default_sort_order)
+        val sortOrder = field.exp_sort.takeIf { !it.isNullOrBlank() } ?: getString(R.string.field_default_sort_order)
 
         sourceChip.text = expSource
         originalNameChip.text = field.exp_name
@@ -326,12 +345,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             when (item.itemId) {
                 android.R.id.home -> {
                     parentFragmentManager.popBackStack()
-                }
-                R.id.rename -> {
-                    showEditDisplayNameDialog(field)
-                }
-                R.id.sort -> {
-                    (activity as? FieldSortController)?.showSortDialog(field)
                 }
                 R.id.delete -> {
                     (activity as? FieldEditorActivity)?.showDeleteConfirmationDialog(listOf(field.exp_id), true)
