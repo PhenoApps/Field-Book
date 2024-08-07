@@ -16,6 +16,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dữ liệu mẫu</string>
     <string name="startup_sample_data_message">Nạp dữ liệu mẫu</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">Chức năng nhập liệu từ tập tin yêu cầu quyền truy cập các tập tin của thiết bị.</string>
     <string name="permission_rationale_storage_export">Chức năng xuất dữ liệu yêu cầu quyền truy cập các tập tin của thiết bị.</string>
@@ -153,6 +154,7 @@
     <string name="activity_collect_dialog_verify_no_button">Không</string>
     <string name="activity_collect_dialog_verify_yes_button">Có</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Thiết bị của bạn không chứa phần cứng cần thiết cho tính năng này</string>
     <string name="trait_delete_warning_photo">Bạn có chắc chắn muốn xóa ảnh này?</string>
@@ -179,6 +181,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Bộ nhớ máy</string>
@@ -276,7 +279,6 @@
     <!-- App  -->
     <string name="about_title">Thông tin phần mềm</string>
     <string name="about_version_title">Phiên bản</string>
-    <string name="about_rate">Đánh giá phần mềm</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Người đứng đầu dự án</string>
     <!-- Support  -->

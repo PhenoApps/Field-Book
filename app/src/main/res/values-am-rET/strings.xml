@@ -14,6 +14,7 @@
     <string name="dialog_warning">ማስጠንቀቂያ፤</string>
     <string name="dialog_save">አስቀምጥ</string>
     <!-- Startup  -->
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
     <string name="settings_fields">ቦታዎች</string>
@@ -111,6 +112,7 @@
     <string name="activity_collect_dialog_verify_no_button">አይደለም፤</string>
     <string name="activity_collect_dialog_verify_yes_button">አዎ፤</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">መሳሪያህ ለዚህ የሚያስፈልገውን ዕቃ የለውም፤</string>
     <!-- Trait Layout: GNSS -->
@@ -128,6 +130,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">የመረጃ ማህደር</string>
