@@ -17,6 +17,8 @@ import com.fieldbook.tracker.fragments.OptionalSetupPolicyFragment
 import com.fieldbook.tracker.fragments.RequiredSetupPolicyFragment
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Constants
+import com.fieldbook.tracker.utilities.ManufacturerUtil
+import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import com.github.appintro.AppIntro
 import com.github.appintro.AppIntroFragment.Companion.createInstance
 import dagger.hilt.android.AndroidEntryPoint
@@ -165,27 +167,24 @@ class AppIntroActivity : AppIntro() {
                 })
         )
 
-        // todo move this adding of high contrast setting to the if block below
         // add high contrast setting for boox devices
-        optionalSetupList.add(OptionalSetupAdapter.OptionalSetupModel(
-            getString(R.string.dialog_ask_high_contrast_title),
-            getString(R.string.dialog_ask_high_contrast_message),
-            {
-                prefs.edit().putBoolean(GeneralKeys.HIGH_CONTRAST_THEME_ENABLED, true).apply()
-            }, {
-                prefs.edit().putBoolean(GeneralKeys.HIGH_CONTRAST_THEME_ENABLED, false).apply()
-            },
-            true
-        ))
-        // todo uncomment this if block
-//        if (ManufacturerUtil.isEInk()) {
-//            if (ManufacturerUtil.isOnyx()) {
-//                ManufacturerUtil.transferHighContrastIcon(resources)
-//            }
-//            if (!SharedPreferenceUtils.isHighContrastTheme(prefs)) {
-//
-//            }
-//        }
+        if (ManufacturerUtil.isEInk()) {
+            if (ManufacturerUtil.isOnyx()) {
+                ManufacturerUtil.transferHighContrastIcon(resources)
+            }
+            if (!SharedPreferenceUtils.isHighContrastTheme(prefs)) {
+                optionalSetupList.add(OptionalSetupAdapter.OptionalSetupModel(
+                    getString(R.string.dialog_ask_high_contrast_title),
+                    getString(R.string.dialog_ask_high_contrast_message),
+                    {
+                        prefs.edit().putBoolean(GeneralKeys.HIGH_CONTRAST_THEME_ENABLED, true).apply()
+                    }, {
+                        prefs.edit().putBoolean(GeneralKeys.HIGH_CONTRAST_THEME_ENABLED, false).apply()
+                    },
+                    true
+                ))
+            }
+        }
 
         return optionalSetupList
     }

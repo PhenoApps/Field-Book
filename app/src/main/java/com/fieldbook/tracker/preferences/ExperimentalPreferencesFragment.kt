@@ -11,7 +11,6 @@ import androidx.preference.PreferenceFragmentCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.AppIntroActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
-import com.fieldbook.tracker.fragments.ImportDBFragment
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -54,13 +53,6 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
         barcode?.setOnPreferenceChangeListener { _, newValue ->
             true
         }
-
-        val appIntro = findPreference<Preference>("launch_app_intro")
-        appIntro?.setOnPreferenceClickListener {
-            val intent = Intent(activity, AppIntroActivity::class.java)
-            startActivityForResult(intent, REQUEST_CODE_APP_INTRO)
-            true
-        }
     }
 
     private fun hideEmptyPreferenceCategories() {
@@ -72,25 +64,4 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
             }
         }
     }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_APP_INTRO) {
-
-            val loadSampleData = prefs.getBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)
-
-            if (context != null && loadSampleData){
-                val importDBFragment = ImportDBFragment()
-
-                childFragmentManager.beginTransaction()
-                    .add(importDBFragment, "com.fieldbook.tracker.fragments.ImportDBFragment")
-                    .addToBackStack(null)
-                    .commit()
-
-            }
-
-            // tutorial and high contrast preferences are saved in the app intro itself
-        }
-    }
-
 }
