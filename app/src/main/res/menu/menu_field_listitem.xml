@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/sort"
-        android:title="@string/fields_sort_update" />
+        android:title="@string/field_sort_entries" />
     <item
         android:id="@+id/syncObs"
         android:title="@string/brapi_obs_sync_menu_name" />
