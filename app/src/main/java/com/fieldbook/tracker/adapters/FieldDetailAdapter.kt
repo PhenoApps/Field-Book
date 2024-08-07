@@ -67,8 +67,8 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         holder.collapsibleContent.visibility = View.VISIBLE
         holder.expandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
 
-        // Check for null and filter out empty strings
-        val filteredObservations = item.observations?.filter { it.isNotEmpty() } ?: emptyList()
+        // Check for null and filter out NAs and empty strings
+        val filteredObservations = item.observations?.filter { it.isNotEmpty() && it != "NA" } ?: emptyList()
 
         if (filteredObservations == null || filteredObservations.isEmpty()) {
             noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_no_data))
