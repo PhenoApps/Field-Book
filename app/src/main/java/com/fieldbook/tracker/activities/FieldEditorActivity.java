@@ -175,7 +175,7 @@ public class FieldEditorActivity extends ThemedActivity
         FloatingActionButton fab = findViewById(R.id.newField);
         fab.setOnClickListener(v -> handleImportAction());
 
-        updateFieldsList();
+        queryAndLoadFields();
 
     }
 
@@ -187,23 +187,13 @@ public class FieldEditorActivity extends ThemedActivity
             systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
         }
 
-        updateFieldsList();
+        queryAndLoadFields();
         mGpsTracker = new GPSTracker(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-    }
-
-    public void updateFieldsList() {
-        try {
-            fieldList = database.getAllFieldObjects(); // Fetch data from the database
-            mAdapter.submitList(new ArrayList<>(fieldList)); // Update the adapter's dataset
-            mAdapter.notifyDataSetChanged();
-        } catch (Exception e) {
-            Log.e(TAG, "Error updating fields list", e);
-        }
     }
 
     // Implementations of methods from FieldAdapter.AdapterCallback
@@ -365,7 +355,7 @@ public class FieldEditorActivity extends ThemedActivity
             CollectActivity.reloadData = true;
         }
 
-        updateFieldsList();
+        queryAndLoadFields();
         mAdapter.exitSelectionMode();
         if (actionMode != null) {
             actionMode.finish();
@@ -409,7 +399,7 @@ public class FieldEditorActivity extends ThemedActivity
                             @Override
                             public void onFieldCreated(int studyDbId) {
                                 fieldSwitcher.switchField(studyDbId);
-                                updateFieldsList();
+                                queryAndLoadFields();
                             }
                         });
                         dialog.show();
@@ -636,7 +626,7 @@ public class FieldEditorActivity extends ThemedActivity
                                 8000,
                                 null, (v) -> {
                                     fieldSwitcher.switchField(studyId);
-                                    updateFieldsList();
+                                    queryAndLoadFields();
                                 }
                         );
                     }
@@ -1023,13 +1013,19 @@ public class FieldEditorActivity extends ThemedActivity
                     .show();
         }
 
-        updateFieldsList();
+        queryAndLoadFields();
 
     }
 
     @Override
     public void queryAndLoadFields() {
-        updateFieldsList();
+        try {
+            fieldList = database.getAllFieldObjects(); // Fetch data from the database
+            mAdapter.submitList(new ArrayList<>(fieldList), () -> recyclerView.scrollToPosition(0));
+            mAdapter.notifyDataSetChanged();
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating fields list", e);
+        }
     }
 
     @NonNull
