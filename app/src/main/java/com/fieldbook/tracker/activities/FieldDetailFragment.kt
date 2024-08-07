@@ -189,6 +189,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         return rootView
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        rootView.setOnTouchListener { v, event ->
+            // Consume touch event to prevent propagation to FieldEditor RecyclerView
+            true
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         loadFieldDetails()

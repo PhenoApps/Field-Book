@@ -164,6 +164,9 @@ public class FieldEditorActivity extends ThemedActivity
                 args.putInt("fieldId", fieldId);
                 fragment.setArguments(args);
 
+                // Disable touch events on the RecyclerView
+                recyclerView.setEnabled(false);
+
                 getSupportFragmentManager().beginTransaction()
                         .replace(android.R.id.content, fragment,"FieldDetailFragmentTag")
                         .addToBackStack(null)
@@ -678,6 +681,7 @@ public class FieldEditorActivity extends ThemedActivity
                 mAdapter.notifyDataSetChanged();
             }
             getSupportFragmentManager().popBackStack();
+            recyclerView.setEnabled(true); // Re-enable touch events
         } else {
             CollectActivity.reloadData = true;
             super.onBackPressed();
