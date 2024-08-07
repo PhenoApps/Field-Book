@@ -289,4 +289,9 @@
     <!-- action mode selected item color -->
     <attr name="selectedItemBackground" format="color"/>
 
+    <!-- chip colors -->
+    <attr name="defaultChipBackground" format="color"/>
+    <attr name="selectableChipBackground" format="color"/>
+    <attr name="selectableChipStroke" format="color"/>
+
 </resources>
