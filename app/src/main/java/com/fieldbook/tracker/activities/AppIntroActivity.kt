@@ -6,40 +6,39 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.OptionalSetupAdapter
 import com.fieldbook.tracker.adapters.RequiredSetupAdapter
+import com.fieldbook.tracker.fragments.GallerySlideFragment
 import com.fieldbook.tracker.fragments.OptionalSetupPolicyFragment
 import com.fieldbook.tracker.fragments.RequiredSetupPolicyFragment
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Constants
 import com.github.appintro.AppIntro
-import com.github.appintro.AppIntroFragment
 import com.github.appintro.AppIntroFragment.Companion.createInstance
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getRoot
 import pub.devrel.easypermissions.EasyPermissions
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AppIntroActivity : AppIntro() {
-    var prefs: SharedPreferences? = null
+
+    @Inject
+    lateinit var prefs: SharedPreferences
+
+    private lateinit var previouslySetTheme: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState);
 
         val context = applicationContext
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        // Make sure you don't call setContentView!
 
-        // Call addSlide passing your Fragments.
-        // You can use AppIntroFragment to use a pre-built fragment
-
+        previouslySetTheme = prefs.getString(GeneralKeys.THEME, "") ?: ""
 
         // field book info 1
         addSlide(
@@ -53,17 +52,8 @@ class AppIntroActivity : AppIntro() {
             )
         )
 
-        // field book info 2
-        addSlide(
-            createInstance(
-                context.getString(R.string.app_intro_intro_title_slide2),
-                context.getString(R.string.app_intro_intro_summary_slide2),
-                R.drawable.field_book_intro,
-                R.color.main_primary_transparent,
-                R.color.main_color_text_dark,
-                R.color.main_color_text_dark,
-            )
-        )
+        // gallery slide
+        addSlide(GallerySlideFragment.newInstance())
 
         // required setup slide
         addSlide(
@@ -90,10 +80,15 @@ class AppIntroActivity : AppIntro() {
             ContextCompat.getColor(this, R.color.main_primary_dark),
             ContextCompat.getColor(this, R.color.main_primary_transparent)
         )
+        setColorDoneText(Color.BLACK)
     }
 
     override fun onDonePressed(currentFragment: Fragment?) {
         super.onDonePressed(currentFragment)
+        // recreate if the theme setting was changed
+        if (previouslySetTheme != prefs.getString(GeneralKeys.THEME, "")) {
+            recreate()
+        }
         setResult(RESULT_OK)
         finish()
     }
@@ -160,23 +155,53 @@ class AppIntroActivity : AppIntro() {
     }
 
     private fun optionalSetupModelArrayList(): ArrayList<OptionalSetupAdapter.OptionalSetupModel> {
-        return arrayListOf(
+        val optionalSetupList = arrayListOf(
             OptionalSetupAdapter.OptionalSetupModel(
                 applicationContext.getString(R.string.app_intro_load_sample_data_title),
                 applicationContext.getString(R.string.app_intro_load_sample_data_summary),
                 {
-                    prefs?.edit()?.putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, true)?.apply()
+                    prefs.edit()?.putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, true)?.apply()
                 }, {
-                    prefs?.edit()?.putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)?.apply()
+                    prefs.edit()?.putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)?.apply()
                 }),
             OptionalSetupAdapter.OptionalSetupModel(
                 applicationContext.getString(R.string.app_intro_tutorial_title),
                 applicationContext.getString(R.string.app_intro_tutorial_summary),
                 {
-                    prefs?.edit()?.putBoolean(GeneralKeys.TIPS, true)?.apply()
+                    prefs.edit()?.putBoolean(GeneralKeys.TIPS, true)?.apply()
                 }, {
-                    prefs?.edit()?.putBoolean(GeneralKeys.TIPS, false)?.apply()
+                    prefs.edit()?.putBoolean(GeneralKeys.TIPS, false)?.apply()
                 })
         )
+
+        // todo move this adding of high contrast setting to the if block below
+        // add high contrast setting for boox devices
+        optionalSetupList.add(OptionalSetupAdapter.OptionalSetupModel(
+            getString(R.string.dialog_ask_high_contrast_title),
+            getString(R.string.dialog_ask_high_contrast_message),
+            {
+                prefs.edit()
+                    .putString(GeneralKeys.THEME, ThemedActivity.HIGH_CONTRAST.toString())
+                    .putString(GeneralKeys.TEXT_THEME, ThemedActivity.MEDIUM.toString())
+                    .apply()
+            }, {
+                prefs.edit()
+                .putString(GeneralKeys.THEME, ThemedActivity.DEFAULT.toString())
+                .putString(GeneralKeys.TEXT_THEME, ThemedActivity.MEDIUM.toString())
+                .apply()
+            },
+            true
+        ))
+        // todo uncomment this if block
+//        if (ManufacturerUtil.isEInk()) {
+//            if (ManufacturerUtil.isOnyx()) {
+//                ManufacturerUtil.transferHighContrastIcon(resources)
+//            }
+//            if (!SharedPreferenceUtils.isHighContrastTheme(prefs)) {
+//
+//            }
+//        }
+
+        return optionalSetupList
     }
 }

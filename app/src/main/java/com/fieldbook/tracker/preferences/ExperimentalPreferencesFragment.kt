@@ -4,23 +4,26 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.AppIntroActivity
-import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.fragments.ImportDBFragment
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
 
     companion object {
         private const val REQUEST_CODE_APP_INTRO = 1
     }
+
+    @Inject
+    lateinit var prefs: SharedPreferences
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 
@@ -74,11 +77,9 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_APP_INTRO) {
 
-            val prefs = (this.activity as PreferencesActivity).let { PreferenceManager.getDefaultSharedPreferences(it) }
+            val loadSampleData = prefs.getBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)
 
-            val loadSampleData = prefs?.getBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)
-
-            if (context != null && loadSampleData == true){
+            if (context != null && loadSampleData){
                 val importDBFragment = ImportDBFragment()
 
                 childFragmentManager.beginTransaction()
@@ -88,7 +89,7 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
 
             }
 
-            // tutorial preferences are saved in the app intro itself
+            // tutorial and high contrast preferences are saved in the app intro itself
         }
     }
 

@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.adapters
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -52,21 +51,23 @@ class OptionalSetupAdapter :
         viewHolder.checkbox.isChecked = item.isChecked
         viewHolder.checkbox.text
 
-        // initially the item is unchecked
-        item.onUnselectCallback?.invoke()
+        // perform action based on initial checked status
+        performItemAction(item)
 
         viewHolder.setupItem.setOnClickListener {
             // Toggle the checked state of the item
             item.isChecked = !item.isChecked
             viewHolder.checkbox.isChecked = item.isChecked
 
-            if (item.isChecked) {
-                Log.d("TAG", "CHECKED: ")
-                item.onSelectCallback?.invoke()
-            } else {
-                Log.d("TAG", "UNCHECKED: ")
-                item.onUnselectCallback?.invoke()
-            }
+            performItemAction(item)
+        }
+    }
+
+    private fun performItemAction(item: OptionalSetupModel) {
+        if (item.isChecked) {
+            item.onSelectCallback?.invoke()
+        } else {
+            item.onUnselectCallback?.invoke()
         }
     }
 
