@@ -407,7 +407,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
                         android:gravity="center_vertical">
 
                         <TextView
@@ -415,7 +415,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/field_data_title"
-                            android:paddingRight="16dp"/>
+                            android:paddingRight="16dp"
+                            android:paddingBottom="8dp"/>
 
                         <com.google.android.material.chip.ChipGroup
                             android:id="@+id/dataChipGroup"
