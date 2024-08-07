@@ -30,15 +30,10 @@ class AppIntroActivity : AppIntro() {
     @Inject
     lateinit var prefs: SharedPreferences
 
-    private lateinit var previouslySetTheme: String
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
 
         val context = applicationContext
-
-
-        previouslySetTheme = prefs.getString(GeneralKeys.THEME, "") ?: ""
 
         // field book info 1
         addSlide(
@@ -85,10 +80,6 @@ class AppIntroActivity : AppIntro() {
 
     override fun onDonePressed(currentFragment: Fragment?) {
         super.onDonePressed(currentFragment)
-        // recreate if the theme setting was changed
-        if (previouslySetTheme != prefs.getString(GeneralKeys.THEME, "")) {
-            recreate()
-        }
         setResult(RESULT_OK)
         finish()
     }
@@ -180,15 +171,9 @@ class AppIntroActivity : AppIntro() {
             getString(R.string.dialog_ask_high_contrast_title),
             getString(R.string.dialog_ask_high_contrast_message),
             {
-                prefs.edit()
-                    .putString(GeneralKeys.THEME, ThemedActivity.HIGH_CONTRAST.toString())
-                    .putString(GeneralKeys.TEXT_THEME, ThemedActivity.MEDIUM.toString())
-                    .apply()
+                prefs.edit().putBoolean(GeneralKeys.HIGH_CONTRAST_THEME_ENABLED, true).apply()
             }, {
-                prefs.edit()
-                .putString(GeneralKeys.THEME, ThemedActivity.DEFAULT.toString())
-                .putString(GeneralKeys.TEXT_THEME, ThemedActivity.MEDIUM.toString())
-                .apply()
+                prefs.edit().putBoolean(GeneralKeys.HIGH_CONTRAST_THEME_ENABLED, false).apply()
             },
             true
         ))

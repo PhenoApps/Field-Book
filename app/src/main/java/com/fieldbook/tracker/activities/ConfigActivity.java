@@ -2,13 +2,10 @@ package com.fieldbook.tracker.activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -40,7 +37,6 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
-import com.fieldbook.tracker.utilities.ManufacturerUtil;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -58,7 +54,6 @@ import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -491,6 +486,8 @@ public class ConfigActivity extends ThemedActivity {
             else {
                 boolean loadSampleData = preferences.getBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false);
 
+                boolean highContrastThemeEnabled = preferences.getBoolean(GeneralKeys.HIGH_CONTRAST_THEME_ENABLED, false);
+
                 if (loadSampleData) {
                     ImportDBFragment importDBFragment = new ImportDBFragment();
 
@@ -499,6 +496,20 @@ public class ConfigActivity extends ThemedActivity {
                             .addToBackStack(null)
                             .commit();
                 }
+
+                if (highContrastThemeEnabled) {
+                    preferences.edit()
+                            .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.HIGH_CONTRAST))
+                            .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
+                            .apply();
+                } else {
+                    preferences.edit()
+                            .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
+                            .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
+                            .apply();
+                }
+
+                recreate();
 
                 // set FIRST_RUN to false only app intro was finished by the user
                 preferences.edit().putBoolean(GeneralKeys.FIRST_RUN, false).apply();

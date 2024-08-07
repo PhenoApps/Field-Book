@@ -96,12 +96,6 @@ class RequiredSetupAdapter :
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = currentList.size
-//
-//    fun isSetUpDone() {
-//        for ()
-//    }
-
-
 
     class DiffCallback : DiffUtil.ItemCallback<RequiredSetupModel>() {
 

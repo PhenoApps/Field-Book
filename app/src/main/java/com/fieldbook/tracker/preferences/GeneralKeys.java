@@ -233,6 +233,8 @@ public class GeneralKeys {
     // app intro
     public static final String LOAD_SAMPLE_DATA = "com.fieldbook.tracker.load_sample_data";
 
+    public static final String HIGH_CONTRAST_THEME_ENABLED = "com.fieldbook.tracker.optional_setup_theme";
+
     private GeneralKeys() {
 
     }
