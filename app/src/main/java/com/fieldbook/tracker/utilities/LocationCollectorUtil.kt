@@ -7,7 +7,7 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.preferences.GeneralPreferencesFragment
+import com.fieldbook.tracker.preferences.LocationPreferencesFragment
 import java.util.*
 
 class LocationCollectorUtil {
@@ -53,26 +53,45 @@ class LocationCollectorUtil {
 
                 //if obs mode, save the most recent location, prioritize external gps
                 val locationCollectionMode: Int = prefs.getString(GeneralKeys.GENERAL_LOCATION_COLLECTION, "0")?.toInt() ?: 0
-                if (locationCollectionMode == GeneralPreferencesFragment.LOCATION_COLLECTION_OBS) {
+                if (locationCollectionMode == LocationPreferencesFragment.LOCATION_COLLECTION_OBS) {
                     if (recent != null) {
                         location = recent
                     }
-                } else if (locationCollectionMode == GeneralPreferencesFragment.LOCATION_COLLECTION_OBS_UNIT) {
+                } else if (locationCollectionMode == LocationPreferencesFragment.LOCATION_COLLECTION_OBS_UNIT) {
 
                     //if obs unit mode, search all observations within the current plot
                     //if a location already exists, use that location for this observation, otherwise use the most recent location
                     location = database.getAllObservations(expId, obsUnit).getLocation() ?: recent ?: String()
 
-                } else if (locationCollectionMode == GeneralPreferencesFragment.LOCATION_COLLECTION_STUDY) {
+                } else if (locationCollectionMode == LocationPreferencesFragment.LOCATION_COLLECTION_STUDY) {
 
                     //similar to above but check if an observation has been saved for a field/study
                     location = database.getAllObservations(expId).getLocation() ?: recent ?: String()
                 }
+
+                // Format location based on preference
+                val coordinateFormat: Int = prefs.getString("com.fieldbook.tracker.COORDINATE_FORMAT", "0")?.toInt() ?: 0
+                location = formatLocation(location, coordinateFormat)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
 
             return location
+        }
+
+        private fun formatLocation(location: String, format: Int): String {
+            return if (format == 1) {
+                // Convert to GeoJSON format
+                val coords = location.split(";")
+                if (coords.size == 2) {
+                    """{"type":"Point","coordinates":[${coords[1]},${coords[0]}]}"""
+                } else {
+                    location
+                }
+            } else {
+                // Default to ISO 6709 format (no change needed)
+                location
+            }
         }
 
         //simple search to find a non null geo coordinate column

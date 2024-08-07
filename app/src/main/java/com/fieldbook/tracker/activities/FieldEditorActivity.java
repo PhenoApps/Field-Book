@@ -370,7 +370,7 @@ public class FieldEditorActivity extends ThemedActivity
         importArray[1] = getString(R.string.import_source_cloud);
         importArray[2] = getString(R.string.fields_new_create_field);
         if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
-            String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
+            String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
             importArray = Arrays.copyOf(importArray, importArray.length + 1);
             importArray[3] = displayName;
         }

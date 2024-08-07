@@ -25,7 +25,7 @@ import org.phenoapps.security.Security
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
+class LocationPreferencesFragment : PreferenceFragmentCompat(),
     Preference.OnPreferenceChangeListener {
 
     private var mPairDevicePref: Preference? = null
@@ -39,6 +39,12 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
             updateUi()
         }
+    companion object {
+        const val LOCATION_COLLECTION_OFF = 0
+        const val LOCATION_COLLECTION_STUDY = 1
+        const val LOCATION_COLLECTION_OBS_UNIT = 2
+        const val LOCATION_COLLECTION_OBS = 3
+    }
 
     private fun updateUi() {
         updateMethodSummaryText()
@@ -46,15 +52,22 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         changeGeoNavLoggingModeView()
         updateParametersSummaryText()
         updateDeviceAddressSummary()
+        updateCoordinateFormatVisibility()
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 
         advisor.initialize()
 
-        setPreferencesFromResource(R.xml.preferences_geonav, rootKey)
+        setPreferencesFromResource(R.xml.preferences_location, rootKey)
 
         preferences.registerOnSharedPreferenceChangeListener(listener)
+
+        val locationCollectionPref = findPreference<ListPreference>("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION")
+        locationCollectionPref?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+            updateCoordinateFormatVisibility((newValue as String).toInt())
+            true
+        }
 
         // Show/hide preferences and category titles based on the ENABLE_GEONAV value
         val geonavEnabledPref: CheckBoxPreference? =
@@ -69,7 +82,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
             updatePreferencesVisibility(geonavEnabledPref.isChecked)
         }
 
-        (this.activity as PreferencesActivity?)!!.supportActionBar!!.title = getString(R.string.preferences_geonav_title)
+        (this.activity as PreferencesActivity?)!!.supportActionBar!!.title = getString(R.string.preferences_location_title)
 
         //add click action on pair rover device to search for bt devices
         mPairDevicePref = findPreference(GeneralKeys.PAIR_BLUETOOTH)
@@ -159,6 +172,13 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
             true
         }
+        updateCoordinateFormatVisibility(locationCollectionPref?.value?.toIntOrNull() ?: LOCATION_COLLECTION_OFF)
+    }
+
+    private fun updateCoordinateFormatVisibility(selectedValue: Int? = null) {
+        val currentValue = selectedValue ?: preferences.getString("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION", "0")?.toIntOrNull() ?: LOCATION_COLLECTION_OFF
+        val coordinateFormatPref = findPreference<Preference>("com.fieldbook.tracker.COORDINATE_FORMAT")
+        coordinateFormatPref?.isVisible = currentValue != LOCATION_COLLECTION_OFF
     }
 
     private fun checkRequiredSensors() {
@@ -225,26 +245,26 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         trapAngle?.summary = getString(R.string.pref_geonav_search_angle_summary, theta)
         updateInterval?.summary = getString(R.string.pref_geonav_update_interval_summary, interval)
     }
-
     private fun updatePreferencesVisibility(isChecked: Boolean) {
-        val preferenceScreen = preferenceScreen
+        val geonavCategory = findPreference<PreferenceCategory>("com.fieldbook.tracker.geonav.CATEGORY")
         val searchMethodPref = findPreference<ListPreference>("com.fieldbook.tracker.geonav.SEARCH_METHOD")
+        val parameterCategory = findPreference<PreferenceCategory>("com.fieldbook.tracker.geonav.parameters.CATEGORY_KEY")
 
-        for (i in 0 until preferenceScreen.preferenceCount) {
-            val preferenceItem = preferenceScreen.getPreference(i)
-
-            // Skip the checkbox preference itself
-            if (preferenceItem.key == "com.fieldbook.tracker.geonav.ENABLE_GEONAV") {
-                continue
-            }
-
-            val isParameter = preferenceItem.key.startsWith("com.fieldbook.tracker.geonav.parameters.")
-            if (isParameter && searchMethodPref?.value == "0") { // Set parameter visibility to false if search method is distance
-                preferenceItem.isVisible = false
-            } else {
-                preferenceItem.isVisible = isChecked
+        geonavCategory?.let { category ->
+            for (i in 0 until category.preferenceCount) {
+                val preferenceItem = category.getPreference(i)
+                if (preferenceItem.key == "com.fieldbook.tracker.geonav.ENABLE_GEONAV") {
+                    continue
+                }
+                if (preferenceItem.key?.startsWith("com.fieldbook.tracker.geonav.parameters.") == true && searchMethodPref?.value == "0") {
+                    preferenceItem.isVisible = false
+                } else {
+                    preferenceItem.isVisible = isChecked
+                }
             }
         }
+
+        parameterCategory?.isVisible = isChecked
     }
 
     private fun updateMethodSummaryText() {

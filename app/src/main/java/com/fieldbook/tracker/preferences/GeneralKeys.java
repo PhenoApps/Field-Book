@@ -31,7 +31,7 @@ public class GeneralKeys {
 
     // Behavior
     public static final String RETURN_CHARACTER                     = "RETURN_CHARACTER";
-    public static final String VOLUME_NAVIGATION                    = "com.fieldbook.tracker.VOLUME_NAVIGATION";
+    public static final String VOLUME_NAVIGATION                    = "VOLUME_NAVIGATION";
     public static final String CYCLING_TRAITS_ADVANCES              = "CycleTraits";
     public static final String RETURN_FIRST_TRAIT              = "ReturnFirst";
     public static final String DISABLE_ENTRY_ARROW_NO_DATA          = "DISABLE_ENTRY_ARROW_NO_DATA";
@@ -45,7 +45,7 @@ public class GeneralKeys {
     public static final String HIDE_ENTRIES_WITH_DATA               = "com.fieldbook.tracker.HIDE_ENTRIES";
     public static final String HIDE_ENTRIES_WITH_DATA_TOOLBAR       = "com.fieldbook.tracker.HIDE_ENTRIES_WITH_DATA_TOOLBAR";
     public static final String USE_DAY_OF_YEAR                      = "UseDay";
-    public static final String DISABLE_SHARE                        = "DisableShare";
+    public static final String ENABLE_SHARE                        = "EnableShare";
     public static final String GENERAL_LOCATION_COLLECTION          = "com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION";
     public static final String ATTR_CHOOSER_DIALOG_TAB              = "ATTR_CHOOSER_DIALOG_TAB";
 

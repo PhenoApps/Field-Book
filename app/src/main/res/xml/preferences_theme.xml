@@ -28,7 +28,7 @@
         android:key="key_preferences_theme_text"
         android:entries="@array/preferences_text_size_entries"
         android:entryValues="@array/preferences_text_size_entry_values"
-        android:defaultValue="2"
+        android:defaultValue="1"
         android:summary="%s"/>
 
     <com.skydoves.colorpickerpreference.ColorPickerPreference
