@@ -31,7 +31,7 @@ class ImportDBFragment : Fragment(){
     @Inject
     lateinit var database: DataHelper
 
-    lateinit var dialog: ProgressDialog
+    private var dialog: ProgressDialog? = null
     private var fail: Boolean = false
 
     //coroutine scope for launching background process
@@ -49,6 +49,11 @@ class ImportDBFragment : Fragment(){
     override fun onDetach() {
         super.onDetach()
         mContext = null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        dialog?.dismiss()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,7 +85,7 @@ class ImportDBFragment : Fragment(){
 
             withContext(Dispatchers.Main){
 
-                dialog.dismiss()
+                dialog?.dismiss()
                 if (fail) {
                     Utils.makeToast(mContext, context?.getString(R.string.import_error_general))
                 }
@@ -111,13 +116,13 @@ class ImportDBFragment : Fragment(){
         // show only if the fragment is added to the activity
         if (isAdded) {
             dialog = ProgressDialog(mContext, R.style.AppAlertDialog)
-            dialog.isIndeterminate = true
-            dialog.setCancelable(false)
-            dialog.setMessage(
+            dialog?.isIndeterminate = true
+            dialog?.setCancelable(false)
+            dialog?.setMessage(
                 Html
                     .fromHtml(context?.getString(R.string.import_dialog_importing))
             )
-            dialog.show()
+            dialog?.show()
         }
     }
 
