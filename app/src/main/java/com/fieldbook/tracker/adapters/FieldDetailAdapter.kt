@@ -63,14 +63,21 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
             toggleCollapse(holder)
         }
 
-        if (item.observations == null || item.observations.isEmpty()) {
+        // Set initial state to expanded
+        holder.collapsibleContent.visibility = View.VISIBLE
+        holder.expandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
+
+        // Check for null and filter out NAs and empty strings
+        val filteredObservations = item.observations?.filter { it.isNotEmpty() && it != "NA" } ?: emptyList()
+
+        if (filteredObservations == null || filteredObservations.isEmpty()) {
             noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_no_data))
             return
         } else if (item.format in nonChartableFormats) {
             noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_incompatible_format))
         } else {
             try {
-                val numericObservations = item.observations.map { BigDecimal(it) }
+                val numericObservations = filteredObservations.map { BigDecimal(it) }
                 if (item.format == "categorical") {
                     throw NumberFormatException("Categorical traits must use bar chart")
                 }
@@ -91,7 +98,7 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                 HorizontalBarChartHelper.setupHorizontalBarChart(
                     holder.itemView.context,
                     holder.barChart,
-                    item.observations,
+                    filteredObservations,
                     parsedCategories.takeIf { it.isNotEmpty() },
                     chartTextSize
                 )

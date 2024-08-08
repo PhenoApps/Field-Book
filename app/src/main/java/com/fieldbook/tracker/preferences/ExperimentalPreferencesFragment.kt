@@ -8,11 +8,13 @@ import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.AppIntroActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import com.fieldbook.tracker.utilities.GeoNavHelper
 
 @AndroidEntryPoint
 class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
@@ -51,6 +53,22 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
 
         val barcode = findPreference<CheckBoxPreference>(GeneralKeys.MLKIT_PREFERENCE_KEY)
         barcode?.setOnPreferenceChangeListener { _, newValue ->
+            true
+        }
+
+        val fieldAudio = findPreference<CheckBoxPreference>(GeneralKeys.ENABLE_FIELD_AUDIO)
+        fieldAudio?.setOnPreferenceChangeListener { _, newValue ->
+            context?.let { ctx ->
+                if (newValue as? Boolean == true) {
+                    val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
+                    prefs.edit()
+                        .putBoolean(GeneralKeys.ENABLE_GEONAV, true)
+                        .putString(
+                            GeneralKeys.GEONAV_LOGGING_MODE,
+                            GeoNavHelper.GeoNavLoggingMode.LIMITED.value
+                        ).apply()
+                }
+            }
             true
         }
     }

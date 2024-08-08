@@ -2,6 +2,8 @@ package com.fieldbook.tracker.dialogs
 
 import android.app.AlertDialog
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
@@ -14,6 +16,10 @@ import com.fieldbook.tracker.utilities.Utils
 
 class GeoNavCollectDialog(private val activity: CollectActivity) :
     AlertDialog.Builder(activity, R.style.AppAlertDialog) {
+
+    companion object {
+        private const val GEO_NAV_RESTART_DELAY_MS = 1000L
+    }
 
     private val preferences by lazy {
         PreferenceManager.getDefaultSharedPreferences(context)
@@ -78,8 +84,7 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
         setNeutralButton(context.getString(R.string.dialog_geonav_collect_neutral_reconnect)) { dialog, which ->
             Utils.makeToast(context, context.getString(R.string.dialog_geonav_collect_reset_start_toast_message))
             activity.getGeoNavHelper().stopGeoNav()
-            activity.getGeoNavHelper().startGeoNav()
-            Utils.makeToast(context, context.getString(R.string.dialog_geonav_collect_reset_end_toast_message))
+            waitForGeoNavStopped()
             dialog.dismiss()
         }
 
@@ -93,6 +98,23 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
         }
 
         return super.setView(view)
+    }
+
+    //recursive function that waits for geo nav threads to stop and then restarts
+    private fun waitForGeoNavStopped() {
+
+        if (!activity.getGeoNavHelper().initialized) {
+
+            activity.getGeoNavHelper().startGeoNav()
+
+        } else {
+
+            Handler(Looper.getMainLooper()).postDelayed({
+
+                waitForGeoNavStopped()
+
+            }, GEO_NAV_RESTART_DELAY_MS)
+        }
     }
 
     private fun loadPreferencesIntoUi() {

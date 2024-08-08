@@ -377,6 +377,15 @@ public class ConfigActivity extends ThemedActivity {
         return 1;
     }
 
+    // Helper function to merge arrays
+    String[] concat(String[] a1, String[] a2) {
+        String[] n = new String[a1.length + a2.length];
+        System.arraycopy(a1, 0, n, 0, a1.length);
+        System.arraycopy(a2, 0, n, a1.length, a2.length);
+
+        return n;
+    }
+
     private void resolveFuzzySearchResult(FieldObject f, @Nullable String plotId) {
 
         soundHelper.playCelebrate();

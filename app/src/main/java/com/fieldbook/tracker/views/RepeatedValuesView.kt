@@ -8,7 +8,6 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.Button
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.Group
 import androidx.viewpager.widget.ViewPager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
@@ -68,7 +67,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     private val rightButton: Button
     private val addButton: FloatingActionButton
     private val pager: ViewPager
-    private val nonEmptyGroup: Group
+    //private val nonEmptyGroup: Group
 
     //initialize all the global view variables
     init {
@@ -79,7 +78,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
         rightButton = findViewById(R.id.repeated_values_view_right_btn)
         addButton = findViewById(R.id.repeated_values_view_add_btn)
         pager = findViewById(R.id.repeated_values_view_pager)
-        nonEmptyGroup = findViewById(R.id.view_repeated_values_group)
+        //nonEmptyGroup = findViewById(R.id.view_repeated_values_group)
 
         pager.pageMargin = 8f.dipToPixels(context).toInt()
 
@@ -181,13 +180,13 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     //inserts a dummy row which later is deleted if the value is blank
     private fun addFirstItem() {
 
-        prepareModeNonEmpty()
+        //prepareModeNonEmpty()
 
         mValues.add(ObservationModelViewHolder(insertNewRep("1"), Color.BLACK))
 
         submitList()
 
-        updateButtonVisibility()
+        //updateButtonVisibility()
 
         (context as CollectActivity).traitLayoutRefresh()
 
@@ -239,11 +238,11 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     //called when values do exist
     fun prepareModeNonEmpty() {
 
-        nonEmptyGroup.visibility = View.VISIBLE
-        addButton.visibility = View.VISIBLE
-        pager.visibility = View.VISIBLE
-        leftButton.visibility = View.VISIBLE
-        rightButton.visibility = View.VISIBLE
+        //nonEmptyGroup.visibility = View.VISIBLE
+        //addButton.visibility = View.VISIBLE
+        //pager.visibility = View.VISIBLE
+        //leftButton.visibility = View.VISIBLE
+        //rightButton.visibility = View.VISIBLE
 
         updateButtonVisibility()
     }
@@ -373,6 +372,5 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
         }
 
         leftButton.visibility = if (pager.currentItem == 0) View.INVISIBLE else View.VISIBLE
-
     }
 }
