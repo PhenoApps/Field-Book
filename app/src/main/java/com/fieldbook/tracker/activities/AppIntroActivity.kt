@@ -42,7 +42,7 @@ class AppIntroActivity : AppIntro() {
             createInstance(
                 context.getString(R.string.app_intro_intro_title_slide1),
                 context.getString(R.string.app_intro_intro_summary_slide1),
-                R.drawable.field_book_intro,
+                R.drawable.field_book_intro_icon,
                 R.color.main_primary_transparent,
                 R.color.main_color_text_dark,
                 R.color.main_color_text_dark,

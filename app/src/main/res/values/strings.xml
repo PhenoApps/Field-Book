@@ -29,24 +29,24 @@
 
     <!-- App Intro -->
     <string name="app_intro_intro_title_slide1">Welcome to Field Book!</string>
-    <string name="app_intro_intro_summary_slide1">Collecting data in the field has traditionally required manually writing and transcribing data. Field Book was created to replace the paper field books and enable increased collection speed with greater data integrity.</string>
+    <string name="app_intro_intro_summary_slide1">Collecting data in the field has traditionally required writing and transcribing from paper notebooks. Field Book was created as a digital solution for data capture that enables increased collection speed with greater data integrity.</string>
     <string name="app_intro_intro_title_slide2">Features and Customization</string>
-    <string name="app_intro_intro_summary_slide2">Data is collected in Field Book with different layouts that can be mixed and matched to meet your specific needs.\n\n By default, collected data is stored locally, but Field Book supports BrAPI, simplifying data transfer between BrAPI-compatible systems.</string>
+    <string name="app_intro_intro_summary_slide2">Data is entered into Field Book with custom trait layouts that are designed to simplify data input and minimize mistakes.\n\n By default, collected data is stored locally, but Field Book supports the Breeding API which allows it to send data to BrAPI-compatible systems.</string>
     <string name="app_intro_required_setup_title">Required Setup</string>
-    <string name="app_intro_required_setup_summary">To get started using Field Book, grant the necessary permissions for the app and define a folder where your data will be stored.</string>
+    <string name="app_intro_required_setup_summary">To get started using Field Book, grant the necessary permissions for the app and then define a folder where your data will be stored.</string>
     <string name="app_intro_permissions_title">Permissions</string>
-    <string name="app_intro_permissions_warning">Please grant permissions</string>
+    <string name="app_intro_permissions_warning">Please grant the necessary permissions</string>
     <string name="app_intro_storage_title">Define Storage</string>
-    <string name="app_intro_storage_summary">Define a folder that to store and manage your data</string>
+    <string name="app_intro_storage_summary">Define a folder where your data will be stored.</string>
     <string name="app_intro_storage_warning">Please set the storage location</string>
     <string name="app_intro_required_optional_title">Optional Setup</string>
-    <string name="app_intro_required_optional_summary">These are a few of the many optional settings that allow you to customize how Field Book operates.</string>
-    <string name="app_intro_load_sample_data_title">Load sample data</string>
-    <string name="app_intro_load_sample_data_summary">Import a sample database with example fields and traits</string>
+    <string name="app_intro_required_optional_summary">These optional settings customize Field Book and can be adjusted in the Field Book Settings.</string>
+    <string name="app_intro_load_sample_data_title">Load Sample Data</string>
+    <string name="app_intro_load_sample_data_summary">Import a sample database that includes example fields and traits.</string>
     <string name="app_intro_tutorial_title">Tutorial</string>
-    <string name="app_intro_tutorial_summary">Add a help icon in the toolbar that describes features throughout the app.</string>
+    <string name="app_intro_tutorial_summary">Add a help icon to the top toolbar that describes features throughout the app.</string>
     <string name="app_intro_high_contrast_title">High Contrast Theme</string>
-    <string name="app_intro_high_contrast_summary">Enable to a high contrast theme with better visibility on eInk devices.</string>
+    <string name="app_intro_high_contrast_summary">Enable a high contrast theme for better visibility on eInk devices.</string>
 
     <!-- Storage Definer -->
     <string name="storage_definer_title">Storage Location</string>

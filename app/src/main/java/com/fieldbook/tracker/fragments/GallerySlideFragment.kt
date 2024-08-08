@@ -21,15 +21,14 @@ class GallerySlideFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         images = intArrayOf(
-            R.drawable.field_book_intro,
-            R.drawable.field_book_intro,
-            R.drawable.field_book_intro,
-            R.drawable.field_book_intro,
-            R.drawable.field_book_intro,
-            R.drawable.field_book_intro,
-            R.drawable.field_book_intro,
-            R.drawable.field_book_intro,
-            R.drawable.field_book_intro,
+            R.drawable.field_book_mini_numeric,
+            R.drawable.field_book_mini_categorical,
+            R.drawable.field_book_mini_percent,
+            //R.drawable.field_book_mini_photo,
+            //R.drawable.field_book_mini_location,
+            //R.drawable.field_book_mini_counter,
+            //R.drawable.field_book_intro_barcode,
+            R.drawable.field_book_intro_brapi,
         )
         return inflater.inflate(R.layout.app_intro_gallery_slide, container, false)
     }
@@ -47,8 +46,8 @@ class GallerySlideFragment : Fragment() {
 
         images.let { drawables ->
             // set # of rows and cols
-            gridLayout.rowCount = 3
-            gridLayout.columnCount = 3
+            gridLayout.rowCount = 2
+            gridLayout.columnCount = 2
 
             drawables.forEachIndexed { index, drawable ->
                 val imageView = ImageView(context).apply {
@@ -56,8 +55,8 @@ class GallerySlideFragment : Fragment() {
                         width = 0
                         height = 0
                         // assign (row, col) position for an image
-                        rowSpec = GridLayout.spec(index / 3, 1f)
-                        columnSpec = GridLayout.spec(index % 3, 1f)
+                        rowSpec = GridLayout.spec(index / 2, 1f)
+                        columnSpec = GridLayout.spec(index % 2, 1f)
                         setMargins(16, 16, 16, 16)
                     }
                     scaleType = ImageView.ScaleType.FIT_CENTER
