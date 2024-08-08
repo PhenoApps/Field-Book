@@ -221,6 +221,9 @@ dependencies {
     implementation "androidx.camera:camera-view:$camerax_version"
     implementation "androidx.camera:camera-core:$camerax_version"
 
+    //AppIntro
+    implementation 'com.github.AppIntro:AppIntro:6.3.1'
+
     // Core library
     androidTestImplementation "androidx.test:core:$coreVersion"
 
@@ -264,6 +267,7 @@ kapt {
 
 repositories {
     mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 task prepareKotlinBuildScriptModel {}

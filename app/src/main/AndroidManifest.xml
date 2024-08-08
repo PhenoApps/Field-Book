@@ -186,6 +186,10 @@
             android:exported="true"
             android:theme="@style/AppTheme" />
 
+        <!-- AppIntroActivity uses the AppIntro package -->
+        <activity android:name=".activities.AppIntroActivity"
+            android:label="My Custom AppIntro" />
+
         <provider
             android:name=".provider.GenericFileProvider"
             android:authorities="${applicationId}.fileprovider"

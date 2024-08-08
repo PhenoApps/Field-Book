@@ -1,16 +1,30 @@
 package com.fieldbook.tracker.preferences
 
 import android.app.AlertDialog
+import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.preference.CheckBoxPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.AppIntroActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import com.fieldbook.tracker.utilities.GeoNavHelper
 
+@AndroidEntryPoint
 class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
+
+    companion object {
+        private const val REQUEST_CODE_APP_INTRO = 1
+    }
+
+    @Inject
+    lateinit var prefs: SharedPreferences
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 
@@ -68,5 +82,4 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
             }
         }
     }
-
 }

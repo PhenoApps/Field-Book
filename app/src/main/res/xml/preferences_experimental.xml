@@ -36,4 +36,11 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+    android:key="experimental_settings_alpha"
+    android:title="@string/preferences_experimental_alpha_title"
+    app:iconSpaceReserved="false">
+
+    </PreferenceCategory>
+
 </PreferenceScreen>
