@@ -174,8 +174,8 @@ class AppIntroActivity : AppIntro() {
             }
             if (!SharedPreferenceUtils.isHighContrastTheme(prefs)) {
                 optionalSetupList.add(OptionalSetupAdapter.OptionalSetupModel(
-                    getString(R.string.dialog_ask_high_contrast_title),
-                    getString(R.string.dialog_ask_high_contrast_message),
+                    getString(R.string.app_intro_high_contrast_title),
+                    getString(R.string.app_intro_high_contrast_summary),
                     {
                         prefs.edit().putBoolean(GeneralKeys.HIGH_CONTRAST_THEME_ENABLED, true).apply()
                     }, {

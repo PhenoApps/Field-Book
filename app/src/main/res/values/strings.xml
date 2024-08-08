@@ -45,6 +45,8 @@
     <string name="app_intro_load_sample_data_summary">Import a sample database with example fields and traits</string>
     <string name="app_intro_tutorial_title">Tutorial</string>
     <string name="app_intro_tutorial_summary">Add a help icon in the toolbar that describes features throughout the app.</string>
+    <string name="app_intro_high_contrast_title">High Contrast Theme</string>
+    <string name="app_intro_high_contrast_summary">Enable to a high contrast theme with better visibility on eInk devices.</string>
 
 
     <!-- Permissions  -->
@@ -1138,8 +1140,6 @@
     <string name="tutorial_traits_visibility_title">Trait Visibility</string>
     <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
     <string name="shutter_capture_content_description">Shutter button for snapping a picture.</string>
-    <string name="dialog_ask_high_contrast_title">High Contrast Theme</string>
-    <string name="dialog_ask_high_contrast_message">Enable to a high contrast theme with better visibility on eInk devices.</string>
     <string name="dialog_geonav_prefs_sensor_missing_title">Required sensor missing</string>
     <string name="dialog_geonav_prefs_sensor_missing_message">The trapezoidal method requires an accelerometer and gyroscope to use compass input.</string>
     <string name="trait_audio_button_content_description">Controls recording audio.</string>
