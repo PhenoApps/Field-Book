@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class GeneralKeys {
     // @formatter:off
@@ -235,6 +236,9 @@ public class GeneralKeys {
     public static final String LOAD_SAMPLE_DATA = "com.fieldbook.tracker.load_sample_data";
 
     public static final String HIGH_CONTRAST_THEME_ENABLED = "com.fieldbook.tracker.optional_setup_theme";
+
+    @Nullable
+    public static final String FROM_INTRO_AUTOMATIC = "com.fieldbook.tracker.activities.intro.from_intro_automatic";
 
     private GeneralKeys() {
 
