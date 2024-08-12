@@ -275,13 +275,13 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             entryCount = "${entryCount} ${field.observation_level}"
         }
 
-        val sortOrder = field.exp_sort.takeIf { !it.isNullOrBlank() } ?: getString(R.string.field_default_sort_order)
+//        val sortOrder = field.exp_sort.takeIf { !it.isNullOrBlank() } ?: getString(R.string.field_default_sort_order)
 
         sourceChip.text = expSource
-        originalNameChip.text = field.exp_name
+        originalNameChip.text = getString(R.string.fields_rename_study)
         entryCountChip.text = entryCount
         attributeCountChip.text = attributeCount
-        sortOrderChip.text = sortOrder
+        sortOrderChip.text = getString(R.string.field_sort_entries)
 
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {

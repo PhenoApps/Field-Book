@@ -88,7 +88,7 @@
     <string name="field_observation_count_format">%1$s %2$s</string>
 
     <!-- Sort -->
-    <string name="field_sort_entries">Sort Entries</string>
+    <string name="field_sort_entries">Sort</string>
     <string name="sort_dialog_saved">Sorting updated</string>
     <string name="sort_dialog_error_saving">Error updating sorting</string>
     <string name="list_item_field_sort_delete_content_description">Delete the sort attribute.</string>
@@ -178,16 +178,9 @@
     <string name="name_conflict_import_name">import name</string>
     <string name="name_conflict_display_name">display name</string>
 
-    <string name="field_import_string">Imported from</string>
-    <string name="field_create_string">Created within</string>
-    <string name="field_detail_import_details">"%1$s" "%2$s" with name "%3$s"</string>
-    <string name="field_detail_entry_attribute_counts">Contains "%1$s" entries and "%2$s" attributes</string>
-    <string name="field_detail_sort_attribute">Sorted by "%1$s"</string>
-    <string name="field_default_sort_order">import order</string>
+<!--    <string name="field_default_sort_order">import order</string>-->
 
     <string name="field_data_title">Data</string>
-    <string name="field_trait_total">"&lt;b>%1$s&lt;/b>" traits</string>
-    <string name="field_observation_total">"&lt;b>%1$s&lt;/b>" observations</string>
     <string name="field_trait_observation_total">"%d" observations</string>
 
     <!-- Field Detail Charts -->
