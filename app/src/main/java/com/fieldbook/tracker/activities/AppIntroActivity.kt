@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -22,6 +23,9 @@ import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import com.github.appintro.AppIntro
 import com.github.appintro.AppIntroFragment.Companion.createInstance
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.runBlocking
+import org.phenoapps.fragments.storage.PhenoLibStorageDefinerFragment.AssetSample
+import org.phenoapps.utils.BaseDocumentTreeUtil
 import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getRoot
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
@@ -32,10 +36,69 @@ class AppIntroActivity : AppIntro() {
     @Inject
     lateinit var prefs: SharedPreferences
 
+    private var directories: Array<String>? = null
+
+    private var samples = mapOf(
+        AssetSample("field_import", "field_sample.csv") to R.string.dir_field_import,
+        AssetSample("field_import", "field_sample2.csv") to R.string.dir_field_import,
+        AssetSample("field_import", "field_sample3.csv") to R.string.dir_field_import,
+        AssetSample("field_import", "rtk_sample.csv") to R.string.dir_field_import,
+        AssetSample("field_import", "training_sample.csv") to R.string.dir_field_import,
+        AssetSample("resources", "feekes_sample.jpg") to R.string.dir_resources,
+        AssetSample("resources", "stem_rust_sample.jpg") to R.string.dir_resources,
+        AssetSample("trait", "trait_sample.trt") to R.string.dir_trait,
+        AssetSample("trait", "severity.txt") to R.string.dir_trait,
+        AssetSample("database", "sample_db.zip") to R.string.dir_database)
+
+    private val launcher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+
+        uri?.let { nonNullUri ->
+
+            runBlocking {
+
+                directories?.let { dirs ->
+
+                    BaseDocumentTreeUtil.defineRootStructure(this@AppIntroActivity, nonNullUri, dirs)?.let { root ->
+
+                        samples.entries.forEach { entry ->
+
+                            val sampleAsset = entry.key
+                            val dir = entry.value
+
+                            BaseDocumentTreeUtil.copyAsset(this@AppIntroActivity, sampleAsset.name, sampleAsset.dir, dir)
+                        }
+
+                        val flags =
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+
+                        this@AppIntroActivity.contentResolver.takePersistableUriPermission(uri, flags)
+
+                    }
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
 
         val context = applicationContext
+
+        //define directories that should be created in root storage
+        context?.let { ctx ->
+            val archive = ctx.getString(R.string.dir_archive)
+            val db = ctx.getString(R.string.dir_database)
+            val fieldExport = ctx.getString(R.string.dir_field_export)
+            val fieldImport = ctx.getString(R.string.dir_field_import)
+            val geonav = ctx.getString(R.string.dir_geonav)
+            val plotData = ctx.getString(R.string.dir_plot_data)
+            val resources = ctx.getString(R.string.dir_resources)
+            val trait = ctx.getString(R.string.dir_trait)
+            val updates = ctx.getString(R.string.dir_updates)
+            directories = arrayOf(archive, db, fieldExport, fieldImport,
+                geonav, plotData, resources, trait, updates
+            )
+        }
 
         // field book info 1
         addSlide(
@@ -134,9 +197,9 @@ class AppIntroActivity : AppIntro() {
                 applicationContext.getString(R.string.app_intro_storage_summary),
                 resources.getDrawable(R.drawable.storage_lock),
                 {
-                    val intent = Intent(this, DefineStorageActivity::class.java)
-                    startActivity(intent)
+                    launcher.launch(null)
                 },
+
                 {
                     val root = getRoot(applicationContext)
                     return@RequiredSetupModel (root != null && root.exists())
