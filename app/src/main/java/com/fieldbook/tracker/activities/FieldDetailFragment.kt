@@ -228,8 +228,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private fun disableDataChipRipples() {
         // Intercept data card touch events to prevent chip ripple but still trigger expand/collapse
 
-        val chipGroup: ChipGroup = rootView.findViewById(R.id.dataChipGroup)
-        chipGroup.setOnTouchListener { _, event ->
+        observationCountChip.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 rootView.findViewById<View>(R.id.data_collapsible_header).performClick()
             }
