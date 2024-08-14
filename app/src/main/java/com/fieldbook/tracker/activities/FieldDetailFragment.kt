@@ -67,6 +67,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var cardViewCollect: CardView
     private lateinit var cardViewExport: CardView
     private lateinit var cardViewSync: CardView
+    private lateinit var cardViewTraits: CardView
     private lateinit var sourceChip: Chip
     private lateinit var originalNameChip: Chip
     private lateinit var entryCountChip: Chip
@@ -125,6 +126,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
         cardViewCollect = rootView.findViewById(R.id.cardViewCollect)
         cardViewExport = rootView.findViewById(R.id.cardViewExport)
+        cardViewTraits = rootView.findViewById(R.id.cardViewTraits)
 
         cardViewCollect.setOnClickListener {
             fieldId?.let { id ->
@@ -141,6 +143,18 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     exportUtil.exportMultipleFields(listOf(id))
                 }
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot export data")
+        }
+
+        cardViewTraits.setOnClickListener {
+            fieldId?.let { id ->
+                (activity as? FieldEditorActivity)?.setActiveField(id)
+                val intent = Intent()
+                intent.setClassName(
+                    requireActivity(),
+                    "com.fieldbook.tracker.activities.TraitEditorActivity"
+                )
+                startActivity(intent)
+            } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot access field-specific traits")
         }
 
         val dataExpandCollapseIcon: ImageView = rootView.findViewById(R.id.data_expand_collapse_icon)
