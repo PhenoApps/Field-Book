@@ -13,9 +13,6 @@ class DefineStorageActivity: ThemedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_define_storage)
-        ManufacturerUtil.eInkDeviceSetup(this, prefs, resources) {
-            recreate()
-        }
     }
 
     override fun onBackPressed() {
