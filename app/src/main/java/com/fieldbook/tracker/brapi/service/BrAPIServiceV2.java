@@ -32,7 +32,6 @@ import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import org.brapi.client.v2.ApiResponse;
 import org.brapi.client.v2.BrAPIClient;
@@ -87,6 +86,7 @@ import org.brapi.v2.model.BrAPIAcceptedSearchResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.threeten.bp.OffsetDateTime;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -107,8 +107,6 @@ import java.util.function.BiFunction;
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
     private static final String ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES = "observationLevelNames";
-
-    private final String REPEATED_VALUE_INDEX_KEY = "rep";
 
     //used to identify field book db id in external references
     private final String fieldBookReferenceSource = "Field Book Upload";
@@ -970,59 +968,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         return externalIdToInternalMap;
     }
 
-    private void mapLocalRepToBrapi(Observation observation, BrAPIObservation brapiObservation) {
-
-        try {
-
-            JsonObject info = brapiObservation.getAdditionalInfo();
-
-            if (info == null) {
-
-                info = new JsonObject();
-
-            }
-
-            if (observation.getRep() != null) {
-
-                info.addProperty(REPEATED_VALUE_INDEX_KEY, observation.getRep());
-
-            }
-
-            brapiObservation.additionalInfo(info);
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
-    }
-
-    private void mapBrapiToLocalRep(Observation observation, BrAPIObservation brapiObservation) {
-
-        try {
-
-            JsonObject info = brapiObservation.getAdditionalInfo();
-
-            if (info != null && info.has(REPEATED_VALUE_INDEX_KEY)) {
-
-                observation.setRep(info.get(REPEATED_VALUE_INDEX_KEY).getAsString());
-
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
-    }
-
     private Observation mapToObservation(BrAPIObservation obs){
         Observation newObservation = new Observation();
         newObservation.setDbId(obs.getObservationDbId());
         newObservation.setUnitDbId(obs.getObservationUnitDbId());
         newObservation.setVariableDbId(obs.getObservationVariableDbId());
+        newObservation.setTimestamp(obs.getObservationTimeStamp().toString());
 
-        mapBrapiToLocalRep(newObservation, obs);
+        newObservation.setTimestamp(
+                OffsetDateTime.parse(
+                        obs.getObservationTimeStamp().toString()
+                )
+        );
 
         //search imported obs references for first field book id
         List<BrAPIExternalReference> references = obs.getExternalReferences();
@@ -1063,14 +1020,17 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             String internalVarId = extVariableDbIdMap.get(brapiObservation.getObservationVariableDbId());
             newObservation.setVariableDbId(internalVarId);
             newObservation.setValue(brapiObservation.getValue());
+            newObservation.setTimestamp(
+                    OffsetDateTime.parse(
+                            brapiObservation.getObservationTimeStamp().toString()
+                    )
+            );
 
             //Make sure we are on the right experiment level.
             // This will cause bugs if there have been plot and plant level traits found as the observations retrieves all of them
             if(internalUnitId != null) {
                 outputList.add(newObservation);
             }
-
-            mapBrapiToLocalRep(newObservation, brapiObservation);
 
         }
         return outputList;
@@ -1184,8 +1144,6 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         reference.setReferenceSource(fieldBookReferenceSource);
 
         newObservation.setExternalReferences(Collections.singletonList(reference));
-
-        mapLocalRepToBrapi(observation, newObservation);
 
         return newObservation;
     }

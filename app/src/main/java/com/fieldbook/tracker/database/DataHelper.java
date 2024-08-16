@@ -2978,9 +2978,7 @@ public class DataHelper {
 
             if (oldVersion <= 11 && newVersion >= 12) {
                 // Create the ObservationDetails view
-                Log.w("DataHelper", "Creating ObservationDetails View. View def is:");
-                Log.w("DataHelper", ObservationDao.Companion.getSObservationsDetailView());
-//                db.execSQL(ObservationDao.Companion.getSObservationsDetailView());
+                db.execSQL(ObservationDao.Companion.getSObservationsDetailView());
             }
         }
     }
