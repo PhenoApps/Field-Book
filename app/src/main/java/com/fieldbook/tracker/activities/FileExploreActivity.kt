@@ -1,309 +1,330 @@
-package com.fieldbook.tracker.activities;
+package com.fieldbook.tracker.activities
 
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.util.Log
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import android.widget.ListAdapter
+import android.widget.ListView
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.documentfile.provider.DocumentFile
+import com.fieldbook.tracker.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.phenoapps.utils.BaseDocumentTreeUtil
+import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getStem
+import java.util.Arrays
+import java.util.Locale
 
-import androidx.annotation.NonNull;
-import androidx.documentfile.provider.DocumentFile;
+class FileExploreActivity : ActivityDialog(), CoroutineScope by MainScope() {
+    private var mainListView: ListView? = null
+    private var progressBar: ProgressBar? = null
 
-import com.fieldbook.tracker.R;
-
-import org.phenoapps.utils.BaseDocumentTreeUtil;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-
-public class FileExploreActivity extends ActivityDialog {
-
-    public static final String EXTRA_RESULT_KEY = "com.fieldbook.tracker.activities.FieldEditorActivity.extras.RESULT";
-
-    public ListView mainListView;
     // Stores names of traversed directories
-    private final ArrayList<String> str = new ArrayList<>();
-    private final Comparator<DocumentFile> mComparator = (f1, f2) -> {
-        if (f1.isDirectory() && !f2.isDirectory()) {
+    private val str = ArrayList<String?>()
+    private val mComparator = java.util.Comparator { f1: DocumentFile, f2: DocumentFile ->
+        if (f1.isDirectory && !f2.isDirectory) {
             // Directory before non-directory
-            return -1;
-        } else if (!f1.isDirectory() && f2.isDirectory()) {
+            return@Comparator -1
+        } else if (!f1.isDirectory && f2.isDirectory) {
             // Non-directory after directory
-            return 1;
+            return@Comparator 1
         } else {
             // Alphabetic order otherwise
-            String f1Name = BaseDocumentTreeUtil.Companion.getStem(f1.getUri(), this);
-            String f2Name = BaseDocumentTreeUtil.Companion.getStem(f2.getUri(), this);
-            return f1Name.compareToIgnoreCase(f2Name);
-        }
-    };
-    // Check if the first level of the directory structure is the one showing
-    private Boolean firstLvl = true;
-    private Item[] fileList;
-    private String chosenFile;
-    private ListAdapter adapter;
-
-    //updates whenever we traverse a directory, loads the current level's files
-    private DocumentFile path;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        if (getIntent() != null && getIntent().getExtras() != null) {
-
-            final String data = getIntent().getExtras().getString("path");
-            final String[] include = getIntent().getExtras().getStringArray("include");
-            final String[] exclude = getIntent().getExtras().getStringArray("exclude");
-            final String title = getIntent().getExtras().getString("title");
-
-            path = DocumentFile.fromTreeUri(this, Uri.parse(data));
-
-            if (path != null) {
-
-                mainListView = new ListView(this);
-
-                android.view.WindowManager.LayoutParams params = this.getWindow().getAttributes();
-                params.width = LinearLayout.LayoutParams.MATCH_PARENT;
-                params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
-                this.getWindow().setAttributes(params);
-
-                setContentView(mainListView);
-
-                try {
-
-                    loadFileList(path, exclude, include);
-
-                } catch (NullPointerException e) {
-
-                    setResult(RESULT_CANCELED);
-
-                    finish();
-                }
-
-                mainListView.setAdapter(adapter);
-
-                if (title != null && title.length() > 0) {
-                    this.setTitle(title);
-                }
-
-                mainListView.setOnItemClickListener((arg0, arg1, which, arg3) -> {
-
-                    chosenFile = fileList[which].file;
-
-                    //File sel = new File(path + "/" + chosenFile);
-                    DocumentFile file = path.findFile(chosenFile);
-
-                    if (file != null && file.exists() && file.isDirectory()) {
-                        firstLvl = false;
-
-                        // Adds chosen directory to list
-                        str.add(chosenFile);
-                        fileList = null;
-                        path = file;
-
-                        loadFileList(file, exclude, include);
-
-                        mainListView.setAdapter(adapter);
-                    }
-
-                    // Checks if 'up' was clicked
-                    // basically this is a 'fake' file in the list
-                    // check if the file is null or file doesn't exist
-                    else if (chosenFile.equalsIgnoreCase("up")
-                            && (file == null || !file.exists())) {
-
-                        // present directory removed from list
-                        String s = str.remove(str.size() - 1);
-
-                        // path modified to exclude present directory
-                        path = path.getParentFile();
-
-                        fileList = null;
-
-                        // if there are no more directories in the list, then
-                        // its the first level
-                        if (str.isEmpty()) {
-                            firstLvl = true;
-                        }
-                        loadFileList(path, exclude, include);
-                        mainListView.setAdapter(adapter);
-                    }
-                    // File picked
-                    else {
-                        try {
-                            if (file != null && file.exists()) {
-                                Intent returnIntent = new Intent();
-                                returnIntent.putExtra(EXTRA_RESULT_KEY, file.getUri().toString());
-                                setResult(RESULT_OK, returnIntent);
-                                finish();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-
-        } else {
-
-            setResult(RESULT_CANCELED);
-
-            finish();
+            val f1Name: String = f1.uri.getStem(this)
+            val f2Name: String = f2.uri.getStem(this)
+            return@Comparator f1Name.compareTo(f2Name, ignoreCase = true)
         }
     }
 
-    private void loadFileList(DocumentFile path, String[] exclude, String[] include) {
+    // Check if the first level of the directory structure is the one showing
+    private var firstLvl = true
+    private var fileList: Array<Item?>? = null
+    private var chosenFile: String? = null
+    private var adapter: ListAdapter? = null
 
+    //updates whenever we traverse a directory, loads the current level's files
+    private var path: DocumentFile? = null
+
+    public override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        if (intent != null && intent.extras != null) {
+            val data = intent.extras!!.getString("path")
+            val include = intent.extras!!.getStringArray("include")
+            val exclude = intent.extras!!.getStringArray("exclude")
+            val title = intent.extras!!.getString("title")
+
+            path = DocumentFile.fromTreeUri(this, Uri.parse(data))
+
+            if (path != null) {
+                mainListView = ListView(this)
+                progressBar = ProgressBar(this)
+
+                val constraintLayout = ConstraintLayout(this)
+
+                constraintLayout.addView(mainListView, ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT)
+                constraintLayout.addView(progressBar, ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT)
+
+                val pbSize = resources.getDimension(R.dimen.act_file_explorer_progress_bar_size).toInt()
+
+                progressBar?.isIndeterminate = true
+                progressBar?.layoutParams = ConstraintLayout.LayoutParams(pbSize, pbSize).also {
+                    it.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+                    it.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+                    it.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+                    it.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+                }
+
+                val params = this.window.attributes
+                params.width = LinearLayout.LayoutParams.MATCH_PARENT
+                params.height = LinearLayout.LayoutParams.WRAP_CONTENT
+                this.window.attributes = params
+
+                setContentView(constraintLayout)
+
+                loadFilesProgress(path, exclude, include)
+
+                if (!title.isNullOrEmpty()) {
+                    this.title = title
+                }
+
+                mainListView?.onItemClickListener =
+                    AdapterView.OnItemClickListener { _: AdapterView<*>?, _: View?, which: Int, _: Long ->
+                        chosenFile = fileList?.get(which)?.file
+                        //File sel = new File(path + "/" + chosenFile);
+                        val file = path?.findFile(chosenFile!!)
+                        if (file != null && file.exists() && file.isDirectory) {
+                            firstLvl = false
+
+                            // Adds chosen directory to list
+                            str.add(chosenFile)
+                            fileList = null
+                            path = file
+
+                            loadFilesProgress(file, exclude, include)
+
+                            mainListView?.adapter = adapter
+                        } else if (chosenFile.equals("up", ignoreCase = true)
+                            && (file == null || !file.exists())
+                        ) {
+                            // present directory removed from list
+
+                            val s = str.removeAt(str.size - 1)
+
+                            // path modified to exclude present directory
+                            path = path?.parentFile
+
+                            fileList = null
+
+                            // if there are no more directories in the list, then
+                            // its the first level
+                            if (str.isEmpty()) {
+                                firstLvl = true
+                            }
+                            loadFilesProgress(path, exclude, include)
+                            mainListView?.adapter = adapter
+                        } else {
+                            try {
+                                if (file != null && file.exists()) {
+                                    val returnIntent = Intent()
+                                    returnIntent.putExtra(EXTRA_RESULT_KEY, file.uri.toString())
+                                    setResult(RESULT_OK, returnIntent)
+                                    finish()
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+            }
+        } else {
+            setResult(RESULT_CANCELED)
+
+            finish()
+        }
+    }
+
+    private fun loadFilesProgress(path: DocumentFile?, exclude: Array<String>? = null, include: Array<String>? = null) {
+
+        progressBar?.visibility = View.VISIBLE
+        mainListView?.visibility = View.INVISIBLE
+
+        launch(Dispatchers.IO) {
+            try {
+                loadFileList(path, exclude, include)
+            } catch (e: NullPointerException) {
+                setResult(RESULT_CANCELED)
+                finish()
+            }
+
+            withContext(Dispatchers.Main) {
+                progressBar?.visibility = View.GONE
+                mainListView?.visibility = View.VISIBLE
+                mainListView?.adapter = adapter
+            }
+        }
+    }
+
+    private fun loadFileList(
+        path: DocumentFile?,
+        exclude: Array<String>?,
+        include: Array<String>?
+    ) {
         // Checks whether path exists
-        if (path != null && path.exists()) {
 
+        if (path != null && path.exists()) {
             //list all files in the passed directory
-            DocumentFile[] files = path.listFiles();
+
+            val files = path.listFiles()
 
             //created an 'accepted' list of the files that do not have the excluded (param) extension
             //and do contain the included extensions
-            ArrayList<DocumentFile> accepted = new ArrayList<>();
+            val accepted = ArrayList<DocumentFile>()
 
             //populate exclude/include lists before iteration intent extra is optional and can be null
-            List<String> excludedExtensions;
-            if (exclude == null) excludedExtensions = new ArrayList<>();
-            else excludedExtensions = Arrays.asList(exclude);
+            val excludedExtensions = if (exclude == null) ArrayList()
+            else listOf(*exclude)
+            val includedExtensions = if (include == null) ArrayList()
+            else listOf(*include)
 
-            List<String> includedExtensions;
-            if (include == null) includedExtensions = new ArrayList<>();
-            else includedExtensions = Arrays.asList(include);
-
-            for (DocumentFile file : files) {
-                String name = file.getName();
+            for (file in files) {
+                val name = file.name
                 if (name != null) {
                     // Skip asset files
-                    if (name.contains(".fieldbook") || name.contains("severity.txt") || name.contains("sharedpref.xml")) {
-                        continue;
+                    if (name.contains(".fieldbook") || name.contains("severity.txt") || name.contains(
+                            "sharedpref.xml"
+                        )
+                    ) {
+                        continue
                     }
 
-                    if (excludedExtensions.contains(checkExtension(name))) continue;
+                    if (excludedExtensions.contains(checkExtension(name))) continue
 
-                    if (includedExtensions.contains(checkExtension(name)) || file.isDirectory()) {
-                        accepted.add(file);
-                        continue;
+                    if (includedExtensions.contains(checkExtension(name)) || file.isDirectory) {
+                        accepted.add(file)
+                        continue
                     }
                 }
             }
 
-            Arrays.sort(files, mComparator);
+            Arrays.sort(files, mComparator)
 
             // collect file names
-            String[] fileNameList = new String[accepted.size()];
-            for (DocumentFile file : accepted) {
-                fileNameList[accepted.indexOf(file)] = file.getName();
+            val fileNameList = arrayOfNulls<String>(accepted.size)
+            for (file in accepted) {
+                fileNameList[accepted.indexOf(file)] = file.name
             }
 
             // create file list for
-            fileList = new Item[fileNameList.length];
+            fileList = arrayOfNulls(fileNameList.size)
 
-            for (int i = 0; i < fileNameList.length; i++) {
-                fileList[i] = new Item(fileNameList[i], R.drawable.ic_file_generic);
+            for (i in fileNameList.indices) {
+                fileList!![i] = Item(
+                    fileNameList[i]!!, R.drawable.ic_file_generic
+                )
 
-                DocumentFile file = path.findFile(fileNameList[i]);
+                val file = path.findFile(fileNameList[i]!!)
 
                 if (file != null && file.exists()) {
-
-                    String name = file.getName();
+                    val name = file.name
 
                     if (name != null) {
-
                         // Set drawables
-                        if (file.isDirectory()) {
-                            fileList[i].icon = R.drawable.ic_file_directory;
-                            Log.d("DIRECTORY", fileList[i].file);
+
+                        if (file.isDirectory) {
+                            fileList!![i]!!.icon = R.drawable.ic_file_directory
+                            Log.d("DIRECTORY", fileList!![i]!!.file)
                         }
-                        if (name.toLowerCase().contains(".csv")) {
-                            fileList[i].icon = R.drawable.ic_file_csv;
+                        if (name.lowercase(Locale.getDefault()).contains(".csv")) {
+                            fileList!![i]!!.icon = R.drawable.ic_file_csv
                         }
 
                         if (name.contains(".xls")) {
-                            fileList[i].icon = R.drawable.ic_file_xls;
+                            fileList!![i]!!.icon = R.drawable.ic_file_xls
                         } else {
-                            Log.d("FILE", fileList[i].file);
+                            Log.d("FILE", fileList!![i]!!.file)
                         }
                     }
                 }
             }
 
             if (!firstLvl) {
-                Item[] temp = new Item[fileList.length + 1];
-                System.arraycopy(fileList, 0, temp, 1, fileList.length);
-                temp[0] = new Item("Up", R.drawable.ic_file_up_dir);
-                fileList = temp;
+                val temp = arrayOfNulls<Item>(
+                    fileList!!.size + 1
+                )
+                System.arraycopy(fileList, 0, temp, 1, fileList!!.size)
+                temp[0] = Item("Up", R.drawable.ic_file_up_dir)
+                fileList = temp
             }
         }
 
-        adapter = new ArrayAdapter<Item>(this,
-                R.layout.custom_dialog_item_select, android.R.id.text1,
-                fileList) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
+        adapter = object : ArrayAdapter<Item?>(
+            this,
+            R.layout.custom_dialog_item_select, android.R.id.text1,
+            fileList!!
+        ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 // creates view
-                View view = super.getView(position, convertView, parent);
-                TextView textView = view.findViewById(android.R.id.text1);
+                val view = super.getView(position, convertView, parent)
+                val textView = view.findViewById<TextView>(android.R.id.text1)
 
-                // put the image on the text view
-                textView.setCompoundDrawablesWithIntrinsicBounds(
-                        fileList[position].icon, 0, 0, 0);
+                fileList?.get(position)?.let {
+                    // put the image on the text view
+                    textView.setCompoundDrawablesWithIntrinsicBounds(
+                        it.icon, 0, 0, 0
+                    )
+                }
+
 
                 // add margin between image and text (support various screen
                 // densities)
-                int dp5 = (int) (5 * getResources().getDisplayMetrics().density + 0.5f);
-                textView.setCompoundDrawablePadding(dp5);
+                val dp5 = (5 * resources.displayMetrics.density + 0.5f).toInt()
+                textView.compoundDrawablePadding = dp5
 
-                return view;
+                return view
             }
-        };
+        }
     }
 
-    private String checkExtension(String name) {
-        String extension = "";
+    private fun checkExtension(name: String): String {
+        var extension = ""
 
-        int i = name.lastIndexOf('.');
+        val i = name.lastIndexOf('.')
         if (i > 0) {
-            extension = name.substring(i + 1);
+            extension = name.substring(i + 1)
         }
-        return extension.toLowerCase();
+        return extension.lowercase(Locale.getDefault())
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
         }
 
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item)
     }
 
     // Wrapper class to hold file data
-    private static class Item {
-        public String file;
-        public int icon;
-
-        Item(String file, Integer icon) {
-            this.file = file;
-            this.icon = icon;
+    private class Item(var file: String, var icon: Int) {
+        override fun toString(): String {
+            return file
         }
+    }
 
-        @NonNull
-        @Override
-        public String toString() {
-            return file;
-        }
+    companion object {
+        const val EXTRA_RESULT_KEY: String =
+            "com.fieldbook.tracker.activities.FieldEditorActivity.extras.RESULT"
     }
 }
