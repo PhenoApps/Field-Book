@@ -26,38 +26,18 @@ class ObservationDao {
 
         val sObservationsDetailView = """
             CREATE VIEW IF NOT EXISTS $sObservationsDetailViewName AS
-            SELECT 
-                obs.internal_id_observation,
-                obs.observation_unit_id,
-                obs.study_id,
-                obs.observation_variable_db_id,
-                obs.observation_variable_name,
-                obs.observation_variable_field_book_format,
-                obs.value,
-                obs.observation_time_stamp,
-                obs.collector,
-                obs.geoCoordinates,
-                obs.observation_db_id,
-                obs.last_synced_time,
-                obs.additional_info,
-                obs.notes,
-                (
-                    SELECT COUNT(*) 
+            SELECT obs.*, 
+                   (SELECT COUNT(*) 
                     FROM observations AS sub_obs 
                     WHERE sub_obs.observation_unit_id = obs.observation_unit_id 
-                    AND sub_obs.observation_variable_name = obs.observation_variable_name 
-                    AND sub_obs.observation_time_stamp <= obs.observation_time_stamp
-                ) AS rep,
-                vars.external_db_id AS external_db_id,
-                vars.observation_variable_details
-            FROM 
-                observations AS obs
-            JOIN 
-                observation_variables AS vars 
-            ON 
-                obs.observation_variable_db_id = vars.internal_id_observation_variable
-            WHERE 
-                obs.value IS NOT NULL;
+                      AND sub_obs.observation_variable_name = obs.observation_variable_name 
+                      AND sub_obs.observation_time_stamp <= obs.observation_time_stamp
+                   ) AS calculated_rep,
+                   vars.external_db_id AS external_db_id,
+                   vars.observation_variable_details
+            FROM observations AS obs
+            JOIN observation_variables AS vars ON obs.observation_variable_db_id = vars.internal_id_observation_variable
+            WHERE obs.value IS NOT NULL;
         """.trimIndent()
 
         fun getAll(): Array<ObservationModel> = withDatabase { db ->
@@ -158,7 +138,7 @@ class ObservationDao {
                         getStringVal(row, "observation_variable_name"),
                         missingPhoto
                     ).apply {
-                        rep = getStringVal(row, "rep")
+                        rep = getStringVal(row, "calculated_rep")
                         unitDbId = getStringVal(row, "observation_unit_id")
                         descriptiveOntologyTerms = listOf(getStringVal(row, "external_db_id"))
                         description = getStringVal(row, "observation_variable_details")
@@ -237,7 +217,7 @@ class ObservationDao {
                 null // No orderBy
             ).toTable().map { row ->
                 BrapiObservation().apply {
-                    rep = getStringVal(row, "rep")
+                    rep = getStringVal(row, "calculated_rep")
                     unitDbId = getStringVal(row, "observation_unit_id")
                     variableDbId = getStringVal(row, "external_db_id")
                     value = CategoryJsonUtil.processValue(row)
