@@ -398,7 +398,7 @@ class ObservationDao {
                     "observation_variable_name" to model.variableName,
                     "observation_variable_field_book_format" to variableFormat,
                     "value" to model.value,
-                    "observation_time_stamp" to model.timestamp,
+                    "observation_time_stamp" to model.timestamp.toString(),
                     "collector" to model.collector,
 //                "geoCoordinates" to model.geo_coordinates,
                     "geoCoordinates" to null,
