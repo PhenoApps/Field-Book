@@ -22,24 +22,6 @@ class ObservationDao {
 
     companion object {
 
-        const val sObservationsDetailViewName = "ObservationsDetail"
-
-        val sObservationsDetailView = """
-            CREATE VIEW IF NOT EXISTS $sObservationsDetailViewName AS
-            SELECT obs.*, 
-                   (SELECT COUNT(*) 
-                    FROM observations AS sub_obs 
-                    WHERE sub_obs.observation_unit_id = obs.observation_unit_id 
-                      AND sub_obs.observation_variable_name = obs.observation_variable_name 
-                      AND sub_obs.observation_time_stamp <= obs.observation_time_stamp
-                   ) AS calculated_rep,
-                   vars.external_db_id AS external_db_id,
-                   vars.observation_variable_details
-            FROM observations AS obs
-            JOIN observation_variables AS vars ON obs.observation_variable_db_id = vars.internal_id_observation_variable
-            WHERE obs.value IS NOT NULL;
-        """.trimIndent()
-
         fun getAll(): Array<ObservationModel> = withDatabase { db ->
 
             db.query(Observation.tableName)
@@ -121,16 +103,41 @@ class ObservationDao {
                 traitDbId
             ).maxByOrNull { it.rep.toInt() }?.rep?.toInt() ?: 0) + 1
 
+        //false warning, cursor is closed in toTable
+        @SuppressLint("Recycle")
         fun getHostImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
-            db.query(
-                sObservationsDetailViewName, // Table name
-                null, // All columns
-                "trait_data_source = ? AND observation_variable_field_book_format = 'photo'",
-                arrayOf(hostUrl), // Selection arguments
-                null,
-                null,
-                null
-            ).toTable().mapNotNull { row ->
+
+            db.rawQuery("""
+                SELECT DISTINCT props.observationUnitDbId AS uniqueName,
+                       props.observationUnitName AS firstName,
+                obs.${Observation.PK} AS id, 
+                obs.value AS value, 
+                obs.observation_time_stamp,
+                obs.observation_unit_id,
+                obs.observation_db_id,
+                obs.last_synced_time,
+                obs.collector,
+                obs.rep,
+                
+                study.${Study.PK} AS ${Study.FK},
+                study.study_db_id,
+                
+                vars.external_db_id AS external_db_id,
+                vars.observation_variable_name as observation_variable_name,
+                vars.observation_variable_details
+                
+            FROM ${Observation.tableName} AS obs
+            JOIN ${Migrator.sObservationUnitPropertyViewName} AS props ON obs.observation_unit_id = props.observationUnitDbId
+            JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
+            JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK}
+           
+            WHERE study.study_source IS NOT NULL
+                AND obs.value <> ''
+                AND vars.trait_data_source = ?
+                AND vars.trait_data_source IS NOT NULL
+                AND vars.observation_variable_field_book_format = 'photo'
+                
+        """.trimIndent(), arrayOf(hostUrl)).toTable().mapNotNull { row ->
                 if (getStringVal(row, "observation_variable_name") != null)
                     FieldBookImage(
                         ctx,
@@ -138,151 +145,69 @@ class ObservationDao {
                         getStringVal(row, "observation_variable_name"),
                         missingPhoto
                     ).apply {
-                        rep = getStringVal(row, "calculated_rep")
-                        unitDbId = getStringVal(row, "observation_unit_id")
+                        rep = getStringVal(row, "rep")
+                        unitDbId = getStringVal(row, "uniqueName")
                         descriptiveOntologyTerms = listOf(getStringVal(row, "external_db_id"))
                         description = getStringVal(row, "observation_variable_details")
                         setTimestamp(getStringVal(row, "observation_time_stamp"))
-                        fieldBookDbId = getStringVal(row, "internal_id_observation")
+                        fieldBookDbId = getStringVal(row, "id")
                         dbId = getStringVal(row, "observation_db_id")
                         setLastSyncedTime(getStringVal(row, "last_synced_time"))
                     } else null
             }
+
         } ?: emptyList()
 
+        /**
+         * TODO: this can be replaced with a view
+         * important note:  observationUnitDbId and observationUnitName are unit attributes that
+         * are required to have for brapi fields; otherwise, this query will fail.
+         */
+        @SuppressLint("Recycle")
+        fun getObservations(hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
+            db.rawQuery("""
+                SELECT DISTINCT props.observationUnitDbId AS uniqueName,
+                    props.observationUnitName AS firstName,
+                    obs.${Observation.PK} AS id, 
+                    obs.value AS value, 
+                    obs.observation_time_stamp,
+                    obs.observation_unit_id,
+                    obs.observation_db_id,
+                    obs.last_synced_time,
+                    obs.collector,
+                    obs.rep,
+                    study.${Study.PK} AS ${Study.FK},
+                    study.study_db_id, 
+                    vars.external_db_id AS external_db_id,
+                    vars.observation_variable_name as observation_variable_name, 
+                    vars.observation_variable_details,
+                    vars.observation_variable_field_book_format as observation_variable_field_book_format
+                FROM ${Observation.tableName} AS obs
+                JOIN ${Migrator.sObservationUnitPropertyViewName} AS props ON obs.observation_unit_id = props.observationUnitDbId
+                JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
+                JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK}
+                WHERE study.study_source IS NOT NULL
+                    AND obs.value <> ''
+                    AND vars.trait_data_source = ?
+                    AND vars.trait_data_source IS NOT NULL
+                    AND vars.observation_variable_field_book_format <> 'photo'
+                    
+        """.trimIndent(), arrayOf(hostUrl)).toTable()
+                    .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
+                        rep = getStringVal(row, "rep")
+                        unitDbId = getStringVal(row, "uniqueName")
+                        variableDbId = getStringVal(row, "external_db_id")
+                        value = CategoryJsonUtil.processValue(row)
+                        variableName = getStringVal(row, "observation_variable_name")
+                        fieldBookDbId = getStringVal(row, "id")
+                        dbId = getStringVal(row, "observation_db_id")
+                        setTimestamp(getStringVal(row, "observation_time_stamp"))
+                        setLastSyncedTime(getStringVal(row, "last_synced_time"))
+                        collector = getStringVal(row, "collector")
+                        studyId = getStringVal(row, "study_db_id")
+                    } }
 
-//        //false warning, cursor is closed in toTable
-//        @SuppressLint("Recycle")
-//        fun getHostImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
-//
-//            db.rawQuery("""
-//                SELECT DISTINCT props.observationUnitDbId AS uniqueName,
-//                       props.observationUnitName AS firstName,
-//                obs.${Observation.PK} AS id,
-//                obs.value AS value,
-//                obs.observation_time_stamp,
-//                obs.observation_unit_id,
-//                obs.observation_db_id,
-//                obs.last_synced_time,
-//                obs.collector,
-//                obs.rep,
-//
-//                study.${Study.PK} AS ${Study.FK},
-//                study.study_db_id,
-//
-//                vars.external_db_id AS external_db_id,
-//                vars.observation_variable_name as observation_variable_name,
-//                vars.observation_variable_details
-//
-//            FROM ${Observation.tableName} AS obs
-//            JOIN ${Migrator.sObservationUnitPropertyViewName} AS props ON obs.observation_unit_id = props.observationUnitDbId
-//            JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK}
-//            JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK}
-//
-//            WHERE study.study_source IS NOT NULL
-//                AND obs.value <> ''
-//                AND vars.trait_data_source = ?
-//                AND vars.trait_data_source IS NOT NULL
-//                AND vars.observation_variable_field_book_format = 'photo'
-//
-//        """.trimIndent(), arrayOf(hostUrl)).toTable().mapNotNull { row ->
-//                if (getStringVal(row, "observation_variable_name") != null)
-//                    FieldBookImage(
-//                        ctx,
-//                        getStringVal(row, "value"),
-//                        getStringVal(row, "observation_variable_name"),
-//                        missingPhoto
-//                    ).apply {
-//                        rep = getStringVal(row, "rep")
-//                        unitDbId = getStringVal(row, "uniqueName")
-//                        descriptiveOntologyTerms = listOf(getStringVal(row, "external_db_id"))
-//                        description = getStringVal(row, "observation_variable_details")
-//                        setTimestamp(getStringVal(row, "observation_time_stamp"))
-//                        fieldBookDbId = getStringVal(row, "id")
-//                        dbId = getStringVal(row, "observation_db_id")
-//                        setLastSyncedTime(getStringVal(row, "last_synced_time"))
-//                    } else null
-//            }
-//
-//        } ?: emptyList()
-
-        fun getObservations(hostUrl: String): List<BrapiObservation> = withDatabase { db ->
-            db.query(
-                sObservationsDetailViewName,
-                null, // No specific columns, so select all columns
-                "trait_data_source = ? AND observation_variable_field_book_format <> 'photo'",
-                arrayOf(hostUrl), // Wrap the string in an array
-                null, // No groupBy
-                null, // No having
-                null // No orderBy
-            ).toTable().map { row ->
-                BrapiObservation().apply {
-                    rep = getStringVal(row, "calculated_rep")
-                    unitDbId = getStringVal(row, "observation_unit_id")
-                    variableDbId = getStringVal(row, "external_db_id")
-                    value = CategoryJsonUtil.processValue(row)
-                    variableName = getStringVal(row, "observation_variable_name")
-                    fieldBookDbId = getStringVal(row, "internal_id_observation")
-                    dbId = getStringVal(row, "observation_db_id")
-                    setTimestamp(getStringVal(row, "observation_time_stamp"))
-                    setLastSyncedTime(getStringVal(row, "last_synced_time"))
-                    collector = getStringVal(row, "collector")
-                    studyId = getStringVal(row, "study_id")
-                }
-            }
         } ?: emptyList()
-
-
-//        /**
-//         * TODO: this can be replaced with a view
-//         * important note:  observationUnitDbId and observationUnitName are unit attributes that
-//         * are required to have for brapi fields; otherwise, this query will fail.
-//         */
-//        @SuppressLint("Recycle")
-//        fun getObservations(hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
-//            db.rawQuery("""
-//                SELECT DISTINCT props.observationUnitDbId AS uniqueName,
-//                    props.observationUnitName AS firstName,
-//                    obs.${Observation.PK} AS id,
-//                    obs.value AS value,
-//                    obs.observation_time_stamp,
-//                    obs.observation_unit_id,
-//                    obs.observation_db_id,
-//                    obs.last_synced_time,
-//                    obs.collector,
-//                    obs.rep,
-//                    study.${Study.PK} AS ${Study.FK},
-//                    study.study_db_id,
-//                    vars.external_db_id AS external_db_id,
-//                    vars.observation_variable_name as observation_variable_name,
-//                    vars.observation_variable_details,
-//                    vars.observation_variable_field_book_format as observation_variable_field_book_format
-//                FROM ${Observation.tableName} AS obs
-//                JOIN ${Migrator.sObservationUnitPropertyViewName} AS props ON obs.observation_unit_id = props.observationUnitDbId
-//                JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK}
-//                JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK}
-//                WHERE study.study_source IS NOT NULL
-//                    AND obs.value <> ''
-//                    AND vars.trait_data_source = ?
-//                    AND vars.trait_data_source IS NOT NULL
-//                    AND vars.observation_variable_field_book_format <> 'photo'
-//
-//        """.trimIndent(), arrayOf(hostUrl)).toTable()
-//                    .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
-//                        rep = getStringVal(row, "rep")
-//                        unitDbId = getStringVal(row, "uniqueName")
-//                        variableDbId = getStringVal(row, "external_db_id")
-//                        value = CategoryJsonUtil.processValue(row)
-//                        variableName = getStringVal(row, "observation_variable_name")
-//                        fieldBookDbId = getStringVal(row, "id")
-//                        dbId = getStringVal(row, "observation_db_id")
-//                        setTimestamp(getStringVal(row, "observation_time_stamp"))
-//                        setLastSyncedTime(getStringVal(row, "last_synced_time"))
-//                        collector = getStringVal(row, "collector")
-//                        studyId = getStringVal(row, "study_db_id")
-//                    } }
-//
-//        } ?: emptyList()
 
         private fun getStringVal(row: Map<String, Any?>?, column: String?) : String? {
             if(row != null && column != null){
