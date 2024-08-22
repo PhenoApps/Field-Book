@@ -39,16 +39,24 @@ import com.fieldbook.tracker.objects.SearchDialogDataModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
+import com.fieldbook.tracker.utilities.ZipUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
@@ -56,13 +64,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import dagger.hilt.android.qualifiers.ActivityContext;
 
@@ -1071,6 +1084,13 @@ public class DataHelper {
 //        }
 //
 //        return data;
+    }
+
+    public ArrayList<TraitObject> getVisibleTraitObjects() {
+
+        open();
+
+        return VisibleObservationVariableDao.Companion.getVisibleTraitObjects();
     }
 
     /**
@@ -2411,32 +2431,38 @@ public class DataHelper {
 
             File oldDb = new File(internalDbPath);
 
-            try {
+            //first check if the file to import is just a .db file
+            if (fileName.endsWith(".db")) { //if it is import it old-style
+                try {
+                    BaseDocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
 
-                BaseDocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
+                    open();
+                } catch (Exception e) {
 
-            } catch (Exception e) {
+                    Log.d("Database", e.toString());
 
-                Log.d("Database", e.toString());
+                }
+            } else if (fileName.endsWith(".zip")){ // for zip file, call the unzip function
+                try (InputStream input = context.getContentResolver().openInputStream(file.getUri())) {
 
+                    try (OutputStream output = new FileOutputStream(internalDbPath)) {
+                        ZipUtil.Companion.unzip(context, input, output);
+
+                        open();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-
-            open();
 
             if (!isTableExists(Migrator.Study.tableName)) {
 
                 Migrator.Companion.migrateSchema(db, getAllTraitObjects());
 
             }
-
-            SharedPreferences.Editor edit = preferences.edit();
-
-            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-            edit.putString(GeneralKeys.UNIQUE_NAME, "");
-            edit.putString(GeneralKeys.PRIMARY_NAME, "");
-            edit.putString(GeneralKeys.SECONDARY_NAME, "");
-            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
-            edit.apply();
 
         }
     }
@@ -2447,21 +2473,20 @@ public class DataHelper {
      */
     public void exportDatabase(Context ctx, String filename) throws IOException {
         String internalDbPath = getDatabasePath(this.context);
-        String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/com.fieldbook.tracker_preferences.xml";
 
         close();
 
         try {
 
             File oldDb = new File(internalDbPath);
-            File oldSp = new File(internalSpPath);
 
             DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(ctx, R.string.dir_database);
 
             if (databaseDir != null) {
 
-                String dbFileName = filename + ".db";
-                String prefFileName = filename + ".db_sharedpref.xml";
+                String dbFileName = "fieldbook.db";
+                String prefFileName = filename + "_db_sharedpref";
+                String zipFileName = filename + ".zip";
 
                 DocumentFile dbDoc = databaseDir.findFile(dbFileName);
                 DocumentFile prefDoc = databaseDir.findFile(prefFileName);
@@ -2476,10 +2501,43 @@ public class DataHelper {
                 DocumentFile backupDatabaseFile = databaseDir.createFile("*/*", dbFileName);
                 DocumentFile backupPreferenceFile = databaseDir.createFile("*/*", prefFileName);
 
+
+                DocumentFile zipFile = databaseDir.findFile(zipFileName);
+                if (zipFile == null){
+                    zipFile = databaseDir.createFile("*/*", zipFileName);
+                }
+
+                // copy the preferences in the backupPreferenceFile
+                OutputStream tempStream = BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_database, prefFileName);
+                ObjectOutputStream objectStream = new ObjectOutputStream(tempStream);
+
+                objectStream.writeObject(preferences.getAll());
+
+                objectStream.close();
+
+                if (tempStream != null) {
+                    tempStream.close();
+                }
+
+                // add the .db file and preferences file to the zip file
+                OutputStream outputStream = context.getContentResolver().openOutputStream(zipFile.getUri());
                 if (backupDatabaseFile != null && backupPreferenceFile != null) {
 
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
-                    BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldSp), backupPreferenceFile);
+
+                    if (outputStream != null){
+                        ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, backupPreferenceFile }, outputStream);
+
+                    }
+
+                    // delete .db file and preferences file
+                    if (backupDatabaseFile.exists()){
+                        backupDatabaseFile.delete();
+                    }
+
+                    if (backupPreferenceFile.exists()){
+                        backupPreferenceFile.delete();
+                    }
                 }
             }
 

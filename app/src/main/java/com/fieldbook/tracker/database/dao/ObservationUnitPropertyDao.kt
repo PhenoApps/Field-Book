@@ -182,7 +182,7 @@ class ObservationUnitPropertyDao {
                     LEFT JOIN observation_units AS units ON units.observation_unit_db_id = obs.observation_unit_id
                     LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                     LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
-                    WHERE units.study_id = ?
+                    WHERE obs.study_id = ?
                       AND obs.observation_variable_name IN ($placeholders)
                     GROUP BY obs.internal_id_observation
                     $sortOrderClause
@@ -289,7 +289,7 @@ class ObservationUnitPropertyDao {
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
-                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id
+                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = $expId
                 WHERE units.study_id = $expId
                 GROUP BY units.internal_id_observation_unit
                 $orderByClause
