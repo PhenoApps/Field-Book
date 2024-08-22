@@ -172,6 +172,7 @@ class ObservationDao {
                     obs.value AS value, 
                     obs.observation_time_stamp,
                     obs.observation_unit_id,
+                    obs.observation_variable_db_id,
                     obs.observation_db_id,
                     obs.last_synced_time,
                     obs.collector,
@@ -197,6 +198,7 @@ class ObservationDao {
                         rep = getStringVal(row, "rep")
                         unitDbId = getStringVal(row, "uniqueName")
                         variableDbId = getStringVal(row, "external_db_id")
+                        internalVariableDbId = getStringVal(row, "observation_variable_db_id")
                         value = CategoryJsonUtil.processValue(row)
                         variableName = getStringVal(row, "observation_variable_name")
                         fieldBookDbId = getStringVal(row, "id")

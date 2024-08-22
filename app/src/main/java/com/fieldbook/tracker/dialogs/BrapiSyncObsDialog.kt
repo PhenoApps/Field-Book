@@ -161,9 +161,9 @@ class BrapiSyncObsDialog(context: Context, private val syncController: FieldSync
 
                         null
                     }) {
-                        println("Stopped:")
-                        null
-                    }
+                    println("Stopped:")
+                    null
+                }
 
                 null
             }) { null }
@@ -256,30 +256,37 @@ internal class ImportRunnableTask(
         }
 
         try {
-            //Sorting here to only save the most recently taken observation if it is not already in the DB
-            val observationList =
-                studyObservations.observationList.sortedByDescending { it.timestamp }
+            // Calculate rep numbers for new observations based on existing observations
+            val hostURL = BrAPIService.getHostUrl(context)
+            val existingObservations = dataHelper.getObservations(hostURL)
 
-            //Then sync the observations
+            // Track the count of existing observations for each unit-variable pair
+            val observationRepBaseMap = mutableMapOf<Pair<String?, String?>, Int>()
+            for (obs in existingObservations) {
+                val key = Pair(obs.unitDbId, obs.internalVariableDbId)
+                observationRepBaseMap[key] = observationRepBaseMap.getOrDefault(key, 0) + 1
+            }
+
+            // Sort new observations by timestamp so rep # will ascend in order with time
+            val observationList = studyObservations.observationList.sortedBy { it.timestamp }
+
             for (obs in observationList) {
-                //Leaving this here for debugging purposes
-//            println("****************************")
-//            println("Saving: varName: " + obs.variableName)
-//            println("Saving: value: " + obs.value)
-//            println("Saving: studyId: " + obs.studyId)
-//            println("Saving: unitDBId: " + obs.unitDbId)
-//            println("Saving: varDbId: " + obs.variableDbId)
+                val key = Pair(obs.unitDbId, obs.variableDbId)
+                val baseRep = observationRepBaseMap.getOrDefault(key, 0)
+                val nextRep = baseRep + 1
+                obs.rep = nextRep.toString()
+
+                // Save observation to the database and update highest rep # for the pair
                 dataHelper.setTraitObservations(studyObservations.fieldBookStudyDbId, obs, traitIdToType)
+                observationRepBaseMap[key] = nextRep
             }
             return 0
-        }
-        catch (exc: Exception) {
+        } catch (exc: Exception) {
             fail = true
             failMessage = exc.message ?: "ERROR"
-            println(exc)
+            Log.e("ImportRunnableTask", "Exception occurred: ${exc.message}", exc)
             return null
         }
-
     }
 
 
