@@ -37,7 +37,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.brapi.update.ImportBrapiActivity;
+import com.fieldbook.tracker.activities.brapi.update.BrapiStudyFilterActivity;
 import com.fieldbook.tracker.adapters.FieldAdapterOld;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
@@ -263,7 +263,7 @@ public class FieldEditorActivityOld extends ThemedActivity
 //    }
     public void loadBrAPI() {
         //Intent intent = new Intent(this, BrapiActivity.class);
-        Intent intent = new Intent(this, ImportBrapiActivity.class);
+        Intent intent = new Intent(this, BrapiStudyFilterActivity.class);
         startActivityForResult(intent, REQUEST_BRAPI_IMPORT_ACTIVITY);
     }
 

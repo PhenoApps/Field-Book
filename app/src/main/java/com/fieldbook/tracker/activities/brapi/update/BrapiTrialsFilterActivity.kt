@@ -10,35 +10,32 @@ import com.google.gson.reflect.TypeToken
 import io.swagger.client.ApiException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import org.brapi.client.v2.model.queryParams.core.ProgramQueryParams
-import org.brapi.v2.model.core.BrAPIProgram
-import org.brapi.v2.model.core.response.BrAPIProgramListResponse
+import org.brapi.client.v2.model.queryParams.core.TrialQueryParams
+import org.brapi.v2.model.core.BrAPITrial
+import org.brapi.v2.model.core.response.BrAPITrialListResponse
 import java.lang.reflect.Type
 
-open class BrapiProgramFilterActivity(override val titleResId: Int = R.string.brapi_filter_type_program) :
-    BrapiFilterActivity<BrAPIProgram, ProgramQueryParams, BrAPIProgramListResponse>() {
+open class BrapiTrialsFilterActivity(override val titleResId: Int = R.string.brapi_filter_type_trial) :
+    BrapiFilterActivity<BrAPITrial, TrialQueryParams, BrAPITrialListResponse>() {
 
     companion object {
 
-        const val FILTER_NAME = "$PREFIX.programDbIds"
+        const val FILTER_NAME = "$PREFIX.trialDbIds"
 
         fun getIntent(context: Context): Intent {
-            return Intent(context, BrapiProgramFilterActivity::class.java)
+            return Intent(context, BrapiTrialsFilterActivity::class.java)
         }
     }
 
-    override val filterName: String
-        get() = FILTER_NAME
-
-    override suspend fun queryByPage(params: ProgramQueryParams) = callbackFlow {
+    override suspend fun queryByPage(params: TrialQueryParams) = callbackFlow {
 
         try {
 
-            (brapiService as BrAPIServiceV2).fetchPrograms(params, { response ->
+            (brapiService as BrAPIServiceV2).fetchTrials(params, { response ->
 
                 response.validateResponse { pagination, result ->
 
-                    trySend(pagination to result.data.filterIsInstance<BrAPIProgram>())
+                    trySend(pagination to result.data.filterIsInstance<BrAPITrial>())
 
                 }
 
@@ -58,20 +55,22 @@ open class BrapiProgramFilterActivity(override val titleResId: Int = R.string.br
         }
     }
 
-    override fun getQueryParams() = ProgramQueryParams()
+    override fun getQueryParams() = TrialQueryParams()
 
-    override fun List<BrAPIProgram?>.mapToUiModel() = filterNotNull().map { program ->
+    override val filterName: String
+        get() = FILTER_NAME
+
+    override fun List<BrAPITrial?>.mapToUiModel() = filterNotNull().map { trial ->
         CheckboxListAdapter.Model(
-            checked = false,
-            id = program.programDbId,
-            label = program.programName,
-            subLabel = program.programType ?: String()
+            checked = trial.trialDbId in cache.map { it.id },
+            id = trial.trialDbId,
+            label = trial.trialName,
+            subLabel = trial.trialDescription
         )
     }
 
-    //TODO make these static?
     override fun getTypeToken(): Type =
-        TypeToken.getParameterized(List::class.java, BrAPIProgram::class.java).type
+        TypeToken.getParameterized(List::class.java, BrAPITrial::class.java).type
 
     override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
         super.onCreateOptionsMenu(menu)

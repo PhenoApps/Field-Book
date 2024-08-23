@@ -154,10 +154,10 @@ public class BrapiProgramActivity extends ThemedActivity {
     private ListAdapter buildProgramsArrayAdapter(List<BrapiProgram> programs) {
         List<Object> itemDataList = new ArrayList<>();
         for (BrapiProgram program : programs) {
-            if(program.getProgramName() != null)
-                itemDataList.add(program.getProgramName());
+            if(program.programName != null)
+                itemDataList.add(program.programName);
             else
-                itemDataList.add(program.getProgramDbId());
+                itemDataList.add(program.programDbId);
         }
         return new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
     }
@@ -170,7 +170,7 @@ public class BrapiProgramActivity extends ThemedActivity {
         } else if (id == R.id.selectProgram) {
             if (this.brapiProgram != null) {
                 Intent intent = new Intent();
-                intent.setData(Uri.parse(this.brapiProgram.getProgramDbId()));
+                intent.setData(Uri.parse(this.brapiProgram.programDbId));
                 setResult(RESULT_OK, intent);
                 finish();
             } else {

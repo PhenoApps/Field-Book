@@ -2,7 +2,6 @@
 <resources>
 
     <!-- Widget styles -->
-
     <style name="PopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
         <item name="android:popupBackground">@drawable/cell</item>
     </style>
@@ -165,4 +164,25 @@
         <item name="android:textColor">?attr/fb_color_text_dark</item>
     </style>
 
+    <!-- Material Components -->
+    <style name="FirstChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
+        <item name="chipBackgroundColor">?attr/fb_first_chip_color</item>
+    </style>
+
+    <style name="SecondChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
+        <item name="chipBackgroundColor">?attr/fb_second_chip_color</item>
+    </style>
+
+    <style name="ThirdChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
+        <item name="chipBackgroundColor">?attr/fb_third_chip_color</item>
+    </style>
+
+    <style name="FourthChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
+        <item name="chipBackgroundColor">?attr/fb_third_chip_color</item>
+    </style>
+
+    <style name="Widget.MaterialComponents.BottomSheet.DragHandle" parent="Widget.Material3.BottomSheet.DragHandle">
+        <item name="tint">?fb_color_accent</item>
+        <item name="android:alpha">0.2</item>
+    </style>
 </resources>

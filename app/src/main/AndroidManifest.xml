@@ -93,7 +93,7 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.brapi.update.ImportBrapiActivity"
+        <activity android:name=".activities.brapi.update.BrapiStudyFilterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
@@ -108,6 +108,20 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
+        <activity android:name=".activities.brapi.update.BrapiSeasonsFilterActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.update.BrapiTrialsFilterActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.update.BrapiCropsFilterActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
         <!-- About activity uses a library, which uses material design components, it has its own style file -->
         <!-- shows version information and references to other apps, etc. -->
         <activity

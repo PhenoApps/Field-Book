@@ -10,35 +10,32 @@ import com.google.gson.reflect.TypeToken
 import io.swagger.client.ApiException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import org.brapi.client.v2.model.queryParams.core.ProgramQueryParams
-import org.brapi.v2.model.core.BrAPIProgram
-import org.brapi.v2.model.core.response.BrAPIProgramListResponse
+import org.brapi.client.v2.model.queryParams.core.SeasonQueryParams
+import org.brapi.v2.model.core.BrAPISeason
+import org.brapi.v2.model.core.response.BrAPISeasonListResponse
 import java.lang.reflect.Type
 
-open class BrapiProgramFilterActivity(override val titleResId: Int = R.string.brapi_filter_type_program) :
-    BrapiFilterActivity<BrAPIProgram, ProgramQueryParams, BrAPIProgramListResponse>() {
+open class BrapiSeasonsFilterActivity(override val titleResId: Int = R.string.brapi_filter_type_season) :
+    BrapiFilterActivity<BrAPISeason, SeasonQueryParams, BrAPISeasonListResponse>() {
 
     companion object {
 
-        const val FILTER_NAME = "$PREFIX.programDbIds"
+        const val FILTER_NAME = "$PREFIX.seasonDbIds"
 
         fun getIntent(context: Context): Intent {
-            return Intent(context, BrapiProgramFilterActivity::class.java)
+            return Intent(context, BrapiSeasonsFilterActivity::class.java)
         }
     }
 
-    override val filterName: String
-        get() = FILTER_NAME
-
-    override suspend fun queryByPage(params: ProgramQueryParams) = callbackFlow {
+    override suspend fun queryByPage(params: SeasonQueryParams) = callbackFlow {
 
         try {
 
-            (brapiService as BrAPIServiceV2).fetchPrograms(params, { response ->
+            (brapiService as BrAPIServiceV2).fetchSeasons(params, { response ->
 
                 response.validateResponse { pagination, result ->
 
-                    trySend(pagination to result.data.filterIsInstance<BrAPIProgram>())
+                    trySend(pagination to result.data.filterIsInstance<BrAPISeason>())
 
                 }
 
@@ -58,20 +55,23 @@ open class BrapiProgramFilterActivity(override val titleResId: Int = R.string.br
         }
     }
 
-    override fun getQueryParams() = ProgramQueryParams()
+    override fun getQueryParams() = SeasonQueryParams()
 
-    override fun List<BrAPIProgram?>.mapToUiModel() = filterNotNull().map { program ->
-        CheckboxListAdapter.Model(
-            checked = false,
-            id = program.programDbId,
-            label = program.programName,
-            subLabel = program.programType ?: String()
-        )
-    }
+    override val filterName: String
+        get() = FILTER_NAME
 
-    //TODO make these static?
     override fun getTypeToken(): Type =
-        TypeToken.getParameterized(List::class.java, BrAPIProgram::class.java).type
+        TypeToken.getParameterized(List::class.java, BrAPISeason::class.java).type
+
+    override fun List<BrAPISeason?>.mapToUiModel(): List<CheckboxListAdapter.Model> =
+        filterNotNull().map { season ->
+            CheckboxListAdapter.Model(
+                checked = false,
+                id = season.seasonDbId,
+                label = season.seasonName ?: season.seasonDbId,
+                subLabel = season.year?.toString() ?: String()
+            )
+        }
 
     override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
         super.onCreateOptionsMenu(menu)

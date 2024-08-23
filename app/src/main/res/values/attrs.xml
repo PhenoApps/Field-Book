@@ -286,4 +286,10 @@
     <!-- within-dialog error message color -->
     <attr name="fb_error_message_color" format="color" />
 
+    <!-- generic chip colors for the different filtering layers / themes -->
+    <attr name="fb_first_chip_color" format="color" />
+    <attr name="fb_second_chip_color" format="color" />
+    <attr name="fb_third_chip_color" format="color" />
+    <attr name="fb_fourth_chip_color" format="color" />
+
 </resources>
