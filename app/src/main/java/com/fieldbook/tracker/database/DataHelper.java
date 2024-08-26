@@ -865,6 +865,14 @@ public class DataHelper {
 
     }
 
+    public void updateObservation(ObservationModel observation) {
+
+        open();
+
+        ObservationDao.Companion.updateObservation(observation);
+
+    }
+
     /**
      * Sync with observationdbids BrAPI
      */

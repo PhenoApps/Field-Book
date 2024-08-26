@@ -30,6 +30,7 @@ public class LayoutCollections {
         traitLayouts.add(new PhotoTraitLayout(_activity));
         traitLayouts.add(new UsbCameraTraitLayout(_activity));
         traitLayouts.add(new GoProTraitLayout(_activity));
+        traitLayouts.add(new CanonTraitLayout(_activity));
     }
 
     /**
@@ -46,7 +47,11 @@ public class LayoutCollections {
         return getTraitLayout("text");
     }
 
-    public PhotoTraitLayout getPhotoTrait() {
+    public AbstractCameraTrait getPhotoTrait(String format) {
+        switch (format) {
+            case "photo":
+                return (PhotoTraitLayout) getTraitLayout("photo");
+        }
         return (PhotoTraitLayout) getTraitLayout("photo");
     }
 

@@ -3,9 +3,13 @@ package com.fieldbook.tracker.offbeat.traits.formats.contracts
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.offbeat.traits.formats.TraitFormat
+import com.fieldbook.tracker.offbeat.traits.formats.coders.CategoricalJsonCoder
+import com.fieldbook.tracker.offbeat.traits.formats.coders.StringCoder
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.CategoriesParameter
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.offbeat.traits.formats.presenters.CategoricalValuePresenter
+import com.fieldbook.tracker.offbeat.traits.formats.presenters.ValuePresenter
 
 /**
  * TODO add multicategorical checkbox UI catch-all "CategoricalOptionsParameter"
@@ -21,4 +25,4 @@ class CategoricalFormat : TraitFormat(
     NameParameter(),
     DetailsParameter(),
     CategoriesParameter()
-)
+), StringCoder by CategoricalJsonCoder(), ValuePresenter by CategoricalValuePresenter()

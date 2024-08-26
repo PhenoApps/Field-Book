@@ -5,6 +5,8 @@ import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.offbeat.traits.formats.TraitFormat
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.offbeat.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.offbeat.traits.formats.presenters.UriPresenter
+import com.fieldbook.tracker.offbeat.traits.formats.presenters.ValuePresenter
 
 class AudioFormat : TraitFormat(
     format = Formats.AUDIO,
@@ -16,4 +18,4 @@ class AudioFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter()
-)
+), ValuePresenter by UriPresenter()

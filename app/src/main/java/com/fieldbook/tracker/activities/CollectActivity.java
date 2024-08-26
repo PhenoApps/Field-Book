@@ -47,6 +47,9 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.devices.camera.UsbCameraApi;
+import com.fieldbook.tracker.devices.camera.GoProApi;
+import com.fieldbook.tracker.devices.camera.CanonApi;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
 import com.fieldbook.tracker.dialogs.SearchDialog;
@@ -56,22 +59,29 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.offbeat.traits.formats.Formats;
+import com.fieldbook.tracker.offbeat.traits.formats.coders.StringCoder;
+import com.fieldbook.tracker.offbeat.traits.formats.TraitFormat;
+import com.fieldbook.tracker.offbeat.traits.formats.presenters.ValuePresenter;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
+import com.fieldbook.tracker.traits.CanonTraitLayout;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
-import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
+import com.fieldbook.tracker.utilities.CameraXFacade;
+import com.fieldbook.tracker.utilities.BluetoothHelper;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.FfmpegHelper;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
-import com.fieldbook.tracker.utilities.GoProWrapper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
@@ -82,6 +92,7 @@ import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
 import com.fieldbook.tracker.utilities.VibrateUtil;
+import com.fieldbook.tracker.utilities.WifiHelper;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
@@ -90,12 +101,11 @@ import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.serenegiant.widget.UVCCameraTextureView;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.phenoapps.interfaces.security.SecureBluetooth;
-import org.phenoapps.interfaces.usb.camera.UsbCameraInterface;
 import org.phenoapps.security.SecureBluetoothActivityImpl;
-import org.phenoapps.usb.camera.UsbCameraHelper;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
@@ -126,12 +136,11 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends ThemedActivity
-        implements UsbCameraInterface, SummaryFragment.SummaryOpenListener,
+        implements SummaryFragment.SummaryOpenListener,
         com.fieldbook.tracker.interfaces.CollectController,
         com.fieldbook.tracker.interfaces.CollectRangeController,
         com.fieldbook.tracker.interfaces.CollectTraitController,
         InfoBarAdapter.InfoBarController,
-        GoProTraitLayout.GoProCollector,
         GPSTracker.GPSTrackerListener,
         SearchDialog.onSearchResultsClickedListener {
 
@@ -144,7 +153,25 @@ public class CollectActivity extends ThemedActivity
     private GeoNavHelper geoNavHelper;
 
     @Inject
+    UsbCameraApi usbCameraApi;
+
+    @Inject
     SharedPreferences preferences;
+
+    @Inject
+    FfmpegHelper ffmpegHelper;
+
+    @Inject
+    GoProApi goProApi;
+
+    @Inject
+    WifiHelper wifiHelper;
+
+    @Inject
+    BluetoothHelper bluetoothHelper;
+
+    @Inject
+    CanonApi canonApi;
 
     @Inject
     KeyboardListenerHelper keyboardListenerHelper;
@@ -175,7 +202,7 @@ public class CollectActivity extends ThemedActivity
     SoundHelperImpl soundHelper;
 
     @Inject
-    GoProWrapper goProWrapper;
+    CameraXFacade cameraXFacade;
 
     private GPSTracker gps;
 
@@ -187,6 +214,8 @@ public class CollectActivity extends ThemedActivity
     public static boolean partialReload;
     public static String TAG = "Field Book";
     public static String GEOTAG = "GeoNav";
+
+    UVCCameraTextureView uvcView;
 
     ImageButton deleteValue;
     ImageButton missingValue;
@@ -236,11 +265,6 @@ public class CollectActivity extends ThemedActivity
     private boolean mSkipLastUsedTrait = false;
 
     private TextToSpeechHelper ttsHelper = null;
-    /**
-     * Usb Camera Helper
-     */
-    private UsbCameraHelper mUsbCameraHelper = null;
-    private boolean usbCameraConnected = false;
 
     private SecureBluetoothActivityImpl secureBluetooth;
 
@@ -309,10 +333,6 @@ public class CollectActivity extends ThemedActivity
             return null;
         });
 
-        mUsbCameraHelper = new UsbCameraHelper(this);
-
-        goProWrapper.attach();
-
         mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
 
         loadScreen();
@@ -320,6 +340,19 @@ public class CollectActivity extends ThemedActivity
         checkForInitialBarcodeSearch();
 
         verifyPersonHelper.checkLastOpened();
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        usbCameraApi.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        usbCameraApi.onStop();
     }
 
     public void triggerTts(String text) {
@@ -506,6 +539,8 @@ public class CollectActivity extends ThemedActivity
         });
 
         refreshInfoBarAdapter();
+
+        uvcView = findViewById(R.id.collect_activity_uvc_tv);
     }
 
     //when softkeyboard is displayed, reset the snackbar to redisplay with a calculated bottom margin
@@ -675,10 +710,12 @@ public class CollectActivity extends ThemedActivity
             boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitDbId(), getRep());
             // if a brapi observation that has been synced, don't allow deleting
             if (status) {
-                if (getTraitFormat().equals("photo")) {
+                String format = getTraitFormat();
+                if (Formats.Companion.isCameraTrait(format)) {
                     // I want to use abstract method
-                    PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                    traitPhoto.brapiDelete();
+                    //TODO update when merged with other offbeat camera formats
+                    AbstractCameraTrait traitPhoto = traitLayouts.getPhotoTrait(format);
+                    traitPhoto.deleteTraitListener();
                 } else {
                     brapiDelete(getTraitName(), false);
                 }
@@ -948,13 +985,15 @@ public class CollectActivity extends ThemedActivity
 
         getTraitLayout().onExit();
 
-        mUsbCameraHelper.destroy();
-
-        goProWrapper.destroy();
-
         traitLayoutRefresh();
 
+        usbCameraApi.onDestroy();
+
         gnssThreadHelper.stop();
+
+        goProApi.onDestroy();
+
+        bluetoothHelper.onDestroy();
 
         super.onDestroy();
     }
@@ -1251,6 +1290,8 @@ public class CollectActivity extends ThemedActivity
 
         customizeToolbarIcons();
 
+        refreshRepeatedValuesToolbarIndicator();
+
         return true;
     }
 
@@ -1478,24 +1519,47 @@ public class CollectActivity extends ThemedActivity
 
             return true;
         } else if (itemId == R.id.action_act_collect_repeated_values_indicator) {
-            showMultiMeasureDeleteDialog();
+            showRepeatedMeasuresDeleteDialog();
 
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void showMultiMeasureDeleteDialog() {
-
-        String labelValPref = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value");
+    private void showRepeatedMeasuresDeleteDialog() {
 
         ObservationModel[] values = database.getRepeatedValues(
                 getStudyId(), getObservationUnit(), getTraitDbId());
 
         ArrayList<String> is = new ArrayList<>();
+        ArrayList<ObservationModel> observations = new ArrayList<>();
+
         for (ObservationModel m: values) {
             if (!m.getValue().isEmpty()) {
-                is.add(m.getValue());
+                String format = m.getObservation_variable_field_book_format();
+                if (format != null) {
+
+                    TraitFormat traitFormat = Formats.Companion.findTrait(this, format);
+
+                    Object valueModel = m.getValue();
+
+                    if (traitFormat instanceof StringCoder) {
+
+                        valueModel = ((StringCoder) traitFormat).decode(m.getValue());
+
+                    }
+
+                    if (traitFormat instanceof ValuePresenter) {
+
+                        is.add(((ValuePresenter) traitFormat).represent(this, valueModel));
+                        observations.add(m);
+
+                    } else {
+
+                        is.add(valueModel.toString());
+                        observations.add(m);
+                    }
+                }
             }
         }
 
@@ -1508,23 +1572,8 @@ public class CollectActivity extends ThemedActivity
 
             for (int n = 0; n < size; n++) {
 
-                ObservationModel model = values[n];
-
-                String value = model.getValue();
-
-                if (!value.isEmpty()) {
-
-                    try {
-
-                        ArrayList<BrAPIScaleValidValuesCategories> c = CategoryJsonUtil.Companion.decode(value);
-
-                        value = CategoryJsonUtil.Companion.flattenMultiCategoryValue(c, labelValPref.equals("label"));
-
-                    } catch (Exception ignore) {}
-
-                    items[n] = value;
-                    checked[n] = false;
-                }
+                items[n] = is.get(n);
+                checked[n] = false;
             }
 
             dialogMultiMeasureDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
@@ -1537,7 +1586,7 @@ public class CollectActivity extends ThemedActivity
                         int checkSize = checked.length;
                         for (int j = 0; j < checkSize; j++) {
                             if (checked[j]) {
-                                deleteItems.add(values[j]);
+                                deleteItems.add(observations.get(j));
                             }
                         }
 
@@ -1968,9 +2017,11 @@ public class CollectActivity extends ThemedActivity
                 String success = getString(R.string.trait_photo_tts_success);
                 String fail = getString(R.string.trait_photo_tts_fail);
                 if (resultCode == RESULT_OK) {
-                    PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                    traitPhoto.makeImage(traitBox.getCurrentTrait(),
-                            traitBox.getNewTraits(), resultCode == RESULT_OK);
+                    //TODO update when merged with other offbeat camera formats
+                    AbstractCameraTrait traitPhoto = traitLayouts.getPhotoTrait("photo");
+                    if (traitPhoto instanceof PhotoTraitLayout) {
+                        ((PhotoTraitLayout) traitPhoto).makeImage(traitBox.getCurrentTrait());
+                    }
 
                     triggerTts(success);
                 } else triggerTts(fail);
@@ -2069,13 +2120,21 @@ public class CollectActivity extends ThemedActivity
         FragmentManager m = getSupportFragmentManager();
         int count = getSupportFragmentManager().getBackStackEntryCount();
 
+        String format = traitBox.getCurrentFormat();
+
         if (count == 0) {
 
             if (isNavigatingFromSummary) {
 
                 isNavigatingFromSummary = false;
 
-            } else {
+            } else if (format.equals(CanonTraitLayout.type)) {
+
+                canonApi.stopSession();
+
+                wifiHelper.disconnect();
+
+            }else {
 
                 finish();
 
@@ -2231,12 +2290,6 @@ public class CollectActivity extends ThemedActivity
 
     }
 
-    @Nullable
-    @Override
-    public UsbCameraHelper getCameraHelper() {
-        return mUsbCameraHelper;
-    }
-
     @Override
     public void onSummaryDestroy() {
         isNavigatingFromSummary = true;
@@ -2290,7 +2343,6 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void inflateTrait(@NonNull BaseTraitLayout layout) {
-        Log.d(TAG, "inflateTrait: ");
         getTraitLayout().onExit();
         View v = LayoutInflater.from(this).inflate(layout.layoutId(), null);
         LinearLayout holder = findViewById(R.id.traitHolder);
@@ -2329,12 +2381,6 @@ public class CollectActivity extends ThemedActivity
     @Override
     public GnssThreadHelper getGnssThreadHelper() {
         return gnssThreadHelper;
-    }
-
-    @NonNull
-    @Override
-    public GoProWrapper wrapper() {
-        return goProWrapper;
     }
 
     @NonNull
@@ -2601,14 +2647,46 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
-    public boolean getUsbCameraConnected() {
-        return usbCameraConnected;
+    @NonNull
+    @Override
+    public UsbCameraApi getUsbApi() {
+        return usbCameraApi;
     }
 
-    public void setUsbCameraConnected(boolean connected) {
-        usbCameraConnected = connected;
+    @NonNull
+    @Override
+    public UVCCameraTextureView getUvcView() { return uvcView; }
+
+    @NonNull
+    @Override
+    public WifiHelper getWifiHelper() { return wifiHelper; }
+
+    @NonNull
+    @Override
+    public BluetoothHelper getBluetoothHelper() { return bluetoothHelper; }
+
+    @NonNull
+    @Override
+    public GoProApi getGoProApi() {
+        return goProApi;
     }
 
+    @NonNull
+    @Override
+    public FfmpegHelper getFfmpegHelper() {
+        return ffmpegHelper;
+    }
+    @NonNull
+    @Override
+    public CameraXFacade getCameraXFacade() {
+        return cameraXFacade;
+    }
+
+    @NonNull
+    @Override
+    public CanonApi getCanonApi() {
+        return canonApi;
+    }
 
     @Override
     public void onSearchResultsClicked(String unique, String range, String plot, boolean reload) {

@@ -2,8 +2,10 @@ package com.fieldbook.tracker.offbeat.traits.formats
 
 import android.content.Context
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.AudioFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.BasePhotoFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.BooleanFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.BrapiFormat
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.CanonFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.CategoricalFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.CounterFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.DateFormat
@@ -19,21 +21,37 @@ import com.fieldbook.tracker.offbeat.traits.formats.contracts.TextFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.UsbCameraFormat
 import com.fieldbook.tracker.offbeat.traits.formats.contracts.ZebraLabelPrintFormat
 
-enum class Formats(val type: Types = Types.SYSTEM) {
+enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false) {
 
     //SYSTEM formats
-    AUDIO, BOOLEAN, CAMERA, CATEGORICAL, MULTI_CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT,
+    AUDIO, BOOLEAN, CAMERA(isCamera = true), CATEGORICAL, MULTI_CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT,
 
     //CUSTOM formats
-    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM), USB_CAMERA(Types.CUSTOM), GO_PRO(Types.CUSTOM),
+    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM),
+    BASE_PHOTO(Types.CUSTOM), USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM, isCamera = true),
     LABEL_PRINT(Types.CUSTOM), BRAPI(Types.CUSTOM);
+
+    companion object {
+        fun isCameraTrait(format: String) = format in setOf("photo", "usb camera", "gopro", "canon")
+
+        fun isExternalCameraTrait(format: String) = format in setOf("usb camera", "gopro", "canon")
+
+        fun getCameraFormats() = entries.filter { it.isCamera }
+
+        fun getMainFormats() = entries - listOf(CAMERA, USB_CAMERA, GO_PRO, CANON)
+
+        fun findTrait(context: Context, format: String) = entries.find { it.getDatabaseName(context) == format }?.getTraitFormatDefinition()
+
+    }
 
     fun getTraitFormatDefinition() = when (this) {
         AUDIO -> AudioFormat()
         BOOLEAN -> BooleanFormat()
+        BASE_PHOTO -> BasePhotoFormat()
         CAMERA -> PhotoFormat()
         USB_CAMERA -> UsbCameraFormat()
         GO_PRO -> GoProFormat()
+        CANON -> CanonFormat()
         CATEGORICAL -> CategoricalFormat()
         MULTI_CATEGORICAL -> MultiCategoricalFormat()
         COUNTER -> CounterFormat()
@@ -48,15 +66,21 @@ enum class Formats(val type: Types = Types.SYSTEM) {
         else -> TextFormat()
     }
 
+    fun getReadableName(ctx: Context): String {
+        val formatDefinition = getTraitFormatDefinition()
+        val stringResource = ctx.getString(formatDefinition.nameStringResourceId)
+
+        return formatDefinition.stringNameAux?.let { it(ctx) } ?: stringResource
+    }
+
     /**
      * This is the trait format DISPLAY name, which tends to be uppercase: Categorical, Numerical
      */
     fun getName(ctx: Context): String {
 
         val formatDefinition = getTraitFormatDefinition()
-        val stringResource = ctx.getString(formatDefinition.nameStringResourceId)
 
-        return formatDefinition.stringNameAux?.let { it(ctx) } ?: stringResource
+        return ctx.getString(formatDefinition.nameStringResourceId)
     }
 
     /**
