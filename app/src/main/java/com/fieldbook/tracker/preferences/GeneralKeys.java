@@ -83,7 +83,7 @@ public class GeneralKeys {
     //GeoNav
     private static final String GEONAV_PREFIX                       = "com.fieldbook.tracker.geonav.";
     public static final String ENABLE_GEONAV                        = GEONAV_PREFIX + "ENABLE_GEONAV";
-    public static final String SEARCH_ANGLE                         = GEONAV_PREFIX + "SEARCH_ANGLE";
+    public static final String SEARCH_ANGLE                         = GEONAV_PREFIX + "parameters.SEARCH_ANGLE";
     public static final String UPDATE_INTERVAL                      = GEONAV_PREFIX + "UPDATE_INTERVAL";
     public static final String PAIR_BLUETOOTH                       = GEONAV_PREFIX + "PAIR_BLUETOOTH";
     public static final String PAIRED_DEVICE_ADDRESS                = GEONAV_PREFIX + "PAIRED_DEVICE_ADDRESS";
@@ -91,7 +91,6 @@ public class GeneralKeys {
     public static final String GEONAV_COMPASS                       = GEONAV_PREFIX + "GEONAV_COMPASS";
     public static final String GEONAV_AVERAGING                     = GEONAV_PREFIX + "GEONAV_AVERAGING";
     public static final String GEONAV_AVERAGING_INTERVAL            = GEONAV_PREFIX + "GEONAV_AVERAGIN_INTERVAL";
-    public static final String GEONAV_PARAMETERS_CATEGORY           = GEONAV_PREFIX + "parameters.CATEGORY_KEY";
     public static final String GEONAV_PARAMETER_D1                  = GEONAV_PREFIX + "parameters.trapezoid.D1";
     public static final String GEONAV_PARAMETER_D2                  = GEONAV_PREFIX + "parameters.trapezoid.D2";
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";

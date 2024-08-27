@@ -756,7 +756,7 @@
     <string name="location_level_off">Off</string>
     <string name="location_level_study">Field</string>
     <string name="location_level_observation_unit">Entry</string>
-    <string name="location_level_observation">Observation</string>
+    <string name="location_level_observation">Observation (higher battery use)</string>
 
     <string name="pref_coordinate_format_title">Collection Format</string>
     <string name="location_format_iso">ISO 6709</string>

@@ -35,10 +35,6 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
 
     private val advisor by Security().secureBluetooth()
 
-    private val listener =
-        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
-            updateUi()
-        }
     companion object {
         const val LOCATION_COLLECTION_OFF = 0
         const val LOCATION_COLLECTION_STUDY = 1
@@ -46,133 +42,83 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
         const val LOCATION_COLLECTION_OBS = 3
     }
 
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        advisor.initialize()
+        setPreferencesFromResource(R.xml.preferences_location, rootKey)
+
+        setupUi()
+        registerPreferenceListeners()
+
+        (activity as PreferencesActivity).supportActionBar?.title = getString(R.string.preferences_location_title)
+    }
+
+    private fun setupUi() {
+        updateUi()
+        updatePreferencesVisibility(isGeoNavEnabled())
+    }
+
+    private fun isGeoNavEnabled(): Boolean {
+        return findPreference<CheckBoxPreference>("com.fieldbook.tracker.geonav.ENABLE_GEONAV")?.isChecked ?: false
+    }
+
+    private fun registerPreferenceListeners() {
+        preferences.registerOnSharedPreferenceChangeListener { _, _ -> updateUi() }
+
+        findPreference<CheckBoxPreference>("com.fieldbook.tracker.geonav.ENABLE_GEONAV")?.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { _, newValue ->
+                updatePreferencesVisibility(newValue as Boolean)
+                true
+            }
+
+        findPreference<ListPreference>("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION")?.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { _, newValue ->
+                updateCoordinateFormatVisibility((newValue as String).toInt())
+                true
+            }
+
+        findPreference<ListPreference>(GeneralKeys.GEONAV_SEARCH_METHOD)?.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { _, newValue ->
+                preferences.edit().putString(GeneralKeys.GEONAV_SEARCH_METHOD, newValue as String).apply()
+                if (newValue == "1") checkRequiredSensors()
+                updatePreferencesVisibility(isGeoNavEnabled())
+                true
+            }
+
+        findPreference<Preference>(GeneralKeys.PAIR_BLUETOOTH)?.let { pairDevicePref ->
+            pairDevicePref.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+                advisor.connectWith {
+                    startDeviceChoiceDialog()
+                }
+                true
+            }
+        }
+
+        setPreferenceChangeListeners(
+            listOf(
+                GeneralKeys.GEONAV_PARAMETER_D1,
+                GeneralKeys.GEONAV_PARAMETER_D2,
+                GeneralKeys.SEARCH_ANGLE,
+                GeneralKeys.UPDATE_INTERVAL
+            )
+        )
+    }
+
+    private fun setPreferenceChangeListeners(keys: List<String>) {
+        keys.forEach { key ->
+            findPreference<Preference>(key)?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+                preferences.edit().putString(key, newValue as? String ?: "").apply()
+                updateParametersSummaryText()
+                true
+            }
+        }
+    }
+
     private fun updateUi() {
         updateMethodSummaryText()
-        updateParametersVisibility()
         changeGeoNavLoggingModeView()
         updateParametersSummaryText()
         updateDeviceAddressSummary()
         updateCoordinateFormatVisibility()
-    }
-
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-
-        advisor.initialize()
-
-        setPreferencesFromResource(R.xml.preferences_location, rootKey)
-
-        preferences.registerOnSharedPreferenceChangeListener(listener)
-
-        val locationCollectionPref = findPreference<ListPreference>("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION")
-        locationCollectionPref?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
-            updateCoordinateFormatVisibility((newValue as String).toInt())
-            true
-        }
-
-        // Show/hide preferences and category titles based on the ENABLE_GEONAV value
-        val geonavEnabledPref: CheckBoxPreference? =
-            findPreference("com.fieldbook.tracker.geonav.ENABLE_GEONAV")
-        if (geonavEnabledPref != null) {
-            geonavEnabledPref.onPreferenceChangeListener =
-                Preference.OnPreferenceChangeListener { _, newValue ->
-                    val isChecked = newValue as Boolean
-                    updatePreferencesVisibility(isChecked)
-                    true
-                }
-            updatePreferencesVisibility(geonavEnabledPref.isChecked)
-        }
-
-        (this.activity as PreferencesActivity?)!!.supportActionBar!!.title = getString(R.string.preferences_location_title)
-
-        //add click action on pair rover device to search for bt devices
-        mPairDevicePref = findPreference(GeneralKeys.PAIR_BLUETOOTH)
-        if (mPairDevicePref != null) {
-            mPairDevicePref!!.onPreferenceClickListener =
-                Preference.OnPreferenceClickListener { view: Preference? ->
-                    advisor.connectWith {
-                        startDeviceChoiceDialog()
-                    }
-                    true
-                }
-        }
-
-        val geoNavMethod = findPreference<ListPreference>(GeneralKeys.GEONAV_SEARCH_METHOD)
-
-        geoNavMethod?.setOnPreferenceChangeListener { preference, newValue ->
-
-            val value = newValue as? String ?: "0"
-
-            preferences.edit()
-                .putString(GeneralKeys.GEONAV_SEARCH_METHOD, newValue as? String ?: "0").apply()
-
-            if (value == "1") {
-
-                checkRequiredSensors()
-
-            }
-
-            updateMethodSummaryText()
-            updateParametersVisibility()
-
-            true
-        }
-
-        val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
-        changeGeoNavLoggingModeView()
-        geoNavLoggingMode?.setOnPreferenceChangeListener { _, newValue ->
-            preferences.edit()
-                .putString(GeneralKeys.GEONAV_LOGGING_MODE, newValue as? String ?: "0").apply()
-
-            changeGeoNavLoggingModeView()
-
-            true
-        }
-
-        val trapBase = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D1)
-        val trapDst = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D2)
-        val trapAngle = findPreference<ListPreference>(GeneralKeys.SEARCH_ANGLE)
-        val updateInterval = findPreference<ListPreference>(GeneralKeys.UPDATE_INTERVAL)
-
-        updateInterval?.setOnPreferenceChangeListener { _, newValue ->
-
-            preferences.edit()
-                .putString(GeneralKeys.UPDATE_INTERVAL, newValue as? String ?: "0").apply()
-
-            updateParametersSummaryText()
-
-            true
-        }
-
-        trapBase?.setOnPreferenceChangeListener { _, newValue ->
-
-            preferences.edit()
-                .putString(GeneralKeys.GEONAV_PARAMETER_D1, newValue as? String ?: "0.001").apply()
-
-            updateParametersSummaryText()
-
-            true
-        }
-
-        trapDst?.setOnPreferenceChangeListener { _, newValue ->
-
-            preferences.edit()
-                .putString(GeneralKeys.GEONAV_PARAMETER_D2, newValue as? String ?: "0.01").apply()
-
-            updateParametersSummaryText()
-
-            true
-        }
-
-        trapAngle?.setOnPreferenceChangeListener { _, newValue ->
-
-            preferences.edit()
-                .putString(GeneralKeys.SEARCH_ANGLE, newValue as? String ?: "22.5").apply()
-
-            updateParametersSummaryText()
-
-            true
-        }
-        updateCoordinateFormatVisibility(locationCollectionPref?.value?.toIntOrNull() ?: LOCATION_COLLECTION_OFF)
     }
 
     private fun updateCoordinateFormatVisibility(selectedValue: Int? = null) {
@@ -245,10 +191,11 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
         trapAngle?.summary = getString(R.string.pref_geonav_search_angle_summary, theta)
         updateInterval?.summary = getString(R.string.pref_geonav_update_interval_summary, interval)
     }
+
+
     private fun updatePreferencesVisibility(isChecked: Boolean) {
         val geonavCategory = findPreference<PreferenceCategory>("com.fieldbook.tracker.geonav.CATEGORY")
-        val searchMethodPref = findPreference<ListPreference>("com.fieldbook.tracker.geonav.SEARCH_METHOD")
-        val parameterCategory = findPreference<PreferenceCategory>("com.fieldbook.tracker.geonav.parameters.CATEGORY_KEY")
+        val searchMethodValue = preferences.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
 
         geonavCategory?.let { category ->
             for (i in 0 until category.preferenceCount) {
@@ -256,51 +203,22 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
                 if (preferenceItem.key == "com.fieldbook.tracker.geonav.ENABLE_GEONAV") {
                     continue
                 }
-                if (preferenceItem.key?.startsWith("com.fieldbook.tracker.geonav.parameters.") == true && searchMethodPref?.value == "0") {
+                if (preferenceItem.key?.startsWith("com.fieldbook.tracker.geonav.parameters.") == true && searchMethodValue == "0") {
                     preferenceItem.isVisible = false
                 } else {
                     preferenceItem.isVisible = isChecked
                 }
             }
         }
-
-        parameterCategory?.isVisible = isChecked
     }
 
     private fun updateMethodSummaryText() {
+        val method = if (preferences.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") == "0")
+            getString(R.string.pref_geonav_method_distance)
+        else
+            getString(R.string.pref_geonav_method_trapezoid)
 
-        val method = if (preferences.getString(
-                GeneralKeys.GEONAV_SEARCH_METHOD,
-                getString(R.string.pref_geonav_method_distance)
-            ) == "0"
-        ) getString(R.string.pref_geonav_method_distance)
-        else getString(R.string.pref_geonav_method_trapezoid)
-
-        findPreference<ListPreference>(GeneralKeys.GEONAV_SEARCH_METHOD)?.summary =
-            getString(R.string.pref_geonav_search_method_summary, method)
-    }
-
-    private fun updateParametersVisibility() {
-        val geoNavCat = findPreference<PreferenceCategory>(GeneralKeys.GEONAV_PARAMETERS_CATEGORY)
-        val geonavEnabled =
-            preferences.getBoolean("com.fieldbook.tracker.geonav.ENABLE_GEONAV", false)
-
-        when {
-            !geonavEnabled -> {
-                geoNavCat?.isVisible = false
-            }
-
-            preferences.getString(
-                GeneralKeys.GEONAV_SEARCH_METHOD,
-                "0"
-            ) == "0" -> { // Distance based
-                geoNavCat?.isVisible = false
-            }
-
-            else -> { // Trapezoidal
-                geoNavCat?.isVisible = true
-            }
-        }
+        findPreference<ListPreference>(GeneralKeys.GEONAV_SEARCH_METHOD)?.summary = getString(R.string.pref_geonav_search_method_summary, method)
     }
 
     /**
@@ -314,9 +232,6 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     override fun onPreferenceChange(preference: Preference, newValue: Any): Boolean {
-
-        updateParametersVisibility()
-
         return true
     }
 
