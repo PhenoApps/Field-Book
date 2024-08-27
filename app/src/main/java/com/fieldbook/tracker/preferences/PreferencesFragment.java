@@ -23,8 +23,7 @@ public class PreferencesFragment extends BasePreferenceFragment {
         SearchConfiguration config = searchPreference.getSearchConfiguration();
         config.setActivity((AppCompatActivity) getActivity());
         config.setFragmentContainerViewId(android.R.id.content);
-
-        config.index(R.xml.preferences);
+        
         config.index(R.xml.preferences_appearance);
         config.index(R.xml.preferences_theme);
         config.index(R.xml.preferences_behavior);
