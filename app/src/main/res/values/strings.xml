@@ -679,8 +679,8 @@
 
     <string name="preferences_appearance_tutorial_description">Add a toolbar button throughout the app that opens the tutorial</string>
 
-    <string name="preferences_appearance_toolbar_customize">Default Buttons</string>
-    <string name="preferences_appearance_toolbar_customize_description">Toggle the visibility of default buttons</string>
+    <string name="preferences_appearance_toolbar_customize">Toolbar Features</string>
+    <string name="preferences_appearance_toolbar_customize_description">Toggle the visibility of default features</string>
     <string name="preferences_appearance_toolbar_customize_search">Search</string>
     <string name="preferences_appearance_toolbar_customize_resources">Resources</string>
     <string name="preferences_appearance_toolbar_customize_summary">Summary</string>
@@ -792,7 +792,7 @@
     <string name="pref_geonav_update_interval_title">Update Interval (s)</string>
     <string name="pref_geonav_update_interval_summary">The time between location updates is %ss</string>
 
-    <string name="pref_geonav_pair">Pair Device</string>
+    <string name="pref_geonav_pair">Location Provider</string>
     <string name="pref_behavior_geonav_internal_gps_choice">Internal GPS</string>
     <string name="choose_paired_bluetooth_devices_title">Choose your paired bluetooth device</string>
 
