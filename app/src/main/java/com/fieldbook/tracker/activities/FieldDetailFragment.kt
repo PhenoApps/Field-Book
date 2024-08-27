@@ -148,11 +148,9 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         cardViewTraits.setOnClickListener {
             fieldId?.let { id ->
                 (activity as? FieldEditorActivity)?.setActiveField(id)
-                val intent = Intent()
-                intent.setClassName(
-                    requireActivity(),
-                    "com.fieldbook.tracker.activities.TraitEditorActivity"
-                )
+                val intent = Intent(requireActivity(), TraitEditorActivity::class.java).apply {
+                    putExtra("FIELD_ID", id)  // Pass the fieldId as an extra
+                }
                 startActivity(intent)
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot access field-specific traits")
         }
@@ -317,7 +315,9 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             getString(R.string.no_activity)
         }
 
-        traitCountChip.text = field.trait_count.toString()
+//        traitCountChip.text = field.trait_count.toString()
+        traitCountChip.text = database.getVisibleTrait(fieldId).count().toString();
+
         if (field.observation_count.toInt() > 0) {
             observationCountChip.visibility = View.VISIBLE
             observationCountChip.text = field.observation_count.toString()
@@ -445,7 +445,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     fun checkTraitsExist(): Int {
-        val traits = database.getVisibleTrait()
+        val traits = database.getVisibleTrait(fieldId)
 
         return when {
             traits.isEmpty() -> {
@@ -473,11 +473,9 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             )
         }
         if (EasyPermissions.hasPermissions(requireActivity(), *perms)) {
-            val intent = Intent()
-            intent.setClassName(
-                requireActivity(),
-                "com.fieldbook.tracker.activities.CollectActivity"
-            )
+            val intent = Intent(requireActivity(), CollectActivity::class.java).apply {
+                putExtra("FIELD_ID", fieldId)
+            }
             startActivity(intent)
         } else {
             // Do not have permissions, request them now

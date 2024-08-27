@@ -259,20 +259,22 @@ class TraitBoxView : ConstraintLayout {
     }
 
     private fun updateTraitProgressBar() {
-        var traits = controller.getDatabase().allTraitObjects
+//        var traits = controller.getDatabase().allTraitObjects
+//
+//        // a new trait object is made while assigning to currentTrait
+//        // so instead of finding the index of currentTrait object
+//        // we find the index of the trait name
+//        val visibleTraits = ArrayList<String>()
+//        for (traitObject in traits) {
+//            if (traitObject.visible) {
+//                visibleTraits.add(traitObject.name)
+//            }
+//        }
 
-        // a new trait object is made while assigning to currentTrait
-        // so instead of finding the index of currentTrait object
-        // we find the index of the trait name
-        val visibleTraits = ArrayList<String>()
-        for (traitObject in traits) {
-            if (traitObject.visible) {
-                visibleTraits.add(traitObject.name)
-            }
+        visibleTraitsList?.let { list ->
+            traitsProgressBar.max = list.size
+            traitsProgressBar.progress = list.indexOf(currentTrait?.name) + 1
         }
-
-        traitsProgressBar.max = visibleTraits.size
-        traitsProgressBar.progress = visibleTraits.indexOf(currentTrait?.name) + 1
     }
 
     fun getNewTraits(): Map<String, String> {

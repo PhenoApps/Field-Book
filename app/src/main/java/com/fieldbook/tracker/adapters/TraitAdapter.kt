@@ -11,9 +11,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.offbeat.traits.formats.Formats
+
 
 /**
  * Reference:
@@ -54,10 +56,12 @@ class TraitAdapter(private val sorter: TraitSorter):
 
                 val trait = view.tag as TraitObject
 
-                if (visibleCheckBox.isChecked) {
-                    sorter.getDatabase().updateTraitVisibility(trait.id, true)
+                val fieldId: Int? = (itemView.context as TraitEditorActivity).getFieldId()
+
+                if (visibleCheckBox.isChecked()) {
+                    sorter.getDatabase().updateTraitVisibility(trait.getId(), true, fieldId);
                 } else {
-                    sorter.getDatabase().updateTraitVisibility(trait.id, false)
+                    sorter.getDatabase().updateTraitVisibility(trait.getId(), false, fieldId);
                 }
             }
 
@@ -113,8 +117,9 @@ class TraitAdapter(private val sorter: TraitSorter):
             viewHolder.formatImageView.setBackgroundResource(icon ?: R.drawable.ic_reorder)
 
             // Check or uncheck the list items
-            val visible = sorter.getDatabase().traitVisibility[this.name]
-            viewHolder.visibleCheckBox.isChecked = visible == null || visible == "true"
+            viewHolder.visibleCheckBox.isChecked = this.visible
+//            val visible = sorter.getDatabase().traitVisibility[this.name]
+//            viewHolder.visibleCheckBox.isChecked = visible == null || visible == "true"
         }
     }
 

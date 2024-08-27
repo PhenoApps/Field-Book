@@ -302,10 +302,22 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         Toolbar toolbar = findViewById(R.id.toolbar);
 
+        Integer fieldId = getFieldId();
+
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(getString(R.string.settings_traits));
+            String title = getString(R.string.settings_traits);
+
+            // If we have a fieldId, use field name as the title
+            if (fieldId != null && fieldId != -1) {
+                FieldObject field = database.getFieldObject(fieldId);
+                if (field != null) {
+                    title = field.getExp_alias();
+                }
+            }
+
+            getSupportActionBar().setTitle(title);
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
@@ -321,13 +333,24 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         brapiDialogShown = false;
 
         traitAdapter = new TraitAdapter(this);
-        traitAdapter.submitList(database.getAllTraitObjects());
+        traitAdapter.submitList(database.getAllTraitObjects(fieldId));
         traitList.setAdapter(traitAdapter);
 
         itemTouchHelper.attachToRecyclerView(traitList);
 
         FloatingActionButton fab = findViewById(R.id.newTrait);
         fab.setOnClickListener(v -> showTraitDialog(null));
+
+        // Load traits with field-specific visibility
+        loadData(database.getAllTraitObjects(fieldId));
+
+    }
+
+    public Integer getFieldId() {
+        if (getIntent().hasExtra("FIELD_ID")) {
+            return getIntent().getIntExtra("FIELD_ID", -1);
+        }
+        return null; // or return -1 if you prefer a default value
     }
 
     @Override
@@ -402,7 +425,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     private void changeAllVisibility() {
         boolean globalVis = preferences.getBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, false);
-        List<TraitObject> allTraits = database.getAllTraitObjects();
+        Integer fieldId = getFieldId();
+        List<TraitObject> allTraits = database.getAllTraitObjects(fieldId);
 
         if (allTraits.isEmpty()) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing_modify));
@@ -413,7 +437,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         globalVis = !allTraits.stream().allMatch(TraitObject::getVisible);
 
         for (TraitObject allTrait : allTraits) {
-            database.updateTraitVisibility(allTrait.getId(), globalVis);
+            database.updateTraitVisibility(allTrait.getId(), globalVis, fieldId);
             Log.d(TAG, allTrait.getName());
         }
 
@@ -835,9 +859,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     @Override
     public void queryAndLoadTraits() {
-
-        loadData(database.getAllTraitObjects());
-
+        Integer fieldId = getFieldId();
+        loadData(database.getAllTraitObjects(fieldId));
     }
 
     @NonNull

@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.database.dao
 
+import android.util.Log
+import com.fieldbook.tracker.database.dao.ObservationVariableDao
 import com.fieldbook.tracker.database.Migrator.Companion.sVisibleObservationVariableViewName
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
@@ -13,15 +15,13 @@ class VisibleObservationVariableDao {
 
     companion object {
 
-        fun getVisibleTrait(): Array<String> = withDatabase { db ->
+        fun getVisibleTrait(fieldId: Int? = null): Array<String> {
+            val allTraits = ObservationVariableDao.getAllTraitObjects(fieldId = fieldId)
 
-            db.query(sVisibleObservationVariableViewName,
-                    select = arrayOf("observation_variable_name"),
-                    orderBy = "position").toTable().map { it ->
-                it["observation_variable_name"].toString()
-            }.toTypedArray()
+            // Filter traits by visibility and return their names
+            return allTraits.filter { it.visible }.map { it.name }.toTypedArray()
+        }
 
-        } ?: emptyArray<String>()
 
         fun getVisibleTraitObjects(): ArrayList<TraitObject> = withDatabase { db ->
             val rows = db.query(sVisibleObservationVariableViewName, orderBy = "position").toTable()

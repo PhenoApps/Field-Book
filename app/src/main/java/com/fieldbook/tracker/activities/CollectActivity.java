@@ -192,6 +192,8 @@ public class CollectActivity extends ThemedActivity
     ImageButton missingValue;
     ImageButton barcodeInput;
 
+    private Integer fieldId;
+
     /**
      * Trait layouts
      */
@@ -265,6 +267,8 @@ public class CollectActivity extends ThemedActivity
 
         gps = new GPSTracker(this, this, 0, 10000);
 
+        fieldId = getFieldId();
+
         guiThread.start();
         myGuiHandler = new Handler(guiThread.getLooper()) {
             @Override
@@ -320,6 +324,13 @@ public class CollectActivity extends ThemedActivity
         checkForInitialBarcodeSearch();
 
         verifyPersonHelper.checkLastOpened();
+    }
+
+    public Integer getFieldId() {
+        if (getIntent().hasExtra("FIELD_ID")) {
+            return getIntent().getIntExtra("FIELD_ID", -1);
+        }
+        return null; // or return -1 if you prefer a default value
     }
 
     public void triggerTts(String text) {
@@ -736,7 +747,7 @@ public class CollectActivity extends ThemedActivity
         traitBox.initTraitDetails();
 
         // trait is unique, format is not
-        String[] traits = database.getVisibleTrait();
+        String[] traits = database.getVisibleTrait(fieldId);
         if (traits != null) {
             traitBox.initTraitType(traits, rangeSuppress);
 
@@ -1076,7 +1087,7 @@ public class CollectActivity extends ThemedActivity
         if (trait != null) {
 
             //get all traits, filter the preference trait and check it's visibility
-            String[] traits = database.getVisibleTrait();
+            String[] traits = database.getVisibleTrait(fieldId);
 
             try {
 

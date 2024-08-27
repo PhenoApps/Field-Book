@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
+import android.util.Log
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
@@ -246,10 +247,9 @@ class ObservationVariableDao {
             )
         }
 
-        fun getAllTraitObjects(sortOrder: String = "internal_id_observation_variable"): ArrayList<TraitObject> = withDatabase { db ->
+        fun getAllTraitObjects(sortOrder: String = "internal_id_observation_variable", fieldId: Int? = null): ArrayList<TraitObject> = withDatabase { db ->
             val traits = ArrayList<TraitObject>()
 
-            // Sort ascending except for visibility, for visibility sort desc to have visible traits first
             val orderDirection = if (sortOrder == "visible") "DESC" else "ASC"
 
             val query = """
@@ -267,13 +267,27 @@ class ObservationVariableDao {
                         id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariable.PK)).toString()
                         externalDbId = cursor.getString(cursor.getColumnIndexOrThrow("external_db_id")) ?: ""
                         realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("position"))
-                        visible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()
                         additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
 
                         // Initialize these to the empty string or else they will be null
                         maximum = ""
                         minimum = ""
                         categories = ""
+
+                        // Handle visibility based on fieldId
+                        val studyIdsJson = cursor.getString(cursor.getColumnIndexOrThrow("study_ids"))
+                        visible = if (fieldId != null) {
+                            try {
+                                val jsonArray = org.json.JSONArray(studyIdsJson)
+                                val isVisible = jsonArrayContains(jsonArray, fieldId)
+                                isVisible
+                            } catch (e: Exception) {
+                                false
+                            }
+                        } else {
+                            val isVisible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()  // Default visibility
+                            isVisible
+                        }
 
                         ObservationVariableValueDao.getVariableValues(id.toInt())?.forEach { value ->
                             val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
@@ -287,54 +301,13 @@ class ObservationVariableDao {
                     traits.add(trait)
                 }
             }
+//            Log.d("DB_QUERY", "Total traits fetched: ${traits.size}")
             ArrayList(traits)
         } ?: ArrayList()
 
+
         // Overload for Java compatibility
-        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("internal_id_observation_variable")
-
-
-//        fun getAllTraitObjects(sortOrder: String): ArrayList<TraitObject> = withDatabase { db ->
-//
-//            ArrayList(db.query(ObservationVariable.tableName, orderBy = "position").toTable().map {
-//
-//                TraitObject().apply {
-//
-//                    name = (it["observation_variable_name"] as? String ?: "")
-//                    format = it["observation_variable_field_book_format"] as? String ?: ""
-//                    defaultValue = it["default_value"] as? String ?: ""
-//                    details = it["observation_variable_details"] as? String ?: ""
-//                    id = (it[ObservationVariable.PK] as? Int ?: -1).toString()
-//                    externalDbId = it["external_db_id"] as? String ?: ""
-//                    realPosition = (it["position"] as? Int ?: -1)
-//                    visible = (it["visible"] as String).toBoolean()
-//                    additionalInfo = it["additional_info"] as? String ?: ""
-//
-//                    //initialize these to the empty string or else they will be null
-//                    maximum = ""
-//                    minimum = ""
-//                    categories = ""
-//
-//                    ObservationVariableValueDao.getVariableValues(id.toInt()).also { values ->
-//
-//                        values?.forEach { value ->
-//
-//                            val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
-//
-//                            when (attrName) {
-//                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                                "category" -> categories = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                            }
-//                        }
-//                    }
-//                }
-//            })
-//
-//        } ?: ArrayList()
+        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("internal_id_observation_variable", null)
 
         fun getTraitVisibility(): HashMap<String, String> = withDatabase { db ->
 
@@ -365,6 +338,7 @@ class ObservationVariableDao {
                         put("visible", t.visible.toString())
                         put("position", t.realPosition)
                         put("additional_info", t.additionalInfo)
+                        put("study_ids", "[]")  // Initialize as an empty JSON array
                         })
 
                 ObservationVariableValueDao.insert(
@@ -427,14 +401,47 @@ class ObservationVariableDao {
 
         } ?: -1L
 
-        fun updateTraitVisibility(traitDbId: String, visible: String) = withDatabase { db ->
+        fun updateTraitVisibility(traitDbId: String, visible: Boolean, fieldId: Int? = null) = withDatabase { db ->
+            if (fieldId != null) {
+                val currentStudyIds = db.rawQuery(
+                    "SELECT study_ids FROM ${ObservationVariable.tableName} WHERE internal_id_observation_variable = ?",
+                    arrayOf(traitDbId)
+                ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else "[]" }
 
-            db.update(
-                ObservationVariable.tableName,
-                ContentValues().apply { put("visible", visible) },
-                "internal_id_observation_variable = ?",
-                arrayOf(traitDbId)
-            )
+                val jsonArray = org.json.JSONArray(currentStudyIds).apply {
+                    if (visible && !jsonArrayContains(this, fieldId)) put(fieldId)
+                    if (!visible) removeFieldIdFromJsonArray(this, fieldId)
+                }
+
+                db.execSQL(
+                    "UPDATE ${ObservationVariable.tableName} SET study_ids = ? WHERE internal_id_observation_variable = ?",
+                    arrayOf(jsonArray.toString(), traitDbId)
+                )
+            } else {
+                db.update(
+                    ObservationVariable.tableName,
+                    ContentValues().apply { put("visible", visible.toString()) },
+                    "internal_id_observation_variable = ?",
+                    arrayOf(traitDbId)
+                )
+            }
+        }
+
+        private fun removeFieldIdFromJsonArray(jsonArray: org.json.JSONArray, fieldId: Int) {
+            for (i in jsonArray.length() - 1 downTo 0) {
+                if (jsonArray.getInt(i) == fieldId) {
+                    jsonArray.remove(i)
+                }
+            }
+        }
+        private fun jsonArrayContains(jsonArray: org.json.JSONArray, value: Int): Boolean {
+            for (i in 0 until jsonArray.length()) {
+                val currentElement = jsonArray.getInt(i)
+                if (currentElement == value) {
+                    return true
+                }
+            }
+            return false
         }
 
         fun writeNewPosition(queryColumn: String, id: String, position: String) = withDatabase { db ->
