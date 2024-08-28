@@ -328,6 +328,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        // Ensure the menu has been fully inflated before longpress listener setup
+        getView().post(() -> setupLongPressListener());
+    }
+
     private void setupLongPressListener() {
         final View menuItemView = getActivity().findViewById(R.id.action_menu_brapi_auto_configure);
         if (menuItemView != null) {
@@ -389,7 +397,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         super.onResume();
         setBaseURLSummary();
         setButtonView();
-        getView().post(() -> setupLongPressListener());
     }
 
     @Override
