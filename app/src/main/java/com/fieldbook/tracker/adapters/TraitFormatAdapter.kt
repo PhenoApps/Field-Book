@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.offbeat.traits.formats.Formats
+import com.fieldbook.tracker.traits.formats.Formats
 
 /**
  * Reference:

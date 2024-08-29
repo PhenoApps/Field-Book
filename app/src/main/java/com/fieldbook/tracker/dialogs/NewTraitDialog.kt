@@ -3,7 +3,6 @@ package com.fieldbook.tracker.dialogs
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -21,11 +20,11 @@ import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.adapters.TraitFormatAdapter
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.offbeat.traits.formats.Formats
-import com.fieldbook.tracker.offbeat.traits.formats.TraitFormatParametersAdapter
-import com.fieldbook.tracker.offbeat.traits.formats.ValidationResult
-import com.fieldbook.tracker.offbeat.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.formats.Formats
+import com.fieldbook.tracker.traits.formats.TraitFormatParametersAdapter
+import com.fieldbook.tracker.traits.formats.ValidationResult
+import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -102,8 +101,8 @@ class NewTraitDialog(
         params?.height = LinearLayout.LayoutParams.WRAP_CONTENT
         dialog?.window?.attributes = params
 
-        context?.let { ctx ->
-            show(ctx)
+        context?.let {
+            show()
         }
     }
 
@@ -137,7 +136,7 @@ class NewTraitDialog(
         positiveBtn?.setText(R.string.next)
         positiveBtn?.setOnClickListener {
             showFormatParameters()
-            if (context?.let { ctx -> getSelectedFormat(ctx) } == null) {
+            if (context?.let { getSelectedFormat() } == null) {
                 Toast.makeText(
                     context,
                     R.string.dialog_new_trait_error_must_select_a_layout,
@@ -245,16 +244,16 @@ class NewTraitDialog(
         return builder.create()
     }
 
-    private fun show(ctx: Context) {
+    private fun show() {
         if (initialTraitObject == null) showFormatLayouts(Formats.getMainFormats()) else showFormatParameters(
             Formats.entries.first {
-                initialTraitObject?.format == it.getDatabaseName(ctx)
+                initialTraitObject?.format == it.getDatabaseName()
             }
         )
     }
 
-    private fun getSelectedFormat(ctx: Context): Formats? =
-        Formats.entries.find { it.getDatabaseName(ctx) == initialTraitObject?.format }
+    private fun getSelectedFormat(): Formats? =
+        Formats.entries.find { it.getDatabaseName() == initialTraitObject?.format }
             ?: (traitFormatsRv.adapter as? TraitFormatAdapter)?.selectedFormat
 
     private fun setupParametersLinearLayout(format: Formats) {
@@ -263,15 +262,15 @@ class NewTraitDialog(
 
         format.getTraitFormatDefinition().parameters.forEach { parameter ->
 
-                parameter.createViewHolder(parametersSv)?.let { holder ->
+            parameter.createViewHolder(parametersSv)?.let { holder ->
 
-                    holder.bind(parameter, initialTraitObject)
+                holder.bind(parameter, initialTraitObject)
 
-                    parametersSv.addViewHolder(holder)
-                }
+                parametersSv.addViewHolder(holder)
             }
         }
     }
+
 
     private fun setupTraitFormatsRv(formats: List<Formats>) {
 
@@ -323,11 +322,11 @@ class NewTraitDialog(
 
                 } else {
 
-                    context?.let { ctx ->
+                    context?.let {
 
                         val t = updateInitialTraitObjectFromUi(traitObject)
 
-                        t.format = format.getDatabaseName(ctx)
+                        t.format = format.getDatabaseName()
 
                         updateDatabaseTrait(t)
 
@@ -432,9 +431,9 @@ class NewTraitDialog(
 
         val index = (traitFormatsRv.adapter as TraitFormatAdapter).selectedFormat?.ordinal
             ?: Formats.TEXT.ordinal
-        val format = Formats.values()[index]
+        val format = Formats.entries[index]
         var t = TraitObject()
-        t.format = format.getDatabaseName(activity)
+        t.format = format.getDatabaseName()
 
         t = parametersSv.merge(t)
 
@@ -464,8 +463,8 @@ class NewTraitDialog(
 
     private fun validateFormat(): ValidationResult {
 
-        context?.let { ctx ->
-            getSelectedFormat(ctx)?.let { selectedFormat ->
+        context?.let {
+            getSelectedFormat()?.let { selectedFormat ->
                 return parametersSv.validateFormat(selectedFormat)
             }
         }
@@ -494,9 +493,9 @@ class NewTraitDialog(
 
         if (adapter?.selectedFormat != null) {
 
-            context?.let { ctx ->
+            context?.let {
 
-                initialTraitObject?.format = adapter.selectedFormat?.getDatabaseName(ctx)
+                initialTraitObject?.format = adapter.selectedFormat?.getDatabaseName()
 
                 showFormatParameters(adapter.selectedFormat ?: Formats.TEXT)
 
@@ -504,7 +503,7 @@ class NewTraitDialog(
         }
     }
 
-    var isShowingCameraOptions = false
+    private var isShowingCameraOptions = false
     override fun onSelected(format: Formats) {
 
         if (format == Formats.BRAPI) {

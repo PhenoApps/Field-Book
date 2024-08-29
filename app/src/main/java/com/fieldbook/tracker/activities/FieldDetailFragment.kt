@@ -32,8 +32,8 @@ import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
-import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.ExportUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil

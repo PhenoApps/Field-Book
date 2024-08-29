@@ -25,8 +25,8 @@ import com.fieldbook.tracker.adapters.ImageAdapter
 import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.RangeObject
-import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.BitmapLoader
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
 import com.fieldbook.tracker.utilities.ExifUtil
