@@ -17,6 +17,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">サンプルデータ</string>
     <string name="startup_sample_data_message">サンプルデータをロードしますか？</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">ファイルのインポートにはデバイスのファイルへのアクセスが必要です。</string>
     <string name="permission_rationale_storage_export">データのエクスポートにはデバイスのファイルへのアクセスが必要です。</string>
@@ -154,6 +155,7 @@
     <string name="activity_collect_dialog_verify_no_button">いいえ</string>
     <string name="activity_collect_dialog_verify_yes_button">はい</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">この機能にハードウェアーが対応していません</string>
     <string name="trait_delete_warning_photo">この写真を削除してもよろしいでしょうか？</string>
@@ -180,6 +182,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">ローカル</string>
@@ -278,7 +281,6 @@
     <!-- App  -->
     <string name="about_title">バージョン情報</string>
     <string name="about_version_title">バージョン</string>
-    <string name="about_rate">このアプリを評価</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">プロジェクトリーダー</string>
     <!-- Support  -->

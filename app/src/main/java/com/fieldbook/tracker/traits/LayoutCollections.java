@@ -58,31 +58,33 @@ public class LayoutCollections {
         getTraitLayout(format).setNaTraitsText();
     }
 
-    public void enableViews() {
-        for (LinearLayout traitLayout : traitLayouts) {
-            enableViews(true, traitLayout);
-        }
-    }
-
-    public void disableViews() {
-        for (BaseTraitLayout traitLayout : traitLayouts) {
-            String type = traitLayout.type();
-            if (!type.equals("photo") && !type.equals("audio") && !type.equals("percent"))
-                enableViews(false, traitLayout);
-        }
-    }
-
-    public void enableViews(Boolean toggle, ViewGroup layout) {
-        layout.setEnabled(false);
-        for (int i = 0; i < layout.getChildCount(); i++) {
-            View child = layout.getChildAt(i);
-            if (child instanceof ViewGroup) {
-                enableViews(toggle, (ViewGroup) child);
-            } else {
-                child.setEnabled(toggle);
-            }
-        }
-    }
+//    Deprecated - simpler to disable/enable data collection using lockOverlay instead
+//
+//    public void enableViews() {
+//        for (LinearLayout traitLayout : traitLayouts) {
+//            enableViews(true, traitLayout);
+//        }
+//    }
+//
+//    public void disableViews() {
+//        for (BaseTraitLayout traitLayout : traitLayouts) {
+//            String type = traitLayout.type();
+//            if (!type.equals("photo") && !type.equals("audio") && !type.equals("percent"))
+//                enableViews(false, traitLayout);
+//        }
+//    }
+//
+//    public void enableViews(Boolean toggle, ViewGroup layout) {
+//        layout.setEnabled(false);
+//        for (int i = 0; i < layout.getChildCount(); i++) {
+//            View child = layout.getChildAt(i);
+//            if (child instanceof ViewGroup) {
+//                enableViews(toggle, (ViewGroup) child);
+//            } else {
+//                child.setEnabled(toggle);
+//            }
+//        }
+//    }
 
     public void registerAllReceivers() {
         for (BaseTraitLayout layout : this.traitLayouts) {

@@ -29,7 +29,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -409,7 +408,7 @@ public class CollectActivity extends ThemedActivity
 
                     } else {
 
-                        Toast.makeText(this, getString(R.string.act_collect_plot_with_code_not_found), Toast.LENGTH_LONG).show();
+                        Utils.makeToast(getApplicationContext(), getString(R.string.act_collect_plot_with_code_not_found));
 
                     }
                 }
@@ -836,7 +835,7 @@ public class CollectActivity extends ThemedActivity
         }
 
         if (!command.equals("quickgoto") && !command.equals("barcode"))
-            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+            Utils.makeToast(this, getString(R.string.main_toolbar_moveto_no_match));
 
         return false;
     }
@@ -923,8 +922,6 @@ public class CollectActivity extends ThemedActivity
         //save the last used trait
         if (traitBox.getCurrentTrait() != null)
             preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
-
-        geoNavHelper.stopAverageHandler();
 
         preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
 
@@ -1185,7 +1182,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     private void brapiDelete(String parent, Boolean hint) {
-        Toast.makeText(getApplicationContext(), getString(R.string.brapi_delete_message), Toast.LENGTH_LONG).show();
+        Utils.makeToast(this, getString(R.string.brapi_delete_message));
         TraitObject trait = traitBox.getCurrentTrait();
         updateObservation(trait, getString(R.string.brapi_na), null);
         if (hint) {
@@ -1291,7 +1288,7 @@ public class CollectActivity extends ThemedActivity
                 e.printStackTrace();
             }
         } else {
-            Toast.makeText(this, "No file preference saved, select a file with a short press", Toast.LENGTH_SHORT).show();
+            Utils.makeToast(this, "No file preference saved, select a file with a short press");
         }
     }
 
@@ -1375,7 +1372,7 @@ public class CollectActivity extends ThemedActivity
                 startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
             }
         } else if (itemId == nextEmptyPlotId) {
-            rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, false, true));
+            rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, true));
             refreshMain();
         } else if (itemId == jumpToPlotId) {
             String moveToUniqueIdValue = preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "");
@@ -1402,9 +1399,18 @@ public class CollectActivity extends ThemedActivity
             i.putExtra("trait", traitBox.getCurrentTrait().getRealPosition());
             startActivityForResult(i, 2);
         } else if (itemId == lockDataId) {
-            if (dataLocked == UNLOCKED) dataLocked = LOCKED;
-            else if (dataLocked == LOCKED) dataLocked = FROZEN;
-            else dataLocked = UNLOCKED;
+            if (dataLocked == UNLOCKED) {
+                dataLocked = LOCKED;
+                Utils.makeToast(this, getString(R.string.activity_collect_locked_state));
+            }
+            else if (dataLocked == LOCKED) {
+                dataLocked = FROZEN;
+                Utils.makeToast(this, getString(R.string.activity_collect_frozen_state));
+            }
+            else {
+                dataLocked = UNLOCKED;
+                Utils.makeToast(this, getString(R.string.activity_collect_unlocked_state));
+            }
             preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
             lockData();
         } else if (itemId == android.R.id.home) {
@@ -1449,35 +1455,23 @@ public class CollectActivity extends ThemedActivity
 
             // if trait audio is recording, give a warning
             if (isTraitAudioRecording) {
-                Toast.makeText(
-                        this, R.string.trait_audio_recording_warning,
-                        Toast.LENGTH_SHORT
-                ).show();
+                Utils.makeToast(this, getString(R.string.trait_audio_recording_warning));
             }
             // if trait audio is playing, give a warning
             else if (isTraitAudioPlaying) {
-                Toast.makeText(
-                        this, R.string.trait_audio_playing_warning,
-                        Toast.LENGTH_SHORT
-                ).show();
+                Utils.makeToast(this, getString(R.string.trait_audio_playing_warning));
             }
             // if trait audio isn't recording or playing
             // record or stop the field audio depending on its state
             else if (!fieldAudioHelper.isRecording()) {
                 // TODO: add trait audio playback stopping logic
                 fieldAudioHelper.startRecording(true);
-                Toast.makeText(
-                        this, R.string.field_audio_recording_start,
-                        Toast.LENGTH_SHORT
-                ).show();
+                Utils.makeToast(this, getString(R.string.field_audio_recording_start));
                 micItem.setIcon(R.drawable.ic_tb_field_mic_on);
                 micItem.setTitle(R.string.menu_collect_stop_field_audio);
             } else {
                 fieldAudioHelper.stopRecording();
-                Toast.makeText(
-                        this, R.string.field_audio_recording_stop,
-                        Toast.LENGTH_SHORT
-                ).show();
+                Utils.makeToast(this, getString(R.string.field_audio_recording_stop));
                 micItem.setIcon(R.drawable.ic_tb_field_mic_off);
                 micItem.setTitle(R.string.menu_collect_start_field_audio);
             }
@@ -1579,7 +1573,7 @@ public class CollectActivity extends ThemedActivity
             }
         } else {
 
-            Toast.makeText(this, R.string.dialog_multi_measure_delete_no_observations, Toast.LENGTH_SHORT).show();
+            Utils.makeToast(this, getString(R.string.dialog_multi_measure_delete_no_observations));
 
         }
     }
@@ -1650,7 +1644,7 @@ public class CollectActivity extends ThemedActivity
 
         if (state == LOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
-            disableDataEntry();
+            disableDataEntry(R.string.activity_collect_locked_state);
         } else if (state == UNLOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
             enableDataEntry();
@@ -1658,7 +1652,7 @@ public class CollectActivity extends ThemedActivity
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
             if (collectInputView.getText().isEmpty()) {
                 enableDataEntry();
-            } else disableDataEntry();
+            } else disableDataEntry(R.string.activity_collect_frozen_state);
         }
 
         TraitObject trait = getCurrentTrait();
@@ -1670,7 +1664,7 @@ public class CollectActivity extends ThemedActivity
     public void traitLockData() {
         if (dataLocked == LOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
-            disableDataEntry();
+            disableDataEntry(R.string.activity_collect_locked_state);
         } else if (dataLocked == UNLOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
             enableDataEntry();
@@ -1678,22 +1672,29 @@ public class CollectActivity extends ThemedActivity
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
             if (collectInputView.getText().isEmpty()) {
                 enableDataEntry();
-            } else disableDataEntry();
+            } else disableDataEntry(R.string.activity_collect_frozen_state);
         }
     }
 
     private void enableDataEntry() {
-        missingValue.setEnabled(true);
-        deleteValue.setEnabled(true);
-        barcodeInput.setEnabled(true);
-        traitLayouts.enableViews();
+//        missingValue.setEnabled(true);
+//        deleteValue.setEnabled(true);
+//        barcodeInput.setEnabled(true);
+//        traitLayouts.enableViews();
+        findViewById(R.id.lockOverlay).setVisibility(View.GONE);
     }
 
-    private void disableDataEntry() {
-        missingValue.setEnabled(false);
-        deleteValue.setEnabled(false);
-        barcodeInput.setEnabled(false);
-        traitLayouts.disableViews();
+    private void disableDataEntry(int toastMessageId) {
+//        missingValue.setEnabled(false);
+//        deleteValue.setEnabled(false);
+//        barcodeInput.setEnabled(false);
+//        traitLayouts.disableViews();
+        View overlay = findViewById(R.id.lockOverlay);
+        overlay.setOnClickListener((v) -> {
+            getSoundHelper().playError();
+            Utils.makeToast(this, getString(toastMessageId));
+        });
+        overlay.setVisibility(View.VISIBLE);
     }
 
     private void moveToPlotID() {
@@ -1847,7 +1848,7 @@ public class CollectActivity extends ThemedActivity
                     }
 
                 } else {
-                    Toast.makeText(this, R.string.act_file_explorer_no_file_error, Toast.LENGTH_SHORT).show();
+                    Utils.makeToast(this, getString(R.string.act_file_explorer_no_file_error));
                 }
                 break;
             case 2:
@@ -2116,7 +2117,7 @@ public class CollectActivity extends ThemedActivity
      */
     @Override
     public int existsAllTraits(final int traitIndex, final int plotId) {
-        final ArrayList<TraitObject> traits = database.getAllTraitObjects();
+        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
         for (int i = 0; i < traits.size(); i++) {
             if (i != traitIndex
                     && !database.getTraitExists(plotId, traits.get(i).getId())) return i;
@@ -2127,7 +2128,7 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public List<Integer> getNonExistingTraits(final int plotId) {
-        final ArrayList<TraitObject> traits = database.getAllTraitObjects();
+        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
         final ArrayList<Integer> indices = new ArrayList<>();
         for (int i = 0; i < traits.size(); i++) {
             if (!database.getTraitExists(plotId, traits.get(i).getId()))
