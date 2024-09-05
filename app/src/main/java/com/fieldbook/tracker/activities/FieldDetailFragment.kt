@@ -54,7 +54,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     lateinit var preferences: SharedPreferences
 
     private var toolbar: Toolbar? = null
-    private var fieldId: Int? = null
+    private var fieldId: Int = -1
     private val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
 
     private lateinit var exportUtil: ExportUtil
@@ -100,7 +100,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         observationCountChip = rootView.findViewById(R.id.observationCountChip)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
 
-        fieldId = arguments?.getInt("fieldId")
+        fieldId = requireArguments().getInt("fieldId")
+        (activity as? FieldEditorActivity)?.setActiveField(fieldId)
         loadFieldDetails()
 
         val overviewExpandCollapseIcon: ImageView = rootView.findViewById(R.id.overview_expand_collapse_icon)
@@ -131,7 +132,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         cardViewCollect.setOnClickListener {
             fieldId?.let { id ->
                 if (checkTraitsExist() >= 0) {
-                    (activity as? FieldEditorActivity)?.setActiveField(id)
                     collectDataFilePermission()
                 }
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot collect data")
@@ -147,7 +147,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
         cardViewTraits.setOnClickListener {
             fieldId?.let { id ->
-                (activity as? FieldEditorActivity)?.setActiveField(id)
                 startActivity(Intent(requireActivity(), TraitEditorActivity::class.java))
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot access field-specific traits")
         }
