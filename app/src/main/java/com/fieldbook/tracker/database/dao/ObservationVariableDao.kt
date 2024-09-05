@@ -247,7 +247,7 @@ class ObservationVariableDao {
             )
         }
 
-        fun getAllTraitObjects(sortOrder: String = "internal_id_observation_variable", fieldId: Int? = null): ArrayList<TraitObject> = withDatabase { db ->
+        fun getAllTraitObjects(sortOrder: String = "internal_id_observation_variable", fieldId: Int): ArrayList<TraitObject> = withDatabase { db ->
             val traits = ArrayList<TraitObject>()
 
             val orderDirection = if (sortOrder == "visible") "DESC" else "ASC"
@@ -276,7 +276,7 @@ class ObservationVariableDao {
 
                         // Handle visibility based on fieldId
                         val studyIdsJson = cursor.getString(cursor.getColumnIndexOrThrow("study_ids"))
-                        visible = if (fieldId != null) {
+                        visible =
                             try {
                                 val jsonArray = org.json.JSONArray(studyIdsJson)
                                 val isVisible = jsonArrayContains(jsonArray, fieldId)
@@ -284,10 +284,6 @@ class ObservationVariableDao {
                             } catch (e: Exception) {
                                 false
                             }
-                        } else {
-                            val isVisible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()  // Default visibility
-                            isVisible
-                        }
 
                         ObservationVariableValueDao.getVariableValues(id.toInt())?.forEach { value ->
                             val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
@@ -307,7 +303,7 @@ class ObservationVariableDao {
 
 
         // Overload for Java compatibility
-        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("internal_id_observation_variable", null)
+        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("internal_id_observation_variable", 0)
 
         fun getTraitVisibility(): HashMap<String, String> = withDatabase { db ->
 
@@ -401,30 +397,21 @@ class ObservationVariableDao {
 
         } ?: -1L
 
-        fun updateTraitVisibility(traitDbId: String, visible: Boolean, fieldId: Int? = null) = withDatabase { db ->
-            if (fieldId != null) {
-                val currentStudyIds = db.rawQuery(
-                    "SELECT study_ids FROM ${ObservationVariable.tableName} WHERE internal_id_observation_variable = ?",
-                    arrayOf(traitDbId)
-                ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else "[]" }
+        fun updateTraitVisibility(traitDbId: String, visible: Boolean, fieldId: Int) = withDatabase { db ->
+            val currentStudyIds = db.rawQuery(
+                "SELECT study_ids FROM ${ObservationVariable.tableName} WHERE internal_id_observation_variable = ?",
+                arrayOf(traitDbId)
+            ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else "[]" }
 
-                val jsonArray = org.json.JSONArray(currentStudyIds).apply {
-                    if (visible && !jsonArrayContains(this, fieldId)) put(fieldId)
-                    if (!visible) removeFieldIdFromJsonArray(this, fieldId)
-                }
-
-                db.execSQL(
-                    "UPDATE ${ObservationVariable.tableName} SET study_ids = ? WHERE internal_id_observation_variable = ?",
-                    arrayOf(jsonArray.toString(), traitDbId)
-                )
-            } else {
-                db.update(
-                    ObservationVariable.tableName,
-                    ContentValues().apply { put("visible", visible.toString()) },
-                    "internal_id_observation_variable = ?",
-                    arrayOf(traitDbId)
-                )
+            val jsonArray = org.json.JSONArray(currentStudyIds).apply {
+                if (visible && !jsonArrayContains(this, fieldId)) put(fieldId)
+                if (!visible) removeFieldIdFromJsonArray(this, fieldId)
             }
+
+            db.execSQL(
+                "UPDATE ${ObservationVariable.tableName} SET study_ids = ? WHERE internal_id_observation_variable = ?",
+                arrayOf(jsonArray.toString(), traitDbId)
+            )
         }
 
         private fun removeFieldIdFromJsonArray(jsonArray: org.json.JSONArray, fieldId: Int) {

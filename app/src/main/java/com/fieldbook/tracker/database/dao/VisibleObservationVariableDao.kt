@@ -15,7 +15,7 @@ class VisibleObservationVariableDao {
 
     companion object {
 
-        fun getVisibleTrait(fieldId: Int? = null): Array<String> {
+        fun getVisibleTrait(fieldId: Int): Array<String> {
             val allTraits = ObservationVariableDao.getAllTraitObjects(fieldId = fieldId)
 
             // Filter traits by visibility and return their names

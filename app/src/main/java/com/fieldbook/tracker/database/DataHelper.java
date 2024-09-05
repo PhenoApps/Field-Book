@@ -302,9 +302,11 @@ public class DataHelper {
      * Helper function to change visibility of a trait. Used in the ratings
      * screen
      */
-    public void updateTraitVisibility(String traitDbId, boolean val, @Nullable Integer fieldId) {
+    public void updateTraitVisibility(String traitDbId, boolean val) {
 
         open();
+
+        Integer fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
         ObservationVariableDao.Companion.updateTraitVisibility(traitDbId, val, fieldId);
 
@@ -1052,17 +1054,14 @@ public class DataHelper {
 
     }
 
-    public String[] getVisibleTrait() {
-        // Call the version with fieldId, passing null
-        return getVisibleTrait(null);
-    }
-
     /**
      * Used by the application to return all traits which are visible
      */
-    public String[] getVisibleTrait(@Nullable Integer fieldId) {
+    public String[] getVisibleTrait() {
 
         open();
+
+        Integer fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
         return VisibleObservationVariableDao.Companion.getVisibleTrait(fieldId);
 
@@ -1352,18 +1351,14 @@ public class DataHelper {
 
     }
 
-    public ArrayList<TraitObject> getAllTraitObjects() {
-        // Call the method with null for the fieldId
-        return getAllTraitObjects(null);
-    }
-
     /**
      * V2 - Get all traits in the system, in order, as TraitObjects
      */
-    public ArrayList<TraitObject> getAllTraitObjects(@Nullable Integer fieldId) {
+    public ArrayList<TraitObject> getAllTraitObjects() {
         open();
 
         String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable");
+        Integer fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
         return ObservationVariableDao.Companion.getAllTraitObjects(sortOrder, fieldId);
 

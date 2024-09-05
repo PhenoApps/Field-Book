@@ -747,7 +747,7 @@ public class CollectActivity extends ThemedActivity
         traitBox.initTraitDetails();
 
         // trait is unique, format is not
-        String[] traits = database.getVisibleTrait(fieldId);
+        String[] traits = database.getVisibleTrait();
         if (traits != null) {
             traitBox.initTraitType(traits, rangeSuppress);
 
@@ -1087,7 +1087,7 @@ public class CollectActivity extends ThemedActivity
         if (trait != null) {
 
             //get all traits, filter the preference trait and check it's visibility
-            String[] traits = database.getVisibleTrait(fieldId);
+            String[] traits = database.getVisibleTrait();
 
             try {
 

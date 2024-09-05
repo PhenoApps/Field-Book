@@ -148,10 +148,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         cardViewTraits.setOnClickListener {
             fieldId?.let { id ->
                 (activity as? FieldEditorActivity)?.setActiveField(id)
-                val intent = Intent(requireActivity(), TraitEditorActivity::class.java).apply {
-                    putExtra("FIELD_ID", id)  // Pass the fieldId as an extra
-                }
-                startActivity(intent)
+                startActivity(Intent(requireActivity(), TraitEditorActivity::class.java))
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot access field-specific traits")
         }
 
@@ -316,7 +313,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         }
 
 //        traitCountChip.text = field.trait_count.toString()
-        traitCountChip.text = database.getVisibleTrait(fieldId).count().toString();
+        traitCountChip.text = database.getVisibleTrait().count().toString();
 
         if (field.observation_count.toInt() > 0) {
             observationCountChip.visibility = View.VISIBLE
@@ -445,7 +442,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     fun checkTraitsExist(): Int {
-        val traits = database.getVisibleTrait(fieldId)
+        val traits = database.getVisibleTrait()
 
         return when {
             traits.isEmpty() -> {
