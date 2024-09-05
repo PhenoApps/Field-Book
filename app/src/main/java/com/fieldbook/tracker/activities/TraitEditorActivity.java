@@ -30,6 +30,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
@@ -301,17 +302,22 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         setContentView(R.layout.activity_traits);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
-            int fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
-            FieldObject field = database.getFieldObject(fieldId);
-            getSupportActionBar().setTitle(field.getExp_alias());
+            getSupportActionBar().setTitle(getString(R.string.settings_traits));
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
+
+        // Sub-toolbar for field name
+        Toolbar subToolbar = findViewById(R.id.sub_toolbar);
+        subToolbar.setNavigationIcon(null);
+        TextView fieldTitle = findViewById(R.id.field_title);
+        int fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+        FieldObject field = database.getFieldObject(fieldId);
+        fieldTitle.setText(field.getExp_alias());
 
         traitList = findViewById(R.id.myList);
 
