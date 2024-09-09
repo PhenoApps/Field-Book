@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -23,20 +24,21 @@ class CheckboxListAdapter(
 ) :
     ListAdapter<CheckboxListAdapter.Model, CheckboxListAdapter.ViewHolder>(DiffCallback()) {
 
-    interface Listener {
-        fun onItemClicked(checked: Boolean, position: Int)
+    fun interface Listener {
+        fun onCheckChanged(checked: Boolean, position: Int)
     }
 
     data class Model(
         var checked: Boolean,
         val id: String,
-        val label: String
+        val label: String,
+        val subLabel: String
     )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val v = LayoutInflater.from(parent.context)
             .inflate(R.layout.list_item_label_checkbox, parent, false)
-        return ViewHolder(v as ConstraintLayout)
+        return ViewHolder(v as CardView)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -44,6 +46,8 @@ class CheckboxListAdapter(
         with(currentList[position]) {
 
             holder.textView.text = label
+
+            holder.subTitleView.text = subLabel
 
             holder.checkBox.isChecked = checked
         }
@@ -53,20 +57,21 @@ class CheckboxListAdapter(
         return currentList.size
     }
 
-    inner class ViewHolder(v: ConstraintLayout) : RecyclerView.ViewHolder(v) {
+    inner class ViewHolder(v: CardView) : RecyclerView.ViewHolder(v) {
 
         var textView: TextView = v.findViewById(R.id.list_item_brapi_filter_tv)
         var checkBox: CheckBox = v.findViewById(R.id.list_item_brapi_filter_cb)
-        var container: ConstraintLayout = v.findViewById(R.id.list_item_brapi_filter_cl)
+        var subTitleView: TextView = v.findViewById(R.id.list_item_brapi_filter_subtitle_tv)
+        var card: CardView = v.findViewById(R.id.list_item_brapi_filter_cv)
 
         init {
 
             //get model from tag and call listener when checkbox is clicked
             checkBox.setOnCheckedChangeListener { _, isChecked ->
-                listener.onItemClicked(isChecked, bindingAdapterPosition)
+                listener.onCheckChanged(isChecked, bindingAdapterPosition)
             }
 
-            container.setOnClickListener {
+            card.setOnClickListener {
                 checkBox.isChecked = !checkBox.isChecked
             }
         }

@@ -1,63 +1,51 @@
 package com.fieldbook.tracker.activities.brapi.update
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
-import com.fieldbook.tracker.brapi.model.BrapiProgram
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import org.brapi.v2.model.core.BrAPIProgram
 
-open class BrapiProgramFilterActivity: BrapiFilterActivity() {
+class BrapiProgramFilterActivity(override val titleResId: Int = R.string.brapi_filter_type_program) :
+    BrapiListFilterActivity<BrAPIProgram>() {
 
     companion object {
-        fun getIntent(activity: Activity): Intent {
-            return Intent(activity, BrapiProgramFilterActivity::class.java)
+
+        const val FILTER_NAME = "$PREFIX.programDbIds"
+
+        fun getIntent(context: Context): Intent {
+            return Intent(context, BrapiProgramFilterActivity::class.java)
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override val filterName: String
+        get() = FILTER_NAME
 
-        titleFilterTextView.text = getString(R.string.brapi_program_filter_title)
-    }
-
-    override fun getChosenFilter(): BrapiFilter {
-
-        //get ids and names of selected programs from the adapter
-        val selectedPrograms = cache.filter { p -> p.checked }.map { p -> p.id }
-
-        prefs.edit().putStringSet("programDbIds", selectedPrograms.toSet()).apply()
-
-        return BrapiFilter(BrapiType.PROGRAM, "test")
-    }
-
-    override fun loadFilter(): BrapiFilter {
-        return BrapiFilter(BrapiType.PROGRAM, "test")
-    }
-
-    override fun Intent.saveFilterData(): BrapiFilter {
-        return getChosenFilter()
-    }
-
-    override fun query() {
-
-        brapiService.getPrograms(paginationManager, { programs ->
-
-            cacheAndSubmitItems(programs.map())
-
-            null
-
-        }) { _ ->
-
-            null
+    override suspend fun loadListData(): Flow<BrAPIProgram> = flow {
+        getStoredModels().forEach { model ->
+            emit(BrAPIProgram().also {
+                it.programDbId = model.programDbId
+                it.programName = model.programName
+            })
         }
     }
 
-    private fun List<BrapiProgram>.map(): List<CheckboxListAdapter.Model> = map { program ->
+    override fun List<BrAPIProgram?>.mapToUiModel() = filterNotNull().map { program ->
         CheckboxListAdapter.Model(
             checked = false,
             id = program.programDbId,
-            label = program.programName
+            label = program.programName,
+            subLabel = program.programType ?: String()
         )
     }
+
+//    override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
+//        super.onCreateOptionsMenu(menu)
+//        menu?.findItem(R.id.action_check_all)?.isVisible = true
+//        menu?.findItem(R.id.action_reset_cache)?.isVisible = true
+//        menu?.findItem(R.id.action_brapi_filter)?.isVisible = false
+//        return true
+//    }
 }

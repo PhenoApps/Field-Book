@@ -1,22 +1,10 @@
-package com.fieldbook.tracker.brapi.model;
+package com.fieldbook.tracker.brapi.model
 
-public class BrapiTrial {
-    private String trialName;
-    private String trialDbId;
-
-    public String getTrialName() {
-        return trialName;
-    }
-
-    public void setTrialName(String trialName) {
-        this.trialName = trialName;
-    }
-
-    public String getTrialDbId() {
-        return trialDbId;
-    }
-
-    public void setTrialDbId(String trialDbId) {
-        this.trialDbId = trialDbId;
-    }
+class BrapiTrial {
+    @JvmField
+    var trialName: String? = null
+    @JvmField
+    var trialDbId: String? = null
+    @JvmField
+    var trialDescription: String? = null
 }

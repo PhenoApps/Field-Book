@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
 import androidx.preference.PreferenceManager;
@@ -18,11 +19,16 @@ import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
+import com.fieldbook.tracker.brapi.service.core.CropService;
+import com.fieldbook.tracker.brapi.service.core.ProgramService;
+import com.fieldbook.tracker.brapi.service.core.SeasonService;
+import com.fieldbook.tracker.brapi.service.core.StudyService;
+import com.fieldbook.tracker.brapi.service.core.TrialService;
+import com.fieldbook.tracker.brapi.service.pheno.ObservationVariableService;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
-import com.fieldbook.tracker.database.models.ObservationVariableModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
@@ -33,23 +39,28 @@ import com.fieldbook.tracker.utilities.SuccessFunction;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
+
 import org.brapi.client.v2.ApiResponse;
 import org.brapi.client.v2.BrAPIClient;
 import org.brapi.client.v2.model.exceptions.ApiException;
 import org.brapi.client.v2.model.queryParams.core.ProgramQueryParams;
+import org.brapi.client.v2.model.queryParams.core.SeasonQueryParams;
 import org.brapi.client.v2.model.queryParams.core.StudyQueryParams;
 import org.brapi.client.v2.model.queryParams.core.TrialQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams;
+import org.brapi.client.v2.modules.core.CommonCropNamesApi;
 import org.brapi.client.v2.modules.core.ProgramsApi;
+import org.brapi.client.v2.modules.core.SeasonsApi;
 import org.brapi.client.v2.modules.core.StudiesApi;
 import org.brapi.client.v2.modules.core.TrialsApi;
+import org.brapi.client.v2.modules.germplasm.GermplasmApi;
 import org.brapi.client.v2.modules.phenotype.ImagesApi;
 import org.brapi.client.v2.modules.phenotype.ObservationUnitsApi;
 import org.brapi.client.v2.modules.phenotype.ObservationVariablesApi;
 import org.brapi.client.v2.modules.phenotype.ObservationsApi;
-import org.brapi.client.v2.modules.germplasm.GermplasmApi;
+import org.brapi.v2.model.BrAPIAcceptedSearchResponse;
 import org.brapi.v2.model.BrAPIExternalReference;
 import org.brapi.v2.model.BrAPIMetadata;
 import org.brapi.v2.model.BrAPIResponse;
@@ -59,11 +70,15 @@ import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
 import org.brapi.v2.model.core.BrAPITrial;
-import org.brapi.v2.model.germ.BrAPIGermplasm;
+import org.brapi.v2.model.core.request.BrAPIStudySearchRequest;
+import org.brapi.v2.model.core.response.BrAPICommonCropNamesResponse;
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse;
+import org.brapi.v2.model.core.response.BrAPISeasonListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudyListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudySingleResponse;
 import org.brapi.v2.model.core.response.BrAPITrialListResponse;
+import org.brapi.v2.model.germ.BrAPIGermplasm;
+import org.brapi.v2.model.germ.BrAPIGermplasmSynonyms;
 import org.brapi.v2.model.germ.request.BrAPIGermplasmSearchRequest;
 import org.brapi.v2.model.pheno.BrAPIImage;
 import org.brapi.v2.model.pheno.BrAPIObservation;
@@ -81,8 +96,6 @@ import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponseResult;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
-import org.brapi.v2.model.germ.BrAPIGermplasmSynonyms;
-import org.brapi.v2.model.BrAPIAcceptedSearchResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,7 +104,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.function.BiConsumer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -100,26 +112,38 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
-public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
+import kotlin.jvm.functions.Function1;
+
+public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService, BrAPIServiceSearch {
 
     private static final String ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES = "observationLevelNames";
-
+    protected final StudiesApi studiesApi;
+    protected final ProgramsApi programsApi;
+    protected final TrialsApi trialsApi;
     //used to identify field book db id in external references
     private final String fieldBookReferenceSource = "Field Book Upload";
-
     private final Context context;
     private final BrAPIClient apiClient;
     private final ImagesApi imagesApi;
-    private final StudiesApi studiesApi;
-    private final ProgramsApi programsApi;
-    private final TrialsApi trialsApi;
     private final ObservationsApi observationsApi;
     private final ObservationUnitsApi observationUnitsApi;
     private final GermplasmApi germplasmApi;
     private final ObservationVariablesApi traitsApi;
+    private final SeasonsApi seasonsApi;
+    private final CommonCropNamesApi cropsApi;
+
+    public final ProgramService programService;
+    public final SeasonService seasonService;
+    public final CropService cropService;
+    public final TrialService trialService;
+    public final StudyService studyService;
+    public final ObservationVariableService observationVariableService;
+
+    public Searcher searcher = new Searcher(this);
 
     public BrAPIServiceV2(Context context) {
         this.context = context;
@@ -134,10 +158,19 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.observationsApi = new ObservationsApi(apiClient);
         this.observationUnitsApi = new ObservationUnitsApi(apiClient);
         this.germplasmApi = new GermplasmApi(apiClient);
+        this.seasonsApi = new SeasonsApi(apiClient);
+        this.cropsApi = new CommonCropNamesApi(apiClient);
+
+        this.programService = new ProgramService.Default(this.programsApi);
+        this.studyService = new StudyService.Default(this.studiesApi);
+        this.seasonService = new SeasonService.Default(this.seasonsApi);
+        this.cropService = new CropService.Default(this.cropsApi);
+        this.trialService = new TrialService.Default(this.trialsApi);
+        this.observationVariableService = new ObservationVariableService.Default(this.traitsApi);
     }
 
     @Override
-    public void authorizeClient(){
+    public void authorizeClient() {
         try {
             apiClient.authenticate(t -> PreferenceManager.getDefaultSharedPreferences(context)
                     .getString(GeneralKeys.BRAPI_TOKEN, null));
@@ -176,8 +209,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    private void updatePageInfo(BrapiPaginationManager paginationManager, BrAPIMetadata metadata){
-        if(paginationManager.getContext() != null) { //null check for JUnits
+    private void updatePageInfo(BrapiPaginationManager paginationManager, BrAPIMetadata metadata) {
+        if (paginationManager.getContext() != null) { //null check for JUnits
             ((Activity) paginationManager.getContext())
                     .runOnUiThread(() -> paginationManager.updatePageInfo(metadata.getPagination().getTotalPages()));
         }
@@ -308,31 +341,31 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                             final Function<Integer, Void> failFunction) {
         Integer initPage = paginationManager.getPage();
         try {
-           BrapiV2ApiCallBack<BrAPIProgramListResponse> callback = new BrapiV2ApiCallBack<BrAPIProgramListResponse>() {
-               @Override
-               public void onSuccess(BrAPIProgramListResponse programsResponse, int i, Map<String, List<String>> map) {
-                   // Cancel processing if the page that was processed is not the page
-                   // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
-                   if (initPage.equals(paginationManager.getPage())) {
-                       updatePageInfo(paginationManager, programsResponse.getMetadata());
-                       List<BrAPIProgram> programList = programsResponse.getResult().getData();
-                       function.apply(mapPrograms(programList));
-                   }
-               }
+            BrapiV2ApiCallBack<BrAPIProgramListResponse> callback = new BrapiV2ApiCallBack<BrAPIProgramListResponse>() {
+                @Override
+                public void onSuccess(BrAPIProgramListResponse programsResponse, int i, Map<String, List<String>> map) {
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage.equals(paginationManager.getPage())) {
+                        updatePageInfo(paginationManager, programsResponse.getMetadata());
+                        List<BrAPIProgram> programList = programsResponse.getResult().getData();
+                        function.apply(mapPrograms(programList));
+                    }
+                }
 
-               @Override
-               public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-                   failFunction.apply(error.getCode());
-                   Log.e("BrAPIServiceV2", "API Exception", error);
-               }
-           };
-           ProgramQueryParams queryParams = new ProgramQueryParams();
-           queryParams.page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
-           programsApi.programsGetAsync(queryParams, callback);
-       } catch (ApiException error) {
-           failFunction.apply(error.getCode());
-           Log.e("BrAPIServiceV2", "API Exception", error);
-       }
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
+                }
+            };
+            ProgramQueryParams queryParams = new ProgramQueryParams();
+            queryParams.page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
+            programsApi.programsGetAsync(queryParams, callback);
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
+        }
     }
 
     private List<BrapiProgram> mapPrograms(List<BrAPIProgram> programList) {
@@ -340,8 +373,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         if (programList != null) {
             for (BrAPIProgram program : programList) {
                 BrapiProgram brapiProgram = new BrapiProgram();
-                brapiProgram.setProgramName(program.getProgramName());
-                brapiProgram.setProgramDbId(program.getProgramDbId());
+                brapiProgram.programName = program.getProgramName();
+                brapiProgram.programDbId = program.getProgramDbId();
+                brapiProgram.programType = program.getProgramType();
                 brapiPrograms.add(brapiProgram);
             }
         }
@@ -386,8 +420,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             for (BrAPITrial trial : trialList) {
                 BrapiTrial brapiTrial = new BrapiTrial();
                 String name = trial.getTrialName();
-                brapiTrial.setTrialName(name);
-                brapiTrial.setTrialDbId(trial.getTrialDbId());
+                brapiTrial.trialName = name;
+                brapiTrial.trialDbId = trial.getTrialDbId();
                 brapiTrials.add(brapiTrial);
             }
         }
@@ -497,7 +531,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 @Override
                 public void onSuccess(BrAPIObservationUnitListResponse response, int i, Map<String, List<String>> map) {
                     int page = response.getMetadata().getPagination().getCurrentPage();
-                    if(page == 0){
+                    if (page == 0) {
                         //one time code
                         study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
                     }
@@ -518,11 +552,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     // Stop after 50 iterations (for safety)
                     // Stop if the current page is the last page according to the server
                     // Stop if there are no more contents
-                    if((queryParams.page() > 50)
+                    if ((queryParams.page() > 50)
                             || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
-                            || (response.getResult().getData().size() == 0)){
+                            || (response.getResult().getData().isEmpty())) {
                         List<String> uniqueDbIds = new ArrayList<>(new HashSet<>(allGermplasmDbIds));
-                        mapAttributeValues(study, allAttributeValues, getGermplasmDetails(uniqueDbIds, failFunction));
+                        Map<String, BrAPIGermplasm> data = getGermplasmDetails(uniqueDbIds, failFunction);
+                        mapAttributeValues(study, allAttributeValues, data);
                         function.apply(study);
 
                     } else {
@@ -572,25 +607,25 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 List<BrAPIObservationUnitLevelRelationship> levels = pos.getObservationLevelRelationships();
                 levels.add(pos.getObservationLevel());
 
-                for(BrAPIObservationUnitLevelRelationship level: levels){
-                    if(level.getLevelName() != null) {
+                for (BrAPIObservationUnitLevelRelationship level : levels) {
+                    if (level.getLevelName() != null) {
                         String attributeName = level.getLevelName();
                         attributeName = attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1).toLowerCase();
                         attributesMap.put(attributeName, level.getLevelCode());
                     }
                 }
 
-                if (pos.getPositionCoordinateX() != null){
+                if (pos.getPositionCoordinateX() != null) {
                     String rowColStr = getRowColStr(pos.getPositionCoordinateXType());
-                    if(rowColStr == null){
+                    if (rowColStr == null) {
                         rowColStr = "Row";
                     }
                     attributesMap.put(rowColStr, pos.getPositionCoordinateX());
                 }
 
-                if (pos.getPositionCoordinateY() != null){
+                if (pos.getPositionCoordinateY() != null) {
                     String rowColStr = getRowColStr(pos.getPositionCoordinateYType());
-                    if(rowColStr == null){
+                    if (rowColStr == null) {
                         rowColStr = "Column";
                     }
                     attributesMap.put(rowColStr, pos.getPositionCoordinateY());
@@ -644,7 +679,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             uniqueAttributes.addAll(attributesMap.keySet());
         }
         study.setAttributes(new ArrayList<>(uniqueAttributes));
-        Log.d("BrAPIServiceV2","Added attributes to the study. Current attributes are: " + study.getAttributes());
+        Log.d("BrAPIServiceV2", "Added attributes to the study. Current attributes are: " + study.getAttributes());
 
         // Assemble the attributesTable
         List<List<String>> attributesTable = new ArrayList<>();
@@ -658,12 +693,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 dataRow.add(attributesMap.getOrDefault(attr, ""));
             }
             attributesTable.add(dataRow);
-            Log.d("BrAPIServiceV2","Added new data row to attributes table: " + dataRow);
+            Log.d("BrAPIServiceV2", "Added new data row to attributes table: " + dataRow);
         }
 
         // Save the attributesTable to the study
         study.getValues().addAll(attributesTable);
-        Log.d("BrAPIServiceV2","Updated study with mapped attributes");
+        Log.d("BrAPIServiceV2", "Updated study with mapped attributes");
     }
 
     public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
@@ -686,23 +721,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         };
 
         return executeBrapiSearch(
-                body -> germplasmApi.searchGermplasmPost(body), // Using lambda for explicit type
-                (id, page, size) -> germplasmApi.searchGermplasmSearchResultsDbIdGet(id, page, size), // Using lambda for explicit type
+                germplasmApi::searchGermplasmPost, // Using lambda for explicit type
+                germplasmApi::searchGermplasmSearchResultsDbIdGet, // Using lambda for explicit type
                 germplasmBody,
                 germplasmMapper,
                 failFunction,
                 pageSize
         );
-    }
-
-    @FunctionalInterface
-    public interface GenericSearchCallFunction<T, R> {
-        ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> apply(T searchRequestBody) throws ApiException;
-    }
-
-    @FunctionalInterface
-    public interface GenericSearchCallWithDbIdFunction<R> {
-        ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> apply(String searchResultsDbId, Integer currentPage, Integer pageSize) throws ApiException;
     }
 
     public <T extends BrAPISearchRequestParametersPaging, R, U> Map<String, U> executeBrapiSearch(
@@ -759,6 +784,73 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         return resultMap;
     }
 
+    public <T extends BrAPISearchRequestParametersPaging, R, U> Pair<Integer, Map<String, U>> executeBrapiSearchByPage(
+            GenericSearchCallFunction<T, R> searchCallFunction,
+            GenericSearchCallWithDbIdFunction<R> searchCallWithDbIdFunction,
+            T searchRequestBody,
+            BiConsumer<List<?>, Map<String, U>> mapper,
+            Function<Integer, Void> failFunction
+    ) {
+        Map<String, U> resultMap = new HashMap<>();
+        String searchResultsDbId = null;
+        Integer totalPages = 0;
+
+        try {
+            ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> response = searchCallFunction.apply(searchRequestBody);
+            validateResponse(response);
+
+            // Process initial response
+            Optional<R> listResultOpt = response.getBody().getLeft();
+            Optional<BrAPIAcceptedSearchResponse> searchResponseOpt = response.getBody().getRight();
+
+            BrAPIMetadata metadata = null;
+
+            if (listResultOpt.isPresent()) {
+                BrAPIStudyListResponse brApiResponse = (BrAPIStudyListResponse) listResultOpt.get();
+                metadata = brApiResponse.getMetadata();
+            } else if (searchResponseOpt.isPresent()) {
+                metadata = searchResponseOpt.get().getMetadata();
+                searchResultsDbId = searchResponseOpt.get().getResult().getSearchResultsDbId();
+            } else {
+                throw new ApiException("Response body is missing result", response.getStatusCode(), response.getHeaders(), null);
+            }
+
+            if (searchResultsDbId != null) {
+                response = searchCallWithDbIdFunction.apply(searchResultsDbId, searchRequestBody.getPage(), searchRequestBody.getPageSize());
+            } else {
+                response = searchCallFunction.apply(searchRequestBody);
+            }
+
+            validateResponse(response);
+
+            Optional<R> apiResponse = response.getBody().getLeft();
+            if (apiResponse != null && apiResponse.isPresent()) {
+                BrAPIStudyListResponse brApiResponse = (BrAPIStudyListResponse) apiResponse.get();
+                //metadata = brApiResponse.getMetadata();
+                processResponse(response, searchRequestBody.getPage(), mapper, resultMap);
+            }
+
+            if (metadata != null && metadata.getPagination() != null) {
+
+                if (metadata.getPagination().getTotalPages() != null) {
+
+                    Log.d("PAGES", "Total Pages: " + metadata.getPagination().getTotalPages());
+                    totalPages = metadata.getPagination().getTotalPages();
+
+                }
+            }
+
+        } catch (ApiException apiException) {
+            Log.e("BrAPIServiceV2", "API Exception: " + apiException.getMessage() +
+                    " Code: " + apiException.getCode() +
+                    " Endpoint: " + (apiException.getResponseBody() != null ? apiException.getResponseBody() : "Unknown"));
+
+            failFunction.apply(apiException.getCode());
+        }
+
+        return new Pair<>(totalPages, resultMap);
+    }
+
     private void validateResponse(ApiResponse<?> response) throws ApiException {
         if (response == null) {
             throw new ApiException("No response received", 0, null, null);
@@ -806,7 +898,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     private String getRowColStr(BrAPIPositionCoordinateTypeEnum type) {
-        if(null != type){
+        if (null != type) {
             switch (type) {
                 case PLANTED_INDIVIDUAL:
                 case GRID_COL:
@@ -866,9 +958,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             Log.e("BrAPIServiceV2", "API Exception", error);
         }
     }
+
     /**
      * Function to pull out the observations for a given study.
      * This method will do an async call to the BrAPI validated server and will get the Observations
+     *
      * @param studyDbId
      * @param observationVariableDbIds
      * @param paginationManager
@@ -877,7 +971,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
      */
     public void getObservations(final String studyDbId, final List<String> observationVariableDbIds,
                                 BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function,
-                                final Function<Integer, Void> failFunction ) {
+                                final Function<Integer, Void> failFunction) {
 
         try {
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
@@ -888,21 +982,21 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                     if (response.getResult() != null) {
 
-                        Map<String,String> extVariableDbIdMap = getExtVariableDbIdMapping();
-                        Map<String,String> extUnitDbIdMap = getExtUnitDbIdMapping();
+                        Map<String, String> extVariableDbIdMap = getExtVariableDbIdMapping();
+                        Map<String, String> extUnitDbIdMap = getExtUnitDbIdMapping();
                         // Result contains a list of observation variables
                         List<BrAPIObservation> brapiObservationList = response.getResult().getData();
                         final List<Observation> observationList = mapObservations(brapiObservationList, extVariableDbIdMap, extUnitDbIdMap);
 
                         function.apply(observationList);
 
-                        System.out.println("TotalNumber of Observation records: "+response.getMetadata().getPagination().getTotalCount());
+                        System.out.println("TotalNumber of Observation records: " + response.getMetadata().getPagination().getTotalCount());
 
                         //Slide pagingation up 1 this is handled within function
                         paginationManager.moveToNextPage();
 
                         //Check if next recursion is valid
-                        if(paginationManager.getPage() < paginationManager.getTotalPages()) {
+                        if (paginationManager.getPage() < paginationManager.getTotalPages()) {
                             //recurse
                             getObservations(studyDbId, observationVariableDbIds, paginationManager, function, failFunction);
                         }
@@ -948,26 +1042,26 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    private Map<String,String> getExtVariableDbIdMapping() {
+    private Map<String, String> getExtVariableDbIdMapping() {
         List<TraitObject> traits = ObservationVariableDao.Companion.getAllTraitObjects();
-        Map<String,String> externalIdToInternalMap = new HashMap<>();
-        for(TraitObject trait : traits) {
+        Map<String, String> externalIdToInternalMap = new HashMap<>();
+        for (TraitObject trait : traits) {
             String dbId = trait.getId();
-            externalIdToInternalMap.put(trait.getExternalDbId(),dbId);
+            externalIdToInternalMap.put(trait.getExternalDbId(), dbId);
         }
         return externalIdToInternalMap;
     }
 
-    private Map<String,String> getExtUnitDbIdMapping(){
+    private Map<String, String> getExtUnitDbIdMapping() {
         ObservationUnitModel[] observationUnits = ObservationUnitDao.Companion.getAll();
         Map<String, String> externalIdToInternalMap = new HashMap<>();
-        for(ObservationUnitModel model : observationUnits) {
-            externalIdToInternalMap.put(model.getObservation_unit_db_id(),String.valueOf(model.getInternal_id_observation_unit()));
+        for (ObservationUnitModel model : observationUnits) {
+            externalIdToInternalMap.put(model.getObservation_unit_db_id(), String.valueOf(model.getInternal_id_observation_unit()));
         }
         return externalIdToInternalMap;
     }
 
-    private Observation mapToObservation(BrAPIObservation obs){
+    private Observation mapToObservation(BrAPIObservation obs) {
         Observation newObservation = new Observation();
         newObservation.setDbId(obs.getObservationDbId());
         newObservation.setUnitDbId(obs.getObservationUnitDbId());
@@ -993,12 +1087,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
     /**
      * Function to map the observations from Brapi to the Fieldbook Observation variable.
+     *
      * @param brapiObservationList
      * @return list of Fieldbook Observation objects
      */
-    private List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList,Map<String,String> extVariableDbIdMap, Map<String,String> extUnitDbIdMap) {
+    private List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList, Map<String, String> extVariableDbIdMap, Map<String, String> extUnitDbIdMap) {
         List<Observation> outputList = new ArrayList<>();
-        for(BrAPIObservation brapiObservation : brapiObservationList) {
+        for (BrAPIObservation brapiObservation : brapiObservationList) {
             Observation newObservation = new Observation();
 
             newObservation.setStudyId(brapiObservation.getStudyDbId());
@@ -1015,7 +1110,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             //Make sure we are on the right experiment level.
             // This will cause bugs if there have been plot and plant level traits found as the observations retrieves all of them
-            if(internalUnitId != null) {
+            if (internalUnitId != null) {
                 outputList.add(newObservation);
             }
 
@@ -1024,8 +1119,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     public void createObservations(List<Observation> observations,
-                               final Function<List<Observation>, Void> function,
-                               final Function<Integer, Void> failFunction) {
+                                   final Function<List<Observation>, Void> function,
+                                   final Function<Integer, Void> failFunction) {
         try {
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
@@ -1034,7 +1129,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     try {
 
                         List<Observation> newObservations = new ArrayList<>();
-                        if(phenotypesResponse.getResult() != null && phenotypesResponse.getResult().getData() != null) {
+                        if (phenotypesResponse.getResult() != null && phenotypesResponse.getResult().getData() != null) {
                             for (BrAPIObservation obs : phenotypesResponse.getResult().getData()) {
                                 newObservations.add(mapToObservation(obs));
                             }
@@ -1071,8 +1166,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     public void updateObservations(List<Observation> observations,
-                                final Function<List<Observation>, Void> function,
-                                final Function<Integer, Void> failFunction) {
+                                   final Function<List<Observation>, Void> function,
+                                   final Function<Integer, Void> failFunction) {
         try {
 
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
@@ -1115,7 +1210,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
-    private BrAPIObservation convertToBrAPIObservation(Observation observation){
+    private BrAPIObservation convertToBrAPIObservation(Observation observation) {
         BrAPIObservation newObservation = new BrAPIObservation();
         newObservation.setCollector(observation.getCollector().trim());
         newObservation.setObservationDbId(observation.getDbId());
@@ -1173,12 +1268,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     // Stop after 50 iterations (for safety)
                     // Stop if the current page is the last page according to the server
                     // Stop if there are no more contents
-                    if((recursiveCounter[0] > 50)
+                    if ((recursiveCounter[0] > 50)
                             || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
-                            || (response.getResult().getData().size() == 0)){
+                            || (response.getResult().getData().size() == 0)) {
                         // Stop recursive loop
                         function.apply(study);
-                    }else {
+                    } else {
                         try {
                             VariableQueryParams queryParams = new VariableQueryParams();
                             queryParams.studyDbId(studyDbId).page(recursiveCounter[0]).pageSize(pageSize);
@@ -1298,7 +1393,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             if (var.getAdditionalInfo() != null && var.getAdditionalInfo().has(ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES)) {
                 JsonArray observationVariableNames = var.getAdditionalInfo().getAsJsonArray(ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES);
                 // Convert the JsonArray to a List<String>
-                Type listType = new TypeToken<List<String>>() {}.getType();
+                Type listType = new TypeToken<List<String>>() {
+                }.getType();
                 trait.setObservationLevelNames(new Gson().fromJson(observationVariableNames, listType));
             }
 
@@ -1316,7 +1412,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     private String buildCategoryDescriptionString(List<BrAPIScaleValidValuesCategories> categories) {
         StringBuilder sb = new StringBuilder();
         for (int j = 0; j < categories.size(); ++j) {
-            sb.append(categories.get(j).getValue()+"="+categories.get(j).getLabel());
+            sb.append(categories.get(j).getValue() + "=" + categories.get(j).getLabel());
             if (j != categories.size() - 1) {
                 sb.append("; ");
             }
@@ -1327,6 +1423,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     /**
      * Called in map traits, this will build a JSON string that encodes
      * value/label category pairs.
+     *
      * @param categories the list of = delimited value/label pairs
      * @return the json encoded valid values BrAPI object
      * @throws JSONException captured in mapTraits
@@ -1485,12 +1582,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                 int plotId = studyDetails.getAttributes().indexOf("Plot");
 
-                System.out.println("Size of study details: "+studyDetails.getValues().size());
+                System.out.println("Size of study details: " + studyDetails.getValues().size());
 
                 for (List<String> dataRow : studyDetails.getValues()) {
                     dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
-                    Log.d("BrAPIServiceV2","Saving: Attributes: "+studyDetails.getAttributes());
-                    Log.d("BrAPIServiceV2","Saving: dataRow: "+dataRow);
+                    Log.d("BrAPIServiceV2", "Saving: Attributes: " + studyDetails.getAttributes());
+                    Log.d("BrAPIServiceV2", "Saving: dataRow: " + dataRow);
                 }
 
                 // Insert the traits already associated with this study
@@ -1535,5 +1632,59 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         } catch (Exception e) {
             return new BrapiControllerResponse(false, e.toString());
         }
+    }
+
+    /* studies delegate pattern */
+    @NonNull
+    @Override
+    public Pair<Integer, Map<String, BrAPIStudy>> searchStudies(@Nullable BrAPIStudySearchRequest requestParams, @Nullable Function<Integer, Void> failFunction) {
+        return searcher.searchStudies(requestParams, failFunction);
+    }
+
+    /* seasons delegate pattern */
+//    @Override
+//    public void fetchSeasons(@NonNull SeasonQueryParams params, @NonNull Function1<? super BrAPISeasonListResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
+//        seasonService.fetchSeasons(params, onSuccess, onFail);
+//    }
+//
+//    /* crops delegates */
+//    //TODO why does CropsAPI use pagination manager here?
+//    @Override
+//    public void fetchCrops(@NonNull BrapiPaginationManager paginationManager, @NonNull Function1<? super BrAPICommonCropNamesResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
+//        cropService.fetchCrops(paginationManager, onSuccess, onFail);
+//    }
+
+    /* studies delegates */
+//    @Override
+//    public void fetchStudies(@NonNull StudyQueryParams params, @NonNull Function1<? super BrAPIStudyListResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
+//        studyService.fetchStudies(params, onSuccess, onFail);
+//    }
+
+    /* programs delegates */
+//    @Override
+//    public void fetchPrograms(@NonNull ProgramQueryParams params, @NonNull Function1<? super BrAPIProgramListResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
+//        programService.fetchPrograms(params, onSuccess, onFail);
+//    }
+//
+//    /* trials delegate */
+//    @Override
+//    public void fetchTrials(@NonNull TrialQueryParams params, @NonNull Function1<? super BrAPITrialListResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
+//        trialService.fetchTrials(params, onSuccess, onFail);
+//    }
+
+    /* observation variable delegates */
+//    @Override
+//    public void fetchObservationVariables(@NonNull VariableQueryParams params, @NonNull Function1<? super BrAPIObservationVariableListResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
+//        observationVariableService.fetchObservationVariables(params, onSuccess, onFail);
+//    }
+
+    @FunctionalInterface
+    public interface GenericSearchCallFunction<T, R> {
+        ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> apply(T searchRequestBody) throws ApiException;
+    }
+
+    @FunctionalInterface
+    public interface GenericSearchCallWithDbIdFunction<R> {
+        ApiResponse<org.apache.commons.lang3.tuple.Pair<Optional<R>, Optional<BrAPIAcceptedSearchResponse>>> apply(String searchResultsDbId, Integer currentPage, Integer pageSize) throws ApiException;
     }
 }

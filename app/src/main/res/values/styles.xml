@@ -7,7 +7,7 @@
     <style name="AppTheme" parent="BaseAppTheme"/>
 
     <!-- all other themes inherit from the default one, but overwrite the colors -->
-    <style name="BaseAppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <style name="BaseAppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
 
         <item name="android:windowActivityTransitions">false</item>
         <item name="windowNoTitle">true</item>
@@ -110,6 +110,12 @@
 
         <item name="fb_error_message_color">@color/RED</item>
 
+        <item name="fb_first_chip_color">@color/main_chip_first_color</item>
+        <item name="fb_second_chip_color">@color/main_chip_second_color</item>
+        <item name="fb_third_chip_color">@color/main_chip_third_color</item>
+        <item name="fb_fourth_chip_color">@color/main_chip_third_color</item>
+
+        <item name="bottomSheetDragHandleStyle">@style/Widget.MaterialComponents.BottomSheet.DragHandle</item>
     </style>
 
     <!-- Blue Theme -->
@@ -141,6 +147,11 @@
         <item name="colorPrimaryVariant">?attr/fb_color_primary_dark</item>
         <item name="colorAccent">?attr/fb_color_accent</item>
         <item name="android:colorAccent">?attr/fb_color_accent</item>
+
+        <item name="fb_first_chip_color">@color/blue_chip_first_color</item>
+        <item name="fb_second_chip_color">@color/blue_chip_second_color</item>
+        <item name="fb_third_chip_color">@color/blue_chip_third_color</item>
+        <item name="fb_fourth_chip_color">@color/blue_chip_third_color</item>
 
     </style>
 
@@ -257,6 +268,28 @@
 
         <item name="fb_error_message_color">@color/GRAY</item>
 
+        <item name="fb_first_chip_color">@color/high_contrast_chip_first_color</item>
+        <item name="fb_second_chip_color">@color/high_contrast_chip_second_color</item>
+        <item name="fb_third_chip_color">@color/high_contrast_chip_third_color</item>
+        <item name="fb_fourth_chip_color">@color/high_contrast_chip_third_color</item>
+
     </style>
 
+    <!-- need to define a theme for each type of material component until we can use the new themes -->
+    <!-- these are for chips, three defined for now to be used generically across filter layers -->
+    <style name="FirstChipTheme" parent="Theme.MaterialComponents">
+        <item name="chipStyle">@style/FirstChipStyle</item>
+    </style>
+
+    <style name="SecondChipTheme" parent="Theme.MaterialComponents">
+        <item name="chipStyle">@style/SecondChipStyle</item>
+    </style>
+
+    <style name="ThirdChipTheme" parent="Theme.MaterialComponents">
+        <item name="chipStyle">@style/ThirdChipStyle</item>
+    </style>
+
+    <style name="FourthChipTheme" parent="Theme.MaterialComponents">
+        <item name="chipStyle">@style/FourthChipStyle</item>
+    </style>
 </resources>
