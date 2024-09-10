@@ -17,7 +17,7 @@
         android:title="@string/traits_sort_visibility" />
     <item
         android:id="@+id/sortTrait"
-        android:icon="@drawable/ic_tb_sort"
+        android:icon="@drawable/ic_sort"
         android:showAsAction="ifRoom"
         android:title="@string/traits_toolbar_sort" />
     <item

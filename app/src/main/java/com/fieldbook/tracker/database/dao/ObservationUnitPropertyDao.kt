@@ -440,7 +440,7 @@ class ObservationUnitPropertyDao {
                     .joinToString(",") { col -> "cast(`$col` as integer), `$col`" } + (if (sortCols.isNotEmpty()) ", " else "")
             }
 
-            if (sortCols.isNotEmpty()) "ORDER BY $sortCols $sortOrder" else ""
+            if (sortCols.isNotEmpty()) "ORDER BY $sortCols COLLATE NOCASE $sortOrder" else ""
         }
 
 

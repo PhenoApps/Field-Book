@@ -8,11 +8,16 @@ import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.DefineStorageActivity
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.runBlocking
 import org.phenoapps.fragments.storage.PhenoLibStorageDefinerFragment
+import org.phenoapps.security.Security
+import org.phenoapps.utils.BaseDocumentTreeUtil
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -20,6 +25,8 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
 
     @Inject
     lateinit var prefs: SharedPreferences
+
+    private val advisor by Security().secureDocumentTree()
 
     //default root folder name if user choose an incorrect root on older devices
     override val defaultAppName: String = "fieldBook"
@@ -43,6 +50,8 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        advisor.initialize()
+
         //define directories that should be created in root storage
         context?.let { ctx ->
             val archive = ctx.getString(R.string.dir_archive)
@@ -63,21 +72,37 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
         view.findViewById<TextView>(R.id.frag_storage_definer_title_tv).text = getString(R.string.storage_definer_title)
         view.findViewById<TextView>(R.id.frag_storage_definer_summary_tv).text = getString(R.string.storage_definer_summary)
 
-    }
+        view.visibility = View.GONE
 
-    override fun onTreeDefined(treeUri: Uri) {
-        (activity as DefineStorageActivity).enableBackButton(false)
-        super.onTreeDefined(treeUri)
-        (activity as DefineStorageActivity).enableBackButton(true)
-    }
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
 
-    override fun actionAfterDefine() {
-        actionNoMigrate()
-    }
+        prefs.edit().putBoolean(GeneralKeys.FROM_INTRO_AUTOMATIC, true).apply()
 
-    override fun actionNoMigrate() {
-        activity?.setResult(Activity.RESULT_OK)
-        activity?.finish()
+        advisor.defineDocumentTree({ treeUri ->
+
+            runBlocking {
+
+                directories?.let { dirs ->
+
+                    BaseDocumentTreeUtil.defineRootStructure(context, treeUri, dirs)?.let { root ->
+
+                        samples.entries.forEach { entry ->
+
+                            val sampleAsset = entry.key
+                            val dir = entry.value
+
+                            BaseDocumentTreeUtil.copyAsset(context, sampleAsset.name, sampleAsset.dir, dir)
+                        }
+
+                        activity?.setResult(Activity.RESULT_OK)
+                        activity?.finish()
+                    }
+                }
+            } },
+            {
+                activity?.finish()
+            }
+        )
     }
 
     //https://stackoverflow.com/questions/9469174/set-theme-for-a-fragment
@@ -86,5 +111,12 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
         val contextThemeWrapper =
             ContextThemeWrapper(context, SharedPreferenceUtils.getThemeResource(prefs))
         return inflater.cloneInContext(contextThemeWrapper)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (prefs.getBoolean(GeneralKeys.FROM_INTRO_AUTOMATIC, false)) {
+            prefs.edit().putBoolean(GeneralKeys.FROM_INTRO_AUTOMATIC, false).apply()
+        } else activity?.finish()
     }
 }

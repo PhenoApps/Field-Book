@@ -20,7 +20,7 @@ import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -30,7 +30,7 @@ import java.util.Set;
  */
 
 public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHolder> {
-    private Set<Integer> selectedIds = new HashSet<>();
+    private Set<Integer> selectedIds = new LinkedHashSet<>();
     private boolean isInSelectionMode = false;
     private static final String TAG = "FieldAdapter";
     private final LayoutInflater mLayoutInflater;
