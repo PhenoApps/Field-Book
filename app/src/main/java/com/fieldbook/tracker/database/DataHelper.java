@@ -3050,7 +3050,14 @@ public class DataHelper {
             }
 
             if (oldVersion <= 11 && newVersion >= 12) {
-                db.execSQL("ALTER TABLE observation_variables ADD COLUMN study_ids JSONB DEFAULT '[]'");
+                db.execSQL("CREATE TABLE studies_observation_variables_link (" +
+                        "internal_id_study_trait_link INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "study_id INTEGER NOT NULL REFERENCES studies(internal_id_study) ON DELETE CASCADE, " + // study/field reference
+                        "observation_variable_id INTEGER NOT NULL REFERENCES observation_variables(internal_id_observation_variable) ON DELETE CASCADE, " + // trait reference
+                        "visibility BOOLEAN NOT NULL DEFAULT 1, " + // 1 = visible, 0 = hidden
+                        "position INTEGER, " +  // Custom trait order
+                        "UNIQUE(study_id, observation_variable_id)" +  // Prevent duplicate study-trait relationships
+                        ");");
             }
         }
     }

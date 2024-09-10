@@ -247,17 +247,24 @@ class ObservationVariableDao {
             )
         }
 
-        fun getAllTraitObjects(sortOrder: String = "internal_id_observation_variable", fieldId: Int): ArrayList<TraitObject> = withDatabase { db ->
+//
+
+        fun getAllTraitObjects(sortOrder: String = "position", studyId: Int): ArrayList<TraitObject> = withDatabase { db ->
             val traits = ArrayList<TraitObject>()
 
             val orderDirection = if (sortOrder == "visible") "DESC" else "ASC"
+            val orderSource = if (sortOrder == "visible") "sovl" else "ov"
 
             val query = """
-                SELECT * FROM ${ObservationVariable.tableName}
-                ORDER BY $sortOrder COLLATE NOCASE $orderDirection
+                SELECT ov.*, sovl.position, sovl.visibility
+                FROM ${ObservationVariable.tableName} ov
+                LEFT JOIN studies_observation_variables_link sovl
+                ON ov.internal_id_observation_variable = sovl.observation_variable_id
+                WHERE sovl.study_id = ?
+                ORDER BY $orderSource.$sortOrder COLLATE NOCASE $orderDirection
             """
 
-            db.rawQuery(query, null).use { cursor ->
+            db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
                 while (cursor.moveToNext()) {
                     val trait = TraitObject().apply {
                         name = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name")) ?: ""
@@ -267,39 +274,20 @@ class ObservationVariableDao {
                         id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariable.PK)).toString()
                         externalDbId = cursor.getString(cursor.getColumnIndexOrThrow("external_db_id")) ?: ""
                         realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("position"))
+                        visible = cursor.getInt(cursor.getColumnIndexOrThrow("visibility")) == 1
                         additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
 
-                        // Initialize these to the empty string or else they will be null
+                        // Initialize these to empty string
                         maximum = ""
                         minimum = ""
                         categories = ""
-
-                        // Handle visibility based on fieldId
-                        val studyIdsJson = cursor.getString(cursor.getColumnIndexOrThrow("study_ids"))
-                        visible =
-                            try {
-                                val jsonArray = org.json.JSONArray(studyIdsJson)
-                                val isVisible = jsonArrayContains(jsonArray, fieldId)
-                                isVisible
-                            } catch (e: Exception) {
-                                false
-                            }
-
-                        ObservationVariableValueDao.getVariableValues(id.toInt())?.forEach { value ->
-                            val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
-                            when (attrName) {
-                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "category" -> categories = value["observation_variable_attribute_value"] as? String ?: ""
-                            }
-                        }
                     }
                     traits.add(trait)
                 }
             }
-//            Log.d("DB_QUERY", "Total traits fetched: ${traits.size}")
-            ArrayList(traits)
+            traits
         } ?: ArrayList()
+
 
 
         // Overload for Java compatibility
