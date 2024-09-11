@@ -28,36 +28,35 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
         val systemTime = System.nanoTime()
 
         //number of hours to wait before asking for user, pref found in profile
-        val interval = when (preferences.getString(GeneralKeys.REQUIRE_USER_INTERVAL, "0")) {
+        val interval = when (preferences.getString(GeneralKeys.VERIFICATION_INTERVAL, "0")) {
             "0" -> 0
             "1" -> 12
-            else -> 24
+            "2" -> 24
+            else -> -1
         }
 
         val nanosToWait = 1e9.toLong() * 3600 * interval
         if ((interval == 0 && !alreadyAsked) // ask on opening and app just opened
             || (interval > 0 && lastOpen != 0L && systemTime - lastOpen > nanosToWait)) { //ask after interval and interval has elapsed
-            val verify: Boolean = preferences.getBoolean(GeneralKeys.REQUIRE_USER_TO_COLLECT, true)
-            if (verify) {
-                val firstName: String = preferences.getString(GeneralKeys.FIRST_NAME, "") ?: ""
-                val lastName: String = preferences.getString(GeneralKeys.LAST_NAME, "") ?: ""
-                if (firstName.isNotEmpty() || lastName.isNotEmpty()) {
-                    //person presumably has been set
-                    showAskCollectorDialog(
-                        context.getString(R.string.activity_collect_dialog_verify_collector) + " " + firstName + " " + lastName + "?",
-                        context.getString(R.string.activity_collect_dialog_verify_yes_button),
-                        context.getString(R.string.activity_collect_dialog_neutral_button),
-                        context.getString(R.string.activity_collect_dialog_verify_no_button)
-                    )
-                } else {
-                    //person presumably hasn't been set
-                    showAskCollectorDialog(
-                        context.getString(R.string.activity_collect_dialog_new_collector),
-                        context.getString(R.string.activity_collect_dialog_verify_no_button),
-                        context.getString(R.string.activity_collect_dialog_neutral_button),
-                        context.getString(R.string.activity_collect_dialog_verify_yes_button)
-                    )
-                }
+
+            val firstName: String = preferences.getString(GeneralKeys.FIRST_NAME, "") ?: ""
+            val lastName: String = preferences.getString(GeneralKeys.LAST_NAME, "") ?: ""
+            if (firstName.isNotEmpty() || lastName.isNotEmpty()) {
+                //person presumably has been set
+                showAskCollectorDialog(
+                    context.getString(R.string.activity_collect_dialog_verify_collector) + " " + firstName + " " + lastName + "?",
+                    context.getString(R.string.activity_collect_dialog_verify_yes_button),
+                    context.getString(R.string.activity_collect_dialog_neutral_button),
+                    context.getString(R.string.activity_collect_dialog_verify_no_button)
+                )
+            } else {
+                //person presumably hasn't been set
+                showAskCollectorDialog(
+                    context.getString(R.string.activity_collect_dialog_new_collector),
+                    context.getString(R.string.activity_collect_dialog_verify_no_button),
+                    context.getString(R.string.activity_collect_dialog_neutral_button),
+                    context.getString(R.string.activity_collect_dialog_verify_yes_button)
+                )
             }
         }
         preferences.edit().putBoolean(GeneralKeys.ASKED_SINCE_OPENED, true).apply()

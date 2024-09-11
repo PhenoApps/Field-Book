@@ -7,13 +7,6 @@
         android:title="@string/preferences_profile_person_title"
         app:iconSpaceReserved="false">
 
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:icon="@drawable/ic_pref_profile_verify"
-            android:key="com.tracker.fieldbook.preference.require_user_to_collect"
-            android:summary="@string/preferences_profile_require_person_summary"
-            android:title="@string/preferences_profile_require_person" />
-
         <Preference
             android:icon="@drawable/ic_pref_profile_person"
             android:key="pref_profile_person"
@@ -21,10 +14,10 @@
 
         <ListPreference
             android:defaultValue="0"
-            android:entries="@array/preferences_profile_ask_user_interval_entries"
-            android:entryValues="@array/preferences_profile_ask_user_interval_values"
+            android:entries="@array/preferences_profile_verification_interval_entries"
+            android:entryValues="@array/preferences_profile_verification_interval_values"
             android:icon="@drawable/hours_24"
-            android:key="com.tracker.fieldbook.preference.require_user_interval"
+            android:key="com.tracker.fieldbook.preference.profile_verification_interval"
             android:summary="%s"
             android:title="@string/preferences_profile_require_interval_title" />
 

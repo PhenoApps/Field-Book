@@ -16,8 +16,7 @@ public class GeneralKeys {
     public static final String LAST_NAME = "LastName";
     public static final String PERSON_UPDATE = "PersonUpdate";
     public static final String MODIFY_PROFILE_SETTINGS = "ModifyProfileSettings";
-    public static final String REQUIRE_USER_TO_COLLECT              = "com.tracker.fieldbook.preference.require_user_to_collect";
-    public static final String REQUIRE_USER_INTERVAL              = "com.tracker.fieldbook.preference.require_user_interval";
+    public static final String VERIFICATION_INTERVAL              = "com.tracker.fieldbook.preference.profile_verification_interval";
 
     // Appearance
     public static final String INFOBAR_UPDATE = "INFOBAR_UPDATE";

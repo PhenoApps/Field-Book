@@ -36,9 +36,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     private static final String TAG = ProfilePreferencesFragment.class.getSimpleName();
 
     Context context;
-    private CheckBoxPreference requireUserToCollect;
     private Preference profilePerson;
-    private ListPreference requireUserInterval;
+//    private ListPreference verificationInterval;
     private AlertDialog personDialog;
 
     @Override
@@ -50,28 +49,10 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         profilePerson = findPreference("pref_profile_person");
         profilePerson.setSummary(personSummary());
-        requireUserInterval = findPreference("com.tracker.fieldbook.preference.require_user_interval");
-        requireUserToCollect = findPreference("com.tracker.fieldbook.preference.require_user_to_collect");
-
-        updatePersonVisibility(requireUserToCollect.isChecked());
+//        verificationInterval = findPreference("com.tracker.fieldbook.preference.require_user_interval");
 
         profilePerson.setOnPreferenceClickListener(preference -> {
             showPersonDialog();
-            return true;
-        });
-
-        requireUserToCollect.setOnPreferenceClickListener(preference -> {
-            boolean isChecked = ((CheckBoxPreference) preference).isChecked();
-            Log.d(TAG, "onPreferenceClick: isChecked is " + isChecked);
-            updatePersonVisibility(isChecked);
-            if (isChecked) {
-                showPersonDialog();
-            } else {
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(GeneralKeys.FIRST_NAME, "");
-                ed.putString(GeneralKeys.LAST_NAME, "");
-                ed.apply();
-            }
             return true;
         });
 
@@ -90,11 +71,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         preferences.edit().putLong(GeneralKeys.LAST_TIME_OPENED, System.nanoTime()).apply();
 
-    }
-
-    private void updatePersonVisibility(boolean isChecked) {
-        profilePerson.setVisible(isChecked);
-        requireUserInterval.setVisible(isChecked);
     }
 
     private void showPersonDialog() {
