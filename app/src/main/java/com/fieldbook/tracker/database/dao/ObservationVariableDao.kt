@@ -249,6 +249,8 @@ class ObservationVariableDao {
 
 //
 
+//
+
         fun getAllTraitObjects(sortOrder: String = "position", studyId: Int): ArrayList<TraitObject> = withDatabase { db ->
             val traits = ArrayList<TraitObject>()
 
@@ -256,13 +258,15 @@ class ObservationVariableDao {
             val orderSource = if (sortOrder == "visible") "sovl" else "ov"
 
             val query = """
-                SELECT ov.*, sovl.position, sovl.visibility
+                SELECT ov.*, sovl.position AS study_position, sovl.visibility AS study_visibility
                 FROM ${ObservationVariable.tableName} ov
                 LEFT JOIN studies_observation_variables_link sovl
-                ON ov.internal_id_observation_variable = sovl.observation_variable_id
-                WHERE sovl.study_id = ?
+                ON ov.internal_id_observation_variable = sovl.observation_variable_id AND sovl.study_id = ?
                 ORDER BY $orderSource.$sortOrder COLLATE NOCASE $orderDirection
             """
+
+            // Log the query and the study ID
+            Log.d("ObservationVariableDao", "Executing query: $query with studyId: $studyId")
 
             db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
                 while (cursor.moveToNext()) {
@@ -273,8 +277,13 @@ class ObservationVariableDao {
                         details = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_details")) ?: ""
                         id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariable.PK)).toString()
                         externalDbId = cursor.getString(cursor.getColumnIndexOrThrow("external_db_id")) ?: ""
-                        realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("position"))
-                        visible = cursor.getInt(cursor.getColumnIndexOrThrow("visibility")) == 1
+                        // Check if sovl.position and sovl.visibility are null, and fallback to ov.position and ov.visible if needed
+                        realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("study_position")).takeIf { !cursor.isNull(cursor.getColumnIndexOrThrow("study_position")) }
+                            ?: cursor.getInt(cursor.getColumnIndexOrThrow("position"))
+
+                        visible = cursor.getInt(cursor.getColumnIndexOrThrow("study_visibility")).takeIf { !cursor.isNull(cursor.getColumnIndexOrThrow("study_visibility")) } == 1
+                                ?: (cursor.getInt(cursor.getColumnIndexOrThrow("visible")) == 1)
+
                         additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
 
                         // Initialize these to empty string
@@ -282,12 +291,19 @@ class ObservationVariableDao {
                         minimum = ""
                         categories = ""
                     }
+
+                    // Log each trait as it's added
+                    Log.d("ObservationVariableDao", "Adding trait: ${trait.name}, ID: ${trait.id}")
+
                     traits.add(trait)
                 }
             }
+
+            // Log the total number of traits
+            Log.d("ObservationVariableDao", "Total traits retrieved: ${traits.size}")
+
             traits
         } ?: ArrayList()
-
 
 
         // Overload for Java compatibility
