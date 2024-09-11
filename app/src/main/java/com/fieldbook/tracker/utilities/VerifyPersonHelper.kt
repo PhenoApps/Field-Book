@@ -28,7 +28,7 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
         val systemTime = System.nanoTime()
 
         //number of hours to wait before asking for user, pref found in profile
-        val interval = when (preferences.getString(GeneralKeys.VERIFICATION_INTERVAL, "0")) {
+        val interval = when (preferences.getString(GeneralKeys.VERIFICATION_INTERVAL, "2")) {
             "0" -> 0
             "1" -> 12
             "2" -> 24
