@@ -648,19 +648,31 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     private void showTraitSortDialog() {
         Map<String, String> sortOptions = new LinkedHashMap<>();
         final String defaultSortOrder = "internal_id_observation_variable";
-        String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, defaultSortOrder);
 
         sortOptions.put(getString(R.string.traits_sort_name), "observation_variable_name");
         sortOptions.put(getString(R.string.traits_sort_format), "observation_variable_field_book_format");
         sortOptions.put(getString(R.string.traits_sort_import_order), "internal_id_observation_variable");
-        sortOptions.put(getString(R.string.traits_sort_visibility), "visible");
+        sortOptions.put(getString(R.string.traits_sort_visibility), "study_visibility");
 
-        ListSortDialog dialog = new ListSortDialog(this, sortOptions, currentSortOrder, defaultSortOrder, criteria -> {
-            Log.d(TAG, "Updating traits list sort order to : " + criteria);
-            preferences.edit().putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, criteria).apply();
-            queryAndLoadTraits();
+        ListSortDialog dialog = new ListSortDialog(this, sortOptions, null, defaultSortOrder, criteria -> {
+            Log.d(TAG, "Sorting traits by: " + criteria);
+            sortAndUpdatePositions(criteria);
         });
         dialog.show();
+    }
+
+    private void sortAndUpdatePositions(String sortOrder) {
+        List<TraitObject> sortedTraits = database.getAllTraitObjects(sortOrder);
+
+        // Update positions in the linking table
+        for (int i = 0; i < sortedTraits.size(); i++) {
+            TraitObject trait = sortedTraits.get(i);
+            Log.d(TAG, "Updating trait '" + trait.getName() + "' (ID: " + trait.getId() + ") to position " + i);
+            database.updateTraitPosition(trait.getId(), i);
+        }
+
+        // Reload the RecyclerView after updating positions
+        queryAndLoadTraits();
     }
 
     private void showExportDialog() {

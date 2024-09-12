@@ -5,10 +5,13 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.util.Log
-import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
-import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
 import com.fieldbook.tracker.database.models.ObservationVariableModel
+import com.fieldbook.tracker.database.query
+import com.fieldbook.tracker.database.queryForMax
+import com.fieldbook.tracker.database.toFirst
+import com.fieldbook.tracker.database.toTable
+import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.TraitObject
 
 class ObservationVariableDao {
@@ -247,82 +250,32 @@ class ObservationVariableDao {
             )
         }
 
-//
-
-//
-
-//        fun getAllTraitObjects(sortOrder: String = "position", studyId: Int): ArrayList<TraitObject> = withDatabase { db ->
-//            val traits = ArrayList<TraitObject>()
-//
-//            val orderDirection = if (sortOrder == "visible") "DESC" else "ASC"
-//            val orderSource = if (sortOrder == "visible") "sovl" else "ov"
-//
-//            val query = """
-//                SELECT ov.*, sovl.position AS study_position, sovl.visibility AS study_visibility
-//                FROM ${ObservationVariable.tableName} ov
-//                LEFT JOIN studies_observation_variables_link sovl
-//                ON ov.internal_id_observation_variable = sovl.observation_variable_id AND sovl.study_id = ?
-//                ORDER BY $orderSource.$sortOrder COLLATE NOCASE $orderDirection
-//            """
-//
-//            // Log the query and the study ID
-//            Log.d("ObservationVariableDao", "Executing query: $query with studyId: $studyId")
-//
-//            db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
-//                while (cursor.moveToNext()) {
-//                    val trait = TraitObject().apply {
-//                        name = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name")) ?: ""
-//                        format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format")) ?: ""
-//                        defaultValue = cursor.getString(cursor.getColumnIndexOrThrow("default_value")) ?: ""
-//                        details = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_details")) ?: ""
-//                        id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariable.PK)).toString()
-//                        externalDbId = cursor.getString(cursor.getColumnIndexOrThrow("external_db_id")) ?: ""
-//                        // Check if sovl.position and sovl.visibility are null, and fallback to ov.position and ov.visible if needed
-//                        realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("study_position")).takeIf { !cursor.isNull(cursor.getColumnIndexOrThrow("study_position")) }
-//                            ?: cursor.getInt(cursor.getColumnIndexOrThrow("position"))
-//
-//                        visible = cursor.getInt(cursor.getColumnIndexOrThrow("study_visibility")).takeIf { !cursor.isNull(cursor.getColumnIndexOrThrow("study_visibility")) } == 1
-//                                ?: (cursor.getInt(cursor.getColumnIndexOrThrow("visible")) == 1)
-//
-//                        additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
-//
-//                        // Initialize these to empty string
-//                        maximum = ""
-//                        minimum = ""
-//                        categories = ""
-//                    }
-//
-//                    // Log each trait as it's added
-//                    Log.d("ObservationVariableDao", "Adding trait: ${trait.name}, ID: ${trait.id}")
-//
-//                    traits.add(trait)
-//                }
-//            }
-//
-//            // Log the total number of traits
-//            Log.d("ObservationVariableDao", "Total traits retrieved: ${traits.size}")
-//
-//            traits
-//        } ?: ArrayList()
-
-        fun getAllTraitObjects(sortOrder: String = "position", studyId: Int): ArrayList<TraitObject> = withDatabase { db ->
+        fun getAllTraitObjects(
+            studyId: Int? = null,
+            sortOrder: String? = null
+        ): ArrayList<TraitObject> = withDatabase { db ->
             val traits = ArrayList<TraitObject>()
 
-//            val orderDirection = if (sortOrder == "visible") "DESC" else "ASC"
-//            val orderSource = if (sortOrder == "visible") "sovl" else "ov"
+            // If sortOrder is null or empty, use the default "real_position" from the link table
+            val actualSortOrder = sortOrder ?: "real_position"
 
+            // Sort ascending, except for visibility which is descending
+            val orderDirection = if (sortOrder == "study_visibility") "DESC" else "ASC"
+
+            // Main query with conditional sorting
             val query = """
                 SELECT ov.*, 
                     COALESCE(sovl.position, ov.position) AS real_position, 
                     sovl.visibility AS study_visibility
                 FROM ${ObservationVariable.tableName} ov
                 LEFT JOIN studies_observation_variables_link sovl
-                ON ov.internal_id_observation_variable = sovl.observation_variable_id AND sovl.study_id = ?
-                ORDER BY real_position COLLATE NOCASE ASC
+                ON ov.internal_id_observation_variable = sovl.observation_variable_id 
+                AND sovl.study_id = ?
+                ORDER BY $actualSortOrder COLLATE NOCASE $orderDirection
             """
 
-            // Log the query and the study ID
-            Log.d("ObservationVariableDao", "Executing query: $query with studyId: $studyId")
+            // Log the query for debugging
+            Log.d("ObservationVariableDao", "Executing query: $query with fieldId: $studyId")
 
             db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
                 while (cursor.moveToNext()) {
@@ -334,29 +287,30 @@ class ObservationVariableDao {
                         id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariable.PK)).toString()
                         externalDbId = cursor.getString(cursor.getColumnIndexOrThrow("external_db_id")) ?: ""
 
-                        // Use the position from the studies_observation_variables_link table (real_position)
+                        // Use position from the link table if available
                         realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("real_position"))
 
-                        // Use visibility from the studies_observation_variables_link table if available
-                        visible = cursor.getInt(cursor.getColumnIndexOrThrow("study_visibility")).takeIf { !cursor.isNull(cursor.getColumnIndexOrThrow("study_visibility")) } == 1
-                                ?: (cursor.getInt(cursor.getColumnIndexOrThrow("visible")) == 1)
+                        // Use visibility from the link table if available, otherwise fall back to the default
+                        visible = cursor.getInt(cursor.getColumnIndexOrThrow("study_visibility")).takeIf {
+                            !cursor.isNull(cursor.getColumnIndexOrThrow("study_visibility"))
+                        } == 1 ?: (cursor.getInt(cursor.getColumnIndexOrThrow("visible")) == 1)
 
                         additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
 
-                        // Initialize these to empty string
+                        // Initialize optional fields
                         maximum = ""
                         minimum = ""
                         categories = ""
                     }
 
-                    // Log each trait as it's added
+                    // Log each trait added
                     Log.d("ObservationVariableDao", "Adding trait: ${trait.name}, ID: ${trait.id}, Real Position: ${trait.realPosition}, Visible: ${trait.visible}")
 
                     traits.add(trait)
                 }
             }
 
-            // Log the total number of traits
+            // Log total traits retrieved
             Log.d("ObservationVariableDao", "Total traits retrieved: ${traits.size}")
 
             traits
@@ -364,7 +318,7 @@ class ObservationVariableDao {
 
 
         // Overload for Java compatibility
-        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("internal_id_observation_variable", 0)
+        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects(0)
 
         fun getTraitVisibility(): HashMap<String, String> = withDatabase { db ->
 

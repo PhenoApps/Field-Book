@@ -61,7 +61,7 @@
     <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
 
     <!-- Warnings/Catches -->
-    <string name="warning_field_missing">No field is currently loaded. Please load a field before collecting data.</string>
+    <string name="warning_field_missing">No field is currently active. Please load and select a field before proceeding.</string>
     <string name="warning_traits_missing">No active traits. Please create and/or activate traits before collecting data.</string>
 
     <!-- Changelog -->

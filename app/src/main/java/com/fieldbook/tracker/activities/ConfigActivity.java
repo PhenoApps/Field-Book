@@ -319,17 +319,18 @@ public class ConfigActivity extends ThemedActivity {
                     startActivity(intent);
                     break;
                 case 1:
+                    if (checkActiveField() < 0) return;
                     intent.setClassName(ConfigActivity.this,
                             TraitEditorActivity.class.getName());
                     startActivity(intent);
 
                     break;
                 case 2:
-                    if (checkTraitsExist() < 0) return;
+                    if (checkTraitsandField() < 0) return;
                     collectDataFilePermission();
                     break;
                 case 3:
-                    if (checkTraitsExist() < 0) return;
+                    if (checkTraitsandField() < 0) return;
                     exportUtil.exportActiveField();
                     break;
                 case 4:
@@ -377,13 +378,21 @@ public class ConfigActivity extends ThemedActivity {
 
     }
 
+    private int checkActiveField() {
+        if (preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
+            Utils.makeToast(getApplicationContext(), getString(R.string.warning_field_missing));
+            return -1;
+        }
+        return 1;
+    }
+
     /**
      * Checks if there are any visible traits in trait editor.
      * Also checks if a field is selected.
      *
      * @return -1 when the conditions fail, otherwise it returns 1
      */
-    private int checkTraitsExist() {
+    private int checkTraitsandField() {
 
         String[] traits = database.getVisibleTrait();
 

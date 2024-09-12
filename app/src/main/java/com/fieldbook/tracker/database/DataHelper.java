@@ -1351,16 +1351,24 @@ public class DataHelper {
 
     }
 
+    // Overloaded method that provides no argument for sortOrder
+    public ArrayList<TraitObject> getAllTraitObjects() {
+        // Call the method with null sortOrder, so it defaults to sorting by position
+        return getAllTraitObjects(null);
+    }
+
     /**
      * V2 - Get all traits in the system, in order, as TraitObjects
      */
-    public ArrayList<TraitObject> getAllTraitObjects() {
+    public ArrayList<TraitObject> getAllTraitObjects(@Nullable String sortOrder) {
         open();
 
-        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable");
+        // Get the field ID from preferences
         Integer fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
-        return ObservationVariableDao.Companion.getAllTraitObjects(sortOrder, fieldId);
+        // Use the method in ObservationVariableDao to retrieve traits based on fieldId and sortOrder
+        return ObservationVariableDao.Companion.getAllTraitObjects(fieldId, sortOrder);
+
 
 //        ArrayList<TraitObject> list = new ArrayList<>();
 //
