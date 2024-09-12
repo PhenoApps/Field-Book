@@ -12,20 +12,27 @@
         android:fitsSystemWindows="true"
         android:minHeight="?attr/actionBarSize"/>
 
-    <ListView
-        android:id="@+id/myList"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:choiceMode="singleChoice" />
+        android:layout_weight="1">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_tb_search"
-        android:layout_margin="8dp"
-        android:id="@+id/act_config_search_fab"
-        android:contentDescription="@string/act_config_search_fab_content_description"
-        android:layout_gravity="end"/>
+        <ListView
+            android:id="@+id/myList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:choiceMode="singleChoice" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_tb_search"
+            android:layout_margin="8dp"
+            android:id="@+id/act_config_search_fab"
+            android:contentDescription="@string/act_config_search_fab_content_description"
+            android:layout_gravity="end|bottom"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"/>
+    </FrameLayout>
 
 </LinearLayout>

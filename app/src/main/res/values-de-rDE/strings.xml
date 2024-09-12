@@ -14,6 +14,7 @@
     <string name="dialog_warning">Warnung</string>
     <string name="dialog_save">Speichern</string>
     <!-- Startup  -->
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
     <string name="settings_fields">Felder</string>
@@ -104,6 +105,7 @@
     <string name="activity_collect_dialog_verify_no_button">Nein</string>
     <string name="activity_collect_dialog_verify_yes_button">Ja</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Ihr Gerät verfüget nicht über die notwendige Hardware um diese Funktion auszuführen</string>
     <!-- Trait Layout: GNSS -->
@@ -121,6 +123,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">Datenbank</string>

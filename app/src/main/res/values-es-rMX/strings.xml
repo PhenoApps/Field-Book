@@ -21,6 +21,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">Datos de ejemplo</string>
     <string name="startup_sample_data_message">¿Cargar datos de ejemplo?</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">La importación de archivos requiere acceso a los archivos del dispositivo.</string>
     <string name="permission_rationale_storage_export">La exportación de datos requiere acceso a los archivos del dispositivo.</string>
@@ -86,6 +87,7 @@
     <string name="import_dialog_unique">Identificador único</string>
     <string name="import_dialog_primary">Orden primario</string>
     <string name="import_dialog_secondary">Orden secundario</string>
+    <string name="import_dialog_sort">Orden de Ordenación</string>
     <string name="import_error_unsupported">Este tipo de archivo no es compatible actualmente</string>
     <string name="import_error_columns_replaced">Los nombres de columnas contienen caracteres no válidos que se reemplazarán durante la importación.</string>
     <string name="import_error_column_name">El nombre de la columna en el archivo importado no puede ser:</string>
@@ -295,6 +297,9 @@
     <string name="dialog_data_grid_header_picker_title">Elegir Fila de Encabezados</string>
     <string name="dialog_data_grid_repeated_measures_title">Elegir Observación</string>
     <string name="menu_action_header_view_data_grid_title">Actualizar Fila de Encabezados</string>
+    <!--- Lock -->
+    <string name="activity_collect_locked_state">Bloqueado - entrada, modificación y eliminación de datos están desactivados</string>
+    <string name="activity_collect_unlocked_state">Desbloqueado: no hay restricciones en la entrada, modificación o eliminación de datos</string>
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">El dispositivo no contiene el hardware necesario para esta opción</string>
     <string name="trait_delete_warning_photo">¿Estás seguro(a) de que quieres eliminar esta imagen?</string>
@@ -446,6 +451,7 @@
     <string name="observation_info_additional_info">Información adicional</string>
     <string name="observation_info_rep">Rep</string>
     <string name="observation_info_other">Otro</string>
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Local</string>
@@ -669,7 +675,6 @@
     <string name="about_title">Acerca de</string>
     <string name="about_version_title">Versión</string>
     <string name="about_manual_title">Manual</string>
-    <string name="about_rate">Califica esta app</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Líder del Projecto</string>
     <string name="about_email_title">Email</string>
@@ -882,8 +887,8 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_traits_visibility_title">Visibilidad de variable</string>
     <string name="tutorial_traits_visibility_description">Las variables se pueden habilitar/deshabilitar usando casilla de verificación.</string>
     <string name="shutter_capture_content_description">Botón obturador para tomar una imagen.</string>
-    <string name="dialog_ask_high_contrast_title">¿Cambiar al Tema de Contraste Alto?</string>
-    <string name="dialog_ask_high_contrast_message">Se ha detectado el dispositivo eInk, sugerimos cambiar al tema de contraste alto para una experiencia óptima</string>
+    <string name="app_intro_high_contrast_title">¿Cambiar al Tema de Contraste Alto?</string>
+    <string name="app_intro_high_contrast_summary">Se ha detectado el dispositivo eInk, sugerimos cambiar al tema de contraste alto para una experiencia óptima</string>
     <string name="dialog_geonav_prefs_sensor_missing_title">Sensor requerido no encontrado</string>
     <string name="dialog_geonav_prefs_sensor_missing_message">El método trapezoidal requiere un acelerómetro y giroscopio para usar la entrada de la brújula.</string>
     <string name="trait_audio_button_content_description">Controla la grabación de audio.</string>

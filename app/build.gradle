@@ -228,6 +228,9 @@ dependencies {
     // Calendar date range picker library
     implementation 'io.github.architshah248.calendar:awesome-calendar:2.0.0'
 
+    //AppIntro
+    implementation 'com.github.AppIntro:AppIntro:6.3.1'
+
     // Core library
     androidTestImplementation "androidx.test:core:$coreVersion"
 
@@ -258,6 +261,8 @@ dependencies {
     // ...with Kotlin.
     kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.49'
 
+    // For trait data charts
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
 }
@@ -269,6 +274,7 @@ kapt {
 
 repositories {
     mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 task prepareKotlinBuildScriptModel {}

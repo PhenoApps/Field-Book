@@ -44,14 +44,6 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity
-            android:name=".activities.FieldEditorActivityOld"
-            android:alwaysRetainTaskState="false"
-            android:configChanges="keyboardHidden|orientation"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-
         <!-- Trait manager, for importing .trt files -->
         <activity
             android:name=".activities.TraitEditorActivity"
@@ -138,7 +130,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="fieldbook.phenoapps.org"
+                    android:host="phenoapps.org/field-book"
                     android:scheme="https"
                     tools:ignore="AppLinkUrlError" /> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
             </intent-filter>
@@ -183,6 +175,10 @@
             android:name=".activities.CameraActivity"
             android:exported="true"
             android:theme="@style/AppTheme" />
+
+        <!-- AppIntroActivity uses the AppIntro package -->
+        <activity android:name=".activities.AppIntroActivity"
+            android:label="My Custom AppIntro" />
 
         <provider
             android:name=".provider.GenericFileProvider"
