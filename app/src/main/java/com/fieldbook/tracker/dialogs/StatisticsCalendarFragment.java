@@ -14,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.fieldbook.tracker.R;
@@ -53,7 +54,7 @@ public class StatisticsCalendarFragment extends Fragment implements DateRangePic
     Calendar dateSelectorStartRange, dateSelectorEndRange;
     DateTimeFormatter timeStampFormat;
     private static final String TIME_STAMP_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
-    private static final String MONTH_HEADER_PATTERN ="MMMM yyyy";
+    private static final String MONTH_HEADER_PATTERN = "MMMM yyyy";
     private static final int THRESHOLD_LOW = 1;
     private static final int THRESHOLD_MEDIUM = 5;
     private static final int THRESHOLD_HIGH = 8;
@@ -280,13 +281,13 @@ public class StatisticsCalendarFragment extends Fragment implements DateRangePic
      */
     private int getColorForObservations(int observations) {
         if (observations == THRESHOLD_LOW) {
-            return R.color.heatmap_color_low;
+            return ContextCompat.getColor(requireContext(),R.color.heatmap_color_low);
         } else if (observations < THRESHOLD_MEDIUM) {
-            return R.color.heatmap_color_medium;
+            return ContextCompat.getColor(requireContext(),R.color.heatmap_color_medium);
         } else if (observations < THRESHOLD_HIGH) {
-            return R.color.heatmap_color_high;
+            return ContextCompat.getColor(requireContext(),R.color.heatmap_color_high);
         } else {
-            return R.color.heatmap_color_max;
+            return ContextCompat.getColor(requireContext(),R.color.heatmap_color_max);
         }
     }
 }
