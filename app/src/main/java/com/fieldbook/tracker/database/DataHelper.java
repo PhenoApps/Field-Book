@@ -2093,7 +2093,9 @@ public class DataHelper {
 
         open();
 
-        ObservationVariableDao.Companion.updateTraitPosition(id, realPosition);
+        Integer fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        ObservationVariableDao.Companion.updateTraitPosition(id, realPosition, fieldId);
 
 //        try {
 //            ContentValues c = new ContentValues();

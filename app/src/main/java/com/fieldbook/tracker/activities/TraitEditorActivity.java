@@ -116,20 +116,24 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
             TraitAdapter adapter = (TraitAdapter) recyclerView.getAdapter();
 
-            if (adapter != null) {
-                int from = viewHolder.getBindingAdapterPosition();
-                int to = target.getBindingAdapterPosition();
+            if (adapter == null) {
+                return false; // Return early if adapter is null
+            }
 
-                try {
-                    adapter.moveItem(from, to);
-                } catch (IndexOutOfBoundsException iobe) {
-                    iobe.printStackTrace();
-                    return false;
-                }
+            int from = viewHolder.getBindingAdapterPosition();
+            int to = target.getBindingAdapterPosition();
+
+            try {
+                adapter.moveItem(from, to);
+            } catch (IndexOutOfBoundsException iobe) {
+                Log.e("onMove", "Error moving item from position " + from + " to " + to, iobe);
+                ;
+                return false;
             }
 
             return true;
         }
+
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
@@ -138,11 +142,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         @Override
         public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
             super.onSelectedChanged(viewHolder, actionState);
-            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-                if (viewHolder != null) {
-                    if (!SharedPreferenceUtils.Companion.isHighContrastTheme(prefs)) {
-                        viewHolder.itemView.setAlpha(0.5f);
-                    }
+            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG && viewHolder != null) {
+                if (!SharedPreferenceUtils.Companion.isHighContrastTheme(prefs)) {
+                    viewHolder.itemView.setAlpha(0.5f);
                 }
             }
         }
@@ -151,6 +153,12 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
             viewHolder.itemView.setAlpha(1f);
+
+            // Notify the adapter that the drag is complete
+            TraitAdapter adapter = (TraitAdapter) recyclerView.getAdapter();
+            if (adapter != null) {
+                adapter.onDragComplete();
+            }
         }
     });
 
@@ -860,6 +868,26 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public void onDrag(@NonNull TraitAdapter.ViewHolder item) {
         itemTouchHelper.startDrag(item);
+    }
+
+    @Override
+    public void onDragComplete(List<? extends TraitObject> traitList) {
+        // Manually build a log string to show the list
+        StringBuilder logString = new StringBuilder("onDragComplete - Received list: ");
+        for (TraitObject trait : traitList) {
+            logString.append(trait.getName()).append(" (ID: ").append(trait.getId()).append("), ");
+        }
+        Log.d("TraitEditorActivity", logString.toString());
+
+        // Update the database with the new positions
+        for (int i = 0; i < traitList.size(); i++) {
+            TraitObject trait = traitList.get(i);
+            Log.d("TraitEditorActivity", "Updating trait '" + trait.getName() + "' (ID: " + trait.getId() + ") to position " + i);
+            database.updateTraitPosition(trait.getId(), i); // Save the new position in the database
+        }
+
+        // Reload the list to reflect the changes
+        queryAndLoadTraits();
     }
 
     /**

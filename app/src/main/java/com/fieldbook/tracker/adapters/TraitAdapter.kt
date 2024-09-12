@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -30,6 +31,7 @@ class TraitAdapter(private val sorter: TraitSorter):
         fun onDrag(item: TraitAdapter.ViewHolder)
         fun getDatabase(): DataHelper
         fun onMenuItemClicked(v: View, trait: TraitObject)
+        fun onDragComplete(list: List<TraitObject>)
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -73,19 +75,36 @@ class TraitAdapter(private val sorter: TraitSorter):
         }
     }
 
+//    fun moveItem(from: Int, to: Int) {
+//        if (from == to) return // No need to move if the positions are the same
+//
+//        val list = currentList.toMutableList()
+//
+//        // Move the item
+//        val movedItem = list.removeAt(from)
+//        list.add(to, movedItem)
+//
+//        Log.d("TraitAdapter", "Moving item '${movedItem.name}' from position $from to position $to")
+//
+//
+//        notifyItemMoved(from, to)
+//    }
+
     fun moveItem(from: Int, to: Int) {
+        if (from == to) return
 
         val list = currentList.toMutableList()
 
-        list[to] = list[from].also { list[from] = list[to] }
+        // Ensure we're moving the initially selected item
+        val movedItem = list[from]
+        list.removeAt(from)
+        list.add(to, movedItem)
 
-        submitList(list)
+        Log.d("TraitAdapter", "Moving item '${movedItem.name}' from position $from to position $to")
 
-        val size = list.size
-        for (i in 0 until size) {
-            sorter.getDatabase().updateTraitPosition(list[i].id, i)
-        }
+        submitList(list) // Ensure the list is updated correctly
     }
+
 
     fun getTraitItem(position: Int): TraitObject {
         return currentList[position]
@@ -120,6 +139,24 @@ class TraitAdapter(private val sorter: TraitSorter):
 //            viewHolder.visibleCheckBox.isChecked = visible == null || visible == "true"
         }
     }
+
+    fun onDragComplete() {
+        val list = currentList.toMutableList()
+        // Log the list order before saving to the database
+        Log.d("TraitAdapter", "onDragComplete - Updated list: ${list.map { it.name to it.id }}")
+
+        sorter.onDragComplete(list) // Pass the updated list to the activity
+
+        // Update positions in the database
+        for (i in list.indices) {
+            Log.d("TraitAdapter", "Updating trait '${list[i].name}' to position $i")
+            sorter.getDatabase().updateTraitPosition(list[i].id, i)
+        }
+
+        // Submit the updated list to reflect changes in the UI
+        submitList(list)
+    }
+
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = currentList.size
