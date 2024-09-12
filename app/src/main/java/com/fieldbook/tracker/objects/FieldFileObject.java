@@ -67,6 +67,8 @@ public class FieldFileObject {
         private final Uri path_;
         private final Context ctx;
 
+        private String name;
+
         FieldFileBase(final Context ctx, final Uri path) {
             this.ctx = ctx;
             path_ = path;
@@ -146,8 +148,13 @@ public class FieldFileObject {
 
         public FieldObject createFieldObject() {
             FieldObject f = new FieldObject();
-            f.setExp_name(this.getStem());
-            f.setExp_alias(this.getStem());
+            if (name == null) {
+                f.setExp_name(this.getStem());
+                f.setExp_alias(this.getStem());
+            } else {
+                f.setExp_name(name);
+                f.setExp_alias(name);
+            }
             f.setExp_source(this.getFileStem());
             f.setImport_format(ImportFormat.fromString(getExtension(this.getFileStem())));
             return f;
@@ -156,6 +163,10 @@ public class FieldFileObject {
         public boolean getOpenFailed() {
             return openFail;
         }
+
+        public void setName(String name) { this.name = name; }
+
+        public String getName() { return name; }
 
         abstract public boolean isCSV();
 
