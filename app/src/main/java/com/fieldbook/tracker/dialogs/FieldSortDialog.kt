@@ -22,7 +22,7 @@ open class FieldSortDialog(private val act: Activity,
     override fun setupUi() {
         super.setupUi()
 
-        setTitle(R.string.dialog_field_sort_title)
+        setTitle(R.string.field_sort_entries)
 
         //submits the new sort list to the field sort controller (where db queries should be handled)
         okButton?.setOnClickListener {
