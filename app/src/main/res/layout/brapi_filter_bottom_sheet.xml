@@ -1,145 +1,132 @@
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/bottomSheet"
-    style="@style/Widget.MaterialComponents.BottomSheet.Modal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="16dp"
-    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+    android:layout_height="wrap_content">
 
-    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
-        android:id="@+id/brapi_filter_drag_handle"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottomSheet"
+        style="@style/Widget.MaterialComponents.BottomSheet.Modal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:padding="16dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-    <TextView
-        android:id="@+id/brapi_filter_title_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_brapi_filter_title"
-        android:textSize="?fb_title_text_size"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_filter_drag_handle"
-        tools:textSize="24sp" />
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+            android:id="@+id/brapi_filter_drag_handle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/brapi_filter_subtitle_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/dialog_brapi_filter_active"
-        android:textSize="?fb_title_text_size"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_filter_title_tv"
-        tools:textSize="24sp" />
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/brapi_filter_cg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_filter_subtitle_tv" />
-
-    <com.google.android.material.divider.MaterialDivider
-        android:id="@+id/sortDivider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_filter_cg" />
-
-    <TextView
-        android:id="@+id/brapi_filter_action_title_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/dialog_brapi_filter_choices_title"
-        android:textSize="?fb_title_text_size"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sortDivider"
-        tools:textSize="24sp" />
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/brapi_filter_action_cg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_filter_action_title_tv"
-        app:singleSelection="true">
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/brapi_filter_programs_cp"
-            style="@style/FirstChipStyle"
+        <TextView
+            android:id="@+id/brapi_filter_title_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checkable="true"
-            android:checked="true"
-            android:text="@string/brapi_filter_type_program" />
+            android:text="@string/dialog_brapi_filter_title"
+            android:textSize="?fb_title_text_size"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/brapi_filter_drag_handle"
+            tools:textSize="24sp" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/brapi_filter_seasons_cp"
-            style="@style/SecondChipStyle"
+        <TextView
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:id="@+id/brapi_filter_subtitle_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checkable="true"
-            android:text="@string/brapi_filter_type_season" />
+            android:layout_marginTop="12dp"
+            android:text="@string/dialog_brapi_filter_active"
+            android:textSize="?fb_title_text_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/brapi_filter_title_tv"
+            tools:textSize="24sp" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/brapi_filter_trials_cp"
-            style="@style/ThirdChipStyle"
+        <ImageButton
+            android:id="@+id/brapi_filter_delete_all_ib"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checkable="true"
-            android:text="@string/brapi_filter_type_trial" />
+            android:contentDescription="@string/brapi_filter_bottom_sheet_delete_all_description"
+            android:src="@drawable/delete_sweep"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/brapi_filter_subtitle_tv"
+            android:visibility="gone"
+            android:backgroundTint="#00ffffff"
+            tools:visibility="visible"/>
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/brapi_filter_crops_cp"
-            style="@style/FourthChipStyle"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/brapi_filter_cg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checkable="true"
-            android:text="@string/brapi_filter_type_crop" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/brapi_filter_subtitle_tv" />
 
-    </com.google.android.material.chip.ChipGroup>
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/sortDivider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/brapi_filter_cg" />
 
-    <com.google.android.material.divider.MaterialDivider
-        android:id="@+id/dividerFilter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_filter_action_cg" />
+        <TextView
+            android:id="@+id/brapi_filter_action_title_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/dialog_brapi_filter_choices_title"
+            android:textSize="?fb_title_text_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/sortDivider"
+            tools:textSize="24sp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/brapi_filter_ok_btn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:backgroundTint="?fb_color_primary"
-        android:text="@string/act_brapi_filter_apply"
-        android:textColor="@color/BLACK"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/brapi_filter_reset_btn"
-        app:layout_constraintTop_toBottomOf="@id/dividerFilter" />
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/brapi_filter_action_cg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/brapi_filter_action_title_tv"
+            app:singleSelection="true">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/brapi_filter_reset_btn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:backgroundTint="?fb_color_primary"
-        android:text="@string/act_brapi_filter_clear"
-        android:textColor="@color/BLACK"
-        app:layout_constraintEnd_toStartOf="@id/brapi_filter_ok_btn"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dividerFilter" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/brapi_filter_programs_cp"
+                style="@style/FirstChipStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="false"
+                android:text="@string/brapi_filter_type_program" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/brapi_filter_seasons_cp"
+                style="@style/SecondChipStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="false"
+                android:text="@string/brapi_filter_type_season" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/brapi_filter_trials_cp"
+                style="@style/ThirdChipStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="false"
+                android:text="@string/brapi_filter_type_trial" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/brapi_filter_crops_cp"
+                style="@style/FourthChipStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="false"
+                android:text="@string/brapi_filter_type_crop" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
+

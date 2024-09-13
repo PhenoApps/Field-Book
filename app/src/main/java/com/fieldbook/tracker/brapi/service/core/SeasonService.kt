@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.channelFlow
 import org.brapi.client.v2.model.exceptions.ApiException
 import org.brapi.client.v2.model.queryParams.core.SeasonQueryParams
 import org.brapi.client.v2.modules.core.SeasonsApi
+import org.brapi.v2.model.core.BrAPISeason
 import org.brapi.v2.model.core.response.BrAPISeasonListResponse
 
 interface SeasonService {
@@ -34,7 +35,7 @@ interface SeasonService {
         override fun fetchAll(params: SeasonQueryParams): Flow<Any> =
             channelFlow {
 
-                Fetcher<SeasonQueryParams, BrAPISeasonListResponse>().fetchAll(
+                Fetcher<BrAPISeason, SeasonQueryParams, BrAPISeasonListResponse>().fetchAll(
                     params,
                     api::seasonsGetAsync
                 ).collect { models ->

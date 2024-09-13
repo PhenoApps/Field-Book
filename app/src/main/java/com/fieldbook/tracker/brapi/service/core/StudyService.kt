@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.channelFlow
 import org.brapi.client.v2.model.exceptions.ApiException
 import org.brapi.client.v2.model.queryParams.core.StudyQueryParams
 import org.brapi.client.v2.modules.core.StudiesApi
+import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.core.response.BrAPIStudyListResponse
 
 interface StudyService {
@@ -49,7 +50,7 @@ interface StudyService {
         override fun fetchAll(params: StudyQueryParams): Flow<Any> =
             channelFlow {
 
-                Fetcher<StudyQueryParams, BrAPIStudyListResponse>().fetchAll(
+                Fetcher<BrAPIStudy, StudyQueryParams, BrAPIStudyListResponse>().fetchAll(
                     params,
                     api::studiesGetAsync
                 ).collect { models ->

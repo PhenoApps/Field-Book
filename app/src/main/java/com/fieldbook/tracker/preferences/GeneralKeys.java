@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class GeneralKeys {
     // @formatter:off
@@ -225,6 +226,8 @@ public class GeneralKeys {
 
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
+    @Nullable
+    public static final String LIST_FILTER_TEXTS = "com.fieldbook.tracker.list_filter_texts";
 
     private GeneralKeys() {
 

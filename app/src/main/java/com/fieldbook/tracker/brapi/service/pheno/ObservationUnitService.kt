@@ -8,35 +8,35 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import org.brapi.client.v2.model.exceptions.ApiException
-import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
-import org.brapi.client.v2.modules.phenotype.ObservationVariablesApi
-import org.brapi.v2.model.pheno.BrAPIObservationVariable
-import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse
+import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams
+import org.brapi.client.v2.modules.phenotype.ObservationUnitsApi
+import org.brapi.v2.model.pheno.BrAPIObservationUnit
+import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse
 
-interface ObservationVariableService {
+interface ObservationUnitService {
 
-    fun fetchObservationVariables(
-        params: VariableQueryParams,
-        onSuccess: ApiListSuccess<BrAPIObservationVariableListResponse>,
+    fun fetchObservationUnits(
+        params: ObservationUnitQueryParams,
+        onSuccess: ApiListSuccess<BrAPIObservationUnitListResponse>,
         onFail: ApiFailCallback
     )
 
     fun fetchAll(
-        params: VariableQueryParams
+        params: ObservationUnitQueryParams
     ): Flow<Any>
 
-    class Default(private val api: ObservationVariablesApi) : ObservationVariableService {
+    class Default(private val api: ObservationUnitsApi) : ObservationUnitService {
 
-        override fun fetchObservationVariables(
-            params: VariableQueryParams,
-            onSuccess: ApiListSuccess<BrAPIObservationVariableListResponse>,
+        override fun fetchObservationUnits(
+            params: ObservationUnitQueryParams,
+            onSuccess: ApiListSuccess<BrAPIObservationUnitListResponse>,
             onFail: ApiFailCallback
         ) {
-            api.variablesGetAsync(
+            api.observationunitsGetAsync(
                 params,
-                object : BrapiV2ApiCallBack<BrAPIObservationVariableListResponse>() {
+                object : BrapiV2ApiCallBack<BrAPIObservationUnitListResponse>() {
                     override fun onSuccess(
-                        result: BrAPIObservationVariableListResponse?,
+                        result: BrAPIObservationUnitListResponse?,
                         statusCode: Int,
                         responseHeaders: MutableMap<String, MutableList<String>>?
                     ) {
@@ -56,12 +56,12 @@ interface ObservationVariableService {
         /**
          * @param queryParams page and pageSize will be overwritten to query all data
          */
-        override fun fetchAll(params: VariableQueryParams): Flow<Any> =
+        override fun fetchAll(params: ObservationUnitQueryParams): Flow<Any> =
             channelFlow {
 
-                Fetcher<BrAPIObservationVariable, VariableQueryParams, BrAPIObservationVariableListResponse>().fetchAll(
+                Fetcher<BrAPIObservationUnit, ObservationUnitQueryParams, BrAPIObservationUnitListResponse>().fetchAll(
                     params,
-                    api::variablesGetAsync
+                    api::observationunitsGetAsync
                 ).collect { models ->
 
                     trySend(models)

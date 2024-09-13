@@ -13,7 +13,6 @@
         android:icon="@drawable/ic_check_all"
         app:showAsAction="ifRoom" />
     <item
-        android:visible="false"
         android:id="@+id/action_reset_cache"
         android:title="@string/menu_filter_brapi_reset_cache_title"
         android:icon="@drawable/ic_field_sync"

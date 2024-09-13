@@ -2,6 +2,7 @@ package com.fieldbook.tracker.brapi.service
 
 import android.util.Log
 import com.fieldbook.tracker.brapi.service.core.ApiCall
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import okhttp3.Call
@@ -17,7 +18,7 @@ import kotlin.reflect.KFunction2
  * @param T the brapi query param sub class
  * @param R the brapi response
  */
-class Fetcher<T : BrAPIQueryParams, R : BrAPIResponse<*>> {
+class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
     fun fetchAll(params: T, apiCall: KFunction2<T, ApiCallback<R>, Call>) = callbackFlow {
 
@@ -31,9 +32,10 @@ class Fetcher<T : BrAPIQueryParams, R : BrAPIResponse<*>> {
             params.pageSize(pageSize)
 
             //callback for returning the data through the flow channel, called after pagination is found
-
             //callback for querying metadata about the api call, then it queries for all data
             val initialCallback = ApiCall<R> {
+
+                Log.d("FETCH", "Checking metadata: ${it.metadata == null}")
 
                 //only care about metadata, so grab its pagination total count and call the api for all data
                 if (it.metadata != null) {
@@ -41,6 +43,13 @@ class Fetcher<T : BrAPIQueryParams, R : BrAPIResponse<*>> {
                     val totalCount = it.metadata.pagination.totalCount
                     val total = it.metadata.pagination.totalPages
                     var actualCount = 0
+
+                    Log.d("FETCH", "Total count: $totalCount, Total pages: $total")
+
+                    if (totalCount == 0) {
+                        trySend(totalCount to emptyList())
+                        return@ApiCall
+                    }
 
                     for (i in 0 until total) {
 
@@ -58,7 +67,7 @@ class Fetcher<T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
                                     actualCount += data.size
 
-                                    trySend(totalCount to data)
+                                    trySend(totalCount to data.mapNotNull { m -> m as? U })
 
                                     Log.d("FETCH", "Sent $actualCount/$totalCount models")
 
@@ -72,7 +81,10 @@ class Fetcher<T : BrAPIQueryParams, R : BrAPIResponse<*>> {
             apiCall(params, initialCallback)
 
         } catch (e: ApiException) {
-            //onFail(e.code)
+
+            e.printStackTrace()
+
+            cancel(e.message ?: "Unknown error")
         }
 
         awaitClose()

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.channelFlow
 import org.brapi.client.v2.model.exceptions.ApiException
 import org.brapi.client.v2.model.queryParams.core.TrialQueryParams
 import org.brapi.client.v2.modules.core.TrialsApi
+import org.brapi.v2.model.core.BrAPITrial
 import org.brapi.v2.model.core.response.BrAPITrialListResponse
 
 interface TrialService {
@@ -49,10 +50,11 @@ interface TrialService {
         override fun fetchAll(params: TrialQueryParams): Flow<Any> =
             channelFlow {
 
-                Fetcher<TrialQueryParams, BrAPITrialListResponse>().fetchAll(
+                Fetcher<BrAPITrial, TrialQueryParams, BrAPITrialListResponse>().fetchAll(
                     params,
                     api::trialsGetAsync
-                ).collect { models ->
+                )
+                    .collect { models ->
 
                     trySend(models)
 

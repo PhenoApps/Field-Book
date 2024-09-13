@@ -24,6 +24,8 @@ import com.fieldbook.tracker.brapi.service.core.ProgramService;
 import com.fieldbook.tracker.brapi.service.core.SeasonService;
 import com.fieldbook.tracker.brapi.service.core.StudyService;
 import com.fieldbook.tracker.brapi.service.core.TrialService;
+import com.fieldbook.tracker.brapi.service.germ.GermplasmService;
+import com.fieldbook.tracker.brapi.service.pheno.ObservationUnitService;
 import com.fieldbook.tracker.brapi.service.pheno.ObservationVariableService;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
@@ -120,7 +122,7 @@ import kotlin.jvm.functions.Function1;
 
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService, BrAPIServiceSearch {
 
-    private static final String ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES = "observationLevelNames";
+    public static final String ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES = "observationLevelNames";
     protected final StudiesApi studiesApi;
     protected final ProgramsApi programsApi;
     protected final TrialsApi trialsApi;
@@ -142,6 +144,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public final TrialService trialService;
     public final StudyService studyService;
     public final ObservationVariableService observationVariableService;
+    public final ObservationUnitService observationUnitService;
+    public final GermplasmService germplasmService;
 
     public Searcher searcher = new Searcher(this);
 
@@ -167,6 +171,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.cropService = new CropService.Default(this.cropsApi);
         this.trialService = new TrialService.Default(this.trialsApi);
         this.observationVariableService = new ObservationVariableService.Default(this.traitsApi);
+        this.observationUnitService = new ObservationUnitService.Default(this.observationUnitsApi);
+        this.germplasmService = new GermplasmService.Default(this.germplasmApi);
     }
 
     @Override

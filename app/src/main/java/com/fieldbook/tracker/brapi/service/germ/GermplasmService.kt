@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.brapi.service.pheno
+package com.fieldbook.tracker.brapi.service.germ
 
 import com.fieldbook.tracker.brapi.service.BrapiV2ApiCallBack
 import com.fieldbook.tracker.brapi.service.Fetcher
@@ -8,35 +8,43 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import org.brapi.client.v2.model.exceptions.ApiException
+import org.brapi.client.v2.model.queryParams.germplasm.GermplasmQueryParams
+import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
+import org.brapi.client.v2.modules.germplasm.GermplasmApi
+import org.brapi.client.v2.modules.phenotype.ObservationUnitsApi
 import org.brapi.client.v2.modules.phenotype.ObservationVariablesApi
+import org.brapi.v2.model.germ.BrAPIGermplasm
+import org.brapi.v2.model.germ.response.BrAPIGermplasmListResponse
+import org.brapi.v2.model.pheno.BrAPIObservationUnit
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
+import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse
 
-interface ObservationVariableService {
+interface GermplasmService {
 
-    fun fetchObservationVariables(
-        params: VariableQueryParams,
-        onSuccess: ApiListSuccess<BrAPIObservationVariableListResponse>,
+    fun fetchGermplasm(
+        params: GermplasmQueryParams,
+        onSuccess: ApiListSuccess<BrAPIGermplasmListResponse>,
         onFail: ApiFailCallback
     )
 
     fun fetchAll(
-        params: VariableQueryParams
+        params: GermplasmQueryParams
     ): Flow<Any>
 
-    class Default(private val api: ObservationVariablesApi) : ObservationVariableService {
+    class Default(private val api: GermplasmApi) : GermplasmService {
 
-        override fun fetchObservationVariables(
-            params: VariableQueryParams,
-            onSuccess: ApiListSuccess<BrAPIObservationVariableListResponse>,
+        override fun fetchGermplasm(
+            params: GermplasmQueryParams,
+            onSuccess: ApiListSuccess<BrAPIGermplasmListResponse>,
             onFail: ApiFailCallback
         ) {
-            api.variablesGetAsync(
+            api.germplasmGetAsync(
                 params,
-                object : BrapiV2ApiCallBack<BrAPIObservationVariableListResponse>() {
+                object : BrapiV2ApiCallBack<BrAPIGermplasmListResponse>() {
                     override fun onSuccess(
-                        result: BrAPIObservationVariableListResponse?,
+                        result: BrAPIGermplasmListResponse?,
                         statusCode: Int,
                         responseHeaders: MutableMap<String, MutableList<String>>?
                     ) {
@@ -56,12 +64,12 @@ interface ObservationVariableService {
         /**
          * @param queryParams page and pageSize will be overwritten to query all data
          */
-        override fun fetchAll(params: VariableQueryParams): Flow<Any> =
+        override fun fetchAll(params: GermplasmQueryParams): Flow<Any> =
             channelFlow {
 
-                Fetcher<BrAPIObservationVariable, VariableQueryParams, BrAPIObservationVariableListResponse>().fetchAll(
+                Fetcher<BrAPIGermplasm, GermplasmQueryParams, BrAPIGermplasmListResponse>().fetchAll(
                     params,
-                    api::variablesGetAsync
+                    api::germplasmGetAsync
                 ).collect { models ->
 
                     trySend(models)

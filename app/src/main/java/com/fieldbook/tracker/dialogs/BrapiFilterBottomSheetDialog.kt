@@ -7,6 +7,8 @@ import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.annotation.OptIn
 import androidx.appcompat.content.res.AppCompatResources
 import com.fieldbook.tracker.R
@@ -16,9 +18,9 @@ import com.fieldbook.tracker.activities.brapi.update.BrapiProgramFilterActivity
 import com.fieldbook.tracker.activities.brapi.update.BrapiSeasonsFilterActivity
 import com.fieldbook.tracker.activities.brapi.update.BrapiStudyFilterActivity
 import com.fieldbook.tracker.activities.brapi.update.BrapiTrialsFilterActivity
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 
@@ -34,8 +36,8 @@ class BrapiFilterBottomSheetDialog(
     private lateinit var seasonsChip: Chip
     private lateinit var trialsChip: Chip
     private lateinit var cropsChip: Chip
-    private lateinit var okButton: MaterialButton
-    private lateinit var resetButton: MaterialButton
+    private lateinit var clearFilterButton: ImageButton
+    private lateinit var subtitleTv: TextView
 
     interface OnFilterSelectedListener {
         fun onFilterSelected(filter: Int)
@@ -63,8 +65,8 @@ class BrapiFilterBottomSheetDialog(
         trialsChip = v.findViewById(R.id.brapi_filter_trials_cp)
         filtersChipGroup = v.findViewById(R.id.brapi_filter_cg)
 
-        okButton = v.findViewById(R.id.brapi_filter_ok_btn)
-        resetButton = v.findViewById(R.id.brapi_filter_reset_btn)
+        clearFilterButton = v.findViewById(R.id.brapi_filter_delete_all_ib)
+        subtitleTv = v.findViewById(R.id.brapi_filter_subtitle_tv)
 
         setupButtons()
         resetChipsUi()
@@ -74,22 +76,27 @@ class BrapiFilterBottomSheetDialog(
 
     private fun setupButtons() {
 
-        okButton.setOnClickListener {
-
-            val actionId = when {
-                programChip.isChecked -> BrapiStudyFilterActivity.FilterChoice.PROGRAM.ordinal
-                trialsChip.isChecked -> BrapiStudyFilterActivity.FilterChoice.TRIAL.ordinal
-                seasonsChip.isChecked -> BrapiStudyFilterActivity.FilterChoice.SEASON.ordinal
-                cropsChip.isChecked -> BrapiStudyFilterActivity.FilterChoice.CROP.ordinal
-                else -> return@setOnClickListener
-            }
-
-            onFilterSelected.onFilterSelected(actionId)
-
+        programChip.setOnClickListener {
+            onFilterSelected.onFilterSelected(BrapiStudyFilterActivity.FilterChoice.PROGRAM.ordinal)
             dismiss()
         }
 
-        resetButton.setOnClickListener {
+        trialsChip.setOnClickListener {
+            onFilterSelected.onFilterSelected(BrapiStudyFilterActivity.FilterChoice.TRIAL.ordinal)
+            dismiss()
+        }
+
+        seasonsChip.setOnClickListener {
+            onFilterSelected.onFilterSelected(BrapiStudyFilterActivity.FilterChoice.SEASON.ordinal)
+            dismiss()
+        }
+
+        cropsChip.setOnClickListener {
+            onFilterSelected.onFilterSelected(BrapiStudyFilterActivity.FilterChoice.CROP.ordinal)
+            dismiss()
+        }
+
+        clearFilterButton.setOnClickListener {
 
             with(preferences.edit()) {
                 for (f in listOf(
@@ -100,10 +107,15 @@ class BrapiFilterBottomSheetDialog(
                 )) {
                     remove(f)
                 }
+
+                remove(GeneralKeys.LIST_FILTER_TEXTS)
+
                 apply()
             }
 
             filtersChipGroup.removeAllViews()
+
+            resetChipsUi()
         }
     }
 
@@ -119,9 +131,7 @@ class BrapiFilterBottomSheetDialog(
     @OptIn(ExperimentalBadgeUtils::class)
     private fun resetChipsUi() {
 
-        chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-            okButton.isEnabled = checkedIds.isNotEmpty()
-        }
+        filtersChipGroup.removeAllViews()
 
         //add new children that are loaded from the program filter activity
         for (f in listOf(
@@ -133,7 +143,21 @@ class BrapiFilterBottomSheetDialog(
             resetChipsUi(f)
         }
 
-        resetButton.isEnabled = filtersChipGroup.childCount > 0
+        val searchText = preferences.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, setOf())
+        searchText?.forEach { text ->
+            val chip = createChip(R.style.FourthChipTheme, text, text)
+            chip.setOnCloseIconClickListener {
+                val currentTexts = preferences.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, setOf())?.toMutableSet()
+                currentTexts?.remove(text)
+                preferences.edit().putStringSet(GeneralKeys.LIST_FILTER_TEXTS, currentTexts).apply()
+                filtersChipGroup.removeView(chip)
+                resetChipsUi()
+            }
+            filtersChipGroup.addView(chip)
+        }
+
+        clearFilterButton.visibility = if (filtersChipGroup.childCount > 0) View.VISIBLE else View.GONE
+        subtitleTv.visibility = if (filtersChipGroup.childCount > 0) View.VISIBLE else View.GONE
     }
 
     private fun resetChipsUi(filterName: String) {

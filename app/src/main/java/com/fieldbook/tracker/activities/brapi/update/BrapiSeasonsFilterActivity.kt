@@ -7,7 +7,7 @@ import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import org.brapi.v2.model.core.BrAPISeason
 
 open class BrapiSeasonsFilterActivity(override val titleResId: Int = R.string.brapi_filter_type_season) :
-    BrapiListFilterActivity<BrAPISeason>() {
+    BrapiSubFilterListActivity<BrAPISeason>() {
 
     companion object {
 
@@ -21,22 +21,23 @@ open class BrapiSeasonsFilterActivity(override val titleResId: Int = R.string.br
     override val filterName: String
         get() = FILTER_NAME
 
-    override fun List<BrAPISeason?>.mapToUiModel() = filterNotNull().map { season ->
-        CheckboxListAdapter.Model(
-            checked = false,
-            id = season.seasonDbId,
-            label = season.seasonName,
-            subLabel = "${season.year}"
-        )
-    }
+    override fun List<TrialStudyModel>.mapToUiModel(): List<CheckboxListAdapter.Model> {
 
-    override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
-        super.onCreateOptionsMenu(menu)
-        menu?.findItem(R.id.action_check_all)?.isVisible = true
-        menu?.findItem(R.id.action_reset_cache)?.isVisible = true
-        menu?.findItem(R.id.action_brapi_filter)?.isVisible = false
-        return true
-    }
+        val seasonSet = hashSetOf<String>()
 
-    //override suspend fun queryAll(): Flow<Any> = brapiService.seasonService.fetchAll(SeasonQueryParams())
+        forEach { model ->
+            model.study.seasons.filterNotNull().forEach { season ->
+                seasonSet.add(season)
+            }
+        }
+
+        return seasonSet.toList().map {
+            CheckboxListAdapter.Model(
+                checked = false,
+                id = it,
+                label = it,
+                subLabel = ""
+            )
+        }
+    }
 }

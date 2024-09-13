@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.channelFlow
 import org.brapi.client.v2.model.exceptions.ApiException
 import org.brapi.client.v2.model.queryParams.core.ProgramQueryParams
 import org.brapi.client.v2.modules.core.ProgramsApi
+import org.brapi.v2.model.core.BrAPIProgram
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse
 
 interface ProgramService {
@@ -49,7 +50,7 @@ interface ProgramService {
         override fun fetchAll(params: ProgramQueryParams): Flow<Any> =
             channelFlow {
 
-                Fetcher<ProgramQueryParams, BrAPIProgramListResponse>().fetchAll(
+                Fetcher<BrAPIProgram, ProgramQueryParams, BrAPIProgramListResponse>().fetchAll(
                     params,
                     api::programsGetAsync
                 ).collect { models ->
