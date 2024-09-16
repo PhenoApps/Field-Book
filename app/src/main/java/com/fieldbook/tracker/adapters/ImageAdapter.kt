@@ -1,9 +1,8 @@
 package com.fieldbook.tracker.adapters
 
+import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Point
-import android.net.Uri
-import android.provider.DocumentsContract
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,7 +29,7 @@ import java.io.FileNotFoundException
  * the preview view is used, which has a shutter button, a settings button, and an 'embiggen' button that
  * starts a fullscreen capture.
  */
-class ImageAdapter(private val listener: ImageItemHandler) :
+class ImageAdapter(private val context: Context, private val listener: ImageItemHandler) :
         ListAdapter<ImageAdapter.Model, ImageAdapter.ViewHolder>(DiffCallback()) {
 
     enum class Type {
@@ -39,6 +38,7 @@ class ImageAdapter(private val listener: ImageItemHandler) :
     }
 
     data class Model(
+        val id: Int,
         val type: Type = Type.IMAGE,
         val orientation: Int = Configuration.ORIENTATION_PORTRAIT,
         var uri: String? = null,
@@ -92,10 +92,12 @@ class ImageAdapter(private val listener: ImageItemHandler) :
                     height = actualHeight
                 }
 
-                val preview = BitmapLoader.getPreview(view.context, model.uri, model.orientation)
+                val preview = if (model.uri == "NA") {
+                    val data = context.resources.assets.open("na_placeholder.jpg").readBytes()
+                    BitmapFactory.decodeByteArray(data, 0, data.size)
+                } else BitmapLoader.getPreview(view.context, model.uri, model.orientation)
 
                 imageView.setImageBitmap(preview)
-
 
             } catch (f: FileNotFoundException) {
 

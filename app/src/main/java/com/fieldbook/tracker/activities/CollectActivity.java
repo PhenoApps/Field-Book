@@ -59,6 +59,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
@@ -683,8 +684,15 @@ public class CollectActivity extends ThemedActivity
         missingValue.setOnClickListener(v -> {
             triggerTts(naTts);
             TraitObject currentTrait = traitBox.getCurrentTrait();
-            updateObservation(currentTrait, "NA", null);
-            setNaText();
+            if (currentTrait != null) {
+                String format = currentTrait.getFormat();
+                if (format != null && Formats.Companion.isCameraTrait(format)) {
+                    ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
+                } else {
+                    updateObservation(currentTrait, "NA", null);
+                    setNaText();
+                }
+            }
         });
 
         barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);

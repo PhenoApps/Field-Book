@@ -93,6 +93,26 @@ abstract class AbstractCameraTrait :
         return R.layout.trait_camera
     }
 
+    fun setImageNa() {
+
+        if (!isLocked) {
+
+            val image = getSelectedImage()
+
+            if (image == null) {
+
+                insertNa()
+
+            } else getImageObservations().firstOrNull { it.internal_id_observation == image.id }?.let { obs ->
+
+                updateObservationValueToNa(obs)
+
+            }
+        }
+
+        loadAdapterItems()
+    }
+
     override fun setNaTraitsText() {}
 
     override fun loadLayout() {
@@ -117,7 +137,7 @@ abstract class AbstractCameraTrait :
         shutterButton = act.findViewById(R.id.camera_fragment_capture_btn)
         previewCardView = act.findViewById(R.id.trait_camera_cv)
 
-        recyclerView?.adapter = ImageAdapter(this)
+        recyclerView?.adapter = ImageAdapter(context, this)
 
         recyclerView?.layoutManager = RightToLeftReversedLinearLayoutManager(context)
 
@@ -244,7 +264,7 @@ abstract class AbstractCameraTrait :
         val plot = obsUnit.plot_id
         val studyId = collectActivity.studyId
         val person = (activity as? CollectActivity)?.person
-        val location = (activity as? CollectActivity)?.locationByPreferences
+        val location = ""//(activity as? CollectActivity)?.locationByPreferences
         val rep = database.getNextRep(studyId, plot, currentTrait.id)
 
         background.launch {
@@ -323,35 +343,42 @@ abstract class AbstractCameraTrait :
         }
     }
 
+    private fun getSelectedImage(): ImageAdapter.Model? {
+
+        //check if its external or no preview
+        val skipPreview = isPreviewable()
+
+        val size = (recyclerView?.adapter as? ImageAdapter)?.currentList?.size ?: 0
+        val lm = recyclerView?.layoutManager as? LinearLayoutManager
+
+        val lastVisible = lm?.findLastVisibleItemPosition()
+        val lastFullVisible = lm?.findLastCompletelyVisibleItemPosition()
+
+        var position = if (lastFullVisible == -1) lastVisible else lastFullVisible
+
+        //get previous position if the first visible is preview
+        if (skipPreview) {
+            position = if (position == size - 1) position - 1 else position
+        }
+
+        //ensure position is within array bounds
+        if (position != null && position in 0 until size) {
+
+            return (recyclerView?.adapter as? ImageAdapter)?.currentList?.get(position)
+
+        }
+
+        return null
+    }
+
     override fun deleteTraitListener() {
 
         if (!isLocked) {
 
-            //check if its external or no preview
-            val skipPreview = isPreviewable()
+            getSelectedImage()?.let { model ->
 
-            val size = (recyclerView?.adapter as? ImageAdapter)?.currentList?.size ?: 0
-            val lm = recyclerView?.layoutManager as? LinearLayoutManager
+                showDeleteImageDialog(model)
 
-            val lastVisible = lm?.findLastVisibleItemPosition()
-            val lastFullVisible = lm?.findLastCompletelyVisibleItemPosition()
-
-            var position = if (lastFullVisible == -1) lastVisible else lastFullVisible
-
-            //get previous position if the first visible is preview
-            if (skipPreview) {
-                position = if (position == size - 1) position - 1 else position
-            }
-
-            //ensure position is within array bounds
-            if (position != null && position in 0 until size) {
-
-                (recyclerView?.adapter as? ImageAdapter)?.currentList?.get(position)
-                    ?.let { model ->
-
-                        showDeleteImageDialog(model)
-
-                    }
             }
         }
     }
@@ -422,6 +449,7 @@ abstract class AbstractCameraTrait :
                 val brapiSynced = database.isBrapiSynced(studyId, plot, traitId, rep)
 
                 ImageAdapter.Model(
+                    id = it.internal_id_observation,
                     type = ImageAdapter.Type.IMAGE,
                     orientation = if (isExternalCamera) Configuration.ORIENTATION_LANDSCAPE else Configuration.ORIENTATION_PORTRAIT,
                     uri = it.value,
@@ -436,6 +464,7 @@ abstract class AbstractCameraTrait :
                 //add preview image adapter item
                 thumbnailModels.add(
                     ImageAdapter.Model(
+                        id = -1,
                         type = ImageAdapter.Type.PREVIEW,
                     )
                 )
@@ -515,6 +544,23 @@ abstract class AbstractCameraTrait :
         return false
     }
 
+    private fun insertNa() {
+
+        database.insertObservation(
+            currentRange.plot_id,
+            currentTrait.id,
+            currentTrait.format,
+            "NA",
+            (activity as? CollectActivity)?.person,
+            (activity as? CollectActivity)?.locationByPreferences,
+            "",
+            (activity as? CollectActivity)?.studyId,
+            null,
+            null,
+            (activity as? CollectActivity)?.rep
+        )
+    }
+
     private fun updateObservationValueToNa(observation: ObservationModel) {
 
         database.updateObservation(observation.also {
@@ -557,24 +603,31 @@ abstract class AbstractCameraTrait :
 
     private fun deleteItem(model: ImageAdapter.Model) {
 
-        getImageObservations().firstOrNull { it.value == model.uri }?.let { observation ->
+        getImageObservations().firstOrNull { it.internal_id_observation == model.id }?.let { observation ->
 
             try {
 
-                DocumentFile.fromSingleUri(context, Uri.parse(observation.value))
-                    ?.let { image ->
+                if (observation.value == "NA") {
 
-                        if (model.brapiSynced == true) {
+                    database.deleteObservation(observation.internal_id_observation.toString())
 
-                            image.delete()
+                } else {
 
-                            updateObservationValueToNa(observation)
+                    DocumentFile.fromSingleUri(context, Uri.parse(observation.value))
+                        ?.let { image ->
 
-                        } else deleteImage(image)
+                            if (model.brapiSynced == true) {
 
-                        loadAdapterItems()
+                                image.delete()
 
-                    }
+                                updateObservationValueToNa(observation)
+
+                            } else deleteImage(image)
+
+                        }
+                }
+
+                loadAdapterItems()
 
             } catch (e: Exception) {
 
