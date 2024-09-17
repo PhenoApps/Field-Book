@@ -105,7 +105,7 @@ abstract class AbstractCameraTrait :
 
             } else getImageObservations().firstOrNull { it.internal_id_observation == image.id }?.let { obs ->
 
-                updateObservationValueToNa(obs)
+                showDeleteImageDialog(image, true)
 
             }
         }
@@ -377,13 +377,13 @@ abstract class AbstractCameraTrait :
 
             getSelectedImage()?.let { model ->
 
-                showDeleteImageDialog(model)
+                showDeleteImageDialog(model, false)
 
             }
         }
     }
 
-    private fun showDeleteImageDialog(model: ImageAdapter.Model) {
+    private fun showDeleteImageDialog(model: ImageAdapter.Model, setNa: Boolean) {
 
         if (!isLocked) {
 
@@ -399,7 +399,7 @@ abstract class AbstractCameraTrait :
 
                     dialog.dismiss()
 
-                    deleteItem(model)
+                    deleteItem(model, setNa)
 
                 }
                 .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
@@ -601,7 +601,7 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    private fun deleteItem(model: ImageAdapter.Model) {
+    private fun deleteItem(model: ImageAdapter.Model, setNa: Boolean) {
 
         getImageObservations().firstOrNull { it.internal_id_observation == model.id }?.let { observation ->
 
@@ -616,7 +616,7 @@ abstract class AbstractCameraTrait :
                     DocumentFile.fromSingleUri(context, Uri.parse(observation.value))
                         ?.let { image ->
 
-                            if (model.brapiSynced == true) {
+                            if (model.brapiSynced == true || setNa) {
 
                                 image.delete()
 
@@ -659,7 +659,7 @@ abstract class AbstractCameraTrait :
 
     override fun onItemDeleted(model: ImageAdapter.Model) {
 
-        showDeleteImageDialog(model)
+        showDeleteImageDialog(model, false)
     }
 
     override fun refreshLock() {
