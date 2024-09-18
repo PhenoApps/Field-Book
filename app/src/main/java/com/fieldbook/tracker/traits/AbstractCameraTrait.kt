@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
@@ -26,6 +27,7 @@ import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.BitmapLoader
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
@@ -105,8 +107,11 @@ abstract class AbstractCameraTrait :
 
             } else getImageObservations().firstOrNull { it.internal_id_observation == image.id }?.let { obs ->
 
-                showDeleteImageDialog(image, true)
+                if (obs.value != "NA") {
 
+                    showDeleteImageDialog(image, true)
+
+                }
             }
         }
 
@@ -264,7 +269,7 @@ abstract class AbstractCameraTrait :
         val plot = obsUnit.plot_id
         val studyId = collectActivity.studyId
         val person = (activity as? CollectActivity)?.person
-        val location = ""//(activity as? CollectActivity)?.locationByPreferences
+        val location = (activity as? CollectActivity)?.locationByPreferences
         val rep = database.getNextRep(studyId, plot, currentTrait.id)
 
         background.launch {
@@ -387,10 +392,17 @@ abstract class AbstractCameraTrait :
 
         if (!isLocked) {
 
-            val preview = BitmapLoader.getPreview(context, model.uri, model.orientation)
-
             val imageView = ImageView(context)
-            imageView.setImageBitmap(preview)
+
+            if (model.uri == "NA") {
+                val data = context.resources.assets.open("na_placeholder.jpg").readBytes()
+                BitmapFactory.decodeByteArray(data, 0, data.size).also { bmp ->
+                    imageView.setImageBitmap(bmp)
+                }
+            } else {
+                val preview = BitmapLoader.getPreview(context, model.uri, model.orientation)
+                imageView.setImageBitmap(preview)
+            }
 
             AlertDialog.Builder(context, R.style.AppAlertDialog)
                 .setTitle(R.string.delete_local_photo)
@@ -646,10 +658,29 @@ abstract class AbstractCameraTrait :
 
             getImageObservations().firstOrNull { it.value == model.uri }?.let { observation ->
 
-                DocumentFile.fromSingleUri(context, Uri.parse(observation.value))?.let { image ->
+                val uri = if (observation.value != "NA") {
+                    DocumentFile.fromSingleUri(context, Uri.parse(observation.value))?.uri
+                } else {
 
-                    activity?.startActivity(Intent(Intent.ACTION_VIEW, image.uri).also {
-                        it.setDataAndType(image.uri, "image/*")
+                    context?.cacheDir?.let { dir ->
+
+                        val file = File(dir, "na_placeholder.jpg")
+
+                        if (!file.exists()) {
+                            val data = context.resources.assets.open("na_placeholder.jpg").readBytes()
+                            BitmapFactory.decodeByteArray(data, 0, data.size).also { bmp ->
+                                file.writeBytes(data)
+                            }
+                        }
+
+                        GenericFileProvider.getUriForFile(context, GenericFileProvider.AUTHORITY, file)
+                    }
+                }
+
+                uri?.let { imageUri ->
+
+                    activity?.startActivity(Intent(Intent.ACTION_VIEW, imageUri).also {
+                        it.setDataAndType(imageUri, "image/*")
                         it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     })
                 }
