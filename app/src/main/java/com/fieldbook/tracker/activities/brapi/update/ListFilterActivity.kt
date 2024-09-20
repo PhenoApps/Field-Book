@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
@@ -69,6 +70,11 @@ abstract class ListFilterActivity : ThemedActivity(),
 
         initUi()
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancel()
     }
 
     open fun List<CheckboxListAdapter.Model>.filterBySearchText(): List<CheckboxListAdapter.Model> {
@@ -150,8 +156,7 @@ abstract class ListFilterActivity : ThemedActivity(),
 
             recyclerView.adapter?.notifyDataSetChanged()
 
-            fetchDescriptionTv.text =
-                resources.getQuantityString(R.plurals.act_brapi_list_filter, models.size, models.size)
+            fetchDescriptionTv.visibility = View.GONE
 
         }
     }

@@ -21,7 +21,16 @@ open class BrapiTrialsFilterActivity(override val titleResId: Int = R.string.bra
     override val filterName: String
         get() = FILTER_NAME
 
+    override fun List<TrialStudyModel>.filterByPreferences(): List<TrialStudyModel> {
+
+        val programDbIds = getIds(BrapiProgramFilterActivity.FILTER_NAME)
+
+        return this
+            .filter { if (programDbIds.isNotEmpty()) it.programDbId in programDbIds else true }
+    }
+
     override fun List<TrialStudyModel>.mapToUiModel() = mapNotNull { model ->
+
         if (model.trialDbId != null && model.trialName != null) {
             CheckboxListAdapter.Model(
                 checked = false,

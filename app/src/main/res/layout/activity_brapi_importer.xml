@@ -34,6 +34,18 @@
         app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tb"
         app:layout_constraintStart_toStartOf="parent"/>
 
+    <com.google.android.material.chip.ChipGroup
+        tools:visibility="visible"
+        android:visibility="gone"
+        android:id="@+id/brapi_importer_cg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintTop_toBottomOf="@id/brapi_importer_sb" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -43,7 +55,7 @@
         android:gravity="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_importer_sb"/>
+        app:layout_constraintTop_toBottomOf="@id/brapi_importer_cg"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
@@ -88,7 +100,7 @@
     <TextView style="@style/TextViewStyle.Bold.Title"
         android:visibility="gone"
         android:id="@+id/act_brapi_import_tv"
-        android:text="@string/dialog_import"
+        android:text="@string/select"
         android:gravity="center"
         android:minHeight="?attr/actionBarSize"
         android:background="?attr/fb_color_primary"

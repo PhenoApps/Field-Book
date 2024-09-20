@@ -21,6 +21,15 @@ open class BrapiSeasonsFilterActivity(override val titleResId: Int = R.string.br
     override val filterName: String
         get() = FILTER_NAME
 
+    override fun List<TrialStudyModel>.filterByPreferences(): List<TrialStudyModel> {
+
+        val programDbIds = getIds(BrapiProgramFilterActivity.FILTER_NAME)
+        val trialDbIds = getIds(BrapiTrialsFilterActivity.FILTER_NAME)
+        return this
+            .filter { if (programDbIds.isNotEmpty()) it.programDbId in programDbIds else true }
+            .filter { if (trialDbIds.isNotEmpty()) it.trialDbId in trialDbIds else true }
+    }
+
     override fun List<TrialStudyModel>.mapToUiModel(): List<CheckboxListAdapter.Model> {
 
         val seasonSet = hashSetOf<String>()

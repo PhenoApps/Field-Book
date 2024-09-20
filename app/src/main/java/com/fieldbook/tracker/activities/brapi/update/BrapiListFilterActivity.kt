@@ -4,12 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.ContextThemeWrapper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
+import androidx.appcompat.content.res.AppCompatResources
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.brapi.service.BrAPIService
@@ -22,6 +24,8 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.badge.ExperimentalBadgeUtils
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -56,6 +60,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     private var queryTrialsJob: Job? = null
 
     protected lateinit var paginationManager: BrapiPaginationManager
+
+    protected lateinit var chipGroup: ChipGroup
 
     /**
      * Filter name to be used as preferences or intent extras key
@@ -100,13 +106,15 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         paginationManager = BrapiPaginationManager(this)
 
+        chipGroup = findViewById(R.id.brapi_importer_cg)
+
         restoreModels()
 
     }
 
 
     @OptIn(ExperimentalBadgeUtils::class)
-    protected fun resetChipsUi() {
+    protected fun resetChipToolbarCount() {
 
         val toolbar = findViewById<MaterialToolbar>(R.id.act_brapi_importer_tb)
 
@@ -127,6 +135,106 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 BadgeUtils.attachBadgeDrawable(it, toolbar, R.id.action_brapi_filter)
             }
         }
+    }
+
+    private fun createChip(styleResId: Int, label: String, id: String) =
+        Chip(ContextThemeWrapper(this, styleResId)).apply {
+            text = label
+            tag = id
+            closeIcon = AppCompatResources.getDrawable(this@BrapiListFilterActivity, R.drawable.close)
+            isCloseIconVisible = true
+            isCheckable = false
+        }
+
+    @OptIn(ExperimentalBadgeUtils::class)
+    private fun resetChipsUi() {
+
+        chipGroup.removeAllViews()
+
+        //add new children that are loaded from the program filter activity
+        for (f in listOf(
+            BrapiProgramFilterActivity.FILTER_NAME,
+            BrapiTrialsFilterActivity.FILTER_NAME,
+            BrapiSeasonsFilterActivity.FILTER_NAME,
+            BrapiCropsFilterActivity.FILTER_NAME
+        )) {
+            resetFilterChips(f)
+        }
+
+        val searchText = prefs.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, setOf())
+        searchText?.forEach { text ->
+            val chip = createChip(R.style.FourthChipTheme, text, text)
+            chip.setOnCloseIconClickListener {
+                val currentTexts = prefs.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, setOf())?.toMutableSet()
+                currentTexts?.remove(text)
+                prefs.edit().putStringSet(GeneralKeys.LIST_FILTER_TEXTS, currentTexts).apply()
+                chipGroup.removeView(chip)
+                restoreModels()
+            }
+            chipGroup.addView(chip)
+        }
+
+        val numFilterLabel = resources.getQuantityString(R.plurals.act_brapi_list_filter, cache.size, cache.size)
+
+        createChip(R.style.FourthChipStyle, numFilterLabel, numFilterLabel).also {
+            it.isCloseIconVisible = false
+            it.chipIcon = AppCompatResources.getDrawable(this, R.drawable.delete_sweep)
+            it.setOnClickListener {
+                chipGroup.removeAllViews()
+                clearFilterPreferences()
+                restoreModels()
+            }
+            chipGroup.addView(it)
+        }
+
+        //resetChipToolbarCount()
+        //clearFilterButton.visibility = if (filtersChipGroup.childCount > 0) View.VISIBLE else View.GONE
+        //subtitleTv.visibility = if (filtersChipGroup.childCount > 0) View.VISIBLE else View.GONE
+    }
+
+    private fun clearFilterPreferences() {
+        for (f in listOf(
+            BrapiProgramFilterActivity.FILTER_NAME,
+            BrapiTrialsFilterActivity.FILTER_NAME,
+            BrapiSeasonsFilterActivity.FILTER_NAME,
+            BrapiCropsFilterActivity.FILTER_NAME
+        )) {
+            prefs.edit().remove(f).apply()
+        }
+
+        prefs.edit().remove(GeneralKeys.LIST_FILTER_TEXTS).apply()
+    }
+
+    private fun resetFilterChips(filterName: String) {
+
+        BrapiFilterTypeAdapter.toModelList(prefs, filterName)
+            .forEach { model ->
+
+                val chip = createChip(
+                    when (filterName) {
+                        BrapiProgramFilterActivity.FILTER_NAME -> R.style.FirstChipTheme
+                        BrapiSeasonsFilterActivity.FILTER_NAME -> R.style.SecondChipTheme
+                        BrapiTrialsFilterActivity.FILTER_NAME -> R.style.ThirdChipTheme
+                        else -> R.style.FourthChipTheme
+                    }, model.label, model.id
+                )
+
+                chip.setOnCloseIconClickListener {
+
+                    deleteFilterId(filterName, model.id)
+                }
+
+                chipGroup.addView(chip)
+            }
+    }
+
+    private fun deleteFilterId(filterName: String, id: String) {
+
+        chipGroup.removeAllViews()
+
+        BrapiFilterTypeAdapter.deleteFilterId(prefs, filterName, id)
+
+        restoreModels()
     }
 
     fun restoreModels() {
@@ -330,7 +438,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 } else if (programDbIds.isNotEmpty()) {
                     intentLauncher.launch(BrapiStudyImportActivity.getIntent(this).also { intent ->
                         intent.putExtra(BrapiStudyImportActivity.EXTRA_STUDY_DB_IDS,
-                            associateProgramStudy().map { it.study.studyDbId }.toTypedArray()
+                            models.map { it.study.studyDbId }.toTypedArray()
                         )
                         intent.putExtra(
                             BrapiStudyImportActivity.EXTRA_PROGRAM_DB_ID,
@@ -365,7 +473,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         ).apply()
     }
 
-    private fun getIds(filterName: String) =
+    protected fun getIds(filterName: String) =
         BrapiFilterTypeAdapter.toModelList(prefs, filterName).map { it.id }
 
     private fun loadStorageItems(models: List<TrialStudyModel>) {

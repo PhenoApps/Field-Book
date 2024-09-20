@@ -1,27 +1,37 @@
 package com.fieldbook.tracker.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
+import com.google.android.material.chip.Chip
+import org.brapi.v2.model.germ.BrAPIGermplasm
+import org.brapi.v2.model.pheno.BrAPIObservationUnit
+import org.brapi.v2.model.pheno.BrAPIObservationVariable
 
 /**
  * Reference:
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
-class StudyAdapter :
+class StudyAdapter(private val studyLoader: StudyLoader) :
     ListAdapter<StudyAdapter.Model, StudyAdapter.ViewHolder>(DiffCallback()) {
+
+    interface StudyLoader {
+        fun getObservationVariables(id: String, position: Int): HashSet<BrAPIObservationVariable>?
+        fun getObservationUnits(id: String, position: Int): HashSet<BrAPIObservationUnit>?
+        fun getGermplasm(id: String, position: Int): HashSet<BrAPIGermplasm>?
+        fun getLocation(id: String): String
+    }
 
     data class Model(
         val id: String,
         val title: String,
-        val unitCount: Int,
-        val traitCount: Int,
-        val location: String
     )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -34,9 +44,15 @@ class StudyAdapter :
 
         with(currentList[position]) {
             holder.titleTextView.text = title
-            holder.unitCountTextView.text = unitCount.toString()
-            holder.traitCountTextView.text = traitCount.toString()
-            holder.locationTextView.text = location
+            holder.traitCountChip.text = studyLoader.getObservationVariables(id, position)?.size?.toString() ?: ""
+            holder.unitCountChip.text = studyLoader.getObservationUnits(id, position)?.size?.toString() ?: ""
+            holder.locationChip.text = studyLoader.getLocation(id)
+
+            if (holder.traitCountChip.text.isNotBlank()
+                && holder.unitCountChip.text.isNotBlank()
+                && holder.locationChip.text.isNotBlank()) {
+                holder.progressBar.visibility = View.GONE
+            }
         }
     }
 
@@ -46,9 +62,10 @@ class StudyAdapter :
 
     inner class ViewHolder(v: CardView) : RecyclerView.ViewHolder(v) {
         var titleTextView: TextView = v.findViewById(R.id.list_item_study_title_tv)
-        var unitCountTextView: TextView = v.findViewById(R.id.list_item_study_units_tv)
-        var traitCountTextView: TextView = v.findViewById(R.id.list_item_study_traits_tv)
-        var locationTextView: TextView = v.findViewById(R.id.list_item_study_location_tv)
+        var unitCountChip: Chip = v.findViewById(R.id.list_item_study_units_chip)
+        var traitCountChip: Chip = v.findViewById(R.id.list_item_study_traits_chip)
+        var locationChip: Chip = v.findViewById(R.id.list_item_study_location_chip)
+        var progressBar: ProgressBar = v.findViewById(R.id.list_item_study_pb)
     }
 
     class DiffCallback : DiffUtil.ItemCallback<Model>() {
@@ -58,8 +75,7 @@ class StudyAdapter :
         }
 
         override fun areContentsTheSame(oldItem: Model, newItem: Model): Boolean {
-            return oldItem.title == newItem.title && oldItem.location == newItem.location
-                    && oldItem.unitCount == newItem.unitCount && oldItem.traitCount == newItem.traitCount
+            return oldItem.title == newItem.title
         }
     }
 }

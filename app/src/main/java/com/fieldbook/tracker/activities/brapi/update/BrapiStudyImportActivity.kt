@@ -18,6 +18,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.activities.brapi.update.mapper.toTraitObject
 import com.fieldbook.tracker.adapters.StudyAdapter
+import com.fieldbook.tracker.adapters.StudyAdapter.Model
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
@@ -28,8 +29,10 @@ import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.brapi.client.v2.model.queryParams.germplasm.GermplasmQueryParams
@@ -91,15 +94,17 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private val observationLevels = hashSetOf<String>()
     private val observationVariables =
         hashMapOf<String, HashSet<BrAPIObservationVariable>>().withDefault { hashSetOf() }
-    private val observationUnits = hashSetOf<BrAPIObservationUnit>()
-    private val germplasms = hashSetOf<BrAPIGermplasm>()
+    private val observationUnits =
+        hashMapOf<String, HashSet<BrAPIObservationUnit>>().withDefault { hashSetOf() }
+    private val germplasms =
+        hashMapOf<String, HashSet<BrAPIGermplasm>>().withDefault { hashSetOf() }
 
     private var selectedLevel: Int = -1
     private var selectedSort: Int = -1
     private var selectedPrimary: Int = -1
     private var selectedSecondary: Int = -1
 
-    private var attributesTable: Map<String, Map<String, String>>? = null
+    private var attributesTable: HashMap<String, Map<String, Map<String, String>>>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,6 +120,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         setSupportActionBar(findViewById(R.id.act_brapi_importer_tb))
 
+        supportActionBar?.setTitle(R.string.act_brapi_study_import_title)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         parseIntentExtras()
@@ -169,52 +175,17 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private fun fetchStudyInfo(programDbId: String, studyDbIds: List<String>) {
 
-        launch(Dispatchers.IO) {
+        launch {
 
             setLoadingText(getString(R.string.act_brapi_study_import_fetch_levels))
 
-            val observationLevelJob = fetchObservationLevels(programDbId)
-            observationLevelJob.join()
-
-            for (studyDbId in studyDbIds) {
-
-                val studyName =
-                    studies.firstOrNull { it.studyDbId == studyDbId }?.studyName ?: studyDbId
-
-                setLoadingText(
-                    getString(
-                        R.string.act_brapi_study_import_fetch_variables, studyName
-                    )
-                )
-
-                val observationVariablesJob = fetchObservationVariables(studyDbId)
-                observationVariablesJob.join()
-
-                setLoadingText(
-                    getString(
-                        R.string.act_brapi_study_import_fetch_units, studyName
-                    )
-                )
-
-                val observationUnitsJob = fetchObservationUnits(studyDbId)
-                observationUnitsJob.join()
-
-                setLoadingText(
-                    getString(
-                        R.string.act_brapi_study_import_fetch_germplasm, studyName
-                    )
-                )
-
-                val germplasmJob = fetchGermplasm(studyDbId)
-                germplasmJob.join()
-            }
-
+            fetchObservationLevels(programDbId).join()
             withContext(Dispatchers.Main) {
+                importButton.isEnabled = false
                 loadingTextView.visibility = View.GONE
                 progressBar.visibility = View.INVISIBLE
-                tabLayout.visibility = View.VISIBLE
+                tabLayout.visibility = View.GONE
 
-                loadTabLayout()
                 loadStudyList(studyDbIds)
                 setupImportButton(studyDbIds)
             }
@@ -225,7 +196,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         LEVELS, SORT, PRIMARY_ORDER, SECONDARY_ORDER
     }
 
-    private fun loadTabLayout() {
+    private fun loadTabLayout(studyDbIds: List<String>) {
+
+        tabLayout.visibility = View.VISIBLE
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -249,21 +222,30 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             }
         })
 
-        attributesTable = getAttributes()
+        listView.visibility = View.VISIBLE
+
+        attributesTable = hashMapOf()
+        attributesTable?.let { table ->
+            for (study in studyDbIds) {
+                table[study] = getAttributes(study)
+            }
+        }
 
         setDefaultAttributeIdentifiers()
 
         setLevelListOptions()
-
-        listView.visibility = View.VISIBLE
     }
 
     private fun setLevelListOptions() {
 
+        val levels = observationLevels.toList().intersect(observationUnits.flatMap { it.value }
+            .map { it.observationUnitPosition.observationLevel.levelName }
+            .toSet()).toTypedArray()
+
         listView.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_list_item_single_choice,
-            observationLevels.toList()
+            levels
         )
 
         listView.setItemChecked(selectedLevel, true)
@@ -279,15 +261,20 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 -1
 
             } else position
+
+            studyList.adapter?.notifyDataSetChanged()
+
         }
     }
+
+    private fun getAttributeKeys() = attributesTable?.values?.flatMap { it.values }?.flatMap { it.keys }?.distinct() ?: listOf()
 
     private fun setSortListOptions() {
 
         listView.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_list_item_single_choice,
-            attributesTable?.values?.flatMap { it.keys }?.distinct() ?: listOf()
+            getAttributeKeys()
         )
 
         listView.setItemChecked(selectedSort, true)
@@ -308,7 +295,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private fun setPrimaryOrderListOptions() {
 
-        val attributes = attributesTable?.values?.flatMap { it.keys }?.distinct() ?: listOf()
+        val attributes = getAttributeKeys()
 
         listView.adapter = ArrayAdapter(
             this,
@@ -334,7 +321,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private fun setSecondaryOrderListOptions() {
 
-        val attributes = attributesTable?.values?.flatMap { it.keys }?.distinct() ?: listOf()
+        val attributes = getAttributeKeys()
 
         listView.adapter = ArrayAdapter(
             this,
@@ -360,7 +347,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private fun setDefaultAttributeIdentifiers() {
 
-        val attributes = attributesTable?.values?.flatMap { it.keys }?.distinct() ?: listOf()
+        val attributes = getAttributeKeys()
 
         if (selectedLevel == -1) {
             selectedLevel = if (observationLevels.contains("plot")) {
@@ -373,6 +360,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         if (selectedPrimary == -1) {
             selectedPrimary = if (attributes.contains("Row")) {
                 attributes.indexOf("Row")
+            } else if (attributes.contains("Block")) {
+                attributes.indexOf("Block")
             } else {
                 0
             }
@@ -381,17 +370,20 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         if (selectedSecondary == -1) {
             selectedSecondary = if (attributes.contains("Column")) {
                 attributes.indexOf("Column")
+            } else if (attributes.contains("Rep")) {
+                attributes.indexOf("Rep")
             } else {
                 0
             }
         }
     }
 
-    private fun getAttributes(): Map<String, Map<String, String>> {
+    private fun getAttributes(studyDbId: String): Map<String, Map<String, String>> {
 
         val unitAttributes = hashMapOf<String, Map<String, String>>()
+        val germs = germplasms[studyDbId] ?: listOf()
 
-        observationUnits.forEach { unit ->
+        observationUnits[studyDbId]?.forEach { unit ->
 
             val attributes = hashMapOf<String, String>()
 
@@ -426,7 +418,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             if (germplasms.isNotEmpty() && unit.germplasmDbId != null) {
 
-                germplasms.firstOrNull { it.germplasmDbId == unit.germplasmDbId }?.let { germ ->
+                germs.firstOrNull { it.germplasmDbId == unit.germplasmDbId }?.let { germ ->
 
                     germ.pedigree?.let { pedigree ->
                         attributes["Pedigree"] = pedigree
@@ -478,30 +470,97 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             it.orientation = LinearLayoutManager.VERTICAL
         }
 
-        studyList.adapter = StudyAdapter()
-
-        val cacheModels = BrapiFilterCache.getStoredModels(this)
+        val cacheModels = BrapiFilterCache.getStoredModels(this@BrapiStudyImportActivity)
 
         val studyModels = studyDbIds.map { id ->
 
             val studyName =
                 cacheModels.firstOrNull { it.study.studyDbId == id }?.study?.studyName ?: id
-            val locationName =
-                cacheModels.firstOrNull { it.study.studyDbId == id }?.study?.locationName ?: ""
-            val unitCount = observationUnits.filter { it.studyDbId == id }.size
-            val traitCount = observationVariables[id]?.size ?: 0
 
-            StudyAdapter.Model(
+            Model(
                 id = id,
                 title = studyName,
-                unitCount = unitCount,
-                traitCount = traitCount,
-                location = locationName
             )
         }
 
+        studyList.adapter = StudyAdapter(object : StudyAdapter.StudyLoader {
+            override fun getObservationVariables(
+                id: String,
+                position: Int
+            ): HashSet<BrAPIObservationVariable>? {
+                return observationVariables[id]?.toHashSet()
+            }
+
+            override fun getObservationUnits(
+                id: String,
+                position: Int
+            ): HashSet<BrAPIObservationUnit>? {
+                return if (selectedLevel >= 0) observationUnits[id]?.toHashSet()
+                    ?.filter { it.observationUnitPosition.observationLevel.levelName == observationLevels.elementAt(selectedLevel) }?.toHashSet()
+                else observationUnits[id]?.toHashSet()
+            }
+
+            override fun getGermplasm(id: String, position: Int): HashSet<BrAPIGermplasm>? {
+                return germplasms[id]?.toHashSet()
+            }
+
+            override fun getLocation(id: String): String {
+               return cacheModels.firstOrNull { it.study.studyDbId == id }?.study?.locationName ?: ""
+            }
+        })
+
         (studyList.adapter as StudyAdapter).submitList(studyModels)
 
+        launch {
+
+            async {
+
+                //fetch variables, units, and germs for all studies asynchronously
+                studyModels.forEachIndexed { index, model ->
+
+                    launch {
+                        val job = fetchObservationVariables(model.id)
+                        job.join()
+                        withContext(Dispatchers.Main) {
+                            studyList.adapter?.notifyItemChanged(index)
+                        }
+                    }
+                }
+
+            }.await()
+
+            async {
+
+                //fetch variables, units, and germs for all studies asynchronously
+                studyModels.forEachIndexed { index, model ->
+
+                    launch {
+                        val job = fetchObservationUnits(model.id)
+                        job.join()
+                    }
+                }
+
+            }.await()
+
+            async {
+
+                //fetch variables, units, and germs for all studies asynchronously
+                studyModels.forEachIndexed { index, model ->
+
+                    launch {
+                        val job = fetchGermplasm(model.id)
+                        job.join()
+                        withContext(Dispatchers.Main) {
+                            studyList.adapter?.notifyItemChanged(index)
+                            loadTabLayout(studyDbIds)
+                        }
+                    }
+                }
+
+            }.await()
+
+            importButton.isEnabled = true
+        }
     }
 
     private fun setupImportButton(studyDbIds: List<String>) {
@@ -538,48 +597,53 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             it.observationLevelName = observationLevels.elementAt(selectedLevel)
         }
 
-        val units =
-            observationUnits.filter { it.studyDbId == study.studyDbId && it.observationUnitPosition.observationLevel.levelName == level.observationLevelName }
+        attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
-        val details = BrapiStudyDetails()
-        details.studyDbId = study.studyDbId
-        details.studyName = study.studyName
-        details.commonCropName = study.commonCropName
-        details.numberOfPlots = units.size
+            observationUnits[study.studyDbId]?.filter { it.observationUnitPosition.observationLevel.levelName == level.observationLevelName }
+                ?.let { units ->
 
-        details.traits = observationVariables[study.studyDbId]?.toList()
-            ?.map { it.toTraitObject(this@BrapiStudyImportActivity) } ?: listOf()
+                    val details = BrapiStudyDetails()
+                    details.studyDbId = study.studyDbId
+                    details.studyName = study.studyName
+                    details.commonCropName = study.commonCropName
+                    details.numberOfPlots = units.size
 
-        val attributes = attributesTable?.values?.flatMap { it.keys }?.distinct() ?: listOf()
-        val primaryId = attributes[selectedPrimary]
-        val secondaryId = attributes[selectedSecondary]
-        val sortOrder = if (selectedSort == -1) "" else attributes[selectedSort]
+                    details.traits = observationVariables[study.studyDbId]?.toList()
+                        ?.map { it.toTraitObject(this@BrapiStudyImportActivity) } ?: listOf()
 
-        details.attributes = attributes
+                    val attributes = studyAttributes.values.flatMap { it.keys }.distinct()
+                    val primaryId = attributes[selectedPrimary]
+                    val secondaryId = attributes[selectedSecondary]
+                    val sortOrder = if (selectedSort == -1) "" else attributes[selectedSort]
 
-        val unitAttributes = ArrayList<List<String>>()
-        units.forEach { unit ->
+                    details.attributes = attributes
 
-            val row = ArrayList<String>()
+                    val unitAttributes = ArrayList<List<String>>()
+                    units.forEach { unit ->
 
-            attributes.forEach { attr ->
-                row.add(attributesTable?.get(unit.observationUnitDbId)?.get(attr) ?: "")
-            }
+                        val row = ArrayList<String>()
 
-            unitAttributes.add(row)
+                        attributes.forEach { attr ->
+                            row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
+                        }
 
+                        unitAttributes.add(row)
+
+                    }
+
+                    details.values = mutableListOf()
+                    details.values.addAll(unitAttributes)
+
+                    brapiService.saveStudyDetails(
+                        details,
+                        level,
+                        primaryId,
+                        secondaryId,
+                        sortOrder
+                    )
+                }
         }
 
-        details.values = mutableListOf()
-        details.values.addAll(unitAttributes)
-
-        brapiService.saveStudyDetails(
-            details,
-            level,
-            primaryId,
-            secondaryId,
-            sortOrder
-        )
     }
 
     private suspend fun fetchObservationLevels(programDbId: String) = coroutineScope {
@@ -603,6 +667,12 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 setResult(RESULT_CANCELED)
                 finish()
             }
+
+            while (observationLevels.isEmpty()) {
+                ensureActive()
+            }
+
+            cancel()
         }
     }
 
@@ -611,93 +681,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             progressBar.isIndeterminate = false
             progressBar.progress = progress
             progressBar.max = progressMax
-        }
-    }
-
-    private suspend fun fetchObservationVariables(studyDbId: String) = coroutineScope {
-
-        val models = arrayListOf<BrAPIObservationVariable>()
-
-        launch(Dispatchers.IO) {
-            (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(VariableQueryParams().also {
-                it.studyDbId(studyDbId)
-            }).collect { variables ->
-
-                val data = variables as Pair<*, *>
-                val total = data.first as Int
-                val variableModels = data.second as List<*>
-                variableModels.forEach { model ->
-
-                    (model as? BrAPIObservationVariable)?.let { variable ->
-
-                        Log.d(TAG, "Variable: ${variable.observationVariableName}")
-
-                        models.add(variable)
-                        Log.d(TAG, "Variable: ${models.size}/$total")
-
-                        if (total == models.size) {
-                            observationVariables.getOrPut(studyDbId) { hashSetOf() }.addAll(models)
-                            cancel()
-                        }
-                    }
-                }
-
-                setProgress(models.size, total)
-
-                if (models.isEmpty() && total == 0) {
-                    cancel()
-                }
-            }
-        }
-    }
-
-    private suspend fun fetchObservationUnits(studyDbId: String) = coroutineScope {
-
-        val units = arrayListOf<BrAPIObservationUnit>()
-
-        launch(Dispatchers.IO) {
-
-            (brapiService as BrAPIServiceV2).observationUnitService.fetchAll(
-                ObservationUnitQueryParams().also {
-                    it.studyDbId(studyDbId)
-                    //it.observationUnitLevelName("plot")
-                }
-            )
-                .collect { response ->
-                    Log.d("Unit", "Response")
-
-                    val data = response as Pair<*, *>
-                    val total = data.first as Int
-                    val models = data.second as List<*>
-                    models.forEach { unit ->
-
-                        (unit as? BrAPIObservationUnit)?.let { u ->
-                            Log.d("Unit", u.observationUnitName)
-                            units.add(u)
-                            if (total == units.size) {
-                                setProgress(units.size, total)
-                                observationUnits.addAll(units)
-                                cancel()
-                            }
-                        }
-                    }
-
-                    setProgress(units.size, total)
-
-                    if (models.isEmpty() && total == 0) {
-
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(
-                                this@BrapiStudyImportActivity,
-                                "No units found",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            finish()
-                        }
-
-                        cancel()
-                    }
-                }
         }
     }
 
@@ -723,19 +706,96 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                         Log.d("Unit", g.germplasmName)
                         germs.add(g)
                         if (total == germs.size) {
-                            setProgress(germs.size, total)
-                            germplasms.addAll(germs)
+                            germplasms.getOrPut(studyDbId) { hashSetOf() }
+                                .addAll(germs)
                             cancel()
                         }
                     }
                 }
 
-                setProgress(germs.size, total)
-
                 if (models.isEmpty() && total == 0) {
                     cancel()
                 }
             }
+        }
+    }
+
+
+    private suspend fun fetchObservationVariables(studyDbId: String) =
+        coroutineScope {
+
+            val models = arrayListOf<BrAPIObservationVariable>()
+
+            launch(Dispatchers.IO) {
+                (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
+                    VariableQueryParams().also {
+                        it.studyDbId(studyDbId)
+                    }).collect { variables ->
+
+                    val data = variables as Pair<*, *>
+                    val total = data.first as Int
+                    val variableModels = data.second as List<*>
+                    variableModels.forEach { model ->
+
+                        (model as? BrAPIObservationVariable)?.let { variable ->
+
+                            Log.d(TAG, "Variable: ${variable.observationVariableName}")
+
+                            models.add(variable)
+                            Log.d(TAG, "Variable: ${models.size}/$total")
+
+                            if (total == models.size) {
+                                observationVariables.getOrPut(studyDbId) { hashSetOf() }
+                                    .addAll(models)
+
+                                cancel()
+                            }
+                        }
+                    }
+
+                    if (models.isEmpty() && total == 0) {
+                        cancel()
+                    }
+                }
+            }
+        }
+
+    private suspend fun fetchObservationUnits(studyDbId: String) = coroutineScope {
+
+        val units = arrayListOf<BrAPIObservationUnit>()
+
+        launch(Dispatchers.IO) {
+
+            (brapiService as BrAPIServiceV2).observationUnitService.fetchAll(
+                ObservationUnitQueryParams().also {
+                    it.studyDbId(studyDbId)
+                    //it.observationUnitLevelName("plot")
+                }
+            )
+                .collect { response ->
+                    Log.d("Unit", "Response")
+
+                    val data = response as Pair<*, *>
+                    val total = data.first as Int
+                    val models = data.second as List<*>
+                    models.forEach { unit ->
+
+                        (unit as? BrAPIObservationUnit)?.let { u ->
+                            Log.d("Unit", u.observationUnitName)
+                            units.add(u)
+                            if (total == units.size) {
+                                observationUnits.getOrPut(studyDbId) { hashSetOf() }
+                                    .addAll(units)
+                                cancel()
+                            }
+                        }
+                    }
+
+                    if (models.isEmpty() && total == 0) {
+
+                        cancel()
+                    }
+                }
         }
     }
 }

@@ -13,6 +13,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <ProgressBar
+            android:id="@+id/list_item_study_pb"
+            android:indeterminate="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
         <TextView
             android:id="@+id/list_item_study_title_tv"
             style="@style/TextViewStyle.Bold.Title"
@@ -26,42 +36,44 @@
             app:layout_constraintHorizontal_bias="0"
             tools:text="KSU" />
 
-        <TextView
-            android:id="@+id/list_item_study_units_tv"
-            style="@style/TextViewStyle.Sub"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/list_item_study_units_chip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            app:drawableStartCompat="@drawable/ic_dots_grid"
+            app:chipIcon="@drawable/ic_dots_grid"
+            android:checkable="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/list_item_study_title_tv"
-            tools:text="108" />
+            tools:text="108"/>
 
-        <TextView
-            android:id="@+id/list_item_study_traits_tv"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/list_item_study_traits_chip"
             style="@style/TextViewStyle.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            app:drawableStartCompat="@drawable/ic_ruler"
+            app:chipIcon="@drawable/ic_ruler"
+            android:checkable="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toEndOf="@id/list_item_study_units_tv"
+            app:layout_constraintStart_toEndOf="@id/list_item_study_units_chip"
             app:layout_constraintTop_toBottomOf="@id/list_item_study_title_tv"
             tools:text="2" />
 
-        <TextView
-            android:id="@+id/list_item_study_location_tv"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/list_item_study_location_chip"
             style="@style/TextViewStyle.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            app:drawableStartCompat="@drawable/map_marker_outline"
+            app:chipIcon="@drawable/map_marker_outline"
+            android:checkable="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toEndOf="@id/list_item_study_traits_tv"
+            app:layout_constraintStart_toEndOf="@id/list_item_study_traits_chip"
             app:layout_constraintTop_toBottomOf="@id/list_item_study_title_tv"
             tools:text="Manhattan, KS" />
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,10 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
-import com.fieldbook.tracker.dialogs.BrapiFilterBottomSheetDialog
 import com.fieldbook.tracker.preferences.GeneralKeys
 import org.brapi.v2.model.core.BrAPIStudy
 
@@ -26,8 +27,6 @@ class BrapiStudyFilterActivity(
         TRIAL,
         CROP
     }
-
-    private var brapiFilterDialog: BrapiFilterBottomSheetDialog? = null
 
     override fun List<TrialStudyModel>.filterByPreferences(): List<TrialStudyModel> {
 
@@ -87,50 +86,20 @@ class BrapiStudyFilterActivity(
             checked = false,
             id = model.study.studyDbId,
             label = model.study.studyName,
-            subLabel = model.study.locationName
+            subLabel = model.trialName ?: model.study.locationName
         )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        brapiFilterDialog = BrapiFilterBottomSheetDialog(
-            prefs,
-            object : BrapiFilterBottomSheetDialog.OnFilterSelectedListener {
-                override fun onFilterSelected(filter: Int) {
-
-                    intentLauncher.launch(
-                        when (filter) {
-                            FilterChoice.PROGRAM.ordinal -> BrapiProgramFilterActivity.getIntent(this@BrapiStudyFilterActivity)
-                            FilterChoice.SEASON.ordinal -> BrapiSeasonsFilterActivity.getIntent(this@BrapiStudyFilterActivity)
-                            FilterChoice.CROP.ordinal -> BrapiCropsFilterActivity.getIntent(this@BrapiStudyFilterActivity)
-                            else -> BrapiTrialsFilterActivity.getIntent(this@BrapiStudyFilterActivity)
-                        }
-                    )
-                }
-
-                override fun onDismiss() {
-
-                    cache.clear()
-
-                    recyclerView.adapter?.notifyDataSetChanged()
-
-                    restoreModels()
-
-                    resetChipsUi()
-
-                    //performQueryWithProgress()
-                }
-            })
+        chipGroup.visibility = View.VISIBLE
 
         setupMainToolbar()
 
         applyTextView.text = getString(R.string.act_brapi_filter_import)
 
     }
-
-    private fun getIds(filterName: String) =
-        BrapiFilterTypeAdapter.toModelList(prefs, filterName).map { it.id }
 
     override fun showNextButton() = cache.any { it.checked }
 
@@ -157,11 +126,31 @@ class BrapiStudyFilterActivity(
             onBackPressed()
             return true
         } else if (item.itemId == R.id.action_brapi_filter) {
-
-            if (brapiFilterDialog?.isVisible != true) {
-                brapiFilterDialog?.show(supportFragmentManager, "filter")
-            }
+            showFilterChoiceDialog()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showFilterChoiceDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_brapi_filter_choices_title)
+            .setItems(
+                arrayOf(
+                    getString(R.string.brapi_filter_type_program),
+                    getString(R.string.brapi_filter_type_season),
+                    getString(R.string.brapi_filter_type_trial),
+                    getString(R.string.brapi_filter_type_crop)
+                )
+            ) { _, which ->
+                intentLauncher.launch(
+                    when (which) {
+                        FilterChoice.PROGRAM.ordinal -> BrapiProgramFilterActivity.getIntent(this)
+                        FilterChoice.SEASON.ordinal -> BrapiSeasonsFilterActivity.getIntent(this)
+                        FilterChoice.CROP.ordinal -> BrapiCropsFilterActivity.getIntent(this)
+                        else -> BrapiTrialsFilterActivity.getIntent(this)
+                    }
+                )
+            }
+            .show()
     }
 }
