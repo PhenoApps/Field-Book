@@ -559,6 +559,17 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             }.await()
 
+            if ((studyList.adapter as StudyAdapter).currentList.any {
+                    observationUnits[it.id]?.isEmpty() != false
+                }) {
+
+                Toast.makeText(this@BrapiStudyImportActivity,
+                    "Failed to fetch observation units", Toast.LENGTH_SHORT).show()
+
+                onBackPressed()
+
+            }
+
             importButton.isEnabled = true
         }
     }
