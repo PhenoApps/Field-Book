@@ -38,11 +38,25 @@ class BrapiFilterCache {
             }
         }
 
+        fun clearPreferences(context: Context) {
+            with(PreferenceManager.getDefaultSharedPreferences(context).edit()) {
+                for (f in listOf(
+                    BrapiTrialsFilterActivity.FILTER_NAME,
+                    BrapiSeasonsFilterActivity.FILTER_NAME,
+                    BrapiProgramFilterActivity.FILTER_NAME,
+                    BrapiCropsFilterActivity.FILTER_NAME
+                )) {
+                    remove(f)
+                }
+                remove(GeneralKeys.LIST_FILTER_TEXTS)
+                apply()
+            }
+        }
+
         fun delete(context: Context, clearPreferences: Boolean = false) {
 
             if (clearPreferences) {
-                PreferenceManager.getDefaultSharedPreferences(context).edit()
-                    .remove(GeneralKeys.LIST_FILTER_TEXTS).apply()
+                clearPreferences(context)
             }
 
             context.externalCacheDir?.let {

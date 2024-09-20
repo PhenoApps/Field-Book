@@ -181,7 +181,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             it.chipIcon = AppCompatResources.getDrawable(this, R.drawable.delete_sweep)
             it.setOnClickListener {
                 chipGroup.removeAllViews()
-                clearFilterPreferences()
+                BrapiFilterCache.clearPreferences(this@BrapiListFilterActivity)
                 restoreModels()
             }
             chipGroup.addView(it)
@@ -190,19 +190,6 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         //resetChipToolbarCount()
         //clearFilterButton.visibility = if (filtersChipGroup.childCount > 0) View.VISIBLE else View.GONE
         //subtitleTv.visibility = if (filtersChipGroup.childCount > 0) View.VISIBLE else View.GONE
-    }
-
-    private fun clearFilterPreferences() {
-        for (f in listOf(
-            BrapiProgramFilterActivity.FILTER_NAME,
-            BrapiTrialsFilterActivity.FILTER_NAME,
-            BrapiSeasonsFilterActivity.FILTER_NAME,
-            BrapiCropsFilterActivity.FILTER_NAME
-        )) {
-            prefs.edit().remove(f).apply()
-        }
-
-        prefs.edit().remove(GeneralKeys.LIST_FILTER_TEXTS).apply()
     }
 
     private fun resetFilterChips(filterName: String) {
