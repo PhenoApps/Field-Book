@@ -65,7 +65,7 @@
         tools:listitem="@layout/list_item_label_checkbox"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/brapi_importer_fetch_data_tv"
-        app:layout_constraintBottom_toTopOf="@id/act_brapi_import_tv"/>
+        app:layout_constraintBottom_toTopOf="@id/act_brapi_importer_button"/>
 
     <!-- hidden pagination ui that brapi service is coupled to -->
     <LinearLayout
@@ -97,17 +97,18 @@
 
     </LinearLayout>
 
-    <TextView style="@style/TextViewStyle.Bold.Title"
+    <com.google.android.material.button.MaterialButton
         android:visibility="gone"
-        android:id="@+id/act_brapi_import_tv"
-        android:text="@string/select"
-        android:gravity="center"
-        android:minHeight="?attr/actionBarSize"
-        android:background="?attr/fb_color_primary"
-        android:layout_width="match_parent"
+        tools:visibility="visible"
+        android:id="@+id/act_brapi_importer_button"
+        android:layout_margin="8dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="@string/dialog_import"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

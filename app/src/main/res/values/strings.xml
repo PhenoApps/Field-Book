@@ -1155,6 +1155,7 @@
     <string name="act_brapi_study_import_title">Study Import</string>
     <string name="select">Select</string>
     <string name="results">results</string>
+    <string name="failed_to_fetch_observation_units">Failed to fetch observation units</string>
     <plurals name="act_brapi_list_filter">
         <item quantity="one">%s result</item>
         <item quantity="other">%s results</item>

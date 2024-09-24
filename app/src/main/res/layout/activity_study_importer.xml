@@ -130,8 +130,9 @@
         android:layout_margin="8dp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="@string/dialog_import"
+        android:text="@string/dialog_save"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/brapi_importer_rv"
         app:layout_constraintEnd_toEndOf="parent"/>

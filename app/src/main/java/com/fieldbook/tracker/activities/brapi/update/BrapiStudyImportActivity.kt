@@ -236,16 +236,16 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         setLevelListOptions()
     }
 
-    private fun setLevelListOptions() {
+    private fun existingLevels() = observationLevels.toList().intersect(observationUnits.flatMap { it.value }
+        .map { it.observationUnitPosition.observationLevel.levelName }
+        .toSet()).toTypedArray()
 
-        val levels = observationLevels.toList().intersect(observationUnits.flatMap { it.value }
-            .map { it.observationUnitPosition.observationLevel.levelName }
-            .toSet()).toTypedArray()
+    private fun setLevelListOptions() {
 
         listView.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_list_item_single_choice,
-            levels
+            existingLevels()
         )
 
         listView.setItemChecked(selectedLevel, true)
@@ -349,9 +349,11 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         val attributes = getAttributeKeys()
 
+        val levels = existingLevels()
+
         if (selectedLevel == -1) {
-            selectedLevel = if (observationLevels.contains("plot")) {
-                observationLevels.indexOf("plot")
+            selectedLevel = if (levels.contains("plot")) {
+                levels.indexOf("plot")
             } else {
                 0
             }
@@ -496,7 +498,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 position: Int
             ): HashSet<BrAPIObservationUnit>? {
                 return if (selectedLevel >= 0) observationUnits[id]?.toHashSet()
-                    ?.filter { it.observationUnitPosition.observationLevel.levelName == observationLevels.elementAt(selectedLevel) }?.toHashSet()
+                    ?.filter { it.observationUnitPosition.observationLevel.levelName == existingLevels().elementAt(selectedLevel) }?.toHashSet()
                 else observationUnits[id]?.toHashSet()
             }
 
@@ -564,7 +566,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 }) {
 
                 Toast.makeText(this@BrapiStudyImportActivity,
-                    "Failed to fetch observation units", Toast.LENGTH_SHORT).show()
+                    getString(R.string.failed_to_fetch_observation_units), Toast.LENGTH_SHORT).show()
 
                 onBackPressed()
 
@@ -605,7 +607,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private fun saveStudy(study: BrAPIStudy) {
 
         val level = BrapiObservationLevel().also {
-            it.observationLevelName = observationLevels.elementAt(selectedLevel)
+            it.observationLevelName = existingLevels().elementAt(selectedLevel)
         }
 
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->

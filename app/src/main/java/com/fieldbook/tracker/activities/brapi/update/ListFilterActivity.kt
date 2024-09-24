@@ -102,7 +102,7 @@ abstract class ListFilterActivity : ThemedActivity(),
 
         fetchDescriptionTv = findViewById(R.id.brapi_importer_fetch_data_tv)
         recyclerView = findViewById(R.id.brapi_importer_rv)
-        applyTextView = findViewById(R.id.act_brapi_import_tv)
+        applyTextView = findViewById(R.id.act_brapi_importer_button)
         progressBar = findViewById(R.id.brapi_importer_pb)
         searchBar = findViewById(R.id.brapi_importer_sb)
 
