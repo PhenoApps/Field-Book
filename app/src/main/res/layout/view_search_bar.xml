@@ -9,6 +9,7 @@
     android:layout_height="48dp"
     android:id="@+id/search_card"
     android:foregroundGravity="center_vertical"
+    app:cardElevation="1dp"
     app:cardCornerRadius="24dp">
 
     <LinearLayout
@@ -17,18 +18,13 @@
         android:orientation="horizontal"
         android:clipToPadding="false"
         android:gravity="center_vertical"
-        android:paddingLeft="8dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingRight="8dp">
+        android:padding="8dp">
 
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:contentDescription="@string/searchpreference_search"
-            android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginRight="16dp"
             android:layout_marginEnd="16dp"
             app:tint="?android:attr/textColorPrimary"
             app:srcCompat="@drawable/searchpreference_ic_search" />
@@ -39,7 +35,6 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
             android:background="@null"
             android:textColor="?android:attr/textColorPrimary"
             android:id="@+id/search"
@@ -49,10 +44,7 @@
             android:id="@+id/clear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
+            android:padding="4dp"
             android:contentDescription="@string/searchpreference_clear"
             android:background="?selectableItemBackgroundBorderless"
             android:visibility="gone"
