@@ -302,17 +302,26 @@ public class DataHelper {
      * Helper function to change visibility of a trait. Used in the ratings
      * screen
      */
-    public void updateTraitVisibility(String traitDbId, boolean val) {
+    public void updateTraitVisibility(String traitDbId, boolean val, Integer fieldId) {
 
         open();
-
-        Integer fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
         ObservationVariableDao.Companion.updateTraitVisibility(traitDbId, val, fieldId);
 
 //        db.execSQL("update " + TRAITS
 //                + " set isVisible = ? where trait like ?", new String[]{
 //                String.valueOf(val), trait});
+    }
+
+    /**
+     * Overloaded method that makes fieldId optional.
+     */
+    public void updateTraitVisibility(String traitDbId, boolean val) {
+        open();
+
+        Integer fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        ObservationVariableDao.Companion.updateTraitVisibility(traitDbId, val, fieldId);
     }
 
     public void updateObservationUnit(ObservationUnitModel model, String geoCoordinates) {
