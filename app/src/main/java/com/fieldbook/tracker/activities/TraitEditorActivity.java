@@ -30,6 +30,8 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
@@ -399,6 +401,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             importExportDialog();
         } else if (itemId == R.id.toggleTrait) {
             changeAllVisibility();
+        } else if (itemId == R.id.duplicateSetup) {
+            showDuplicateSetupDialog();
         } else if (itemId == android.R.id.home) {
             CollectActivity.reloadData = true;
             finish();
@@ -444,6 +448,43 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         ed.putBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, globalVis);
         ed.apply();
         queryAndLoadTraits();
+    }
+
+    private void showDuplicateSetupDialog() {
+        // Fetch the list of fields from the database
+        List<String> fields = database.getFieldsWithTraitInfo();
+
+        // Create the AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.traits_duplicate_setup);
+
+        // Set up the layout
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+
+        // Add the text
+        TextView textView = new TextView(this);
+        textView.setText(R.string.traits_duplicate_setup_summary);
+        layout.addView(textView);
+
+        // Add the dropdown (Spinner)
+        Spinner spinner = new Spinner(this);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fields);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        layout.addView(spinner);
+
+        builder.setView(layout);
+
+        // Set up the buttons
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        builder.setPositiveButton("Apply", (dialog, which) -> {
+            String selectedField = (String) spinner.getSelectedItem();
+            applyDuplicateSetup(selectedField);
+        });
+
+        builder.create().show();
     }
 
     private void importExportDialog() {

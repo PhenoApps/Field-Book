@@ -200,6 +200,9 @@
 
 
     <!-- TRAITS -->
+    <string name="traits_duplicate_setup">Duplicate Trait Setup</string>
+    <string name="traits_duplicate_setup_summary">Copy trait active status and order from another field</string>
+
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sort Traits</string>
     <string name="traits_sort_name">Name</string>
