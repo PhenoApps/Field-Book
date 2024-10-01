@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
@@ -45,6 +46,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity;
+import com.fieldbook.tracker.adapters.FieldSpinnerAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapterController;
 import com.fieldbook.tracker.async.ImportCSVTask;
@@ -451,37 +453,51 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     private void showDuplicateSetupDialog() {
-        // Fetch the list of fields from the database
-        List<String> fields = database.getFieldsWithTraitInfo();
+        ArrayList<FieldObject> fields = database.getAllFieldObjects();
 
-        // Create the AlertDialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.traits_duplicate_setup);
+        builder.setTitle(R.string.traits_duplicate_setup_summary);
 
-        // Set up the layout
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(50, 40, 50, 10);
 
-        // Add the text
         TextView textView = new TextView(this);
-        textView.setText(R.string.traits_duplicate_setup_summary);
+//        textView.setText(R.string.traits_duplicate_setup_summary);
         layout.addView(textView);
 
-        // Add the dropdown (Spinner)
         Spinner spinner = new Spinner(this);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fields);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        FieldSpinnerAdapter adapter = new FieldSpinnerAdapter(this, fields);
+        ArrayAdapter<FieldObject> adapter = new ArrayAdapter<FieldObject>(this, R.layout.spinner_item_trait_duplication, fields) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.spinner_item_trait_duplication, parent, false);
+                }
+                TextView traitCountTextView = convertView.findViewById(R.id.visible_trait_count);
+                TextView fieldNameTextView = convertView.findViewById(R.id.field_alias);
+                FieldObject field = (FieldObject) getItem(position);
+                traitCountTextView.setText(String.valueOf(field.getVisible_trait_count()));
+                fieldNameTextView.setText(field.getExp_alias());
+                return convertView;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                return getView(position, convertView, parent);
+            }
+        };
         spinner.setAdapter(adapter);
         layout.addView(spinner);
 
         builder.setView(layout);
 
-        // Set up the buttons
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-        builder.setPositiveButton("Apply", (dialog, which) -> {
-            String selectedField = (String) spinner.getSelectedItem();
-            applyDuplicateSetup(selectedField);
+        builder.setNegativeButton(R.string.dialog_cancel, (dialog, which) -> dialog.dismiss());
+        builder.setPositiveButton(R.string.traits_duplicate_setup_apply, (dialog, which) -> {
+            FieldObject selectedField = (FieldObject) spinner.getSelectedItem();
+            Integer targetFieldId = selectedField.getExp_id();
+            database.duplicateTraitSetup(targetFieldId);
+            queryAndLoadTraits();
         });
 
         builder.create().show();

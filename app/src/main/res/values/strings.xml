@@ -201,7 +201,9 @@
 
     <!-- TRAITS -->
     <string name="traits_duplicate_setup">Duplicate Trait Setup</string>
-    <string name="traits_duplicate_setup_summary">Copy trait active status and order from another field</string>
+    <string name="traits_duplicate_setup_summary">Copy trait visibility and order from another field</string>
+    <string name="traits_field_spinner_text">active traits</string>
+    <string name="traits_duplicate_setup_apply">Apply</string>
 
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sort Traits</string>

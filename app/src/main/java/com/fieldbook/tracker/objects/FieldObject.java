@@ -26,7 +26,8 @@ public class FieldObject {
     private ImportFormat import_format;
     private String observation_level;
     private String attribute_count;
-    private String trait_count;
+    private String collected_trait_count;
+    private String visible_trait_count;
     private String observation_count;
 
     public static class TraitDetail {
@@ -54,7 +55,7 @@ public class FieldObject {
         }
         public int getCount() { return count; }
         public List<String> getObservations() { return observations; }
-        public float getCompleteness() { return completeness; }  // Add this line
+        public float getCompleteness() { return completeness; }
     }
 
     private List<TraitDetail> traitDetails;
@@ -219,12 +220,19 @@ public class FieldObject {
     public void setAttribute_count(String attribute_count) {
         this.attribute_count = attribute_count;
     }
-    public String getTrait_count() {
-        return trait_count;
+    public String getCollected_trait_count() {
+        return collected_trait_count;
     }
 
-    public void setTrait_count(String trait_count) {
-        this.trait_count = trait_count;
+    public void setCollected_trait_count(String collected_trait_count) {
+        this.collected_trait_count = collected_trait_count;
+    }
+    public String getVisible_trait_count() {
+        return visible_trait_count;
+    }
+
+    public void setVisible_trait_count(String visible_trait_count) {
+        this.visible_trait_count = visible_trait_count;
     }
     public String getObservation_count() {
         return observation_count;

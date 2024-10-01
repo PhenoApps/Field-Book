@@ -299,6 +299,20 @@ public class DataHelper {
 
 
     /**
+     * Helper function to copy trait visibility and order from one study to another
+     */
+    public void duplicateTraitSetup(Integer targetFieldId) {
+
+        open();
+
+        Integer activeFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        ObservationVariableDao.Companion.duplicateTraitSetup(targetFieldId, activeFieldId);
+
+    }
+
+
+    /**
      * Helper function to change visibility of a trait. Used in the ratings
      * screen
      */

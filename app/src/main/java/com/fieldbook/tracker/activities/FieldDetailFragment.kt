@@ -311,8 +311,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             getString(R.string.no_activity)
         }
 
-//        traitCountChip.text = field.trait_count.toString()
-        traitCountChip.text = database.getVisibleTrait().count().toString();
+        traitCountChip.text = field.visible_trait_count.toString()
+//        traitCountChip.text = database.getVisibleTrait().count().toString();
 
         if (field.observation_count.toInt() > 0) {
             observationCountChip.visibility = View.VISIBLE

@@ -437,22 +437,38 @@ class ObservationVariableDao {
 
         } ?: -1L
 
-//        fun updateTraitVisibility(traitDbId: String, visible: Boolean, fieldId: Int) = withDatabase { db ->
-//            val currentStudyIds = db.rawQuery(
-//                "SELECT study_ids FROM ${ObservationVariable.tableName} WHERE internal_id_observation_variable = ?",
-//                arrayOf(traitDbId)
-//            ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else "[]" }
-//
-//            val jsonArray = org.json.JSONArray(currentStudyIds).apply {
-//                if (visible && !jsonArrayContains(this, fieldId)) put(fieldId)
-//                if (!visible) removeFieldIdFromJsonArray(this, fieldId)
-//            }
-//
-//            db.execSQL(
-//                "UPDATE ${ObservationVariable.tableName} SET study_ids = ? WHERE internal_id_observation_variable = ?",
-//                arrayOf(jsonArray.toString(), traitDbId)
-//            )
-//        }
+        fun duplicateTraitSetup(targetFieldId: Int, selectedFieldId: Int) = withDatabase { db ->
+            // Step 1: Delete all rows that match the selectedFieldId
+            db.delete(
+                "studies_observation_variables_link",
+                "study_id = ?",
+                arrayOf(selectedFieldId.toString())
+            )
+
+            // Step 2: Retrieve all rows that match the targetFieldId
+            val cursor = db.query(
+                "studies_observation_variables_link",
+                null,
+                "study_id = ?",
+                arrayOf(targetFieldId.toString()),
+                null,
+                null,
+                null
+            )
+
+            // Step 3: Insert duplicate rows with the study_id changed to the selectedFieldId
+            cursor.use {
+                while (it.moveToNext()) {
+                    val contentValues = ContentValues().apply {
+                        put("observation_variable_id", it.getString(it.getColumnIndexOrThrow("observation_variable_id")))
+                        put("study_id", selectedFieldId)
+                        put("visibility", it.getInt(it.getColumnIndexOrThrow("visibility")))
+                        put("position", it.getInt(it.getColumnIndexOrThrow("position")))
+                    }
+                    db.insert("studies_observation_variables_link", null, contentValues)
+                }
+            }
+        }
 
         fun updateTraitVisibility(traitDbId: String, visible: Boolean, fieldId: Int) = withDatabase { db ->
             // Check if the link between the trait and the field already exists

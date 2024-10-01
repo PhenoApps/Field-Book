@@ -185,7 +185,8 @@ class StudyDao {
                 else -> observationLevel
             }
             it.attribute_count = this["attribute_count"]?.toString()
-            it.trait_count = this["trait_count"]?.toString()
+            it.collected_trait_count = this["collected_trait_count"]?.toString()
+            it.visible_trait_count = this["visible_trait_count"]?.toString()
             it.observation_count = this["observation_count"]?.toString()
         }
 
@@ -198,7 +199,8 @@ class StudyDao {
                 SELECT 
                     Studies.*,
                     (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
-                    (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
+                    (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS collected_trait_count,
+                    (SELECT COUNT(DISTINCT observation_variable_id) FROM studies_observation_variables_link WHERE study_id = Studies.${Study.PK} AND visibility = 1) AS visible_trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
                 ORDER BY $sortOrder COLLATE NOCASE ${if (isDateSort) "DESC" else "ASC"}
@@ -237,7 +239,8 @@ class StudyDao {
                     study_sort_name,
                     count,
                     (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
-                    (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
+                    (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS collected_trait_count,
+                    (SELECT COUNT(DISTINCT observation_variable_id) FROM studies_observation_variables_link WHERE study_id = Studies.${Study.PK} AND visibility = 1) AS visible_trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
                 WHERE ${Study.PK} = ?

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/visible_trait_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:paddingEnd="8dp"
+        android:text="Visible Trait Count" />
+
+    <TextView
+        android:id="@+id/field_alias"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Field Alias" />
+</LinearLayout>
