@@ -73,7 +73,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var entryCountChip: Chip
     private lateinit var attributeCountChip: Chip
     private lateinit var sortOrderChip: Chip
-    private lateinit var traitCountChip: Chip
+    private lateinit var visibleTraitCountChip: Chip
+    private lateinit var collectedTraitCountChip: Chip
     private lateinit var observationCountChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
@@ -96,7 +97,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         entryCountChip = rootView.findViewById(R.id.entryCountChip)
         attributeCountChip = rootView.findViewById(R.id.attributeCountChip)
         sortOrderChip = rootView.findViewById(R.id.sortOrderChip)
-        traitCountChip = rootView.findViewById(R.id.traitCountChip)
+        visibleTraitCountChip = rootView.findViewById(R.id.visibleTraitCountChip)
+        collectedTraitCountChip = rootView.findViewById(R.id.collectedTraitCountChip)
         observationCountChip = rootView.findViewById(R.id.observationCountChip)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
 
@@ -311,8 +313,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             getString(R.string.no_activity)
         }
 
-        traitCountChip.text = field.visible_trait_count.toString()
-//        traitCountChip.text = database.getVisibleTrait().count().toString();
+        visibleTraitCountChip.text = field.visible_trait_count.toString()
+        collectedTraitCountChip.text = field.collected_trait_count.toString()
 
         if (field.observation_count.toInt() > 0) {
             observationCountChip.visibility = View.VISIBLE
