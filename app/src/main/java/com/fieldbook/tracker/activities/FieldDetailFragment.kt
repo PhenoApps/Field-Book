@@ -64,6 +64,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var lastEditTextView: TextView
     private lateinit var lastExportTextView: TextView
     private lateinit var lastSyncTextView: TextView
+    private lateinit var lastTraitModificationTextView: TextView
+    private lateinit var lastDataTextView: TextView
     private lateinit var cardViewCollect: CardView
     private lateinit var cardViewExport: CardView
     private lateinit var cardViewSync: CardView
@@ -92,6 +94,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         lastExportTextView = rootView.findViewById(R.id.lastExportTextView)
         cardViewSync = rootView.findViewById(R.id.cardViewSync)
         lastSyncTextView = rootView.findViewById(R.id.lastSyncTextView)
+        lastTraitModificationTextView = rootView.findViewById(R.id.dateTraitsModifiedTextView)
+        lastDataTextView = rootView.findViewById(R.id.dateLastCollectionTextView)
         sourceChip = rootView.findViewById(R.id.sourceChip)
         originalNameChip = rootView.findViewById(R.id.originalNameChip)
         entryCountChip = rootView.findViewById(R.id.entryCountChip)
@@ -309,6 +313,20 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         val lastSync = field.date_sync
         if (!lastSync.isNullOrEmpty()) {
             lastSyncTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastSync)
+        } else {
+            getString(R.string.no_activity)
+        }
+
+        val lastTraitModification = field.date_traits_modified
+        if (!lastTraitModification.isNullOrEmpty()) {
+            lastTraitModificationTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastTraitModification)
+        } else {
+            getString(R.string.no_activity)
+        }
+
+        val lastCollection = field.date_edit
+        if (!lastCollection.isNullOrEmpty()) {
+            lastDataTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastCollection)
         } else {
             getString(R.string.no_activity)
         }

@@ -2866,7 +2866,7 @@ public class DataHelper {
                     + "(attribute_value_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_id INTEGER, attribute_value VARCHAR, plot_id INTEGER, exp_id INTEGER)");
             db.execSQL("CREATE TABLE "
                     + EXP_INDEX
-                    + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER, exp_source VARCHAR)");
+                    + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR,VARCHAR date_import , date_edit VARCHAR, date_export VARCHAR, count INTEGER, exp_source VARCHAR)");
 
             //Do not know why the unique constraint does not work
             //db.execSQL("CREATE UNIQUE INDEX expname ON " + EXP_INDEX +"(exp_name);");
@@ -3088,8 +3088,9 @@ public class DataHelper {
                         "study_id INTEGER NOT NULL REFERENCES studies(internal_id_study) ON DELETE CASCADE, " + // study/field reference
                         "observation_variable_id INTEGER NOT NULL REFERENCES observation_variables(internal_id_observation_variable) ON DELETE CASCADE, " + // trait reference
                         "visibility BOOLEAN NOT NULL DEFAULT 1, " + // 1 = visible, 0 = hidden
-                        "position INTEGER, " +  // Custom trait order
-                        "UNIQUE(study_id, observation_variable_id)" +  // Prevent duplicate study-trait relationships
+                        "position INTEGER, " + // trait order
+                        "date_linked TEXT, " + // timestamp when the link was created or updated
+                        "UNIQUE(study_id, observation_variable_id)" +  // prevent duplicate study-trait relationships
                         ");");
             }
         }

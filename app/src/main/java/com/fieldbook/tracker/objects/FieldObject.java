@@ -21,6 +21,7 @@ public class FieldObject {
     private String date_edit;
     private String date_export;
     private String date_sync;
+    private String date_traits_modified;
     private String count;
     private String exp_source;
     private ImportFormat import_format;
@@ -180,6 +181,14 @@ public class FieldObject {
 
     public void setDate_sync(String date_sync) {
         this.date_sync = date_sync;
+    }
+
+    public String getDate_traits_modified() {
+        return date_traits_modified;
+    }
+
+    public void setDate_traits_modified(String date_traits_modified) {
+        this.date_traits_modified = date_traits_modified;
     }
 
     public String getCount() {

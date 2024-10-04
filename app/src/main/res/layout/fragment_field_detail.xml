@@ -391,64 +391,70 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:paddingTop="12dp"
                 android:paddingBottom="12dp">
 
-                <!-- Traits Item -->
+                <!-- Trait Icon -->
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="8dp"
+                    android:src="@drawable/ic_nav_drawer_traits" />
+
+                <!-- Title and Date Text -->
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="16dp">
 
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_margin="8dp"
-                        android:src="@drawable/ic_nav_drawer_traits" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <!-- Trait Title -->
+                    <TextView
+                        style="@style/TextViewStyle.Bold.Title"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center_vertical">
+                        android:text="@string/settings_traits"
+                        android:paddingBottom="4dp" />
 
-                        <TextView
-                            style="@style/TextViewStyle.Bold.Title"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/settings_traits"
-                            android:paddingRight="16dp"
-                            android:paddingBottom="8dp"/>
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/visibleTraitCountChip"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:clickable="false"
-                            android:focusable="false"
-                            app:chipIcon="@drawable/ic_ruler"
-                            app:chipIconSize="24dp"
-                            app:ensureMinTouchTargetSize="false"
-                            app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/defaultChipBackground" />
-
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/ic_chevron_right" />
+                    <!-- Date Traits Modified (Replacing the Chip) -->
+                    <TextView
+                        style="@style/TextViewStyle.Sub"
+                        android:id="@+id/dateTraitsModifiedTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/no_activity" />
 
                 </LinearLayout>
+
+                <!-- Chip shifted to the right -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/visibleTraitCountChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"
+                    app:chipIcon="@drawable/ic_ruler"
+                    app:chipIconSize="24dp"
+                    app:ensureMinTouchTargetSize="false"
+                    app:closeIconVisible="false"
+                    app:chipBackgroundColor="?attr/defaultChipBackground"
+                    android:layout_marginEnd="8dp" />
+
+                <!-- Chevron Icon -->
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_chevron_right" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Data Card -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewData"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp">
@@ -471,12 +477,14 @@
                     android:clickable="true"
                     android:focusable="true">
 
+                    <!-- Data Icon -->
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_margin="8dp"
                         android:src="@drawable/ic_chart_bar" />
 
+                    <!-- Title and Date Text -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -484,50 +492,62 @@
                         android:orientation="vertical"
                         android:gravity="center_vertical">
 
+                        <!-- Data Title -->
                         <TextView
                             style="@style/TextViewStyle.Bold.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/field_data_title"
                             android:paddingRight="16dp"
-                            android:paddingBottom="8dp"/>
+                            android:paddingBottom="4dp"/>
 
-                        <com.google.android.material.chip.ChipGroup
-                            android:id="@+id/dataChipGroup"
+                        <!-- Date Last Collection (New Subtitle) -->
+                        <TextView
+                            style="@style/TextViewStyle.Sub"
+                            android:id="@+id/dateLastCollectionTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            app:singleLine="false"
-                            app:chipSpacingHorizontal="8dp"
-                            app:chipSpacingVertical="8dp"
-                            android:descendantFocusability="blocksDescendants">
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/collectedTraitCountChip"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:clickable="false"
-                                android:focusable="false"
-                                app:chipIcon="@drawable/ic_ruler"
-                                app:chipIconSize="24dp"
-                                app:ensureMinTouchTargetSize="false"
-                                app:closeIconVisible="false"
-                                app:chipBackgroundColor="?attr/defaultChipBackground" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/observationCountChip"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:clickable="false"
-                                android:focusable="false"
-                                app:chipIcon="@drawable/ic_eye"
-                                app:chipIconSize="24dp"
-                                app:ensureMinTouchTargetSize="false"
-                                app:closeIconVisible="false"
-                                app:chipBackgroundColor="?attr/defaultChipBackground" />
-                        </com.google.android.material.chip.ChipGroup>
+                            android:text="@string/no_activity" />
 
                     </LinearLayout>
+
+                    <!-- Chip Group aligned to the right -->
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/dataChipGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        app:singleLine="false"
+                        app:chipSpacingHorizontal="8dp"
+                        app:chipSpacingVertical="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:descendantFocusability="blocksDescendants">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/collectedTraitCountChip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIcon="@drawable/ic_ruler"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/observationCountChip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIcon="@drawable/ic_eye"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+
+                    </com.google.android.material.chip.ChipGroup>
 
                     <!-- Collapse/Expand Icon -->
                     <ImageView

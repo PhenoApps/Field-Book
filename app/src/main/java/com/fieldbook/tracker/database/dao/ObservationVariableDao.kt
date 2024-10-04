@@ -13,6 +13,7 @@ import com.fieldbook.tracker.database.toFirst
 import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.TraitObject
+import org.threeten.bp.OffsetDateTime
 
 class ObservationVariableDao {
 
@@ -391,15 +392,15 @@ class ObservationVariableDao {
             if (exists) {
                 // Update the position in the link table if it exists
                 db.execSQL(
-                    "UPDATE studies_observation_variables_link SET position = ? WHERE observation_variable_id = ? AND study_id = ?",
-                    arrayOf(realPosition.toString(), traitDbId, fieldId.toString())
+                    "UPDATE studies_observation_variables_link SET position = ?, date_linked = ? WHERE observation_variable_id = ? AND study_id = ?",
+                    arrayOf(realPosition.toString(), OffsetDateTime.now().toString(), traitDbId, fieldId.toString())
                 )
                 Log.d("ObservationVariableDao", "Updated position: traitDbId=$traitDbId, fieldId=$fieldId, position=$realPosition")
             } else {
                 // Insert a new link if it doesn't exist
                 db.execSQL(
-                    "INSERT INTO studies_observation_variables_link (observation_variable_id, study_id, visibility, position) VALUES (?, ?, ?, ?)",
-                    arrayOf(traitDbId, fieldId.toString(), 0, realPosition.toString()) // Default visibility to 1 (true)
+                    "INSERT INTO studies_observation_variables_link (observation_variable_id, study_id, visibility, position, date_linked) VALUES (?, ?, ?, ?, ?)",
+                    arrayOf(traitDbId, fieldId.toString(), 0, realPosition.toString(), OffsetDateTime.now().toString()) // Default visibility to 1 (true)
                 )
                 Log.d("ObservationVariableDao", "Inserted new link with position: traitDbId=$traitDbId, fieldId=$fieldId, position=$realPosition")
             }
@@ -456,7 +457,7 @@ class ObservationVariableDao {
                 null
             )
 
-            // Step 3: Insert duplicate rows with the study_id changed to the selectedFieldId
+            // Step 3: Insert duplicate rows with updated date and the study_id changed to the selectedFieldId
             cursor.use {
                 while (it.moveToNext()) {
                     val contentValues = ContentValues().apply {
@@ -464,6 +465,7 @@ class ObservationVariableDao {
                         put("study_id", selectedFieldId)
                         put("visibility", it.getInt(it.getColumnIndexOrThrow("visibility")))
                         put("position", it.getInt(it.getColumnIndexOrThrow("position")))
+                        put("date_linked", OffsetDateTime.now().toString())
                     }
                     db.insert("studies_observation_variables_link", null, contentValues)
                 }
@@ -471,7 +473,6 @@ class ObservationVariableDao {
         }
 
         fun updateTraitVisibility(traitDbId: String, visible: Boolean, fieldId: Int) = withDatabase { db ->
-            // Check if the link between the trait and the field already exists
             val exists = db.rawQuery(
                 "SELECT COUNT(*) FROM studies_observation_variables_link WHERE observation_variable_id = ? AND study_id = ?",
                 arrayOf(traitDbId, fieldId.toString())
@@ -480,19 +481,17 @@ class ObservationVariableDao {
             }
 
             if (exists) {
-                // Update the existing link to set the visibility
                 db.execSQL(
-                    "UPDATE studies_observation_variables_link SET visibility = ? WHERE observation_variable_id = ? AND study_id = ?",
-                    arrayOf(if (visible) 1 else 0, traitDbId, fieldId.toString())
+                    "UPDATE studies_observation_variables_link SET visibility = ?, date_linked = ? WHERE observation_variable_id = ? AND study_id = ?",
+                    arrayOf(if (visible) 1 else 0, OffsetDateTime.now().toString(), traitDbId, fieldId.toString())
                 )
-                Log.d("ObservationVariableDao", "Updated link: traitDbId=$traitDbId, fieldId=$fieldId, visibility=$visible")
+                Log.d("ObservationVariableDao", "Updated visibility and date_linked: traitDbId=$traitDbId, fieldId=$fieldId, visibility=$visible")
             } else {
-                // Insert a new link if it doesn't exist (without position for now)
                 db.execSQL(
-                    "INSERT INTO studies_observation_variables_link (observation_variable_id, study_id, visibility) VALUES (?, ?, ?)",
-                    arrayOf(traitDbId, fieldId.toString(), if (visible) 1 else 0)
+                    "INSERT INTO studies_observation_variables_link (observation_variable_id, study_id, visibility, date_linked) VALUES (?, ?, ?, ?)",
+                    arrayOf(traitDbId, fieldId.toString(), if (visible) 1 else 0, OffsetDateTime.now().toString())
                 )
-                Log.d("ObservationVariableDao", "Inserted new link: traitDbId=$traitDbId, fieldId=$fieldId, visibility=$visible")
+                Log.d("ObservationVariableDao", "Inserted new link with visibility and date_linked: traitDbId=$traitDbId, fieldId=$fieldId, visibility=$visible")
             }
         }
 
