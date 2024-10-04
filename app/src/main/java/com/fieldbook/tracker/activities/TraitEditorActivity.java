@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -67,6 +68,7 @@ import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.chip.Chip;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -454,31 +456,18 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     private void showDuplicateSetupDialog() {
         ArrayList<FieldObject> fields = database.getAllFieldObjects();
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.traits_duplicate_setup_summary);
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View dialogView = inflater.inflate(R.layout.dialog_trait_duplicate_setup, null);
 
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 40, 50, 10);
+        Spinner spinner = dialogView.findViewById(R.id.duplicate_setup_spinner);
 
-        TextView textView = new TextView(this);
-//        textView.setText(R.string.traits_duplicate_setup_summary);
-        layout.addView(textView);
-
-        Spinner spinner = new Spinner(this);
-//        FieldSpinnerAdapter adapter = new FieldSpinnerAdapter(this, fields);
         ArrayAdapter<FieldObject> adapter = new ArrayAdapter<FieldObject>(this, R.layout.spinner_item_trait_duplication, fields) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.spinner_item_trait_duplication, parent, false);
-                }
-                TextView traitCountTextView = convertView.findViewById(R.id.visible_trait_count);
-                TextView fieldNameTextView = convertView.findViewById(R.id.field_alias);
-                FieldObject field = (FieldObject) getItem(position);
-                traitCountTextView.setText(String.valueOf(field.getVisible_trait_count()));
-                fieldNameTextView.setText(field.getExp_alias());
-                return convertView;
+                View view = convertView != null ? convertView : LayoutInflater.from(getContext()).inflate(R.layout.spinner_item_trait_duplication, parent, false);
+                ((TextView) view.findViewById(R.id.field_alias)).setText(getItem(position).getExp_alias());
+                ((Chip) view.findViewById(R.id.visibleTraitCountChip)).setText(String.valueOf(getItem(position).getVisible_trait_count()));
+                return view;
             }
 
             @Override
@@ -487,19 +476,23 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             }
         };
         spinner.setAdapter(adapter);
-        layout.addView(spinner);
 
-        builder.setView(layout);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.traits_duplicate_setup_summary)
+                .setView(dialogView)
+                .setNegativeButton(R.string.dialog_cancel, (d, which) -> d.dismiss())
+                .setPositiveButton(R.string.traits_duplicate_setup_apply, (d, which) -> {
+                    // Retrieve selected field and duplicate the setup
+                    FieldObject selectedField = (FieldObject) spinner.getSelectedItem();
+                    if (selectedField != null) {
+                        database.duplicateTraitSetup(selectedField.getExp_id());
+                        queryAndLoadTraits();
+                    }
+                    d.dismiss();
+                })
+                .create();
 
-        builder.setNegativeButton(R.string.dialog_cancel, (dialog, which) -> dialog.dismiss());
-        builder.setPositiveButton(R.string.traits_duplicate_setup_apply, (dialog, which) -> {
-            FieldObject selectedField = (FieldObject) spinner.getSelectedItem();
-            Integer targetFieldId = selectedField.getExp_id();
-            database.duplicateTraitSetup(targetFieldId);
-            queryAndLoadTraits();
-        });
-
-        builder.create().show();
+        dialog.show();
     }
 
     private void importExportDialog() {
