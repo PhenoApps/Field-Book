@@ -10,12 +10,14 @@ import android.view.MotionEvent
 import android.view.View.OnTouchListener
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.TraitEditorActivity
+import com.fieldbook.tracker.adapters.TraitBoxViewAdapter
 import com.fieldbook.tracker.interfaces.CollectTraitController
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -33,12 +35,13 @@ class TraitBoxView : ConstraintLayout {
     private var traitLeft: ImageView
     private var traitRight: ImageView
 
-    private var traitsProgressBar: ProgressBar
+    private var traitsStatusBarRv: RecyclerView? = null
+    private var traitBoxItemModels: List<TraitBoxViewAdapter.TraitBoxItemModel>? = null
 
     var currentTrait: TraitObject? = null
 
     private var visibleTraitsList: Array<String>? = null
-    private var rangeSuppress: Boolean? = null
+    var rangeSuppress: Boolean? = null
 
     /**
      * New traits is a map of observations where the key is the trait name
@@ -58,10 +61,11 @@ class TraitBoxView : ConstraintLayout {
         traitLeft = v.findViewById(R.id.traitLeft)
         traitRight = v.findViewById(R.id.traitRight)
 
+        traitsStatusBarRv = v.findViewById(R.id.traitsStatusBarRv)
+
         prefixTraits = controller.getDatabase().rangeColumnNames
         newTraits = HashMap()
 
-        traitsProgressBar = findViewById(R.id.traitsProgressBar)
     }
 
     constructor(ctx: Context) : super(ctx)
@@ -159,6 +163,19 @@ class TraitBoxView : ConstraintLayout {
         this.visibleTraitsList = visibleTraits
         this.rangeSuppress = rangeSuppress
 
+        traitsStatusBarRv?.isNestedScrollingEnabled = false
+        traitsStatusBarRv?.adapter = TraitBoxViewAdapter(this)
+//        recyclerView?.layoutManager = NonScrollableHorizontalLayoutManager()
+        traitsStatusBarRv?.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
+//        recyclerView?.viewTreeObserver?.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
+//            override fun onGlobalLayout() {
+//                recyclerView?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
+//                val ht = recyclerView?.height //height is ready
+//                Log.d("TAG", "onGlobalLayout: $ht")
+//            }
+//        })
+
         // navigate to the last used trait using preferences
         // if using for the first time, use the first element
         traitTypeTv.text = controller.getPreferences().getString(GeneralKeys.LAST_USED_TRAIT,
@@ -173,7 +190,11 @@ class TraitBoxView : ConstraintLayout {
         }
     }
 
-    private fun loadLayout(rangeSuppress: Boolean){
+    fun getRecyclerView(): RecyclerView? {
+        return traitsStatusBarRv
+    }
+
+    fun loadLayout(rangeSuppress: Boolean) {
         val traitPosition = getSelectedItemPosition()
 
         setSelection(traitPosition)
@@ -183,6 +204,8 @@ class TraitBoxView : ConstraintLayout {
             traitTypeTv.text
                 .toString()
         )
+
+        updateTraitsStatusBar()
 
         // Update last used trait so it is preserved when entry moves
         controller.getPreferences().edit().putString(GeneralKeys.LAST_USED_TRAIT,traitTypeTv.text.toString()).apply()
@@ -227,7 +250,7 @@ class TraitBoxView : ConstraintLayout {
             controller.getInputView().isEnabled = true
         }
 
-        updateTraitProgressBar()
+        updateTraitsStatusBar()
     }
 
     private fun showTraitPickerDialog(visibleTraits: Array<String>?) {
@@ -258,21 +281,35 @@ class TraitBoxView : ConstraintLayout {
 
     }
 
-    private fun updateTraitProgressBar() {
-        var traits = controller.getDatabase().allTraitObjects
+    private fun updateTraitsStatusBar() {
+        val visibleTraits: Array<String> = controller.getDatabase().getVisibleTrait()
 
-        // a new trait object is made while assigning to currentTrait
-        // so instead of finding the index of currentTrait object
-        // we find the index of the trait name
-        val visibleTraits = ArrayList<String>()
-        for (traitObject in traits) {
-            if (traitObject.visible) {
-                visibleTraits.add(traitObject.name)
+        val studyId =
+            controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+        val field = controller.getDatabase().getFieldObject(studyId.toInt())
+
+        traitBoxItemModels =  visibleTraits.map { visibleTrait ->
+            // find the matching trait in field.traitDetails (if any)
+            val matchingTrait = field.traitDetails.find { it.traitName == visibleTrait }
+
+            TraitBoxViewAdapter.TraitBoxItemModel(
+                visibleTrait,
+                matchingTrait?.observations?.isNotEmpty() ?: false
+            )
+        }
+        (traitsStatusBarRv?.adapter as TraitBoxViewAdapter).submitList(traitBoxItemModels)
+
+        // the recyclerView height was 0 initially, so calculate the icon size again
+        traitsStatusBarRv?.post {
+            for (pos in field.traitDetails.indices) {
+                val viewHolder = traitsStatusBarRv?.findViewHolderForAdapterPosition(pos) as? TraitBoxViewAdapter.ViewHolder
+                viewHolder?.let {
+                    (traitsStatusBarRv?.adapter as TraitBoxViewAdapter).calculateAndSetItemSize(it)
+                }
             }
         }
+        (traitsStatusBarRv?.adapter as TraitBoxViewAdapter).notifyDataSetChanged()
 
-        traitsProgressBar.max = visibleTraits.size
-        traitsProgressBar.progress = visibleTraits.indexOf(currentTrait?.name) + 1
     }
 
     fun getNewTraits(): Map<String, String> {
@@ -319,6 +356,7 @@ class TraitBoxView : ConstraintLayout {
             traitTypeTv.text
                 .toString()
         )
+        (traitsStatusBarRv?.adapter as TraitBoxViewAdapter).setCurrentSelection(pos)
     }
 
     private fun getSelectedItemPosition(): Int {

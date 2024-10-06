@@ -43,6 +43,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
+import com.fieldbook.tracker.adapters.TraitBoxViewAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
@@ -98,7 +99,6 @@ import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.serenegiant.widget.UVCCameraTextureView;
@@ -1130,6 +1130,16 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
+    public void updateCurrentTraitStatus(Boolean hasObservation) {
+        RecyclerView traitBoxRecyclerView = traitBox.getRecyclerView();
+        if (traitBoxRecyclerView != null) {
+            TraitBoxViewAdapter traitBoxViewAdapter = (TraitBoxViewAdapter) traitBoxRecyclerView.getAdapter();
+            if (traitBoxViewAdapter != null){
+                traitBoxViewAdapter.updateCurrentTraitStatus(hasObservation);
+            }
+        }
+    }
+
     /**
      * Helper function update user data in the memory based hashmap as well as
      * the database
@@ -1184,6 +1194,8 @@ public class CollectActivity extends ThemedActivity
                 database.insertObservation(obsUnit, trait.getId(), trait.getFormat(), value, person,
                         getLocationByPreferences(), "", studyId, observationDbId,
                         lastSyncedTime, rep);
+
+                updateCurrentTraitStatus(true);
             }
         }
 
