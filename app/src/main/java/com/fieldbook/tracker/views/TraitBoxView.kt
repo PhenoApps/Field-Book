@@ -284,24 +284,17 @@ class TraitBoxView : ConstraintLayout {
     private fun updateTraitsStatusBar() {
         val visibleTraits: Array<String> = controller.getDatabase().getVisibleTrait()
 
-        val studyId =
-            controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        val field = controller.getDatabase().getFieldObject(studyId.toInt())
-
-        traitBoxItemModels =  visibleTraits.map { visibleTrait ->
-            // find the matching trait in field.traitDetails (if any)
-            val matchingTrait = field.traitDetails.find { it.traitName == visibleTrait }
-
+        traitBoxItemModels = visibleTraits.map { trait ->
             TraitBoxViewAdapter.TraitBoxItemModel(
-                visibleTrait,
-                matchingTrait?.observations?.isNotEmpty() ?: false
+                trait,
+                newTraits.containsKey(trait)
             )
         }
         (traitsStatusBarRv?.adapter as TraitBoxViewAdapter).submitList(traitBoxItemModels)
 
         // the recyclerView height was 0 initially, so calculate the icon size again
         traitsStatusBarRv?.post {
-            for (pos in field.traitDetails.indices) {
+            for (pos in visibleTraits.indices) {
                 val viewHolder = traitsStatusBarRv?.findViewHolderForAdapterPosition(pos) as? TraitBoxViewAdapter.ViewHolder
                 viewHolder?.let {
                     (traitsStatusBarRv?.adapter as TraitBoxViewAdapter).calculateAndSetItemSize(it)
