@@ -163,10 +163,12 @@ class TraitBoxView : ConstraintLayout {
         this.visibleTraitsList = visibleTraits
         this.rangeSuppress = rangeSuppress
 
-        traitsStatusBarRv?.isNestedScrollingEnabled = false
         traitsStatusBarRv?.adapter = TraitBoxViewAdapter(this)
-//        recyclerView?.layoutManager = NonScrollableHorizontalLayoutManager()
-        traitsStatusBarRv?.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        traitsStatusBarRv?.layoutManager = object : LinearLayoutManager(context, HORIZONTAL, false) {
+            override fun canScrollHorizontally(): Boolean {
+                return false
+            }
+        }
 
 //        recyclerView?.viewTreeObserver?.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
 //            override fun onGlobalLayout() {
