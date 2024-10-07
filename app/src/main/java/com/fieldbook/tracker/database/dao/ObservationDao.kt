@@ -172,6 +172,7 @@ class ObservationDao {
                     obs.value AS value, 
                     obs.observation_time_stamp,
                     obs.observation_unit_id,
+                    obs.observation_variable_db_id,
                     obs.observation_db_id,
                     obs.last_synced_time,
                     obs.collector,
@@ -197,6 +198,7 @@ class ObservationDao {
                         rep = getStringVal(row, "rep")
                         unitDbId = getStringVal(row, "uniqueName")
                         variableDbId = getStringVal(row, "external_db_id")
+                        internalVariableDbId = getStringVal(row, "observation_variable_db_id")
                         value = CategoryJsonUtil.processValue(row)
                         variableName = getStringVal(row, "observation_variable_name")
                         fieldBookDbId = getStringVal(row, "id")
@@ -378,14 +380,14 @@ class ObservationDao {
 
         fun insertObservation(studyId: Int, model: BrapiObservation, traitIdToTypeMap:Map<String,String>): Int = withDatabase { db ->
 
-            if (getObservation("$studyId", model.unitDbId, model.variableDbId, "1")?.dbId != null) {
+            if (getObservation("$studyId", model.unitDbId, model.variableDbId, model.rep ?: "1")?.dbId != null) {
                 println(
                     "DbId: ${
                         getObservation(
                             "$studyId",
                             model.unitDbId,
                             model.variableDbId,
-                            "1"
+                            model.rep ?: "1"
                         )?.dbId
                     }"
                 )
@@ -398,7 +400,7 @@ class ObservationDao {
                     "observation_variable_name" to model.variableName,
                     "observation_variable_field_book_format" to variableFormat,
                     "value" to model.value,
-                    "observation_time_stamp" to model.timestamp,
+                    "observation_time_stamp" to model.timestamp.toString(),
                     "collector" to model.collector,
 //                "geoCoordinates" to model.geo_coordinates,
                     "geoCoordinates" to null,
@@ -406,7 +408,7 @@ class ObservationDao {
 //                "additional_info" to model.additional_info,
                     "additional_info" to null,
                     "observation_db_id" to model.dbId,
-                    "rep" to "1",
+                    "rep" to model.rep,
                     Study.FK to studyId,
                     ObservationUnit.FK to model.unitDbId,
                     ObservationVariable.FK to model.variableDbId

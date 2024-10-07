@@ -86,6 +86,7 @@ import org.brapi.v2.model.BrAPIAcceptedSearchResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.threeten.bp.OffsetDateTime;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -308,31 +309,31 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                             final Function<Integer, Void> failFunction) {
         Integer initPage = paginationManager.getPage();
         try {
-           BrapiV2ApiCallBack<BrAPIProgramListResponse> callback = new BrapiV2ApiCallBack<BrAPIProgramListResponse>() {
-               @Override
-               public void onSuccess(BrAPIProgramListResponse programsResponse, int i, Map<String, List<String>> map) {
-                   // Cancel processing if the page that was processed is not the page
-                   // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
-                   if (initPage.equals(paginationManager.getPage())) {
-                       updatePageInfo(paginationManager, programsResponse.getMetadata());
-                       List<BrAPIProgram> programList = programsResponse.getResult().getData();
-                       function.apply(mapPrograms(programList));
-                   }
-               }
+            BrapiV2ApiCallBack<BrAPIProgramListResponse> callback = new BrapiV2ApiCallBack<BrAPIProgramListResponse>() {
+                @Override
+                public void onSuccess(BrAPIProgramListResponse programsResponse, int i, Map<String, List<String>> map) {
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage.equals(paginationManager.getPage())) {
+                        updatePageInfo(paginationManager, programsResponse.getMetadata());
+                        List<BrAPIProgram> programList = programsResponse.getResult().getData();
+                        function.apply(mapPrograms(programList));
+                    }
+                }
 
-               @Override
-               public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-                   failFunction.apply(error.getCode());
-                   Log.e("BrAPIServiceV2", "API Exception", error);
-               }
-           };
-           ProgramQueryParams queryParams = new ProgramQueryParams();
-           queryParams.page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
-           programsApi.programsGetAsync(queryParams, callback);
-       } catch (ApiException error) {
-           failFunction.apply(error.getCode());
-           Log.e("BrAPIServiceV2", "API Exception", error);
-       }
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
+                }
+            };
+            ProgramQueryParams queryParams = new ProgramQueryParams();
+            queryParams.page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
+            programsApi.programsGetAsync(queryParams, callback);
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
+        }
     }
 
     private List<BrapiProgram> mapPrograms(List<BrAPIProgram> programList) {
@@ -972,6 +973,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         newObservation.setDbId(obs.getObservationDbId());
         newObservation.setUnitDbId(obs.getObservationUnitDbId());
         newObservation.setVariableDbId(obs.getObservationVariableDbId());
+        newObservation.setTimestamp(obs.getObservationTimeStamp().toString());
+
+        newObservation.setTimestamp(
+                OffsetDateTime.parse(
+                        obs.getObservationTimeStamp().toString()
+                )
+        );
 
         //search imported obs references for first field book id
         List<BrAPIExternalReference> references = obs.getExternalReferences();
@@ -1012,6 +1020,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             String internalVarId = extVariableDbIdMap.get(brapiObservation.getObservationVariableDbId());
             newObservation.setVariableDbId(internalVarId);
             newObservation.setValue(brapiObservation.getValue());
+            newObservation.setTimestamp(
+                    OffsetDateTime.parse(
+                            brapiObservation.getObservationTimeStamp().toString()
+                    )
+            );
 
             //Make sure we are on the right experiment level.
             // This will cause bugs if there have been plot and plant level traits found as the observations retrieves all of them
@@ -1024,8 +1037,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     public void createObservations(List<Observation> observations,
-                               final Function<List<Observation>, Void> function,
-                               final Function<Integer, Void> failFunction) {
+                                   final Function<List<Observation>, Void> function,
+                                   final Function<Integer, Void> failFunction) {
         try {
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
@@ -1071,8 +1084,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     public void updateObservations(List<Observation> observations,
-                                final Function<List<Observation>, Void> function,
-                                final Function<Integer, Void> failFunction) {
+                                   final Function<List<Observation>, Void> function,
+                                   final Function<Integer, Void> failFunction) {
         try {
 
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
