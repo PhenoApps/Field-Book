@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.TraitEditorActivity
-import com.fieldbook.tracker.adapters.TraitBoxViewAdapter
+import com.fieldbook.tracker.adapters.TraitsStatusAdapter
 import com.fieldbook.tracker.interfaces.CollectTraitController
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -36,7 +36,7 @@ class TraitBoxView : ConstraintLayout {
     private var traitRight: ImageView
 
     private var traitsStatusBarRv: RecyclerView? = null
-    private var traitBoxItemModels: List<TraitBoxViewAdapter.TraitBoxItemModel>? = null
+    private var traitBoxItemModels: List<TraitsStatusAdapter.TraitBoxItemModel>? = null
 
     var currentTrait: TraitObject? = null
 
@@ -163,7 +163,7 @@ class TraitBoxView : ConstraintLayout {
         this.visibleTraitsList = visibleTraits
         this.rangeSuppress = rangeSuppress
 
-        traitsStatusBarRv?.adapter = TraitBoxViewAdapter(this)
+        traitsStatusBarRv?.adapter = TraitsStatusAdapter(this)
         traitsStatusBarRv?.layoutManager = object : LinearLayoutManager(context, HORIZONTAL, false) {
             override fun canScrollHorizontally(): Boolean {
                 return false
@@ -287,23 +287,23 @@ class TraitBoxView : ConstraintLayout {
         val visibleTraits: Array<String> = controller.getDatabase().getVisibleTrait()
 
         traitBoxItemModels = visibleTraits.map { trait ->
-            TraitBoxViewAdapter.TraitBoxItemModel(
+            TraitsStatusAdapter.TraitBoxItemModel(
                 trait,
                 newTraits.containsKey(trait)
             )
         }
-        (traitsStatusBarRv?.adapter as TraitBoxViewAdapter).submitList(traitBoxItemModels)
+        (traitsStatusBarRv?.adapter as TraitsStatusAdapter).submitList(traitBoxItemModels)
 
         // the recyclerView height was 0 initially, so calculate the icon size again
         traitsStatusBarRv?.post {
             for (pos in visibleTraits.indices) {
-                val viewHolder = traitsStatusBarRv?.findViewHolderForAdapterPosition(pos) as? TraitBoxViewAdapter.ViewHolder
+                val viewHolder = traitsStatusBarRv?.findViewHolderForAdapterPosition(pos) as? TraitsStatusAdapter.ViewHolder
                 viewHolder?.let {
-                    (traitsStatusBarRv?.adapter as TraitBoxViewAdapter).calculateAndSetItemSize(it)
+                    (traitsStatusBarRv?.adapter as TraitsStatusAdapter).calculateAndSetItemSize(it)
                 }
             }
         }
-        (traitsStatusBarRv?.adapter as TraitBoxViewAdapter).notifyDataSetChanged()
+        (traitsStatusBarRv?.adapter as TraitsStatusAdapter).notifyDataSetChanged()
 
     }
 
@@ -351,7 +351,7 @@ class TraitBoxView : ConstraintLayout {
             traitTypeTv.text
                 .toString()
         )
-        (traitsStatusBarRv?.adapter as TraitBoxViewAdapter).setCurrentSelection(pos)
+        (traitsStatusBarRv?.adapter as TraitsStatusAdapter).setCurrentSelection(pos)
     }
 
     private fun getSelectedItemPosition(): Int {

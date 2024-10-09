@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.adapters
 
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -13,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.views.TraitBoxView
 
-class TraitBoxViewAdapter(private val traitBoxView: TraitBoxView) :
-    ListAdapter<TraitBoxViewAdapter.TraitBoxItemModel, TraitBoxViewAdapter.ViewHolder>(
+class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
+    ListAdapter<TraitsStatusAdapter.TraitBoxItemModel, TraitsStatusAdapter.ViewHolder>(
         DiffCallback()
     ) {
 

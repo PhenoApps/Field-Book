@@ -43,7 +43,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
-import com.fieldbook.tracker.adapters.TraitBoxViewAdapter;
+import com.fieldbook.tracker.adapters.TraitsStatusAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
@@ -1133,9 +1133,9 @@ public class CollectActivity extends ThemedActivity
     public void updateCurrentTraitStatus(Boolean hasObservation) {
         RecyclerView traitBoxRecyclerView = traitBox.getRecyclerView();
         if (traitBoxRecyclerView != null) {
-            TraitBoxViewAdapter traitBoxViewAdapter = (TraitBoxViewAdapter) traitBoxRecyclerView.getAdapter();
-            if (traitBoxViewAdapter != null){
-                traitBoxViewAdapter.updateCurrentTraitStatus(hasObservation);
+            TraitsStatusAdapter traitsStatusAdapter = (TraitsStatusAdapter) traitBoxRecyclerView.getAdapter();
+            if (traitsStatusAdapter != null){
+                traitsStatusAdapter.updateCurrentTraitStatus(hasObservation);
             }
         }
     }
