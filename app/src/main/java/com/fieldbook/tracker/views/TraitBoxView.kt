@@ -286,10 +286,15 @@ class TraitBoxView : ConstraintLayout {
     private fun updateTraitsStatusBar() {
         val visibleTraits: Array<String> = controller.getDatabase().getVisibleTrait()
 
+        // images saved are not stored in newTraits hashMap
+        // get the data for current plot_id again
+        val rangeBox = controller.getRangeBox()
+        val traitsValue = controller.getDatabase().getUserDetail(rangeBox.getPlotID())
+
         traitBoxItemModels = visibleTraits.map { trait ->
             TraitsStatusAdapter.TraitBoxItemModel(
                 trait,
-                newTraits.containsKey(trait)
+                traitsValue.containsKey(trait)
             )
         }
         (traitsStatusBarRv?.adapter as TraitsStatusAdapter).submitList(traitBoxItemModels)
