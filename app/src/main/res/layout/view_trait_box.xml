@@ -64,16 +64,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/traitTypeTv"
-        app:layout_constraintBottom_toTopOf="@id/traitsProgressBar" />
+        app:layout_constraintBottom_toTopOf="@id/traitsStatusBarRv" />
 
-    <ProgressBar
-        android:id="@+id/traitsProgressBar"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/traitsStatusBarRv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:progressTint="?attr/colorPrimaryDark"
-        style="?android:attr/progressBarStyleHorizontal"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
+        android:orientation="horizontal"
+        android:foregroundGravity="center"
+        app:layout_constraintTop_toBottomOf="@id/traitDetails"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

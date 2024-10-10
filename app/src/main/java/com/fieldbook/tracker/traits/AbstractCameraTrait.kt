@@ -345,6 +345,9 @@ abstract class AbstractCameraTrait :
         ui.launch {
 
             loadAdapterItems()
+
+            // update trait status as observation was saved
+            (context as CollectActivity).updateCurrentTraitStatus(true)
         }
     }
 
@@ -647,6 +650,11 @@ abstract class AbstractCameraTrait :
 
             }
 
+            ui.launch {
+                if (getImageObservations().isEmpty()){
+                    (context as CollectActivity).updateCurrentTraitStatus(false)
+                }
+            }
             (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
 
         }
