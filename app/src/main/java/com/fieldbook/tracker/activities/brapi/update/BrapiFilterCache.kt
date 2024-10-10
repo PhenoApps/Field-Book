@@ -13,6 +13,29 @@ class BrapiFilterCache {
 
         private const val JSON_FILE_NAME = "com.fieldbook.tracker.activities.filters.json"
 
+        enum class CacheClearInterval {
+            EVERY, DAILY, WEEKLY, NEVER
+        }
+
+        fun checkClearCache(context: Context) {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            when (prefs.getString(GeneralKeys.BRAPI_INVALIDATE_CACHE_INTERVAL, CacheClearInterval.NEVER.ordinal.toString())) {
+                CacheClearInterval.EVERY.ordinal.toString() -> delete(context, true)
+                CacheClearInterval.DAILY.ordinal.toString() -> {
+                    val lastCleared = prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
+                    if (System.currentTimeMillis() - lastCleared > 24 * 60 * 60 * 1000) {
+                        delete(context, true)
+                    }
+                }
+                CacheClearInterval.WEEKLY.ordinal.toString() -> {
+                    val lastCleared = prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
+                    if (System.currentTimeMillis() - lastCleared > 7 * 24 * 60 * 60 * 1000) {
+                        delete(context, true)
+                    }
+                }
+            }
+        }
+
         fun getStoredModels(context: Context): List<TrialStudyModel> {
 
             context.externalCacheDir?.let { cacheDir ->
@@ -49,6 +72,7 @@ class BrapiFilterCache {
                     remove(f)
                 }
                 remove(GeneralKeys.LIST_FILTER_TEXTS)
+                remove(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR)
                 apply()
             }
         }

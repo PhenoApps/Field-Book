@@ -65,9 +65,25 @@
     <string name="ask_user_interval_every_open">Every time app opens</string>
     <string name="ask_user_interval_every_12">Every 12 hours</string>
     <string name="ask_user_interval_every_24">Every 24 hours</string>
+    <string name="prefs_brapi_cache_invalidate_choice_each_time">Every time BrAPI import is opened</string>
+    <string name="prefs_brapi_cache_invalidate_choice_daily">Daily</string>
+    <string name="prefs_brapi_cache_invalidate_choice_weekly">Weekly</string>
+    <string name="prefs_brapi_cache_invalidate_choice_none">Never</string>
     <string-array name="brapi_filter_type_entries">
         <item>@string/brapi_filter_type_program</item>
         <item>@string/brapi_filter_type_season</item>
         <item>@string/brapi_filter_type_trial</item>
+    </string-array>
+    <string-array name="pref_brapi_cache_invalidate_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="pref_brapi_cache_invalidate_entries">
+        <item>@string/prefs_brapi_cache_invalidate_choice_each_time</item>
+        <item>@string/prefs_brapi_cache_invalidate_choice_daily</item>
+        <item>@string/prefs_brapi_cache_invalidate_choice_weekly</item>
+        <item>@string/prefs_brapi_cache_invalidate_choice_none</item>
     </string-array>
 </resources>

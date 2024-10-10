@@ -1156,6 +1156,9 @@
     <string name="select">Select</string>
     <string name="results">results</string>
     <string name="failed_to_fetch_observation_units">Failed to fetch observation units</string>
+    <string name="preferences_brapi_cache_invalidate_dialog_title">Invalidate Cache Interval Choices</string>
+    <string name="preferences_brapi_cache_invalidate_summary">%s</string>
+    <string name="preferences_brapi_cache_invalidate_title">Cache Invalidation</string>
     <plurals name="act_brapi_list_filter">
         <item quantity="one">%s result</item>
         <item quantity="other">%s results</item>

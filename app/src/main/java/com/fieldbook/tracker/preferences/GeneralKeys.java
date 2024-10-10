@@ -81,6 +81,9 @@ public class GeneralKeys {
 
     public static final String BRAPI_DISPLAY_NAME                   = "BRAPI_DISPLAY_NAME";
 
+    public static final String BRAPI_INVALIDATE_CACHE_INTERVAL      = "BRAPI_CACHE_INVALIDATE_INTERVAL";
+    public static final String BRAPI_INVALIDATE_CACHE_LAST_CLEAR    = "BRAPI_INVALIDATE_CACHE_LAST_CLEAR";
+
     //GeoNav
     private static final String GEONAV_PREFIX                       = "com.fieldbook.tracker.geonav.";
     public static final String ENABLE_GEONAV                        = GEONAV_PREFIX + "ENABLE_GEONAV";

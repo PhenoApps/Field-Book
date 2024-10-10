@@ -110,6 +110,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         restoreModels()
 
+        BrapiFilterCache.checkClearCache(this)
     }
 
 
