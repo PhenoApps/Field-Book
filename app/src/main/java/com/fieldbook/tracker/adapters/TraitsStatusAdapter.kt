@@ -19,19 +19,16 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
 
     data class TraitBoxItemModel(val trait: String, var hasObservation: Boolean)
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        var imageView: ImageView = view.findViewById(R.id.traitCircle)
+        var imageView: ImageView = view.findViewById(R.id.traitStatus)
     }
 
     private var currentSelection: Int = -1
-
-    private var itemsCount = 0
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.trait_circle, viewGroup, false)
-
+            .inflate(R.layout.trait_status, viewGroup, false)
 
         return ViewHolder(view)
     }
@@ -41,13 +38,12 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
         calculateAndSetItemSize(viewHolder)
 
         with(currentList[position]) {
-            if (hasObservation) {
-                viewHolder.imageView.setImageResource(R.drawable.circle_filled)
-            } else {
-                viewHolder.imageView.setImageResource(R.drawable.circle_outline)
-            }
-
             if (position == currentSelection) {
+                if (hasObservation) {
+                    viewHolder.imageView.setImageResource(R.drawable.square_rounded_filled)
+                } else {
+                    viewHolder.imageView.setImageResource(R.drawable.square_rounded_outline)
+                }
                 viewHolder.imageView.setColorFilter(
                     ContextCompat.getColor(
                         viewHolder.imageView.context,
@@ -55,6 +51,11 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
                     )
                 )
             } else {
+                if (hasObservation) {
+                    viewHolder.imageView.setImageResource(R.drawable.circle_filled)
+                } else {
+                    viewHolder.imageView.setImageResource(R.drawable.circle_outline)
+                }
                 viewHolder.imageView.setColorFilter(
                     ContextCompat.getColor(
                         viewHolder.imageView.context,
