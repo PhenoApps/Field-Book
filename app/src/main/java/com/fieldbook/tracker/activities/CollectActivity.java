@@ -724,6 +724,9 @@ public class CollectActivity extends ThemedActivity
                 traitLayouts.deleteTraitListener(getTraitFormat());
             }
 
+            // if no more observations present, update trait status
+            if (getCurrentObservation() == null) updateCurrentTraitStatus(false);
+
             triggerTts(deleteTts);
         });
 
@@ -1671,6 +1674,8 @@ public class CollectActivity extends ThemedActivity
             ObservationModel[] currentModels = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
 
             if (currentModels.length == 0) {
+
+                updateCurrentTraitStatus(false);
 
                 collectInputView.setText("");
 
