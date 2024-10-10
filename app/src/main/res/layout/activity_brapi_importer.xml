@@ -10,73 +10,73 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/fb_color_primary"
-        app:menu="@menu/menu_filter_brapi"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/menu_filter_brapi" />
 
-    <ProgressBar style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:visibility="visible"
+    <ProgressBar
         android:id="@+id/brapi_importer_pb"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:indeterminate="true"
         android:layout_marginTop="-7dp"
-        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tb"
+        android:indeterminate="true"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tb" />
 
     <com.fieldbook.tracker.views.SearchBar
-        android:layout_margin="8dp"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
         android:id="@+id/brapi_importer_sb"
-        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tb"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tb" />
 
     <com.google.android.material.chip.ChipGroup
-        tools:visibility="visible"
-        android:visibility="gone"
         android:id="@+id/brapi_importer_cg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintTop_toBottomOf="@id/brapi_importer_sb" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/brapi_importer_sb"
+        tools:visibility="visible" />
 
     <TextView
+        android:id="@+id/brapi_importer_fetch_data_tv"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="2dp"
-        android:id="@+id/brapi_importer_fetch_data_tv"
-        android:text="@string/brapi_importer_fetch_data"
         android:gravity="center"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/brapi_importer_fetch_data"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_importer_cg"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/brapi_importer_cg" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/brapi_importer_rv"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:id="@+id/brapi_importer_rv"
         android:orientation="vertical"
-        tools:listitem="@layout/list_item_label_checkbox"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toTopOf="@id/act_brapi_importer_button"
         app:layout_constraintTop_toBottomOf="@id/brapi_importer_fetch_data_tv"
-        app:layout_constraintBottom_toTopOf="@id/act_brapi_importer_button"/>
+        tools:listitem="@layout/list_item_label_checkbox" />
 
     <!-- hidden pagination ui that brapi service is coupled to -->
     <LinearLayout
-        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom|center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
-        <include
-            layout="@layout/brapi_pagination_buttons"/>
+        <include layout="@layout/brapi_pagination_buttons" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -98,17 +98,17 @@
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:visibility="gone"
-        tools:visibility="visible"
         android:id="@+id/act_brapi_importer_button"
-        android:layout_margin="8dp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         android:minHeight="?attr/actionBarSize"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:text="@string/dialog_import"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        tools:visibility="visible" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

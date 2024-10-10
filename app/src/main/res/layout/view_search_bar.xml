@@ -2,54 +2,54 @@
 
 <!-- based on https://github.com/ByteHamster/SearchPreference/blob/master/lib/src/main/res/layout/searchpreference_searchbar.xml -->
 
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/search_card"
     android:layout_width="match_parent"
     android:layout_height="48dp"
-    android:id="@+id/search_card"
+    android:layout_margin="8dp"
     android:foregroundGravity="center_vertical"
-    app:cardElevation="1dp"
-    app:cardCornerRadius="24dp">
+    app:cardCornerRadius="24dp"
+    app:cardElevation="1dp">
 
     <LinearLayout
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
+        android:layout_height="match_parent"
         android:clipToPadding="false"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:padding="8dp">
 
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="@string/searchpreference_search"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="16dp"
-            app:tint="?android:attr/textColorPrimary"
-            app:srcCompat="@drawable/searchpreference_ic_search" />
+            android:contentDescription="@string/searchpreference_search"
+            app:srcCompat="@drawable/searchpreference_ic_search"
+            app:tint="?android:attr/textColorPrimary" />
 
         <AutoCompleteTextView
-            android:hint="@string/searchpreference_search"
-            android:layout_weight="1"
+            android:id="@+id/search"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_weight="1"
             android:background="@null"
-            android:textColor="?android:attr/textColorPrimary"
-            android:id="@+id/search"
-            android:inputType="textNoSuggestions" />
+            android:hint="@string/searchpreference_search"
+            android:inputType="textNoSuggestions"
+            android:textColor="?android:attr/textColorPrimary" />
 
         <ImageView
             android:id="@+id/clear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:contentDescription="@string/searchpreference_clear"
             android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/searchpreference_clear"
+            android:padding="4dp"
             android:visibility="gone"
-            app:tint="?android:attr/textColorPrimary"
-            app:srcCompat="@drawable/searchpreference_ic_clear" />
+            app:srcCompat="@drawable/searchpreference_ic_clear"
+            app:tint="?android:attr/textColorPrimary" />
 
     </LinearLayout>
 
