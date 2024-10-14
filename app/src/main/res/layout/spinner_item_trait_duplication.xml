@@ -7,6 +7,15 @@
     android:orientation="horizontal"
     android:padding="8dp">
 
+    <TextView
+        android:paddingEnd="8dp"
+        android:id="@+id/field_alias"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textStyle="bold"
+        android:text="Field Alias" />
+
     <com.google.android.material.chip.Chip
         android:id="@+id/visibleTraitCountChip"
         android:layout_width="wrap_content"
@@ -22,13 +31,4 @@
         app:closeIconVisible="false"
         app:chipBackgroundColor="?attr/defaultChipBackground"
         android:text="0" />
-
-    <TextView
-        android:paddingStart="8dp"
-        android:id="@+id/field_alias"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:textStyle="bold"
-        android:text="Field Alias" />
 </LinearLayout>
