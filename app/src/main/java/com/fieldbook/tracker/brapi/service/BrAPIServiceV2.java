@@ -1493,9 +1493,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     Log.d("BrAPIServiceV2","Saving: dataRow: "+dataRow);
                 }
 
-                // Insert the traits already associated with this study
+                // Insert the traits already associated with this study and set them to active
                 for (TraitObject t : studyDetails.getTraits()) {
-                    dataHelper.insertTraits(t);
+                    long traitId = dataHelper.insertTraits(t);
+                    if (traitId != -1) {
+                        dataHelper.updateTraitVisibility(String.valueOf(traitId), true, field.getExp_id());
+                    }
+
                 }
 
 //                for(Observation obs : studyDetails.getObservations()) {

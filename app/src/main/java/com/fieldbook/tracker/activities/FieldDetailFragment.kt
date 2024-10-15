@@ -54,7 +54,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     lateinit var preferences: SharedPreferences
 
     private var toolbar: Toolbar? = null
-    private var fieldId: Int? = null
+    private var fieldId: Int = -1
     private val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
 
     private lateinit var exportUtil: ExportUtil
@@ -64,15 +64,19 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var lastEditTextView: TextView
     private lateinit var lastExportTextView: TextView
     private lateinit var lastSyncTextView: TextView
+    private lateinit var lastTraitModificationTextView: TextView
+    private lateinit var lastDataTextView: TextView
     private lateinit var cardViewCollect: CardView
     private lateinit var cardViewExport: CardView
     private lateinit var cardViewSync: CardView
+    private lateinit var cardViewTraits: CardView
     private lateinit var sourceChip: Chip
     private lateinit var originalNameChip: Chip
     private lateinit var entryCountChip: Chip
     private lateinit var attributeCountChip: Chip
     private lateinit var sortOrderChip: Chip
-    private lateinit var traitCountChip: Chip
+    private lateinit var visibleTraitCountChip: Chip
+    private lateinit var collectedTraitCountChip: Chip
     private lateinit var observationCountChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
@@ -90,16 +94,20 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         lastExportTextView = rootView.findViewById(R.id.lastExportTextView)
         cardViewSync = rootView.findViewById(R.id.cardViewSync)
         lastSyncTextView = rootView.findViewById(R.id.lastSyncTextView)
+        lastTraitModificationTextView = rootView.findViewById(R.id.dateTraitsModifiedTextView)
+        lastDataTextView = rootView.findViewById(R.id.dateLastCollectionTextView)
         sourceChip = rootView.findViewById(R.id.sourceChip)
         originalNameChip = rootView.findViewById(R.id.originalNameChip)
         entryCountChip = rootView.findViewById(R.id.entryCountChip)
         attributeCountChip = rootView.findViewById(R.id.attributeCountChip)
         sortOrderChip = rootView.findViewById(R.id.sortOrderChip)
-        traitCountChip = rootView.findViewById(R.id.traitCountChip)
+        visibleTraitCountChip = rootView.findViewById(R.id.visibleTraitCountChip)
+        collectedTraitCountChip = rootView.findViewById(R.id.collectedTraitCountChip)
         observationCountChip = rootView.findViewById(R.id.observationCountChip)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
 
-        fieldId = arguments?.getInt("fieldId")
+        fieldId = requireArguments().getInt("fieldId")
+        (activity as? FieldEditorActivity)?.setActiveField(fieldId)
         loadFieldDetails()
 
         val overviewExpandCollapseIcon: ImageView = rootView.findViewById(R.id.overview_expand_collapse_icon)
@@ -125,11 +133,11 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
         cardViewCollect = rootView.findViewById(R.id.cardViewCollect)
         cardViewExport = rootView.findViewById(R.id.cardViewExport)
+        cardViewTraits = rootView.findViewById(R.id.cardViewTraits)
 
         cardViewCollect.setOnClickListener {
             fieldId?.let { id ->
                 if (checkTraitsExist() >= 0) {
-                    (activity as? FieldEditorActivity)?.setActiveField(id)
                     collectDataFilePermission()
                 }
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot collect data")
@@ -141,6 +149,12 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     exportUtil.exportMultipleFields(listOf(id))
                 }
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot export data")
+        }
+
+        cardViewTraits.setOnClickListener {
+            fieldId?.let { id ->
+                startActivity(Intent(requireActivity(), TraitEditorActivity::class.java))
+            } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot access field-specific traits")
         }
 
         val dataExpandCollapseIcon: ImageView = rootView.findViewById(R.id.data_expand_collapse_icon)
@@ -214,8 +228,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private fun disableDataChipRipples() {
         // Intercept data card touch events to prevent chip ripple but still trigger expand/collapse
 
-        val chipGroup: ChipGroup = rootView.findViewById(R.id.dataChipGroup)
-        chipGroup.setOnTouchListener { _, event ->
+        observationCountChip.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 rootView.findViewById<View>(R.id.data_collapsible_header).performClick()
             }
@@ -283,6 +296,15 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         attributeCountChip.text = attributeCount
         sortOrderChip.text = getString(R.string.field_sort_entries)
 
+        visibleTraitCountChip.text = field.visible_trait_count.toString()
+
+        val lastTraitModification = field.date_traits_modified
+        if (!lastTraitModification.isNullOrEmpty()) {
+            lastTraitModificationTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastTraitModification)
+        } else {
+            getString(R.string.no_activity)
+        }
+
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {
             lastEditTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastEdit)
@@ -304,12 +326,21 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             getString(R.string.no_activity)
         }
 
-        traitCountChip.text = field.trait_count.toString()
         if (field.observation_count.toInt() > 0) {
+            collectedTraitCountChip.visibility = View.VISIBLE
             observationCountChip.visibility = View.VISIBLE
+            collectedTraitCountChip.text = field.collected_trait_count.toString()
             observationCountChip.text = field.observation_count.toString()
         } else {
+            collectedTraitCountChip.visibility = View.GONE
             observationCountChip.visibility = View.GONE
+        }
+
+        val lastCollection = field.date_edit
+        if (!lastCollection.isNullOrEmpty()) {
+            lastDataTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastCollection)
+        } else {
+            getString(R.string.no_activity)
         }
 
     }
@@ -460,11 +491,9 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             )
         }
         if (EasyPermissions.hasPermissions(requireActivity(), *perms)) {
-            val intent = Intent()
-            intent.setClassName(
-                requireActivity(),
-                "com.fieldbook.tracker.activities.CollectActivity"
-            )
+            val intent = Intent(requireActivity(), CollectActivity::class.java).apply {
+                putExtra("FIELD_ID", fieldId)
+            }
             startActivity(intent)
         } else {
             // Do not have permissions, request them now

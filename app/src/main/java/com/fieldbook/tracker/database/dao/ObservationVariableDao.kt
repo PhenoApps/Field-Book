@@ -4,11 +4,16 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
-import com.fieldbook.tracker.database.*
+import android.util.Log
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
-import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
 import com.fieldbook.tracker.database.models.ObservationVariableModel
+import com.fieldbook.tracker.database.query
+import com.fieldbook.tracker.database.queryForMax
+import com.fieldbook.tracker.database.toFirst
+import com.fieldbook.tracker.database.toTable
+import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.TraitObject
+import org.threeten.bp.OffsetDateTime
 
 class ObservationVariableDao {
 
@@ -246,18 +251,34 @@ class ObservationVariableDao {
             )
         }
 
-        fun getAllTraitObjects(sortOrder: String = "internal_id_observation_variable"): ArrayList<TraitObject> = withDatabase { db ->
+        fun getAllTraitObjects(
+            studyId: Int? = null,
+            sortOrder: String? = null
+        ): ArrayList<TraitObject> = withDatabase { db ->
             val traits = ArrayList<TraitObject>()
 
-            // Sort ascending except for visibility, for visibility sort desc to have visible traits first
-            val orderDirection = if (sortOrder == "visible") "DESC" else "ASC"
+            // If sortOrder is null or empty, use the default "real_position" from the link table
+            val actualSortOrder = sortOrder ?: "real_position"
 
+            // Sort ascending, except for visibility which is descending
+            val orderDirection = if (sortOrder == "study_visibility") "DESC" else "ASC"
+
+            // Main query with conditional sorting
             val query = """
-                SELECT * FROM ${ObservationVariable.tableName}
-                ORDER BY $sortOrder COLLATE NOCASE $orderDirection
+                SELECT ov.*, 
+                    COALESCE(sovl.position, ov.position) AS real_position, 
+                    sovl.visibility AS study_visibility
+                FROM ${ObservationVariable.tableName} ov
+                LEFT JOIN studies_observation_variables_link sovl
+                ON ov.internal_id_observation_variable = sovl.observation_variable_id 
+                AND sovl.study_id = ?
+                ORDER BY $actualSortOrder COLLATE NOCASE $orderDirection
             """
 
-            db.rawQuery(query, null).use { cursor ->
+            // Log the query for debugging
+            Log.d("ObservationVariableDao", "Executing query: $query with fieldId: $studyId")
+
+            db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
                 while (cursor.moveToNext()) {
                     val trait = TraitObject().apply {
                         name = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name")) ?: ""
@@ -266,75 +287,39 @@ class ObservationVariableDao {
                         details = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_details")) ?: ""
                         id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariable.PK)).toString()
                         externalDbId = cursor.getString(cursor.getColumnIndexOrThrow("external_db_id")) ?: ""
-                        realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("position"))
-                        visible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()
+
+                        // Use position from the link table if available
+                        realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("real_position"))
+
+                        // Use visibility from the link table if available, otherwise fall back to the default
+                        visible = cursor.getInt(cursor.getColumnIndexOrThrow("study_visibility")).takeIf {
+                            !cursor.isNull(cursor.getColumnIndexOrThrow("study_visibility"))
+                        } == 1 ?: (cursor.getInt(cursor.getColumnIndexOrThrow("visible")) == 1)
+
                         additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
 
-                        // Initialize these to the empty string or else they will be null
+                        // Initialize optional fields
                         maximum = ""
                         minimum = ""
                         categories = ""
-
-                        ObservationVariableValueDao.getVariableValues(id.toInt())?.forEach { value ->
-                            val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
-                            when (attrName) {
-                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "category" -> categories = value["observation_variable_attribute_value"] as? String ?: ""
-                            }
-                        }
                     }
+
+                    // Log each trait added
+                    Log.d("ObservationVariableDao", "Adding trait: ${trait.name}, ID: ${trait.id}, Real Position: ${trait.realPosition}, Visible: ${trait.visible}")
+
                     traits.add(trait)
                 }
             }
-            ArrayList(traits)
+
+            // Log total traits retrieved
+            Log.d("ObservationVariableDao", "Total traits retrieved: ${traits.size}")
+
+            traits
         } ?: ArrayList()
 
+
         // Overload for Java compatibility
-        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("internal_id_observation_variable")
-
-
-//        fun getAllTraitObjects(sortOrder: String): ArrayList<TraitObject> = withDatabase { db ->
-//
-//            ArrayList(db.query(ObservationVariable.tableName, orderBy = "position").toTable().map {
-//
-//                TraitObject().apply {
-//
-//                    name = (it["observation_variable_name"] as? String ?: "")
-//                    format = it["observation_variable_field_book_format"] as? String ?: ""
-//                    defaultValue = it["default_value"] as? String ?: ""
-//                    details = it["observation_variable_details"] as? String ?: ""
-//                    id = (it[ObservationVariable.PK] as? Int ?: -1).toString()
-//                    externalDbId = it["external_db_id"] as? String ?: ""
-//                    realPosition = (it["position"] as? Int ?: -1)
-//                    visible = (it["visible"] as String).toBoolean()
-//                    additionalInfo = it["additional_info"] as? String ?: ""
-//
-//                    //initialize these to the empty string or else they will be null
-//                    maximum = ""
-//                    minimum = ""
-//                    categories = ""
-//
-//                    ObservationVariableValueDao.getVariableValues(id.toInt()).also { values ->
-//
-//                        values?.forEach { value ->
-//
-//                            val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
-//
-//                            when (attrName) {
-//                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                                "category" -> categories = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                            }
-//                        }
-//                    }
-//                }
-//            })
-//
-//        } ?: ArrayList()
+        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects(0)
 
         fun getTraitVisibility(): HashMap<String, String> = withDatabase { db ->
 
@@ -388,11 +373,37 @@ class ObservationVariableDao {
             db.delete(ObservationVariable.tableName, null, null)
         }
 
-        fun updateTraitPosition(id: String, realPosition: Int) = withDatabase { db ->
+//        fun updateTraitPosition(id: String, realPosition: Int) = withDatabase { db ->
+//
+//            db.update(ObservationVariable.tableName, ContentValues().apply {
+//                put("position", realPosition)
+//            }, "${ObservationVariable.PK} = ?", arrayOf(id))
+//        }
 
-            db.update(ObservationVariable.tableName, ContentValues().apply {
-                put("position", realPosition)
-            }, "${ObservationVariable.PK} = ?", arrayOf(id))
+        fun updateTraitPosition(traitDbId: String, realPosition: Int, fieldId: Int) = withDatabase { db ->
+            // Check if the link exists in the studies_observation_variables_link table
+            val exists = db.rawQuery(
+                "SELECT COUNT(*) FROM studies_observation_variables_link WHERE observation_variable_id = ? AND study_id = ?",
+                arrayOf(traitDbId, fieldId.toString())
+            ).use { cursor ->
+                cursor.moveToFirst() && cursor.getInt(0) > 0
+            }
+
+            if (exists) {
+                // Update the position in the link table if it exists
+                db.execSQL(
+                    "UPDATE studies_observation_variables_link SET position = ?, date_linked = ? WHERE observation_variable_id = ? AND study_id = ?",
+                    arrayOf(realPosition.toString(), OffsetDateTime.now().toString(), traitDbId, fieldId.toString())
+                )
+                Log.d("ObservationVariableDao", "Updated position: traitDbId=$traitDbId, fieldId=$fieldId, position=$realPosition")
+            } else {
+                // Insert a new link if it doesn't exist
+                db.execSQL(
+                    "INSERT INTO studies_observation_variables_link (observation_variable_id, study_id, visibility, position, date_linked) VALUES (?, ?, ?, ?, ?)",
+                    arrayOf(traitDbId, fieldId.toString(), 0, realPosition.toString(), OffsetDateTime.now().toString()) // Default visibility to 1 (true)
+                )
+                Log.d("ObservationVariableDao", "Inserted new link with position: traitDbId=$traitDbId, fieldId=$fieldId, position=$realPosition")
+            }
         }
 
         //TODO need to edit min/max/category obs. var. val/attrs
@@ -427,14 +438,78 @@ class ObservationVariableDao {
 
         } ?: -1L
 
-        fun updateTraitVisibility(traitDbId: String, visible: String) = withDatabase { db ->
-
-            db.update(
-                ObservationVariable.tableName,
-                ContentValues().apply { put("visible", visible) },
-                "internal_id_observation_variable = ?",
-                arrayOf(traitDbId)
+        fun duplicateTraitSetup(targetFieldId: Int, selectedFieldId: Int) = withDatabase { db ->
+            // Step 1: Delete all rows that match the selectedFieldId
+            db.delete(
+                "studies_observation_variables_link",
+                "study_id = ?",
+                arrayOf(selectedFieldId.toString())
             )
+
+            // Step 2: Retrieve all rows that match the targetFieldId
+            val cursor = db.query(
+                "studies_observation_variables_link",
+                null,
+                "study_id = ?",
+                arrayOf(targetFieldId.toString()),
+                null,
+                null,
+                null
+            )
+
+            // Step 3: Insert duplicate rows with updated date and the study_id changed to the selectedFieldId
+            cursor.use {
+                while (it.moveToNext()) {
+                    val contentValues = ContentValues().apply {
+                        put("observation_variable_id", it.getString(it.getColumnIndexOrThrow("observation_variable_id")))
+                        put("study_id", selectedFieldId)
+                        put("visibility", it.getInt(it.getColumnIndexOrThrow("visibility")))
+                        put("position", it.getInt(it.getColumnIndexOrThrow("position")))
+                        put("date_linked", OffsetDateTime.now().toString())
+                    }
+                    db.insert("studies_observation_variables_link", null, contentValues)
+                }
+            }
+        }
+
+        fun updateTraitVisibility(traitDbId: String, visible: Boolean, fieldId: Int) = withDatabase { db ->
+            val exists = db.rawQuery(
+                "SELECT COUNT(*) FROM studies_observation_variables_link WHERE observation_variable_id = ? AND study_id = ?",
+                arrayOf(traitDbId, fieldId.toString())
+            ).use { cursor ->
+                cursor.moveToFirst() && cursor.getInt(0) > 0
+            }
+
+            if (exists) {
+                db.execSQL(
+                    "UPDATE studies_observation_variables_link SET visibility = ?, date_linked = ? WHERE observation_variable_id = ? AND study_id = ?",
+                    arrayOf(if (visible) 1 else 0, OffsetDateTime.now().toString(), traitDbId, fieldId.toString())
+                )
+                Log.d("ObservationVariableDao", "Updated visibility and date_linked: traitDbId=$traitDbId, fieldId=$fieldId, visibility=$visible")
+            } else {
+                db.execSQL(
+                    "INSERT INTO studies_observation_variables_link (observation_variable_id, study_id, visibility, date_linked) VALUES (?, ?, ?, ?)",
+                    arrayOf(traitDbId, fieldId.toString(), if (visible) 1 else 0, OffsetDateTime.now().toString())
+                )
+                Log.d("ObservationVariableDao", "Inserted new link with visibility and date_linked: traitDbId=$traitDbId, fieldId=$fieldId, visibility=$visible")
+            }
+        }
+
+        private fun removeFieldIdFromJsonArray(jsonArray: org.json.JSONArray, fieldId: Int) {
+            for (i in jsonArray.length() - 1 downTo 0) {
+                if (jsonArray.getInt(i) == fieldId) {
+                    jsonArray.remove(i)
+                }
+            }
+        }
+        private fun jsonArrayContains(jsonArray: org.json.JSONArray, value: Int): Boolean {
+            for (i in 0 until jsonArray.length()) {
+                val currentElement = jsonArray.getInt(i)
+                if (currentElement == value) {
+                    return true
+                }
+            }
+            return false
         }
 
         fun writeNewPosition(queryColumn: String, id: String, position: String) = withDatabase { db ->

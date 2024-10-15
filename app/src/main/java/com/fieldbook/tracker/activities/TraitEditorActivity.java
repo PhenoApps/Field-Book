@@ -21,15 +21,20 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
@@ -63,6 +68,7 @@ import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.chip.Chip;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -115,20 +121,24 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
             TraitAdapter adapter = (TraitAdapter) recyclerView.getAdapter();
 
-            if (adapter != null) {
-                int from = viewHolder.getBindingAdapterPosition();
-                int to = target.getBindingAdapterPosition();
+            if (adapter == null) {
+                return false; // Return early if adapter is null
+            }
 
-                try {
-                    adapter.moveItem(from, to);
-                } catch (IndexOutOfBoundsException iobe) {
-                    iobe.printStackTrace();
-                    return false;
-                }
+            int from = viewHolder.getBindingAdapterPosition();
+            int to = target.getBindingAdapterPosition();
+
+            try {
+                adapter.moveItem(from, to);
+            } catch (IndexOutOfBoundsException iobe) {
+                Log.e("onMove", "Error moving item from position " + from + " to " + to, iobe);
+                ;
+                return false;
             }
 
             return true;
         }
+
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
@@ -137,11 +147,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         @Override
         public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
             super.onSelectedChanged(viewHolder, actionState);
-            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-                if (viewHolder != null) {
-                    if (!SharedPreferenceUtils.Companion.isHighContrastTheme(prefs)) {
-                        viewHolder.itemView.setAlpha(0.5f);
-                    }
+            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG && viewHolder != null) {
+                if (!SharedPreferenceUtils.Companion.isHighContrastTheme(prefs)) {
+                    viewHolder.itemView.setAlpha(0.5f);
                 }
             }
         }
@@ -150,6 +158,12 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
             viewHolder.itemView.setAlpha(1f);
+
+            // Notify the adapter that the drag is complete
+            TraitAdapter adapter = (TraitAdapter) recyclerView.getAdapter();
+            if (adapter != null) {
+                adapter.onDragComplete();
+            }
         }
     });
 
@@ -301,7 +315,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         setContentView(R.layout.activity_traits);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
@@ -310,6 +323,14 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
+
+        // Sub-toolbar for field name
+        Toolbar subToolbar = findViewById(R.id.sub_toolbar);
+        subToolbar.setNavigationIcon(null);
+        TextView fieldTitle = findViewById(R.id.field_title);
+        int fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+        FieldObject field = database.getFieldObject(fieldId);
+        fieldTitle.setText(field.getExp_alias());
 
         traitList = findViewById(R.id.myList);
 
@@ -328,6 +349,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         FloatingActionButton fab = findViewById(R.id.newTrait);
         fab.setOnClickListener(v -> showTraitDialog(null));
+
+        // Load traits with field-specific visibility
+        loadData(database.getAllTraitObjects());
+
     }
 
     @Override
@@ -379,6 +404,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             importExportDialog();
         } else if (itemId == R.id.toggleTrait) {
             changeAllVisibility();
+        } else if (itemId == R.id.duplicateSetup) {
+            showDuplicateSetupDialog();
         } else if (itemId == android.R.id.home) {
             CollectActivity.reloadData = true;
             finish();
@@ -402,6 +429,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     private void changeAllVisibility() {
         boolean globalVis = preferences.getBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, false);
+
         List<TraitObject> allTraits = database.getAllTraitObjects();
 
         if (allTraits.isEmpty()) {
@@ -423,6 +451,48 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         ed.putBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, globalVis);
         ed.apply();
         queryAndLoadTraits();
+    }
+
+    private void showDuplicateSetupDialog() {
+        ArrayList<FieldObject> fields = database.getAllFieldObjects();
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View dialogView = inflater.inflate(R.layout.dialog_trait_duplicate_setup, null);
+
+        Spinner spinner = dialogView.findViewById(R.id.duplicate_setup_spinner);
+
+        ArrayAdapter<FieldObject> adapter = new ArrayAdapter<FieldObject>(this, R.layout.spinner_item_trait_duplication, fields) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = convertView != null ? convertView : LayoutInflater.from(getContext()).inflate(R.layout.spinner_item_trait_duplication, parent, false);
+                ((TextView) view.findViewById(R.id.field_alias)).setText(getItem(position).getExp_alias());
+                ((Chip) view.findViewById(R.id.visibleTraitCountChip)).setText(String.valueOf(getItem(position).getVisible_trait_count()));
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                return getView(position, convertView, parent);
+            }
+        };
+        spinner.setAdapter(adapter);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.traits_duplicate_setup_summary)
+                .setView(dialogView)
+                .setNegativeButton(R.string.dialog_cancel, (d, which) -> d.dismiss())
+                .setPositiveButton(R.string.traits_duplicate_setup_apply, (d, which) -> {
+                    // Retrieve selected field and duplicate the setup
+                    FieldObject selectedField = (FieldObject) spinner.getSelectedItem();
+                    if (selectedField != null) {
+                        database.duplicateTraitSetup(selectedField.getExp_id());
+                        queryAndLoadTraits();
+                    }
+                    d.dismiss();
+                })
+                .create();
+
+        dialog.show();
     }
 
     private void importExportDialog() {
@@ -627,19 +697,31 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     private void showTraitSortDialog() {
         Map<String, String> sortOptions = new LinkedHashMap<>();
         final String defaultSortOrder = "internal_id_observation_variable";
-        String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, defaultSortOrder);
 
         sortOptions.put(getString(R.string.traits_sort_name), "observation_variable_name");
         sortOptions.put(getString(R.string.traits_sort_format), "observation_variable_field_book_format");
         sortOptions.put(getString(R.string.traits_sort_import_order), "internal_id_observation_variable");
-        sortOptions.put(getString(R.string.traits_sort_visibility), "visible");
+        sortOptions.put(getString(R.string.traits_sort_visibility), "study_visibility");
 
-        ListSortDialog dialog = new ListSortDialog(this, sortOptions, currentSortOrder, defaultSortOrder, criteria -> {
-            Log.d(TAG, "Updating traits list sort order to : " + criteria);
-            preferences.edit().putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, criteria).apply();
-            queryAndLoadTraits();
+        ListSortDialog dialog = new ListSortDialog(this, sortOptions, null, defaultSortOrder, criteria -> {
+            Log.d(TAG, "Sorting traits by: " + criteria);
+            sortAndUpdatePositions(criteria);
         });
         dialog.show();
+    }
+
+    private void sortAndUpdatePositions(String sortOrder) {
+        List<TraitObject> sortedTraits = database.getAllTraitObjects(sortOrder);
+
+        // Update positions in the linking table
+        for (int i = 0; i < sortedTraits.size(); i++) {
+            TraitObject trait = sortedTraits.get(i);
+            Log.d(TAG, "Updating trait '" + trait.getName() + "' (ID: " + trait.getId() + ") to position " + i);
+            database.updateTraitPosition(trait.getId(), i);
+        }
+
+        // Reload the RecyclerView after updating positions
+        queryAndLoadTraits();
     }
 
     private void showExportDialog() {
@@ -835,9 +917,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     @Override
     public void queryAndLoadTraits() {
-
         loadData(database.getAllTraitObjects());
-
     }
 
     @NonNull
@@ -849,6 +929,26 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public void onDrag(@NonNull TraitAdapter.ViewHolder item) {
         itemTouchHelper.startDrag(item);
+    }
+
+    @Override
+    public void onDragComplete(List<? extends TraitObject> traitList) {
+        // Manually build a log string to show the list
+        StringBuilder logString = new StringBuilder("onDragComplete - Received list: ");
+        for (TraitObject trait : traitList) {
+            logString.append(trait.getName()).append(" (ID: ").append(trait.getId()).append("), ");
+        }
+        Log.d("TraitEditorActivity", logString.toString());
+
+        // Update the database with the new positions
+        for (int i = 0; i < traitList.size(); i++) {
+            TraitObject trait = traitList.get(i);
+            Log.d("TraitEditorActivity", "Updating trait '" + trait.getName() + "' (ID: " + trait.getId() + ") to position " + i);
+            database.updateTraitPosition(trait.getId(), i); // Save the new position in the database
+        }
+
+        // Reload the list to reflect the changes
+        queryAndLoadTraits();
     }
 
     /**

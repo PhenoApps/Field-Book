@@ -74,7 +74,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
 public class DataHelper {
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 11;
+    public static final int DATABASE_VERSION = 12;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -288,18 +288,43 @@ public class DataHelper {
 
 
     /**
-     * Helper function to change visibility of a trait. Used in the ratings
-     * screen
+     * Helper function to copy trait visibility and order from one study to another
      */
-    public void updateTraitVisibility(String traitDbId, boolean val) {
+    public void duplicateTraitSetup(Integer targetFieldId) {
 
         open();
 
-        ObservationVariableDao.Companion.updateTraitVisibility(traitDbId, String.valueOf(val));
+        Integer activeFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        ObservationVariableDao.Companion.duplicateTraitSetup(targetFieldId, activeFieldId);
+
+    }
+
+
+    /**
+     * Helper function to change visibility of a trait. Used in the ratings
+     * screen
+     */
+    public void updateTraitVisibility(String traitDbId, boolean val, Integer fieldId) {
+
+        open();
+
+        ObservationVariableDao.Companion.updateTraitVisibility(traitDbId, val, fieldId);
 
 //        db.execSQL("update " + TRAITS
 //                + " set isVisible = ? where trait like ?", new String[]{
 //                String.valueOf(val), trait});
+    }
+
+    /**
+     * Overloaded method that makes fieldId optional.
+     */
+    public void updateTraitVisibility(String traitDbId, boolean val) {
+        open();
+
+        Integer fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        ObservationVariableDao.Companion.updateTraitVisibility(traitDbId, val, fieldId);
     }
 
     public void updateObservationUnit(ObservationUnitModel model, String geoCoordinates) {
@@ -1056,7 +1081,9 @@ public class DataHelper {
 
         open();
 
-        return VisibleObservationVariableDao.Companion.getVisibleTrait();
+        Integer fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        return VisibleObservationVariableDao.Companion.getVisibleTrait(fieldId);
 
 //        String[] data = null;
 //
@@ -1344,16 +1371,24 @@ public class DataHelper {
 
     }
 
+    // Overloaded method that provides no argument for sortOrder
+    public ArrayList<TraitObject> getAllTraitObjects() {
+        // Call the method with null sortOrder, so it defaults to sorting by position
+        return getAllTraitObjects(null);
+    }
+
     /**
      * V2 - Get all traits in the system, in order, as TraitObjects
      */
-    public ArrayList<TraitObject> getAllTraitObjects() {
-
+    public ArrayList<TraitObject> getAllTraitObjects(@Nullable String sortOrder) {
         open();
 
-        return ObservationVariableDao.Companion.getAllTraitObjects(
-                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
-        );
+        // Get the field ID from preferences
+        Integer fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        // Use the method in ObservationVariableDao to retrieve traits based on fieldId and sortOrder
+        return ObservationVariableDao.Companion.getAllTraitObjects(fieldId, sortOrder);
+
 
 //        ArrayList<TraitObject> list = new ArrayList<>();
 //
@@ -2086,7 +2121,9 @@ public class DataHelper {
 
         open();
 
-        ObservationVariableDao.Companion.updateTraitPosition(id, realPosition);
+        Integer fieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        ObservationVariableDao.Companion.updateTraitPosition(id, realPosition, fieldId);
 
 //        try {
 //            ContentValues c = new ContentValues();
@@ -2833,7 +2870,7 @@ public class DataHelper {
                     + "(attribute_value_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_id INTEGER, attribute_value VARCHAR, plot_id INTEGER, exp_id INTEGER)");
             db.execSQL("CREATE TABLE "
                     + EXP_INDEX
-                    + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER, exp_source VARCHAR)");
+                    + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR,VARCHAR date_import , date_edit VARCHAR, date_export VARCHAR, count INTEGER, exp_source VARCHAR)");
 
             //Do not know why the unique constraint does not work
             //db.execSQL("CREATE UNIQUE INDEX expname ON " + EXP_INDEX +"(exp_name);");
@@ -3047,6 +3084,18 @@ public class DataHelper {
                 helper.populateImportFormat(db);
                 helper.fixStudyAliases(db);
 
+            }
+
+            if (oldVersion <= 11 && newVersion >= 12) {
+                db.execSQL("CREATE TABLE studies_observation_variables_link (" +
+                        "internal_id_study_trait_link INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "study_id INTEGER NOT NULL REFERENCES studies(internal_id_study) ON DELETE CASCADE, " + // study/field reference
+                        "observation_variable_id INTEGER NOT NULL REFERENCES observation_variables(internal_id_observation_variable) ON DELETE CASCADE, " + // trait reference
+                        "visibility BOOLEAN NOT NULL DEFAULT 1, " + // 1 = visible, 0 = hidden
+                        "position INTEGER, " + // trait order
+                        "date_linked TEXT, " + // timestamp when the link was created or updated
+                        "UNIQUE(study_id, observation_variable_id)" +  // prevent duplicate study-trait relationships
+                        ");");
             }
         }
     }

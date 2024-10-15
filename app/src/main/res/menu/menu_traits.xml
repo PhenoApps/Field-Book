@@ -11,6 +11,11 @@
         android:showAsAction="always"
         android:title="@string/tutorial_dialog_title" />
     <item
+        android:id="@+id/duplicateSetup"
+        android:icon="@drawable/ic_content_duplicate"
+        android:showAsAction="always"
+        android:title="@string/traits_duplicate_setup" />
+    <item
         android:id="@+id/toggleTrait"
         android:icon="@drawable/ic_tb_toggle_all"
         android:showAsAction="always"

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import androidx.annotation.Nullable;
 
 import com.fieldbook.tracker.R;
 
@@ -29,7 +30,7 @@ public class ListSortDialog {
         void onSortOptionSelected(String criteria);
     }
 
-    public ListSortDialog(Activity activity, Map<String, String> sortOptions, String currentSortOrder, String defaultSortOrder, OnSortOptionSelectedListener listener) {
+    public ListSortDialog(Activity activity, Map<String, String> sortOptions, @Nullable String currentSortOrder, String defaultSortOrder, OnSortOptionSelectedListener listener) {
         this.activity = activity;
         this.sortOptions = sortOptions;
         this.currentSortOrder = currentSortOrder;
@@ -53,12 +54,14 @@ public class ListSortDialog {
                 View view = super.getView(position, convertView, parent);
                 TextView textView = view.findViewById(R.id.spinnerTarget);
 
-                // Highlight the current sort order
-                String columnName = sortOptions.get(displayOptions.get(position));
-                if (columnName != null && columnName.equals(currentSortOrder)) {
-                    textView.setBackgroundColor(backgroundColor);
-                } else {
-                    textView.setBackgroundColor(activity.getResources().getColor(android.R.color.transparent));
+                // Only highlight the current sort order if it's not null
+                if (currentSortOrder != null) {
+                    String columnName = sortOptions.get(displayOptions.get(position));
+                    if (columnName != null && columnName.equals(currentSortOrder)) {
+                        textView.setBackgroundColor(backgroundColor);
+                    } else {
+                        textView.setBackgroundColor(activity.getResources().getColor(android.R.color.transparent));
+                    }
                 }
 
                 return view;

@@ -221,6 +221,8 @@ public class CollectActivity extends ThemedActivity
     ImageButton missingValue;
     ImageButton barcodeInput;
 
+    private Integer fieldId;
+
     /**
      * Trait layouts
      */
@@ -289,6 +291,8 @@ public class CollectActivity extends ThemedActivity
 
         gps = new GPSTracker(this, this, 0, 10000);
 
+        fieldId = getFieldId();
+
         guiThread.start();
         myGuiHandler = new Handler(guiThread.getLooper()) {
             @Override
@@ -353,6 +357,13 @@ public class CollectActivity extends ThemedActivity
     protected void onStop() {
         super.onStop();
         usbCameraApi.onStop();
+    }
+
+    public Integer getFieldId() {
+        if (getIntent().hasExtra("FIELD_ID")) {
+            return getIntent().getIntExtra("FIELD_ID", -1);
+        }
+        return null; // or return -1 if you prefer a default value
     }
 
     public void triggerTts(String text) {

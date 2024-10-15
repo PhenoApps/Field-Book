@@ -82,8 +82,8 @@
     <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
 
     <!-- Warnings/Catches -->
-    <string name="warning_field_missing">No field is currently loaded. Please load a field before collecting data.</string>
-    <string name="warning_traits_missing">No traits exist. Please create traits before collecting data.</string>
+    <string name="warning_field_missing">No field is currently active. Please load and select a field before proceeding.</string>
+    <string name="warning_traits_missing">No active traits. Please create and/or activate traits before collecting data.</string>
 
     <!-- Changelog -->
     <string name="changelog_title">Changelog</string>
@@ -221,6 +221,11 @@
 
 
     <!-- TRAITS -->
+    <string name="traits_duplicate_setup">Duplicate Trait Setup</string>
+    <string name="traits_duplicate_setup_summary">Copy trait visibility and order from another field</string>
+    <string name="traits_field_spinner_text">active traits</string>
+    <string name="traits_duplicate_setup_apply">Apply</string>
+
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sort Traits</string>
     <string name="traits_sort_name">Name</string>
