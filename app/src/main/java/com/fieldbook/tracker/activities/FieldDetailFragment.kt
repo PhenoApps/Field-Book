@@ -296,6 +296,15 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         attributeCountChip.text = attributeCount
         sortOrderChip.text = getString(R.string.field_sort_entries)
 
+        visibleTraitCountChip.text = field.visible_trait_count.toString()
+
+        val lastTraitModification = field.date_traits_modified
+        if (!lastTraitModification.isNullOrEmpty()) {
+            lastTraitModificationTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastTraitModification)
+        } else {
+            getString(R.string.no_activity)
+        }
+
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {
             lastEditTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastEdit)
@@ -317,11 +326,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             getString(R.string.no_activity)
         }
 
-        val lastTraitModification = field.date_traits_modified
-        if (!lastTraitModification.isNullOrEmpty()) {
-            lastTraitModificationTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastTraitModification)
+        if (field.observation_count.toInt() > 0) {
+            collectedTraitCountChip.visibility = View.VISIBLE
+            observationCountChip.visibility = View.VISIBLE
+            collectedTraitCountChip.text = field.collected_trait_count.toString()
+            observationCountChip.text = field.observation_count.toString()
         } else {
-            getString(R.string.no_activity)
+            collectedTraitCountChip.visibility = View.GONE
+            observationCountChip.visibility = View.GONE
         }
 
         val lastCollection = field.date_edit
@@ -329,16 +341,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             lastDataTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastCollection)
         } else {
             getString(R.string.no_activity)
-        }
-
-        visibleTraitCountChip.text = field.visible_trait_count.toString()
-        collectedTraitCountChip.text = field.collected_trait_count.toString()
-
-        if (field.observation_count.toInt() > 0) {
-            observationCountChip.visibility = View.VISIBLE
-            observationCountChip.text = field.observation_count.toString()
-        } else {
-            observationCountChip.visibility = View.GONE
         }
 
     }
