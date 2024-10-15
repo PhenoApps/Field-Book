@@ -174,8 +174,86 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- Traits Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardViewTraits"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_margin="8dp"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardElevation="4dp"
+            app:rippleColor="@color/main_card_color_pressed"
+            app:strokeColor="@android:color/transparent"
+            app:cardBackgroundColor="@color/main_color_background">
 
-    <!-- Collect Card -->
+            <!-- Card Content -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
+
+                <!-- Trait Icon -->
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="8dp"
+                    android:src="@drawable/ic_nav_drawer_traits" />
+
+                <!-- Title and Date Text -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="16dp">
+
+                    <!-- Trait Title -->
+                    <TextView
+                        style="@style/TextViewStyle.Bold.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_traits"
+                        android:paddingBottom="4dp" />
+
+                    <!-- Date Traits Modified (Replacing the Chip) -->
+                    <TextView
+                        style="@style/TextViewStyle.Sub"
+                        android:id="@+id/dateTraitsModifiedTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/no_activity" />
+
+                </LinearLayout>
+
+                <!-- Chip shifted to the right -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/visibleTraitCountChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"
+                    app:chipIcon="@drawable/ic_ruler"
+                    app:chipIconSize="24dp"
+                    app:ensureMinTouchTargetSize="false"
+                    app:closeIconVisible="false"
+                    app:chipBackgroundColor="?attr/defaultChipBackground"
+                    android:layout_marginEnd="8dp" />
+
+                <!-- Chevron Icon -->
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_chevron_right" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Collect Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardViewCollect"
             android:layout_width="match_parent"
@@ -369,85 +447,6 @@
                         android:src="@drawable/ic_chevron_right" />
 
                 </LinearLayout>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Traits Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardViewTraits"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_margin="8dp"
-            android:foreground="?attr/selectableItemBackground"
-            app:cardElevation="4dp"
-            app:rippleColor="@color/main_card_color_pressed"
-            app:strokeColor="@android:color/transparent"
-            app:cardBackgroundColor="@color/main_color_background">
-
-            <!-- Card Content -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp">
-
-                <!-- Trait Icon -->
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_margin="8dp"
-                    android:src="@drawable/ic_nav_drawer_traits" />
-
-                <!-- Title and Date Text -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginEnd="16dp">
-
-                    <!-- Trait Title -->
-                    <TextView
-                        style="@style/TextViewStyle.Bold.Title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_traits"
-                        android:paddingBottom="4dp" />
-
-                    <!-- Date Traits Modified (Replacing the Chip) -->
-                    <TextView
-                        style="@style/TextViewStyle.Sub"
-                        android:id="@+id/dateTraitsModifiedTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/no_activity" />
-
-                </LinearLayout>
-
-                <!-- Chip shifted to the right -->
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/visibleTraitCountChip"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:clickable="false"
-                    android:focusable="false"
-                    app:chipIcon="@drawable/ic_ruler"
-                    app:chipIconSize="24dp"
-                    app:ensureMinTouchTargetSize="false"
-                    app:closeIconVisible="false"
-                    app:chipBackgroundColor="?attr/defaultChipBackground"
-                    android:layout_marginEnd="8dp" />
-
-                <!-- Chevron Icon -->
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:src="@drawable/ic_chevron_right" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
