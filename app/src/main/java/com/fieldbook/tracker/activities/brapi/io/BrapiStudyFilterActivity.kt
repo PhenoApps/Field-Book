@@ -42,7 +42,6 @@ class BrapiStudyFilterActivity(
             .filter { if (commonCropNames.isNotEmpty()) it.study.commonCropName in commonCropNames else true }
     }
 
-    //TODO should text be or or and?
     override fun List<CheckboxListAdapter.Model>.filterBySearchTextPreferences(): List<CheckboxListAdapter.Model> {
 
         val searchTexts = prefs.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, emptySet())

@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.brapi.service.core
 
 import com.fieldbook.tracker.brapi.service.BrapiV2ApiCallBack
+import org.brapi.client.v2.model.exceptions.ApiException
 
 typealias ApiFailCallback = (Int) -> Void?
 typealias ApiListSuccess<T> = (T?) -> Void?
@@ -32,7 +33,7 @@ class SuccessListCallback<R>(private val successCallback: (response: R) -> Unit)
     }
 }
 
-class ApiCall<T>(private val onSuccess: (T) -> Unit) : BrapiV2ApiCallBack<T>() {
+class ApiCall<T>(private val onSuccess: (T) -> Unit, private val onFailure: (ApiException?) -> Unit) : BrapiV2ApiCallBack<T>() {
 
     override fun onSuccess(
         result: T,
@@ -40,5 +41,13 @@ class ApiCall<T>(private val onSuccess: (T) -> Unit) : BrapiV2ApiCallBack<T>() {
         responseHeaders: MutableMap<String, MutableList<String>>?
     ) {
         onSuccess(result)
+    }
+
+    override fun onFailure(
+        error: ApiException?,
+        i: Int,
+        map: MutableMap<String, MutableList<String>>?
+    ) {
+        onFailure(error)
     }
 }

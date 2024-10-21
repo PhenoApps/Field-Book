@@ -33,7 +33,7 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
             //callback for returning the data through the flow channel, called after pagination is found
             //callback for querying metadata about the api call, then it queries for all data
-            val initialCallback = ApiCall<R> {
+            val initialCallback = ApiCall<R>({
 
                 Log.d("FETCH", "Checking metadata: ${it.metadata == null}")
 
@@ -57,7 +57,7 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
                         params.pageSize(pageSize)
 
                         Log.d("FETCH", "Calling page $i/$total with $pageSize items")
-                        apiCall(params, ApiCall<R> { response ->
+                        apiCall(params, ApiCall<R>({ response ->
 
                             if (response.metadata != null && response.result != null) {
 
@@ -73,18 +73,32 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
                                 }
                             }
+
+                        }) { e ->
+
+                            this@callbackFlow.close(e?.cause)
+
                         })
                     }
                 }
+
+            }) { e ->
+
+                this@callbackFlow.close(e?.cause)
+
             }
 
             apiCall(params, initialCallback)
 
-        } catch (e: ApiException) {
+            Log.d("FETCH", "Initial call made")
+
+        } catch (e: Exception) {
 
             e.printStackTrace()
 
             cancel(e.message ?: "Unknown error")
+
+            throw(e)
         }
 
         awaitClose()

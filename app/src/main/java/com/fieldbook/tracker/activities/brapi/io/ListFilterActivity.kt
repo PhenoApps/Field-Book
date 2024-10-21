@@ -141,7 +141,6 @@ abstract class ListFilterActivity : ThemedActivity(),
 
         importTextView.setOnClickListener {
             onFinishButtonClicked()
-            finish()
         }
     }
 

@@ -120,7 +120,7 @@ import java.util.stream.Collectors;
 
 import kotlin.jvm.functions.Function1;
 
-public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService, BrAPIServiceSearch {
+public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
     public static final String ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES = "observationLevelNames";
     protected final StudiesApi studiesApi;
@@ -146,8 +146,6 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public final ObservationVariableService observationVariableService;
     public final ObservationUnitService observationUnitService;
     public final GermplasmService germplasmService;
-
-    public Searcher searcher = new Searcher(this);
 
     public BrAPIServiceV2(Context context) {
         this.context = context;
@@ -1639,50 +1637,6 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             return new BrapiControllerResponse(false, e.toString());
         }
     }
-
-    /* studies delegate pattern */
-    @NonNull
-    @Override
-    public Pair<Integer, Map<String, BrAPIStudy>> searchStudies(@Nullable BrAPIStudySearchRequest requestParams, @Nullable Function<Integer, Void> failFunction) {
-        return searcher.searchStudies(requestParams, failFunction);
-    }
-
-    /* seasons delegate pattern */
-//    @Override
-//    public void fetchSeasons(@NonNull SeasonQueryParams params, @NonNull Function1<? super BrAPISeasonListResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
-//        seasonService.fetchSeasons(params, onSuccess, onFail);
-//    }
-//
-//    /* crops delegates */
-//    //TODO why does CropsAPI use pagination manager here?
-//    @Override
-//    public void fetchCrops(@NonNull BrapiPaginationManager paginationManager, @NonNull Function1<? super BrAPICommonCropNamesResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
-//        cropService.fetchCrops(paginationManager, onSuccess, onFail);
-//    }
-
-    /* studies delegates */
-//    @Override
-//    public void fetchStudies(@NonNull StudyQueryParams params, @NonNull Function1<? super BrAPIStudyListResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
-//        studyService.fetchStudies(params, onSuccess, onFail);
-//    }
-
-    /* programs delegates */
-//    @Override
-//    public void fetchPrograms(@NonNull ProgramQueryParams params, @NonNull Function1<? super BrAPIProgramListResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
-//        programService.fetchPrograms(params, onSuccess, onFail);
-//    }
-//
-//    /* trials delegate */
-//    @Override
-//    public void fetchTrials(@NonNull TrialQueryParams params, @NonNull Function1<? super BrAPITrialListResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
-//        trialService.fetchTrials(params, onSuccess, onFail);
-//    }
-
-    /* observation variable delegates */
-//    @Override
-//    public void fetchObservationVariables(@NonNull VariableQueryParams params, @NonNull Function1<? super BrAPIObservationVariableListResponse, Void> onSuccess, @NonNull Function1<? super Integer, Void> onFail) {
-//        observationVariableService.fetchObservationVariables(params, onSuccess, onFail);
-//    }
 
     @FunctionalInterface
     public interface GenericSearchCallFunction<T, R> {

@@ -33,6 +33,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.brapi.client.v2.model.queryParams.germplasm.GermplasmQueryParams
@@ -47,7 +48,7 @@ import java.util.Locale
 import kotlin.collections.set
 
 /**
- * receive study infomation including trial
+ * receive study information including trial
  * from trial get program
  * get obs. levels
  * get observation units, and traits, germplasm
@@ -73,7 +74,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 launch(Dispatchers.Main) {
                     Toast.makeText(
                         this@BrapiStudyImportActivity,
-                        "BrAPI V1 is not compatible.",
+                        getString(R.string.brapi_v1_is_not_compatible),
                         Toast.LENGTH_SHORT
                     ).show()
                     setResult(Activity.RESULT_CANCELED)
@@ -144,7 +145,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private fun parseIntentExtras() {
         val programDbId = intent.getStringExtra(EXTRA_PROGRAM_DB_ID)
         if (programDbId == null) {
-            Toast.makeText(this, "No programDbId provided", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.no_programdbid_provided), Toast.LENGTH_SHORT).show()
             setResult(Activity.RESULT_CANCELED)
             finish()
         } else {
@@ -154,7 +155,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             if (studyDbIds.isEmpty()) {
                 // fetch study info
-                Toast.makeText(this, "No studyDbIds provided", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.no_studydbids_provided), Toast.LENGTH_SHORT).show()
                 setResult(Activity.RESULT_CANCELED)
                 finish()
             } else {
@@ -708,7 +709,12 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             (brapiService as BrAPIServiceV2).germplasmService.fetchAll(GermplasmQueryParams()
                 .also {
                     it.studyDbId(studyDbId)
-                }).collect { result ->
+                })
+                .catch {
+                    Log.e(TAG, "Failed to fetch germplasm")
+                    cancel()
+                }
+                .collect { result ->
 
                 val data = result as Pair<*, *>
                 val total = data.first as Int
@@ -743,7 +749,12 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
                     VariableQueryParams().also {
                         it.studyDbId(studyDbId)
-                    }).collect { variables ->
+                    })
+                    .catch {
+                        Log.e(TAG, "Failed to fetch observation variables")
+                        cancel()
+                    }
+                    .collect { variables ->
 
                     val data = variables as Pair<*, *>
                     val total = data.first as Int
@@ -785,6 +796,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     //it.observationUnitLevelName("plot")
                 }
             )
+                .catch {
+                    Log.e(TAG, "Failed to fetch observation units")
+                    cancel()
+                }
                 .collect { response ->
                     Log.d("Unit", "Response")
 

@@ -1160,6 +1160,9 @@
     <string name="preferences_brapi_cache_invalidate_summary">%s</string>
     <string name="preferences_brapi_cache_invalidate_title">Cache Invalidation</string>
     <string name="brapi_v1_is_not_compatible">BrAPI V1 is not compatible.</string>
+    <string name="no_programdbid_provided">No programDbId provided</string>
+    <string name="no_studydbids_provided">No studyDbIds provided</string>
+    <string name="act_brapi_list_api_exception">Unknown error. Please check BrAPI preferences or contact developers.</string>
     <plurals name="act_brapi_list_filter">
         <item quantity="one">%s result</item>
         <item quantity="other">%s results</item>

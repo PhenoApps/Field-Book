@@ -30,6 +30,9 @@ import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.cancel
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.brapi.client.v2.model.queryParams.core.StudyQueryParams
@@ -284,6 +287,10 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         (brapiService as BrAPIServiceV2).studyService.fetchAll(
             StudyQueryParams()
         )
+            .catch {
+                onApiException()
+                queryStudiesJob?.cancel()
+            }
             .collect {
 
             var (totalCount, models) = it as Pair<*, *>
@@ -324,6 +331,16 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         }
     }
 
+    private fun onApiException() {
+        launch(Dispatchers.Main) {
+            Toast.makeText(
+                this@BrapiListFilterActivity,
+                getString(R.string.act_brapi_list_api_exception),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        finish()
+    }
 
     private suspend fun queryTrials() {
 
@@ -332,6 +349,10 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             var count = 0
 
             (brapiService as BrAPIServiceV2).trialService.fetchAll(TrialQueryParams())
+                .catch {
+                    onApiException()
+                    queryTrialsJob?.cancel()
+                }
                 .collect { it ->
 
                     var (total, models) = it as Pair<*, *>
