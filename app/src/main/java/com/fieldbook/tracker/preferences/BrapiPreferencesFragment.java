@@ -33,7 +33,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.activities.ScannerActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
-import com.fieldbook.tracker.activities.brapi.update.BrapiFilterCache;
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.objects.BrAPIConfig;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.google.gson.Gson;

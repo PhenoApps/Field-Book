@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.update.mapper
+package com.fieldbook.tracker.activities.brapi.io.mapper
 
 import android.content.Context
 import com.fieldbook.tracker.brapi.service.BrAPIService
@@ -8,6 +8,10 @@ import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
+
+/**
+ * File for extension functions to convert BrAPI objects to FieldBook objects
+ */
 
 fun BrAPIObservationVariable.toTraitObject(context: Context) = TraitObject().also {
 

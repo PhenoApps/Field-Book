@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.update
+package com.fieldbook.tracker.activities.brapi.io
 
 import android.app.Activity
 import android.content.Intent
@@ -19,7 +19,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
- * TODO erase local cache when server changes, or use directory structure
+ * An abstract class for displaying a list of items. Uses a CheckboxAdapter to display the list of items
+ * and allows the user to filter the list by searching for a specific item.
+ * The user can then select the items they want to import and click the 'Apply' button to finish.
+ *
  * Type parameters
  * param T the list data type that will be converted into the CheckboxAdapter Model
  */
@@ -41,7 +44,7 @@ abstract class ListFilterActivity : ThemedActivity(),
 
     protected var cache = mutableListOf<CheckboxListAdapter.Model>()
 
-    protected lateinit var applyTextView: TextView
+    protected lateinit var importTextView: TextView
     protected lateinit var progressBar: ProgressBar
     protected lateinit var searchBar: SearchBar
 
@@ -64,7 +67,7 @@ abstract class ListFilterActivity : ThemedActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_brapi_importer)
+        setContentView(R.layout.activity_list_filter)
 
         setupToolbar()
 
@@ -90,7 +93,7 @@ abstract class ListFilterActivity : ThemedActivity(),
 
     private fun setupToolbar() {
 
-        setSupportActionBar(findViewById(R.id.act_brapi_importer_tb))
+        setSupportActionBar(findViewById(R.id.act_list_filter_tb))
 
         supportActionBar?.title =
             getString(R.string.act_brapi_filter_by_title, getString(titleResId))
@@ -100,13 +103,13 @@ abstract class ListFilterActivity : ThemedActivity(),
 
     private fun initUi() {
 
-        fetchDescriptionTv = findViewById(R.id.brapi_importer_fetch_data_tv)
-        recyclerView = findViewById(R.id.brapi_importer_rv)
-        applyTextView = findViewById(R.id.act_brapi_importer_button)
-        progressBar = findViewById(R.id.brapi_importer_pb)
-        searchBar = findViewById(R.id.brapi_importer_sb)
+        fetchDescriptionTv = findViewById(R.id.act_list_filter_fetch_data_tv)
+        recyclerView = findViewById(R.id.act_list_filter_rv)
+        importTextView = findViewById(R.id.act_list_filter_import_btn)
+        progressBar = findViewById(R.id.act_list_filter_pb)
+        searchBar = findViewById(R.id.act_list_filter_sb)
 
-        applyTextView.text = getString(R.string.act_brapi_filter_apply)
+        importTextView.text = getString(R.string.act_brapi_filter_apply)
 
         setupRecyclerView()
 
@@ -123,7 +126,7 @@ abstract class ListFilterActivity : ThemedActivity(),
         recyclerView.adapter = CheckboxListAdapter { checked, position ->
             cache[position].checked = checked
             //submitAdapterItems(cache)
-            applyTextView.visibility = if (showNextButton()) View.VISIBLE else View.GONE
+            importTextView.visibility = if (showNextButton()) View.VISIBLE else View.GONE
         }
     }
 
@@ -132,11 +135,11 @@ abstract class ListFilterActivity : ThemedActivity(),
 
     private fun setupApplyFilterView() {
 
-        applyTextView.visibility = showNextButton().let { show ->
+        importTextView.visibility = showNextButton().let { show ->
             if (show) View.VISIBLE else View.GONE
         }
 
-        applyTextView.setOnClickListener {
+        importTextView.setOnClickListener {
             onFinishButtonClicked()
             finish()
         }

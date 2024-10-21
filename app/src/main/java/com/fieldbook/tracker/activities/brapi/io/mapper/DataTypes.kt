@@ -1,7 +1,10 @@
-package com.fieldbook.tracker.activities.brapi.update.mapper
+package com.fieldbook.tracker.activities.brapi.io.mapper
 
 import java.util.Locale
 
+/**
+ * Static class for converting BrAPI variable formats to Field Book variable formats
+ */
 class DataTypes {
     companion object {
         /**

@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.update
+package com.fieldbook.tracker.activities.brapi.io
 
 import android.app.Activity
 import android.content.Context
@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
-import com.fieldbook.tracker.activities.brapi.update.mapper.toTraitObject
+import com.fieldbook.tracker.activities.brapi.io.mapper.toTraitObject
 import com.fieldbook.tracker.adapters.StudyAdapter
 import com.fieldbook.tracker.adapters.StudyAdapter.Model
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel
@@ -112,13 +112,13 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         setContentView(R.layout.activity_study_importer)
 
         loadingTextView = findViewById(R.id.act_brapi_importer_tv)
-        progressBar = findViewById(R.id.brapi_importer_pb)
+        progressBar = findViewById(R.id.act_list_filter_pb)
         tabLayout = findViewById(R.id.brapi_importer_tl)
         listView = findViewById(R.id.act_study_importer_lv)
-        studyList = findViewById(R.id.brapi_importer_rv)
+        studyList = findViewById(R.id.act_list_filter_rv)
         importButton = findViewById(R.id.act_study_importer_import_button)
 
-        setSupportActionBar(findViewById(R.id.act_brapi_importer_tb))
+        setSupportActionBar(findViewById(R.id.act_list_filter_tb))
 
         supportActionBar?.setTitle(R.string.act_brapi_study_import_title)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

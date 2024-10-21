@@ -1159,6 +1159,7 @@
     <string name="preferences_brapi_cache_invalidate_dialog_title">Invalidate Cache Interval Choices</string>
     <string name="preferences_brapi_cache_invalidate_summary">%s</string>
     <string name="preferences_brapi_cache_invalidate_title">Cache Invalidation</string>
+    <string name="brapi_v1_is_not_compatible">BrAPI V1 is not compatible.</string>
     <plurals name="act_brapi_list_filter">
         <item quantity="one">%s result</item>
         <item quantity="other">%s results</item>

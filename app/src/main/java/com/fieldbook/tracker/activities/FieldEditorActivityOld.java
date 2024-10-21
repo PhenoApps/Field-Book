@@ -37,7 +37,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.brapi.update.BrapiStudyFilterActivity;
+import com.fieldbook.tracker.activities.brapi.io.BrapiStudyFilterActivity;
 import com.fieldbook.tracker.adapters.FieldAdapterOld;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;

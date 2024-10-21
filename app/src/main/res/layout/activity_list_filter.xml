@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/act_brapi_importer_tb"
+        android:id="@+id/act_list_filter_tb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/fb_color_primary"
@@ -16,7 +16,7 @@
         app:menu="@menu/menu_filter_brapi" />
 
     <ProgressBar
-        android:id="@+id/brapi_importer_pb"
+        android:id="@+id/act_list_filter_pb"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -25,17 +25,17 @@
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tb" />
+        app:layout_constraintTop_toBottomOf="@id/act_list_filter_tb" />
 
     <com.fieldbook.tracker.views.SearchBar
-        android:id="@+id/brapi_importer_sb"
+        android:id="@+id/act_list_filter_sb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tb" />
+        app:layout_constraintTop_toBottomOf="@id/act_list_filter_tb" />
 
     <com.google.android.material.chip.ChipGroup
-        android:id="@+id/brapi_importer_cg"
+        android:id="@+id/act_list_filter_cg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
@@ -44,11 +44,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_importer_sb"
+        app:layout_constraintTop_toBottomOf="@id/act_list_filter_sb"
         tools:visibility="visible" />
 
     <TextView
-        android:id="@+id/brapi_importer_fetch_data_tv"
+        android:id="@+id/act_list_filter_fetch_data_tv"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="2dp"
@@ -56,16 +56,16 @@
         android:text="@string/brapi_importer_fetch_data"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_importer_cg" />
+        app:layout_constraintTop_toBottomOf="@id/act_list_filter_cg" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/brapi_importer_rv"
+        android:id="@+id/act_list_filter_rv"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toTopOf="@id/act_brapi_importer_button"
-        app:layout_constraintTop_toBottomOf="@id/brapi_importer_fetch_data_tv"
+        app:layout_constraintBottom_toTopOf="@id/act_list_filter_import_btn"
+        app:layout_constraintTop_toBottomOf="@id/act_list_filter_fetch_data_tv"
         tools:listitem="@layout/list_item_label_checkbox" />
 
     <!-- hidden pagination ui that brapi service is coupled to -->
@@ -98,7 +98,7 @@
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/act_brapi_importer_button"
+        android:id="@+id/act_list_filter_import_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
@@ -109,6 +109,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

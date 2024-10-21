@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.update
+package com.fieldbook.tracker.activities.brapi.io
 
 import android.content.Context
 import android.content.Intent
@@ -97,7 +97,7 @@ class BrapiStudyFilterActivity(
 
         setupMainToolbar()
 
-        applyTextView.text = getString(R.string.act_brapi_filter_import)
+        importTextView.text = getString(R.string.act_brapi_filter_import)
 
     }
 

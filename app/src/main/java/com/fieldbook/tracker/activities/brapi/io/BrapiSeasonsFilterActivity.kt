@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.update
+package com.fieldbook.tracker.activities.brapi.io
 
 import android.content.Context
 import android.content.Intent

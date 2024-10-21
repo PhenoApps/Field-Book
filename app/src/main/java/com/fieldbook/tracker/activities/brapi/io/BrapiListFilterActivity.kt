@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.update
+package com.fieldbook.tracker.activities.brapi.io
 
 import android.app.Activity
 import android.content.Intent
@@ -84,14 +84,13 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             restoreModels()
         }
 
-    //TODO string resource
     private val brapiService: BrAPIService by lazy {
         BrAPIServiceFactory.getBrAPIService(this).also { service ->
             if (service is BrAPIServiceV1) {
                 launch(Dispatchers.Main) {
                     Toast.makeText(
                         this@BrapiListFilterActivity,
-                        "BrAPI V1 is not compatible.",
+                        getString(R.string.brapi_v1_is_not_compatible),
                         Toast.LENGTH_SHORT
                     ).show()
                     setResult(Activity.RESULT_CANCELED)
@@ -106,7 +105,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         paginationManager = BrapiPaginationManager(this)
 
-        chipGroup = findViewById(R.id.brapi_importer_cg)
+        chipGroup = findViewById(R.id.act_list_filter_cg)
 
         restoreModels()
 
@@ -117,7 +116,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     @OptIn(ExperimentalBadgeUtils::class)
     protected fun resetChipToolbarCount() {
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.act_brapi_importer_tb)
+        val toolbar = findViewById<MaterialToolbar>(R.id.act_list_filter_tb)
 
         if (numFilterBadge != null) {
             BadgeUtils.detachBadgeDrawable(numFilterBadge, toolbar, R.id.action_brapi_filter)
@@ -407,11 +406,11 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     private fun setupApplyFilterView() {
 
-        applyTextView.visibility = showNextButton().let { show ->
+        importTextView.visibility = showNextButton().let { show ->
             if (show) View.VISIBLE else View.GONE
         }
 
-        applyTextView.setOnClickListener {
+        importTextView.setOnClickListener {
             if (this is BrapiStudyFilterActivity) {
 
                 val models = associateProgramStudy()
@@ -475,7 +474,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             .distinct()
             .filterBySearchTextPreferences()
             .persistCheckBoxes()
-            .sortedBy { it.label } //TODO add menu icon
+            .sortedBy { it.label }
 
         cache.addAll(uiModels)
 
