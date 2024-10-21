@@ -36,7 +36,7 @@ open class BrapiTrialsFilterActivity(override val titleResId: Int = R.string.bra
                 checked = false,
                 id = model.trialDbId!!,
                 label = model.trialName!!,
-                subLabel = model.study.locationName
+                subLabel = model.study.locationName ?: ""
             )
         } else {
             null

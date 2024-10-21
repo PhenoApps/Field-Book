@@ -284,7 +284,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         (brapiService as BrAPIServiceV2).studyService.fetchAll(
             StudyQueryParams()
-        ).collect {
+        )
+            .collect {
 
             var (totalCount, models) = it as Pair<*, *>
             totalCount = totalCount as Int
@@ -300,7 +301,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                     checked = false,
                     id = m.studyDbId,
                     label = m.studyName,
-                    subLabel = m.locationName
+                    subLabel = m.locationName ?: ""
                 )
             }
 
@@ -314,7 +315,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
             withContext(Dispatchers.Main) {
                 setProgress(count, totalCount)
-                if (count == totalCount) {
+                if (count == totalCount || totalCount < 512) {
                     progressBar.visibility = View.GONE
                     fetchDescriptionTv.visibility = View.GONE
                     saveCacheToFile(modelCache as List<BrAPIStudy>, trialModels)
@@ -353,7 +354,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                         setProgress(count, total)
                     }
 
-                    if (total == trialModels.size) {
+                    if (total == trialModels.size || total < 512) {
                         queryTrialsJob?.cancel()
                     }
                 }

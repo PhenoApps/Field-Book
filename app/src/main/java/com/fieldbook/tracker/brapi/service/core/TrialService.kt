@@ -56,7 +56,12 @@ interface TrialService {
                 )
                     .collect { models ->
 
-                    trySend(models)
+                        if (models == null) {
+                            close()
+                            return@collect
+                        }
+
+                        trySend(models)
 
                 }
 

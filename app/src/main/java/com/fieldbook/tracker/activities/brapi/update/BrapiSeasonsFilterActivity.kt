@@ -35,7 +35,7 @@ open class BrapiSeasonsFilterActivity(override val titleResId: Int = R.string.br
         val seasonSet = hashSetOf<String>()
 
         forEach { model ->
-            model.study.seasons.filterNotNull().forEach { season ->
+            model.study.seasons?.filterNotNull()?.forEach { season ->
                 seasonSet.add(season)
             }
         }
