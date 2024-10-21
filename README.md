@@ -1,4 +1,4 @@
-# <img width="25" src="https://github.com/PhenoApps/Field-Book/blob/main/docs/source/img/icon.png"> Field Book
+# <img width="25" src="https://github.com/PhenoApps/Field-Book/blob/main/docs/_static/icons/icon.png"> Field Book
 
 [![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.fieldbook.tracker%26l%3DDownloads%26m%3D%24totalinstalls)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)
 [![Rating](https://img.shields.io/endpoint?color=green&logo=google-play&logoColor=green&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.fieldbook.tracker%26l%3DRating%26m%3D%25E2%25AD%2590%2520%24rating)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)

@@ -26,6 +26,11 @@
     <string name="startup_sample_data_title">Sample data</string>
     <string name="startup_sample_data_message">Load sample data?</string>
 
+    <!-- Storage Definer -->
+    <string name="storage_definer_title">Storage Location</string>
+    <string name="storage_definer_summary">Please select or create a folder that Field Book can use to store app data.</string>
+    <string name="define_button_text">Choose Folder</string>
+
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
     <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
@@ -524,8 +529,10 @@
     <string name="observation_info_rep">Rep</string>
     <string name="observation_info_other">Other</string>
 
-
-
+    <!-- Skip Entries -->
+    <string name="collect_sole_entry_without_data">This is the only entry without data</string>
+    <string name="collect_all_entries_complete_for_current_trait">All entries have data for the current trait</string>
+    <string name="collect_all_entries_complete_for_all_traits">All entries have data for all traits</string>
 
     <!-- EXPORT -->
     <!-- Export dialog -->
@@ -552,16 +559,11 @@
     <string name="export_multiple_fields_name">multiple_fields</string>
     <string name="export_multiple_fields_message">Note: Multiple field exports are bundled in a ZIP file</string>
 
-
     <!-- Citation -->
+    <string name="citation_card_title">Cite Field Book</string>
     <string name="citation_title">Citation</string>
     <string name="citation_string">If you utilize Field Book for research, please cite the following journal article:</string>
     <string name="citation_text" translatable="false">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
-
-
-
-
-
 
     <!-- SETTINGS -->
     <!-- General -->
@@ -824,7 +826,7 @@
     <string name="about_title">About</string>
     <string name="about_version_title">Version</string>
     <string name="about_manual_title">Manual</string>
-    <string name="about_rate">Rate this app</string>
+    <string name="about_rate">Rate Field Book</string>
 
     <!-- Lead  -->
     <string name="about_project_lead_title">Project Lead</string>
@@ -913,7 +915,7 @@
 
     <string name="brapi_oidc_scope">OIDC Scope</string>
     <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
-    <string name="brapi_oidc_scope_default" translatable="false"></string>
+    <string name="brapi_oidc_scope_default" translatable="false" />
 
     <string name="preferences_brapi_traits_title">BrAPI Variables</string>
     <string name="preferences_appearance_collect_labelval_customize">Value vs Label Display</string>
@@ -1123,6 +1125,11 @@
     <string name="act_brapi_filter_apply">Filter</string>
     <string name="act_brapi_filter_import">Import</string>
     <string name="act_brapi_filter_clear">Clear</string>
+    <string name="repeated_values_pager_content_description">repeated values</string>
+    <string name="repeated_values_right_button_content_description">right</string>
+    <string name="repeated_values_left_button_content_description">left</string>
+    <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
+    <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
 
     <string name="dialog_brapi_filter_title">Filters</string>
     <string name="dialog_brapi_filter_active">Active</string>

@@ -61,11 +61,26 @@ public class FieldFileObject {
         return path.substring(first).toLowerCase();
     }
 
+    public static String getExtensionFromClass(FieldFileBase fieldFile) {
+
+        if (fieldFile instanceof FieldFileCSV) {
+            return "csv";
+        } else if (fieldFile instanceof FieldFileExcel) {
+            return "xls";
+        } else if (fieldFile instanceof FieldFileXlsx) {
+            return "xlsx";
+        } else {
+            return "";
+        }
+    }
+
     public abstract static class FieldFileBase {
         boolean openFail;
         boolean specialCharactersFail;
         private final Uri path_;
         private final Context ctx;
+
+        private String name;
 
         FieldFileBase(final Context ctx, final Uri path) {
             this.ctx = ctx;
@@ -146,16 +161,27 @@ public class FieldFileObject {
 
         public FieldObject createFieldObject() {
             FieldObject f = new FieldObject();
-            f.setExp_name(this.getStem());
-            f.setExp_alias(this.getStem());
-            f.setExp_source(this.getFileStem());
-            f.setImport_format(ImportFormat.fromString(getExtension(this.getFileStem())));
+            if (name == null) {
+                f.setExp_name(this.getStem());
+                f.setExp_alias(this.getStem());
+                f.setExp_source(this.getFileStem());
+                f.setImport_format(ImportFormat.fromString(getExtension(this.getFileStem())));
+            } else {
+                f.setExp_name(name);
+                f.setExp_alias(name);
+                f.setExp_source(name + "." + getExtensionFromClass(this));
+                f.setImport_format(ImportFormat.fromString(getExtensionFromClass(this)));
+            }
             return f;
         }
 
         public boolean getOpenFailed() {
             return openFail;
         }
+
+        public void setName(String name) { this.name = name; }
+
+        public String getName() { return name; }
 
         abstract public boolean isCSV();
 

@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.database.sqlite.SQLiteException
 import android.location.Location
 import android.os.Handler
 import android.os.Looper
@@ -75,6 +76,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     //flag to track when collect button is disabled
     private var isCollectEnabled = false
+
+    //flag to track if this is the first time user is collecting a location before leaving the entry
+    private var isFirstCollect = true
 
     private lateinit var chipGroup: ChipGroup
     private lateinit var averageSwitch: SwitchCompat
@@ -216,24 +220,46 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             .setCancelable(false)
             .create()
 
+        precision = prefs.getString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, "Any") ?: "Any"
+
         //initialize lbm and create a filter to broadcast nmea strings
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(context)
-        val filter = IntentFilter()
-        filter.addAction(ACTION_BROADCAST_GNSS_TRAIT)
-
-        unregisterGnssReceiver()
-
-        /**
-         * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
-         * The parser parameter is a model for the parsed message, and is used to populate the
-         * trait layout UI.
-         */
-        mLocalBroadcastManager.registerReceiver(receiver, filter)
-
-        precision = prefs.getString(GeneralKeys.GNSS_LAST_CHOSEN_PRECISION, "Any") ?: "Any"
 
         setupChooseBluetoothDevice()
 
+        checkIfFirstConnect()
+    }
+
+    //updates the average warning flag everytime the layout is loaded
+    //if a geo coordinate already exists, we warn the user before they try to update it
+    private fun checkIfFirstConnect() {
+
+        try {
+
+            val studyDbId = (context as CollectActivity).studyId
+
+            val units = database.getAllObservationUnits(studyDbId.toInt())
+                .filter { it.observation_unit_db_id == currentRange.plot_id }
+
+            if (units.isNotEmpty()) {
+
+                val unit = units.first()
+
+                //the saved geo coordinate location
+                val location = GeodeticUtils.parseGeoCoordinate(unit.geo_coordinates)
+
+                isFirstCollect = location == null
+            }
+
+        } catch (e: SQLiteException) {
+
+            isFirstCollect = true
+
+        } catch (e: NoSuchElementException) {
+
+            isFirstCollect = true
+
+        }
     }
 
     /**
@@ -370,7 +396,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                     val info = AverageInfo(unit, location, pointsToAverage, latLength, lngLength, precision)
                     if (avgDuration > -1L) {
 
-                        if (location != null) {
+                        if (!isFirstCollect) {
 
                             //averaging is updating the location, so ask the user
                             alertLocationUpdate {
@@ -389,8 +415,19 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
                         if (location != null) {
 
-                            //averaging is updating the location, so ask the user
-                            alertLocationUpdate {
+                            if (!isFirstCollect) {
+
+                                //averaging is updating the location, so ask the user
+                                alertLocationUpdate {
+                                    val original = (location.latitude) to (location.longitude)
+                                    val current = newLat to newLng
+                                    pointsToAverage.add(original)
+                                    pointsToAverage.add(current)
+                                    averagePoints(info)
+                                }
+
+                            } else {
+
                                 val original = (location.latitude) to (location.longitude)
                                 val current = newLat to newLng
                                 pointsToAverage.add(original)
@@ -602,11 +639,60 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     /**
      * Starts connect thread and sets up the UI.
      */
+    var isRegistered = false
     private fun setupCommunicationsUi(value: BluetoothDevice? = null) {
 
         if (value != null) {
+
+            unregisterGnssReceiver()
+
             mLastDevice = value
-            if (!getThreadHelper().isAlive) getThreadHelper().start(value, mHandler)
+
+            var startNewCommThread = true
+
+            if (prefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
+
+                val geoNavAddress = prefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, null)
+
+                if (geoNavAddress == value.address) {
+
+                    if (!controller.getGeoNavHelper().initialized) {
+                        controller.getGeoNavHelper().startGeoNav()
+                    }
+
+                    startNewCommThread = false
+
+                    //if (!isRegistered) {
+                      //  mLocalBroadcastManager.unregisterReceiver(receiver)
+
+                        val filter = IntentFilter()
+                        filter.addAction(GNSSResponseReceiver.ACTION_BROADCAST_GNSS_ROVER)
+                        mLocalBroadcastManager.registerReceiver(receiver, filter)
+
+                        isRegistered = true
+                    //}
+
+
+                }
+            }
+
+            if (startNewCommThread) {
+
+                if (!getThreadHelper().isAlive) {
+
+                    getThreadHelper().start(value, mHandler)
+
+                    val filter = IntentFilter()
+                    filter.addAction(ACTION_BROADCAST_GNSS_TRAIT)
+
+                    /**
+                     * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
+                     * The parser parameter is a model for the parsed message, and is used to populate the
+                     * trait layout UI.
+                     */
+                    mLocalBroadcastManager.registerReceiver(receiver, filter)
+                }
+            }
         }
 
         //make connected UI visible
@@ -625,19 +711,27 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                 val latitude = latTextView.text.toString()
                 val longitude = lngTextView.text.toString()
                 val elevation = altTextView.text.toString()
-                val precision = accTextView.text.toString()
+                val uiPrecision = accTextView.text.toString()
 
                 val isFloat = try {
-                    precision.toDouble()
+                    uiPrecision.toDouble()
                     true
                 } catch (e: NumberFormatException) {
                     false
                 }
 
-                submitGnss(latitude, longitude, elevation, if (isFloat) "GPS" else precision)
+                val precisionName = if (isFloat) "GPS" else uiPrecision
 
-                triggerTts(context.getString(R.string.trait_location_saved_tts))
+                if (NmeaParser().compareFix(precisionName, precision ?: "Any")) {
 
+                    submitGnss(latitude, longitude, elevation, precisionName)
+
+                    triggerTts(context.getString(R.string.trait_location_saved_tts))
+
+                } else {
+
+                    soundWarning()
+                }
             }
         }
 
