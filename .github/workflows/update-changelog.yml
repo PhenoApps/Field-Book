@@ -1,9 +1,9 @@
+name: update-changelog
+
 on:
   push:
     branches:
       - main
-
-name: update-changelog
 
 jobs:
   update-changelog:

@@ -1,10 +1,10 @@
+name: do-github-release
+
 on:
   schedule:
     # Run every Monday at 20:00 (8:00 PM)
     - cron: "0 20 * * 1"
   workflow_dispatch:
-
-name: do-github-release
 
 jobs:
 
