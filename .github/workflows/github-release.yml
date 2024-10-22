@@ -1,6 +1,7 @@
 on:
   schedule:
-    - cron: "0 20 * * *"
+    # Run every Monday at 20:00 (8:00 PM)
+    - cron: "0 20 * * 1"
   workflow_dispatch:
 
 name: do-github-release
@@ -11,21 +12,31 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       app_changed: ${{ steps.check_app_changes.outputs.app_changed }}
+      changelog_additions: ${{ steps.check_changelog.outputs.changelog_additions }}
+      version_changed: ${{ steps.check_version.outputs.version_changed }}
     steps:
+
       - name: Checkout repo
         uses: actions/checkout@v2
-        with:          
+        with:
           token: ${{secrets.ACTIONS_PAT}}
           fetch-depth: 0
+
+      - name: Determine last release tag and commit
+        id: set_commit_vars
+        run: |
+          LAST_RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "LAST_RELEASE_TAG was $LAST_RELEASE_TAG"
+
+          LAST_RELEASE_COMMIT=$(git rev-list -n 1 $LAST_RELEASE_TAG)
+          echo "LAST_RELEASE_COMMIT was $LAST_RELEASE_COMMIT"
+
+          echo "LAST_RELEASE_TAG=$LAST_RELEASE_TAG" >> $GITHUB_ENV
+          echo "LAST_RELEASE_COMMIT=$LAST_RELEASE_COMMIT" >> $GITHUB_ENV
 
       - name: Check if app directory changed
         id: check_app_changes
         run: |
-          LAST_RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-          echo "LAST_RELEASE_TAG was $LAST_RELEASE_TAG"
-          LAST_RELEASE_COMMIT=$(git rev-list -n 1 $LAST_RELEASE_TAG)
-          echo "LAST_RELEASE_COMMIT was $LAST_RELEASE_COMMIT"
-    
           changed_files=$(git diff-tree --no-commit-id --name-only $LAST_RELEASE_COMMIT $GITHUB_SHA | grep '^app' || echo "none")
           echo "Changed app files: $changed_files"
 
@@ -37,10 +48,65 @@ jobs:
             echo "app_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Check CHANGELOG.md changes
+        id: check_changelog
+        run: |
+          # Extract the contents of the unreleased section
+          unreleased_section=$(sed -n '/## \[Unreleased\]/,/^## /p' CHANGELOG.md | sed '1,2d' | sed '$d')
+
+          if [ -n "$unreleased_section" ]; then
+            changelog_additions=$(echo "$unreleased_section" | sed 's/^- /✔ /g')
+            # Use multiline escape sequences
+            changelog_escaped="${changelog_additions//'%'/'%25'}"
+            changelog_escaped="${changelog_escaped//$'\n'/'%0A'}"
+            changelog_escaped="${changelog_escaped//$'\r'/'%0D'}"
+            echo "changelog_additions=$changelog_escaped" >> $GITHUB_OUTPUT
+            echo "changelog_additions: $changelog_escaped" # Also log release notes
+          else
+            echo "No changes found in the Unreleased section."
+            echo "changelog_additions=none" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Check if version.properties changed
+        id: check_version
+        run: |
+          version_changed=$(git diff --name-only $LAST_RELEASE_COMMIT $GITHUB_SHA | grep 'version.properties' || echo "none")
+          echo "version_changed: $version_changed"
+          if [ "$version_changed" != "none" ]; then
+            echo "version_changed=true" >> "$GITHUB_OUTPUT"
+            if [ -f version.properties ]; then
+              source version.properties
+            else
+              echo "version.properties file not found. Exiting."
+              exit 1
+            fi
+            OLD_VERSION=$(git show $LAST_RELEASE_COMMIT:version.properties | grep 'version' | awk -F= '{print $2}')
+            echo "OLD_VERSION: $OLD_VERSION"
+            NEW_VERSION=$majorVersion.$minorVersion.$patchVersion
+            echo "NEW_VERSION: $NEW_VERSION"
+
+            # Ensure NEW_VERSION and OLD_VERSION are valid before comparing
+            if [[ -z "$NEW_VERSION" || -z "$OLD_VERSION" ]]; then
+              echo "Either NEW_VERSION or OLD_VERSION is empty. Exiting."
+              exit 1
+            fi
+
+            if [[ "$NEW_VERSION" == "$OLD_VERSION" || "$NEW_VERSION" < "$OLD_VERSION" ]]; then
+              echo "New version is not higher than the old version. Exiting."
+              exit 1
+            else
+              # New version is higher than the old version
+              echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+            fi
+          else
+            echo "version_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
   build-and-release:
     runs-on: ubuntu-latest
     needs: check-app-changes
-    if: ${{ needs.check-app-changes.outputs.app_changed == 'true' }}
+    if: ${{ needs['check-app-changes'].outputs.app_changed == 'true' }}
     steps:
 
       - name: Checkout repo
@@ -63,7 +129,8 @@ jobs:
       # Uses semantic commits to automate version bumping.
       # No scope or "fix:" = PATCH, "feat:" or "minor:" = MINOR, "BREAKING CHANGE:", "major:", or fix/feat with appended "!" = MAJOR
       # Additional details: https://www.conventionalcommits.org/en/v1.0.0/
-      - name: Increment version
+      - name: Increment version and update changelog
+        if: needs.check-app-changes.outputs.version_changed == 'false'
         run: |
           #!/bin/bash
           COMMIT_MSG=$(git log -1 --pretty=format:"%b" || git log -1 --pretty=format:"%B")
@@ -88,21 +155,32 @@ jobs:
           echo "patchVersion=$patchVersion" >> version.properties
 
           VERSION=$majorVersion.$minorVersion.$patchVersion
-          RELEASE=$majorVersion.$minorVersion
-          echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "RELEASE=$RELEASE" >> $GITHUB_ENV
           echo "BUMP_TYPE=$BUMP_TYPE" >> $GITHUB_ENV
 
+          # Update the Unreleased section in CHANGELOG.md
+          today=$(date +'%Y-%m-%d')
+          sed -i "s/## \[Unreleased\]/## \[v$VERSION\] - $today/" CHANGELOG.md
+          
+          # Insert a new Unreleased section
+          sed -i '/## \[v'$VERSION'\]/i ## [Unreleased]\n\n### Added\n\n### Changed\n\n### Fixed\n' CHANGELOG.md
+
+          # Add the link to the release at the end of CHANGELOG.md
+          printf "\n[v$VERSION]: https://github.com/PhenoApps/Field-Book/releases/tag/v$VERSION\n" >> CHANGELOG.md
+
       - name: Commit version changes
+        if: needs.check-app-changes.outputs.version_changed == 'false'
         uses: EndBug/add-and-commit@v7
         with:
-          add: 'version.properties'
-          message: Bump ${{ env.BUMP_TYPE }}
+          add: |
+            version.properties
+            CHANGELOG.md
+          message: Bump ${{ env.BUMP_TYPE }} and update changelog for v${{ env.VERSION }}
           author_email: git-action-bot@example.com
           author_name: Git Action Bot
 
       - name: Push changes
+        if: needs.check-app-changes.outputs.version_changed == 'false'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -129,36 +207,29 @@ jobs:
           name: Signed APK
           path: app/build/outputs/
 
-      - name: Get matching release
-        uses: cardinalby/git-get-release-action@1.2.4
-        id: matching_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          releaseName: v${{ env.RELEASE }}
-          doNotFailIfNotFound: 'true'
-
-      - name: Delete matching release if exists
-        if: steps.matching_release.outputs.id != ''
-        run: |
-          curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/releases/${{ steps.matching_release.outputs.id}}"
-
-      # Updates the latest release if just a new patch, drafts a new prerelease if major or minor version has changed 
       - name: Make github release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: v${{ env.RELEASE }}
+          release_name: v${{ env.VERSION }}
           tag: ${{ env.VERSION }}
           file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-          asset_name: Field-Book-v${{ env.RELEASE }}.apk
-          overwrite: ${{ env.BUMP_TYPE == 'patchVersion' }}
-          prerelease: ${{ env.BUMP_TYPE != 'patchVersion' }}
-          body: |
-            ${{ steps.matching_release.outputs.body }}
-            ${{ env.COMMIT_MSG }}
+          asset_name: Field-Book-v${{ env.VERSION }}.apk
+          body: ${{ needs.check-app-changes.outputs.changelog_additions }}
+      
+      - name: Check date for Google Play upload
+        id: date_check
+        run: |
+          CURRENT_DATE=$(date +%m%d)
+          echo "CURRENT_DATE: $CURRENT_DATE"
+          if [ "$CURRENT_DATE" -ge 0415 ] && [ "$CURRENT_DATE" -le 0915 ]; then
+            echo "UPLOAD_TO_PLAY_STORE=false" >> $GITHUB_ENV
+          else
+            echo "UPLOAD_TO_PLAY_STORE=true" >> $GITHUB_ENV
+          fi
     
       - name: Release APK to Play Store
+        if: env.UPLOAD_TO_PLAY_STORE == 'true'
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
