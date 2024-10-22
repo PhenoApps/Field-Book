@@ -30,4 +30,7 @@
     <dimen name="fb_trait_fab_size">76dp</dimen>
     <dimen name="fb_trait_big_fab_size">176dp</dimen>
     <dimen name="fb_trait_fab_image_size">38dp</dimen>
+
+    <dimen name="act_file_explorer_progress_bar_size">256dp</dimen>
+
 </resources>
