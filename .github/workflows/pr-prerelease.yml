@@ -1,3 +1,5 @@
+name: do-pr-prerelease
+
 on:
   workflow_dispatch:
   #pull_request:
@@ -5,8 +7,6 @@ on:
   #    - main
   #  paths:
   #    - 'app/**'
-
-name: do-pr-prerelease
 
 jobs:
   build-and-upload:

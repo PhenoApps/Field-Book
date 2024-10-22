@@ -1,6 +1,6 @@
-on: delete
-
 name: do-artifacts-cleanup
+
+on: delete
 
 jobs:
   delete-archived-apk:
