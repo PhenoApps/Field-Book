@@ -215,6 +215,7 @@
     <attr format="color" name="fb_color_text_light"/>
     <attr format="color" name="fb_color_text_dark"/>
     <attr format="color" name="fb_color_text_secondary"/>
+    <attr format="color" name="fb_color_text_high_contrast_inverted"/>
 
     <!-- color of edit text hint -->
     <attr format="color" name="fb_color_hint_text"/>

@@ -48,6 +48,7 @@
         <item name="fb_button_color_pressed">@color/main_button_color_pressed</item>
         <item name="fb_subheading_color">@color/main_subheading_color</item>
         <item name="fb_color_text_secondary">@color/main_color_text_secondary</item>
+        <item name="fb_color_text_high_contrast_inverted">@color/main_button_text_color</item>
         <item name="fb_round_button_background">@drawable/custom_round_button</item>
         <item name="fb_round_button_background_with_indicator">
             @drawable/selector_round_button_background
@@ -162,6 +163,7 @@
         <item name="fb_color_accent">@color/high_contrast_color_accent</item>
         <item name="fb_color_text_light">@color/high_contrast_color_text_light</item>
         <item name="fb_color_text_dark">@color/high_contrast_color_text_dark</item>
+        <item name="fb_color_text_high_contrast_inverted">@color/high_contrast_primary</item>
         <item name="fb_color_hint_text">@color/high_contrast_color_hint_text</item>
         <item name="fb_color_background">@color/high_contrast_color_background</item>
         <item name="fb_color_text_button_background">?attr/fb_color_primary</item>
