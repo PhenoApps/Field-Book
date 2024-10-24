@@ -300,11 +300,11 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
                 String name = program.getName();
                 String programName = program.getProgramName();
                 if (programName != null && !programName.isEmpty()) {
-                    brapiProgram.setProgramName(programName);
+                    brapiProgram.programName = programName;
                 } else {
-                    brapiProgram.setProgramName(name);
+                    brapiProgram.programName = name;
                 }
-                brapiProgram.setProgramDbId(program.getProgramDbId());
+                brapiProgram.programDbId = program.getProgramDbId();
                 brapiPrograms.add(brapiProgram);
             }
         }
@@ -346,8 +346,8 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             for (TrialSummary trial : trialList) {
                 BrapiTrial brapiTrial = new BrapiTrial();
                 String name = trial.getTrialName();
-                brapiTrial.setTrialName(name);
-                brapiTrial.setTrialDbId(trial.getTrialDbId());
+                brapiTrial.trialName = name;
+                brapiTrial.trialDbId = trial.getTrialDbId();
                 brapiTrials.add(brapiTrial);
             }
         }

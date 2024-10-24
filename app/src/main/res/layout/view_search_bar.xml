@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- based on https://github.com/ByteHamster/SearchPreference/blob/master/lib/src/main/res/layout/searchpreference_searchbar.xml -->
+
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/search_card"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:layout_margin="8dp"
+    android:foregroundGravity="center_vertical"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="@string/searchpreference_search"
+            app:srcCompat="@drawable/searchpreference_ic_search"
+            app:tint="?android:attr/textColorPrimary" />
+
+        <AutoCompleteTextView
+            android:id="@+id/search"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="@string/searchpreference_search"
+            android:inputType="textNoSuggestions"
+            android:textColor="?android:attr/textColorPrimary" />
+
+        <ImageView
+            android:id="@+id/clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/searchpreference_clear"
+            android:padding="4dp"
+            android:visibility="gone"
+            app:srcCompat="@drawable/searchpreference_ic_clear"
+            app:tint="?android:attr/textColorPrimary" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

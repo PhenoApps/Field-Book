@@ -129,10 +129,10 @@ public class BrapiTrialActivity extends ThemedActivity {
     private ListAdapter buildTrialsArrayAdapter(List<BrapiTrial> trials) {
         List<Object> itemDataList = new ArrayList<>();
         for (BrapiTrial trial : trials) {
-            if(trial.getTrialName() != null)
-                itemDataList.add(trial.getTrialName());
+            if(trial.trialName != null)
+                itemDataList.add(trial.trialName);
             else
-                itemDataList.add(trial.getTrialDbId());
+                itemDataList.add(trial.trialDbId);
         }
         return new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
     }
@@ -145,7 +145,7 @@ public class BrapiTrialActivity extends ThemedActivity {
         } else if (id == R.id.selectTrial) {
             if (this.brapiTrial != null) {
                 Intent intent = new Intent();
-                intent.setData(Uri.parse(this.brapiTrial.getTrialDbId()));
+                intent.setData(Uri.parse(this.brapiTrial.trialDbId));
                 setResult(RESULT_OK, intent);
                 finish();
             } else {

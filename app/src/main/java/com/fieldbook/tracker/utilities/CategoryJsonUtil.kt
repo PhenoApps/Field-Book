@@ -4,9 +4,6 @@ import com.fieldbook.tracker.traits.CategoricalTraitLayout
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 
 
 /**
@@ -104,5 +101,39 @@ class CategoryJsonUtil {
 
         fun contains(cats: ArrayList<BrAPIScaleValidValuesCategories>, cat: BrAPIScaleValidValuesCategories) = cat in cats
         fun contains(cats: ArrayList<BrAPIScaleValidValuesCategories>, value: String) = value in cats.map { it.value }
+
+
+        fun buildCategoryList(categories: List<BrAPIScaleValidValuesCategories>): String {
+            return try {
+                encode(ArrayList(categories))
+            } catch (e: Exception) {
+                buildCategoryListOld(categories)
+            }
+        }
+
+        fun buildCategoryDescriptionString(categories: List<BrAPIScaleValidValuesCategories>): String {
+            val sb = java.lang.StringBuilder()
+            for (j in categories.indices) {
+                sb.append(categories[j].value + "=" + categories[j].label)
+                if (j != categories.size - 1) {
+                    sb.append("; ")
+                }
+            }
+            return sb.toString()
+        }
+
+        private fun buildCategoryListOld(categories: List<BrAPIScaleValidValuesCategories>?): String {
+            val sb = StringBuilder()
+            if (categories != null) {
+                for (j in categories.indices) {
+                    // Use the "value" like brapi v1
+                    sb.append(categories[j].value)
+                    if (j != categories.size - 1) {
+                        sb.append("/")
+                    }
+                }
+            }
+            return sb.toString()
+        }
     }
 }
