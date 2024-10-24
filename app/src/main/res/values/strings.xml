@@ -1148,7 +1148,7 @@
     <string name="menu_action_brapi_filter_clear_all">Clear all filters</string>
     <string name="brapi_filter_error">Something went wrong querying for %s</string>
     <string name="brapi_importer_fetch_data">Fetching data, the first run may take a minute.</string>
-    <string name="menu_filter_brapi_reset_cache_title">Reset</string>
+    <string name="menu_filter_brapi_reset_cache_title">Reset Cache</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">clear all filters</string>
     <string name="act_brapi_study_import_fetch_levels">Fetching observation levels...</string>
     <string name="act_brapi_study_import_fetch_variables">Fetching variables for %s...</string>

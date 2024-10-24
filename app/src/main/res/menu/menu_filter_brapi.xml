@@ -16,5 +16,5 @@
         android:id="@+id/action_reset_cache"
         android:title="@string/menu_filter_brapi_reset_cache_title"
         android:icon="@drawable/ic_field_sync"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 </menu>
