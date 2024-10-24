@@ -48,22 +48,22 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Level"/>
+            android:text="@string/level"/>
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sort"/>
+            android:text="@string/primary"/>
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Primary"/>
+            android:text="@string/secondary"/>
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Secondary"/>
+            android:text="@string/sort"/>
 
     </com.google.android.material.tabs.TabLayout>
     
@@ -133,6 +133,9 @@
         android:minHeight="?attr/actionBarSize"
         app:layout_constraintBottom_toBottomOf="parent"
         android:text="@string/dialog_save"
+        android:textColor="?attr/fb_color_text_high_contrast_inverted"
+        android:background="@drawable/cell"
+        android:backgroundTint="?attr/fb_color_primary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/act_list_filter_rv"
         app:layout_constraintEnd_toEndOf="parent"/>

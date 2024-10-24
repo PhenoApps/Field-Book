@@ -22,17 +22,17 @@ class BrapiFilterCache {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             val currentTime = System.currentTimeMillis()
             when (prefs.getString(GeneralKeys.BRAPI_INVALIDATE_CACHE_INTERVAL, CacheClearInterval.NEVER.ordinal.toString())) {
-                CacheClearInterval.EVERY.ordinal.toString() -> delete(context, true)
+                CacheClearInterval.EVERY.ordinal.toString() -> delete(context, false)
                 CacheClearInterval.DAILY.ordinal.toString() -> {
                     val lastCleared = prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
                     if (currentTime - lastCleared > 24 * 60 * 60 * 1000) {
-                        delete(context, true)
+                        delete(context, false)
                     }
                 }
                 CacheClearInterval.WEEKLY.ordinal.toString() -> {
                     val lastCleared = prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
                     if (currentTime - lastCleared > 7 * 24 * 60 * 60 * 1000) {
-                        delete(context, true)
+                        delete(context, false)
                     }
                 }
             }

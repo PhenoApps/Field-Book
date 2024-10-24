@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.Toolbar
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.brapi.service.BrAPIService
@@ -112,10 +113,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         chipGroup = findViewById(R.id.act_list_filter_cg)
 
         restoreModels()
-
-        BrapiFilterCache.checkClearCache(this)
     }
-
 
     @OptIn(ExperimentalBadgeUtils::class)
     protected fun resetChipToolbarCount() {
@@ -178,22 +176,15 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             chipGroup.addView(chip)
         }
 
-        val numFilterLabel = resources.getQuantityString(R.plurals.act_brapi_list_filter, cache.size, cache.size)
-
-        createChip(R.style.FourthChipStyle, numFilterLabel, numFilterLabel).also {
-            it.isCloseIconVisible = false
-            it.chipIcon = AppCompatResources.getDrawable(this, R.drawable.delete_sweep)
-            it.setOnClickListener {
-                chipGroup.removeAllViews()
-                BrapiFilterCache.clearPreferences(this@BrapiListFilterActivity)
-                restoreModels()
-            }
-            chipGroup.addView(it)
-        }
-
         //resetChipToolbarCount()
         //clearFilterButton.visibility = if (filtersChipGroup.childCount > 0) View.VISIBLE else View.GONE
         //subtitleTv.visibility = if (filtersChipGroup.childCount > 0) View.VISIBLE else View.GONE
+    }
+
+    private fun clearFilters() {
+        chipGroup.removeAllViews()
+        BrapiFilterCache.clearPreferences(this@BrapiListFilterActivity)
+        restoreModels()
     }
 
     private fun resetFilterChips(filterName: String) {
@@ -276,6 +267,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
             toggleProgressBar(View.INVISIBLE)
 
+            restoreModels()
         }
     }
 
@@ -498,12 +490,25 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             .persistCheckBoxes()
             .sortedBy { it.label }
 
-        cache.addAll(uiModels)
+        cache.addAll(uiModels.distinct().filter { it !in cache })
 
         submitAdapterItems(cache)
 
         resetChipsUi()
 
+        resetFilterCountDisplay()
+
+    }
+
+    private fun resetFilterCountDisplay() {
+
+        val numFilterLabel = resources.getQuantityString(R.plurals.act_brapi_list_filter, cache.size, cache.size)
+
+        searchBar.editText.hint = getString(R.string.search_bar_hint, numFilterLabel)
+
+        findViewById<MaterialToolbar>(R.id.act_list_filter_tb)
+            .menu?.findItem(R.id.action_clear_filters)
+            ?.setVisible(chipGroup.childCount > 0)
     }
 
     private fun List<CheckboxListAdapter.Model>.persistCheckBoxes(): List<CheckboxListAdapter.Model> {
@@ -552,10 +557,11 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         if (::paginationManager.isInitialized) paginationManager.reset()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_filter_brapi, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        menuInflater.inflate(R.menu.menu_filter_brapi, menu)
+//        this.menu = menu?.findItem(R.id.action_clear_filters)
+//        return super.onCreateOptionsMenu(menu)
+//    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
@@ -579,6 +585,10 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                         resetStorageCache()
                         dialog.dismiss()
                     }.show()
+            }
+
+            R.id.action_clear_filters -> {
+                clearFilters()
             }
 
             android.R.id.home -> {

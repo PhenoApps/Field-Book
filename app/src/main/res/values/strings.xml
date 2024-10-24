@@ -1172,6 +1172,12 @@
     <string name="act_brapi_list_api_exception">Unknown error. Please check BrAPI preferences or contact developers.</string>
     <string name="act_brapi_list_filter_reset_cache_title">Confirm Reset</string>
     <string name="act_brapi_list_filter_reset_cache_message">This will delete local BrAPI data used for searching and importing.</string>
+    <string name="search_bar_hint">Searching… %s</string>
+    <string name="menu_filter_brapi_clear_filters">Clear Filters</string>
+    <string name="level">Level</string>
+    <string name="primary">Primary</string>
+    <string name="secondary">Secondary</string>
+    <string name="sort">Sort</string>
     <plurals name="act_brapi_list_filter">
         <item quantity="one">%s result</item>
         <item quantity="other">%s results</item>

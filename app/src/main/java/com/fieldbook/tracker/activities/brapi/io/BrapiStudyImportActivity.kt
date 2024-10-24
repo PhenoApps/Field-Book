@@ -194,7 +194,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     }
 
     enum class Tab {
-        LEVELS, SORT, PRIMARY_ORDER, SECONDARY_ORDER
+        LEVELS, PRIMARY_ORDER, SECONDARY_ORDER, SORT
     }
 
     private fun loadTabLayout(studyDbIds: List<String>) {
