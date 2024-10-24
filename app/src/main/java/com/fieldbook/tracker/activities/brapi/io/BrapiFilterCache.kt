@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities.brapi.io
 
 import android.content.Context
+import android.os.SystemClock
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.gson.Gson
@@ -19,17 +20,18 @@ class BrapiFilterCache {
 
         fun checkClearCache(context: Context) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val currentTime = System.currentTimeMillis()
             when (prefs.getString(GeneralKeys.BRAPI_INVALIDATE_CACHE_INTERVAL, CacheClearInterval.NEVER.ordinal.toString())) {
                 CacheClearInterval.EVERY.ordinal.toString() -> delete(context, true)
                 CacheClearInterval.DAILY.ordinal.toString() -> {
                     val lastCleared = prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
-                    if (System.currentTimeMillis() - lastCleared > 24 * 60 * 60 * 1000) {
+                    if (currentTime - lastCleared > 24 * 60 * 60 * 1000) {
                         delete(context, true)
                     }
                 }
                 CacheClearInterval.WEEKLY.ordinal.toString() -> {
                     val lastCleared = prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
-                    if (System.currentTimeMillis() - lastCleared > 7 * 24 * 60 * 60 * 1000) {
+                    if (currentTime - lastCleared > 7 * 24 * 60 * 60 * 1000) {
                         delete(context, true)
                     }
                 }
@@ -86,6 +88,12 @@ class BrapiFilterCache {
             context.externalCacheDir?.let {
                 File(it, JSON_FILE_NAME).delete()
             }
+
+            PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, System.currentTimeMillis())
+                .apply()
+
         }
 
         private fun getTypeToken(): Type =

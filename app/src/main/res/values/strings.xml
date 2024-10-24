@@ -1170,6 +1170,8 @@
     <string name="no_programdbid_provided">No programDbId provided</string>
     <string name="no_studydbids_provided">No studyDbIds provided</string>
     <string name="act_brapi_list_api_exception">Unknown error. Please check BrAPI preferences or contact developers.</string>
+    <string name="act_brapi_list_filter_reset_cache_title">Confirm Reset</string>
+    <string name="act_brapi_list_filter_reset_cache_message">This will delete local BrAPI data used for searching and importing.</string>
     <plurals name="act_brapi_list_filter">
         <item quantity="one">%s result</item>
         <item quantity="other">%s results</item>

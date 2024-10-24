@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities.brapi.io
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -570,7 +571,14 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             R.id.action_reset_cache -> {
-                resetStorageCache()
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.act_brapi_list_filter_reset_cache_title)
+                    .setMessage(getString(R.string.act_brapi_list_filter_reset_cache_message))
+                    .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
+                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                        resetStorageCache()
+                        dialog.dismiss()
+                    }.show()
             }
 
             android.R.id.home -> {
