@@ -44,7 +44,7 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
 
         with(currentList[position]) {
             holder.titleTextView.text = title
-            holder.traitCountChip.text = studyLoader.getObservationVariables(id, position)?.size?.toString() ?: ""
+            holder.traitCountChip.text = studyLoader.getObservationVariables(id, position)?.size?.toString() ?: "0"
             holder.unitCountChip.text = studyLoader.getObservationUnits(id, position)?.size?.toString() ?: ""
             holder.locationChip.text = studyLoader.getLocation(id)
 
