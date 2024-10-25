@@ -1,9 +1,13 @@
 ## Description
 
 <!-- 
-Provide a summary of your changes including motivation and context.
+Provide a summary of your changes in the description box below including motivation and context.
 If these changes fix a bug or resolves a feature request, be sure to link to that issue.
 -->
+
+```description
+
+```
 
 ## Type of change
 
@@ -25,7 +29,7 @@ After you create the pull request, check the boxes to classify your contribution
 
 ## Changelog entry
 <!-- 
-Add a one-line changelog entry to the `release-note` box below. This will be copied to the changelog file when the pull request is merged.
+Add a one-line changelog entry to the release-note box below. This will be copied to the changelog file when the pull request is merged.
 
 Your release note should clear and simple. Most users won't be familiar with the technical details of your pull request, so consider what they need to know as you write your release note.
 
