@@ -8,7 +8,7 @@
         app:iconSpaceReserved="false">
 
         <Preference
-            android:icon="@drawable/ic_bluetooth_black_24dp"
+            android:icon="@drawable/ic_crosshairs_gps"
             android:key="com.fieldbook.tracker.geonav.PAIR_BLUETOOTH"
             android:title="@string/pref_geonav_pair" />
 

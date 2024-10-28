@@ -585,8 +585,7 @@
     <string name="preferences_system_title">System</string>
 
     <string name="preferences_system_defaults_title">Defaults</string>
-    <string name="preferences_system_files_base_directory_title">Define Storage Location</string>
-    <string name="preferences_system_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
+
     <string name="preferences_source_default_import">Import Source</string>
     <string name="preferences_source_default_export">Export Source</string>
 
@@ -595,17 +594,6 @@
 
     <string name="preferences_general_share_enable">Enable File Sharing</string>
     <string name="preferences_general_share_enable_description">When files are exported, a share dialog will be displayed</string>
-
-    <string name="preferences_system_database_title">Database</string>
-
-    <string name="database_dialog_title">Database</string>
-    <string name="database_import">Import Database</string>
-    <string name="database_export">Export Database</string>
-    <string name="database_reset">Delete Database</string>
-    <string name="database_reset_warning1">All data will be deleted. Are you sure you want to reset the database?</string>
-    <string name="database_reset_warning2">A database reset cannot be reversed. The app will quit after clearing the database. Are you really sure you want to continue?</string>
-    <string name="database_reset_message">Database has been deleted</string>
-    <string name="share_file_title">Sending file…</string>
 
     <!-- Profile -->
     <string name="preferences_profile_title">Profile</string>
@@ -818,6 +806,22 @@
     <string name="preferences_general_tts_language_description">Choose a compatible TTS language</string>
 
     <!-- BrAPI preferences are in the BrAPI section below -->
+
+    <!-- Storage -->
+    <string name="preferences_storage_title">Storage</string>
+
+    <string name="preferences_storage_files_base_directory_title">Define Storage Location</string>
+    <string name="preferences_storage_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
+
+    <string name="preferences_storage_database_title">Database</string>
+    <string name="database_dialog_title">Database</string>
+    <string name="database_import">Import Database</string>
+    <string name="database_export">Export Database</string>
+    <string name="database_reset">Delete Database</string>
+    <string name="database_reset_warning1">All data will be deleted. Are you sure you want to reset the database?</string>
+    <string name="database_reset_warning2">A database reset cannot be reversed. The app will quit after clearing the database. Are you really sure you want to continue?</string>
+    <string name="database_reset_message">Database has been deleted</string>
+    <string name="share_file_title">Sending file…</string>
 
     <!-- Experimental -->
     <string name="preferences_experimental_title">Experimental</string>

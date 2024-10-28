@@ -41,7 +41,7 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
-            android:icon="@drawable/ic_gesture_tap"
+            android:icon="@drawable/ic_swap_vertical"
             android:key="FLIP_FLOP_ARROWS"
             android:summary="@string/preferences_general_swap_navigation_description"
             android:title="@string/preferences_general_swap_navigation" />

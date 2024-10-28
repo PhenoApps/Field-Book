@@ -49,6 +49,12 @@
         app:fragment="com.fieldbook.tracker.preferences.BrapiPreferencesFragment" />
 
     <Preference
+        android:icon="@drawable/ic_database_cog"
+        android:key="pref_key_storage_settings"
+        android:title="@string/preferences_storage_title"
+        app:fragment="com.fieldbook.tracker.preferences.StoragePreferencesFragment" />
+
+    <Preference
         android:icon="@drawable/ic_experimental"
         android:key="pref_key_experimental_settings"
         android:title="@string/preferences_experimental_title"

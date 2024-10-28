@@ -55,7 +55,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
-public class SystemPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class StoragePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     @Inject
     SharedPreferences preferences;
@@ -79,13 +79,11 @@ public class SystemPreferencesFragment extends PreferenceFragmentCompat implemen
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
-        setPreferencesFromResource(R.xml.preferences_system, rootKey);
+        setPreferencesFromResource(R.xml.preferences_storage, rootKey);
 
-        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_system_title));
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_storage_title));
 
         defaultStorageLocation = findPreference("DEFAULT_STORAGE_LOCATION_PREFERENCE");
-        ListPreference importSourceDefaultPref = findPreference("IMPORT_SOURCE_DEFAULT");
-        ListPreference exportSourceDefaultPref = findPreference("EXPORT_SOURCE_DEFAULT");
 
 
         String storageSummary = preferences.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, null);
@@ -96,18 +94,6 @@ public class SystemPreferencesFragment extends PreferenceFragmentCompat implemen
             startActivityForResult(intent, REQUEST_STORAGE_DEFINER_CODE);
             return true;
         });
-
-        if (importSourceDefaultPref != null) {
-            importSourceDefaultPref.setOnPreferenceChangeListener((preference, newValue) -> {
-                return validateBrapiEnabledBeforeSetting(newValue.toString());
-            });
-        }
-
-        if (exportSourceDefaultPref != null) {
-            exportSourceDefaultPref.setOnPreferenceChangeListener((preference, newValue) -> {
-                return validateBrapiEnabledBeforeSetting(newValue.toString());
-            });
-        }
 
         Preference databaseImport = findPreference("pref_database_import");
         Preference databaseExport = findPreference("pref_database_export");
@@ -132,7 +118,7 @@ public class SystemPreferencesFragment extends PreferenceFragmentCompat implemen
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        SystemPreferencesFragment.this.context = context;
+        StoragePreferencesFragment.this.context = context;
     }
 
     @Override

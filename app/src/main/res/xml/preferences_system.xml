@@ -7,12 +7,6 @@
         android:title="@string/preferences_system_defaults_title"
         app:iconSpaceReserved="false">
 
-        <Preference
-            android:icon="@drawable/ic_pref_general_root_directory"
-            android:key="DEFAULT_STORAGE_LOCATION_PREFERENCE"
-            android:summary="@string/preferences_system_files_base_directory_description"
-            android:title="@string/preferences_system_files_base_directory_title" />
-
         <ListPreference
             android:defaultValue="0"
             android:icon="@drawable/ic_pref_source_import_default"
@@ -41,28 +35,6 @@
             android:summary="@string/preferences_general_share_enable_description"
             android:title="@string/preferences_general_share_enable" />
 
-    </PreferenceCategory>
-    <PreferenceCategory
-        android:key="database_operations"
-        android:title="@string/preferences_system_database_title"
-        app:iconSpaceReserved="false">
-        <Preference
-            android:icon="@drawable/ic_pref_database_import"
-            android:key="pref_database_import"
-            android:summary=""
-            android:title="@string/database_import" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_database_export"
-            android:key="pref_database_export"
-            android:summary=""
-            android:title="@string/database_export" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_database_delete"
-            android:key="pref_database_delete"
-            android:summary=""
-            android:title="@string/database_reset" />
     </PreferenceCategory>
 
 </PreferenceScreen>
