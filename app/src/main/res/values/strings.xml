@@ -619,6 +619,9 @@
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
     <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID</string>
 
+    <!-- Features -->
+    <string name="preferences_features_title">Features</string>
+
     <!-- Appearance -->
     <string name="preferences_appearance_title">Appearance</string>
     <string name="preferences_appearance_application_title">Application</string>
@@ -668,7 +671,7 @@
 
     <string name="preferences_appearance_tutorial_description">Add a toolbar button throughout the app that opens the tutorial</string>
 
-    <string name="preferences_appearance_toolbar_customize">Toolbar Features</string>
+    <string name="preferences_appearance_toolbar_customize">Toolbar Actions</string>
     <string name="preferences_appearance_toolbar_customize_description">Toggle the visibility of default features</string>
     <string name="preferences_appearance_toolbar_customize_search">Search</string>
     <string name="preferences_appearance_toolbar_customize_resources">Resources</string>

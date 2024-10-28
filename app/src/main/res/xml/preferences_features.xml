@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:key="category_features_system"
+        android:title="@string/preferences_appearance_application_title"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_tb_help"
+            android:key="Tips"
+            android:summary="@string/preferences_appearance_tutorial_description"
+            android:title="@string/tutorial_dialog_title"
+            app:allowDividerBelow="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="category_features_toolbar"
+        android:title="@string/preferences_appearance_collect_toolbar_title"
+        app:allowDividerAbove="true"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_tb_datagrid"
+            android:key="DataGrid"
+            android:summary="@string/preferences_general_feature_datagrid_description"
+            android:title="@string/preferences_general_feature_datagrid" />
+
+        <ListPreference
+            android:icon="@drawable/ic_tb_forward"
+            android:key="com.fieldbook.tracker.HIDE_ENTRIES_WITH_DATA_TOOLBAR"
+            android:summary="%s"
+            android:title="@string/preferences_general_feature_next_missing"
+            android:entries="@array/pref_general_skip_entries_entries"
+            android:entryValues="@array/pref_general_skip_entries_values"
+            android:defaultValue="0"/>
+
+        <ListPreference
+            android:icon="@drawable/ic_tb_barcode_scan"
+            android:key="com.fieldbook.tracker.MOVE_TO_UNIQUE_ID"
+            android:summary="%s"
+            android:title="@string/preferences_general_feature_barcode_text"
+            android:entries="@array/pref_general_move_to_unique_id_entries"
+            android:entryValues="@array/pref_general_move_to_unique_id_values"
+            android:defaultValue="0"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

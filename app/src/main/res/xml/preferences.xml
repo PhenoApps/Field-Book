@@ -7,16 +7,16 @@
     <EditTextPreference android:layout="@layout/view_preferences_horizontal_break" />
 
     <Preference
-        android:icon="@drawable/ic_pref_system"
-        android:key="pref_key_system_settings"
-        android:title="@string/preferences_system_title"
-        app:fragment="com.fieldbook.tracker.preferences.SystemPreferencesFragment" />
-
-    <Preference
         android:icon="@drawable/ic_pref_profile_person"
         android:key="pref_key_profile_settings"
         android:title="@string/settings_profile"
         app:fragment="com.fieldbook.tracker.preferences.ProfilePreferencesFragment" />
+
+    <Preference
+        android:icon="@drawable/ic_star_circle_outline"
+        android:key="pref_key_feature_settings"
+        android:title="@string/preferences_features_title"
+        app:fragment="com.fieldbook.tracker.preferences.FeaturesPreferencesFragment" />
 
     <Preference
         android:icon="@drawable/ic_pref_appearance"
@@ -47,6 +47,12 @@
         android:key="pref_key_brapi_settings"
         android:title="@string/preferences_brapi"
         app:fragment="com.fieldbook.tracker.preferences.BrapiPreferencesFragment" />
+
+    <Preference
+        android:icon="@drawable/ic_pref_system"
+        android:key="pref_key_system_settings"
+        android:title="@string/preferences_system_title"
+        app:fragment="com.fieldbook.tracker.preferences.SystemPreferencesFragment" />
 
     <Preference
         android:icon="@drawable/ic_database_cog"

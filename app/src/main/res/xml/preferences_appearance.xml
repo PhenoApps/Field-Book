@@ -21,19 +21,11 @@
             android:title="@string/preferences_appearance_language"
             app:fragment="com.fieldbook.tracker.preferences.LanguagePreferenceFragment"/>
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_tb_help"
-            android:key="Tips"
-            android:summary="@string/preferences_appearance_tutorial_description"
-            android:title="@string/tutorial_dialog_title"
-            app:allowDividerBelow="true" />
-
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="category_appearance_toolbar"
-        android:title="@string/preferences_appearance_collect_toolbar_title"
+        android:key="category_appearance_collect"
+        android:title="@string/preferences_appearance_collect_screen_title"
         app:allowDividerAbove="true"
         app:iconSpaceReserved="false">
 
@@ -46,39 +38,6 @@
             android:key="TOOLBAR_CUSTOMIZE"
             android:summary="@string/preferences_appearance_toolbar_customize_description"
             android:title="@string/preferences_appearance_toolbar_customize" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_tb_datagrid"
-            android:key="DataGrid"
-            android:summary="@string/preferences_general_feature_datagrid_description"
-            android:title="@string/preferences_general_feature_datagrid" />
-
-        <ListPreference
-            android:icon="@drawable/ic_tb_forward"
-            android:key="com.fieldbook.tracker.HIDE_ENTRIES_WITH_DATA_TOOLBAR"
-            android:summary="%s"
-            android:title="@string/preferences_general_feature_next_missing"
-            android:entries="@array/pref_general_skip_entries_entries"
-            android:entryValues="@array/pref_general_skip_entries_values"
-            android:defaultValue="0"/>
-
-        <ListPreference
-            android:icon="@drawable/ic_tb_barcode_scan"
-            android:key="com.fieldbook.tracker.MOVE_TO_UNIQUE_ID"
-            android:summary="%s"
-            android:title="@string/preferences_general_feature_barcode_text"
-            android:entries="@array/pref_general_move_to_unique_id_entries"
-            android:entryValues="@array/pref_general_move_to_unique_id_values"
-            android:defaultValue="0"/>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="category_appearance_collect"
-        android:title="@string/preferences_appearance_collect_screen_title"
-        app:allowDividerAbove="true"
-        app:iconSpaceReserved="false">
 
         <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
             android:icon="@drawable/ic_adv_infobar_count"
