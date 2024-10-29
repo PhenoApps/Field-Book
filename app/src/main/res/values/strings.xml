@@ -1156,6 +1156,7 @@
     <string name="act_brapi_study_import_fetch_germplasm">Fetching germplasm for %s...</string>
     <string name="act_brapi_list_filter_loading_trials">Loading trials, please wait.</string>
     <string name="act_brapi_list_filter_loading_studies">Loading studies, please wait.</string>
+    <string name="act_brapi_list_filter_loading_variables">Loading variables, please wait.</string>
     <string name="act_brapi_list_filter_loading_complete">Complete</string>
     <string name="act_brapi_list_filter_error_multiple_programs">Please select studies from the same program.</string>
     <string name="act_brapi_study_import_saving">Saving...</string>
@@ -1178,6 +1179,9 @@
     <string name="primary">Primary</string>
     <string name="secondary">Secondary</string>
     <string name="sort">Sort</string>
+    <string name="brapi_traits_filter_title">Traits</string>
+    <string name="brapi_filter_type_study">Study</string>
+    <string name="act_brapi_study_filter">Filter</string>
     <plurals name="act_brapi_list_filter">
         <item quantity="one">%s result</item>
         <item quantity="other">%s results</item>

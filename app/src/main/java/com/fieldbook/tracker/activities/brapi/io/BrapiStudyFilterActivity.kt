@@ -18,8 +18,15 @@ class BrapiStudyFilterActivity(
 ) : BrapiSubFilterListActivity<BrAPIStudy>() {
 
     companion object {
+
+        const val EXTRA_MODE = "com.fieldbook.tracker.activities.brapi.io.BrapiStudyFilterActivity.EXTRA_MODE"
+
+        const val FILTER_NAME = "$PREFIX.studies"
+
         fun getIntent(context: Context) = Intent(context, BrapiStudyFilterActivity::class.java)
     }
+
+    var isFilterMode = false
 
     enum class FilterChoice {
         PROGRAM,
@@ -96,11 +103,19 @@ class BrapiStudyFilterActivity(
 
         setupMainToolbar()
 
-        importTextView.text = getString(R.string.act_brapi_filter_import)
+        isFilterMode = intent?.hasExtra(EXTRA_MODE) == true
+
+        if (!isFilterMode) {
+            prefs.edit().remove(FILTER_NAME).apply()
+        }
+
+        importTextView.text = getString(if (isFilterMode) R.string.act_brapi_study_filter else R.string.act_brapi_filter_import)
 
     }
 
-    override fun showNextButton() = cache.any { it.checked }
+    override fun showNextButton(): Boolean {
+        return if (isFilterMode) true else cache.any { it.checked }
+    }
 
     private fun setupMainToolbar() {
 

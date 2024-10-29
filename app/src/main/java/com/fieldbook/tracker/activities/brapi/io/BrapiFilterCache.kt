@@ -6,6 +6,7 @@ import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import org.brapi.v2.model.pheno.BrAPIObservationVariable
 import java.io.File
 import java.lang.reflect.Type
 
@@ -16,6 +17,18 @@ class BrapiFilterCache {
 
         enum class CacheClearInterval {
             EVERY, DAILY, WEEKLY, NEVER
+        }
+
+        fun saveVariablesToStudy(context: Context, studyDbId: String, models: List<BrAPIObservationVariable>) {
+            saveToStorage(context,
+                getStoredModels(context).map {
+                    if (it.study.studyDbId == studyDbId) {
+                        it.copy(variables = models)
+                    } else {
+                        it
+                    }
+                }
+            )
         }
 
         fun checkClearCache(context: Context) {
@@ -69,7 +82,8 @@ class BrapiFilterCache {
                     BrapiTrialsFilterActivity.FILTER_NAME,
                     BrapiSeasonsFilterActivity.FILTER_NAME,
                     BrapiProgramFilterActivity.FILTER_NAME,
-                    BrapiCropsFilterActivity.FILTER_NAME
+                    BrapiCropsFilterActivity.FILTER_NAME,
+                    BrapiStudyFilterActivity.FILTER_NAME
                 )) {
                     remove(f)
                 }

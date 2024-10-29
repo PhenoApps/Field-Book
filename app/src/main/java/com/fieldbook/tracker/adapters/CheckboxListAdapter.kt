@@ -33,7 +33,11 @@ class CheckboxListAdapter(
         val id: String,
         val label: String,
         val subLabel: String
-    )
+    ) {
+        override fun equals(other: Any?): Boolean {
+            return id == (other as? Model)?.id
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val v = LayoutInflater.from(parent.context)

@@ -42,6 +42,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity;
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
+import com.fieldbook.tracker.activities.brapi.io.BrapiStudyFilterActivity;
+import com.fieldbook.tracker.activities.brapi.io.BrapiTraitFilterActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapterController;
 import com.fieldbook.tracker.async.ImportCSVTask;
@@ -555,8 +558,12 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     public void startBrapiTraitActivity(boolean fromTraitCreator) {
-        Intent intent = new Intent();
-        intent.setClassName(this, BrapiTraitActivity.class.getName());
+//        Intent intent = new Intent();
+//        intent.setClassName(this, BrapiTraitActivity.class.getName());
+//        startActivityForResult(intent, REQUEST_CODE_BRAPI_TRAIT_ACTIVITY);
+
+        Intent intent = new Intent(this, BrapiTraitFilterActivity.class);
+        BrapiFilterCache.Companion.checkClearCache(this);
         startActivityForResult(intent, REQUEST_CODE_BRAPI_TRAIT_ACTIVITY);
     }
 

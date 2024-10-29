@@ -89,7 +89,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             restoreModels()
         }
 
-    private val brapiService: BrAPIService by lazy {
+    protected val brapiService: BrAPIService by lazy {
         BrAPIServiceFactory.getBrAPIService(this).also { service ->
             if (service is BrAPIServiceV1) {
                 launch(Dispatchers.Main) {
@@ -324,7 +324,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         }
     }
 
-    private fun onApiException() {
+    protected fun onApiException() {
         launch(Dispatchers.Main) {
             Toast.makeText(
                 this@BrapiListFilterActivity,
@@ -380,6 +380,12 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             val models = associateProgramStudy()
             val programDbIds = models.map { it.programDbId }.distinct()
 
+            if (isFilterMode) {
+                saveFilter()
+                finish()
+                return
+            }
+
             if (programDbIds.size > 1) {
                 Toast.makeText(
                     this,
@@ -418,45 +424,6 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         return models
     }
 
-    private fun setupApplyFilterView() {
-
-        importTextView.visibility = showNextButton().let { show ->
-            if (show) View.VISIBLE else View.GONE
-        }
-
-        importTextView.setOnClickListener {
-            if (this is BrapiStudyFilterActivity) {
-
-                val models = associateProgramStudy()
-                val programDbIds = models.map { it.programDbId }.distinct()
-
-                if (programDbIds.size > 1) {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.act_brapi_list_filter_error_multiple_programs),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setOnClickListener
-                } else if (programDbIds.isNotEmpty()) {
-                    intentLauncher.launch(BrapiStudyImportActivity.getIntent(this).also { intent ->
-                        intent.putExtra(BrapiStudyImportActivity.EXTRA_STUDY_DB_IDS,
-                            models.map { it.study.studyDbId }.toTypedArray()
-                        )
-                        intent.putExtra(
-                            BrapiStudyImportActivity.EXTRA_PROGRAM_DB_ID,
-                            programDbIds.first()
-                        )
-                    })
-                }
-
-            } else {
-                saveFilter()
-            }
-
-            finish()
-        }
-    }
-
     private fun loadFilter() = BrapiFilterTypeAdapter.toModelList(prefs, filterName)
 
     /**
@@ -467,12 +434,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         //get ids and names of selected programs from the adapter
         val selected = cache.filter { p -> p.checked }
 
-        val gsonString = Gson().toJson(selected)
-
-        prefs.edit().putString(
-            filterName,
-            gsonString
-        ).apply()
+        BrapiFilterTypeAdapter.saveFilter(prefs, filterName, selected)
     }
 
     protected fun getIds(filterName: String) =
@@ -490,7 +452,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             .persistCheckBoxes()
             .sortedBy { it.label }
 
-        cache.addAll(uiModels.distinct().filter { it !in cache })
+        cache.addAll(uiModels.filter { it !in cache })
 
         submitAdapterItems(cache)
 
@@ -557,12 +519,6 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         if (::paginationManager.isInitialized) paginationManager.reset()
     }
 
-//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-//        menuInflater.inflate(R.menu.menu_filter_brapi, menu)
-//        this.menu = menu?.findItem(R.id.action_clear_filters)
-//        return super.onCreateOptionsMenu(menu)
-//    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         when (item.itemId) {
@@ -577,18 +533,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             R.id.action_reset_cache -> {
-                AlertDialog.Builder(this)
-                    .setTitle(R.string.act_brapi_list_filter_reset_cache_title)
-                    .setMessage(getString(R.string.act_brapi_list_filter_reset_cache_message))
-                    .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
-                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                        resetStorageCache()
-                        dialog.dismiss()
-                    }.show()
-            }
-
-            R.id.action_clear_filters -> {
-                clearFilters()
+                resetStorageCache()
             }
 
             android.R.id.home -> {
