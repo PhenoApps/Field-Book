@@ -35,7 +35,7 @@
             android:title="@string/brapi_display_name"
             app:negativeButtonText="@android:string/cancel"
             app:neutralButtonText="@string/brapi_edit_display_name_server"
-            app:positiveButtonText="@android:string/ok" />
+            app:positiveButtonText="@string/dialog_save" />
 
         <Preference
             android:icon="@drawable/ic_pref_brapi_logout"
@@ -68,7 +68,7 @@
             android:title="@string/brapi_oidc_url"
             app:negativeButtonText="@android:string/cancel"
             app:neutralButtonText="@string/dialog_scan"
-            app:positiveButtonText="@android:string/ok" />
+            app:positiveButtonText="@string/dialog_save" />
 
         <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
             android:defaultValue="@string/brapi_oidc_clientid_default"
@@ -79,7 +79,7 @@
             android:summary="@string/brapi_oidc_clientid_desc"
             android:title="@string/brapi_oidc_clientid"
             app:negativeButtonText="@android:string/cancel"
-            app:positiveButtonText="@android:string/ok" />
+            app:positiveButtonText="@string/dialog_save" />
 
         <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
             android:defaultValue="@string/brapi_oidc_scope_default"
@@ -90,7 +90,7 @@
             android:summary="@string/brapi_oidc_scope_desc"
             android:title="@string/brapi_oidc_scope"
             app:negativeButtonText="@android:string/cancel"
-            app:positiveButtonText="@android:string/ok" />
+            app:positiveButtonText="@string/dialog_save" />
 
     </PreferenceCategory>
 

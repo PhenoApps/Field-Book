@@ -163,7 +163,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
         new AlertDialog.Builder(context)
                 .setTitle(R.string.preferences_behavior_cycle_sound_title)
                 .setMessage(R.string.preferences_behavior_cycle_sound_description)
-                .setPositiveButton(R.string.dialog_ok, (dialog, which) -> {
+                .setPositiveButton(R.string.dialog_enable, (dialog, which) -> {
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putBoolean("CYCLE_TRAITS_SOUND", true);
                     editor.apply();

@@ -21,6 +21,8 @@
     <string name="dialog_back">Back</string>
     <string name="dialog_scan">Scan</string>
     <string name="dialog_sort_by">Sort By</string>
+    <string name="dialog_enable">Enable</string>
+    <string name="dialog_delete">Delete</string>
 
     <string name="barcode_scanner_text">Scan a barcode</string>
 
@@ -708,7 +710,7 @@
     <string name="preferences_behavior_cycle_traits">Auto-Advance Entry</string>
     <string name="preferences_behavior_cycle_traits_description">Cycling through the trait list automatically advances entry</string>
     <string name="preferences_behavior_cycle_sound_title">Enable sound effect?</string>
-    <string name="preferences_behavior_cycle_sound_description">Press OK to enable sound effect when traits are cycled (recommended)</string>
+    <string name="preferences_behavior_cycle_sound_description">A sound effect will be played when traits are cycled (recommended)</string>
 
     <string name="preferences_behavior_return_to_first_trait">Auto-Reset Traits</string>
     <string name="preferences_behavior_return_to_first_trait_description">Advancing the entry automatically resets to the first trait</string>
@@ -834,7 +836,7 @@
     <string name="pref_experimental_repeated_values_title">Repeated Measures</string>
     <string name="pref_experimental_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
     <string name="pref_experimental_repeated_values_disabled_title">Repeated Measures Disabled</string>
-    <string name="pref_experimental_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable</string>
+    <string name="pref_experimental_repeated_values_disabled_message">Any repeated values that have been collected will be hidden until this feature is enabled again</string>
 
     <string name="pref_experimental_enable_field_audio_title">Enable Field Audio</string>
     <string name="pref_experimental_enable_field_audio_summary">Enable audio recording feature for the entire field</string>

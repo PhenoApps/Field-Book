@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -332,13 +333,16 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
         builder.setTitle(getString(R.string.dialog_warning));
         builder.setMessage(getString(R.string.database_reset_warning1));
-        builder.setPositiveButton(getString(R.string.dialog_yes), (dialog, which) -> {
+        builder.setPositiveButton(getString(R.string.dialog_delete), (dialog, which) -> {
             dialog.dismiss();
             showDatabaseResetDialog2();
         });
-        builder.setNegativeButton(getString(R.string.dialog_no), (dialog, which) -> dialog.dismiss());
+        builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, which) -> dialog.dismiss());
         AlertDialog alert = builder.create();
         alert.show();
+
+        // Set the delete button text color to red
+        alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(getContext(), R.color.main_value_saved_color));
     }
 
     private void showDatabaseResetDialog2() {
