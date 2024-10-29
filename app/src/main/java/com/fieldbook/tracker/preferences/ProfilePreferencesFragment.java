@@ -33,8 +33,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     @Inject
     SharedPreferences preferences;
 
-    private static final String TAG = ProfilePreferencesFragment.class.getSimpleName();
-
     Context context;
     private Preference profilePerson;
 //    private ListPreference verificationInterval;
@@ -140,95 +138,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         return tagName;
     }
 
-    private String refreshIdSummary(Preference refresh) {
-
-        String newId = UUID.randomUUID().toString();
-
-        preferences.edit().putString(GeneralKeys.CRASHLYTICS_ID, newId).apply();
-
-        refresh.setSummary(newId);
-
-        FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
-        instance.setUserId(newId);
-        instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, newId);
-
-        return newId;
-    }
-
-    private void setupCrashlyticsPreference() {
-
-        try {
-
-            CheckBoxPreference enablePref = findPreference(GeneralKeys.CRASHLYTICS_ID_ENABLED);
-            Preference refreshPref = findPreference(GeneralKeys.CRASHLYTICS_ID_REFRESH);
-
-            //check both preferences are found
-            if (enablePref != null && refreshPref != null) {
-
-                //check box listener, setup refresh visibility / on click implementation
-                enablePref.setOnPreferenceChangeListener((pref, newValue) -> {
-
-                    //get current id, might be null
-                    AtomicReference<String> id = new AtomicReference<>(preferences.getString(GeneralKeys.CRASHLYTICS_ID, null));
-
-                    boolean enabled = (boolean) newValue;
-
-                    refreshPref.setVisible(enabled);
-
-                    //when refresh is clicked, update the unique id in the preferencs and update summary
-                    refreshPref.setOnPreferenceClickListener((v) -> {
-
-                        if (enabled) {
-
-                            id.set(refreshIdSummary(refreshPref));
-
-                        }
-
-                        return true;
-                    });
-
-                    if (enabled && id.get() == null) {
-
-                        id.set(refreshIdSummary(refreshPref));
-
-                    } else if (!enabled) {
-
-                        FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
-                        instance.setUserId("");
-                        instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, "");
-                    }
-
-                    return true;
-                });
-
-                //get current id, might be null
-                String id = preferences.getString(GeneralKeys.CRASHLYTICS_ID, null);
-
-                //when checkbox is initialized, check if id is null and update refresh vis
-                //update refresh summary as well
-                refreshPref.setVisible(enablePref.isChecked());
-
-                if (id != null) {
-
-                    refreshPref.setSummary(id);
-
-                    refreshPref.setOnPreferenceClickListener((v) -> {
-
-                        refreshIdSummary(refreshPref);
-
-                        return true;
-                    });
-                }
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            Log.d(TAG, "Crashlytics setup failed.");
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -245,6 +154,5 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     @Override
     public void onResume() {
         super.onResume();
-        setupCrashlyticsPreference();
     }
 }

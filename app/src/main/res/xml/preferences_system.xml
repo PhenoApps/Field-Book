@@ -37,4 +37,25 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:key="crashlytics_category"
+        android:title="@string/preferences_profile_crashlytics"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_card_account_details_outline"
+            android:key="com.tracker.fieldbook.preference.crashlytics.user_id_enabled"
+            android:title="@string/pref_profile_crashlytics_user_id_enabled"
+            android:summary="@string/pref_profile_crashlytics_user_id_enabled_summary"/>
+
+        <Preference
+            app:isPreferenceVisible="false"
+            android:icon="@drawable/ic_refresh"
+            android:key="com.tracker.fieldbook.preference.crashlytics.refresh"
+            android:summary="@string/pref_profile_crashlytics_refresh_summary"
+            android:title="@string/pref_profile_crashlytics_refresh_title" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>
