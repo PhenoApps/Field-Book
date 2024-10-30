@@ -37,6 +37,14 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         calculateAndSetItemSize(viewHolder)
 
+        val context = viewHolder.imageView.context
+        val theme = context.theme
+
+        val activeTraitColor = TypedValue()
+        theme.resolveAttribute(R.attr.fb_color_primary_dark, activeTraitColor, true)
+        val inactiveTraitColor = TypedValue()
+        theme.resolveAttribute(R.attr.fb_trait_boolean_false_color, inactiveTraitColor, true)
+
         with(currentList[position]) {
             if (position == currentSelection) {
                 if (hasObservation) {
@@ -44,24 +52,14 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
                 } else {
                     viewHolder.imageView.setImageResource(R.drawable.square_rounded_outline)
                 }
-                viewHolder.imageView.setColorFilter(
-                    ContextCompat.getColor(
-                        viewHolder.imageView.context,
-                        R.color.main_trait_percent_start_color
-                    )
-                )
+                viewHolder.imageView.setColorFilter(activeTraitColor.data)
             } else {
                 if (hasObservation) {
                     viewHolder.imageView.setImageResource(R.drawable.circle_filled)
                 } else {
                     viewHolder.imageView.setImageResource(R.drawable.circle_outline)
                 }
-                viewHolder.imageView.setColorFilter(
-                    ContextCompat.getColor(
-                        viewHolder.imageView.context,
-                        R.color.main_trait_boolean_false_color
-                    )
-                )
+                viewHolder.imageView.setColorFilter(inactiveTraitColor.data)
             }
 
 //            viewHolder.imageView.setOnClickListener {
