@@ -4,13 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.google.android.material.slider.Slider
+    <ProgressBar
         android:id="@+id/plotsProgressBar"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.MaterialComponents.Light"
+        android:progressTint="?attr/colorAccent"
+        style="?android:attr/progressBarStyleHorizontal"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <ImageView
