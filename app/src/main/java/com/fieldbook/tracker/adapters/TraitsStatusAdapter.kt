@@ -77,16 +77,17 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
     // calculate item size and update the view
     fun calculateAndSetItemSize(viewHolder: ViewHolder) {
         val itemCount = itemCount
+        val context = viewHolder.imageView.context
 
         val parentWidth = traitBoxView.getRecyclerView()?.width ?: 0
 
         val availableWidth = parentWidth - (traitBoxView.getRecyclerView()?.paddingLeft ?: 0) - (traitBoxView.getRecyclerView()?.paddingRight ?: 0)
         val calculatedSize = availableWidth / itemCount
 
-        val defaultMaxSizeDp = 25 // in dp
+        val defaultMaxSizeDp = context.resources.getDimension(R.dimen.fb_trait_status_bar_icon_default_max_size)
         val defaultMaxSizePx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
-            defaultMaxSizeDp.toFloat(),
+            defaultMaxSizeDp,
             traitBoxView.context.resources.displayMetrics
         ).toInt() // in px
 
