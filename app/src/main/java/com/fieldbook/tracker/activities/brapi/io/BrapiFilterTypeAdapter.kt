@@ -9,9 +9,9 @@ class BrapiFilterTypeAdapter {
 
     companion object {
 
-        fun toModelList(prefs: SharedPreferences, filterName: String): List<CheckboxListAdapter.Model> {
+        fun toModelList(prefs: SharedPreferences, key: String): List<CheckboxListAdapter.Model> {
 
-            val jsonString = prefs.getString(filterName, "")
+            val jsonString = prefs.getString(key, "")
 
             return try {
                 Gson().fromJson<List<CheckboxListAdapter.Model>>(jsonString,
@@ -22,15 +22,15 @@ class BrapiFilterTypeAdapter {
             }
         }
 
-        fun saveFilter(prefs: SharedPreferences, filterName: String, list: List<CheckboxListAdapter.Model>) {
+        fun saveFilter(prefs: SharedPreferences, key: String, list: List<CheckboxListAdapter.Model>) {
             val jsonString = Gson().toJson(list)
-            prefs.edit().putString(filterName, jsonString).apply()
+            prefs.edit().putString(key, jsonString).apply()
         }
 
-        fun deleteFilterId(prefs: SharedPreferences, filterName: String, id: String) {
-            val list = toModelList(prefs, filterName)
+        fun deleteFilterId(prefs: SharedPreferences, key: String, id: String) {
+            val list = toModelList(prefs, key)
             val newList = list.filter { it.id != id }
-            saveFilter(prefs, filterName, newList)
+            saveFilter(prefs, key, newList)
         }
     }
 }

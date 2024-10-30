@@ -11,7 +11,7 @@ class BrapiProgramFilterActivity(override val titleResId: Int = R.string.brapi_f
 
     companion object {
 
-        const val FILTER_NAME = "$PREFIX.programDbIds"
+        const val FILTER_NAME = "programDbIds"
 
         fun getIntent(context: Context): Intent {
             return Intent(context, BrapiProgramFilterActivity::class.java)

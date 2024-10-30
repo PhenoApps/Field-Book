@@ -29,6 +29,15 @@ class BrapiFilterCache {
                     }
                 }
             )
+            saveToStorage(context,
+                getStoredModels(context).map {
+                    if (it.variables == null) {
+                        it.copy(variables = listOf())
+                    } else {
+                        it
+                    }
+                }
+            )
         }
 
         fun checkClearCache(context: Context) {
@@ -76,18 +85,19 @@ class BrapiFilterCache {
             }
         }
 
-        fun clearPreferences(context: Context) {
+        fun clearPreferences(context: Context, filterer: String = "") {
             with(PreferenceManager.getDefaultSharedPreferences(context).edit()) {
                 for (f in listOf(
                     BrapiTrialsFilterActivity.FILTER_NAME,
                     BrapiSeasonsFilterActivity.FILTER_NAME,
                     BrapiProgramFilterActivity.FILTER_NAME,
                     BrapiCropsFilterActivity.FILTER_NAME,
-                    BrapiStudyFilterActivity.FILTER_NAME
+                    BrapiStudyFilterActivity.FILTER_NAME,
+                    BrapiTraitFilterActivity.FILTER_NAME,
                 )) {
-                    remove(f)
+                    remove("$filterer$f")
+                    remove("${f}${GeneralKeys.LIST_FILTER_TEXTS}")
                 }
-                remove(GeneralKeys.LIST_FILTER_TEXTS)
                 remove(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR)
                 apply()
             }
@@ -97,6 +107,8 @@ class BrapiFilterCache {
 
             if (clearPreferences) {
                 clearPreferences(context)
+                clearPreferences(context, BrapiStudyFilterActivity.FILTERER_KEY)
+                clearPreferences(context, BrapiTraitFilterActivity.FILTERER_KEY)
             }
 
             context.externalCacheDir?.let {

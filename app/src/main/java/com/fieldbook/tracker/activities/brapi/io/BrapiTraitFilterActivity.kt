@@ -13,6 +13,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.preferences.GeneralKeys
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,11 +23,14 @@ import org.brapi.v2.model.core.BrAPITrial
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
 
 class BrapiTraitFilterActivity(
-    override val filterName: String = "$PREFIX.traits",
+    override val defaultRootFilterKey: String = FILTERER_KEY,
+    override val filterName: String = "traits",
     override val titleResId: Int = R.string.brapi_traits_filter_title
 ) : BrapiSubFilterListActivity<BrAPIStudy>() {
 
     companion object {
+        const val FILTER_NAME = "traits"
+        const val FILTERER_KEY = "com.fieldbook.tracker.activities.brapi.io.filters.traits."
         fun getIntent(context: Context) = Intent(context, BrapiTraitFilterActivity::class.java)
     }
 
@@ -37,6 +41,8 @@ class BrapiTraitFilterActivity(
     }
 
     private var queryVariablesJob: Job? = null
+
+    private var queried = false
 
     override fun List<TrialStudyModel>.filterByPreferences(): List<TrialStudyModel> {
 
@@ -52,7 +58,7 @@ class BrapiTraitFilterActivity(
 
     override fun List<CheckboxListAdapter.Model>.filterBySearchTextPreferences(): List<CheckboxListAdapter.Model> {
 
-        val searchTexts = prefs.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, emptySet())
+        val searchTexts = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", emptySet())
 
         return if (searchTexts?.isEmpty() != false) this else filter { model ->
             searchTexts.map { it.lowercase() }.all { tokens ->
@@ -63,9 +69,9 @@ class BrapiTraitFilterActivity(
 
     override fun onSearchTextComplete(searchText: String) {
 
-        prefs.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, setOf())?.let { texts ->
+        prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.let { texts ->
             prefs.edit().putStringSet(
-                GeneralKeys.LIST_FILTER_TEXTS,
+                "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
                 texts.plus(searchText)
             ).apply()
         }
@@ -111,20 +117,27 @@ class BrapiTraitFilterActivity(
 
         importTextView.text = getString(R.string.act_brapi_filter_import)
 
-        fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_variables)
-        progressBar.visibility = View.VISIBLE
-        progressBar.progress = 0
+    }
 
-        launch {
-            queryVariablesJob = queryVariables()
-            queryVariablesJob?.join()
+    override suspend fun loadData() {
+        super.loadData()
+
+        withContext(Dispatchers.Main) {
+            fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_variables)
+            progressBar.visibility = View.VISIBLE
+            progressBar.progress = 0
         }
+
+        queryVariablesJob = queryVariables()
+        queryVariablesJob?.join()
+
+        restoreModels()
+
     }
 
     private suspend fun queryVariablesForStudy(studyDbId: String? = null) {
-        var count = 0
 
-        val modelCache = arrayListOf<BrAPIObservationVariable>()
+        var count = 0
 
         (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
             VariableQueryParams().also {
@@ -144,40 +157,27 @@ class BrapiTraitFilterActivity(
 
                 count += (models as List<*>).size
 
-                modelCache.addAll(models)
-
-                val uiModels = models.map { m ->
-                    CheckboxListAdapter.Model(
-                        checked = false,
-                        id = m.observationVariableDbId,
-                        label = m.observationVariableName ?: m.observationVariableDbId,
-                        subLabel = m.commonCropName ?: m.observationVariableDbId
-                    )
-                }
-
-                uiModels.sortedBy { m -> m.id }.forEach { model ->
-                    if (model !in cache) {
-                        cache.add(model)
-                    }
-                }
-
-                submitAdapterItems(cache)
-
                 withContext(Dispatchers.Main) {
                     setProgress(count, totalCount)
                     if (count == totalCount || totalCount < 512) {
-                        //progressBar.visibility = View.GONE
-                        //fetchDescriptionTv.visibility = View.GONE
                         studyDbId?.let { id ->
                             BrapiFilterCache.saveVariablesToStudy(this@BrapiTraitFilterActivity, id, models)
                         }
-                        //queryVariablesJob?.cancel()
+                        cancel()
                     }
                 }
             }
     }
 
+    override fun hasData(): Boolean {
+        val storedModels = BrapiFilterCache.getStoredModels(this)
+        val anyNullVariables = storedModels.any { it.study.observationVariableDbIds.isNotEmpty() && it.variables == null }
+        return storedModels.isNotEmpty() || queried || anyNullVariables
+    }
+
     private suspend fun queryVariables() = launch(Dispatchers.IO) {
+
+        queried = true
 
         val storedModels = BrapiFilterCache.getStoredModels(this@BrapiTraitFilterActivity)
         if (storedModels.isEmpty()) {
@@ -186,10 +186,6 @@ class BrapiTraitFilterActivity(
             if (it.variables == null) {
                 queryVariablesForStudy(it.study.studyDbId)
             }
-        }
-
-        withContext(Dispatchers.Main) {
-            restoreModels()
         }
     }
 
@@ -240,6 +236,8 @@ class BrapiTraitFilterActivity(
                             it.putExtra(BrapiStudyFilterActivity.EXTRA_MODE, "filter")
                         }
                         else -> BrapiCropsFilterActivity.getIntent(this)
+                    }.also {
+                        it.putExtra(EXTRA_FILTER_ROOT, defaultRootFilterKey)
                     }
                 )
             }

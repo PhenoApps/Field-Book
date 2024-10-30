@@ -13,16 +13,15 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import org.brapi.v2.model.core.BrAPIStudy
 
 class BrapiStudyFilterActivity(
-    override val filterName: String = "$PREFIX.studies",
+    override val defaultRootFilterKey: String = FILTERER_KEY,
+    override val filterName: String = "studies",
     override val titleResId: Int = R.string.brapi_studies_filter_title
 ) : BrapiSubFilterListActivity<BrAPIStudy>() {
 
     companion object {
-
+        const val FILTER_NAME = "studies"
+        const val FILTERER_KEY = "com.fieldbook.tracker.activities.brapi.io.filters.studies."
         const val EXTRA_MODE = "com.fieldbook.tracker.activities.brapi.io.BrapiStudyFilterActivity.EXTRA_MODE"
-
-        const val FILTER_NAME = "$PREFIX.studies"
-
         fun getIntent(context: Context) = Intent(context, BrapiStudyFilterActivity::class.java)
     }
 
@@ -51,7 +50,7 @@ class BrapiStudyFilterActivity(
 
     override fun List<CheckboxListAdapter.Model>.filterBySearchTextPreferences(): List<CheckboxListAdapter.Model> {
 
-        val searchTexts = prefs.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, emptySet())
+        val searchTexts = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", emptySet())
 
         return if (searchTexts?.isEmpty() != false) this else filter { model ->
             searchTexts.map { it.lowercase() }.all { tokens ->
@@ -62,9 +61,9 @@ class BrapiStudyFilterActivity(
 
     override fun onSearchTextComplete(searchText: String) {
 
-        prefs.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, setOf())?.let { texts ->
+        prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.let { texts ->
             prefs.edit().putStringSet(
-                GeneralKeys.LIST_FILTER_TEXTS,
+                "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
                 texts.plus(searchText)
             ).apply()
         }
@@ -129,9 +128,9 @@ class BrapiStudyFilterActivity(
     //add menu to toolbar
     override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_filter_brapi, menu)
-        menu?.findItem(R.id.action_check_all)?.isVisible = false
-        menu?.findItem(R.id.action_reset_cache)?.isVisible = true
-        menu?.findItem(R.id.action_brapi_filter)?.isVisible = true
+        menu?.findItem(R.id.action_check_all)?.isVisible = isFilterMode
+        menu?.findItem(R.id.action_reset_cache)?.isVisible = !isFilterMode
+        menu?.findItem(R.id.action_brapi_filter)?.isVisible = !isFilterMode
         return true
     }
 
@@ -162,6 +161,8 @@ class BrapiStudyFilterActivity(
                         FilterChoice.SEASON.ordinal -> BrapiSeasonsFilterActivity.getIntent(this)
                         FilterChoice.CROP.ordinal -> BrapiCropsFilterActivity.getIntent(this)
                         else -> BrapiTrialsFilterActivity.getIntent(this)
+                    }.also {
+                        it.putExtra(EXTRA_FILTER_ROOT, defaultRootFilterKey)
                     }
                 )
             }

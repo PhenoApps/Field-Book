@@ -11,7 +11,7 @@ open class BrapiSeasonsFilterActivity(override val titleResId: Int = R.string.br
 
     companion object {
 
-        const val FILTER_NAME = "$PREFIX.seasonDbIds"
+        const val FILTER_NAME = "seasonDbIds"
 
         fun getIntent(context: Context): Intent {
             return Intent(context, BrapiSeasonsFilterActivity::class.java)

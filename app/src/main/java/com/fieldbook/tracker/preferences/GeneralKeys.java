@@ -230,7 +230,7 @@ public class GeneralKeys {
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
     @Nullable
-    public static final String LIST_FILTER_TEXTS = "com.fieldbook.tracker.list_filter_texts";
+    public static final String LIST_FILTER_TEXTS = ".list_filter_texts";
 
     private GeneralKeys() {
 

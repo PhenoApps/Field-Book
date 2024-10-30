@@ -10,7 +10,7 @@ open class BrapiCropsFilterActivity(override val titleResId: Int = R.string.brap
 
     companion object {
 
-        const val FILTER_NAME = "$PREFIX.cropDbIds"
+        const val FILTER_NAME = "cropDbIds"
 
         fun getIntent(context: Context): Intent {
             return Intent(context, BrapiCropsFilterActivity::class.java)

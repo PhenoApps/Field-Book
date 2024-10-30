@@ -50,12 +50,16 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     companion object {
 
-        const val PREFIX = "com.fieldbook.tracker.activities.filters"
+        const val EXTRA_FILTER_ROOT = "com.fieldbook.tracker.activities.brapi.io.extras.filter_root"
 
         fun getIntent(activity: Activity): Intent {
             return Intent(activity, BrapiListFilterActivity::class.java)
         }
     }
+
+    open val defaultRootFilterKey: String = ""
+
+    private var filterer: String = ""
 
     private var numFilterBadge: BadgeDrawable? = null
 
@@ -113,29 +117,9 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         chipGroup = findViewById(R.id.act_list_filter_cg)
 
         restoreModels()
-    }
 
-    @OptIn(ExperimentalBadgeUtils::class)
-    protected fun resetChipToolbarCount() {
-
-        val toolbar = findViewById<MaterialToolbar>(R.id.act_list_filter_tb)
-
-        if (numFilterBadge != null) {
-            BadgeUtils.detachBadgeDrawable(numFilterBadge, toolbar, R.id.action_brapi_filter)
-        }
-
-        val numFilters = getNumberOfFilters()
-
-        if (numFilters > 0) {
-
-            numFilterBadge = BadgeDrawable.create(this).apply {
-                isVisible = true
-                number = getNumberOfFilters()
-                horizontalOffset = 16
-                maxNumber = 9
-            }.also {
-                BadgeUtils.attachBadgeDrawable(it, toolbar, R.id.action_brapi_filter)
-            }
+        if (intent?.hasExtra(EXTRA_FILTER_ROOT) == true) {
+            filterer = intent?.getStringExtra(EXTRA_FILTER_ROOT) ?: ""
         }
     }
 
@@ -151,45 +135,47 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     @OptIn(ExperimentalBadgeUtils::class)
     private fun resetChipsUi() {
 
-        chipGroup.removeAllViews()
+        if (filterer.isEmpty()) {
 
-        //add new children that are loaded from the program filter activity
-        for (f in listOf(
-            BrapiProgramFilterActivity.FILTER_NAME,
-            BrapiTrialsFilterActivity.FILTER_NAME,
-            BrapiSeasonsFilterActivity.FILTER_NAME,
-            BrapiCropsFilterActivity.FILTER_NAME
-        )) {
-            resetFilterChips(f)
-        }
+            chipGroup.removeAllViews()
 
-        val searchText = prefs.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, setOf())
-        searchText?.forEach { text ->
-            val chip = createChip(R.style.FourthChipTheme, text, text)
-            chip.setOnCloseIconClickListener {
-                val currentTexts = prefs.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, setOf())?.toMutableSet()
-                currentTexts?.remove(text)
-                prefs.edit().putStringSet(GeneralKeys.LIST_FILTER_TEXTS, currentTexts).apply()
-                chipGroup.removeView(chip)
-                restoreModels()
+            //add new children that are loaded from the program filter activity
+            for (f in listOf(
+                BrapiProgramFilterActivity.FILTER_NAME,
+                BrapiTrialsFilterActivity.FILTER_NAME,
+                BrapiSeasonsFilterActivity.FILTER_NAME,
+                BrapiCropsFilterActivity.FILTER_NAME,
+                BrapiStudyFilterActivity.FILTER_NAME
+            )) {
+                resetFilterChips(f)
             }
-            chipGroup.addView(chip)
-        }
 
-        //resetChipToolbarCount()
-        //clearFilterButton.visibility = if (filtersChipGroup.childCount > 0) View.VISIBLE else View.GONE
-        //subtitleTv.visibility = if (filtersChipGroup.childCount > 0) View.VISIBLE else View.GONE
+            val searchText = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())
+            searchText?.forEach { text ->
+                val chip = createChip(R.style.FourthChipTheme, text, text)
+                chip.setOnCloseIconClickListener {
+                    val currentTexts = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.toMutableSet()
+                    currentTexts?.remove(text)
+                    prefs.edit().putStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", currentTexts).apply()
+                    chipGroup.removeView(chip)
+                    restoreModels()
+                }
+                chipGroup.addView(chip)
+            }
+        }
     }
 
     private fun clearFilters() {
         chipGroup.removeAllViews()
-        BrapiFilterCache.clearPreferences(this@BrapiListFilterActivity)
+        BrapiFilterCache.clearPreferences(this@BrapiListFilterActivity, defaultRootFilterKey)
         restoreModels()
     }
 
+    private fun getFilterKey() = "$filterer$filterName"
+
     private fun resetFilterChips(filterName: String) {
 
-        BrapiFilterTypeAdapter.toModelList(prefs, filterName)
+        BrapiFilterTypeAdapter.toModelList(prefs, "$defaultRootFilterKey$filterName")
             .forEach { model ->
 
                 val chip = createChip(
@@ -203,7 +189,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
                 chip.setOnCloseIconClickListener {
 
-                    deleteFilterId(filterName, model.id)
+                    deleteFilterId("$defaultRootFilterKey$filterName", model.id)
                 }
 
                 chipGroup.addView(chip)
@@ -219,56 +205,51 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         restoreModels()
     }
 
+    open fun hasData(): Boolean {
+        return BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity).isNotEmpty()
+    }
+
     fun restoreModels() {
 
         progressBar.visibility = View.VISIBLE
 
         launch(Dispatchers.IO) {
-            val storedModels = BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity)
-            if (storedModels.isEmpty()) {
-                loadData()
+            if (!hasData()) {
+                launch(Dispatchers.Main) {
+                    loadData()
+                }
             } else {
                 withContext(Dispatchers.Main) {
                     progressBar.visibility = View.GONE
-                    loadStorageItems(storedModels)
+                    loadStorageItems(BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity))
                 }
             }
         }
     }
 
-    private fun getNumberOfFilters() =
-        (BrapiFilterTypeAdapter.toModelList(prefs, BrapiProgramFilterActivity.FILTER_NAME) +
-                BrapiFilterTypeAdapter.toModelList(prefs, BrapiTrialsFilterActivity.FILTER_NAME) +
-                BrapiFilterTypeAdapter.toModelList(prefs, BrapiSeasonsFilterActivity.FILTER_NAME) +
-                BrapiFilterTypeAdapter.toModelList(prefs, BrapiCropsFilterActivity.FILTER_NAME))
-            .filter { it.checked }.size +
-                (prefs.getStringSet(GeneralKeys.LIST_FILTER_TEXTS, setOf())?.size ?: 0)
+    open suspend fun loadData() {
 
-    private suspend fun loadData() {
+        toggleProgressBar(View.VISIBLE)
 
-        launch(Dispatchers.Main) {
+        fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_trials)
+        progressBar.visibility = View.VISIBLE
 
-            toggleProgressBar(View.VISIBLE)
+        queryTrials()
+        queryTrialsJob?.join()
 
-            fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_trials)
-            progressBar.visibility = View.VISIBLE
+        fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_studies)
+        progressBar.visibility = View.VISIBLE
+        progressBar.progress = 0
 
-            queryTrials()
-            queryTrialsJob?.join()
+        queryStudiesJob = queryStudies()
+        queryStudiesJob?.join()
 
-            fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_studies)
-            progressBar.visibility = View.VISIBLE
-            progressBar.progress = 0
+        fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_complete)
 
-            queryStudiesJob = queryStudies()
-            queryStudiesJob?.join()
+        toggleProgressBar(View.INVISIBLE)
 
-            fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_complete)
+        restoreModels()
 
-            toggleProgressBar(View.INVISIBLE)
-
-            restoreModels()
-        }
     }
 
     private suspend fun queryStudies() = launch(Dispatchers.IO) {
@@ -295,22 +276,23 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
             modelCache.addAll(models)
 
-            val uiModels = models.map { m ->
-                CheckboxListAdapter.Model(
-                    checked = false,
-                    id = m.studyDbId,
-                    label = m.studyName,
-                    subLabel = m.locationName ?: ""
-                )
-            }
-
-            uiModels.sortedBy { m -> m.id }.forEach { model ->
-                if (model !in cache) {
-                    cache.add(model)
-                }
-            }
-
-            submitAdapterItems(cache)
+                //TODO clean this up
+//            val uiModels = models.map { m ->
+//                CheckboxListAdapter.Model(
+//                    checked = false,
+//                    id = m.studyDbId,
+//                    label = m.studyName,
+//                    subLabel = m.locationName ?: ""
+//                )
+//            }
+//
+//            uiModels.sortedBy { m -> m.id }.forEach { model ->
+//                if (model !in cache) {
+//                    cache.add(model)
+//                }
+//            }
+//
+//            submitAdapterItems(cache)
 
             withContext(Dispatchers.Main) {
                 setProgress(count, totalCount)
@@ -424,7 +406,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         return models
     }
 
-    private fun loadFilter() = BrapiFilterTypeAdapter.toModelList(prefs, filterName)
+    private fun loadFilter() = BrapiFilterTypeAdapter.toModelList(prefs, getFilterKey())
 
     /**
      * Save checked items to preferences
@@ -434,11 +416,11 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         //get ids and names of selected programs from the adapter
         val selected = cache.filter { p -> p.checked }
 
-        BrapiFilterTypeAdapter.saveFilter(prefs, filterName, selected)
+        BrapiFilterTypeAdapter.saveFilter(prefs, getFilterKey(), selected)
     }
 
     protected fun getIds(filterName: String) =
-        BrapiFilterTypeAdapter.toModelList(prefs, filterName).map { it.id }
+        BrapiFilterTypeAdapter.toModelList(prefs, "$filterer$filterName").map { it.id }
 
     private fun loadStorageItems(models: List<TrialStudyModel>) {
 
@@ -533,7 +515,18 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             R.id.action_reset_cache -> {
-                resetStorageCache()
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.act_brapi_list_filter_reset_cache_title)
+                    .setMessage(getString(R.string.act_brapi_list_filter_reset_cache_message))
+                    .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
+                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                        resetStorageCache()
+                        dialog.dismiss()
+                    }.show()
+            }
+
+            R.id.action_clear_filters -> {
+                clearFilters()
             }
 
             android.R.id.home -> {

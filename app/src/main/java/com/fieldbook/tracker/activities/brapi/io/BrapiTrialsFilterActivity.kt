@@ -11,7 +11,7 @@ open class BrapiTrialsFilterActivity(override val titleResId: Int = R.string.bra
 
     companion object {
 
-        const val FILTER_NAME = "$PREFIX.trialDbIds"
+        const val FILTER_NAME = "trialDbIds"
 
         fun getIntent(context: Context): Intent {
             return Intent(context, BrapiTrialsFilterActivity::class.java)
