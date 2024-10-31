@@ -2,7 +2,6 @@ package com.fieldbook.tracker.activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.DialogFragment;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,6 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.fragment.app.DialogFragment;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
@@ -47,6 +47,7 @@ import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
 import com.fieldbook.tracker.dialogs.FieldSortDialog;
+import com.fieldbook.tracker.dialogs.SortDialogFragment;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
@@ -805,11 +806,14 @@ public class FieldEditorActivityOld extends ThemedActivity
         }
 
         //initialize: initial items are the current sort order, selectable items are the obs. unit attributes.
-        FieldSortDialog d = new FieldSortDialog(this, field,
+        FieldSortDialog dialogFragment = new FieldSortDialog().newInstance(
+                this,
+                field,
                 sortOrderList.toArray(new String[]{}),
-                database.getRangeColumnNames());
+                database.getRangeColumnNames()
+        );
 
-        d.show();
+        dialogFragment.show(this.getSupportFragmentManager(), "SortDialogFragment");
     }
 
     @Override

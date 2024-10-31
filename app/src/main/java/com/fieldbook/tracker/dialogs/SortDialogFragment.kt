@@ -3,21 +3,24 @@ package com.fieldbook.tracker.dialogs
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.SortAdapter
+import com.fieldbook.tracker.interfaces.FieldSortController
+import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 
 /**
-Extensible sort dialog
+Extensible sort dialog fragment
 
 Look at FieldSortDialog and FieldAdapter for example: extends and overrides setup ui to update field object
 //EXAMPLE: extend this class and implement this on click in on create, extend Sorter interface and call save method
@@ -29,44 +32,61 @@ Look at FieldSortDialog and FieldAdapter for example: extends and overrides setu
 //            dismiss()
 //        }
  */
-open class SortDialog(
-    act: Activity,
-    private val initialItems: Array<String>,
-    private val selectableItems: Array<String>
-) : Dialog(act), SortAdapter.Sorter {
+open class SortDialogFragment : DialogFragment(), SortAdapter.Sorter {
 
-    protected var attributeRv: RecyclerView? = null
+    protected var act: Activity? = null
+    protected var field: FieldObject? = null
+    protected var initialItems: Array<String>? = null
+    protected var selectableItems: Array<String>? = null
+    protected var dialogTitle: String? = null
+
+    protected  var attributeRv: RecyclerView? = null
     protected var cancelButton: Button? = null
-    protected var deleteAllButton: ImageButton? = null
-    protected var addButton: ImageButton? = null
-    protected var sortOrderButton: ImageButton? = null
+    protected  var deleteAllButton: ImageButton? = null
+    protected  var addButton: ImageButton? = null
+    protected  var sortOrderButton: ImageButton? = null
     protected var okButton: Button? = null
-    protected var sortList = arrayListOf<String>()
+    protected  var sortList = arrayListOf<String>()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    fun newInstance(
+        act: Activity,
+        field: FieldObject,
+        initialItems: Array<String>,
+        selectableItems: Array<String>,
+        dialogTitle: String,
+    ): SortDialogFragment {
+        this.act = act
+        this.field = field
+        this.initialItems = initialItems
+        this.selectableItems = selectableItems
+        this.dialogTitle = dialogTitle
+        return this
+    }
 
-        setContentView(R.layout.dialog_field_sort)
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+            .setTitle(R.string.dialog_field_sort_title)
+            .setNegativeButton(R.string.dialog_cancel) { _, _ -> }
+            .setPositiveButton(R.string.dialog_ok) { _, _ -> }
 
-        setCanceledOnTouchOutside(true)
+        val view = layoutInflater.inflate(R.layout.dialog_field_sort, null)
+        builder.setView(view)
 
-        //when shown, update the window size to %80 width and %50 height
-        setOnShowListener {
+        val dialog = builder.create()
 
-            window?.let { w ->
+        attributeRv = view.findViewById(R.id.dialog_field_sort_rv)
+        addButton = view.findViewById(R.id.dialog_field_sort_add_btn)
+        deleteAllButton = view.findViewById(R.id.dialog_field_sort_delete_all_btn)
+        sortOrderButton = view.findViewById(R.id.dialog_field_sort_toggle_order_btn)
 
-                val rect = Rect()
-                w.decorView.getWindowVisibleDisplayFrame(rect)
+        dialog.show()
 
-                w.setLayout(
-                    (rect.width() * .8).toInt(), (rect.height() * .5).toInt()
-                )
-            }
-
-        }
+        okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+        cancelButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
 
         setupUi()
 
+        return dialog
     }
 
     private val itemTouchHelper by lazy {
@@ -133,28 +153,22 @@ open class SortDialog(
         ItemTouchHelper(itemTouchCallback)
     }
 
+
     /**
      * Initialize views and all business logic
      */
     open fun setupUi() {
 
-        attributeRv = findViewById(R.id.dialog_field_sort_rv)
-        addButton = findViewById(R.id.dialog_field_sort_add_btn)
-        okButton = findViewById(R.id.dialog_field_sort_ok_btn)
-        cancelButton = findViewById(R.id.dialog_field_sort_cancel_btn)
-        deleteAllButton = findViewById(R.id.dialog_field_sort_delete_all_btn)
-        sortOrderButton = findViewById(R.id.dialog_field_sort_toggle_order_btn)
-
-        //used for drag and drog
+        //used for drag and drop
         itemTouchHelper.attachToRecyclerView(attributeRv)
 
         attributeRv?.itemAnimator = null
 
         attributeRv?.adapter = SortAdapter(this).also { adapter ->
 
-            if (selectableItems.isNotEmpty()) {
+            if (selectableItems?.isNotEmpty() == true) {
 
-                sortList.addAll(initialItems)
+                sortList.addAll(initialItems?.toList() ?: emptyList())
 
                 adapter.submitList(sortList)
 
@@ -173,18 +187,22 @@ open class SortDialog(
         //starts a dialog to add another attribute that hasn't been added already
         addButton?.setOnClickListener {
 
-            val unused = selectableItems.filter { it !in sortList }
+            val unused = selectableItems?.filter { it !in sortList }
 
-            if (unused.isNotEmpty()) {
+            if (unused != null) {
+                if (unused.isNotEmpty()) {
 
-                askDialogForAttribute(unused)
+                    askDialogForAttribute(unused)
 
-            } else {
+                } else {
 
-                Toast.makeText(
-                    context, R.string.dialog_field_sort_no_more_attributes_found, Toast.LENGTH_SHORT
-                ).show()
+                    Toast.makeText(
+                        context,
+                        R.string.dialog_field_sort_no_more_attributes_found,
+                        Toast.LENGTH_SHORT
+                    ).show()
 
+                }
             }
         }
 
@@ -206,21 +224,25 @@ open class SortDialog(
 
             val studyId = getStudyId()
 
-            toggleSortOrder(studyId)
+            studyId?.let { it1 -> toggleSortOrder(it1) }
 
-            sortOrderButton?.setImageResource(getSortIcon(studyId))
+            studyId?.let { it1 -> getSortIcon(it1) }
+                ?.let { it2 -> sortOrderButton?.setImageResource(it2) }
         }
 
         submitList()
 
-        sortOrderButton?.setImageResource(getSortIcon(getStudyId()))
+        getStudyId()?.let { getSortIcon(it) }?.let { sortOrderButton?.setImageResource(it) }
 
     }
 
-    private fun getStudyId() = PreferenceManager.getDefaultSharedPreferences(context)
-        .getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+    private fun getStudyId() = context?.let {
+        PreferenceManager.getDefaultSharedPreferences(it)
+            .getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+    }
 
-    private fun getSortIcon(studyId: String) = if (isSortOrderAsc(studyId)) R.drawable.sort_ascending else R.drawable.sort_descending
+    private fun getSortIcon(studyId: String) =
+        if (isSortOrderAsc(studyId) == true) R.drawable.sort_ascending else R.drawable.sort_descending
 
     private fun toggleSortOrder(studyId: String) = when (isSortOrderAsc(studyId)) {
         true -> persistSortOrder(studyId, false)
@@ -230,12 +252,16 @@ open class SortDialog(
     private fun isSortOrderAsc(studyId: String) = getSortOrder(studyId)
 
     private fun persistSortOrder(studyId: String, isAsc: Boolean) =
-        PreferenceManager.getDefaultSharedPreferences(context).edit()
-            .putBoolean("${GeneralKeys.SORT_ORDER}.$studyId", isAsc).apply()
+        context?.let {
+            PreferenceManager.getDefaultSharedPreferences(it).edit()
+                .putBoolean("${GeneralKeys.SORT_ORDER}.$studyId", isAsc).apply()
+        }
 
     private fun getSortOrder(studyId: String) =
-        PreferenceManager.getDefaultSharedPreferences(context)
-            .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)
+        context?.let {
+            PreferenceManager.getDefaultSharedPreferences(it)
+                .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)
+        }
 
     private fun submitList() {
 
@@ -261,9 +287,13 @@ open class SortDialog(
 
         val dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
 
-        dialog.setTitle(R.string.dialog_field_sort_title)
-
-        val adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, unused)
+        val adapter = context?.let {
+            ArrayAdapter(
+                it,
+                android.R.layout.simple_list_item_1,
+                unused
+            )
+        }
 
         dialog.setAdapter(adapter) { d, which ->
 
