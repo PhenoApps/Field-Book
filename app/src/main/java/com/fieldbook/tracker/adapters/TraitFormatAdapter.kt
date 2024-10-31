@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.offbeat.traits.formats.Formats
+import com.fieldbook.tracker.traits.formats.Formats
 
 /**
  * Reference:
@@ -60,7 +60,7 @@ class TraitFormatAdapter(
         // contents of the view with that element
         with(currentList[position]) {
             viewHolder.iconBtn.setImageResource(getIcon())
-            viewHolder.nameTv.text = getName(context)
+            viewHolder.nameTv.text = getReadableName(context)
 
             viewHolder.iconBtn.setOnClickListener {
 

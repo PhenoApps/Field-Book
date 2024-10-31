@@ -65,7 +65,7 @@ open class SortDialogFragment : DialogFragment(), SortAdapter.Sorter {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
-            .setTitle(R.string.dialog_field_sort_title)
+            .setTitle(this.dialogTitle)
             .setNegativeButton(R.string.dialog_cancel) { _, _ -> }
             .setPositiveButton(R.string.dialog_ok) { _, _ -> }
 

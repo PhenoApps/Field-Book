@@ -168,6 +168,8 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                     String labelNumber = String.valueOf(numLabels);
                     // Use the number of labels printed to record each print event
                     ((CollectActivity) getContext()).insertPrintObservation(labelNumber);
+
+                    ((CollectActivity) getContext()).refreshRepeatedValuesToolbarIndicator();
                 }
             }
         }
@@ -230,6 +232,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
 
         try {
 

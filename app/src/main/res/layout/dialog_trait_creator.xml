@@ -23,7 +23,7 @@
         app:spanCount="3"
         tools:listitem="@layout/list_item_traits_grid" />
 
-    <com.fieldbook.tracker.offbeat.traits.formats.ui.ParameterScrollView
+    <com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
         android:id="@+id/dialog_new_trait_parameters_psv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
-    </com.fieldbook.tracker.offbeat.traits.formats.ui.ParameterScrollView>
+    </com.fieldbook.tracker.traits.formats.ui.ParameterScrollView>
 
 </LinearLayout>
 

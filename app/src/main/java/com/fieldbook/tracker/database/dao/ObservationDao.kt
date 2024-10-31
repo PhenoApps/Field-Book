@@ -12,7 +12,6 @@ import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sLocalImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sNonImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sRemoteImageObservationsViewName
-import com.fieldbook.tracker.database.dao.ObservationVariableDao.Companion.getTraitByName
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import org.threeten.bp.OffsetDateTime
@@ -164,10 +163,12 @@ class ObservationDao {
          * are required to have for brapi fields; otherwise, this query will fail.
          */
         @SuppressLint("Recycle")
-        fun getObservations(hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
+
+
+        fun getObservations(fieldId: Int, hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
             db.rawQuery("""
-                SELECT DISTINCT props.observationUnitDbId AS uniqueName,
-                    props.observationUnitName AS firstName,
+                SELECT
+                    DISTINCT obs.observation_unit_id AS unitDbId,
                     obs.${Observation.PK} AS id, 
                     obs.value AS value, 
                     obs.observation_time_stamp,
@@ -183,29 +184,29 @@ class ObservationDao {
                     vars.observation_variable_details,
                     vars.observation_variable_field_book_format as observation_variable_field_book_format
                 FROM ${Observation.tableName} AS obs
-                JOIN ${Migrator.sObservationUnitPropertyViewName} AS props ON obs.observation_unit_id = props.observationUnitDbId
                 JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
                 JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK}
-                WHERE study.study_source IS NOT NULL
+                WHERE obs.study_id = ?
+                    AND study.study_source IS NOT NULL
                     AND obs.value <> ''
                     AND vars.trait_data_source = ?
                     AND vars.trait_data_source IS NOT NULL
                     AND vars.observation_variable_field_book_format <> 'photo'
                     
-        """.trimIndent(), arrayOf(hostUrl)).toTable()
-                    .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
-                        rep = getStringVal(row, "rep")
-                        unitDbId = getStringVal(row, "uniqueName")
-                        variableDbId = getStringVal(row, "external_db_id")
-                        value = CategoryJsonUtil.processValue(row)
-                        variableName = getStringVal(row, "observation_variable_name")
-                        fieldBookDbId = getStringVal(row, "id")
-                        dbId = getStringVal(row, "observation_db_id")
-                        setTimestamp(getStringVal(row, "observation_time_stamp"))
-                        setLastSyncedTime(getStringVal(row, "last_synced_time"))
-                        collector = getStringVal(row, "collector")
-                        studyId = getStringVal(row, "study_db_id")
-                    } }
+        """.trimIndent(), arrayOf(fieldId.toString(), hostUrl)).toTable()
+                .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
+                    rep = getStringVal(row, "rep")
+                    unitDbId = getStringVal(row, "unitDbId")
+                    variableDbId = getStringVal(row, "external_db_id")
+                    value = CategoryJsonUtil.processValue(row)
+                    variableName = getStringVal(row, "observation_variable_name")
+                    fieldBookDbId = getStringVal(row, "id")
+                    dbId = getStringVal(row, "observation_db_id")
+                    setTimestamp(getStringVal(row, "observation_time_stamp"))
+                    setLastSyncedTime(getStringVal(row, "last_synced_time"))
+                    collector = getStringVal(row, "collector")
+                    studyId = getStringVal(row, "study_db_id")
+                } }
 
         } ?: emptyList()
 
@@ -534,6 +535,11 @@ class ObservationDao {
                 )
             }
 
+        fun delete(id: String) = withDatabase { db ->
+            db.delete(Observation.tableName,
+                "${Observation.PK} = ?", arrayOf(id))
+        }
+
         fun updateObservationModels(observations: List<ObservationModel>) = withDatabase { db ->
 
             observations.forEach {
@@ -588,7 +594,10 @@ class ObservationDao {
         fun updateObservation(observation: ObservationModel) = withDatabase { db ->
 
             db.update(Observation.tableName,
-                contentValuesOf(*observation.map.map { it.key to it.value }.toTypedArray()),
+                (contentValuesOf(*observation.map.map { it.key to it.value }.toTypedArray())
+                    .also {
+                        it.put("value", observation.value)
+                    }),
                 "internal_id_observation = ?",
                 arrayOf(observation.internal_id_observation.toString())
                 )
