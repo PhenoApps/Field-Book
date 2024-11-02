@@ -206,7 +206,7 @@ public class BrapiExportActivity extends ThemedActivity {
                 showSaving();
                 sendData();
             }
-        } else if (id == R.id.brapi_cancel_btn) {
+        } else if (id == R.id.close_btn) {
             finish();
         }
     }
