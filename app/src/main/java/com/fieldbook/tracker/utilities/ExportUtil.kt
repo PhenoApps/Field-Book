@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.database.Cursor
 import android.os.Build
@@ -16,10 +15,11 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.documentfile.provider.DocumentFile
+import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.BrapiExportActivity
-import com.fieldbook.tracker.brapi.BrapiAuthDialog
+import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.CitationDialog
@@ -173,8 +173,8 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             exportIntent.putIntegerArrayListExtra(BrapiExportActivity.FIELD_IDS, ArrayList(fieldIds))
             context.startActivity(exportIntent)
         } else {
-            val brapiAuth = BrapiAuthDialog(context)
-            brapiAuth.show()
+            val brapiAuth = BrapiAuthDialogFragment().newInstance()
+            brapiAuth?.show((context as FragmentActivity).supportFragmentManager, "BrapiAuthDialogFragment")
         }
     }
 

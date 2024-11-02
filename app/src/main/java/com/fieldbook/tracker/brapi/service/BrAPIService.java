@@ -8,12 +8,13 @@ import android.util.Patterns;
 import android.widget.Toast;
 
 import androidx.arch.core.util.Function;
+import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
-import com.fieldbook.tracker.brapi.BrapiAuthDialog;
+import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiProgram;
@@ -136,8 +137,8 @@ public interface BrAPIService {
             case UNAUTHORIZED:
                 // Start the login process
                 ((Activity) context).runOnUiThread(() -> {
-                    BrapiAuthDialog brapiAuth = new BrapiAuthDialog(context);
-                    brapiAuth.show();
+                    BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
+                    brapiAuth.show(((FragmentActivity) context).getSupportFragmentManager(), "BrapiAuthDialogFragment");
                 });
                 toastMsg = context.getString(R.string.brapi_auth_deny);
                 break;
