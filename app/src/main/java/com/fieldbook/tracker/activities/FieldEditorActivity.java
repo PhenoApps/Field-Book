@@ -37,7 +37,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.fragment.app.DialogFragment;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -49,9 +48,8 @@ import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
-import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
+import com.fieldbook.tracker.dialogs.FieldCreatorDialogFragment;
 import com.fieldbook.tracker.dialogs.FieldSortDialog;
-import com.fieldbook.tracker.dialogs.SortDialogFragment;
 import com.fieldbook.tracker.dialogs.ListAddDialog;
 import com.fieldbook.tracker.dialogs.ListSortDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
@@ -61,7 +59,6 @@ import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.ArrayIndexComparator;
 import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
@@ -398,15 +395,15 @@ public class FieldEditorActivity extends ThemedActivity
                         loadCloud();
                         break;
                     case 2:
-                        FieldCreatorDialog dialog = new FieldCreatorDialog((ThemedActivity) FieldEditorActivity.this);
-                        dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
+                        FieldCreatorDialogFragment dialog = new FieldCreatorDialogFragment((ThemedActivity) FieldEditorActivity.this);
+                        dialog.setFieldCreationCallback(new FieldCreatorDialogFragment.FieldCreationCallback() {
                             @Override
                             public void onFieldCreated(int studyDbId) {
                                 fieldSwitcher.switchField(studyDbId);
                                 queryAndLoadFields();
                             }
                         });
-                        dialog.show();
+                        dialog.show(getSupportFragmentManager(), "FieldCreatorDialogFragment");
                         break;
                     case 3:
                         loadBrAPI();

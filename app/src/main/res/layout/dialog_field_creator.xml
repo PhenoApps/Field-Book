@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="16dp">
+    android:layout_margin="16dp"
+    android:paddingHorizontal="30dp"
+    android:paddingTop="30dp">
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/dialog_field_creator_group_start_point"
@@ -14,16 +16,14 @@
         app:constraint_referenced_ids="dialog_field_creator_top_left_radio_button,
             dialog_field_creator_top_right_radio_button,
             dialog_field_creator_bottom_left_radio_button,
-            dialog_field_creator_bottom_right_radio_button,
-            dialog_field_creator_start_back_button"/>
+            dialog_field_creator_bottom_right_radio_button"/>
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/dialog_field_creator_group_pattern"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="plot_linear_button, plot_zigzag_button,
-            dialog_field_creator_pattern_back_button"/>
+        app:constraint_referenced_ids="plot_linear_button, plot_zigzag_button"/>
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/dialog_field_creator_group_size"
@@ -33,7 +33,7 @@
         android:visibility="visible"
         app:constraint_referenced_ids="dialog_field_creator_field_row_edit_text,
             dialog_field_creator_field_column_edit_text,
-            dialog_field_creator_size_button, dialog_field_creator_field_name_edit_text"/>
+            dialog_field_creator_field_name_edit_text"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -75,15 +75,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_field_row_edit_text" />
 
-    <Button style="@style/Widget.AppCompat.Button.Borderless"
-        android:id="@+id/dialog_field_creator_size_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_ok"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_field_column_edit_text" />
-
     <!-- endregion -->
 
     <!---region Choose starting point view group -->
@@ -120,15 +111,6 @@
         app:layout_constraintStart_toStartOf="@+id/dialog_field_creator_bottom_right_radio_button"
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title" />
 
-    <Button style="@style/Widget.AppCompat.Button.Borderless"
-        android:id="@+id/dialog_field_creator_start_back_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_back"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_bottom_right_radio_button" />
-
     <!-- endregion -->
 
     <!---region Choose plot pattern view group -->
@@ -151,15 +133,6 @@
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
         android:contentDescription="@string/dialog_field_creator_zig_button_content_desc" />
 
-    <Button style="@style/Widget.AppCompat.Button.Borderless"
-        android:id="@+id/dialog_field_creator_pattern_back_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_back"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/plot_zigzag_button" />
-
     <!--endregion-->
 
     <!--region Review view group-->
@@ -172,9 +145,7 @@
         android:visibility="gone"
         app:constraint_referenced_ids="dialog_field_creator_review_text,
             field_creator_plot_large_field_text_view,
-            dialog_field_creator_review_image, dialog_field_creator_submit_button,
-            dialog_field_creator_cancel_button, field_creator_plot_insert_text_view,
-            dialog_field_creator_back_button"/>
+            dialog_field_creator_review_image, field_creator_plot_insert_text_view"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -211,31 +182,6 @@
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
         tools:src="@drawable/ic_plot_pattern_linear"
         android:contentDescription="@string/dialog_field_creator_review_image_content_desc" />
-
-    <Button style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/dialog_field_creator_submit_button"
-        android:text="@android:string/ok"
-        app:layout_constraintTop_toBottomOf="@id/field_creator_plot_insert_text_view"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <Button style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/dialog_field_creator_back_button"
-        android:text="@string/dialog_back"
-        app:layout_constraintTop_toBottomOf="@id/field_creator_plot_insert_text_view"
-        app:layout_constraintEnd_toStartOf="@id/dialog_field_creator_submit_button"/>
-
-    <Button style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/dialog_field_creator_cancel_button"
-        android:text="@android:string/cancel"
-        app:layout_constraintTop_toBottomOf="@id/field_creator_plot_insert_text_view"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/dialog_field_creator_back_button"/>
     <!--endregion-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
