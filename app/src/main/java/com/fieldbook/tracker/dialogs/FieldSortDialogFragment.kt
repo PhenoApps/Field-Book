@@ -10,14 +10,14 @@ import com.fieldbook.tracker.objects.FieldObject
 Opens from the FieldEditorActivity FieldAdapter "sort" option.
 Allows user to make and order a list of field attributes to sort by.
  */
-class FieldSortDialog : SortDialogFragment(), SortAdapter.Sorter {
+class FieldSortDialogFragment : SortDialogFragment(), SortAdapter.Sorter {
     fun newInstance(
         activity: Activity,
         field: FieldObject,
         initialItems: Array<String>,
         selectableItems: Array<String>
-    ): FieldSortDialog {
-        return FieldSortDialog().apply {
+    ): FieldSortDialogFragment {
+        return FieldSortDialogFragment().apply {
             this.act = activity
             this.field = field
             this.initialItems = initialItems

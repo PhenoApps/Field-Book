@@ -49,7 +49,7 @@ import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialogFragment;
-import com.fieldbook.tracker.dialogs.FieldSortDialog;
+import com.fieldbook.tracker.dialogs.FieldSortDialogFragment;
 import com.fieldbook.tracker.dialogs.ListAddDialog;
 import com.fieldbook.tracker.dialogs.ListSortDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
@@ -968,7 +968,7 @@ public class FieldEditorActivity extends ThemedActivity
         }
 
         //initialize: initial items are the current sort order, selectable items are the obs. unit attributes.
-        FieldSortDialog dialogFragment = new FieldSortDialog().newInstance(
+        FieldSortDialogFragment dialogFragment = new FieldSortDialogFragment().newInstance(
                 this,
                 field,
                 sortOrderList.toArray(new String[]{}),
