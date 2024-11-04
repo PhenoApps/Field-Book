@@ -1,8 +1,10 @@
 package com.fieldbook.tracker.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -32,10 +34,20 @@ class CheckboxListAdapter(
         var checked: Boolean,
         val id: String,
         val label: String,
-        val subLabel: String
+        val subLabel: String,
+        var iconResId: Int? = null,
     ) {
         override fun equals(other: Any?): Boolean {
             return id == (other as? Model)?.id
+        }
+
+        override fun hashCode(): Int {
+            var result = checked.hashCode()
+            result = 31 * result + id.hashCode()
+            result = 31 * result + label.hashCode()
+            result = 31 * result + subLabel.hashCode()
+            result = 31 * result + (iconResId ?: 0)
+            return result
         }
     }
 
@@ -54,6 +66,13 @@ class CheckboxListAdapter(
             holder.subTitleView.text = subLabel
 
             holder.checkBox.isChecked = checked
+
+            holder.imageView.visibility = View.GONE
+
+            this.iconResId?.let { resId ->
+                holder.imageView.visibility = View.VISIBLE
+                holder.imageView.setImageResource(resId)
+            }
         }
     }
 
@@ -63,6 +82,7 @@ class CheckboxListAdapter(
 
     inner class ViewHolder(v: CardView) : RecyclerView.ViewHolder(v) {
 
+        var imageView: ImageView = v.findViewById(R.id.list_item_brapi_filter_iv)
         var textView: TextView = v.findViewById(R.id.list_item_brapi_filter_tv)
         var checkBox: CheckBox = v.findViewById(R.id.list_item_brapi_filter_cb)
         var subTitleView: TextView = v.findViewById(R.id.list_item_brapi_filter_subtitle_tv)
@@ -88,7 +108,7 @@ class CheckboxListAdapter(
         }
 
         override fun areContentsTheSame(oldItem: Model, newItem: Model): Boolean {
-            return oldItem.checked == newItem.checked
+            return oldItem.checked == newItem.checked && oldItem.iconResId == newItem.iconResId
         }
     }
 }

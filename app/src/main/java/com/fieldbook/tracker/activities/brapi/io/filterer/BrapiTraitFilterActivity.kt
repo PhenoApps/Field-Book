@@ -14,9 +14,11 @@ import com.fieldbook.tracker.activities.brapi.io.BrapiSubFilterListActivity
 import com.fieldbook.tracker.activities.brapi.io.BrapiTraitImporterActivity
 import com.fieldbook.tracker.activities.brapi.io.BrapiTrialsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
+import com.fieldbook.tracker.activities.brapi.io.mapper.DataTypes
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.formats.Formats
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -26,6 +28,7 @@ import kotlinx.coroutines.withContext
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
 import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
+import org.brapi.v2.model.pheno.BrAPITraitDataType
 
 class BrapiTraitFilterActivity(
     override val defaultRootFilterKey: String = FILTERER_KEY,
@@ -106,9 +109,15 @@ class BrapiTraitFilterActivity(
                 CheckboxListAdapter.Model(
                     checked = false,
                     id = model.observationVariableDbId,
-                    label = model.observationVariableName ?: model.observationVariableDbId,
+                    label = model.synonyms?.firstOrNull() ?: model.observationVariableName ?: model.observationVariableDbId,
                     subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}"
-                )
+                ).also {
+                    model.scale?.dataType?.name?.let { dataType ->
+                        Formats.findTrait(DataTypes.convertBrAPIDataType(dataType))?.iconDrawableResourceId?.let { icon ->
+                            it.iconResId = icon
+                        }
+                    }
+                }
             }.toList()
 
     override fun onCreate(savedInstanceState: Bundle?) {

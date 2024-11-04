@@ -9,5 +9,5 @@ data class TrialStudyModel(
     var trialName: String? = null,
     var programDbId: String? = null,
     var programName: String? = null,
-    val variables: List<BrAPIObservationVariable>? = null
+    var variables: List<BrAPIObservationVariable>? = null
 )

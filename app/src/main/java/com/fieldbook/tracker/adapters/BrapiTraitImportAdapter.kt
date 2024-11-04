@@ -21,17 +21,11 @@ import org.brapi.v2.model.pheno.BrAPIObservationVariable
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
 class BrapiTraitImportAdapter(private val loader: TraitLoader) :
-    ListAdapter<BrapiTraitImportAdapter.Model, BrapiTraitImportAdapter.ViewHolder>(DiffCallback()) {
+    ListAdapter<CheckboxListAdapter.Model, BrapiTraitImportAdapter.ViewHolder>(CheckboxListAdapter.DiffCallback()) {
 
     interface TraitLoader {
         fun onItemClicked(id: String)
     }
-
-    data class Model(
-        val id: String,
-        val title: String,
-        val iconResId: Int
-    )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val v = LayoutInflater.from(parent.context)
@@ -42,8 +36,9 @@ class BrapiTraitImportAdapter(private val loader: TraitLoader) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         with(currentList[position]) {
-            holder.titleView.text = title
-            holder.imageView.setImageResource(iconResId)
+            holder.titleView.text = label
+            holder.imageView.setImageResource(iconResId ?: R.drawable.ic_trait_text)
+            holder.imageView.visibility = View.VISIBLE
             holder.itemView.setOnClickListener {
                 loader.onItemClicked(id)
             }
@@ -57,16 +52,5 @@ class BrapiTraitImportAdapter(private val loader: TraitLoader) :
     inner class ViewHolder(v: CardView) : RecyclerView.ViewHolder(v) {
         var imageView: ImageView = v.findViewById(R.id.list_item_brapi_trait_format_selector_iv)
         var titleView: TextView = v.findViewById(R.id.list_item_brapi_trait_format_selector_tv)
-    }
-
-    class DiffCallback : DiffUtil.ItemCallback<Model>() {
-
-        override fun areItemsTheSame(oldItem: Model, newItem: Model): Boolean {
-            return oldItem.id == newItem.id
-        }
-
-        override fun areContentsTheSame(oldItem: Model, newItem: Model): Boolean {
-            return oldItem.title == newItem.title && oldItem.iconResId == newItem.iconResId
-        }
     }
 }

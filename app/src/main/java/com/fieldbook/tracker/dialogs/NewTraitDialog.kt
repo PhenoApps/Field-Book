@@ -48,6 +48,10 @@ class NewTraitDialog(
         fun onFormatSelected(format: Formats) = Unit
     }
 
+    interface TraitObjectUpdateListener {
+        fun onTraitObjectUpdated(traitObject: TraitObject) = Unit
+    }
+
     @Inject
     lateinit var soundHelperImpl: SoundHelperImpl
 
@@ -62,6 +66,9 @@ class NewTraitDialog(
 
     //flag to just return selectable format
     var isSelectingFormat: Boolean = false
+
+    //flag for editing existing brapi variable being imported
+    var isBrapiTraitImport: Boolean = false
 
     // UI elements of new trait dialog
     private lateinit var traitFormatsRv: RecyclerView
@@ -330,7 +337,7 @@ class NewTraitDialog(
 
             initialTraitObject?.let { traitObject ->
 
-                if (validateFormat().result != true) {
+                if (validateFormat().result != true && !isBrapiTraitImport) {
 
                     pass = false
 
@@ -342,7 +349,15 @@ class NewTraitDialog(
 
                         t.format = format.getDatabaseName()
 
-                        updateDatabaseTrait(t)
+                        if (isBrapiTraitImport) {
+
+                            (activity as? TraitObjectUpdateListener)?.onTraitObjectUpdated(t)
+
+                        } else {
+
+                            updateDatabaseTrait(t)
+
+                        }
 
                         onSaveFinish()
                     }
@@ -360,27 +375,30 @@ class NewTraitDialog(
 
     private fun onSaveFinish() {
 
-        val ed = this.prefs.edit()
-        ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false)
-        ed.apply()
+        if (!isSelectingFormat && !isBrapiTraitImport) {
 
-        // Display our BrAPI dialog if it has not been show already
-        // Get our dialog state from our adapter to see if a trait has been selected
-        (activity as? TraitEditorActivity)?.adapter?.infoDialogShown?.let {
-            setBrAPIDialogShown(it)
+            val ed = this.prefs.edit()
+            ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false)
+            ed.apply()
 
-            if (!brapiDialogShown) {
-                setBrAPIDialogShown(
-                    activity.displayBrapiInfo(activity, null, true)
-                )
+            // Display our BrAPI dialog if it has not been show already
+            // Get our dialog state from our adapter to see if a trait has been selected
+            (activity as? TraitEditorActivity)?.adapter?.infoDialogShown?.let {
+                setBrAPIDialogShown(it)
+
+                if (!brapiDialogShown) {
+                    setBrAPIDialogShown(
+                        activity.displayBrapiInfo(activity, null, true)
+                    )
+                }
             }
+
+            CollectActivity.reloadData = true
+
+            soundHelperImpl.playCelebrate()
         }
 
         (activity as? TraitDialogDismissListener)?.onNewTraitDialogDismiss()
-
-        CollectActivity.reloadData = true
-
-        soundHelperImpl.playCelebrate()
 
         dismiss()
     }

@@ -13,6 +13,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <ImageView
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:src="@drawable/ic_trait_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:padding="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/list_item_brapi_filter_iv"
+            tools:ignore="ContentDescription" />
+
         <TextView
             android:id="@+id/list_item_brapi_filter_tv"
             style="@style/TextViewStyle.Bold.Title"
@@ -21,7 +35,7 @@
             android:layout_margin="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/list_item_brapi_filter_cb"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/list_item_brapi_filter_iv"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0"
             app:layout_constraintHorizontal_bias="0"
@@ -36,7 +50,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/list_item_brapi_filter_cb"
             app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/list_item_brapi_filter_iv"
             app:layout_constraintTop_toBottomOf="@id/list_item_brapi_filter_tv"
             tools:text="Manhattan, KS" />
 

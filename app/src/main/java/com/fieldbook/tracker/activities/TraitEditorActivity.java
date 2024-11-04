@@ -566,7 +566,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         Intent intent = new Intent(this, BrapiTraitFilterActivity.class);
         BrapiFilterCache.Companion.checkClearCache(this);
-        startActivityForResult(intent, REQUEST_CODE_BRAPI_TRAIT_ACTIVITY);
+        startActivity(intent);
     }
 
     private void showFileDialog() {
