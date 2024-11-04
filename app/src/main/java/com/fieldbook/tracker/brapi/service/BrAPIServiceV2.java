@@ -1071,13 +1071,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         newObservation.setDbId(obs.getObservationDbId());
         newObservation.setUnitDbId(obs.getObservationUnitDbId());
         newObservation.setVariableDbId(obs.getObservationVariableDbId());
-        newObservation.setTimestamp(obs.getObservationTimeStamp().toString());
 
         newObservation.setTimestamp(
                 OffsetDateTime.parse(
                         obs.getObservationTimeStamp().toString()
                 )
         );
+        newObservation.setLastSyncedTime(OffsetDateTime.now()); // We just received this!
 
         //search imported obs references for first field book id
         List<BrAPIExternalReference> references = obs.getExternalReferences();
@@ -1119,6 +1119,10 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             String internalVarId = extVariableDbIdMap.get(brapiObservation.getObservationVariableDbId());
             newObservation.setVariableDbId(internalVarId);
             newObservation.setValue(brapiObservation.getValue());
+            if (brapiObservation.getObservationTimeStamp() != null) {
+                newObservation.setTimestamp(TimeAdapter.convertFrom(brapiObservation.getObservationTimeStamp()));
+            }
+            newObservation.setLastSyncedTime(OffsetDateTime.now()); // Use current time as sync time
             newObservation.setTimestamp(
                     OffsetDateTime.parse(
                             brapiObservation.getObservationTimeStamp().toString()
