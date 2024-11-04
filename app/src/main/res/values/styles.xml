@@ -13,6 +13,10 @@
         <item name="windowNoTitle">true</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeBackground">@color/main_primary</item>
+        <item name="selectedItemBackground">@color/main_primary_transparent</item>
+        <item name="defaultChipBackground">@color/main_primary_transparent</item>
+        <item name="selectableChipBackground">@color/WHITE</item>
+        <item name="selectableChipStroke">@color/main_primary</item>
         <item name="fb_color_primary">@color/main_primary</item>
         <item name="fb_color_primary_dark">@color/main_primary_dark</item>
         <item name="fb_color_accent">@color/main_color_accent</item>
@@ -111,6 +115,8 @@
 
         <item name="fb_error_message_color">@color/RED</item>
 
+        <item name="colorSecondary">?attr/fb_color_accent</item>
+
         <item name="fb_first_chip_color">@color/main_chip_first_color</item>
         <item name="fb_second_chip_color">@color/main_chip_second_color</item>
         <item name="fb_third_chip_color">@color/main_chip_third_color</item>
@@ -121,6 +127,11 @@
 
     <!-- Blue Theme -->
     <style name="BaseAppTheme.Blue">
+        <item name="actionModeBackground">@color/blue_primary</item>
+        <item name="selectedItemBackground">@color/blue_primary_transparent</item>
+        <item name="defaultChipBackground">@color/blue_primary_transparent</item>
+        <item name="selectableChipBackground">@color/WHITE</item>
+        <item name="selectableChipStroke">@color/blue_primary</item>
         <item name="fb_color_primary">@color/blue_primary</item>
         <item name="fb_color_primary_dark">@color/blue_primary_dark</item>
         <item name="fb_color_accent">@color/blue_color_accent</item>
@@ -158,6 +169,11 @@
 
     <!-- High Contrast Theme -->
     <style name="BaseAppTheme.HighContrast">
+        <item name="actionModeBackground">@color/high_contrast_primary</item>
+        <item name="selectedItemBackground">@color/light_gray</item>
+        <item name="defaultChipBackground">@color/light_gray</item>
+        <item name="selectableChipBackground">@color/WHITE</item>
+        <item name="selectableChipStroke">@color/GRAY</item>
         <item name="fb_color_primary">@color/high_contrast_primary</item>
         <item name="fb_color_primary_dark">@color/high_contrast_primary_dark</item>
         <item name="fb_color_accent">@color/high_contrast_color_accent</item>
