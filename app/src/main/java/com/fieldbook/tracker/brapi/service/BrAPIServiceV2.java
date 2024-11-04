@@ -86,6 +86,7 @@ import org.brapi.v2.model.BrAPIAcceptedSearchResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.threeten.bp.OffsetDateTime;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -972,6 +973,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         newObservation.setDbId(obs.getObservationDbId());
         newObservation.setUnitDbId(obs.getObservationUnitDbId());
         newObservation.setVariableDbId(obs.getObservationVariableDbId());
+        newObservation.setLastSyncedTime(OffsetDateTime.now()); // We just received this!
 
         //search imported obs references for first field book id
         List<BrAPIExternalReference> references = obs.getExternalReferences();
@@ -1012,6 +1014,10 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             String internalVarId = extVariableDbIdMap.get(brapiObservation.getObservationVariableDbId());
             newObservation.setVariableDbId(internalVarId);
             newObservation.setValue(brapiObservation.getValue());
+            if (brapiObservation.getObservationTimeStamp() != null) {
+                newObservation.setTimestamp(TimeAdapter.convertFrom(brapiObservation.getObservationTimeStamp()));
+            }
+            newObservation.setLastSyncedTime(OffsetDateTime.now()); // Use current time as sync time
 
             //Make sure we are on the right experiment level.
             // This will cause bugs if there have been plot and plant level traits found as the observations retrieves all of them
