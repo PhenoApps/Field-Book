@@ -6,15 +6,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.ContextThemeWrapper
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.OptIn
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.appcompat.widget.Toolbar
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.filterer.BrapiStudyFilterActivity
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
@@ -24,11 +22,9 @@ import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.badge.BadgeDrawable
-import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -411,7 +407,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     /**
      * Save checked items to preferences
      **/
-    private fun saveFilter() {
+    protected fun saveFilter() {
 
         //get ids and names of selected programs from the adapter
         val selected = cache.filter { p -> p.checked }

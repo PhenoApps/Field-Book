@@ -93,12 +93,12 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.brapi.io.BrapiStudyFilterActivity"
+        <activity android:name=".activities.brapi.io.filterer.BrapiStudyFilterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.brapi.io.BrapiTraitFilterActivity"
+        <activity android:name=".activities.brapi.io.filterer.BrapiTraitFilterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
@@ -129,6 +129,11 @@
             android:screenOrientation="portrait" />
 
         <activity android:name=".activities.brapi.io.BrapiStudyImportActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.io.BrapiTraitImporterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />

@@ -1,8 +1,9 @@
 package com.fieldbook.tracker.activities.brapi.io
 
 import android.content.Context
-import android.os.SystemClock
 import androidx.preference.PreferenceManager
+import com.fieldbook.tracker.activities.brapi.io.filterer.BrapiStudyFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filterer.BrapiTraitFilterActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

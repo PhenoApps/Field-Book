@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.io
+package com.fieldbook.tracker.activities.brapi.io.filterer
 
 import android.content.Context
 import android.content.Intent
@@ -8,6 +8,12 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.BrapiCropsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
+import com.fieldbook.tracker.activities.brapi.io.BrapiSubFilterListActivity
+import com.fieldbook.tracker.activities.brapi.io.BrapiTraitImporterActivity
+import com.fieldbook.tracker.activities.brapi.io.BrapiTrialsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -19,7 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
 import org.brapi.v2.model.core.BrAPIStudy
-import org.brapi.v2.model.core.BrAPITrial
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
 
 class BrapiTraitFilterActivity(
@@ -119,6 +124,14 @@ class BrapiTraitFilterActivity(
 
     }
 
+    override fun onFinishButtonClicked() {
+        super.onFinishButtonClicked()
+        saveFilter()
+        BrapiTraitImporterActivity.getIntent(this).also {
+            intentLauncher.launch(it)
+        }
+    }
+
     override suspend fun loadData() {
         super.loadData()
 
@@ -161,7 +174,11 @@ class BrapiTraitFilterActivity(
                     setProgress(count, totalCount)
                     if (count == totalCount || totalCount < 512) {
                         studyDbId?.let { id ->
-                            BrapiFilterCache.saveVariablesToStudy(this@BrapiTraitFilterActivity, id, models)
+                            BrapiFilterCache.saveVariablesToStudy(
+                                this@BrapiTraitFilterActivity,
+                                id,
+                                models
+                            )
                         }
                         cancel()
                     }

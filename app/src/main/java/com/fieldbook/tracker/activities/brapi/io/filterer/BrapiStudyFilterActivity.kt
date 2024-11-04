@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.io
+package com.fieldbook.tracker.activities.brapi.io.filterer
 
 import android.content.Context
 import android.content.Intent
@@ -8,6 +8,12 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.BrapiCropsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.BrapiProgramFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.BrapiSeasonsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.BrapiSubFilterListActivity
+import com.fieldbook.tracker.activities.brapi.io.BrapiTrialsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.preferences.GeneralKeys
 import org.brapi.v2.model.core.BrAPIStudy
@@ -21,7 +27,7 @@ class BrapiStudyFilterActivity(
     companion object {
         const val FILTER_NAME = "studies"
         const val FILTERER_KEY = "com.fieldbook.tracker.activities.brapi.io.filters.studies."
-        const val EXTRA_MODE = "com.fieldbook.tracker.activities.brapi.io.BrapiStudyFilterActivity.EXTRA_MODE"
+        const val EXTRA_MODE = "com.fieldbook.tracker.activities.brapi.io.filterer.BrapiStudyFilterActivity.EXTRA_MODE"
         fun getIntent(context: Context) = Intent(context, BrapiStudyFilterActivity::class.java)
     }
 
