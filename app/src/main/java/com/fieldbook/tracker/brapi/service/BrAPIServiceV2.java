@@ -1085,7 +1085,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             for (BrAPIExternalReference ref : references) {
                 String source = ref.getReferenceSource();
                 if (source != null && source.equals(fieldBookReferenceSource)) {
-                    String id = ref.getReferenceID();
+                    String id = ref.getReferenceId();
+                    if (id != null && !id.isEmpty()) {
+                        newObservation.setFieldBookDbId(id);
+                        break;
+                    }
+                    // Check obsolete referenceID
+                    id = ref.getReferenceID();
                     if (id != null && !id.isEmpty()) {
                         newObservation.setFieldBookDbId(id);
                         break;
@@ -1239,7 +1245,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         newObservation.setValue(observation.getValue());
 
         BrAPIExternalReference reference = new BrAPIExternalReference();
-        reference.setReferenceID(observation.getFieldbookDbId());
+        reference.setReferenceId(observation.getFieldbookDbId());
+        reference.setReferenceID(observation.getFieldbookDbId()); // Keep obsolete referenceID
         reference.setReferenceSource(fieldBookReferenceSource);
 
         newObservation.setExternalReferences(Collections.singletonList(reference));
