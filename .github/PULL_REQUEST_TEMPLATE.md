@@ -1,13 +1,11 @@
 ## Description
 
 <!-- 
-Provide a summary of your changes in the description box below including motivation and context.
+Provide a summary of your changes below including motivation and context.
 If these changes fix a bug or resolves a feature request, be sure to link to that issue.
 -->
 
-```description
 
-```
 
 ## Type of change
 
