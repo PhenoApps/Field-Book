@@ -11,13 +11,16 @@ import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.activities.brapi.io.filterer.BrapiTraitFilterActivity
 import com.fieldbook.tracker.adapters.BrapiTraitImportAdapter
 import com.fieldbook.tracker.dialogs.NewTraitDialog
+import com.fieldbook.tracker.traits.formats.Formats
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 
-class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedActivity(), CoroutineScope by MainScope() {
+class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedActivity(),
+    CoroutineScope by MainScope(),
+    NewTraitDialog.TraitDialogFormatListener{
 
     //override val titleResId: Int = R.string.act_brapi_trait_preprocess_title
 
@@ -71,10 +74,14 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
 
     override fun onItemClicked(id: String) {
 
-        val traitDialog = NewTraitDialog(this) {
+        val traitDialog = NewTraitDialog(this)
 
-        }
+        traitDialog.isSelectingFormat = true
 
-        traitDialog.show(supportFragmentManager, "NewTraitDialog")
+        traitDialog.show(supportFragmentManager, "TraitDialogChooser")
+    }
+
+    override fun onFormatSelected(format: Formats) {
+        println(format.getDatabaseName())
     }
 }

@@ -55,6 +55,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.utilities.ArrayIndexComparator;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.FileUtil;
@@ -89,7 +90,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
-public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController, TraitAdapter.TraitSorter {
+public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController, TraitAdapter.TraitSorter, NewTraitDialog.TraitDialogDismissListener {
 
     public static final String TAG = "TraitEditor";
     public static int REQUEST_CLOUD_FILE_CODE = 5;
@@ -896,10 +897,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     private void showTraitDialog(@Nullable TraitObject traitObject) {
         queryAndLoadTraits();
-        NewTraitDialog traitDialog = new NewTraitDialog(this, () -> {
-            queryAndLoadTraits();
-            return null;
-        });
+        NewTraitDialog traitDialog = new NewTraitDialog(this);
         traitDialog.setTraitObject(traitObject);
         traitDialog.show(getSupportFragmentManager(), "NewTraitDialog");
     }
@@ -963,5 +961,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         queryAndLoadTraits();
 
         CollectActivity.reloadData = true;
+    }
+
+    @Override
+    public void onNewTraitDialogDismiss() {
+        queryAndLoadTraits();
     }
 }
