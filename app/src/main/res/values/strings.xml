@@ -1261,6 +1261,7 @@
     <string name="brapi_filter_type_study">Study</string>
     <string name="act_brapi_study_filter">Filter</string>
     <string name="act_brapi_trait_preprocess_title">Field Book Format Chooser</string>
+    <string name="act_brapi_trait_import_title">Choose Formats</string>
     <plurals name="act_brapi_list_filter">
         <item quantity="one">%s result</item>
         <item quantity="other">%s results</item>

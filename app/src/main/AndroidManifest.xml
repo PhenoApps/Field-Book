@@ -85,37 +85,37 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.brapi.io.filterer.BrapiStudyFilterActivity"
+        <activity android:name=".activities.brapi.io.filter.filterer.BrapiStudyFilterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.brapi.io.filterer.BrapiTraitFilterActivity"
+        <activity android:name=".activities.brapi.io.filter.filterer.BrapiTraitFilterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.brapi.io.ListFilterActivity"
+        <activity android:name=".activities.brapi.io.filter.ListFilterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.brapi.io.BrapiProgramFilterActivity"
+        <activity android:name=".activities.brapi.io.filter.BrapiProgramFilterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.brapi.io.BrapiSeasonsFilterActivity"
+        <activity android:name=".activities.brapi.io.filter.BrapiSeasonsFilterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.brapi.io.BrapiTrialsFilterActivity"
+        <activity android:name=".activities.brapi.io.filter.BrapiTrialsFilterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.brapi.io.BrapiCropsFilterActivity"
+        <activity android:name=".activities.brapi.io.filter.BrapiCropsFilterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />

@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.io
+package com.fieldbook.tracker.activities.brapi.io.filter
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -12,7 +12,11 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.brapi.io.filterer.BrapiStudyFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterTypeAdapter
+import com.fieldbook.tracker.activities.brapi.io.BrapiStudyImportActivity
+import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
+import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
@@ -28,8 +32,6 @@ import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.cancel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -373,7 +375,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 return
             } else if (programDbIds.isNotEmpty()) {
                 intentLauncher.launch(BrapiStudyImportActivity.getIntent(this).also { intent ->
-                    intent.putExtra(BrapiStudyImportActivity.EXTRA_STUDY_DB_IDS,
+                    intent.putExtra(
+                        BrapiStudyImportActivity.EXTRA_STUDY_DB_IDS,
                         associateProgramStudy().map { it.study.studyDbId }.toTypedArray()
                     )
                     intent.putExtra(

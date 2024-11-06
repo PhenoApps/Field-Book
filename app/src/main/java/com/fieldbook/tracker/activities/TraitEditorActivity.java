@@ -42,7 +42,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
-import com.fieldbook.tracker.activities.brapi.io.filterer.BrapiTraitFilterActivity;
+import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapterController;
 import com.fieldbook.tracker.async.ImportCSVTask;

@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.io.filterer
+package com.fieldbook.tracker.activities.brapi.io.filter.filterer
 
 import android.content.Context
 import android.content.Intent
@@ -8,11 +8,11 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.brapi.io.BrapiCropsFilterActivity
-import com.fieldbook.tracker.activities.brapi.io.BrapiProgramFilterActivity
-import com.fieldbook.tracker.activities.brapi.io.BrapiSeasonsFilterActivity
-import com.fieldbook.tracker.activities.brapi.io.BrapiSubFilterListActivity
-import com.fieldbook.tracker.activities.brapi.io.BrapiTrialsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiProgramFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSubFilterListActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.preferences.GeneralKeys

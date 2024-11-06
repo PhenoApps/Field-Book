@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.io.filterer
+package com.fieldbook.tracker.activities.brapi.io.filter.filterer
 
 import android.content.Context
 import android.content.Intent
@@ -8,11 +8,11 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.brapi.io.BrapiCropsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
-import com.fieldbook.tracker.activities.brapi.io.BrapiSubFilterListActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSubFilterListActivity
 import com.fieldbook.tracker.activities.brapi.io.BrapiTraitImporterActivity
-import com.fieldbook.tracker.activities.brapi.io.BrapiTrialsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.activities.brapi.io.mapper.DataTypes
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
@@ -28,7 +28,6 @@ import kotlinx.coroutines.withContext
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
 import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
-import org.brapi.v2.model.pheno.BrAPITraitDataType
 
 class BrapiTraitFilterActivity(
     override val defaultRootFilterKey: String = FILTERER_KEY,
@@ -134,10 +133,9 @@ class BrapiTraitFilterActivity(
     }
 
     override fun onFinishButtonClicked() {
-        super.onFinishButtonClicked()
         saveFilter()
         BrapiTraitImporterActivity.getIntent(this).also {
-            intentLauncher.launch(it)
+           intentLauncher.launch(it)
         }
     }
 

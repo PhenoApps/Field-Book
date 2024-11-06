@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.io
+package com.fieldbook.tracker.activities.brapi.io.filter
 
 import android.text.TextWatcher
 import android.widget.AdapterView

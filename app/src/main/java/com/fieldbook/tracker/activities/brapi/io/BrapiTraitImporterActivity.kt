@@ -9,7 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
-import com.fieldbook.tracker.activities.brapi.io.filterer.BrapiTraitFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.mapper.toTraitObject
 import com.fieldbook.tracker.adapters.BrapiTraitImportAdapter
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
@@ -18,6 +18,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.NewTraitDialog
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.traits.TextTraitLayout
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.TextFormat
 import com.google.android.material.appbar.MaterialToolbar
@@ -33,9 +34,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedActivity(),
     CoroutineScope by MainScope(),
-    NewTraitDialog.TraitObjectUpdateListener{
+    NewTraitDialog.TraitObjectUpdateListener {
 
-    //override val titleResId: Int = R.string.act_brapi_trait_preprocess_title
     companion object {
 
         fun getIntent(activity: Activity): Intent {
@@ -100,8 +100,21 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
                 database.insertTraits(u)
             }
 
+            setResult(Activity.RESULT_OK)
             finish()
         }
+
+        setupToolbar()
+
+    }
+
+    private fun setupToolbar() {
+
+        setSupportActionBar(findViewById(R.id.act_brapi_trait_import_tb))
+
+        supportActionBar?.title = getString(R.string.act_brapi_trait_import_title)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
     }
 
     override fun onDestroy() {
@@ -113,6 +126,7 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
 
         when (item.itemId) {
             android.R.id.home -> {
+                setResult(Activity.RESULT_CANCELED)
                 finish()
                 return true
             }
@@ -128,15 +142,18 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
             BrapiFilterCache.getStoredModels(this).mapNotNull { it.variables }.flatten()
                 .find { it.observationVariableDbId == id }?.toTraitObject(this)
 
-        val traitDialog = NewTraitDialog(this)
+       // if (traitObject?.format == TextTraitLayout.type) {
 
-        //traitDialog.isSelectingFormat = true
+            val traitDialog = NewTraitDialog(this)
 
-        traitDialog.isBrapiTraitImport = true
+            //traitDialog.isSelectingFormat = true
 
-        traitDialog.setTraitObject(traitObject)
+            traitDialog.isBrapiTraitImport = true
 
-        traitDialog.show(supportFragmentManager, "TraitDialogChooser")
+            traitDialog.setTraitObject(traitObject)
+
+            traitDialog.show(supportFragmentManager, "TraitDialogChooser")
+       // }
     }
 
     override fun onTraitObjectUpdated(traitObject: TraitObject) {

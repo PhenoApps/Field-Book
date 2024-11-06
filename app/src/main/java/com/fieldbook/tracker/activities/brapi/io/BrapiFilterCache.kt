@@ -2,8 +2,12 @@ package com.fieldbook.tracker.activities.brapi.io
 
 import android.content.Context
 import androidx.preference.PreferenceManager
-import com.fieldbook.tracker.activities.brapi.io.filterer.BrapiStudyFilterActivity
-import com.fieldbook.tracker.activities.brapi.io.filterer.BrapiTraitFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiProgramFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

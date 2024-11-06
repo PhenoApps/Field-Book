@@ -1,8 +1,9 @@
-package com.fieldbook.tracker.activities.brapi.io
+package com.fieldbook.tracker.activities.brapi.io.filter
 
 import android.content.Context
 import android.content.Intent
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import org.brapi.v2.model.core.BrAPISeason
 

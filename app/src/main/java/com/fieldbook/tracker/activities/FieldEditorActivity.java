@@ -43,7 +43,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiActivity;
-import com.fieldbook.tracker.activities.brapi.io.filterer.BrapiStudyFilterActivity;
+import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity;
 import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
