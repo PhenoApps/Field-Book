@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Field Book documentation (https://github.com/PhenoApps/Field-Book/pull/1072)
 
 ### Fixed
+- Fix issue with importing traits (https://github.com/PhenoApps/Field-Book/pull/1074)
 
 ## [v5.6] - 2024-10-02
 
