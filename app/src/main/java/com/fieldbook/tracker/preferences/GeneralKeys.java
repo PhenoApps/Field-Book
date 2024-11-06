@@ -116,6 +116,17 @@ public class GeneralKeys {
 
     public static final String GNSS_PRECISION_OK_SOUND           = "GNSS_PRECISION_OK_SOUND";
 
+    // Canon
+    public static final String CANON_SSID_NAME = "com.tracker.fieldbook.preferences.keys.canon.ssid_name";
+
+    public static final String CANON_IP = "com.tracker.fieldbook.preferences.keys.canon.ip";
+
+    public static final String CANON_PORT = "com.tracker.fieldbook.preferences.keys.canon.port";
+
+    public static final String CANON_DEBUG = "com.tracker.fieldbook.preferences.keys.canon.debug";
+    public static final String CANON_HELP = "com.tracker.fieldbook.preferences.keys.canon.help";
+    public static final String CANON_CAMERA_PREVIEW = "com.fieldbook.tracker.traits.camera.canon.PREVIEW";
+
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
     public static final String MLKIT_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.mlkit";
@@ -217,6 +228,21 @@ public class GeneralKeys {
 
     //categorical trait
     public static final String LABELVAL_CUSTOMIZE = "LABELVAL_CUSTOMIZE";
+
+    //camera traits
+    public static final String CAMERA_SYSTEM_PREVIEW = "com.fieldbook.tracker.traits.camera.SYSTEM_PREVIEW";
+
+    public static final String CAMERA_SYSTEM = "com.fieldbook.tracker.traits.camera.SYSTEM";
+
+    public static final String CAMERA_RESOLUTION = "com.fieldbook.tracker.traits.camera.RESOLUTION";
+
+    public static final String USB_CAMERA_PREVIEW = "com.fieldbook.tracker.traits.camera.usb.PREVIEW";
+
+    public static final String USB_CAMERA_RESOLUTION_INDEX = "com.fieldbook.tracker.traits.camera.USB_RESOLUTION_INDEX";
+
+    public static final String USB_CAMERA_AUTO_WHITE_BALANCE = "com.fieldbook.tracker.traits.camera.usb.AUTO_WHITE_BALANCE";
+
+    public static final String USB_CAMERA_AUTO_FOCUS = "com.fieldbook.tracker.traits.camera.usb.AUTO_FOCUS";
 
     //tts
     public static final String TTS_LANGUAGE_ENABLED = "TTS_LANGUAGE_ENABLED";

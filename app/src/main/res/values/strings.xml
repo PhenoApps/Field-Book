@@ -289,6 +289,7 @@
     <string name="traits_create_true">True</string>
     <string name="traits_create_false">False</string>
     <string name="traits_create_categories_text">Use / to separate categories</string>
+    <string name="traits_create_camera">Camera</string>
 
     <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
     <string name="traits_create_warning_duplicate">Trait already exists</string>
@@ -1202,4 +1203,46 @@
     <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
     <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
 
+    <!-- base camera strings -->
+    <string name="trait_camera_connect_content_description">Starts a device connection.</string>
+    <string name="trait_camera_preview_content_description">This previews the camera\'s display.</string>
+    <string name="trait_camera_capture_content_description">Capture a photo</string>
+    <string name="delete_local_photo">Delete Photo</string>
+    <string name="trait_system_photo_settings_title">System Photo Settings</string>
+    <string name="trait_photos_no_settings">This trait has no settings.</string>
+    <string name="view_trait_photo_settings_preview_title">Preview</string>
+    <string name="view_trait_photo_settings_resolution_title">Target Resolution</string>
+    <string name="view_trait_photo_settings_system_title">System Camera</string>
+    <string name="trait_name_alt_photo_system">System</string>
+    <string name="trait_name_alt_usb">USB</string>
+    <string name="view_trait_photo_settings_camera_custom">Default</string>
+    <string name="view_trait_photo_settings_camera_system">Android</string>
+    <string name="view_trait_photo_settings_camera_choice_description">Choose between the default Field Book camera and the Android camera app.</string>
+
+    <!-- usb camera trait -->
+    <string name="usb_camera_resolution_options_title">Supported Resolutions</string>
+    <string name="usb_camera_plug_in_camera">Please plug in a UVC compatible web cam.</string>
+    <string name="view_trait_photo_settings_white_balance_title">Auto White Balance</string>
+    <string name="view_trait_photo_settings_auto_focus_title">Auto Focus</string>
+
+    <!-- gopro -->
+    <string name="dialog_go_pro_wait_stream_title">Waiting for live preview</string>
+    <string name="dialog_go_pro_wait_stream_message">This may take a minute.</string>
+
+    <!-- canon camera strings -->
+    <string name="canon_frag_connect_btn_content_description">shutter button</string>
+    <string name="traits_format_canon">Canon</string>
+    <string name="pref_canon_ip_title">Canon IP Address</string>
+    <string name="pref_canon_port_title">Canon Port</string>
+    <string name="preferences_canon_title">Canon</string>
+    <string name="pref_canon_ssid_summary">This name is used to find your device\'s AP. This name must be contained within the actual SSID.</string>
+    <string name="pref_canon_title">SSID Name</string>
+    <string name="pref_canon_ip_summary">This is the ip displayed on your camera when setting up the AP.</string>
+    <string name="pref_canon_port_summary">This is the port displayed on your camera when setting up the AP.</string>
+    <string name="pref_canon_help_title">Help</string>
+    <string name="pref_canon_help_summary">This will open a URL to the FieldBook Canon manual.</string>
+    <string name="pref_canon_debug_title">Debug</string>
+    <string name="pref_canon_debug_summary">A preferences for developers to monitor device output.</string>
+    <string name="trait_usb_photo_settings_title">USB Photo Settings</string>
+    <string name="canon_trait_settings_title">Canon Settings</string>
 </resources>

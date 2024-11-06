@@ -5,7 +5,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.database.*
@@ -13,7 +12,6 @@ import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sLocalImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sNonImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sRemoteImageObservationsViewName
-import com.fieldbook.tracker.database.dao.ObservationVariableDao.Companion.getTraitByName
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import org.threeten.bp.OffsetDateTime
@@ -563,6 +561,11 @@ class ObservationDao {
                 )
             }
 
+        fun delete(id: String) = withDatabase { db ->
+            db.delete(Observation.tableName,
+                "${Observation.PK} = ?", arrayOf(id))
+        }
+
         fun updateObservationModels(observations: List<ObservationModel>) = withDatabase { db ->
 
             observations.forEach {
@@ -617,7 +620,10 @@ class ObservationDao {
         fun updateObservation(observation: ObservationModel) = withDatabase { db ->
 
             db.update(Observation.tableName,
-                contentValuesOf(*observation.map.map { it.key to it.value }.toTypedArray()),
+                (contentValuesOf(*observation.map.map { it.key to it.value }.toTypedArray())
+                    .also {
+                        it.put("value", observation.value)
+                    }),
                 "internal_id_observation = ?",
                 arrayOf(observation.internal_id_observation.toString())
                 )

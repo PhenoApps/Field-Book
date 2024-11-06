@@ -39,7 +39,6 @@ import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.NmeaParser
-import com.fieldbook.tracker.offbeat.traits.formats.Formats
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.impactZoneSearch
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.lowPassFilter

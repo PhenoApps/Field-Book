@@ -1,30 +1,35 @@
 package com.fieldbook.tracker.activities
 
 import android.os.Bundle
-import android.util.Log
 import android.util.Size
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.camera.core.CameraSelector
+import androidx.annotation.OptIn
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import androidx.camera.core.Camera
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
 import com.fieldbook.tracker.R
-import com.google.common.util.concurrent.ListenableFuture
+import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.AbstractCameraTrait
+import com.fieldbook.tracker.utilities.CameraXFacade
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
-import java.util.concurrent.Executors
+import java.util.concurrent.ExecutorService
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class CameraActivity : ThemedActivity() {
 
-    private lateinit var cameraSelector: CameraSelector
-    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
+    @Inject
+    lateinit var cameraXFacade: CameraXFacade
+
     private lateinit var previewView: PreviewView
     private lateinit var titleTextView: TextView
     private lateinit var shutterButton: ImageButton
+
+    private var supportedResolutions: List<Size> = listOf()
 
     companion object {
 
@@ -38,21 +43,27 @@ class CameraActivity : ThemedActivity() {
 
         setContentView(R.layout.activity_camera)
 
-        cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-
         previewView = findViewById(R.id.act_camera_pv)
+
+        previewView.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+
         titleTextView = findViewById(R.id.act_camera_title_tv)
-        shutterButton = findViewById(R.id.act_camera_shutter_btn)
+        shutterButton = findViewById(R.id.camerax_capture_btn)
 
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            bindLifecycle(cameraProvider)
-        }, ContextCompat.getMainExecutor(this))
-
-        cameraSelector =
-            CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
+        cameraXFacade.await(this) {
+            bindCameraForInformation()
+        }
 
         setupCameraTitleView()
+    }
+
+    private fun onSettingsChanged() {
+
+        cameraXFacade.unbind()
+
+        cameraXFacade.await(this) {
+            bindLifecycle()
+        }
     }
 
     private fun setupCameraTitleView() {
@@ -64,45 +75,67 @@ class CameraActivity : ThemedActivity() {
         }
     }
 
-    private fun bindLifecycle(cameraProvider: ProcessCameraProvider) {
+    @OptIn(ExperimentalCamera2Interop::class)
+    private fun bindCameraForInformation() {
 
-        val preview = Preview.Builder()
-            .setTargetResolution(Size(1080, 1920))
-            .setTargetRotation(previewView.display?.rotation ?: 0)
-            .build()
+        cameraXFacade.bindIdentity { _, sizes ->
 
-        val cameraSelector = CameraSelector.Builder()
-            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-            .build()
+            supportedResolutions = sizes
 
-        val imageCapture = ImageCapture.Builder()
-            .build()
-
-        previewView.display?.rotation?.let { rot ->
-            imageCapture.targetRotation = rot
         }
 
-        val cameraExecutor = Executors.newSingleThreadExecutor()
+        //trigger ui update based on preferences
+        onSettingsChanged()
 
-        preview.setSurfaceProvider(previewView.surfaceProvider)
+        bindLifecycle()
+    }
+
+    private fun getSupportedResolutionByPreferences(): Size? {
+
+        val supportedResolutionPreferredIndex = prefs.getInt(
+            GeneralKeys.CAMERA_RESOLUTION,
+            0
+        )
+
+        var resolution: Size? = null
+
+        if (supportedResolutions.isNotEmpty() && supportedResolutionPreferredIndex < supportedResolutions.size) {
+
+            resolution = supportedResolutions[supportedResolutionPreferredIndex]
+
+        }
+
+        return resolution
+    }
+
+    private fun bindLifecycle() {
 
         try {
 
-            val camera = cameraProvider.bindToLifecycle(
-                this as LifecycleOwner,
-                cameraSelector,
-                preview,
-                imageCapture
-            )
+            val resolution = getSupportedResolutionByPreferences()
 
-            Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
+            cameraXFacade.bindPreview(
+                previewView, resolution
+            ) { camera, executor, capture ->
+
+                setupCaptureUi(camera, executor, capture)
+            }
+
+        } catch (_: IllegalArgumentException) {
+
+        }
+    }
+
+    private fun setupCaptureUi(camera: Camera, executor: ExecutorService, capture: ImageCapture) {
+
+        try {
 
             shutterButton.setOnClickListener {
 
-                val file = File(cacheDir, "temp.jpg")
+                val file = File(cacheDir, AbstractCameraTrait.TEMPORARY_IMAGE_NAME)
 
                 val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
-                imageCapture.takePicture(outputFileOptions, cameraExecutor,
+                capture.takePicture(outputFileOptions, executor,
                     object : ImageCapture.OnImageSavedCallback {
                         override fun onError(error: ImageCaptureException) {}
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {

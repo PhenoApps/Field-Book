@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.fieldbook.tracker.traits.CameraTrait xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/camera_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:visibility="gone"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:visibility="visible">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/camera_fragment_cv">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:orientation="horizontal"
+            tools:listitem="@layout/list_item_image"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:id="@+id/camera_fragment_rv"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/camera_fragment_capture_btn"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintHorizontal_bias="0.5"/>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="@dimen/camera_preview_landscape_width"
+            android:layout_height="@dimen/camera_preview_landscape_height"
+            android:id="@+id/trait_camera_cv"
+            android:visibility="gone"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/camera_fragment_rv"
+            app:layout_constraintBottom_toTopOf="@id/camera_fragment_capture_btn">
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/trait_camera_iv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                tools:src="@raw/chip"
+                android:contentDescription="@string/trait_camera_preview_content_description" />
+
+            <androidx.media3.ui.PlayerView
+                android:visibility="gone"
+                android:id="@+id/trait_camera_spv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:keepScreenOn="true"
+                android:minHeight="256dp"
+                app:resize_mode="zoom"
+                app:show_buffering="when_playing"
+                app:show_shuffle_button="true"
+                app:use_controller="false"/>
+
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
+            android:contentDescription="@string/trait_camera_connect_content_description"
+            android:src="@drawable/ic_connection"
+            android:id="@+id/camera_fragment_connect_btn"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
+            android:layout_margin="8dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/camera_fragment_rv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.SmallTraitButtons"
+            android:id="@+id/camera_fragment_settings_btn"
+            android:layout_width="@dimen/fb_trait_fab_size_small"
+            android:layout_height="@dimen/fb_trait_fab_size_small"
+            android:layout_margin="8dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:src="@drawable/ic_nav_drawer_settings"
+            app:layout_constraintTop_toTopOf="@id/camera_fragment_capture_btn"
+            app:layout_constraintEnd_toStartOf="@id/camera_fragment_capture_btn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/camera_fragment_capture_btn"
+            android:contentDescription="@string/trait_camera_capture_content_description"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/FloatingActionButtonStyle.TraitButtons"
+            android:id="@+id/camera_fragment_capture_btn"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
+            android:layout_margin="8dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:src="@drawable/camera_24px"
+            app:layout_constraintTop_toBottomOf="@id/trait_camera_cv"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:contentDescription="@string/trait_camera_capture_content_description" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.fieldbook.tracker.traits.CameraTrait>

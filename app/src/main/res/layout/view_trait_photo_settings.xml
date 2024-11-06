@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/view_trait_photo_settings_camera_choice_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/view_trait_photo_settings_camera_choice_description"
+        android:layout_margin="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/view_trait_photo_settings_camera_rg"
+        android:layout_margin="16dp"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_trait_photo_settings_camera_choice_tv">
+        <RadioButton
+            android:id="@+id/view_trait_photo_settings_camera_custom_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/view_trait_photo_settings_camera_custom"/>
+        <RadioButton
+            android:id="@+id/view_trait_photo_settings_camera_system_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/view_trait_photo_settings_camera_system"/>
+    </RadioGroup>
+
+    <CheckBox
+        android:id="@+id/view_trait_photo_preview_cb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/view_trait_photo_settings_preview_title"
+        android:layout_margin="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_trait_photo_settings_camera_rg" />
+
+    <TextView
+        android:id="@+id/view_trait_photo_settings_resolution_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/view_trait_photo_settings_resolution_title"
+        android:layout_margin="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_trait_photo_preview_cb" />
+
+    <FrameLayout
+        android:id="@+id/view_trait_photo_settings_resolution_fl"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        app:layout_constraintHeight_percent="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_trait_photo_settings_resolution_tv"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_margin="16dp"
+            android:background="@drawable/cell">
+
+            <RadioGroup
+                android:layout_margin="16dp"
+                android:id="@+id/view_trait_photo_settings_resolution_rg"
+                android:paddingBottom="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </ScrollView>
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
