@@ -3,6 +3,7 @@ package com.fieldbook.tracker.dialogs;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -280,14 +281,16 @@ public class StatisticsCalendarFragment extends Fragment implements DateRangePic
      * @return ID of the color
      */
     private int getColorForObservations(int observations) {
+        TypedValue colorValue = new TypedValue();
         if (observations == THRESHOLD_LOW) {
-            return ContextCompat.getColor(requireContext(),R.color.heatmap_color_low);
+            getActivity().getTheme().resolveAttribute(R.attr.fb_heatmap_color_low, colorValue, true);
         } else if (observations < THRESHOLD_MEDIUM) {
-            return ContextCompat.getColor(requireContext(),R.color.heatmap_color_medium);
+            getActivity().getTheme().resolveAttribute(R.attr.fb_heatmap_color_medium, colorValue, true);
         } else if (observations < THRESHOLD_HIGH) {
-            return ContextCompat.getColor(requireContext(),R.color.heatmap_color_high);
+            getActivity().getTheme().resolveAttribute(R.attr.fb_heatmap_color_high, colorValue, true);
         } else {
-            return ContextCompat.getColor(requireContext(),R.color.heatmap_color_max);
+            getActivity().getTheme().resolveAttribute(R.attr.fb_heatmap_color_max, colorValue, true);
         }
+        return colorValue.data;
     }
 }
