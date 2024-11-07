@@ -23,6 +23,10 @@ import com.fieldbook.tracker.activities.StatisticsActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.StatisticObject;
+import com.fieldbook.tracker.traits.formats.Formats;
+import com.fieldbook.tracker.traits.formats.TraitFormat;
+import com.fieldbook.tracker.traits.formats.coders.StringCoder;
+import com.fieldbook.tracker.traits.formats.presenters.ValuePresenter;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FileUtil;
 
@@ -123,8 +127,10 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             }
             dateObjects.add(dateObject);
 
-            if (observation.getObservation_variable_field_book_format().equals("photo")) {
-                imageCount++;
+            if (observation.getObservation_variable_field_book_format() != null) {
+                if (Formats.Companion.isCameraTrait(observation.getObservation_variable_field_book_format())) {
+                    imageCount++;
+                }
             }
 
             String date = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault()).format(dateObject);
@@ -188,12 +194,30 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         for (ObservationModel observation : observations) {
             if (observation.getObservation_unit_id().equals(unitWithMostObservations)) {
                 final String traitFormat = observation.getObservation_variable_field_book_format();
-                if (traitFormat.equals("categorical") || traitFormat.equals("multicat") || traitFormat.equals("qualitative"))
-                    unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + decodeCategorical(observation.getValue()));
-                else if (traitFormat.equals("photo"))
-                    unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + "<image>");
-                else
-                    unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + observation.getValue());
+
+                if (traitFormat != null) {
+
+                    TraitFormat formats = Formats.Companion.findTrait(traitFormat);
+
+                    Object valueModel = observation.getValue();
+
+                    if (formats instanceof StringCoder) {
+
+                        valueModel = ((StringCoder) formats).decode(valueModel.toString());
+
+                    }
+
+                    if (formats instanceof ValuePresenter) {
+
+                        unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + ((ValuePresenter) formats).represent(originActivity, valueModel));
+
+                    } else {
+
+                        unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + observation.getValue());
+
+                    }
+
+                }
             }
         }
 
