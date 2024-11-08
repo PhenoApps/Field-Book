@@ -137,7 +137,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
         exportSourceList.adapter = adapter
 
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
         builder.setTitle(R.string.export_dialog_title)
             .setView(layout)
             .setPositiveButton(context.getString(R.string.dialog_cancel)) { dialog, _ -> dialog.dismiss() }
@@ -224,7 +224,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         defaultFileString = "${timeStamp.format(Calendar.getInstance().time)}_$defaultFieldString"
         fileName.setText(defaultFileString)
 
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
         builder.setTitle(R.string.settings_export)
             .setCancelable(true)
             .setView(layout)
@@ -306,7 +306,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             //show a warning if table is selected and repeated measures is enabled
             if (checkTable.isChecked && repeatedMeasuresEnabled) {
 
-                AlertDialog.Builder(context)
+                AlertDialog.Builder(context, R.style.AppAlertDialog)
                     .setTitle(R.string.export_util_repeated_measures_table_warning_title)
                     .setMessage(R.string.export_util_repeated_measures_table_warning_message)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
