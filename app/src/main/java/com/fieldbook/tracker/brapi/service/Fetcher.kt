@@ -76,7 +76,7 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
                         }) { e ->
 
-                            this@callbackFlow.close(e?.cause)
+                            e?.printStackTrace()
 
                         })
                     }
@@ -84,7 +84,9 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
             }) { e ->
 
-                this@callbackFlow.close(e?.cause)
+                e?.printStackTrace()
+
+                cancel(e?.message ?: "Unknown error", e)
 
             }
 

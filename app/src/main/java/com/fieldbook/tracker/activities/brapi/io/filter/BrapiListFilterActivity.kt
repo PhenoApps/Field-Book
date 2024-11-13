@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterTypeAdapter
 import com.fieldbook.tracker.activities.brapi.io.BrapiStudyImportActivity
@@ -32,7 +33,9 @@ import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.brapi.client.v2.model.queryParams.core.StudyQueryParams
@@ -75,14 +78,14 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
      */
     abstract val filterName: String
 
-    abstract fun List<TrialStudyModel>.mapToUiModel(): List<CheckboxListAdapter.Model>
+    abstract fun BrapiCacheModel.mapToUiModel(): List<CheckboxListAdapter.Model>
 
     /**
      * By default pass the same list.
      * Only affects data in the study list activity, uses shared preferences saved from other activities
      * to filter the list
      */
-    open fun List<TrialStudyModel>.filterByPreferences(): List<TrialStudyModel> = this
+    open fun BrapiCacheModel.filterByPreferences(): BrapiCacheModel = this
 
     open fun List<CheckboxListAdapter.Model>.filterBySearchTextPreferences(): List<CheckboxListAdapter.Model> = this
 
@@ -130,7 +133,6 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             isCheckable = false
         }
 
-    @OptIn(ExperimentalBadgeUtils::class)
     private fun resetChipsUi() {
 
         if (filterer.isEmpty()) {
@@ -204,7 +206,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     }
 
     open fun hasData(): Boolean {
-        return BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity).isNotEmpty()
+        return BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity).studies.isNotEmpty()
     }
 
     fun restoreModels() {
@@ -227,32 +229,30 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     open suspend fun loadData() {
 
-        toggleProgressBar(View.VISIBLE)
+        try {
+            toggleProgressBar(View.VISIBLE)
 
-        fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_trials)
-        progressBar.visibility = View.VISIBLE
+            progressBar.visibility = View.VISIBLE
 
-        queryTrials()
-        queryTrialsJob?.join()
+            queryTrialsJob = queryTrials()
+            queryTrialsJob?.join()
 
-        fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_studies)
-        progressBar.visibility = View.VISIBLE
-        progressBar.progress = 0
+            progressBar.visibility = View.VISIBLE
+            progressBar.progress = 0
 
-        queryStudiesJob = queryStudies()
-        queryStudiesJob?.join()
+            queryStudiesJob = queryStudies()
+            queryStudiesJob?.join()
 
-        fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_complete)
+            toggleProgressBar(View.INVISIBLE)
 
-        toggleProgressBar(View.INVISIBLE)
+            restoreModels()
 
-        restoreModels()
-
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private suspend fun queryStudies() = launch(Dispatchers.IO) {
-
-        var count = 0
 
         val modelCache = arrayListOf<BrAPIStudy>()
 
@@ -265,42 +265,21 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
             .collect {
 
-            var (totalCount, models) = it as Pair<*, *>
-            totalCount = totalCount as Int
-            models = models as List<*>
-            models = models.map { m -> m as BrAPIStudy }
+                var (totalCount, models) = it as Pair<*, *>
+                totalCount = totalCount as Int
+                models = models as List<*>
+                models = models.map { m -> m as BrAPIStudy }
+                modelCache.addAll(models)
 
-            count += (models as List<*>).size
-
-            modelCache.addAll(models)
-
-                //TODO clean this up
-//            val uiModels = models.map { m ->
-//                CheckboxListAdapter.Model(
-//                    checked = false,
-//                    id = m.studyDbId,
-//                    label = m.studyName,
-//                    subLabel = m.locationName ?: ""
-//                )
-//            }
-//
-//            uiModels.sortedBy { m -> m.id }.forEach { model ->
-//                if (model !in cache) {
-//                    cache.add(model)
-//                }
-//            }
-//
-//            submitAdapterItems(cache)
-
-            withContext(Dispatchers.Main) {
-                setProgress(count, totalCount)
-                if (count == totalCount || totalCount < 512) {
-                    progressBar.visibility = View.GONE
-                    fetchDescriptionTv.visibility = View.GONE
-                    saveCacheToFile(modelCache as List<BrAPIStudy>, trialModels)
-                    queryStudiesJob?.cancel()
+                withContext(Dispatchers.Main) {
+                    setProgress(modelCache.size, totalCount)
+                    if (modelCache.size == totalCount || totalCount < 512) {
+                        progressBar.visibility = View.GONE
+                        fetchDescriptionTv.visibility = View.GONE
+                        saveCacheToFile(modelCache as List<BrAPIStudy>, trialModels)
+                        queryStudiesJob?.cancel()
+                    }
                 }
-            }
         }
     }
 
@@ -311,47 +290,36 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 getString(R.string.act_brapi_list_api_exception),
                 Toast.LENGTH_SHORT
             ).show()
+            finish()
         }
-        finish()
     }
 
-    private suspend fun queryTrials() {
+    private suspend fun queryTrials() = async(Dispatchers.IO) {
 
-        queryTrialsJob = async(Dispatchers.IO) {
+        (brapiService as BrAPIServiceV2).trialService.fetchAll(TrialQueryParams())
 
-            var count = 0
+            .catch {
+                onApiException()
+                cancel()
+                queryTrialsJob?.cancel()
+            }
+            .collect { it ->
 
-            (brapiService as BrAPIServiceV2).trialService.fetchAll(TrialQueryParams())
-                .catch {
-                    onApiException()
+                var (total, models) = it as Pair<*, *>
+                total = total as Int
+                models = models as List<*>
+                models = models.map { it as BrAPITrial }
+
+                trialModels.addAll(models)
+
+                withContext(Dispatchers.Main) {
+                    setProgress(trialModels.size, total)
+                }
+
+                if (total == trialModels.size || total < 512) {
                     queryTrialsJob?.cancel()
                 }
-                .collect { it ->
-
-                    var (total, models) = it as Pair<*, *>
-                    total = total as Int
-                    models = models as List<*>
-                    models = models.map { it as BrAPITrial }
-
-                    models.forEach { model ->
-                        if (model !in trialModels) {
-                            trialModels.add(model)
-
-                            Log.d("TRIAL", model.trialName)
-
-                            count++
-                        }
-                    }
-
-                    withContext(Dispatchers.Main) {
-                        setProgress(count, total)
-                    }
-
-                    if (total == trialModels.size || total < 512) {
-                        queryTrialsJob?.cancel()
-                    }
-                }
-        }
+            }
     }
 
     override fun onFinishButtonClicked() {
@@ -398,7 +366,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         val models = arrayListOf<TrialStudyModel>()
 
         val checkedIds = cache.filter { it.checked }.map { it.id }
-        models.addAll(BrapiFilterCache.getStoredModels(this).filter {
+        models.addAll(BrapiFilterCache.getStoredModels(this).studies.filter {
             it.study.studyDbId in checkedIds
         })
 
@@ -421,7 +389,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     protected fun getIds(filterName: String) =
         BrapiFilterTypeAdapter.toModelList(prefs, "$filterer$filterName").map { it.id }
 
-    private fun loadStorageItems(models: List<TrialStudyModel>) {
+    private fun loadStorageItems(models: BrapiCacheModel) {
 
         cache.clear()
 
@@ -472,6 +440,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         submitAdapterItems(cache)
 
+        resetFilterCountDisplay()
+
         restoreModels()
     }
 
@@ -492,7 +462,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             model
         }
 
-        BrapiFilterCache.saveToStorage(this, studyTrials)
+        BrapiFilterCache.saveStudyTrialsToFile(this, studyTrials)
     }
 
     override fun onResume() {

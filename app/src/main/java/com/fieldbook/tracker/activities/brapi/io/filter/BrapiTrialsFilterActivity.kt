@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities.brapi.io.filter
 import android.content.Context
 import android.content.Intent
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
 import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import org.brapi.v2.model.core.BrAPITrial
@@ -22,15 +23,16 @@ open class BrapiTrialsFilterActivity(override val titleResId: Int = R.string.bra
     override val filterName: String
         get() = FILTER_NAME
 
-    override fun List<TrialStudyModel>.filterByPreferences(): List<TrialStudyModel> {
+    override fun BrapiCacheModel.filterByPreferences(): BrapiCacheModel {
 
         val programDbIds = getIds(BrapiProgramFilterActivity.FILTER_NAME)
 
-        return this
-            .filter { if (programDbIds.isNotEmpty()) it.programDbId in programDbIds else true }
+        return this.also {
+            it.studies = it.studies.filter { if (programDbIds.isNotEmpty()) it.programDbId in programDbIds else true }
+        }
     }
 
-    override fun List<TrialStudyModel>.mapToUiModel() = mapNotNull { model ->
+    override fun BrapiCacheModel.mapToUiModel() = studies.mapNotNull { model ->
 
         if (model.trialDbId != null && model.trialName != null) {
             CheckboxListAdapter.Model(

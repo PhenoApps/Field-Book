@@ -8,6 +8,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiProgramFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity
@@ -40,18 +41,22 @@ class BrapiStudyFilterActivity(
         CROP
     }
 
-    override fun List<TrialStudyModel>.filterByPreferences(): List<TrialStudyModel> {
+    override fun BrapiCacheModel.filterByPreferences(): BrapiCacheModel {
 
-        val programDbIds = getIds(BrapiProgramFilterActivity.FILTER_NAME)
-        val trialDbIds = getIds(BrapiTrialsFilterActivity.FILTER_NAME)
-        val seasonDbIds = getIds(BrapiSeasonsFilterActivity.FILTER_NAME)
-        val commonCropNames = getIds(BrapiCropsFilterActivity.FILTER_NAME)
+        val programDbIds = getIds("${defaultRootFilterKey}${BrapiProgramFilterActivity.FILTER_NAME}")
+        val trialDbIds = getIds("${defaultRootFilterKey}${BrapiTrialsFilterActivity.FILTER_NAME}")
+        val seasonDbIds = getIds("${defaultRootFilterKey}${BrapiSeasonsFilterActivity.FILTER_NAME}")
+        val commonCropNames = getIds("${defaultRootFilterKey}${BrapiCropsFilterActivity.FILTER_NAME}")
 
-        return this
-            .filter { if (programDbIds.isNotEmpty()) it.programDbId in programDbIds else true }
-            .filter { if (trialDbIds.isNotEmpty()) it.trialDbId in trialDbIds else true }
-            .filter { if (seasonDbIds.isNotEmpty()) it.study.seasons.any { s -> s in seasonDbIds } else true }
-            .filter { if (commonCropNames.isNotEmpty()) it.study.commonCropName in commonCropNames else true }
+        val result = this.also {
+            it.studies =
+                it.studies.filter { if (programDbIds.isNotEmpty()) it.programDbId in programDbIds else true }
+                    .filter { if (trialDbIds.isNotEmpty()) it.trialDbId in trialDbIds else true }
+                    .filter { if (seasonDbIds.isNotEmpty()) it.study.seasons.any { s -> s in seasonDbIds } else true }
+                    .filter { if (commonCropNames.isNotEmpty()) it.study.commonCropName in commonCropNames else true }
+        }
+
+        return result
     }
 
     override fun List<CheckboxListAdapter.Model>.filterBySearchTextPreferences(): List<CheckboxListAdapter.Model> {
@@ -92,7 +97,7 @@ class BrapiStudyFilterActivity(
         }
     }
 
-    override fun List<TrialStudyModel>.mapToUiModel() = map { model ->
+    override fun BrapiCacheModel.mapToUiModel() = studies.map { model ->
         CheckboxListAdapter.Model(
             checked = false,
             id = model.study.studyDbId,
@@ -115,6 +120,8 @@ class BrapiStudyFilterActivity(
         }
 
         importTextView.text = getString(if (isFilterMode) R.string.act_brapi_study_filter else R.string.act_brapi_filter_import)
+
+        fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_studies)
 
     }
 

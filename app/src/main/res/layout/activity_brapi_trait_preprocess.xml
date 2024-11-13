@@ -26,6 +26,17 @@
         tools:listitem="@layout/list_item_brapi_trait_format_selector"
         android:id="@+id/act_brapi_trait_import_rv"/>
 
+    <ProgressBar
+        android:visibility="gone"
+        android:id="@+id/act_brapi_trait_import_pb"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:indeterminate="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
     <com.google.android.material.button.MaterialButton
         android:layout_width="0dp"
         android:layout_height="wrap_content"

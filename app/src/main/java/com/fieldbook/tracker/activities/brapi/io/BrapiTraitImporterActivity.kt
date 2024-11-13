@@ -4,11 +4,15 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
+import com.fieldbook.tracker.activities.brapi.io.BrapiStudyImportActivity.Companion.EXTRA_PROGRAM_DB_ID
+import com.fieldbook.tracker.activities.brapi.io.BrapiStudyImportActivity.Companion.EXTRA_STUDY_DB_IDS
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.mapper.toTraitObject
 import com.fieldbook.tracker.adapters.BrapiTraitImportAdapter
@@ -38,6 +42,8 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
 
     companion object {
 
+        const val EXTRA_TRAIT_DB_ID = "observationVariableDbId"
+
         fun getIntent(activity: Activity): Intent {
             return Intent(activity, BrapiTraitImporterActivity::class.java)
         }
@@ -46,25 +52,10 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
     @Inject
     lateinit var database: DataHelper
 
-    private val brapiService by lazy {
-        BrAPIServiceFactory.getBrAPIService(this).also { service ->
-            if (service is BrAPIServiceV1) {
-                launch(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@BrapiTraitImporterActivity,
-                        getString(R.string.brapi_v1_is_not_compatible),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    setResult(Activity.RESULT_CANCELED)
-                    finish()
-                }
-            }
-        }
-    }
-
     private var toolbar: Toolbar? = null
     private var recyclerView: androidx.recyclerview.widget.RecyclerView? = null
     private var finishButton: MaterialButton? = null
+    private var progressBar: ProgressBar? = null
 
     private var selectId: String? = null
 
@@ -77,35 +68,50 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
         setContentView(R.layout.activity_brapi_trait_preprocess)
         toolbar = findViewById(R.id.act_brapi_trait_import_tb)
         recyclerView = findViewById(R.id.act_brapi_trait_import_rv)
+        progressBar = findViewById(R.id.act_brapi_trait_import_pb)
 
         cache = BrapiFilterTypeAdapter.toModelList(prefs, BrapiTraitFilterActivity.FILTER_NAME)
 
         recyclerView?.adapter = BrapiTraitImportAdapter(this).also {
             it.submitList(cache)
-            //it.notifyDataSetChanged()
         }
 
         finishButton = findViewById(R.id.act_brapi_trait_import_finish_button)
 
+        setupToolbar()
+
+        parseIntentExtras()
+
+    }
+
+    private fun parseIntentExtras() {
+        val dbIds = intent.getStringArrayListExtra(EXTRA_TRAIT_DB_ID)
+        if (dbIds == null) {
+            setResult(Activity.RESULT_CANCELED)
+            finish()
+        }
+
         finishButton?.setOnClickListener {
 
-            //TODO show progress here, dismiss trait dialog when finish
-            BrapiFilterCache.getStoredModels(this).mapNotNull { it.variables }.flatten().forEach { trait ->
+            recyclerView?.visibility = View.GONE
+            finishButton?.visibility = View.GONE
+            progressBar?.visibility = View.VISIBLE
+
+            BrapiFilterCache.getStoredModels(this).variables.values.forEach { trait ->
                 if (varUpdates[trait.observationVariableDbId] == null) {
                     varUpdates[trait.observationVariableDbId] = trait.toTraitObject(this)
                 }
             }
 
             varUpdates.forEach { (t, u) ->
-                database.insertTraits(u)
+                if (t in dbIds!!) {
+                    database.insertTraits(u)
+                }
             }
 
             setResult(Activity.RESULT_OK)
             finish()
         }
-
-        setupToolbar()
-
     }
 
     private fun setupToolbar() {
@@ -139,10 +145,10 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
         selectId = id
 
         val traitObject =
-            BrapiFilterCache.getStoredModels(this).mapNotNull { it.variables }.flatten()
+            BrapiFilterCache.getStoredModels(this).variables.values
                 .find { it.observationVariableDbId == id }?.toTraitObject(this)
 
-       // if (traitObject?.format == TextTraitLayout.type) {
+        if (traitObject?.format == TextTraitLayout.type) {
 
             val traitDialog = NewTraitDialog(this)
 
@@ -153,7 +159,7 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
             traitDialog.setTraitObject(traitObject)
 
             traitDialog.show(supportFragmentManager, "TraitDialogChooser")
-       // }
+        }
     }
 
     override fun onTraitObjectUpdated(traitObject: TraitObject) {

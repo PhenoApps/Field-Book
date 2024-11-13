@@ -8,6 +8,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSubFilterListActivity
@@ -51,16 +52,27 @@ class BrapiTraitFilterActivity(
 
     private var queried = false
 
-    override fun List<TrialStudyModel>.filterByPreferences(): List<TrialStudyModel> {
+    override fun BrapiCacheModel.filterByPreferences(): BrapiCacheModel {
 
-        val studyDbIds = getIds(BrapiStudyFilterActivity.FILTER_NAME)
-        val trialDbIds = getIds(BrapiTrialsFilterActivity.FILTER_NAME)
-        val commonCropNames = getIds(BrapiCropsFilterActivity.FILTER_NAME)
+        val studyDbIds = getIds("${defaultRootFilterKey}${BrapiStudyFilterActivity.FILTER_NAME}")
+        val trialDbIds = getIds("${defaultRootFilterKey}${BrapiTrialsFilterActivity.FILTER_NAME}")
+        val commonCropNames = getIds("${defaultRootFilterKey}${BrapiCropsFilterActivity.FILTER_NAME}")
 
-        return this
+        val observationVariableIds = this.studies
             .filter { if (studyDbIds.isNotEmpty()) it.study.studyDbId in studyDbIds else true }
             .filter { if (trialDbIds.isNotEmpty()) it.trialDbId in trialDbIds else true }
-            .filter { if (commonCropNames.isNotEmpty()) it.study.commonCropName in commonCropNames else true }
+            .map { it.study.observationVariableDbIds ?: listOf() }.flatten()
+
+        println(observationVariableIds.size)
+        val filteredVars = this.variables.values
+            .filter { if (observationVariableIds.isNotEmpty()) it.observationVariableDbId in observationVariableIds else true }
+            .filter { if (commonCropNames.isNotEmpty()) it.commonCropName in commonCropNames else true}
+            .associateBy { it.observationVariableDbId }
+            .toMutableMap()
+
+        return this.also {
+            it.variables = filteredVars
+        }
     }
 
     override fun List<CheckboxListAdapter.Model>.filterBySearchTextPreferences(): List<CheckboxListAdapter.Model> {
@@ -101,8 +113,8 @@ class BrapiTraitFilterActivity(
         }
     }
 
-    override fun List<TrialStudyModel>.mapToUiModel() =
-        asSequence().filter { it?.variables != null }.flatMap { it.variables!! }
+    override fun BrapiCacheModel.mapToUiModel() =
+        variables.values
             .filter { it.observationVariableDbId != null }
             .map { model ->
                 CheckboxListAdapter.Model(
@@ -130,87 +142,82 @@ class BrapiTraitFilterActivity(
 
         importTextView.text = getString(R.string.act_brapi_filter_import)
 
+        fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_variables)
+
     }
 
     override fun onFinishButtonClicked() {
         saveFilter()
         BrapiTraitImporterActivity.getIntent(this).also {
-           intentLauncher.launch(it)
+           intentLauncher.launch(it.also {
+               it.putStringArrayListExtra(BrapiTraitImporterActivity.EXTRA_TRAIT_DB_ID,
+                   ArrayList(cache.filter { it.checked }.map { it.id })
+               )
+           })
         }
+        finish()
     }
 
     override suspend fun loadData() {
-        super.loadData()
+        //super.loadData()
 
-        withContext(Dispatchers.Main) {
-            fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_variables)
-            progressBar.visibility = View.VISIBLE
-            progressBar.progress = 0
+        if (!queried) {
+
+            withContext(Dispatchers.Main) {
+                fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_variables)
+                progressBar.visibility = View.VISIBLE
+                progressBar.progress = 0
+            }
+
+            queryVariablesJob = queryVariables()
+            queryVariablesJob?.join()
         }
-
-        queryVariablesJob = queryVariables()
-        queryVariablesJob?.join()
-
-        restoreModels()
-
-    }
-
-    private suspend fun queryVariablesForStudy(studyDbId: String? = null) {
-
-        var count = 0
-
-        (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
-            VariableQueryParams().also {
-                it.studyDbId(studyDbId)
-            }
-        )
-            .catch {
-                onApiException()
-                queryVariablesJob?.cancel()
-            }
-            .collect {
-
-                var (totalCount, models) = it as Pair<*, *>
-                totalCount = totalCount as Int
-                models = models as List<*>
-                models = models.map { m -> m as BrAPIObservationVariable }
-
-                count += (models as List<*>).size
-
-                withContext(Dispatchers.Main) {
-                    setProgress(count, totalCount)
-                    if (count == totalCount || totalCount < 512) {
-                        studyDbId?.let { id ->
-                            BrapiFilterCache.saveVariablesToStudy(
-                                this@BrapiTraitFilterActivity,
-                                id,
-                                models
-                            )
-                        }
-                        cancel()
-                    }
-                }
-            }
-    }
-
-    override fun hasData(): Boolean {
-        val storedModels = BrapiFilterCache.getStoredModels(this)
-        val anyNullVariables = storedModels.any { it.study.observationVariableDbIds.isNotEmpty() && it.variables == null }
-        return storedModels.isNotEmpty() || queried || anyNullVariables
     }
 
     private suspend fun queryVariables() = launch(Dispatchers.IO) {
 
-        queried = true
+        val variables = arrayListOf<BrAPIObservationVariable>()
 
-        val storedModels = BrapiFilterCache.getStoredModels(this@BrapiTraitFilterActivity)
-        if (storedModels.isEmpty()) {
-            queryVariablesForStudy()
-        } else storedModels.forEach {
-            if (it.variables == null) {
-                queryVariablesForStudy(it.study.studyDbId)
-            }
+        try {
+
+            var count = 0
+
+            queried = true
+
+            (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
+                VariableQueryParams()
+            )
+                .catch {
+                    onApiException()
+                    queryVariablesJob?.cancel()
+                }
+                .collect {
+
+                    var (totalCount, models) = it as Pair<*, *>
+                    totalCount = totalCount as Int
+                    models = models as List<*>
+                    models = models.map { m -> m as BrAPIObservationVariable }
+
+                    count += (models as List<*>).size
+
+                    variables.addAll(models)
+
+                    withContext(Dispatchers.Main) {
+                        setProgress(variables.size, totalCount)
+                        if (variables.size == totalCount || totalCount < 512) {
+                            BrapiFilterCache.saveVariables(this@BrapiTraitFilterActivity, variables)
+                            restoreModels()
+                            cancel()
+                        }
+                    }
+                }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+    }
+
+    override fun hasData(): Boolean {
+        return BrapiFilterCache.getStoredModels(this).variables.isNotEmpty() or queried
     }
 
     override fun showNextButton() = cache.any { it.checked }

@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities.brapi.io.filter
 import android.content.Context
 import android.content.Intent
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
 import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 
@@ -21,7 +22,7 @@ open class BrapiCropsFilterActivity(override val titleResId: Int = R.string.brap
     override val filterName: String
         get() = FILTER_NAME
 
-    override fun List<TrialStudyModel>.mapToUiModel() = map { model ->
+    override fun BrapiCacheModel.mapToUiModel() = studies.map { model ->
         CheckboxListAdapter.Model(
             checked = false,
             id = model.study.commonCropName,

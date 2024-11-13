@@ -161,7 +161,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 finish()
             } else {
 
-                studies.addAll(BrapiFilterCache.getStoredModels(this).map { it.study }
+                studies.addAll(BrapiFilterCache.getStoredModels(this).studies.map { it.study }
                     .filter { it.studyDbId in studyDbIds })
 
                 fetchStudyInfo(programDbId, studyDbIds)
@@ -479,7 +479,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         val studyModels = studyDbIds.map { id ->
 
             val studyName =
-                cacheModels.firstOrNull { it.study.studyDbId == id }?.study?.studyName ?: id
+                cacheModels.studies.firstOrNull { it.study.studyDbId == id }?.study?.studyName ?: id
 
             Model(
                 id = id,
@@ -509,7 +509,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             }
 
             override fun getLocation(id: String): String {
-               return cacheModels.firstOrNull { it.study.studyDbId == id }?.study?.locationName ?: ""
+               return cacheModels.studies.firstOrNull { it.study.studyDbId == id }?.study?.locationName ?: ""
             }
         })
 

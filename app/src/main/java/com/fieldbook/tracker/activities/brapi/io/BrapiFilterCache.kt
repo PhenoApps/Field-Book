@@ -24,40 +24,34 @@ class BrapiFilterCache {
             EVERY, DAILY, WEEKLY, NEVER
         }
 
-        fun saveVariablesToStudy(context: Context, studyDbId: String, models: List<BrAPIObservationVariable>) {
+        fun saveVariables(context: Context, models: List<BrAPIObservationVariable>) {
             saveToStorage(context,
-                getStoredModels(context).map {
-                    if (it.study.studyDbId == studyDbId) {
-                        it.copy(variables = models)
-                    } else {
-                        it
+                getStoredModels(context).also { storedModel ->
+                    models.forEach {
+                        storedModel.variables[it.observationVariableDbId] = it
                     }
-                }
-            )
-            saveToStorage(context,
-                getStoredModels(context).map {
-                    if (it.variables == null) {
-                        it.copy(variables = listOf())
-                    } else {
-                        it
-                    }
-                }
-            )
+                })
         }
 
         fun checkClearCache(context: Context) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             val currentTime = System.currentTimeMillis()
-            when (prefs.getString(GeneralKeys.BRAPI_INVALIDATE_CACHE_INTERVAL, CacheClearInterval.NEVER.ordinal.toString())) {
+            when (prefs.getString(
+                GeneralKeys.BRAPI_INVALIDATE_CACHE_INTERVAL,
+                CacheClearInterval.NEVER.ordinal.toString()
+            )) {
                 CacheClearInterval.EVERY.ordinal.toString() -> delete(context, false)
                 CacheClearInterval.DAILY.ordinal.toString() -> {
-                    val lastCleared = prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
+                    val lastCleared =
+                        prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
                     if (currentTime - lastCleared > 24 * 60 * 60 * 1000) {
                         delete(context, false)
                     }
                 }
+
                 CacheClearInterval.WEEKLY.ordinal.toString() -> {
-                    val lastCleared = prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
+                    val lastCleared =
+                        prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
                     if (currentTime - lastCleared > 7 * 24 * 60 * 60 * 1000) {
                         delete(context, false)
                     }
@@ -65,7 +59,7 @@ class BrapiFilterCache {
             }
         }
 
-        fun getStoredModels(context: Context): List<TrialStudyModel> {
+        fun getStoredModels(context: Context): BrapiCacheModel {
 
             context.externalCacheDir?.let { cacheDir ->
                 val file = File(cacheDir, JSON_FILE_NAME)
@@ -73,18 +67,22 @@ class BrapiFilterCache {
                     val json = file.readText()
                     return Gson().fromJson(
                         json,
-                        TypeToken.getParameterized(
-                            List::class.java,
-                            TrialStudyModel::class.java
-                        ).type
+                        getTypeToken()
                     )
                 }
             }
-            return listOf()
+            return BrapiCacheModel.empty()
         }
 
-        fun saveToStorage(context: Context, list: List<TrialStudyModel>) {
-            val json = Gson().toJson(list, getTypeToken())
+        fun saveStudyTrialsToFile(context: Context, models: List<TrialStudyModel>) {
+            saveToStorage(context,
+                getStoredModels(context).also { storedModel ->
+                    storedModel.studies = models
+                })
+        }
+
+        fun saveToStorage(context: Context, model: BrapiCacheModel) {
+            val json = Gson().toJson(model, getTypeToken())
             context.externalCacheDir?.let {
                 File(it, JSON_FILE_NAME).writeText(json)
             }
@@ -128,7 +126,7 @@ class BrapiFilterCache {
         }
 
         private fun getTypeToken(): Type =
-            TypeToken.getParameterized(List::class.java, TrialStudyModel::class.java).type
+            TypeToken.get(BrapiCacheModel::class.java).type
 
     }
 }
