@@ -9,12 +9,15 @@ import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterTypeAdapter
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiProgramFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity.Companion.filterByProgramAndTrial
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSubFilterListActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity
-import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity.Companion.filterByProgram
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.preferences.GeneralKeys
 import org.brapi.v2.model.core.BrAPIStudy
@@ -44,7 +47,7 @@ class BrapiStudyFilterActivity(
     override fun BrapiCacheModel.filterByPreferences(): BrapiCacheModel {
 
         val programDbIds = getIds("${defaultRootFilterKey}${BrapiProgramFilterActivity.FILTER_NAME}")
-        val trialDbIds = getIds("${defaultRootFilterKey}${BrapiTrialsFilterActivity.FILTER_NAME}")
+        val trialDbIds = getModels(BrapiTrialsFilterActivity.FILTER_NAME).filter { it.checked }.map { it.id }
         val seasonDbIds = getIds("${defaultRootFilterKey}${BrapiSeasonsFilterActivity.FILTER_NAME}")
         val commonCropNames = getIds("${defaultRootFilterKey}${BrapiCropsFilterActivity.FILTER_NAME}")
 
@@ -158,14 +161,37 @@ class BrapiStudyFilterActivity(
     }
 
     private fun showFilterChoiceDialog() {
+
+        val pids = BrapiFilterTypeAdapter.toModelList(prefs,
+            "${defaultRootFilterKey}${BrapiProgramFilterActivity.FILTER_NAME}")
+            .filter { it.checked }
+            .map { it.id }
+
+        val tids = BrapiFilterTypeAdapter.toModelList(prefs,
+            "${defaultRootFilterKey}${BrapiTrialsFilterActivity.FILTER_NAME}")
+            .filter { it.checked }
+            .map { it.id }
+
+        val seasons = BrapiFilterTypeAdapter.toModelList(prefs,
+            "${defaultRootFilterKey}${BrapiSeasonsFilterActivity.FILTER_NAME}")
+            .filter { it.checked }
+            .map { it.id }
+
+        val models = BrapiFilterCache.getStoredModels(this).studies
+        val programCount = models.mapNotNull { it.programDbId }.distinct().size
+        val trialCount = models.filterByProgram(pids, seasons).mapNotNull { it.trialDbId }.distinct().size
+        val seasonCount = models.filterByProgramAndTrial(pids, tids)
+            .map { it.study.seasons }.flatten().filterNotNull().distinct().size
+        val cropCount = models.map { it.study.commonCropName }.distinct().size
+
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_brapi_filter_choices_title)
             .setItems(
                 arrayOf(
-                    getString(R.string.brapi_filter_type_program),
-                    getString(R.string.brapi_filter_type_season),
-                    getString(R.string.brapi_filter_type_trial),
-                    getString(R.string.brapi_filter_type_crop)
+                    getString(R.string.brapi_filter_type_program_count, "$programCount"),
+                    getString(R.string.brapi_filter_type_season_count, "$seasonCount"),
+                    getString(R.string.brapi_filter_type_trial_count, "$trialCount"),
+                    getString(R.string.brapi_filter_type_crop_count, "$cropCount")
                 )
             ) { _, which ->
                 intentLauncher.launch(

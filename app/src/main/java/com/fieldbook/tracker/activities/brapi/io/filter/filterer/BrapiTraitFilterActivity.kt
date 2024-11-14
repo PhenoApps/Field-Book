@@ -11,10 +11,16 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterTypeAdapter
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSubFilterListActivity
 import com.fieldbook.tracker.activities.brapi.io.BrapiTraitImporterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiProgramFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity.Companion.filterByProgramAndTrial
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity.Companion.filterByProgram
+import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity.FilterChoice
 import com.fieldbook.tracker.activities.brapi.io.mapper.DataTypes
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
@@ -255,13 +261,25 @@ class BrapiTraitFilterActivity(
     }
 
     private fun showFilterChoiceDialog() {
+
+        val tids = BrapiFilterTypeAdapter.toModelList(prefs,
+            "${defaultRootFilterKey}${BrapiTrialsFilterActivity.FILTER_NAME}")
+            .filter { it.checked }
+            .map { it.id }
+
+        val models = BrapiFilterCache.getStoredModels(this).studies
+        val trialCount = models.mapNotNull { it.trialDbId }.distinct().size
+        val cropCount = models.mapNotNull { it.study.commonCropName }.distinct().size
+        val studyCount = models.filter { if (tids.isNotEmpty()) it.trialDbId in tids else true }
+            .mapNotNull { it.study.studyDbId }.distinct().size
+
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_brapi_filter_choices_title)
             .setItems(
                 arrayOf(
-                    getString(R.string.brapi_filter_type_trial),
-                    getString(R.string.brapi_filter_type_study),
-                    getString(R.string.brapi_filter_type_crop)
+                    getString(R.string.brapi_filter_type_trial_count, "$trialCount"),
+                    getString(R.string.brapi_filter_type_study_count, "$studyCount"),
+                    getString(R.string.brapi_filter_type_crop_count, "$cropCount")
                 )
             ) { _, which ->
                 intentLauncher.launch(

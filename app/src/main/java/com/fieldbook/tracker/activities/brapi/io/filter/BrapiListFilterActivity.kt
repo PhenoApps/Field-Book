@@ -395,8 +395,10 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         BrapiFilterTypeAdapter.saveFilter(prefs, getFilterKey(), selected)
     }
 
-    protected fun getIds(filterName: String) =
-        BrapiFilterTypeAdapter.toModelList(prefs, "$filterer$filterName").map { it.id }
+    protected fun getModels(filterName: String) =
+        BrapiFilterTypeAdapter.toModelList(prefs, "$filterer$filterName")
+
+    protected fun getIds(filterName: String) = getModels(filterName).map { it.id }
 
     private fun loadStorageItems(models: BrapiCacheModel) {
 

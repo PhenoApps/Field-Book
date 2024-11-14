@@ -18,18 +18,23 @@ open class BrapiTrialsFilterActivity(override val titleResId: Int = R.string.bra
         fun getIntent(context: Context): Intent {
             return Intent(context, BrapiTrialsFilterActivity::class.java)
         }
+
+        fun List<TrialStudyModel>.filterByProgram(programs: List<String>, seasons: List<String>): List<TrialStudyModel> {
+
+            return filter { if (programs.isNotEmpty()) it.programDbId in programs else true }
+                .filter { if (seasons.isNotEmpty()) it.study.seasons.any { s -> s in seasons } else true }
+        }
     }
 
     override val filterName: String
         get() = FILTER_NAME
 
-    override fun BrapiCacheModel.filterByPreferences(): BrapiCacheModel {
-
-        val programDbIds = getIds(BrapiProgramFilterActivity.FILTER_NAME)
-
-        return this.also {
-            it.studies = it.studies.filter { if (programDbIds.isNotEmpty()) it.programDbId in programDbIds else true }
-        }
+    override fun BrapiCacheModel.filterByPreferences() = this.also {
+        it.studies = it.studies.filterByProgram(
+            getModels(BrapiProgramFilterActivity.FILTER_NAME).filter { it.checked }.map { it.id },
+            getModels(BrapiSeasonsFilterActivity.FILTER_NAME).filter { it.checked }.map { it.id }
+        )
+            .distinctBy { it.trialDbId }
     }
 
     override fun BrapiCacheModel.mapToUiModel() = studies.mapNotNull { model ->
