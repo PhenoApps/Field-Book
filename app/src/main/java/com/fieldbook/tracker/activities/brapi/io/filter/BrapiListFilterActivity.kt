@@ -256,8 +256,12 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         val modelCache = arrayListOf<BrAPIStudy>()
 
+        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+
         (brapiService as BrAPIServiceV2).studyService.fetchAll(
-            StudyQueryParams()
+            StudyQueryParams().also {
+                it.pageSize(pageSize)
+            }
         )
             .catch {
                 onApiException()
@@ -273,7 +277,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
                 withContext(Dispatchers.Main) {
                     setProgress(modelCache.size, totalCount)
-                    if (modelCache.size == totalCount || totalCount < 512) {
+                    if (modelCache.size == totalCount || totalCount < pageSize) {
                         progressBar.visibility = View.GONE
                         fetchDescriptionTv.visibility = View.GONE
                         saveCacheToFile(modelCache as List<BrAPIStudy>, trialModels)
@@ -296,7 +300,12 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     private suspend fun queryTrials() = async(Dispatchers.IO) {
 
-        (brapiService as BrAPIServiceV2).trialService.fetchAll(TrialQueryParams())
+        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+
+        (brapiService as BrAPIServiceV2).trialService.fetchAll(
+            TrialQueryParams().also {
+                it.pageSize(pageSize)
+            })
 
             .catch {
                 onApiException()
@@ -316,7 +325,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                     setProgress(trialModels.size, total)
                 }
 
-                if (total == trialModels.size || total < 512) {
+                if (total == trialModels.size || total < pageSize) {
                     queryTrialsJob?.cancel()
                 }
             }

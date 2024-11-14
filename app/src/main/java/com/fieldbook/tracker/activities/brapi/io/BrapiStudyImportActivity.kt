@@ -25,6 +25,7 @@ import com.fieldbook.tracker.brapi.model.BrapiStudyDetails
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.CoroutineScope
@@ -703,6 +704,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         val germs = arrayListOf<BrAPIGermplasm>()
 
+        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+
         Log.d(TAG, "Fetching germplasm for $studyDbId")
 
         launch(Dispatchers.IO) {
@@ -710,6 +713,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             (brapiService as BrAPIServiceV2).germplasmService.fetchAll(GermplasmQueryParams()
                 .also {
                     it.studyDbId(studyDbId)
+                    it.pageSize(pageSize)
                 })
                 .catch {
                     Log.e(TAG, "Failed to fetch germplasm")
@@ -746,10 +750,13 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             val models = arrayListOf<BrAPIObservationVariable>()
 
+            val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+
             launch(Dispatchers.IO) {
                 (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
                     VariableQueryParams().also {
                         it.studyDbId(studyDbId)
+                        it.pageSize(pageSize)
                     })
                     .catch {
                         Log.e(TAG, "Failed to fetch observation variables")
@@ -789,11 +796,14 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         val units = arrayListOf<BrAPIObservationUnit>()
 
+        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+
         launch(Dispatchers.IO) {
 
             (brapiService as BrAPIServiceV2).observationUnitService.fetchAll(
                 ObservationUnitQueryParams().also {
                     it.studyDbId(studyDbId)
+                    it.pageSize(pageSize)
                     //it.observationUnitLevelName("plot")
                 }
             )

@@ -176,6 +176,8 @@ class BrapiTraitFilterActivity(
 
     private suspend fun queryVariables() = launch(Dispatchers.IO) {
 
+        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+
         val variables = arrayListOf<BrAPIObservationVariable>()
 
         try {
@@ -185,7 +187,9 @@ class BrapiTraitFilterActivity(
             queried = true
 
             (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
-                VariableQueryParams()
+                VariableQueryParams().also {
+                    it.pageSize(pageSize)
+                }
             )
                 .catch {
                     onApiException()
@@ -204,7 +208,7 @@ class BrapiTraitFilterActivity(
 
                     withContext(Dispatchers.Main) {
                         setProgress(variables.size, totalCount)
-                        if (variables.size == totalCount || totalCount < 512) {
+                        if (variables.size == totalCount || totalCount < pageSize) {
                             BrapiFilterCache.saveVariables(this@BrapiTraitFilterActivity, variables)
                             restoreModels()
                             cancel()

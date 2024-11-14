@@ -24,12 +24,9 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
         try {
 
-            val pageSize = 512
-
             //first step: get the first page to read pagination metadata to determine how many
             //page will need to be queried
             params.page(0)
-            params.pageSize(pageSize)
 
             //callback for returning the data through the flow channel, called after pagination is found
             //callback for querying metadata about the api call, then it queries for all data
@@ -54,9 +51,8 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
                     for (i in 0 until total) {
 
                         params.page(i)
-                        params.pageSize(pageSize)
 
-                        Log.d("FETCH", "Calling page $i/$total with $pageSize items")
+                        Log.d("FETCH", "Calling page $i/$total with ${params.pageSize()} items")
                         apiCall(params, ApiCall<R>({ response ->
 
                             if (response.metadata != null && response.result != null) {
