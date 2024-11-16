@@ -3,7 +3,9 @@ package com.fieldbook.tracker.adapters
 import android.content.Context
 import android.text.TextUtils
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.preference.PreferenceManager
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.InfoBarModel
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
 
 /**
@@ -37,6 +40,22 @@ class InfoBarAdapter(private val context: Context) :
         fun onInfoBarClicked(position: Int)
     }
 
+    private var hidePrefixEnabled: Boolean = false
+
+    private val iconResources = intArrayOf(
+        R.drawable.ic_infobar_rhombus,
+        R.drawable.ic_infobar_circle,
+        R.drawable.ic_infobar_triangle,
+        R.drawable.ic_infobar_square_rounded,
+        R.drawable.ic_infobar_pentagon,
+        R.drawable.ic_infobar_hexagon
+    )
+
+    init {
+        hidePrefixEnabled = preferences.getBoolean(GeneralKeys.HIDE_INFOBAR_PREFIX, false)
+        notifyDataSetChanged()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
         val v = LayoutInflater.from(parent.context)
@@ -47,16 +66,33 @@ class InfoBarAdapter(private val context: Context) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = currentList[position]
 
-        setViewHolderText(holder, item.prefix, item.value)
+        if (hidePrefixEnabled) { // set infobar to hide prefix using icon and display value
+            holder.prefixTextView.visibility = View.GONE
+            holder.iconView.visibility = View.VISIBLE
 
+            val iconIndex = position % iconResources.size
+            holder.iconView.setImageResource(iconResources[iconIndex])
+
+            holder.valueTextView.text = item.value
+        } else { // set infobar to prefix: value
+            holder.prefixTextView.visibility = View.VISIBLE
+            holder.iconView.visibility = View.GONE
+
+            setViewHolderText(holder, item.prefix, item.value)
+        }
+
+        // initial check of isWordWrapped
         updateWordWrapState(holder, item.isWordWrapped)
 
-        holder.prefixTextView.setOnClickListener {
+        // change infobar prefix when clicked
+        val clickableView = if (hidePrefixEnabled) holder.iconView else holder.prefixTextView
+        clickableView.setOnClickListener {
 
             (context as InfoBarController).onInfoBarClicked(position)
 
         }
 
+        // enable/disable word wrap when value is long clicked
         holder.valueTextView.setOnLongClickListener {
             item.isWordWrapped = !item.isWordWrapped
 
@@ -64,7 +100,7 @@ class InfoBarAdapter(private val context: Context) :
 
             updateWordWrapState(holder, item.isWordWrapped)
 
-            showWordWrapToast(item.prefix, item.isWordWrapped)
+            showWordWrapToast((position + 1).toString(), item.isWordWrapped)
 
             true
         }
@@ -87,11 +123,11 @@ class InfoBarAdapter(private val context: Context) :
     }
 
 
-    private fun showWordWrapToast(prefix: String, isWordWrapped: Boolean) {
+    private fun showWordWrapToast(position: String, isWordWrapped: Boolean) {
         val message = if (isWordWrapped) {
-            String.format(context.getString(R.string.infobar_word_wrap_enabled), prefix)
+            String.format(context.getString(R.string.infobar_word_wrap_enabled), position)
         } else {
-            String.format(context.getString(R.string.infobar_word_wrap_disabled), prefix)
+            String.format(context.getString(R.string.infobar_word_wrap_disabled), position)
         }
         Utils.makeToast(context, message)
     }
@@ -102,14 +138,9 @@ class InfoBarAdapter(private val context: Context) :
     }
 
     class ViewHolder(v: ConstraintLayout) : RecyclerView.ViewHolder(v) {
-
-        var prefixTextView: TextView
-        var valueTextView: TextView
-
-        init {
-            prefixTextView = v.findViewById(R.id.list_item_infobar_prefix)
-            valueTextView = v.findViewById(R.id.list_item_infobar_value)
-        }
+        var prefixTextView: TextView = v.findViewById(R.id.list_item_infobar_prefix)
+        var valueTextView: TextView = v.findViewById(R.id.list_item_infobar_value)
+        var iconView: ImageView = v.findViewById(R.id.list_item_infobar_icon)
     }
 
     // Return the size of your dataset (invoked by the layout manager)

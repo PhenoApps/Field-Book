@@ -313,8 +313,8 @@
     <string name="dialog_infobar_att_chooser_title">Infobar %d</string>
     <string name="infobars_attribute_placeholder">Select</string>
     <string name="field_name_attribute">field_name</string>
-    <string name="infobar_word_wrap_enabled">Word wrap enabled for %s infobar</string>
-    <string name="infobar_word_wrap_disabled">Word wrap disabled for %s infobar</string>
+    <string name="infobar_word_wrap_enabled">Word wrap enabled for Infobar %s</string>
+    <string name="infobar_word_wrap_disabled">Word wrap disabled for Infobar %s</string>
 
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
@@ -683,6 +683,9 @@
 
     <string name="preferences_appearance_infobar_number">Number of InfoBars</string>
     <string name="preferences_appearance_infobar_number_description">Adjust the number of Infobars displayed on the main screen</string>
+
+    <string name="preferences_appearance_infobar_hide_prefix">Hide Infobar prefix</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">Infobar prefix will be replaced by a generic icon</string>
 
     <string name="preferences_appearance_quickgoto">Quick GoTo</string>
     <string name="preferences_appearance_quickgoto_description">Changes middle section of main screen to the legacy Quick GoTo</string>

@@ -23,6 +23,7 @@ public class GeneralKeys {
     public static final String INFOBAR_UPDATE = "INFOBAR_UPDATE";
     public static final String TOOLBAR_CUSTOMIZE                    = "TOOLBAR_CUSTOMIZE";
     public static final String INFOBAR_NUMBER                       = "INFOBAR_NUMBER";
+    public static final String HIDE_INFOBAR_PREFIX                  = "HIDE_INFOBAR_PREFIX";
     public static final String APPLICATION_THEME                    = "APPLICATION_THEME";
     public static final String RESTORE_DEFAULT_THEME                = "RESTORE_DEFAULT_THEME";
     public static final String LANGUAGE_LOCALE_ID                   = "com.tracker.fieldbook.preference.language.id";

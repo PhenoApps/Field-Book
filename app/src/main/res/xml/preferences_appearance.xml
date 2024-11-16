@@ -57,6 +57,13 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_hide_infobar_prefix"
+            android:key="HIDE_INFOBAR_PREFIX"
+            android:summary="@string/preferences_appearance_infobar_hide_prefix_description"
+            android:title="@string/preferences_appearance_infobar_hide_prefix" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:icon="@drawable/ic_adv_quick_goto"
             android:key="QuickGoTo"
             android:summary="@string/preferences_appearance_quickgoto_description"
