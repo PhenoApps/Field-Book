@@ -1,16 +1,18 @@
 package com.fieldbook.tracker.adapters
 
 import android.content.Context
+import android.text.TextUtils
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.InfoBarModel
+import com.fieldbook.tracker.utilities.Utils
 
 /**
  * Reference:
@@ -29,6 +31,8 @@ import com.fieldbook.tracker.objects.InfoBarModel
 class InfoBarAdapter(private val context: Context) :
     ListAdapter<InfoBarModel, InfoBarAdapter.ViewHolder>(DiffCallback()) {
 
+    private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+
     interface InfoBarController {
         fun onInfoBarClicked(position: Int)
     }
@@ -41,10 +45,11 @@ class InfoBarAdapter(private val context: Context) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item = currentList[position]
 
-        with (currentList[position]) {
-            setViewHolderText(holder, prefix, value)
-        }
+        setViewHolderText(holder, item.prefix, item.value)
+
+        updateWordWrapState(holder, item.isWordWrapped)
 
         holder.prefixTextView.setOnClickListener {
 
@@ -52,13 +57,43 @@ class InfoBarAdapter(private val context: Context) :
 
         }
 
-        holder.valueTextView.setOnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> holder.valueTextView.maxLines = 5
-                MotionEvent.ACTION_UP -> holder.valueTextView.maxLines = 1
-            }
+        holder.valueTextView.setOnLongClickListener {
+            item.isWordWrapped = !item.isWordWrapped
+
+            saveWordWrapState(position, item.isWordWrapped)
+
+            updateWordWrapState(holder, item.isWordWrapped)
+
+            showWordWrapToast(item.prefix, item.isWordWrapped)
+
             true
         }
+    }
+
+    private fun saveWordWrapState(position: Int, isWordWrapped: Boolean) {
+        preferences.edit().putBoolean("INFOBAR_WORD_WRAP_$position", isWordWrapped).apply()
+    }
+
+    private fun updateWordWrapState(holder: ViewHolder, isWordWrapped: Boolean) {
+        holder.valueTextView.apply {
+            if (isWordWrapped) {
+                maxLines = 5
+                ellipsize = null
+            } else {
+                maxLines = 1
+                ellipsize = TextUtils.TruncateAt.END
+            }
+        }
+    }
+
+
+    private fun showWordWrapToast(prefix: String, isWordWrapped: Boolean) {
+        val message = if (isWordWrapped) {
+            String.format(context.getString(R.string.infobar_word_wrap_enabled), prefix)
+        } else {
+            String.format(context.getString(R.string.infobar_word_wrap_disabled), prefix)
+        }
+        Utils.makeToast(context, message)
     }
 
     private fun setViewHolderText(holder: ViewHolder, label: String?, value: String) {

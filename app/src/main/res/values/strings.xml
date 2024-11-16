@@ -313,6 +313,8 @@
     <string name="dialog_infobar_att_chooser_title">Infobar %d</string>
     <string name="infobars_attribute_placeholder">Select</string>
     <string name="field_name_attribute">field_name</string>
+    <string name="infobar_word_wrap_enabled">Word wrap enabled for %s infobar</string>
+    <string name="infobar_word_wrap_disabled">Word wrap disabled for %s infobar</string>
 
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
