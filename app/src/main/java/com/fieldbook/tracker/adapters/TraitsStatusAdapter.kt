@@ -1,12 +1,10 @@
 package com.fieldbook.tracker.adapters
 
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -44,7 +42,7 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
         val activeTraitColor = TypedValue()
         theme.resolveAttribute(R.attr.fb_color_primary_dark, activeTraitColor, true)
         val inactiveTraitColor = TypedValue()
-        theme.resolveAttribute(R.attr.fb_trait_boolean_false_color, inactiveTraitColor, true)
+        theme.resolveAttribute(R.attr.fb_color_accent, inactiveTraitColor, true)
 
         with(currentList[position]) {
             if (position == currentSelection) {
