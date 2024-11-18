@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.adapters
 
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -76,26 +77,29 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
 
     // calculate item size and update the view
     fun calculateAndSetItemSize(viewHolder: ViewHolder) {
-        val itemCount = itemCount
-        val context = viewHolder.imageView.context
+        val recyclerView = traitBoxView.getRecyclerView() ?: return
+        recyclerView.post {
+            val itemCount = itemCount
+            val context = viewHolder.imageView.context
 
-        val parentWidth = traitBoxView.getRecyclerView()?.width ?: 0
+            val parentWidth = recyclerView.width
 
-        val availableWidth = parentWidth - (traitBoxView.getRecyclerView()?.paddingLeft ?: 0) - (traitBoxView.getRecyclerView()?.paddingRight ?: 0)
-        val calculatedSize = availableWidth / itemCount
+            val availableWidth = parentWidth - recyclerView.paddingLeft - recyclerView.paddingRight
+            val calculatedSize = availableWidth / itemCount
 
-        val defaultMaxSizeDp = context.resources.getDimension(R.dimen.fb_trait_status_bar_icon_default_max_size)
-        val defaultMaxSizePx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            defaultMaxSizeDp,
-            traitBoxView.context.resources.displayMetrics
-        ).toInt() // in px
+            val defaultMaxSizeDp = context.resources.getDimension(R.dimen.fb_trait_status_bar_icon_default_max_size)
+            val defaultMaxSizePx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                defaultMaxSizeDp,
+                traitBoxView.context.resources.displayMetrics
+            ).toInt() // in px
 
-        val itemSize = minOf(calculatedSize, defaultMaxSizePx)
+            val itemSize = minOf(calculatedSize, defaultMaxSizePx)
 
-        viewHolder.imageView.layoutParams = viewHolder.imageView.layoutParams.apply {
-            width = itemSize
-            height = itemSize
+            viewHolder.imageView.layoutParams = viewHolder.imageView.layoutParams.apply {
+                width = itemSize
+                height = itemSize
+            }
         }
 
     }
