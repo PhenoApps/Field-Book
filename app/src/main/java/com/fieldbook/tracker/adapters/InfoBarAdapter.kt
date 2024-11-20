@@ -42,13 +42,22 @@ class InfoBarAdapter(private val context: Context) :
 
     private var hidePrefixEnabled: Boolean = false
 
-    private val iconResources = intArrayOf(
+    private val wordWrapEnabledIconResources = intArrayOf(
         R.drawable.ic_infobar_rhombus,
         R.drawable.ic_infobar_circle,
         R.drawable.ic_infobar_triangle,
         R.drawable.ic_infobar_square_rounded,
         R.drawable.ic_infobar_pentagon,
         R.drawable.ic_infobar_hexagon
+    )
+
+    private val wordWrapDisabledIconResources = intArrayOf(
+        R.drawable.ic_infobar_rhombus_outline,
+        R.drawable.ic_infobar_circle_outline,
+        R.drawable.ic_infobar_triangle_outline,
+        R.drawable.ic_infobar_square_rounded_outline,
+        R.drawable.ic_infobar_pentagon_outline,
+        R.drawable.ic_infobar_hexagon_outline
     )
 
     init {
@@ -70,8 +79,7 @@ class InfoBarAdapter(private val context: Context) :
             holder.prefixTextView.visibility = View.GONE
             holder.iconView.visibility = View.VISIBLE
 
-            val iconIndex = position % iconResources.size
-            holder.iconView.setImageResource(iconResources[iconIndex])
+            setIcon(holder, position, item.isWordWrapped)
 
             holder.valueTextView.text = item.value
         } else { // set infobar to prefix: value
@@ -97,6 +105,8 @@ class InfoBarAdapter(private val context: Context) :
             item.isWordWrapped = !item.isWordWrapped
 
             saveWordWrapState(position, item.isWordWrapped)
+
+            setIcon(holder, position, item.isWordWrapped)
 
             updateWordWrapState(holder, item.isWordWrapped)
 
@@ -130,6 +140,13 @@ class InfoBarAdapter(private val context: Context) :
             String.format(context.getString(R.string.infobar_word_wrap_disabled), position)
         }
         Utils.makeToast(context, message)
+    }
+
+    // if wordWrap is disabled, use outline icon
+    // else use filled icon
+    private fun setIcon(holder: ViewHolder, position: Int, isWordWrapped: Boolean) {
+        val iconIndex = position % wordWrapEnabledIconResources.size
+        holder.iconView.setImageResource(if (isWordWrapped) wordWrapEnabledIconResources[iconIndex] else wordWrapDisabledIconResources[iconIndex])
     }
 
     private fun setViewHolderText(holder: ViewHolder, label: String?, value: String) {
