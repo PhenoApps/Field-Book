@@ -13,7 +13,8 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/list_item_infobar_value"
+        app:layout_constraintBottom_toBottomOf="@id/list_item_infobar_value"
         tools:src="@drawable/ic_infobar_rhombus" />
 
     <TextView
