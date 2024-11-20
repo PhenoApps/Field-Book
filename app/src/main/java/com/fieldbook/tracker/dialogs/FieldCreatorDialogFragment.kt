@@ -1,11 +1,12 @@
 package com.fieldbook.tracker.dialogs
 
+import android.app.AlertDialog
+import android.app.Dialog
 import android.database.sqlite.SQLiteAbortException
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -13,6 +14,7 @@ import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.Group
+import androidx.fragment.app.DialogFragment
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.database.DataHelper
@@ -36,8 +38,8 @@ import java.util.UUID
  *
  *                 FieldCreatorDialog dialog = new FieldCreatorDialog(this);
  */
-class FieldCreatorDialog(private val activity: ThemedActivity) :
-    BorderedDialog(activity, R.style.AppAlertDialog), CoroutineScope by MainScope() {
+class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
+    DialogFragment(), CoroutineScope by MainScope() {
 
     private val helper by lazy { DataHelper(context) }
 
@@ -49,6 +51,8 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
 
     var mCancelJobFlag = false
 
+    var fieldCreatorDialog: AlertDialog? = null
+
     // Inside FieldCreatorDialog class
     interface FieldCreationCallback {
         fun onFieldCreated(studyDbId: Int)
@@ -56,25 +60,28 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
 
     var fieldCreationCallback: FieldCreationCallback? = null
 
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        builder.setNegativeButton(getString(R.string.dialog_cancel), null)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        builder.setPositiveButton(getString(R.string.dialog_ok), null)
 
-        setContentView(R.layout.dialog_field_creator)
+        builder.setNeutralButton(getString(R.string.dialog_back), null)
 
-        titleTextView = findViewById(R.id.dialog_field_creator_title)
 
-        //canceling the dialog might leave the insert job on the background thread
-        //which might be preferable for large plot sizes
-        //setCancelable(false)
+        val inflater = this.getLayoutInflater()
+        val view = inflater.inflate(R.layout.dialog_field_creator, null)
+        builder.setView(view)
 
-        setCanceledOnTouchOutside(true)
+        fieldCreatorDialog = builder.create()
+        fieldCreatorDialog?.show()
 
-        //for some reason this is required for the views to match the layout file
-        window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        titleTextView = view.findViewById(R.id.dialog_field_creator_title)
 
         setupSizeGroup()
 
+
+        return fieldCreatorDialog!!
     }
 
     //the initial step that asks the user for row/column size of their field
@@ -83,20 +90,45 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
 
         titleTextView?.setText(R.string.dialog_field_creator_ask_size)
 
-        val sizeGroup = findViewById<Group>(R.id.dialog_field_creator_group_size)
+        val sizeGroup = fieldCreatorDialog?.findViewById<Group>(R.id.dialog_field_creator_group_size)
 
-        val submitSizeButton = findViewById<Button>(R.id.dialog_field_creator_size_button)
+        val rowsEditText = fieldCreatorDialog?.findViewById<EditText>(R.id.dialog_field_creator_field_row_edit_text)
+        val colsEditText = fieldCreatorDialog?.findViewById<EditText>(R.id.dialog_field_creator_field_column_edit_text)
+        val nameEditText = fieldCreatorDialog?.findViewById<EditText>(R.id.dialog_field_creator_field_name_edit_text)
 
-        sizeGroup.visibility = View.VISIBLE
+        val submitSizeButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_POSITIVE)
+        val cancelButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEGATIVE)
+        val neutralButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEUTRAL)
+
+        submitSizeButton?.visibility = View.VISIBLE
+        cancelButton?.visibility = View.VISIBLE
+        neutralButton?.visibility = View.GONE
+
+        cancelButton?.setOnClickListener {
+            dismiss()
+        }
+
+
+        sizeGroup?.visibility = View.VISIBLE
+
+        // set EditText hint color
+        val typedValue = TypedValue()
+        val theme = context?.theme
+        theme?.resolveAttribute(R.attr.fb_color_hint_text, typedValue, true)
+        val hintColor = typedValue.data
+
+        rowsEditText?.setHintTextColor(hintColor)
+        colsEditText?.setHintTextColor(hintColor)
+        nameEditText?.setHintTextColor(hintColor)
 
         //when the size OK button is pressed...
-        submitSizeButton.setOnClickListener {
+        submitSizeButton?.setOnClickListener {
 
             //check that the rows/columns aren't empty
-            val rowsText = findViewById<EditText>(R.id.dialog_field_creator_field_row_edit_text).text
-            val colsText = findViewById<EditText>(R.id.dialog_field_creator_field_column_edit_text).text
-            val nameText = findViewById<EditText>(R.id.dialog_field_creator_field_name_edit_text).text
-            if (nameText.isNotBlank() && rowsText.isNotBlank() && colsText.isNotBlank()) {
+            val rowsText = rowsEditText?.text
+            val colsText = colsEditText?.text
+            val nameText = nameEditText?.text
+            if (!nameText.isNullOrBlank() && !rowsText.isNullOrBlank() && !colsText.isNullOrBlank()) {
 
                 //check that the text can be parsed as a whole number and is greater than 0
                 try {
@@ -113,7 +145,7 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
                             || cols > Int.MAX_VALUE) throw java.lang.NumberFormatException()
 
                         //change current group visibility before setting up next group
-                        sizeGroup.visibility = View.GONE
+                        sizeGroup?.visibility = View.GONE
 
                         setupRadioGroup(nameText.toString(), rows, cols)
 
@@ -131,7 +163,9 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
 
                 }
 
-            } else Toast.makeText(activity, R.string.dialog_field_creator_size_group_error, Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(activity, R.string.dialog_field_creator_size_group_error, Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -139,32 +173,38 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
 
         titleTextView?.setText(R.string.dialog_field_creator_ask_start_point)
 
-        val group = findViewById<Group>(R.id.dialog_field_creator_group_start_point)
+        val group = fieldCreatorDialog?.findViewById<Group>(R.id.dialog_field_creator_group_start_point)
 
-        group.visibility = View.VISIBLE
+        group?.visibility = View.VISIBLE
 
-        val backButton = findViewById<Button>(R.id.dialog_field_creator_start_back_button)
+        val positiveButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_POSITIVE)
+        val negativeButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEGATIVE)
+        val backButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEUTRAL)
 
-        backButton.setOnClickListener {
+        positiveButton?.visibility = View.GONE
+        negativeButton?.visibility = View.GONE
+        backButton?.visibility = View.VISIBLE
 
-            group.visibility = View.GONE
+        backButton?.setOnClickListener {
+
+            group?.visibility = View.GONE
 
             setupSizeGroup()
         }
 
         //set click listeners for the buttons, when one is pressed switch to the next group
-        group.referencedIds.forEach { id ->
+        group?.referencedIds?.forEach { id ->
 
-            (findViewById(id) as? RadioButton)?.apply {
+            (fieldCreatorDialog?.findViewById(id) as? RadioButton)?.apply {
 
                 isChecked = false
             }
         }
 
         //set click listeners for the buttons, when one is pressed switch to the next group
-        group.referencedIds.forEach { id ->
+        group?.referencedIds?.forEach { id ->
 
-            (findViewById(id) as? RadioButton)?.apply {
+            (fieldCreatorDialog?.findViewById(id) as? RadioButton)?.apply {
 
                 setOnClickListener {
 
@@ -181,16 +221,22 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
 
         titleTextView?.setText(R.string.dialog_field_creator_ask_pattern)
 
-        val patternGroup = findViewById<Group>(R.id.dialog_field_creator_group_pattern)
+        val patternGroup = fieldCreatorDialog?.findViewById<Group>(R.id.dialog_field_creator_group_pattern)
 
-        val linearButton = findViewById<ImageButton>(R.id.plot_linear_button)
-        val zigButton = findViewById<ImageButton>(R.id.plot_zigzag_button)
+        val linearButton = fieldCreatorDialog?.findViewById<ImageButton>(R.id.plot_linear_button)
+        val zigButton = fieldCreatorDialog?.findViewById<ImageButton>(R.id.plot_zigzag_button)
 
-        val backButton = findViewById<Button>(R.id.dialog_field_creator_pattern_back_button)
+        val positiveButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_POSITIVE)
+        val negativeButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEGATIVE)
+        val backButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEUTRAL)
 
-        backButton.setOnClickListener {
+        positiveButton?.visibility = View.GONE
+        negativeButton?.visibility = View.GONE
+        backButton?.visibility = View.VISIBLE
 
-            patternGroup.visibility = View.GONE
+        backButton?.setOnClickListener {
+
+            patternGroup?.visibility = View.GONE
 
             setupRadioGroup(name, rows, cols)
         }
@@ -199,24 +245,24 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
         when (startId) {
             R.id.dialog_field_creator_top_right_radio_button,
             R.id.dialog_field_creator_bottom_right_radio_button -> {
-                linearButton.scaleX = -1.0f
-                linearButton.scaleY = -1.0f
+                linearButton?.scaleX = -1.0f
+                linearButton?.scaleY = -1.0f
 
                 if (startId == R.id.dialog_field_creator_bottom_right_radio_button) {
-                    zigButton.scaleY = -1.0f
+                    zigButton?.scaleY = -1.0f
                 }
-                zigButton.scaleX = -1.0f
+                zigButton?.scaleX = -1.0f
             }
             R.id.dialog_field_creator_bottom_left_radio_button -> {
-                zigButton.scaleY = -1.0f
+                zigButton?.scaleY = -1.0f
             }
         }
 
-        patternGroup.visibility = View.VISIBLE
+        patternGroup?.visibility = View.VISIBLE
 
-        patternGroup.referencedIds.forEach { id ->
+        patternGroup?.referencedIds?.forEach { id ->
 
-            (findViewById(id) as? ImageButton)?.setOnClickListener {
+            (fieldCreatorDialog?.findViewById(id) as? ImageButton)?.setOnClickListener {
 
                 patternGroup.visibility = View.GONE
 
@@ -227,83 +273,87 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
 
     private fun setupReviewGroup(name: String, rows: Int, cols: Int, startId: Int, pattern: Int) {
 
-        titleTextView?.text = context.getString(R.string.dialog_field_creator_review_title)
+        titleTextView?.text = context?.getString(R.string.dialog_field_creator_review_title)
 
         //set the group visibility
-        val reviewGroup = findViewById<Group>(R.id.dialog_field_creator_group_review)
-        reviewGroup.visibility = View.VISIBLE
+        val reviewGroup = fieldCreatorDialog?.findViewById<Group>(R.id.dialog_field_creator_group_review)
+        reviewGroup?.visibility = View.VISIBLE
 
         //initialize ui view objects
-        val reviewTitleText = findViewById<TextView>(R.id.dialog_field_creator_review_text)
+        val reviewTitleText = fieldCreatorDialog?.findViewById<TextView>(R.id.dialog_field_creator_review_text)
         //val reviewInsertText = findViewById<TextView>(R.id.field_creator_plot_insert_text_view)
-        val largeTextView = findViewById<TextView>(R.id.field_creator_plot_large_field_text_view)
-        val submitButton = findViewById<Button>(R.id.dialog_field_creator_submit_button)
-        val cancelButton = findViewById<Button>(R.id.dialog_field_creator_cancel_button)
-        val backButton = findViewById<Button>(R.id.dialog_field_creator_back_button)
-        val imageView = findViewById<ImageView>(R.id.dialog_field_creator_review_image)
+        val largeTextView = fieldCreatorDialog?.findViewById<TextView>(R.id.field_creator_plot_large_field_text_view)
+        val submitButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_POSITIVE)
+        val cancelButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEGATIVE)
+        val backButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEUTRAL)
+        val imageView = fieldCreatorDialog?.findViewById<ImageView>(R.id.dialog_field_creator_review_image)
 
         //warning if numbers are greater than 50
         if (rows*cols > 50*50) {
-            largeTextView.text = activity.getString(R.string.dialog_field_creator_large_field)
+            largeTextView?.text = activity.getString(R.string.dialog_field_creator_large_field)
         }
 
         //set current plow(?) pattern: use rotation
         when (pattern) {
             R.id.plot_linear_button -> {
 
-                imageView.setImageResource(R.drawable.ic_plot_pattern_linear)
+                imageView?.setImageResource(R.drawable.ic_plot_pattern_linear)
 
                 //mirror linear pattern when starting on the right
                 when (startId) {
                     R.id.dialog_field_creator_top_right_radio_button,
                     R.id.dialog_field_creator_bottom_right_radio_button -> {
-                        imageView.scaleX = -1.0f
-                        imageView.scaleY = -1.0f
+                        imageView?.scaleX = -1.0f
+                        imageView?.scaleY = -1.0f
                     }
                 }
             }
             R.id.plot_zigzag_button -> {
 
-                imageView.setImageResource(R.drawable.ic_plot_pattern_zigzag)
+                imageView?.setImageResource(R.drawable.ic_plot_pattern_zigzag)
 
                 //mirror or flip zig zag pattern
                 when (startId) {
                     R.id.dialog_field_creator_top_right_radio_button,
                     R.id.dialog_field_creator_bottom_right_radio_button -> {
                         if (startId == R.id.dialog_field_creator_bottom_right_radio_button) {
-                            imageView.scaleY = -1.0f
+                            imageView?.scaleY = -1.0f
                         }
-                        imageView.scaleX = -1.0f
+                        imageView?.scaleX = -1.0f
                     }
                     R.id.dialog_field_creator_bottom_left_radio_button -> {
-                        imageView.scaleY = -1.0f
+                        imageView?.scaleY = -1.0f
                     }
                 }
             }
         }
 
         //set field format review, shows rows and columns
-        reviewTitleText.text = activity.getString(R.string.dialog_field_creator_insert_field,
+        reviewTitleText?.text = activity.getString(R.string.dialog_field_creator_insert_field,
             rows.toString(), cols.toString())
 
+        submitButton?.visibility = View.VISIBLE
+        cancelButton?.visibility = View.VISIBLE
+        backButton?.visibility = View.VISIBLE
+
         //dismiss the dialog if the user clicks the cancel button, otherwise insert the data
-        cancelButton.setOnClickListener {
+        cancelButton?.setOnClickListener {
             dismiss()
         }
 
-        backButton.setOnClickListener {
+        backButton?.setOnClickListener {
 
-            reviewGroup.visibility = View.GONE
+            reviewGroup?.visibility = View.GONE
 
             setupPatternGroup(name, rows, cols, startId)
 
         }
 
-        submitButton.setOnClickListener {
+        submitButton?.setOnClickListener {
 
             it.isEnabled = false //no accidental double clicks...
 
-            backButton.isEnabled = false //no going back now
+            backButton?.isEnabled = false //no going back now
 
             insertBasicField(name, rows, cols, pattern)
         }
@@ -316,8 +366,8 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
     private fun insertBasicField(name: String, rows: Int, cols: Int, pattern: Int) {
         Log.d("FieldCreatorDialog", "Starting to insert basic field with name: $name")
         //insert job is cancelled when the cancel button is pressed
-        val cancelButton = findViewById<Button>(R.id.dialog_field_creator_cancel_button)
-        cancelButton.setOnClickListener {
+        val cancelButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEGATIVE)
+        cancelButton?.setOnClickListener {
             mCancelJobFlag = true
             Log.d("FieldCreatorDialog", "New field insert job cancelled by user.")
         }
@@ -423,12 +473,12 @@ class FieldCreatorDialog(private val activity: ThemedActivity) :
     }
 
     private fun updateFieldInsertText(row: String, col: String) = activity.runOnUiThread {
-        findViewById<TextView>(R.id.dialog_field_creator_review_text).text =
+        fieldCreatorDialog?.findViewById<TextView>(R.id.dialog_field_creator_review_text)?.text =
             activity.getString(R.string.dialog_field_creator_insert_field_complete, row, col)
     }
 
     private fun updatePlotInsertText(row: String, col: String, index: String) = activity.runOnUiThread {
-        findViewById<TextView>(R.id.field_creator_plot_insert_text_view).text =
+        fieldCreatorDialog?.findViewById<TextView>(R.id.field_creator_plot_insert_text_view)?.text =
             activity.getString(R.string.dialog_field_creator_insert_plot, index, row, col)
     }
 

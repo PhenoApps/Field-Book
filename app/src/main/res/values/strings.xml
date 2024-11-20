@@ -113,6 +113,7 @@
     <string name="sort_dialog_saved">Sorting updated</string>
     <string name="sort_dialog_error_saving">Error updating sorting</string>
     <string name="list_item_field_sort_delete_content_description">Delete the sort attribute.</string>
+    <string name="dialog_field_sort_title">Sort Entries</string>
     <string name="list_item_field_sort_drag_content_description">Drag to move item.</string>
     <string name="dialog_field_sort_no_attributes_found">No attributes found.</string>
     <string name="dialog_field_sort_no_more_attributes_found">All attributes have been used.</string>
@@ -974,12 +975,7 @@
     <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
     <string name="brapi_auth_permission_deny">ERROR: You do not have the permissions necessary to perform this action</string>
     <string name="brapi_auth_needed_title">Login Needed</string>
-    <string name="brapi_auth_needed">
-    You need to be logged into the system you are attempting to sync data with in order
-        to sync your data.
-
-    Would you like to authenticate now?
-    </string>
+    <string name="brapi_auth_needed">You need to be logged into the system you are attempting to sync data with in order to sync your data.\n\nWould you like to authenticate now?</string>
 
     <!-- BrAPI Import -->
     <string name="import_dialog_title_brapi_fields">BrAPI Field Import</string>
@@ -1021,6 +1017,7 @@
     <string name="brapi_export_unknown_error">ERROR: Unknown Error</string>
     <string name="brapi_export_successful">BrAPI Export Successful</string>
     <string name="brapi_saving_indicator">Saving Observations…</string>
+    <string name="brapi_field_non_matching_sources_title">Sources Do Not Match</string>
     <string name="brapi_field_non_matching_sources">Unable to sync data. Field data originates from, %1$s, BrAPI url currently set to %2$s. Sources must match.</string>
     <string name="brapi_enable_before_sync">BRAPI is disabled. Please enable it in settings before using sync.</string>
     <string name="brapi_trait_already_exists">Trait already exists: %1$s. Not saving.</string>
