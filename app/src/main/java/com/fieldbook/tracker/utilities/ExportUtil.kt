@@ -22,6 +22,7 @@ import com.fieldbook.tracker.activities.brapi.BrapiExportActivity
 import com.fieldbook.tracker.brapi.BrapiAuthDialog
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.dialogs.CitationDialog
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -530,7 +531,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
                     progressDialog?.dismiss()
                     finalFile?.let { shareFile(it) }
-                    showCitationDialog()
+                    CitationDialog(context).show()
                 }
             }
             is ExportResult.Failure -> {
@@ -629,19 +630,4 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             }
         }
     }
-
-    private fun showCitationDialog() {
-        val builder =
-            androidx.appcompat.app.AlertDialog.Builder(context, R.style.AppAlertDialog)
-        builder.setTitle(context.getString(R.string.citation_title))
-            .setMessage(context.getString(R.string.citation_string) + "\n\n" + context.getString(R.string.citation_text))
-            .setCancelable(false)
-        builder.setPositiveButton(context.getString(R.string.dialog_ok),
-            DialogInterface.OnClickListener { dialog, which ->
-                dialog.dismiss()
-            })
-        val alert = builder.create()
-        alert.show()
-    }
-
 }

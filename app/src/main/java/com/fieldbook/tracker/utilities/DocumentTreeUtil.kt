@@ -39,11 +39,15 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
                     val plotDataDirName = context.getString(R.string.dir_plot_data)
                     val fieldDir = createDir(context, plotDataDirName, field)
                     if (fieldDir != null) {
-                        val traitDir = fieldDir.findFile(traitName)
+                        var traitDir = fieldDir.findFile(traitName)
                         if (traitDir == null || !traitDir.exists()) {
                             fieldDir.createDirectory(traitName)
                         }
-                        return fieldDir.findFile(traitName)
+                        traitDir = fieldDir.findFile(traitName)
+                        if (traitDir != null && traitDir.findFile(".nomedia")?.exists() != true) {
+                            traitDir.createFile("*/*", ".nomedia")
+                        }
+                        return traitDir
                     }
                 } else return null
             }
@@ -67,11 +71,15 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
                     val fieldDataDirName = context.getString(R.string.dir_field_data)
                     val fieldDir = createDir(context, fieldDataDirName, field)
                     if (fieldDir != null) {
-                        val attributeDir = fieldDir.findFile(attributeName)
+                        var attributeDir = fieldDir.findFile(attributeName)
                         if (attributeDir == null || !attributeDir.exists()) {
                             fieldDir.createDirectory(attributeName)
                         }
-                        return fieldDir.findFile(attributeName)
+                        attributeDir = fieldDir.findFile(attributeName)
+                        if (attributeDir != null && attributeDir.findFile(".nomedia")?.exists() != true) {
+                            attributeDir.createFile("*/*", ".nomedia")
+                        }
+                        return attributeDir
                     }
                 } else return null
             }

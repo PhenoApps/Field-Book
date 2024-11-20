@@ -777,7 +777,7 @@ public class FieldEditorActivity extends ThemedActivity
 
             DocumentFile importDoc = DocumentFile.fromSingleUri(this, docUri);
 
-            if (importDoc != null && importDoc.exists()) {
+            if (importDoc != null) {
 
                 ContentResolver resolver = getContentResolver();
                 if (resolver != null) {
@@ -785,6 +785,8 @@ public class FieldEditorActivity extends ThemedActivity
                     String cloudName = null;
                     if (isCloud != null && isCloud) {
                         cloudName = getFileName(Uri.parse(chosenFile));
+                    } else {
+                        if (!importDoc.exists()) return;
                     }
 
                     try (InputStream is = resolver.openInputStream(docUri)) {
@@ -792,10 +794,16 @@ public class FieldEditorActivity extends ThemedActivity
                         fieldFile = FieldFileObject.create(this, docUri, is, cloudName);
 
                         String fieldFileName = fieldFile.getStem();
+                        if (isCloud != null && isCloud) {
+                            int index = cloudName.lastIndexOf(".");
+                            if (index > -1) {
+                                cloudName = cloudName.substring(0, index);
+                            }
+                            fieldFile.setName(cloudName);
+                        }
 
                         Editor e = preferences.edit();
                         e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
-                        e.putString(GeneralKeys.FIELD_ALIAS, fieldFileName);
                         e.apply();
 
                         if (database.checkFieldName(fieldFileName) >= 0) {

@@ -17,6 +17,7 @@
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dati di prova</string>
     <string name="startup_sample_data_message">Vuoi caricare i dati di prova forniti?</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_storage_export">L\'esportazione dei dati richiede l\'accesso ai file del dispositivo.</string>
@@ -153,6 +154,7 @@
     <string name="activity_collect_dialog_verify_no_button">No</string>
     <string name="activity_collect_dialog_verify_yes_button">Sì</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Il tuo dispositivo non contiene l\'hardware necessario per questa funzione</string>
     <string name="trait_delete_warning_photo">Sei sicuro di voler cancellare questa foto?</string>
@@ -179,6 +181,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Locale</string>
@@ -275,7 +278,6 @@
     <!-- App  -->
     <string name="about_title">A proposito</string>
     <string name="about_version_title">Versione</string>
-    <string name="about_rate">Valuta questa app</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Responsabile del progetto</string>
     <!-- Support  -->

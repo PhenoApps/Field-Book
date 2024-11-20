@@ -23,6 +23,7 @@ import com.danielstone.materialaboutlibrary.items.MaterialAboutTitleItem;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutCard;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutList;
 import com.fieldbook.tracker.BuildConfig;
+import com.fieldbook.tracker.dialogs.CitationDialog;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.mikepenz.aboutlibraries.LibsBuilder;
@@ -92,7 +93,18 @@ public class AboutActivity extends MaterialAboutActivity {
                 getResources().getDrawable(R.drawable.book_open_variant),
                 getString(R.string.about_manual_title),
                 false,
-                Uri.parse("https://docs.fieldbook.phenoapps.org/en/latest/field-book.html")));
+                Uri.parse("https://fieldbook.phenoapps.org/")));
+
+        appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
+                .text(R.string.citation_card_title)
+                .icon(R.drawable.ic_script_text_outline)
+                .setOnClickAction(new MaterialAboutItemOnClickAction() {
+                    @Override
+                    public void onClick() {
+                        new CitationDialog(AboutActivity.this).show();
+                    }
+                })
+                .build());
 
         appCardBuilder.addItem(ConvenienceBuilder.createRateActionItem(c,
                 getResources().getDrawable(R.drawable.ic_about_rate),
@@ -194,7 +206,13 @@ public class AboutActivity extends MaterialAboutActivity {
                 .setOnClickAction(openAppOrStore("org.phenoapps.intercross", c))
                 .build());
 
-        return new MaterialAboutList(appCardBuilder.build(), authorCardBuilder.build(), contributorsCardBuilder.build(), otherAppsCardBuilder.build(), technicalCardBuilder.build());
+        return new MaterialAboutList(
+                appCardBuilder.build(),
+                authorCardBuilder.build(),
+                contributorsCardBuilder.build(),
+                otherAppsCardBuilder.build(),
+                technicalCardBuilder.build()
+        );
     }
 
     private String getCurrentAppVersion() {

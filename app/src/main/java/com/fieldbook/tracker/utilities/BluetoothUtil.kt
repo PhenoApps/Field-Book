@@ -34,11 +34,14 @@ class BluetoothUtil {
 
             val input = RadioGroup(ctx)
 
-            pairedDevices.forEachIndexed { _, t ->
-                val button = RadioButton(ctx)
-                button.text = t.name
-                input.addView(button)
-                map[button.id] = t
+            pairedDevices.forEach { device ->
+                val deviceName = device.name
+                if (!deviceName.isNullOrBlank()) {
+                    val button = RadioButton(ctx)
+                    button.text = deviceName
+                    input.addView(button)
+                    map[button.id] = device
+                }
             }
 
             val builder = AlertDialog.Builder(ctx, R.style.AppAlertDialog).apply {

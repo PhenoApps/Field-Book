@@ -1,4 +1,4 @@
-# <img width="25" src="https://github.com/PhenoApps/Field-Book/blob/main/docs/source/img/icon.png"> Field Book
+# <img width="25" src="https://github.com/PhenoApps/Field-Book/blob/main/docs/_static/icons/icon.png"> Field Book
 
 [![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.fieldbook.tracker%26l%3DDownloads%26m%3D%24totalinstalls)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)
 [![Rating](https://img.shields.io/endpoint?color=green&logo=google-play&logoColor=green&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.fieldbook.tracker%26l%3DRating%26m%3D%25E2%25AD%2590%2520%24rating)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)
@@ -11,7 +11,7 @@
 Field Book is a simple app for collecting phenotypic notes. Data capture in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity. Field Book uses custom layouts for different types of data to facilitate rapid data collection. Traits being collected are defined by the user and can be exported and transferred between devices. Sample files are provided in the app. Field Book is compatible with [BrAPI](https://brapi.org/) which can be used to transfer data to compatible databases.
 
 ## 📖 Help
-Check the [user manual](https://docs.fieldbook.phenoapps.org/en/latest/field-book.html) and the [wiki](https://github.com/PhenoApps/Field-Book/wiki) for usage instructions. If you run into a problem while using Field Book, search [existing issues](https://github.com/PhenoApps/Field-Book/issues) and [discussions](https://github.com/PhenoApps/Field-Book/discussions) to see if it is currently being addressed. If you have a new feature idea or want to report a new bug, [create a new issue](https://github.com/PhenoApps/Field-Book/issues/new/choose).
+Check the [user manual](https://fieldbook.phenoapps.org/#/) and the [wiki](https://github.com/PhenoApps/Field-Book/wiki) for usage instructions. If you run into a problem while using Field Book, search [existing issues](https://github.com/PhenoApps/Field-Book/issues) and [discussions](https://github.com/PhenoApps/Field-Book/discussions) to see if it is currently being addressed. If you have a new feature idea or want to report a new bug, [create a new issue](https://github.com/PhenoApps/Field-Book/issues/new/choose).
 
 ## 🌎 Contribute
 Visit our [translation page](https://crowdin.com/project/field-book) to help translate Field Book to your language. To submit code or new features, please review our [contribution guidelines](https://github.com/PhenoApps/Field-Book/wiki/Contributing) before opening a [pull request](https://github.com/PhenoApps/Field-Book/pulls).

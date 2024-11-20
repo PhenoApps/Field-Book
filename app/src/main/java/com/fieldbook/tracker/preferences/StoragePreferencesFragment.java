@@ -32,6 +32,8 @@ import com.fieldbook.tracker.activities.DefineStorageActivity;
 import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
@@ -45,6 +47,7 @@ import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
@@ -198,37 +201,56 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
         protected Integer doInBackground(Integer... params) {
             if (file != null && file.getName() != null) {
                 database.close();
-                if (file.getName().endsWith(".db")) {
-                    try {
-                        database.importDatabase(file);
-                    } catch (Exception e) {
-                        Log.d("Database", e.toString());
-                        e.printStackTrace();
-                        fail = true;
-                    }
-                } else if (file.getName().endsWith(".zip")) {
-                    String internalDbPath = DataHelper.getDatabasePath(context);
-                    try (InputStream input = context.getContentResolver().openInputStream(file.getUri())) {
-                        try (OutputStream output = new FileOutputStream(internalDbPath)) {
-                            ZipUtil.Companion.unzip(context, input, output);
-                            SharedPreferences.Editor edit = preferences.edit();
-                            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-                            edit.putString(GeneralKeys.UNIQUE_NAME, "");
-                            edit.putString(GeneralKeys.PRIMARY_NAME, "");
-                            edit.putString(GeneralKeys.SECONDARY_NAME, "");
-                            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
-                            edit.apply();
-                            database.open();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            throw new Exception();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+
+                try {
+                    database.importDatabase(file); // (handles both .db and .zip)
+                    clearPreferences();
+
+                    if (file.getName().equals("sample_db.zip") || file.getName().equals("sample.db")) {
+                        selectFirstField();
+                    } 
+                } catch (Exception e) {
+                    Log.d("Database", e.toString());
+                    e.printStackTrace();
+                    fail = true;
                 }
             }
             return 0;
+        }
+
+        private void clearPreferences() {
+            // clear the previous preferences after a .db import
+            SharedPreferences.Editor edit = preferences.edit();
+
+            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+            edit.putString(GeneralKeys.UNIQUE_NAME, "");
+            edit.putString(GeneralKeys.PRIMARY_NAME, "");
+            edit.putString(GeneralKeys.SECONDARY_NAME, "");
+            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+            edit.apply();
+        }
+
+        public void selectFirstField() {
+
+            try {
+
+                FieldObject[] fs = database.getAllFieldObjects().toArray(new FieldObject[0]);
+
+                if (fs.length > 0) {
+
+                    switchField(fs[0].getExp_id());
+                }
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+            }
+        }
+
+        private void switchField(int studyId) {
+            FieldSwitchImpl fieldSwitcher = new FieldSwitchImpl(context.getApplicationContext());
+            fieldSwitcher.switchField(studyId);
         }
 
         @Override

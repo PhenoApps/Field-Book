@@ -61,11 +61,26 @@ public class FieldFileObject {
         return path.substring(first).toLowerCase();
     }
 
+    public static String getExtensionFromClass(FieldFileBase fieldFile) {
+
+        if (fieldFile instanceof FieldFileCSV) {
+            return "csv";
+        } else if (fieldFile instanceof FieldFileExcel) {
+            return "xls";
+        } else if (fieldFile instanceof FieldFileXlsx) {
+            return "xlsx";
+        } else {
+            return "";
+        }
+    }
+
     public abstract static class FieldFileBase {
         boolean openFail;
         boolean specialCharactersFail;
         private final Uri path_;
         private final Context ctx;
+
+        private String name;
 
         FieldFileBase(final Context ctx, final Uri path) {
             this.ctx = ctx;
@@ -146,16 +161,27 @@ public class FieldFileObject {
 
         public FieldObject createFieldObject() {
             FieldObject f = new FieldObject();
-            f.setExp_name(this.getStem());
-            f.setExp_alias(this.getStem());
-            f.setExp_source(this.getFileStem());
-            f.setImport_format(ImportFormat.fromString(getExtension(this.getFileStem())));
+            if (name == null) {
+                f.setExp_name(this.getStem());
+                f.setExp_alias(this.getStem());
+                f.setExp_source(this.getFileStem());
+                f.setImport_format(ImportFormat.fromString(getExtension(this.getFileStem())));
+            } else {
+                f.setExp_name(name);
+                f.setExp_alias(name);
+                f.setExp_source(name + "." + getExtensionFromClass(this));
+                f.setImport_format(ImportFormat.fromString(getExtensionFromClass(this)));
+            }
             return f;
         }
 
         public boolean getOpenFailed() {
             return openFail;
         }
+
+        public void setName(String name) { this.name = name; }
+
+        public String getName() { return name; }
 
         abstract public boolean isCSV();
 
@@ -460,37 +486,40 @@ public class FieldFileObject {
         public String[] readNext() {
 
             DataFormatter fmt = new DataFormatter();
-            ArrayList<XSSFRow> rows = new ArrayList<>();
             XSSFSheet sheet = wb.getSheetAt(0);
-
             XSSFFormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
 
-            for (Iterator<Row> it = sheet.rowIterator(); it.hasNext();) {
-                rows.add((XSSFRow) it.next());
-            }
-
-            if (currentRow >= rows.size()) {
+            if (currentRow >= sheet.getPhysicalNumberOfRows()) {
                 return null;
             }
 
+            XSSFRow row = sheet.getRow(currentRow);
             ArrayList<String> data = new ArrayList<>();
-            for (Iterator<Cell> it = rows.get(currentRow).cellIterator(); it.hasNext();) {
-                XSSFCell cell = (XSSFCell) it.next();
-                if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {//formula
-                    int type = evaluator.evaluateFormulaCell(cell);
-                    switch (type) {
-                        case CELL_TYPE_BOOLEAN:
-                            data.add(String.valueOf(cell.getBooleanCellValue()));
-                            break;
-                        case CELL_TYPE_NUMERIC:
-                            data.add(String.valueOf(cell.getNumericCellValue()));
-                            break;
-                        default:
-                            data.add(cell.getStringCellValue());
-                            break;
+
+            int maxColumns = sheet.getRow(0).getLastCellNum(); // Get total number of columns from header
+
+            for (int colIdx = 0; colIdx < maxColumns; colIdx++) {
+                XSSFCell cell = (row == null) ? null : row.getCell(colIdx);
+
+                if (cell != null) {
+                    if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {//formula
+                        int type = evaluator.evaluateFormulaCell(cell);
+                        switch (type) {
+                            case CELL_TYPE_BOOLEAN:
+                                data.add(String.valueOf(cell.getBooleanCellValue()));
+                                break;
+                            case CELL_TYPE_NUMERIC:
+                                data.add(String.valueOf(cell.getNumericCellValue()));
+                                break;
+                            default:
+                                data.add(cell.getStringCellValue());
+                                break;
+                        }
+                    } else {
+                        data.add(fmt.formatCellValue(cell));
                     }
                 } else {
-                    data.add(fmt.formatCellValue(cell));
+                    data.add(""); // Add empty string for missing/empty cells
                 }
             }
 
