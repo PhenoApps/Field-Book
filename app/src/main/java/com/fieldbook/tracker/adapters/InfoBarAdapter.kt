@@ -85,7 +85,7 @@ class InfoBarAdapter(private val context: Context) :
         updateWordWrapState(holder, item.isWordWrapped)
 
         // change infobar prefix when clicked
-        val clickableView = if (hidePrefixEnabled) holder.iconView else holder.prefixTextView
+        val clickableView = if (hidePrefixEnabled) holder.valueTextView else holder.prefixTextView
         clickableView.setOnClickListener {
 
             (context as InfoBarController).onInfoBarClicked(position)
@@ -138,9 +138,9 @@ class InfoBarAdapter(private val context: Context) :
     }
 
     class ViewHolder(v: ConstraintLayout) : RecyclerView.ViewHolder(v) {
-        var prefixTextView: TextView = v.findViewById(R.id.list_item_infobar_prefix)
-        var valueTextView: TextView = v.findViewById(R.id.list_item_infobar_value)
-        var iconView: ImageView = v.findViewById(R.id.list_item_infobar_icon)
+        val prefixTextView: TextView = v.findViewById(R.id.list_item_infobar_prefix)
+        val valueTextView: TextView = v.findViewById(R.id.list_item_infobar_value)
+        val iconView: ImageView = v.findViewById(R.id.list_item_infobar_icon)
     }
 
     // Return the size of your dataset (invoked by the layout manager)
