@@ -30,6 +30,27 @@
     <string name="startup_sample_data_title">Sample data</string>
     <string name="startup_sample_data_message">Load sample data?</string>
 
+    <!-- App Intro -->
+    <string name="app_intro_intro_title_slide1">Welcome to Field Book!</string>
+    <string name="app_intro_intro_summary_slide1">Collecting data in the field has traditionally required writing and transcribing from paper notebooks. Field Book was created as a digital solution for data capture that enables increased collection speed with greater data integrity.</string>
+    <string name="app_intro_intro_title_slide2">Features and Customization</string>
+    <string name="app_intro_intro_summary_slide2">Data is entered into Field Book with custom trait layouts that are designed to simplify data input and minimize mistakes.\n\n By default, collected data is stored locally, but Field Book supports the Breeding API which allows it to send data to BrAPI-compatible systems.</string>
+    <string name="app_intro_required_setup_title">Required Setup</string>
+    <string name="app_intro_required_setup_summary">To get started using Field Book, grant the necessary permissions for the app and then define a folder where your data will be stored.</string>
+    <string name="app_intro_permissions_title">Permissions</string>
+    <string name="app_intro_permissions_warning">Please grant the necessary permissions</string>
+    <string name="app_intro_storage_title">Define Storage</string>
+    <string name="app_intro_storage_summary">Define a folder where your data will be stored.</string>
+    <string name="app_intro_storage_warning">Please set the storage location</string>
+    <string name="app_intro_required_optional_title">Optional Setup</string>
+    <string name="app_intro_required_optional_summary">These optional settings customize Field Book and can be adjusted in the Field Book Settings.</string>
+    <string name="app_intro_load_sample_data_title">Load Sample Data</string>
+    <string name="app_intro_load_sample_data_summary">Import a sample database that includes example fields and traits.</string>
+    <string name="app_intro_tutorial_title">Tutorial</string>
+    <string name="app_intro_tutorial_summary">Add a help icon to the top toolbar that describes features throughout the app.</string>
+    <string name="app_intro_high_contrast_title">High Contrast Theme</string>
+    <string name="app_intro_high_contrast_summary">Enable a high contrast theme for better visibility on eInk devices.</string>
+
     <!-- Storage Definer -->
     <string name="storage_definer_title">Storage Location</string>
     <string name="storage_definer_summary">Please select or create a folder that Field Book can use to store app data.</string>
@@ -91,7 +112,7 @@
     <string name="field_observation_count_format">%1$s %2$s</string>
 
     <!-- Sort -->
-    <string name="field_sort_entries">Sort Entries</string>
+    <string name="field_sort_entries">Sort</string>
     <string name="sort_dialog_saved">Sorting updated</string>
     <string name="sort_dialog_error_saving">Error updating sorting</string>
     <string name="list_item_field_sort_delete_content_description">Delete the sort attribute.</string>
@@ -181,14 +202,9 @@
     <string name="name_conflict_import_name">import name</string>
     <string name="name_conflict_display_name">display name</string>
 
-    <string name="field_import_string">Imported from</string>
-    <string name="field_create_string">Created within</string>
-    <string name="field_detail_narrative">"%1$s" "%2$s" with name "%3$s". Contains "%4$s" entries and "%5$s" attributes. Sorted by "%6$s"</string>
-    <string name="field_default_sort_order">import order</string>
+<!--    <string name="field_default_sort_order">import order</string>-->
 
     <string name="field_data_title">Data</string>
-    <string name="field_trait_total">"&lt;b>%1$s&lt;/b>" traits</string>
-    <string name="field_observation_total">"&lt;b>%1$s&lt;/b>" observations</string>
     <string name="field_trait_observation_total">"%d" observations</string>
 
     <!-- Field Detail Charts -->
@@ -275,6 +291,7 @@
     <string name="traits_create_true">True</string>
     <string name="traits_create_false">False</string>
     <string name="traits_create_categories_text">Use / to separate categories</string>
+    <string name="traits_create_camera">Camera</string>
 
     <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
     <string name="traits_create_warning_duplicate">Trait already exists</string>
@@ -1104,7 +1121,12 @@
     <string name="brapi_na">NA</string>
 
 
-
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_title">Would you like to enable the tutorial?</string>
+    <string name="intro_tutorial_description">This setting can be changed in the Settings</string>
+    <string name="intro_tutorial_radio_item_yes">Yes</string>
+    <string name="intro_tutorial_radio_item_no">No</string>
+    <string name="intro_tutorial_warning">Please make a choice</string>
 
 
     <!-- TUTORIAL -->
@@ -1163,8 +1185,6 @@
     <string name="tutorial_traits_visibility_title">Trait Visibility</string>
     <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
     <string name="shutter_capture_content_description">Shutter button for snapping a picture.</string>
-    <string name="dialog_ask_high_contrast_title">Switch to High Contrast Theme?</string>
-    <string name="dialog_ask_high_contrast_message">eInk device was detected, we suggest switching to the high contrast theme for an optimal experience</string>
     <string name="dialog_geonav_prefs_sensor_missing_title">Required sensor missing</string>
     <string name="dialog_geonav_prefs_sensor_missing_message">The trapezoidal method requires an accelerometer and gyroscope to use compass input.</string>
     <string name="trait_audio_button_content_description">Controls recording audio.</string>
@@ -1188,4 +1208,46 @@
     <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
     <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
 
+    <!-- base camera strings -->
+    <string name="trait_camera_connect_content_description">Starts a device connection.</string>
+    <string name="trait_camera_preview_content_description">This previews the camera\'s display.</string>
+    <string name="trait_camera_capture_content_description">Capture a photo</string>
+    <string name="delete_local_photo">Delete Photo</string>
+    <string name="trait_system_photo_settings_title">System Photo Settings</string>
+    <string name="trait_photos_no_settings">This trait has no settings.</string>
+    <string name="view_trait_photo_settings_preview_title">Preview</string>
+    <string name="view_trait_photo_settings_resolution_title">Target Resolution</string>
+    <string name="view_trait_photo_settings_system_title">System Camera</string>
+    <string name="trait_name_alt_photo_system">System</string>
+    <string name="trait_name_alt_usb">USB</string>
+    <string name="view_trait_photo_settings_camera_custom">Default</string>
+    <string name="view_trait_photo_settings_camera_system">Android</string>
+    <string name="view_trait_photo_settings_camera_choice_description">Choose between the default Field Book camera and the Android camera app.</string>
+
+    <!-- usb camera trait -->
+    <string name="usb_camera_resolution_options_title">Supported Resolutions</string>
+    <string name="usb_camera_plug_in_camera">Please plug in a UVC compatible web cam.</string>
+    <string name="view_trait_photo_settings_white_balance_title">Auto White Balance</string>
+    <string name="view_trait_photo_settings_auto_focus_title">Auto Focus</string>
+
+    <!-- gopro -->
+    <string name="dialog_go_pro_wait_stream_title">Waiting for live preview</string>
+    <string name="dialog_go_pro_wait_stream_message">This may take a minute.</string>
+
+    <!-- canon camera strings -->
+    <string name="canon_frag_connect_btn_content_description">shutter button</string>
+    <string name="traits_format_canon">Canon</string>
+    <string name="pref_canon_ip_title">Canon IP Address</string>
+    <string name="pref_canon_port_title">Canon Port</string>
+    <string name="preferences_canon_title">Canon</string>
+    <string name="pref_canon_ssid_summary">This name is used to find your device\'s AP. This name must be contained within the actual SSID.</string>
+    <string name="pref_canon_title">SSID Name</string>
+    <string name="pref_canon_ip_summary">This is the ip displayed on your camera when setting up the AP.</string>
+    <string name="pref_canon_port_summary">This is the port displayed on your camera when setting up the AP.</string>
+    <string name="pref_canon_help_title">Help</string>
+    <string name="pref_canon_help_summary">This will open a URL to the FieldBook Canon manual.</string>
+    <string name="pref_canon_debug_title">Debug</string>
+    <string name="pref_canon_debug_summary">A preferences for developers to monitor device output.</string>
+    <string name="trait_usb_photo_settings_title">USB Photo Settings</string>
+    <string name="canon_trait_settings_title">Canon Settings</string>
 </resources>

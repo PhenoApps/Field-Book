@@ -1,8 +1,10 @@
 package com.fieldbook.tracker.preferences;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import com.bytehamster.lib.preferencesearch.SearchConfiguration;
 import com.bytehamster.lib.preferencesearch.SearchPreference;
@@ -12,10 +14,14 @@ import com.fieldbook.tracker.activities.PreferencesActivity;
 
 public class PreferencesFragment extends BasePreferenceFragment {
 
+    private PreferenceManager prefMgr;
+    private Context context;
     private SearchPreference searchPreference;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        prefMgr = getPreferenceManager();
+        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
@@ -32,6 +38,7 @@ public class PreferencesFragment extends BasePreferenceFragment {
         config.index(R.xml.preferences_profile);
         config.index(R.xml.preferences_sounds);
         config.index(R.xml.preferences_experimental);
+        config.index(R.xml.preferences_geonav);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
     }
@@ -47,6 +54,12 @@ public class PreferencesFragment extends BasePreferenceFragment {
             //todo figure out why this doesn't ripple like it should
             result.highlight(this);
         }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        PreferencesFragment.this.context = context;
     }
 
     @Override

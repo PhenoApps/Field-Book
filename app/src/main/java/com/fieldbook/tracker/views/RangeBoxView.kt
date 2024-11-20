@@ -116,6 +116,11 @@ class RangeBoxView : ConstraintLayout {
         defStyleRes
     )
 
+    fun toggleNavigation(toggle: Boolean) {
+        rangeLeft.isEnabled = toggle
+        rangeRight.isEnabled = toggle
+    }
+
     fun getRangeID(): IntArray {
         return rangeID
     }

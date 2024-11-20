@@ -44,16 +44,10 @@ import com.fieldbook.tracker.utilities.ZipUtil;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
@@ -64,18 +58,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import dagger.hilt.android.qualifiers.ActivityContext;
 
@@ -862,6 +851,14 @@ public class DataHelper {
     public void updateObservationModels(SQLiteDatabase db, List<ObservationModel> observations) {
 
         ObservationDao.Companion.updateObservationModels(db, observations);
+
+    }
+
+    public void updateObservation(ObservationModel observation) {
+
+        open();
+
+        ObservationDao.Companion.updateObservation(observation);
 
     }
 
@@ -2777,6 +2774,13 @@ public class DataHelper {
         open();
 
         return ObservationUnitPropertyDao.Companion.getObservationUnitPropertyByUniqueId(uniqueName, column, uniqueId);
+    }
+
+    public void deleteObservation(String id) {
+
+        open();
+
+        ObservationDao.Companion.delete(id);
     }
 
     /**
