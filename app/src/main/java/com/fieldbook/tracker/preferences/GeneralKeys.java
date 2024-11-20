@@ -271,6 +271,9 @@ public class GeneralKeys {
     @Nullable
     public static final String FROM_INTRO_AUTOMATIC = "com.fieldbook.tracker.activities.intro.from_intro_automatic";
 
+    @NotNull
+    public static final String EXPERIMENTAL_NEW_BRAPI_UI = "com.tracker.fieldbook.preferences.keys.enable_enhanced_brapi_import";
+
     private GeneralKeys() {
 
     }

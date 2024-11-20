@@ -49,8 +49,7 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
             holder.locationChip.text = studyLoader.getLocation(id)
 
             if (holder.traitCountChip.text.isNotBlank()
-                && holder.unitCountChip.text.isNotBlank()
-                && holder.locationChip.text.isNotBlank()) {
+                && holder.unitCountChip.text.isNotBlank()) {
                 holder.progressBar.visibility = View.GONE
             }
         }

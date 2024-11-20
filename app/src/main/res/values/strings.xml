@@ -1272,4 +1272,7 @@
     <string name="brapi_filter_type_trial_count">Trial (%s)</string>
     <string name="brapi_filter_type_crop_count">Crop (%s)</string>
     <string name="brapi_filter_type_study_count">Study (%s)</string>
+    <string name="pref_alpha_enhanced_brapi_import_summary">When enabled, a new BrAPI import UI will be used for studies and traits.</string>
+    <string name="pref_alpha_brapi_import_title">New BrAPI Import UI</string>
+    <string name="opening_brapi_no_network_error">Networking must be enabled to use BrAPI features.</string>
 </resources>

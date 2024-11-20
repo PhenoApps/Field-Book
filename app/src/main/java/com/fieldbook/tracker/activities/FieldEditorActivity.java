@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.activities;
 
+import static com.fieldbook.tracker.activities.TraitEditorActivity.REQUEST_CODE_BRAPI_TRAIT_ACTIVITY;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
@@ -43,7 +45,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiActivity;
+import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity;
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity;
+import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity;
 import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
@@ -437,8 +442,20 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     public void loadBrAPI() {
-        Intent intent = new Intent(this, BrapiStudyFilterActivity.class);
-        startActivityForResult(intent, REQUEST_BRAPI_IMPORT_ACTIVITY);
+
+        if (Utils.isConnected(this)) {
+            if (prefs.getBoolean(GeneralKeys.EXPERIMENTAL_NEW_BRAPI_UI, false)) {
+                Intent intent = new Intent(this, BrapiStudyFilterActivity.class);
+                BrapiFilterCache.Companion.checkClearCache(this);
+                startActivityForResult(intent, REQUEST_BRAPI_IMPORT_ACTIVITY);
+            } else {
+                Intent intent = new Intent();
+                intent.setClassName(this, BrapiActivity.class.getName());
+                startActivityForResult(intent, REQUEST_CODE_BRAPI_TRAIT_ACTIVITY);
+            }
+        } else {
+            Toast.makeText(this, R.string.opening_brapi_no_network_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void loadCloud() {

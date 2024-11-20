@@ -248,7 +248,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         listView.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_list_item_single_choice,
-            existingLevels()
+            observationLevels.toList().toTypedArray()
         )
 
         listView.setItemChecked(selectedLevel, true)
@@ -500,9 +500,15 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 id: String,
                 position: Int
             ): HashSet<BrAPIObservationUnit>? {
-                return if (selectedLevel >= 0) observationUnits[id]?.toHashSet()
-                    ?.filter { it.observationUnitPosition.observationLevel.levelName == existingLevels().elementAt(selectedLevel) }?.toHashSet()
-                else observationUnits[id]?.toHashSet()
+                return try {
+                    val levels = existingLevels()
+                    if (selectedLevel >= 0 && levels.isNotEmpty()) observationUnits[id]?.toHashSet()
+                        ?.filter { it.observationUnitPosition.observationLevel.levelName == levels.elementAt(selectedLevel) }?.toHashSet()
+                    else observationUnits[id]?.toHashSet()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to get observation units", e)
+                    hashSetOf()
+                }
             }
 
             override fun getGermplasm(id: String, position: Int): HashSet<BrAPIGermplasm>? {
@@ -610,7 +616,13 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private fun saveStudy(study: BrAPIStudy) {
 
         val level = BrapiObservationLevel().also {
-            it.observationLevelName = existingLevels().elementAt(selectedLevel)
+            it.observationLevelName = try {
+                existingLevels().elementAt(selectedLevel)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to get observation level", e)
+                finish()
+                ""
+            }
         }
 
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
@@ -721,26 +733,26 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 }
                 .collect { result ->
 
-                val data = result as Pair<*, *>
-                val total = data.first as Int
-                val models = data.second as List<*>
-                models.forEach { unit ->
+                    val data = result as Pair<*, *>
+                    val total = data.first as Int
+                    val models = data.second as List<*>
+                    models.forEach { unit ->
 
-                    (unit as? BrAPIGermplasm)?.let { g ->
-                        Log.d("Unit", g.germplasmName)
-                        germs.add(g)
-                        if (total == germs.size) {
-                            germplasms.getOrPut(studyDbId) { hashSetOf() }
-                                .addAll(germs)
-                            cancel()
+                        (unit as? BrAPIGermplasm)?.let { g ->
+                            Log.d("Unit", g.germplasmName)
+                            germs.add(g)
+                            if (total == germs.size) {
+                                germplasms.getOrPut(studyDbId) { hashSetOf() }
+                                    .addAll(germs)
+                                cancel()
+                            }
                         }
                     }
-                }
 
-                if (models.isEmpty() && total == 0) {
-                    cancel()
+                    if (models.isEmpty() && total == 0) {
+                        cancel()
+                    }
                 }
-            }
         }
     }
 

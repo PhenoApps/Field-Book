@@ -41,6 +41,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
@@ -560,13 +561,20 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     public void startBrapiTraitActivity(boolean fromTraitCreator) {
-//        Intent intent = new Intent();
-//        intent.setClassName(this, BrapiTraitActivity.class.getName());
-//        startActivityForResult(intent, REQUEST_CODE_BRAPI_TRAIT_ACTIVITY);
 
-        Intent intent = new Intent(this, BrapiTraitFilterActivity.class);
-        BrapiFilterCache.Companion.checkClearCache(this);
-        startActivity(intent);
+        if (Utils.isConnected(this)) {
+            if (prefs.getBoolean(GeneralKeys.EXPERIMENTAL_NEW_BRAPI_UI, false)) {
+                Intent intent = new Intent(this, BrapiTraitFilterActivity.class);
+                BrapiFilterCache.Companion.checkClearCache(this);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent();
+                intent.setClassName(this, BrapiTraitActivity.class.getName());
+                startActivityForResult(intent, REQUEST_CODE_BRAPI_TRAIT_ACTIVITY);
+            }
+        } else {
+            Toast.makeText(this, R.string.opening_brapi_no_network_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showFileDialog() {
