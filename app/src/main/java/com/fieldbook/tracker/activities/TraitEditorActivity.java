@@ -9,6 +9,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -45,7 +46,7 @@ import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapterController;
 import com.fieldbook.tracker.async.ImportCSVTask;
-import com.fieldbook.tracker.brapi.BrapiInfoDialog;
+import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.dialogs.ListSortDialog;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
@@ -209,8 +210,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 // should be shown.
                 if (noCheckTrait) {
 
-                    BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
-                    brapiInfo.show();
+                    BrapiInfoDialogFragment dialogFragment = new BrapiInfoDialogFragment().newInstance(getResources().getString(R.string.brapi_info_message));
+                    dialogFragment.show(this.getSupportFragmentManager(), "brapiInfoDialogFragment");
                     return true;
                 }
 
@@ -226,8 +227,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                     if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
 
                         // Show info dialog if a BrAPI field is selected.
-                        BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
-                        brapiInfo.show();
+                        BrapiInfoDialogFragment dialogFragment = new BrapiInfoDialogFragment().newInstance(getResources().getString(R.string.brapi_info_message));
+                        dialogFragment.show(this.getSupportFragmentManager(), "brapiInfoDialogFragment");
 
                         // Only show the info dialog on the first non-BrAPI trait selected.
                         return true;

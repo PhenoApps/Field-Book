@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.database.Cursor
 import android.os.Build
@@ -16,10 +15,11 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.documentfile.provider.DocumentFile
+import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.BrapiExportActivity
-import com.fieldbook.tracker.brapi.BrapiAuthDialog
+import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.CitationDialog
@@ -137,7 +137,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
         exportSourceList.adapter = adapter
 
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
         builder.setTitle(R.string.export_dialog_title)
             .setView(layout)
             .setPositiveButton(context.getString(R.string.dialog_cancel)) { dialog, _ -> dialog.dismiss() }
@@ -173,8 +173,8 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             exportIntent.putIntegerArrayListExtra(BrapiExportActivity.FIELD_IDS, ArrayList(fieldIds))
             context.startActivity(exportIntent)
         } else {
-            val brapiAuth = BrapiAuthDialog(context)
-            brapiAuth.show()
+            val brapiAuth = BrapiAuthDialogFragment().newInstance()
+            brapiAuth?.show((context as FragmentActivity).supportFragmentManager, "BrapiAuthDialogFragment")
         }
     }
 
@@ -224,7 +224,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         defaultFileString = "${timeStamp.format(Calendar.getInstance().time)}_$defaultFieldString"
         fileName.setText(defaultFileString)
 
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
         builder.setTitle(R.string.settings_export)
             .setCancelable(true)
             .setView(layout)
@@ -306,7 +306,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             //show a warning if table is selected and repeated measures is enabled
             if (checkTable.isChecked && repeatedMeasuresEnabled) {
 
-                AlertDialog.Builder(context)
+                AlertDialog.Builder(context, R.style.AppAlertDialog)
                     .setTitle(R.string.export_util_repeated_measures_table_warning_title)
                     .setMessage(R.string.export_util_repeated_measures_table_warning_message)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
