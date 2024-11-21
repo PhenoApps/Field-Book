@@ -5,23 +5,28 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
+import androidx.fragment.app.DialogFragment;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
@@ -37,13 +42,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener {
+public class BrapiLoadDialog extends DialogFragment {
 
     private Button saveBtn;
     private BrapiStudyDetails study;
     private BrapiStudyDetails studyDetails;
     private BrAPIService brAPIService;
-    private final Context context;
+    private Context context;
     private Boolean studyLoadStatus = false;
     private Boolean plotLoadStatus = false;
     private Boolean traitLoadStatus = false;
@@ -60,9 +65,23 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     private String selectedSecondary;
     private String selectedSort;
 
-    public BrapiLoadDialog(@NonNull Context context) {
-        super(context);
-        this.context = context;
+    private TextView studyNumPlotsLbl;
+    private RelativeLayout loadingPanel;
+
+    private TextView studyNameValue;
+    private TextView studyDescriptionValue;
+    private TextView studyLocationValue;
+    private TextView studyNumPlotsValue;
+    private TextView studyNumTraitsValue;
+    private Spinner studyPrimaryKey;
+    private Spinner studySecondaryKey;
+    private Spinner studySortOrder;
+
+    public BrapiLoadDialog() {
+    }
+
+    public static BrapiLoadDialog newInstance() {
+        return new BrapiLoadDialog();
     }
 
     public void setSelectedStudy(BrapiStudyDetails selectedStudy) {
@@ -73,22 +92,51 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         this.paginationManager = paginationManager;
     }
 
+    @NonNull
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        this.setCanceledOnTouchOutside(false);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.dialog_brapi_import);
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        this.context = requireActivity();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
+
+//        builder.setTitle(R.string.field_import_string);
+        builder.setNegativeButton(R.string.dialog_cancel, (dialog, which) -> dialog.dismiss());
+
+        builder.setPositiveButton(R.string.dialog_save, (dialog, which) -> {
+                saveStudy();
+                dialog.dismiss();
+        });
+
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_brapi_import, null);
+        builder.setView(view);
+
+        AlertDialog brapiLoadDialog = builder.create();
+        brapiLoadDialog.show();
+
+
         brAPIService = BrAPIServiceFactory.getBrAPIService(this.context);
 
-        saveBtn = findViewById(R.id.brapi_save_btn);
-        saveBtn.setOnClickListener(this);
-        Button cancelBtn = findViewById(R.id.brapi_cancel_btn);
-        cancelBtn.setOnClickListener(this);
+        saveBtn = brapiLoadDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+
+        studyNumPlotsLbl = view.findViewById(R.id.studyNumPlotsLbl);
+        loadingPanel = view.findViewById(R.id.loadingPanel);
+        studyNameValue = view.findViewById(R.id.studyNameValue);
+        studyDescriptionValue = view.findViewById(R.id.studyDescriptionValue);
+        studyLocationValue = view.findViewById(R.id.studyLocationValue);
+        studyNumPlotsValue = view.findViewById(R.id.studyNumPlotsValue);
+        studyNumTraitsValue = view.findViewById(R.id.studyNumTraitsValue);
+        studyPrimaryKey = view.findViewById(R.id.studyPrimaryKey);
+        studySecondaryKey = view.findViewById(R.id.studySecondaryKey);
+        studySortOrder = view.findViewById(R.id.studySortOrder);
+
+        return brapiLoadDialog;
     }
 
     @Override
-    protected void onStart(){
+    public void onStart() {
+        super.onStart();
         // Set our OK button to be disabled until we are finished loading
         saveBtn.setVisibility(View.GONE);
         studyDetails = new BrapiStudyDetails();
@@ -100,7 +148,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
     private void updateNumPlotsLabel() {
         if (selectedObservationLevel != null) {
-            ((TextView) findViewById(R.id.studyNumPlotsLbl)).setText(
+            studyNumPlotsLbl.setText(
                     makePlural(this.selectedObservationLevel.getObservationLevelName()));
         }
     }
@@ -121,134 +169,94 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     }
 
     private void buildStudyDetails() {
-        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
-        brAPIService.getStudyDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
-            @Override
-            public Void apply(final BrapiStudyDetails study) {
+        loadingPanel.setVisibility(View.VISIBLE);
+        brAPIService.getStudyDetails(study.getStudyDbId(), study -> {
 
-                ((Activity) context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        BrapiStudyDetails.merge(studyDetails, study);
-                        loadStudy();
-                        // Check if user should save yet
-                        studyLoadStatus = true;
-                        if (checkAllLoadsFinished()) {
-                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                            saveBtn.setVisibility(View.VISIBLE);
-                            resetLoadStatus();
-                        }
-                    }
-                });
-                return null;
-            }
-        }, new Function<Integer, Void>() {
-
-            @Override
-            public Void apply(final Integer code) {
-                ((Activity) context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        Toast.makeText(context, context.getString(R.string.brapi_study_detail_error), Toast.LENGTH_LONG).show();
-                    }
-                });
-                return null;
-            }
+            ((Activity) context).runOnUiThread(() -> {
+                BrapiStudyDetails.merge(studyDetails, study);
+                loadStudy();
+                // Check if user should save yet
+                studyLoadStatus = true;
+                if (checkAllLoadsFinished()) {
+                    loadingPanel.setVisibility(View.GONE);
+                    saveBtn.setVisibility(View.VISIBLE);
+                    resetLoadStatus();
+                }
+            });
+            return null;
+        }, code -> {
+            ((Activity) context).runOnUiThread(() -> {
+                loadingPanel.setVisibility(View.GONE);
+                Toast.makeText(context, context.getString(R.string.brapi_study_detail_error), Toast.LENGTH_LONG).show();
+            });
+            return null;
         });
 
-        brAPIService.getPlotDetails(study.getStudyDbId(), selectedObservationLevel, new Function<BrapiStudyDetails, Void>() {
-            @Override
-            public Void apply(final BrapiStudyDetails study) {
+        brAPIService.getPlotDetails(study.getStudyDbId(), selectedObservationLevel, study -> {
 
-                ((Activity) context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        BrapiStudyDetails.merge(studyDetails, study);
-                        loadStudy();
-                        // Check if user should save yet
-                        plotLoadStatus = true;
-                        if (checkAllLoadsFinished()) {
-                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                            saveBtn.setVisibility(View.VISIBLE);
-                            resetLoadStatus();
-                        }
-                    }
-                });
-                return null;
-            }
-
-        }, new Function<Integer, Void>() {
-
-            @Override
-            public Void apply(final Integer code) {
-                ((Activity) context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        new AlertDialog.Builder(context, R.style.AppAlertDialog)
-                                .setTitle(R.string.dialog_save_error_title)
-                                .setPositiveButton(org.phenoapps.androidlibrary.R.string.okButtonText, (dialogInterface, i) -> {
-                                    ((Activity) context).finish();
-                                }).setMessage(R.string.brapi_plot_detail_error).create().show();
-                    }
-                });
-                return null;
-            }
+            ((Activity) context).runOnUiThread(() -> {
+                BrapiStudyDetails.merge(studyDetails, study);
+                loadStudy();
+                // Check if user should save yet
+                plotLoadStatus = true;
+                if (checkAllLoadsFinished()) {
+                    loadingPanel.setVisibility(View.GONE);
+                    saveBtn.setVisibility(View.VISIBLE);
+                    resetLoadStatus();
+                }
+            });
+            return null;
+        }, code -> {
+            ((Activity) context).runOnUiThread(() -> {
+                loadingPanel.setVisibility(View.GONE);
+                new AlertDialog.Builder(context, R.style.AppAlertDialog)
+                        .setTitle(R.string.dialog_save_error_title)
+                        .setPositiveButton(org.phenoapps.androidlibrary.R.string.okButtonText, (dialogInterface, i) -> {
+                            ((Activity) context).finish();
+                        }).setMessage(R.string.brapi_plot_detail_error).create().show();
+            });
+            return null;
         });
 
 
-        brAPIService.getTraits(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
-            @Override
-            public Void apply(final BrapiStudyDetails study) {
+        brAPIService.getTraits(study.getStudyDbId(), study -> {
 
-                ((Activity) context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        BrapiStudyDetails.merge(studyDetails, study);
+            ((Activity) context).runOnUiThread(() -> {
+                BrapiStudyDetails.merge(studyDetails, study);
 
-                        // This is BMS specific. Remove the traits that are not part of the selected Observation Level.
-                        // To ensure that only relevant traits are included in the imported study/field.
-                        studyDetails.getTraits().removeIf(t -> t.getObservationLevelNames() != null &&
-                                t.getObservationLevelNames().stream().noneMatch(s -> s.equalsIgnoreCase(selectedObservationLevel.getObservationLevelName())));
+                // This is BMS specific. Remove the traits that are not part of the selected Observation Level.
+                // To ensure that only relevant traits are included in the imported study/field.
+                studyDetails.getTraits().removeIf(t -> t.getObservationLevelNames() != null &&
+                        t.getObservationLevelNames().stream().noneMatch(s -> s.equalsIgnoreCase(selectedObservationLevel.getObservationLevelName())));
 
-                        loadStudy();
-                        // Check if user should save yet
-                        traitLoadStatus = true;
-                        if (checkAllLoadsFinished()) {
-                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                            saveBtn.setVisibility(View.VISIBLE);
-                            resetLoadStatus();
-                        }
-                    }
-                });
-                return null;
-            }
-        }, new Function<Integer, Void>() {
+                loadStudy();
+                // Check if user should save yet
+                traitLoadStatus = true;
+                if (checkAllLoadsFinished()) {
+                    loadingPanel.setVisibility(View.GONE);
+                    saveBtn.setVisibility(View.VISIBLE);
+                    resetLoadStatus();
+                }
+            });
+            return null;
+        }, code -> {
+            ((Activity) context).runOnUiThread(() -> {
+                // Allow load to continue even if Traits fail to load
+                Toast.makeText(context, context.getString(R.string.brapi_study_traits_error), Toast.LENGTH_LONG).show();
 
-            @Override
-            public Void apply(final Integer code) {
-                ((Activity) context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Allow load to continue even if Traits fail to load
-                        Toast.makeText(context, context.getString(R.string.brapi_study_traits_error), Toast.LENGTH_LONG).show();
-
-                        BrapiStudyDetails emptyTraits = new BrapiStudyDetails();
-                        emptyTraits.setTraits(new ArrayList<>());
-                        BrapiStudyDetails.merge(studyDetails, emptyTraits);
-                        loadStudy();
-                        // Check if user should save yet
-                        traitLoadStatus = true;
-                        if (checkAllLoadsFinished()) {
-                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                            saveBtn.setVisibility(View.VISIBLE);
-                            resetLoadStatus();
-                        }
-                    }
-                });
-                return null;
-            }
+                BrapiStudyDetails emptyTraits = new BrapiStudyDetails();
+                emptyTraits.setTraits(new ArrayList<>());
+                BrapiStudyDetails.merge(studyDetails, emptyTraits);
+                loadStudy();
+                // Check if user should save yet
+                traitLoadStatus = true;
+                if (checkAllLoadsFinished()) {
+                    loadingPanel.setVisibility(View.GONE);
+                    saveBtn.setVisibility(View.VISIBLE);
+                    resetLoadStatus();
+                }
+            });
+            return null;
         });
     }
 
@@ -263,72 +271,58 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         List<String> observationVariableDbIds = new ArrayList<String>();
 
         //Trying to get the traits as well:
-        brAPIService.getTraits(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
-            @Override
-            public Void apply(BrapiStudyDetails input) {
-                for(TraitObject obj : input.getTraits()) {
-                    System.out.println("Trait:" + obj.getName());
-                    System.out.println("ObsIds: " + obj.getExternalDbId());
-                    observationVariableDbIds.add(obj.getExternalDbId());
-                }
+        brAPIService.getTraits(study.getStudyDbId(), input -> {
+            for(TraitObject obj : input.getTraits()) {
+                System.out.println("Trait:" + obj.getName());
+                System.out.println("ObsIds: " + obj.getExternalDbId());
+                observationVariableDbIds.add(obj.getExternalDbId());
+            }
 
-                return null;
-            }
-        }, new Function<Integer, Void>() {
-            @Override
-            public Void apply(Integer input) {
-                return null;
-            }
-        });
+            return null;
+        }, input -> null);
 
         System.out.println("obsIds Size:"+observationVariableDbIds.size());
-        brAPIService.getObservations(study.getStudyDbId(), observationVariableDbIds, paginationManager, new Function<List<Observation>, Void>() {
-            @Override
-            public Void apply(List<Observation> input) {
-                study.setObservations(input);
-                BrapiStudyDetails.merge(studyDetails, study);
-                System.out.println("StudyId: " + study.getStudyDbId());
-                System.out.println("StudyName: " + study.getStudyName());
-                for(Observation obs : input) {
+        brAPIService.getObservations(study.getStudyDbId(), observationVariableDbIds, paginationManager, input -> {
+            study.setObservations(input);
+            BrapiStudyDetails.merge(studyDetails, study);
+            System.out.println("StudyId: " + study.getStudyDbId());
+            System.out.println("StudyName: " + study.getStudyName());
+            for(Observation obs : input) {
 
-                    System.out.println("***************************");
-                    System.out.println("StudyId: "+obs.getStudyId());
-                    System.out.println("ObsId: "+obs.getDbId());
-                    System.out.println("UnitDbId: "+obs.getUnitDbId());
+                System.out.println("***************************");
+                System.out.println("StudyId: "+obs.getStudyId());
+                System.out.println("ObsId: "+obs.getDbId());
+                System.out.println("UnitDbId: "+obs.getUnitDbId());
 
-                    System.out.println("VariableDbId: "+obs.getVariableDbId());
-                    System.out.println("VariableName: "+obs.getVariableName());
-                    System.out.println("Value: "+obs.getValue());
-                }
-                return null;
+                System.out.println("VariableDbId: "+obs.getVariableDbId());
+                System.out.println("VariableName: "+obs.getVariableName());
+                System.out.println("Value: "+obs.getValue());
             }
-        }, new Function<Integer, Void>() {
-            @Override
-            public Void apply(Integer input) {
-                System.out.println("Stopped:");
-                return null;
-            }
+            return null;
+        }, input -> {
+            System.out.println("Stopped:");
+            return null;
         });
     }
 
     private void loadStudy() {
         if (this.studyDetails.getStudyName() != null)
-            ((TextView) findViewById(R.id.studyNameValue)).setText(this.studyDetails.getStudyName());
+            studyNameValue.setText(this.studyDetails.getStudyName());
         if (this.studyDetails.getStudyDescription() != null)
-            ((TextView) findViewById(R.id.studyDescriptionValue)).setText(this.studyDetails.getStudyDescription());
+            studyDescriptionValue.setText(this.studyDetails.getStudyDescription());
         if (this.studyDetails.getStudyLocation() != null)
-            ((TextView) findViewById(R.id.studyLocationValue)).setText(this.studyDetails.getStudyLocation());
+            studyLocationValue.setText(this.studyDetails.getStudyLocation());
         if (this.studyDetails.getNumberOfPlots() != null)
-            ((TextView) findViewById(R.id.studyNumPlotsValue)).setText(this.studyDetails.getNumberOfPlots().toString());
+            studyNumPlotsValue.setText(this.studyDetails.getNumberOfPlots().toString());
         if (this.studyDetails.getTraits() != null)
-            ((TextView) findViewById(R.id.studyNumTraitsValue)).setText(String.valueOf(this.studyDetails.getTraits().size()));
+           studyNumTraitsValue.setText(String.valueOf(this.studyDetails.getTraits().size()));
 
 
         if(this.studyDetails.getAttributes() != null && !this.studyDetails.getAttributes().isEmpty()) {
-            ArrayAdapter<String> keyOptions = new ArrayAdapter<String>(this.context,
+            ArrayAdapter<String> keyOptions = new ArrayAdapter<>(this.context,
                     android.R.layout.simple_spinner_dropdown_item, studyDetails.getAttributes());
 
-            Spinner primary = findViewById(R.id.studyPrimaryKey);
+            Spinner primary = studyPrimaryKey;
             primary.setAdapter(keyOptions);
             primary.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -342,7 +336,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 }
             });
 
-            Spinner secondary = findViewById(R.id.studySecondaryKey);
+            Spinner secondary = studySecondaryKey;
             secondary.setAdapter(keyOptions);
             secondary.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -356,7 +350,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 }
             });
 
-            Spinner sort = findViewById(R.id.studySortOrder);
+            Spinner sort = studySortOrder;
             sort.setAdapter(keyOptions);
             sort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -390,17 +384,6 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         studyLoadStatus = false;
         traitLoadStatus = false;
         plotLoadStatus = false;
-    }
-
-    @Override
-    public void onClick(View v) {
-        int id = v.getId();
-        if (id == R.id.brapi_save_btn) {
-            saveStudy();
-        } else if (id == R.id.brapi_cancel_btn) {
-            dismiss();
-        }
-        dismiss();
     }
 
     private void saveStudy() {

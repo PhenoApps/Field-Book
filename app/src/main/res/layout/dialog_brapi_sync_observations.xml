@@ -10,21 +10,6 @@
     android:paddingRight="20dp"
     android:paddingBottom="5dp">
 
-
-
-
-    <TextView
-        android:id="@+id/studyNameLbl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="10dp"
-        android:text="@string/brapi_obs_header_name"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_medium"
-        android:textStyle="bold" />
-
     <TextView
         android:id="@+id/studyNameValue"
         android:layout_width="wrap_content"
@@ -126,37 +111,6 @@
             android:text="@string/no_observations_warning"
             android:textColor="#FF0000"
             android:textSize="@dimen/text_size_xlarge"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/brapi_save_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:minWidth="@dimen/button_default_width"
-            android:onClick="dialogButtonClicked"
-            android:text="@string/dialog_save"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/brapi_cancel_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:minWidth="@dimen/button_default_width"
-            android:onClick="dialogButtonClicked"
-            android:text="@string/dialog_cancel"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
     </LinearLayout>
 

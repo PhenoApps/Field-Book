@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.database.Cursor
 import android.os.Build
@@ -16,10 +15,11 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.documentfile.provider.DocumentFile
+import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.BrapiExportActivity
-import com.fieldbook.tracker.brapi.BrapiAuthDialog
+import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.CitationDialog
@@ -86,16 +86,13 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     fun export() {
         val exporter = preferences.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "")
 
-        when (exporter) {
-            "local" -> exportPermission()
-            "brapi" -> fieldIds.forEach { fieldId -> exportBrAPI(fieldId) }
-            else -> {
-                if (allFieldsBrAPI() && preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
-                    showExportDialog()
-                } else {
-                    exportPermission()
-                }
-            }
+        if (!allFieldsBrAPI() || exporter == "local" || !preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+            // use local export if any fields aren't all brapi, if brapi is disabled, or if local pref is set
+            exportPermission()
+        } else if (exporter == "brapi") {
+            exportBrAPI(fieldIds)
+        } else {
+            showExportDialog() // provide export type choice if fields are all brapi but pref is not set
         }
     }
 
@@ -104,12 +101,12 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             val field = database.getFieldObject(fieldId)
             val importFormat = field?.import_format
             if (importFormat != ImportFormat.BRAPI) {
+                Log.d(TAG, "Not all fields are BrAPI fields")
                 return false
             }
         }
         return true
     }
-
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_EXPORT_DATA)
     fun exportPermission() {
@@ -140,40 +137,31 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
         exportSourceList.adapter = adapter
 
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
         builder.setTitle(R.string.export_dialog_title)
             .setView(layout)
             .setPositiveButton(context.getString(R.string.dialog_cancel)) { dialog, _ -> dialog.dismiss() }
-            .create()
-            .show()
 
+        val dialog = builder.create()
+        dialog.show()
         exportSourceList.setOnItemClickListener { _, _, which, _ ->
             when (which) {
                 0 -> exportPermission()
-                1 -> fieldIds.forEach { fieldId -> exportBrAPI(fieldId) }
+                1 -> exportBrAPI(fieldIds)
             }
+            dialog.dismiss()
         }
     }
 
-    fun exportBrAPI(fieldId: Int) {
-//        val activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
-//        val activeField = if (activeFieldId != -1) {
-//            database.getFieldObject(activeFieldId)
-//        } else {
-//            Toast.makeText(context, R.string.warning_field_missing, Toast.LENGTH_LONG).show()
-//            return
-//        }
-        val activeField = database.getFieldObject(fieldId)
-        if (activeField.getImport_format() != ImportFormat.BRAPI) {
-            Toast.makeText(context, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show()
-            return
-        }
+    fun exportBrAPI(fieldIds: List<Int>) {
+        val activeFields = fieldIds.map { fieldId -> database.getFieldObject(fieldId) }
+        val nonMatchingSourceFields = activeFields.filter { !BrAPIService.checkMatchBrapiUrl(context, it.getExp_source()) }
 
-        if (!BrAPIService.checkMatchBrapiUrl(context, activeField.getExp_source())) {
+        if (nonMatchingSourceFields.isNotEmpty()) {
             val hostURL = BrAPIService.getHostUrl(context)
             val badSourceMsg = context.resources.getString(
                 R.string.brapi_field_non_matching_sources,
-                activeField.getExp_source(),
+                nonMatchingSourceFields.joinToString(", ") { it.getExp_source() },
                 hostURL
             )
             Toast.makeText(context, badSourceMsg, Toast.LENGTH_LONG).show()
@@ -182,11 +170,11 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
         if (BrAPIService.isLoggedIn(context)) {
             val exportIntent = Intent(context, BrapiExportActivity::class.java)
-            exportIntent.putExtra(BrapiExportActivity.FIELD_ID, fieldId);
+            exportIntent.putIntegerArrayListExtra(BrapiExportActivity.FIELD_IDS, ArrayList(fieldIds))
             context.startActivity(exportIntent)
         } else {
-            val brapiAuth = BrapiAuthDialog(context)
-            brapiAuth.show()
+            val brapiAuth = BrapiAuthDialogFragment().newInstance()
+            brapiAuth?.show((context as FragmentActivity).supportFragmentManager, "BrapiAuthDialogFragment")
         }
     }
 
@@ -236,7 +224,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         defaultFileString = "${timeStamp.format(Calendar.getInstance().time)}_$defaultFieldString"
         fileName.setText(defaultFileString)
 
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
         builder.setTitle(R.string.settings_export)
             .setCancelable(true)
             .setView(layout)
@@ -318,7 +306,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             //show a warning if table is selected and repeated measures is enabled
             if (checkTable.isChecked && repeatedMeasuresEnabled) {
 
-                AlertDialog.Builder(context)
+                AlertDialog.Builder(context, R.style.AppAlertDialog)
                     .setTitle(R.string.export_util_repeated_measures_table_warning_title)
                     .setMessage(R.string.export_util_repeated_measures_table_warning_message)
                     .setPositiveButton(android.R.string.ok) { _, _ ->

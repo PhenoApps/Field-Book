@@ -52,7 +52,7 @@ public class BrapiActivity extends ThemedActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (brapiLoadDialog != null) {
+        if (brapiLoadDialog != null && brapiLoadDialog.isAdded()) {
             brapiLoadDialog.dismiss();
         }
     }
@@ -73,7 +73,7 @@ public class BrapiActivity extends ThemedActivity {
                 paginationManager = new BrapiPaginationManager(this);
 
                 brAPIService = BrAPIServiceFactory.getBrAPIService(BrapiActivity.this);
-                brapiLoadDialog = new BrapiLoadDialog(this);
+                brapiLoadDialog = BrapiLoadDialog.newInstance();
 
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
@@ -233,7 +233,7 @@ public class BrapiActivity extends ThemedActivity {
             brapiLoadDialog.setSelectedStudy(this.selectedStudy);
             brapiLoadDialog.setObservationLevel(this.selectedObservationLevel);
             brapiLoadDialog.setPaginationManager(this.paginationManager);
-            brapiLoadDialog.show();
+            brapiLoadDialog.show(this.getSupportFragmentManager(), "BrapiLoadDialog");
         } else{
             Toast toast = Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_study, Toast.LENGTH_LONG);
             toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
