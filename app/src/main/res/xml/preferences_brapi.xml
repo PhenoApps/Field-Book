@@ -10,15 +10,9 @@
         android:title="@string/preferences_brapi_enable_title" />
 
     <PreferenceCategory
-        android:key="brapi_category"
-        android:title="@string/preferences_brapi_core_title"
+        android:key="brapi_server"
+        android:title="@string/preferences_brapi_server_title"
         app:iconSpaceReserved="false">
-
-        <Preference
-                android:icon="@drawable/ic_trait_barcode"
-                android:key="brapi_config_barcode"
-                android:title="@string/preferences_brapi_barcode_config_title"
-                android:summary="@string/preferences_brapi_barcode_config_summary" />
 
         <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
             android:defaultValue="@string/brapi_base_url_default"
@@ -33,7 +27,7 @@
             app:positiveButtonText="@string/brapi_save_authorize" />
 
         <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
-            android:defaultValue="@string/preferences_brapi_server_test"
+            android:defaultValue="@string/brapi_edit_display_name_default"
             android:dialogTitle="@string/brapi_edit_display_name"
             android:icon="@drawable/ic_pref_brapi_name"
             android:key="BRAPI_DISPLAY_NAME"
@@ -41,12 +35,69 @@
             android:title="@string/brapi_display_name"
             app:negativeButtonText="@android:string/cancel"
             app:neutralButtonText="@string/brapi_edit_display_name_server"
-            app:positiveButtonText="@android:string/ok" />
+            app:positiveButtonText="@string/dialog_save" />
 
         <Preference
             android:icon="@drawable/ic_pref_brapi_logout"
             android:key="revokeBrapiAuth"
             android:title="@string/brapi_revoke_auth" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="brapi_oidc_settings"
+        android:title="@string/preferences_brapi_authorization_title"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:defaultValue="@string/preferences_brapi_oidc_flow_oauth_implicit"
+            android:entries="@array/pref_brapi_oidc_flow"
+            android:entryValues="@array/pref_brapi_oidc_flow"
+            android:icon="@drawable/ic_pref_brapi_version"
+            android:key="BRAPI_OIDC_FLOW"
+            android:summary="%s"
+            android:title="@string/preferences_brapi_oidc_flow" />
+
+        <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
+            android:defaultValue="@string/brapi_oidc_url_default"
+            android:dialogMessage="@string/brapi_oidc_url_desc"
+            android:dialogTitle="@string/brapi_oidc_url"
+            android:icon="@drawable/ic_adv_brapi_base"
+            android:key="BRAPI_OIDC_URL"
+            android:summary="@string/brapi_oidc_url_desc"
+            android:title="@string/brapi_oidc_url"
+            app:negativeButtonText="@android:string/cancel"
+            app:neutralButtonText="@string/dialog_scan"
+            app:positiveButtonText="@string/dialog_save" />
+
+        <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
+            android:defaultValue="@string/brapi_oidc_clientid_default"
+            android:dialogMessage="@string/brapi_oidc_clientid_desc"
+            android:dialogTitle="@string/brapi_oidc_clientid"
+            android:icon="@drawable/ic_pref_brapi_client_id"
+            android:key="BRAPI_OIDC_CLIENT_ID"
+            android:summary="@string/brapi_oidc_clientid_desc"
+            android:title="@string/brapi_oidc_clientid"
+            app:negativeButtonText="@android:string/cancel"
+            app:positiveButtonText="@string/dialog_save" />
+
+        <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
+            android:defaultValue="@string/brapi_oidc_scope_default"
+            android:dialogMessage="@string/brapi_oidc_scope_desc"
+            android:dialogTitle="@string/brapi_oidc_scope"
+            android:icon="@drawable/ic_pref_brapi_scope"
+            android:key="BRAPI_OIDC_SCOPE"
+            android:summary="@string/brapi_oidc_scope_desc"
+            android:title="@string/brapi_oidc_scope"
+            app:negativeButtonText="@android:string/cancel"
+            app:positiveButtonText="@string/dialog_save" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="brapi_advanced"
+        android:title="@string/preferences_brapi_advanced_title"
+        app:iconSpaceReserved="false">
 
         <ListPreference
             android:defaultValue="@string/preferences_brapi_version_v2"
@@ -83,55 +134,6 @@
             android:selectAllOnFocus="true"
             android:summary="%s"
             android:title="@string/brapi_timeout" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="brapi_oidc_settings"
-        android:title="@string/preferences_brapi_advanced_title"
-        app:iconSpaceReserved="false">
-
-        <ListPreference
-            android:defaultValue="@string/preferences_brapi_oidc_flow_oauth_implicit"
-            android:entries="@array/pref_brapi_oidc_flow"
-            android:entryValues="@array/pref_brapi_oidc_flow"
-            android:icon="@drawable/ic_pref_brapi_version"
-            android:key="BRAPI_OIDC_FLOW"
-            android:summary="%s"
-            android:title="@string/preferences_brapi_oidc_flow" />
-
-        <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
-            android:defaultValue="@string/brapi_oidc_url_default"
-            android:dialogMessage="@string/brapi_oidc_url_desc"
-            android:dialogTitle="@string/brapi_oidc_url"
-            android:icon="@drawable/ic_adv_brapi_base"
-            android:key="BRAPI_OIDC_URL"
-            android:summary="@string/brapi_oidc_url_desc"
-            android:title="@string/brapi_oidc_url"
-            app:negativeButtonText="@android:string/cancel"
-            app:neutralButtonText="@string/dialog_scan"
-            app:positiveButtonText="@android:string/ok" />
-
-        <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
-            android:defaultValue="@string/brapi_oidc_clientid_default"
-            android:dialogMessage="@string/brapi_oidc_clientid_desc"
-            android:dialogTitle="@string/brapi_oidc_clientid"
-            android:icon="@drawable/ic_pref_brapi_client_id"
-            android:key="BRAPI_OIDC_CLIENT_ID"
-            android:summary="@string/brapi_oidc_clientid_desc"
-            android:title="@string/brapi_oidc_clientid"
-            app:negativeButtonText="@android:string/cancel"
-            app:positiveButtonText="@android:string/ok" />
-
-        <org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog
-            android:defaultValue="@string/brapi_oidc_scope_default"
-            android:dialogMessage="@string/brapi_oidc_scope_desc"
-            android:dialogTitle="@string/brapi_oidc_scope"
-            android:icon="@drawable/ic_pref_brapi_scope"
-            android:key="BRAPI_OIDC_SCOPE"
-            android:summary="@string/brapi_oidc_scope_desc"
-            android:title="@string/brapi_oidc_scope"
-            app:negativeButtonText="@android:string/cancel"
-            app:positiveButtonText="@android:string/ok" />
 
     </PreferenceCategory>
 
@@ -150,50 +152,4 @@
             android:title="@string/preferences_appearance_collect_labelval_customize" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="brapi_server_list"
-        android:title="@string/preferences_brapi_servers_title"
-        app:iconSpaceReserved="false"
-        app:initialExpandedChildrenCount="1">
-
-        <Preference
-            android:icon="@drawable/ic_trait_barcode"
-            android:key="brapi_server_barcode"
-            android:title="@string/preferences_brapi_server_barcode" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server"
-            android:key="brapi_server_cassavabase"
-            android:title="@string/preferences_brapi_server_cassavabase" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server"
-            android:key="brapi_server_t3_wheat"
-            android:title="@string/preferences_brapi_server_t3_wheat" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server"
-            android:key="brapi_server_t3_oat"
-            android:title="@string/preferences_brapi_server_t3_oat" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server"
-            android:key="brapi_server_t3_barley"
-            android:title="@string/preferences_brapi_server_t3_barley" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server"
-            android:key="brapi_server_default"
-            android:title="@string/preferences_brapi_server_test" />
-
-        <Preference
-            android:icon="@drawable/ic_pref_brapi_server_add"
-            android:key="brapi_server_add"
-            android:title="@string/preferences_brapi_server_add">
-
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="https://github.com/PhenoApps/Field-Book/issues/new?assignees=&amp;labels=enhancement%2C+feature+request&amp;template=feature_request.md&amp;title=%5BREQUEST%5D" />
-        </Preference>
-    </PreferenceCategory>
 </PreferenceScreen>

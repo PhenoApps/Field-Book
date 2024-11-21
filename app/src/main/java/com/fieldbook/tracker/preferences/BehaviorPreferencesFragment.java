@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -39,33 +40,18 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
         setPreferencesFromResource(R.xml.preferences_behavior, rootKey);
+        CheckBoxPreference cycleTraitsPref = findPreference("CycleTraits");
 
-        Preference skipEntriesPref = this.findPreference(GeneralKeys.HIDE_ENTRIES_WITH_DATA);
-
-        if (skipEntriesPref != null) {
-
-            //set preference change listener to change summary when needed
-            skipEntriesPref.setOnPreferenceChangeListener(this);
-
-            //also initialize the summary whenever the fragment is opened, or else it defaults to "disabled"
-            String skipMode = preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1");
-
-            switchSkipPreferenceMode(skipMode, skipEntriesPref);
-
-        }
-
-        Preference switchVolumePref = this.findPreference(GeneralKeys.VOLUME_NAVIGATION);
-
-        if (switchVolumePref != null) {
-
-            //set preference change listener to change summary when needed
-            switchVolumePref.setOnPreferenceChangeListener(this);
-
-            //also initialize the summary whenever the fragment is opened, or else it defaults to "disabled"
-            String switchMode = preferences.getString(GeneralKeys.VOLUME_NAVIGATION, "0");
-
-            switchVolumePreferenceMode(switchMode, switchVolumePref);
-
+        if (cycleTraitsPref != null) {
+            cycleTraitsPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                boolean isChecked = (Boolean) newValue;
+                if (isChecked) {
+                    if (!preferences.getBoolean("CYCLE_TRAITS_SOUND", false)) {
+                        promptEnableCycleTraitsSound();
+                    }
+                }
+                return true;
+            });
         }
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_behavior_title));
@@ -111,81 +97,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-
-        //When the skip entries preference is changed, update the summary that is defined in string.xml.
-        if (preference.hasKey()) {
-
-            if (preference.getKey().equals(GeneralKeys.HIDE_ENTRIES_WITH_DATA)) {
-
-                switchSkipPreferenceMode((String) newValue, preference);
-
-            } else if (preference.getKey().equals(GeneralKeys.VOLUME_NAVIGATION)) {
-
-                switchVolumePreferenceMode((String) newValue, preference);
-
-            }
-
-        }
-
         return true;
-    }
-
-    private void switchSkipPreferenceMode(String mode, Preference preference) {
-
-        switch (mode) {
-
-            case "2": {
-
-                preference.setSummary(R.string.preferences_general_skip_entries_with_data_description);
-
-                break;
-
-            }
-
-            case "3": {
-
-                preference.setSummary(R.string.preferences_general_skip_entries_across_all_traits_description);
-
-                break;
-
-            }
-
-            default: {
-
-                preference.setSummary(R.string.preferences_general_skip_entries_disabled);
-
-                break;
-
-            }
-        }
-    }
-
-    private void switchVolumePreferenceMode(String mode, Preference preference) {
-
-        switch (mode) {
-
-            case "1": {
-                preference.setSummary(R.string.preferences_behavior_volume_buttons_navigate_traits_description);
-
-                break;
-
-            }
-
-            case "2": {
-                preference.setSummary(R.string.preferences_behavior_volume_buttons_navigate_entries_description);
-
-                break;
-
-            }
-
-            default: {
-
-                preference.setSummary(R.string.preferences_behavior_volume_buttons_navigate_description);
-
-                break;
-
-            }
-        }
     }
 
     /**
@@ -246,4 +158,18 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
         } else context.startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
     }
+
+    private void promptEnableCycleTraitsSound() {
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.preferences_behavior_cycle_sound_title)
+                .setMessage(R.string.preferences_behavior_cycle_sound_description)
+                .setPositiveButton(R.string.dialog_enable, (dialog, which) -> {
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean("CYCLE_TRAITS_SOUND", true);
+                    editor.apply();
+                })
+                .setNegativeButton(R.string.dialog_no, null)
+                .show();
+    }
+
 }
