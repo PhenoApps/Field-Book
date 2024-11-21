@@ -38,7 +38,7 @@ public class PreferencesFragment extends BasePreferenceFragment {
         config.index(R.xml.preferences_profile);
         config.index(R.xml.preferences_sounds);
         config.index(R.xml.preferences_experimental);
-        config.index(R.xml.preferences_geonav);
+        config.index(R.xml.preferences_location);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
     }

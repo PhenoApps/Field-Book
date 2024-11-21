@@ -833,6 +833,7 @@
     <!-- Storage -->
     <string name="preferences_storage_title">Storage</string>
 
+    <string name="preferences_storage_storage_title">Storage</string>
     <string name="preferences_storage_files_base_directory_title">Define Storage Location</string>
     <string name="preferences_storage_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
 
