@@ -30,4 +30,12 @@ open class BrapiCropsFilterActivity(override val titleResId: Int = R.string.brap
             subLabel = ""
         )
     }
+
+    override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_filter_brapi, menu)
+        menu?.findItem(R.id.action_check_all)?.isVisible = true
+        menu?.findItem(R.id.action_reset_cache)?.isVisible = false
+        menu?.findItem(R.id.action_brapi_filter)?.isVisible = false
+        return true
+    }
 }

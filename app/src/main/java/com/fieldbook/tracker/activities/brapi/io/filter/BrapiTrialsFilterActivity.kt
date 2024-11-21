@@ -52,7 +52,7 @@ open class BrapiTrialsFilterActivity(override val titleResId: Int = R.string.bra
     }
 
     override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
-        super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.menu_filter_brapi, menu)
         menu?.findItem(R.id.action_check_all)?.isVisible = true
         menu?.findItem(R.id.action_reset_cache)?.isVisible = false
         menu?.findItem(R.id.action_brapi_filter)?.isVisible = false

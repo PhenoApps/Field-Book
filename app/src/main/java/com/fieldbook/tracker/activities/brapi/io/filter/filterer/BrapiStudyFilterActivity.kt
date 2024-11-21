@@ -181,7 +181,7 @@ class BrapiStudyFilterActivity(
         val programCount = models.mapNotNull { it.programDbId }.distinct().size
         val trialCount = models.filterByProgram(pids, seasons).mapNotNull { it.trialDbId }.distinct().size
         val seasonCount = models.filterByProgramAndTrial(pids, tids)
-            .map { it.study.seasons }.flatten().filterNotNull().distinct().size
+            .map { it.study.seasons ?: listOf() }.flatten().filterNotNull().distinct().size
         val cropCount = models.map { it.study.commonCropName }.distinct().size
 
         AlertDialog.Builder(this)

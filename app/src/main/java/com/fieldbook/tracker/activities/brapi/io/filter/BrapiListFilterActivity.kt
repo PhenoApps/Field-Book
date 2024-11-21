@@ -395,6 +395,9 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         BrapiFilterTypeAdapter.saveFilter(prefs, getFilterKey(), selected)
     }
 
+    protected fun getCheckedModels(filterName: String) =
+        BrapiFilterTypeAdapter.toModelList(prefs, "$filterer$filterName").filter { it.checked }
+
     protected fun getModels(filterName: String) =
         BrapiFilterTypeAdapter.toModelList(prefs, "$filterer$filterName")
 
