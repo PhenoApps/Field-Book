@@ -116,6 +116,13 @@
 
         <item name="colorSecondary">?attr/fb_color_accent</item>
 
+        <item name="fb_heatmap_color_high">@color/main_heatmap_color_high</item>
+        <item name="fb_heatmap_color_medium">@color/main_heatmap_color_medium</item>
+        <item name="fb_heatmap_color_low">@color/main_heatmap_color_low</item>
+        <item name="fb_heatmap_color_max">@color/main_heatmap_color_max</item>
+
+        <item name="selected_date_circle_color">?fb_heatmap_color_medium</item>
+
     </style>
 
     <!-- Blue Theme -->
@@ -152,6 +159,13 @@
         <item name="colorPrimaryVariant">?attr/fb_color_primary_dark</item>
         <item name="colorAccent">?attr/fb_color_accent</item>
         <item name="android:colorAccent">?attr/fb_color_accent</item>
+
+        <item name="fb_heatmap_color_high">@color/blue_heatmap_color_high</item>
+        <item name="fb_heatmap_color_medium">@color/blue_heatmap_color_medium</item>
+        <item name="fb_heatmap_color_low">@color/blue_heatmap_color_low</item>
+        <item name="fb_heatmap_color_max">@color/blue_heatmap_color_max</item>
+
+        <item name="selected_date_circle_color">?fb_heatmap_color_medium</item>
 
     </style>
 
@@ -273,6 +287,12 @@
 
         <item name="fb_error_message_color">@color/GRAY</item>
 
+        <item name="fb_heatmap_color_high">@color/high_heatmap_color_high</item>
+        <item name="fb_heatmap_color_medium">@color/high_heatmap_color_medium</item>
+        <item name="fb_heatmap_color_low">@color/high_heatmap_color_low</item>
+        <item name="fb_heatmap_color_max">@color/high_heatmap_color_max</item>
+
+        <item name="selected_date_circle_color">?fb_heatmap_color_medium</item>
     </style>
 
 </resources>

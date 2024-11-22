@@ -69,6 +69,7 @@
     <string name="settings_export">Export</string>
     <string name="settings_advanced">Settings</string>
     <string name="settings_profile">Profile</string>
+    <string name="settings_statistics">Statistics</string>
 
     <!-- Config Activity Fuzzy Search  -->
     <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
@@ -874,6 +875,48 @@
     <string name="pref_beta_mlkit_summary">This option uses the MLKit library instead of the ZXing library for scanning barcodes</string>
     <string name="pref_beta_mlkit_enabled_title">Barcode Scanning using MLKit enabled</string>
     <string name="pref_beta_mlkit_enabled_message">Enabling this feature will switch the barcode scanning library from ZXing to MLKit</string>
+
+
+    <!-- STATISTICS -->
+
+    <string name="warning_no_observations">No observations have been collected</string>
+    <string name="warning_no_data">No data to display</string>
+    <string name="warning_invalid_date_range">Select a valid date range</string>
+    <string name="stats_heatmap_title">Heatmap</string>
+    <string name="stats_heatmap">View a heatmap of the collected observations</string>
+    <string name="stats_loading">Loading…</string>
+    <string name="stats_first_day">Scroll to the first day with a collected observation</string>
+    <string name="stats_last_day">Scroll to the last day with a collected observation</string>
+    <string name="stats_calendar_range">Select a date range to filter the displayed dates</string>
+    <string name="stats_counter">Swap the date with the number of observations collected that day</string>
+    <string name="stats_date_range_picker_title">Select a date range</string>
+
+    <string name="stats_tab_layout_total">Total</string>
+    <string name="stats_tab_layout_year">Year</string>
+    <string name="stats_tab_layout_month">Month</string>
+
+    <string name="stat_card_export_title_total">Total Field Book Stats</string>
+    <string name="stat_card_export_title">Field Book Stats for</string>
+
+    <string name="stat_title_fields">Fields</string>
+    <string name="stat_title_entries">Entries</string>
+    <string name="stat_title_data">Data</string>
+    <string name="stat_title_hours">Hours</string>
+    <string name="stat_title_people">People</string>
+    <string name="stat_title_photos">Photos</string>
+    <string name="stat_title_busiest">Busiest</string>
+    <string name="stat_title_most">Most</string>
+
+    <string name="stat_fields_dialog_title">Fields imported in</string>
+    <string name="stat_people_dialog_title">List of People</string>
+    <string name="stat_most_dialog_title">List of Observations</string>
+
+    <string name="stat_entries_toast_message">entries have been phenotyped</string>
+    <string name="stat_data_toast_message">observations have been collected</string>
+    <string name="stat_hours_toast_message">hours spent phenotyping</string>
+    <string name="stat_photos_toast_message">photos have been captured</string>
+    <string name="stat_busiest_toast_message">observations were collected on </string>
+
 
     <!-- ABOUT -->
     <!-- App  -->
