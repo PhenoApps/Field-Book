@@ -1253,6 +1253,7 @@
     <string name="repeated_values_left_button_content_description">left</string>
     <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
     <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
+    <string name="activity_file_explorer_up_directory_name">Up</string>
 
     <!-- base camera strings -->
     <string name="trait_camera_connect_content_description">Starts a device connection.</string>
