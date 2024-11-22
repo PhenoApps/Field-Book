@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class GeneralKeys {
     // @formatter:off
@@ -16,13 +17,13 @@ public class GeneralKeys {
     public static final String LAST_NAME = "LastName";
     public static final String PERSON_UPDATE = "PersonUpdate";
     public static final String MODIFY_PROFILE_SETTINGS = "ModifyProfileSettings";
-    public static final String REQUIRE_USER_TO_COLLECT              = "com.tracker.fieldbook.preference.require_user_to_collect";
-    public static final String REQUIRE_USER_INTERVAL              = "com.tracker.fieldbook.preference.require_user_interval";
+    public static final String VERIFICATION_INTERVAL              = "com.tracker.fieldbook.preference.profile_verification_interval";
 
     // Appearance
     public static final String INFOBAR_UPDATE = "INFOBAR_UPDATE";
     public static final String TOOLBAR_CUSTOMIZE                    = "TOOLBAR_CUSTOMIZE";
     public static final String INFOBAR_NUMBER                       = "INFOBAR_NUMBER";
+    public static final String HIDE_INFOBAR_PREFIX                  = "HIDE_INFOBAR_PREFIX";
     public static final String APPLICATION_THEME                    = "APPLICATION_THEME";
     public static final String RESTORE_DEFAULT_THEME                = "RESTORE_DEFAULT_THEME";
     public static final String LANGUAGE_LOCALE_ID                   = "com.tracker.fieldbook.preference.language.id";
@@ -31,7 +32,7 @@ public class GeneralKeys {
 
     // Behavior
     public static final String RETURN_CHARACTER                     = "RETURN_CHARACTER";
-    public static final String VOLUME_NAVIGATION                    = "com.fieldbook.tracker.VOLUME_NAVIGATION";
+    public static final String VOLUME_NAVIGATION                    = "VOLUME_NAVIGATION";
     public static final String CYCLING_TRAITS_ADVANCES              = "CycleTraits";
     public static final String RETURN_FIRST_TRAIT              = "ReturnFirst";
     public static final String DISABLE_ENTRY_ARROW_NO_DATA          = "DISABLE_ENTRY_ARROW_NO_DATA";
@@ -45,7 +46,7 @@ public class GeneralKeys {
     public static final String HIDE_ENTRIES_WITH_DATA               = "com.fieldbook.tracker.HIDE_ENTRIES";
     public static final String HIDE_ENTRIES_WITH_DATA_TOOLBAR       = "com.fieldbook.tracker.HIDE_ENTRIES_WITH_DATA_TOOLBAR";
     public static final String USE_DAY_OF_YEAR                      = "UseDay";
-    public static final String DISABLE_SHARE                        = "DisableShare";
+    public static final String ENABLE_SHARE                        = "EnableShare";
     public static final String GENERAL_LOCATION_COLLECTION          = "com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION";
     public static final String ATTR_CHOOSER_DIALOG_TAB              = "ATTR_CHOOSER_DIALOG_TAB";
 
@@ -83,7 +84,7 @@ public class GeneralKeys {
     //GeoNav
     private static final String GEONAV_PREFIX                       = "com.fieldbook.tracker.geonav.";
     public static final String ENABLE_GEONAV                        = GEONAV_PREFIX + "ENABLE_GEONAV";
-    public static final String SEARCH_ANGLE                         = GEONAV_PREFIX + "SEARCH_ANGLE";
+    public static final String SEARCH_ANGLE                         = GEONAV_PREFIX + "parameters.SEARCH_ANGLE";
     public static final String UPDATE_INTERVAL                      = GEONAV_PREFIX + "UPDATE_INTERVAL";
     public static final String PAIR_BLUETOOTH                       = GEONAV_PREFIX + "PAIR_BLUETOOTH";
     public static final String PAIRED_DEVICE_ADDRESS                = GEONAV_PREFIX + "PAIRED_DEVICE_ADDRESS";
@@ -91,7 +92,6 @@ public class GeneralKeys {
     public static final String GEONAV_COMPASS                       = GEONAV_PREFIX + "GEONAV_COMPASS";
     public static final String GEONAV_AVERAGING                     = GEONAV_PREFIX + "GEONAV_AVERAGING";
     public static final String GEONAV_AVERAGING_INTERVAL            = GEONAV_PREFIX + "GEONAV_AVERAGIN_INTERVAL";
-    public static final String GEONAV_PARAMETERS_CATEGORY           = GEONAV_PREFIX + "parameters.CATEGORY_KEY";
     public static final String GEONAV_PARAMETER_D1                  = GEONAV_PREFIX + "parameters.trapezoid.D1";
     public static final String GEONAV_PARAMETER_D2                  = GEONAV_PREFIX + "parameters.trapezoid.D2";
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
@@ -115,14 +115,23 @@ public class GeneralKeys {
 
     public static final String GNSS_PRECISION_OK_SOUND           = "GNSS_PRECISION_OK_SOUND";
 
+    // Canon
+    public static final String CANON_SSID_NAME = "com.tracker.fieldbook.preferences.keys.canon.ssid_name";
+
+    public static final String CANON_IP = "com.tracker.fieldbook.preferences.keys.canon.ip";
+
+    public static final String CANON_PORT = "com.tracker.fieldbook.preferences.keys.canon.port";
+
+    public static final String CANON_DEBUG = "com.tracker.fieldbook.preferences.keys.canon.debug";
+    public static final String CANON_HELP = "com.tracker.fieldbook.preferences.keys.canon.help";
+    public static final String CANON_CAMERA_PREVIEW = "com.fieldbook.tracker.traits.camera.canon.PREVIEW";
+
     //Beta feature keys
     public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
     public static final String MLKIT_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.mlkit";
 
 
     public static final String ENABLE_FIELD_AUDIO = "com.tracker.fieldbook.preferences.keys.enable_field_audio";
-
-    public static final String INDIVIDUAL_FIELD_PAGE_ENABLED = "com.tracker.fieldbook.preferences.keys.enable_individual_field_page";
 
     public static final String LAST_TIME_OPENED = "LastTimeAppOpened";
     public static final String ASKED_SINCE_OPENED = "AskedSinceAppOpened";
@@ -195,7 +204,8 @@ public class GeneralKeys {
     public static final String EXPORT_OVERWRITE = "Overwrite";
 
     // Field detail
-    public static final String FIELD_DETAIL_COLLAPSED = "FIELD_DETAIL_COLLAPSED";
+    public static final String FIELD_DETAIL_OVERVIEW_COLLAPSED = "FIELD_DETAIL_OVERVIEW_COLLAPSED";
+    public static final String FIELD_DETAIL_DATA_COLLAPSED = "FIELD_DETAIL_DATA_COLLAPSED";
 
     //Data grid
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
@@ -218,6 +228,21 @@ public class GeneralKeys {
     //categorical trait
     public static final String LABELVAL_CUSTOMIZE = "LABELVAL_CUSTOMIZE";
 
+    //camera traits
+    public static final String CAMERA_SYSTEM_PREVIEW = "com.fieldbook.tracker.traits.camera.SYSTEM_PREVIEW";
+
+    public static final String CAMERA_SYSTEM = "com.fieldbook.tracker.traits.camera.SYSTEM";
+
+    public static final String CAMERA_RESOLUTION = "com.fieldbook.tracker.traits.camera.RESOLUTION";
+
+    public static final String USB_CAMERA_PREVIEW = "com.fieldbook.tracker.traits.camera.usb.PREVIEW";
+
+    public static final String USB_CAMERA_RESOLUTION_INDEX = "com.fieldbook.tracker.traits.camera.USB_RESOLUTION_INDEX";
+
+    public static final String USB_CAMERA_AUTO_WHITE_BALANCE = "com.fieldbook.tracker.traits.camera.usb.AUTO_WHITE_BALANCE";
+
+    public static final String USB_CAMERA_AUTO_FOCUS = "com.fieldbook.tracker.traits.camera.usb.AUTO_FOCUS";
+
     //tts
     public static final String TTS_LANGUAGE_ENABLED = "TTS_LANGUAGE_ENABLED";
     public static final String TTS_LANGUAGE = "TTS_LANGUAGE";
@@ -225,6 +250,20 @@ public class GeneralKeys {
 
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
+
+    @NotNull
+    public static final String FIELDS_LIST_SORT_ORDER = "com.fieldbook.tracker.fields_list_sort_order";
+
+    @NotNull
+    public static final String TRAITS_LIST_SORT_ORDER = "com.fieldbook.tracker.traits_list_sort_order";
+    
+    // app intro
+    public static final String LOAD_SAMPLE_DATA = "com.fieldbook.tracker.load_sample_data";
+
+    public static final String HIGH_CONTRAST_THEME_ENABLED = "com.fieldbook.tracker.optional_setup_theme";
+
+    @Nullable
+    public static final String FROM_INTRO_AUTOMATIC = "com.fieldbook.tracker.activities.intro.from_intro_automatic";
 
     private GeneralKeys() {
 

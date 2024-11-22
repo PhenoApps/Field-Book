@@ -4,6 +4,7 @@
     <!-- App -->
     <!-- Dialog -->
     <!-- Startup  -->
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
     <!-- Config Activity Fuzzy Search  -->
@@ -34,6 +35,7 @@
     <!-- Search  -->
     <!--- Profile -->
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <!-- Trait Layout: GNSS -->
     <!-- Trait Layout: Date -->
@@ -49,6 +51,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <!-- Citation -->

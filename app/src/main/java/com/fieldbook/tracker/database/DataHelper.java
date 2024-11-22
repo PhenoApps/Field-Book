@@ -39,6 +39,7 @@ import com.fieldbook.tracker.objects.SearchDialogDataModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
+import com.fieldbook.tracker.utilities.ZipUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
@@ -49,6 +50,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
@@ -677,11 +679,11 @@ public class DataHelper {
     /**
      * Get the data for brapi export to external system
      */
-    public List<Observation> getObservations(String hostUrl) {
+    public List<Observation> getObservations(int fieldId, String hostUrl) {
 
         open();
 
-        return ObservationDao.Companion.getObservations(hostUrl);
+        return ObservationDao.Companion.getObservations(fieldId, hostUrl);
 
 //        List<Observation> observations = new ArrayList<Observation>();
 //
@@ -849,6 +851,14 @@ public class DataHelper {
     public void updateObservationModels(SQLiteDatabase db, List<ObservationModel> observations) {
 
         ObservationDao.Companion.updateObservationModels(db, observations);
+
+    }
+
+    public void updateObservation(ObservationModel observation) {
+
+        open();
+
+        ObservationDao.Companion.updateObservation(observation);
 
     }
 
@@ -1263,7 +1273,9 @@ public class DataHelper {
 
         open();
 
-        return StudyDao.Companion.getAllFieldObjects();
+        return StudyDao.Companion.getAllFieldObjects(
+                preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+        );
 
 //        ArrayList<FieldObject> list = new ArrayList<>();
 //
@@ -1300,7 +1312,10 @@ public class DataHelper {
 
         open();
 
-        return StudyDao.Companion.getFieldObject(studyId);
+        return StudyDao.Companion.getFieldObject(
+                studyId,
+                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
+        );
 
 //        Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
 //                        "secondary_id", "date_import", "date_edit", "date_export", "count", "exp_source"},
@@ -1336,7 +1351,9 @@ public class DataHelper {
 
         open();
 
-        return ObservationVariableDao.Companion.getAllTraitObjects();
+        return ObservationVariableDao.Companion.getAllTraitObjects(
+                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
+        );
 
 //        ArrayList<TraitObject> list = new ArrayList<>();
 //
@@ -1568,7 +1585,9 @@ public class DataHelper {
 
         if (!isTableExists("ObservationUnitProperty")) {
 
-            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects(
+                    preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+            );
 
             if (!fields.isEmpty()) {
 
@@ -1800,7 +1819,9 @@ public class DataHelper {
 //        if (db == null || !db.isOpen()) db = openHelper.getWritableDatabase();
         if (!isTableExists("ObservationUnitProperty")) {
 
-            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects(
+                    preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
+            );
 
             if (!fields.isEmpty()) {
 
@@ -2418,32 +2439,38 @@ public class DataHelper {
 
             File oldDb = new File(internalDbPath);
 
-            try {
+            //first check if the file to import is just a .db file
+            if (fileName.endsWith(".db")) { //if it is import it old-style
+                try {
+                    BaseDocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
 
-                BaseDocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
+                    open();
+                } catch (Exception e) {
 
-            } catch (Exception e) {
+                    Log.d("Database", e.toString());
 
-                Log.d("Database", e.toString());
+                }
+            } else if (fileName.endsWith(".zip")){ // for zip file, call the unzip function
+                try (InputStream input = context.getContentResolver().openInputStream(file.getUri())) {
 
+                    try (OutputStream output = new FileOutputStream(internalDbPath)) {
+                        ZipUtil.Companion.unzip(context, input, output);
+
+                        open();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-
-            open();
 
             if (!isTableExists(Migrator.Study.tableName)) {
 
                 Migrator.Companion.migrateSchema(db, getAllTraitObjects());
 
             }
-
-            SharedPreferences.Editor edit = preferences.edit();
-
-            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-            edit.putString(GeneralKeys.UNIQUE_NAME, "");
-            edit.putString(GeneralKeys.PRIMARY_NAME, "");
-            edit.putString(GeneralKeys.SECONDARY_NAME, "");
-            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
-            edit.apply();
 
         }
     }
@@ -2454,21 +2481,20 @@ public class DataHelper {
      */
     public void exportDatabase(Context ctx, String filename) throws IOException {
         String internalDbPath = getDatabasePath(this.context);
-        String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/com.fieldbook.tracker_preferences.xml";
 
         close();
 
         try {
 
             File oldDb = new File(internalDbPath);
-            File oldSp = new File(internalSpPath);
 
             DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(ctx, R.string.dir_database);
 
             if (databaseDir != null) {
 
-                String dbFileName = filename + ".db";
-                String prefFileName = filename + ".db_sharedpref.xml";
+                String dbFileName = "fieldbook.db";
+                String prefFileName = filename + "_db_sharedpref";
+                String zipFileName = filename + ".zip";
 
                 DocumentFile dbDoc = databaseDir.findFile(dbFileName);
                 DocumentFile prefDoc = databaseDir.findFile(prefFileName);
@@ -2483,10 +2509,43 @@ public class DataHelper {
                 DocumentFile backupDatabaseFile = databaseDir.createFile("*/*", dbFileName);
                 DocumentFile backupPreferenceFile = databaseDir.createFile("*/*", prefFileName);
 
+
+                DocumentFile zipFile = databaseDir.findFile(zipFileName);
+                if (zipFile == null){
+                    zipFile = databaseDir.createFile("*/*", zipFileName);
+                }
+
+                // copy the preferences in the backupPreferenceFile
+                OutputStream tempStream = BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_database, prefFileName);
+                ObjectOutputStream objectStream = new ObjectOutputStream(tempStream);
+
+                objectStream.writeObject(preferences.getAll());
+
+                objectStream.close();
+
+                if (tempStream != null) {
+                    tempStream.close();
+                }
+
+                // add the .db file and preferences file to the zip file
+                OutputStream outputStream = context.getContentResolver().openOutputStream(zipFile.getUri());
                 if (backupDatabaseFile != null && backupPreferenceFile != null) {
 
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
-                    BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldSp), backupPreferenceFile);
+
+                    if (outputStream != null){
+                        ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, backupPreferenceFile }, outputStream);
+
+                    }
+
+                    // delete .db file and preferences file
+                    if (backupDatabaseFile.exists()){
+                        backupDatabaseFile.delete();
+                    }
+
+                    if (backupPreferenceFile.exists()){
+                        backupPreferenceFile.delete();
+                    }
                 }
             }
 
@@ -2703,6 +2762,20 @@ public class DataHelper {
         return ObservationDao.Companion.getAll(studyId, plotId, traitDbId);
     }
 
+//    public ObservationModel[] getAllObservationsFromAYear(String startDate, String endDate) {
+//
+//        open();
+//
+//        return ObservationDao.Companion.getAllFromAYear(startDate, endDate);
+//    }
+
+    public ObservationModel[] getAllObservationsFromAYear(String year) {
+
+        open();
+
+        return ObservationDao.Companion.getAllFromAYear(year);
+    }
+
     public ObservationModel[] getRepeatedValues(String studyId, String plotId, String traitDbId) {
 
         open();
@@ -2715,6 +2788,13 @@ public class DataHelper {
         open();
 
         return ObservationUnitPropertyDao.Companion.getObservationUnitPropertyByUniqueId(uniqueName, column, uniqueId);
+    }
+
+    public void deleteObservation(String id) {
+
+        open();
+
+        ObservationDao.Companion.delete(id);
     }
 
     /**

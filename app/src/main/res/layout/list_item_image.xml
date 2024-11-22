@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="4dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="@dimen/camera_preview_portrait_width"
+        android:layout_height="@dimen/camera_preview_portrait_height"
+        android:id="@+id/list_item_image_cv"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+            tools:src="@raw/chip"
+            android:id="@+id/list_item_image_iv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/list_item_image_content_description"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <ProgressBar
+        android:id="@+id/list_item_image_pb"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <ImageButton
+        android:background="@drawable/circle_background_simple"
+        android:padding="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_close_circle_outline"
+        app:layout_constraintEnd_toEndOf="@id/list_item_image_cv"
+        app:layout_constraintTop_toTopOf="@id/list_item_image_cv"
+        android:contentDescription="@string/list_item_image_close_content_description"
+        android:id="@+id/list_item_image_close_btn"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

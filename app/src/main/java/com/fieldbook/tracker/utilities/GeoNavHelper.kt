@@ -715,10 +715,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         }
     }
 
-    fun stopAverageHandler() {
-        mAverageHandlerThread.quit()
-    }
-
     /**
      * Called in onResume and stopped in onPause
      * Starts a file in storage/geonav/log.txt

@@ -2,13 +2,10 @@ package com.fieldbook.tracker.activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -26,21 +23,21 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
+import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.fragments.ImportDBFragment;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.ExportUtil;
-import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
-import com.fieldbook.tracker.utilities.ManufacturerUtil;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -58,7 +55,6 @@ import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -92,7 +88,7 @@ public class ConfigActivity extends ThemedActivity {
     private static final int REQUEST_BARCODE = 100;
     private final static String TAG = ConfigActivity.class.getSimpleName();
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
-    private final int REQUEST_STORAGE_DEFINER = 104;
+    private final int REQUEST_APP_INTRO_CODE = 120;
 //    private final Runnable exportData = () -> new ExportDataTask().execute(0);
     @Inject
     public DataHelper database;
@@ -201,6 +197,7 @@ public class ConfigActivity extends ThemedActivity {
             //this will grant FB access to the chosen folder
             //preference and activity is handled through this utility call
 
+
             SharedPreferences.Editor ed = preferences.edit();
 
             Set<String> entries = preferences.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
@@ -210,8 +207,17 @@ public class ConfigActivity extends ThemedActivity {
             entries.add("lockData");
 
             ed.putStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, entries);
-            ed.putBoolean(GeneralKeys.FIRST_RUN, false);
             ed.apply();
+
+            // to disable App Intro for debug mode
+            // uncomment the if-block
+            // and comment the startActivityForResult for AppIntroActivity
+//            if (BuildConfig.DEBUG) {
+//                ed.putBoolean(GeneralKeys.FIRST_RUN, false).apply();
+//            }
+
+            Intent intent = new Intent(this, AppIntroActivity.class);
+            startActivityForResult(intent, REQUEST_APP_INTRO_CODE);
         }
     }
 
@@ -219,29 +225,11 @@ public class ConfigActivity extends ThemedActivity {
 
         versionBasedSetup();
 
+        Log.d(TAG, "preferencesSetup: " + BuildConfig.DEBUG);
+
         firstRunSetup();
 
-        if (!BaseDocumentTreeUtil.Companion.isEnabled(this)) {
-
-            startActivityForResult(new Intent(this, DefineStorageActivity.class),
-                    REQUEST_STORAGE_DEFINER);
-        } else {
-
-        verifyPersonHelper.updateLastOpenedTime();
-            ManufacturerUtil.Companion.eInkDeviceSetup(this, prefs, getResources(), () -> {
-
-                recreate();
-
-                // request permissions
-                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
-
-                return null;
-            });
-        }
-
         migratePreferencesToDefault();
-
-        verifyPersonHelper.updateLastOpenedTime();
     }
 
     /**
@@ -306,23 +294,16 @@ public class ConfigActivity extends ThemedActivity {
         settingsList = findViewById(R.id.myList);
 
         String[] configList = new String[]{getString(R.string.settings_fields),
-                getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)};
+                getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.settings_statistics), getString(R.string.about_title)};
 
-        Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
+        Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_nav_drawer_statistics, R.drawable.ic_tb_info};
 
         settingsList.setOnItemClickListener((av, arg1, position, arg3) -> {
             Intent intent = new Intent();
             switch (position) {
                 case 0:
-                    if (preferences.getBoolean(GeneralKeys.INDIVIDUAL_FIELD_PAGE_ENABLED, false)) {
-                        Log.d("Config", "individual field enabled");
-                        intent.setClassName(ConfigActivity.this,
-                                FieldEditorActivity.class.getName());
-                    } else {
-                        Log.d("Config", "individual field disabled");
-                        intent.setClassName(ConfigActivity.this,
-                                FieldEditorActivityOld.class.getName());
-                    }
+                    intent.setClassName(ConfigActivity.this,
+                            FieldEditorActivity.class.getName());
                     startActivity(intent);
                     break;
                 case 1:
@@ -345,6 +326,13 @@ public class ConfigActivity extends ThemedActivity {
                     startActivity(intent);
                     break;
                 case 5:
+                    if (checkObservationsExist() > 0) {
+                        intent.setClassName(ConfigActivity.this,
+                                StatisticsActivity.class.getName());
+                        startActivity(intent);
+                    }
+                    break;
+                case 6:
                     intent.setClassName(ConfigActivity.this,
                             AboutActivity.class.getName());
                     startActivity(intent);
@@ -354,15 +342,6 @@ public class ConfigActivity extends ThemedActivity {
 
         ImageListAdapter adapterImg = new ImageListAdapter(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
-
-        SharedPreferences.Editor ed = preferences.edit();
-
-        if (!preferences.getBoolean(GeneralKeys.TIPS_CONFIGURED, false)) {
-            ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
-            ed.apply();
-            showTipsDialog();
-            loadSampleDataDialog();
-        }
 
         mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
 
@@ -406,63 +385,17 @@ public class ConfigActivity extends ThemedActivity {
         return 1;
     }
 
-    private void showTipsDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
-
-        builder.setTitle(getString(R.string.tutorial_dialog_title));
-        builder.setMessage(getString(R.string.tutorial_dialog_description));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Editor ed = preferences.edit();
-                ed.putBoolean(GeneralKeys.TIPS, true);
-                ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
-                ed.apply();
-
-                dialog.dismiss();
-
-                invalidateOptionsMenu();
-
-                Intent intent = new Intent();
-                intent.setClassName(ConfigActivity.this,
-                        ConfigActivity.class.getName());
-                startActivity(intent);
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Editor ed = preferences.edit();
-                ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
-                ed.apply();
-
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    private void loadSampleDataDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
-
-        builder.setTitle(getString(R.string.startup_sample_data_title));
-        builder.setMessage(getString(R.string.startup_sample_data_message));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), (dialog, which) -> {
-            // Load database with sample data
-            DocumentFile sampleDatabase = BaseDocumentTreeUtil.Companion.getFile(ConfigActivity.this,
-                    R.string.dir_database, "sample.db");
-            if (sampleDatabase != null && sampleDatabase.exists()) {
-                invokeDatabaseImport(sampleDatabase);
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), (dialog, which) -> dialog.dismiss());
-
-        AlertDialog alert = builder.create();
-        alert.show();
+    /**
+     * Checks if any observations are collected.
+     * @return -1 if there are no observations, else 1
+     */
+    private int checkObservationsExist() {
+        final ObservationModel[] observations = database.getAllObservations();
+        if (observations.length == 0) {
+            Utils.makeToast(getApplicationContext(), getString(R.string.warning_no_observations));
+            return -1;
+        }
+        return 1;
     }
 
     // Helper function to merge arrays
@@ -578,11 +511,38 @@ public class ConfigActivity extends ThemedActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_STORAGE_DEFINER) {
+        if (requestCode == REQUEST_APP_INTRO_CODE) {
             if (resultCode != Activity.RESULT_OK) finish();
             else {
-                // request permissions
-                ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+                boolean loadSampleData = preferences.getBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false);
+
+                boolean highContrastThemeEnabled = preferences.getBoolean(GeneralKeys.HIGH_CONTRAST_THEME_ENABLED, false);
+
+                if (loadSampleData) {
+                    ImportDBFragment importDBFragment = new ImportDBFragment();
+
+                    getSupportFragmentManager().beginTransaction()
+                            .add(importDBFragment, "com.fieldbook.tracker.fragments.ImportDBFragment")
+                            .addToBackStack(null)
+                            .commit();
+                }
+
+                if (highContrastThemeEnabled) {
+                    preferences.edit()
+                            .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.HIGH_CONTRAST))
+                            .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
+                            .apply();
+                } else {
+                    preferences.edit()
+                            .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
+                            .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
+                            .apply();
+                }
+
+                recreate();
+
+                // set FIRST_RUN to false only app intro was finished by the user
+                preferences.edit().putBoolean(GeneralKeys.FIRST_RUN, false).apply();
             }
         } else if (requestCode == REQUEST_BARCODE) {
             if (resultCode == RESULT_OK) {

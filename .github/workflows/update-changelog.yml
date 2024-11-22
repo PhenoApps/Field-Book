@@ -1,0 +1,94 @@
+name: update-changelog
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+
+    env:
+      GH_TOKEN: ${{ secrets.ACTIONS_PAT }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ACTIONS_PAT }}
+          fetch-depth: 0
+      
+      - name: Extract changelog entry from PR
+        id: extract_changelog
+        run: |
+          # Get the latest commit SHA
+          commit_sha=$(git log -1 --format="%H")
+          echo "Commit SHA: $commit_sha"
+
+          # Find the pull request associated with the commit
+          pr_number=$(gh api -X GET "repos/${{ github.repository }}/commits/$commit_sha/pulls" --jq '.[0].number')
+
+          # Exit gracefully if no PR is found
+          if [ -z "$pr_number" ]; then
+            echo "No associated PR found for commit $commit_sha."
+            exit 0
+          fi
+
+          # Get the PR body and extract release note
+          pr_body=$(gh api -X GET "repos/${{ github.repository }}/pulls/$pr_number" --jq '.body' | sed 's/\r//g')
+          changelog_entry=$(echo "$pr_body" | awk 'BEGIN { found=0 } /```release-note/ { found=1; next } /```/ { found=0 } found { print }' | sed '/^$/d')
+
+          # Exit if no changelog entry found
+          if [ -z "$changelog_entry" ]; then
+            echo "No changelog entry found."
+            exit 0
+          fi
+
+          # Detect change type (CHANGE, FEATURE, BUGFIX, ENHANCEMENT)
+          change_type=$(echo "$pr_body" | grep -oP '(?<=- \[x\] `)\w+')
+          case "$change_type" in
+            "FEATURE"|"ENHANCEMENT")
+              section="### Added"
+              ;;
+            "CHANGE")
+              section="### Changed"
+              ;;
+            "BUGFIX")
+              section="### Fixed"
+              ;;
+            "NONE")
+              echo "No notable changelog entry needed."
+              exit 0
+              ;;
+            *)
+              echo "Unknown change type: $change_type"
+              exit 1
+              ;;
+          esac
+
+          # Store the extracted information in environment variables
+          pr_url="https://github.com/${{ github.repository }}/pull/$pr_number"
+          echo "changelog=${changelog_entry} ($pr_url)" >> $GITHUB_ENV
+          echo "section=$section" >> $GITHUB_ENV
+          echo "pr_number=$pr_number" >> $GITHUB_ENV
+
+      - name: Add entry to changelog
+        if: env.pr_number != ''
+        run: |
+          # Insert the changelog entry under the first matching section in Unreleased (avoids / delimeter to not conflict with url)
+          sed -i "0,/${{ env.section }}/s@${{ env.section }}@${{ env.section }}\n- ${{ env.changelog }}@" CHANGELOG.md
+
+          # Show the updated changelog
+          cat CHANGELOG.md
+
+      - name: Commit and push changelog update
+        if: env.pr_number != ''
+        uses: EndBug/add-and-commit@v7
+        with:
+          add: 'CHANGELOG.md'
+          message: "Update CHANGELOG.md with entry from PR #${{ env.pr_number }}"
+          author_email: git-action-bot@example.com
+          author_name: Git Action Bot
+          token: ${{ secrets.GITHUB_TOKEN }}
+          push: true

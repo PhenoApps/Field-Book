@@ -14,6 +14,7 @@
     <string name="dialog_warning">चेतावनी</string>
     <string name="dialog_save">सुरक्षित करें</string>
     <!-- Startup  -->
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
     <string name="settings_fields">खेत</string>
@@ -111,6 +112,7 @@
     <string name="activity_collect_dialog_verify_no_button">नहीं</string>
     <string name="activity_collect_dialog_verify_yes_button">हां</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">आपके यंत्र में इस सुविधा के लिए आवश्यक हार्डवेयर नहीं है</string>
     <!-- Trait Layout: GNSS -->
@@ -128,6 +130,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">आंकड़ा कोष</string>

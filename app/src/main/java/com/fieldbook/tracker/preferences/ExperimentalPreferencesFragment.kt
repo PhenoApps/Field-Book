@@ -1,14 +1,30 @@
 package com.fieldbook.tracker.preferences
 
 import android.app.AlertDialog
+import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.preference.CheckBoxPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.AppIntroActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import com.fieldbook.tracker.utilities.GeoNavHelper
 
+@AndroidEntryPoint
 class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
+
+    companion object {
+        private const val REQUEST_CODE_APP_INTRO = 1
+    }
+
+    @Inject
+    lateinit var prefs: SharedPreferences
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 
@@ -39,6 +55,22 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
         barcode?.setOnPreferenceChangeListener { _, newValue ->
             true
         }
+
+        val fieldAudio = findPreference<CheckBoxPreference>(GeneralKeys.ENABLE_FIELD_AUDIO)
+        fieldAudio?.setOnPreferenceChangeListener { _, newValue ->
+            context?.let { ctx ->
+                if (newValue as? Boolean == true) {
+                    val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
+                    prefs.edit()
+                        .putBoolean(GeneralKeys.ENABLE_GEONAV, true)
+                        .putString(
+                            GeneralKeys.GEONAV_LOGGING_MODE,
+                            GeoNavHelper.GeoNavLoggingMode.LIMITED.value
+                        ).apply()
+                }
+            }
+            true
+        }
     }
 
     private fun hideEmptyPreferenceCategories() {
@@ -50,5 +82,4 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
             }
         }
     }
-
 }
