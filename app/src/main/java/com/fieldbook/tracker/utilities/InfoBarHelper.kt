@@ -89,7 +89,9 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
 
                 context.preference.edit().putString("DROP$i", initialLabel).apply()
 
-                infoBarModels.add(InfoBarModel(initialLabel, value))
+                val isWordWrapped = preferences.getBoolean("INFOBAR_WORD_WRAP_$i", false)
+
+                infoBarModels.add(InfoBarModel(initialLabel, value, isWordWrapped))
             }
         }
 
