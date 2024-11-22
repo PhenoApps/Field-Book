@@ -10,6 +10,7 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
+    <string name="dialog_clear">Clear</string>
     <string name="dialog_close">Close</string>
     <string name="dialog_confirm">Are you sure?</string>
     <string name="dialog_import">Import</string>
@@ -20,6 +21,8 @@
     <string name="dialog_back">Back</string>
     <string name="dialog_scan">Scan</string>
     <string name="dialog_sort_by">Sort By</string>
+    <string name="dialog_enable">Enable</string>
+    <string name="dialog_delete">Delete</string>
 
     <string name="barcode_scanner_text">Scan a barcode</string>
 
@@ -66,6 +69,7 @@
     <string name="settings_export">Export</string>
     <string name="settings_advanced">Settings</string>
     <string name="settings_profile">Profile</string>
+    <string name="settings_statistics">Statistics</string>
 
     <!-- Config Activity Fuzzy Search  -->
     <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
@@ -345,6 +349,8 @@
     <string name="dialog_infobar_att_chooser_title">Infobar %d</string>
     <string name="infobars_attribute_placeholder">Select</string>
     <string name="field_name_attribute">field_name</string>
+    <string name="infobar_word_wrap_enabled">Word wrap enabled for Infobar %s</string>
+    <string name="infobar_word_wrap_disabled">Word wrap disabled for Infobar %s</string>
 
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
@@ -599,66 +605,49 @@
 
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_title">General</string>
+    <string name="preferences_system_title">System</string>
 
-    <string name="preferences_general_system_title">System Defaults</string>
-    <string name="preferences_general_files_base_directory_title">Define storage location</string>
-    <string name="preferences_general_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
-    <string name="preferences_source_default_import">Default import source</string>
-    <string name="preferences_source_default_export">Default export source</string>
+    <string name="preferences_system_defaults_title">Defaults</string>
 
-    <string name="pref_general_location_collection_title">Location collected</string>
-    <string name="pref_general_location_collection_summary">Select a method for collecting location while using Field Book.</string>
-    <string name="location_level_off">Off</string>
-    <string name="pref_general_location_collection_off_summary">No location data will be collected for any phenotypes.</string>
-    <string name="location_level_study">Field / Study</string>
-    <string name="pref_general_location_collection_study_summary">A location will be collected for the first the phenotype within a field.</string>
-    <string name="location_level_observation_unit">Plot / Observation Unit</string>
-    <string name="pref_general_location_collection_summary_obs_units">A location will be collected for the first phenotype in a plot.</string>
-    <string name="location_level_observation">Phenotype / Observation</string>
-    <string name="pref_general_location_collection_summary_obs">A location will be collected for every phenotype that is collected.</string>
-    <string name="pref_general_location_collection_obs_dialog_title">This setting may substantially increase battery consumption.</string>
+    <string name="preferences_source_default_import">Import Source</string>
+    <string name="preferences_source_default_export">Export Source</string>
 
-    <string name="preferences_general_collect_tools">Collect Toolbar</string>
+    <string name="brapi_disabled_alert_title">BrAPI Disabled</string>
+    <string name="brapi_disabled_alert_message">BrAPI must be enabled first in the BrAPI settings.</string>
 
-    <string name="preferences_general_feature_next_missing">Next entry with no data</string>
-    <string name="preferences_general_feature_next_missing_description">Adds a button to the toolbar that jumps to the next entry with no data depending on settings.</string>
-    <string name="preferences_general_skip_entries_disabled">Disabled</string>
-    <string name="preferences_general_skip_entries_across_all_traits_description">Skip entries that have data for all traits</string>
-    <string name="preferences_general_skip_entries_default_description">Go to next plot.</string>
-    <string name="preferences_general_skip_entries_default">Default</string>
-
-    <string name="preferences_general_feature_barcode_text">Move to unique identifier</string>
-    <string name="preferences_general_feature_barcode_text_description">Adds a button to the toolbar to move to a specific entry by its unique id. Input method depends on settings.</string>
-    <string name="move_to_unique_id_disabled">Disabled</string>
-    <string name="move_to_unique_id_text_or_scan">Text Entry with Camera Scan Optional</string>
-    <string name="move_to_unique_id_text_or_scan_description">Toolbar button opens a dialog with a text input for a unique id and an optional Scan button</string>
-    <string name="move_to_unique_id_direct_camera_scan">Direct Camera Scan</string>
-    <string name="move_to_unique_id_direct_camera_scan_description">Toolbar button directly opens the device camera to scan a unique id barcode</string>
-
-    <string name="preferences_general_feature_datagrid">Datagrid</string>
-    <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
+    <string name="preferences_general_share_enable">Enable File Sharing</string>
+    <string name="preferences_general_share_enable_description">When files are exported, a share dialog will be displayed</string>
 
     <!-- Profile -->
-    <string name="profile_person">Person</string>
-    <string name="profile_person_title">Set person</string>
-    <string name="profile_name_first">First name</string>
-    <string name="profile_name_last">Last name</string>
-    <string name="profile_reset">Reset Profile</string>
+    <string name="preferences_profile_title">Profile</string>
+    <string name="preferences_profile_person_title">Person</string>
+    <string name="preferences_profile_require_person">Require Person</string>
+    <string name="preferences_profile_require_person_summary">Track name of the person collecting data</string>
 
-    <string name="preferences_profile_settings">Profile Settings</string>
-    <string name="pref_profile_title">Require Person</string>
-    <string name="pref_profile_require_interval_title">Time between verification</string>
+    <string name="preferences_profile_set_person">Person Name</string>
+    <string name="preferences_profile_person_dialog_title">Set Person</string>
+    <string name="preferences_profile_name_first">First Name</string>
+    <string name="preferences_profile_name_last">Last Name</string>
+    <string name="preferences_profile_name_error">Both fields cannot be blank</string>
+
+    <string name="preferences_profile_require_interval_title">Verification Interval</string>
+    <string name="verification_interval_every_open">Every time app opens</string>
+    <string name="verification_interval_every_12">Every 12 hours</string>
+    <string name="verification_interval_every_24">Every 24 hours</string>
+    <string name="verification_interval_never">Never</string>
 
     <string name="preferences_profile_crashlytics" translatable="false">Crashlytics</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
-    <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">Include an anonymous, unique ID in crash logs to help the development team fix bugs</string>
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
-    <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
+    <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID</string>
+
+    <!-- Features -->
+    <string name="preferences_features_title">Features</string>
 
     <!-- Appearance -->
     <string name="preferences_appearance_title">Appearance</string>
-    <string name="preferences_appearance_system_category_title">Application</string>
+    <string name="preferences_appearance_application_title">Application</string>
 
     <string name="preferences_appearance_theme_title">Theme</string>
     <string name="preferences_appearance_theme_summary">Modify specific colors or the entire theme of Field Book</string>
@@ -701,79 +690,111 @@
     <string name="language_vi_vRN" translatable="false">Tiếng Việt</string>
     <string name="language_zh_rCN" translatable="false">简体字</string>
 
-    <string name="preferences_appearance_tutorial_description">Adds a tutorial icon to the collect, settings, fields, and traits screens</string>
+    <string name="preferences_appearance_collect_toolbar_title">Collect Toolbar</string>
 
-    <string name="preferences_appearance_collection_category_title">Collect Screen</string>
-    <string name="preferences_appearance_toolbar_customize">Customize toolbar icons</string>
-    <string name="preferences_appearance_toolbar_customize_description">Modify default icons on the collect screen</string>
+    <string name="preferences_appearance_tutorial_description">Add a toolbar button throughout the app that opens the tutorial</string>
+
+    <string name="preferences_appearance_toolbar_customize">Toolbar Actions</string>
+    <string name="preferences_appearance_toolbar_customize_description">Toggle the visibility of default features</string>
     <string name="preferences_appearance_toolbar_customize_search">Search</string>
     <string name="preferences_appearance_toolbar_customize_resources">Resources</string>
     <string name="preferences_appearance_toolbar_customize_summary">Summary</string>
     <string name="preferences_appearance_toolbar_customize_lock">Lock</string>
 
-    <string name="preferences_appearance_infobar_number">Number of InfoBars</string>
+    <string name="preferences_general_feature_datagrid">Datagrid</string>
+    <string name="preferences_general_feature_datagrid_description">Add a button to display a grid of collected data</string>
+
+    <string name="preferences_general_feature_next_missing">Next Entry With No Data</string>
+    <string name="preferences_general_skip_entries_disabled">Disabled</string>
+    <string name="preferences_general_skip_entries_with_data">Button skips entries that already have values for the current trait</string>
+    <string name="preferences_general_skip_entries_across_all_traits">Button skips entries that already have values for all traits</string>
+
+    <string name="preferences_general_feature_barcode_text">Move To Unique ID</string>
+    <string name="move_to_unique_id_disabled">Disabled</string>
+    <string name="move_to_unique_id_text_or_scan">Button uses text entry with optional camera scan</string>
+    <string name="move_to_unique_id_direct_camera_scan">Button uses direct camera scan</string>
+
+    <string name="preferences_appearance_collect_screen_title">Collect Screen</string>
+
+    <string name="preferences_appearance_infobar_number">Number Of InfoBars</string>
     <string name="preferences_appearance_infobar_number_description">Adjust the number of Infobars displayed on the main screen</string>
 
+    <string name="preferences_appearance_infobar_hide_prefix">Hide Infobar prefix</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">Infobar prefix will be replaced by a generic icon</string>
+
     <string name="preferences_appearance_quickgoto">Quick GoTo</string>
-    <string name="preferences_appearance_quickgoto_description">Changes middle section of main screen to the legacy Quick GoTo</string>
+    <string name="preferences_appearance_quickgoto_description">Change the middle section of main screen to the legacy Quick GoTo</string>
 
     <!-- Behavior -->
     <string name="preferences_behavior_title">Behavior</string>
-    <string name="preferences_behavior_cycle_traits">Cycling traits advances entry</string>
-    <string name="preferences_behavior_cycle_traits_description">After going through all traits, Field Book goes to the next entry</string>
+    <string name="preferences_behavior_movement_title">Movement</string>
+    <string name="preferences_behavior_hardware_title">Hardware</string>
+    <string name="preferences_behavior_data_title">Data</string>
 
-    <string name="preferences_behavior_volume_buttons_navigate">Map volume keys to trait or entry arrows</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">Volume keys duplicate selected navigation type</string>
-    <string name="preferences_behavior_volume_buttons_navigate_traits_description">Volume keys duplicate trait navigation arrows</string>
-    <string name="preferences_behavior_volume_buttons_navigate_entries_description">Volume keys duplicate entry navigation arrows</string>
+    <string name="preferences_behavior_cycle_traits">Auto-Advance Entry</string>
+    <string name="preferences_behavior_cycle_traits_description">Cycling through the trait list automatically advances entry</string>
+    <string name="preferences_behavior_cycle_sound_title">Enable sound effect?</string>
+    <string name="preferences_behavior_cycle_sound_description">A sound effect will be played when traits are cycled (recommended)</string>
 
+    <string name="preferences_behavior_return_to_first_trait">Auto-Reset Traits</string>
+    <string name="preferences_behavior_return_to_first_trait_description">Advancing the entry automatically resets to the first trait</string>
+
+    <string name="preferences_behavior_disable_entry_arrow">Require Data To Move Entry</string>
+    <string name="preferences_behavior_disable_entry_arrow_neither">Disabled</string>
+    <string name="preferences_behavior_disable_entry_arrow_left">Require data to move left</string>
+    <string name="preferences_behavior_disable_entry_arrow_right">Require data to move right</string>
+    <string name="preferences_behavior_disable_entry_arrow_both">Require data to move either direction</string>
+
+    <string name="preferences_behavior_skip_entries_title">Skip Entries</string>
+    <string name="preferences_behavior_skip_entries_disabled">Disabled</string>
+    <string name="preferences_behavior_skip_entries_with_data">Arrows skip entries that already have values for the current trait</string>
+    <string name="preferences_behavior_skip_entries_across_all_traits">Arrows skip entries that already have values for all traits</string>
+
+    <string name="preferences_general_swap_navigation">Swap Navigation</string>
+    <string name="preferences_general_swap_navigation_description">Swap the behavior of the entry and trait arrows</string>
+
+    <string name="preferences_behavior_volume_buttons_navigate">Navigate With Volume Keys</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Disabled</string>
-    <string name="preferences_behavior_volume_buttons_navigate_traits">Navigate traits</string>
-    <string name="preferences_behavior_volume_buttons_navigate_entries">Navigate entries</string>
+    <string name="preferences_behavior_volume_buttons_navigate_traits">Volume keys navigate traits</string>
+    <string name="preferences_behavior_volume_buttons_navigate_entries">Volume keys navigate entries</string>
 
-    <string name="preferences_behavior_return_to_first_trait">Advancing entry returns to first trait</string>
-    <string name="preferences_behavior_return_to_first_trait_description">When moving to the next entry, Field Book also returns to the first trait</string>
-
-    <string name="preferences_behavior_return_character">Return key signal</string>
-    <string name="preferences_behavior_return_character_next_plot">Next plot</string>
-    <string name="preferences_behavior_return_character_next_trait">Next trait</string>
+    <string name="preferences_behavior_return_character">Carriage Return Action</string>
     <string name="preferences_behavior_return_character_do_nothing">Do nothing</string>
+    <string name="preferences_behavior_return_character_next_plot">Carriage return advances plot</string>
+    <string name="preferences_behavior_return_character_next_trait">Carriage return advances trait</string>
 
-    <string name="preferences_behavior_disable_entry_arrow">Disable entry navigation if no data</string>
-    <string name="preferences_behavior_disable_entry_arrow_neither">Neither</string>
-    <string name="preferences_behavior_disable_entry_arrow_left">Left</string>
-    <string name="preferences_behavior_disable_entry_arrow_right">Right</string>
-    <string name="preferences_behavior_disable_entry_arrow_both">Both</string>
-
-    <string name="preferences_general_share_disable">Disable file sharing</string>
-    <string name="preferences_general_share_disable_description">When files are exported, the share dialog will not be displayed</string>
-
-    <string name="preferences_general_use_day_number">Use day of year</string>
+    <string name="preferences_general_use_day_number">Use Day Of Year</string>
     <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
 
-    <string name="preferences_general_skip_entries_with_data">Skip entries across active trait</string>
-    <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the active trait</string>
-    <string name="preferences_general_skip_entries_across_all_traits">Skip entries across all traits</string>
+    <!-- Location -->
+    <string name="preferences_location_title">Location</string>
+    <string name="preferences_location_defaults_title">GeoCoordinates</string>
 
-    <string name="preferences_general_flip_flop_arrows">Flip Flop Arrows</string>
-    <string name="preferences_general_flip_flop_arrows_description">Swaps the trait and plot arrow functions</string>
+    <string name="pref_general_location_collection_title">Collection Level</string>
+    <string name="location_level_off">Off</string>
+    <string name="location_level_study">Field</string>
+    <string name="location_level_observation_unit">Entry</string>
+    <string name="location_level_observation">Observation (higher battery use)</string>
 
-    <!-- GeoNav -->
-    <string name="preferences_geonav_title">GeoNav</string>
+    <string name="pref_coordinate_format_title">Collection Format</string>
+    <string name="location_format_iso">ISO 6709</string>
+    <string name="location_format_geojson">GeoJSON</string>
+
+    <string name="pref_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_enable_title">Enable GeoNav</string>
-    <string name="pref_geonav_enable_summary">Enables usage of device location to navigate fields.</string>
+    <string name="pref_geonav_enable_summary">Navigate fields using device location</string>
 
     <string name="pref_geonav_search_method_title">Search Method</string>
-    <string name="pref_geonav_search_method_summary">The %s method used to search for plots in GeoNav.</string>
+    <string name="pref_geonav_search_method_summary">The %s method used to search for plots in GeoNav</string>
     <string name="pref_geonav_method_distance">Distance</string>
     <string name="pref_geonav_method_trapezoid">Trapezoidal</string>
 
     <string name="pref_behavior_geonav_parameters_category_title">Parameters</string>
     <string name="pref_geonav_search_trapezoid_d1_title">Trapezoid Base (km)</string>
-    <string name="pref_geonav_search_trapezoid_d1_summary">The shorter base of the trapezoid is %s km.</string>
+    <string name="pref_geonav_search_trapezoid_d1_summary">The shorter base of the trapezoid is %s km</string>
     <string name="pref_geonav_search_trapezoid_d2_title">Trapezoid Distance (km)</string>
-    <string name="pref_geonav_search_trapezoid_d2_summary">The distance from the user to the opposite end of the trapezoid is %s km.</string>
-    <string name="pref_geonav_search_angle_summary">GeoNav creates a trapezoid in front of the user, the angle closest to the user is defined as %s°.</string>
+    <string name="pref_geonav_search_trapezoid_d2_summary">The distance from the user to the opposite end of the trapezoid is %s km</string>
+    <string name="pref_geonav_search_angle_summary">GeoNav creates a trapezoid in front of the user, the angle closest to the user is defined as %s°</string>
     <string name="pref_geonav_search_angle_title">GeoNav Search Angle (degrees)</string>
 
     <string name="pref_geonav_log">GeoNav Log</string>
@@ -787,39 +808,46 @@
     <string name="pref_geonav_log_both_description">Both: Logging all location updates and algorithm steps to storage/geonav/log.txt, closest entry to storage/geonav/limited_log.txt</string>
 
     <string name="pref_geonav_update_interval_title">Update Interval (s)</string>
-    <string name="pref_geonav_update_interval_summary">The time between location updates is %ss.</string>
+    <string name="pref_geonav_update_interval_summary">The time between location updates is %ss</string>
 
-    <string name="pref_geonav_pair">Pair Device</string>
+    <string name="pref_geonav_pair">Location Provider</string>
     <string name="pref_behavior_geonav_internal_gps_choice">Internal GPS</string>
-    <string name="choose_paired_bluetooth_devices_title">Choose your paired bluetooth device.</string>
+    <string name="choose_paired_bluetooth_devices_title">Choose your paired bluetooth device</string>
 
     <!-- Sounds -->
     <string name="preferences_sounds">Sounds</string>
-    <string name="preferences_sound_primary_order_sound">Primary order sound</string>
-    <string name="preferences_sound_primary_order_sound_description">Notification sound when the primary order changes</string>
+    <string name="preferences_sound_primary_order_title">Change Primary Order</string>
+    <string name="preferences_sound_primary_order_description">Play plonk sound when the primary order changes</string>
 
-    <string name="preferences_sound_entry_title">Entry navigation sound</string>
-    <string name="preferences_sound_entry_description">Notification sound when moving between entries</string>
+    <string name="preferences_sound_entry_title">Change Entry</string>
+    <string name="preferences_sound_entry_description">Play advance sound when moving between entries</string>
 
-    <string name="preferences_sound_cycle_traits_title">Cycle traits sound</string>
-    <string name="preferences_sound_cycle_traits_description">Notification sound when traits are completely cycled through</string>
+    <string name="preferences_sound_cycle_traits_title">Cycle Traits</string>
+    <string name="preferences_sound_cycle_traits_description">Play cycle sound when traits are completely cycled through</string>
 
-    <string name="preferences_sound_delete_obs_title">Delete Observation Sound</string>
-    <string name="preferences_sound_delete_obs_description">Notification sound when observation is deleted in Collect activity.</string>
+    <string name="preferences_sound_delete_obs_title">Delete Observation</string>
+    <string name="preferences_sound_delete_obs_description">Play delete sound when observation is deleted</string>
 
     <string name="preferences_category_audio_tts_title">Text to Speech</string>
     <string name="preferences_general_tts_title">Text to Speech</string>
-    <string name="preferences_general_tts_description">Enable TTS when data is entered in the Collect activity.</string>
+    <string name="preferences_general_tts_description">Enable TTS when data is entered in the Collect activity</string>
     <string name="preferences_general_tts_language_title">Choose Language</string>
-    <string name="preferences_general_tts_language_description">Choose a compatible TTS language.</string>
+    <string name="preferences_general_tts_language_description">Choose a compatible TTS language</string>
 
     <!-- BrAPI preferences are in the BrAPI section below -->
 
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_title">Storage</string>
+
+    <string name="preferences_storage_storage_title">Storage</string>
+    <string name="preferences_storage_files_base_directory_title">Define Storage Location</string>
+    <string name="preferences_storage_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
+
+    <string name="preferences_storage_database_title">Database</string>
     <string name="database_dialog_title">Database</string>
-    <string name="database_import">Import database</string>
-    <string name="database_export">Export database</string>
-    <string name="database_reset">Delete database</string>
+    <string name="database_import">Import Database</string>
+    <string name="database_export">Export Database</string>
+    <string name="database_reset">Delete Database</string>
     <string name="database_reset_warning1">All data will be deleted. Are you sure you want to reset the database?</string>
     <string name="database_reset_warning2">A database reset cannot be reversed. The app will quit after clearing the database. Are you really sure you want to continue?</string>
     <string name="database_reset_message">Database has been deleted</string>
@@ -833,14 +861,14 @@
     <string name="pref_experimental_repeated_values_title">Repeated Measures</string>
     <string name="pref_experimental_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
     <string name="pref_experimental_repeated_values_disabled_title">Repeated Measures Disabled</string>
-    <string name="pref_experimental_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable.</string>
+    <string name="pref_experimental_repeated_values_disabled_message">Any repeated values that have been collected will be hidden until this feature is enabled again</string>
 
     <string name="pref_experimental_enable_field_audio_title">Enable Field Audio</string>
-    <string name="pref_experimental_enable_field_audio_summary">Enable audio recording feature for the entire field.</string>
+    <string name="pref_experimental_enable_field_audio_summary">Enable audio recording feature for the entire field</string>
     <string name="menu_collect_start_field_audio">Start Recorder</string>
     <string name="menu_collect_stop_field_audio">Stop Recorder</string>
-    <string name="field_audio_recording_start">Recording field level audio.</string>
-    <string name="field_audio_recording_stop">A new field level audio file was saved.</string>
+    <string name="field_audio_recording_start">Recording field level audio</string>
+    <string name="field_audio_recording_stop">A new field level audio file was saved</string>
     <string name="field_audio_recording_warning">Field level audio is already recording. Stop that first.</string>
     <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
     <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
@@ -851,7 +879,49 @@
     <string name="pref_beta_mlkit_title">MLKit Library</string>
     <string name="pref_beta_mlkit_summary">This option uses the MLKit library instead of the ZXing library for scanning barcodes</string>
     <string name="pref_beta_mlkit_enabled_title">Barcode Scanning using MLKit enabled</string>
-    <string name="pref_beta_mlkit_enabled_message">Enabling this feature will switch the barcode scanning library from ZXing to MLKit.</string>
+    <string name="pref_beta_mlkit_enabled_message">Enabling this feature will switch the barcode scanning library from ZXing to MLKit</string>
+
+
+    <!-- STATISTICS -->
+
+    <string name="warning_no_observations">No observations have been collected</string>
+    <string name="warning_no_data">No data to display</string>
+    <string name="warning_invalid_date_range">Select a valid date range</string>
+    <string name="stats_heatmap_title">Heatmap</string>
+    <string name="stats_heatmap">View a heatmap of the collected observations</string>
+    <string name="stats_loading">Loading…</string>
+    <string name="stats_first_day">Scroll to the first day with a collected observation</string>
+    <string name="stats_last_day">Scroll to the last day with a collected observation</string>
+    <string name="stats_calendar_range">Select a date range to filter the displayed dates</string>
+    <string name="stats_counter">Swap the date with the number of observations collected that day</string>
+    <string name="stats_date_range_picker_title">Select a date range</string>
+
+    <string name="stats_tab_layout_total">Total</string>
+    <string name="stats_tab_layout_year">Year</string>
+    <string name="stats_tab_layout_month">Month</string>
+
+    <string name="stat_card_export_title_total">Total Field Book Stats</string>
+    <string name="stat_card_export_title">Field Book Stats for</string>
+
+    <string name="stat_title_fields">Fields</string>
+    <string name="stat_title_entries">Entries</string>
+    <string name="stat_title_data">Data</string>
+    <string name="stat_title_hours">Hours</string>
+    <string name="stat_title_people">People</string>
+    <string name="stat_title_photos">Photos</string>
+    <string name="stat_title_busiest">Busiest</string>
+    <string name="stat_title_most">Most</string>
+
+    <string name="stat_fields_dialog_title">Fields imported in</string>
+    <string name="stat_people_dialog_title">List of People</string>
+    <string name="stat_most_dialog_title">List of Observations</string>
+
+    <string name="stat_entries_toast_message">entries have been phenotyped</string>
+    <string name="stat_data_toast_message">observations have been collected</string>
+    <string name="stat_hours_toast_message">hours spent phenotyping</string>
+    <string name="stat_photos_toast_message">photos have been captured</string>
+    <string name="stat_busiest_toast_message">observations were collected on </string>
+
 
     <!-- ABOUT -->
     <!-- App  -->
@@ -897,7 +967,7 @@
 
     <string name="preferences_brapi_enable_title">Enable BrAPI</string>
     <string name="preferences_brapi_enable_summary">The Breeding API allows simple data transfer to compatible databases.</string>
-    <string name="preferences_brapi_core_title">Configuration</string>
+    <string name="preferences_brapi_server_title">Server</string>
     <string name="preferences_brapi_barcode_config_title">Auto-configure</string>
     <string name="preferences_brapi_barcode_config_summary">Manage settings with QR codes</string>
     <string name="preferences_brapi_barcode_config_scan">Import new settings</string>
@@ -921,6 +991,7 @@
 
     <string name="brapi_edit_display_name">Edit Display Name</string>
     <string name="brapi_edit_display_name_server">Server Name</string>
+    <string name="brapi_edit_display_name_default">BrAPI Test Server</string>
 
     <string name="preferences_brapi_version">BrAPI Version</string>
     <string name="preferences_brapi_version_v1" translatable="false">V1</string>
@@ -930,7 +1001,8 @@
     <string name="brapi_timeout">Server Timeout</string>
     <string name="brapi_chunk_size">Chunk Size</string>
 
-    <string name="preferences_brapi_advanced_title">Auth Settings</string>
+    <string name="preferences_brapi_authorization_title">Authorization</string>
+    <string name="preferences_brapi_advanced_title">Advanced</string>
 
     <string name="preferences_brapi_oidc_flow" translatable="false">OIDC Flow</string>
     <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
@@ -949,7 +1021,7 @@
     <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
     <string name="brapi_oidc_scope_default" translatable="false" />
 
-    <string name="preferences_brapi_traits_title">BrAPI Variables</string>
+    <string name="preferences_brapi_traits_title">Preferences</string>
     <string name="preferences_appearance_collect_labelval_customize">Value vs Label Display</string>
     <string name="preferences_appearance_collect_labelval_customize_description">Display values or labels on the collect screen</string>
     <string name="preferences_appearance_collect_labelval_customize_value">Value</string>
@@ -958,12 +1030,37 @@
     <string name="preferences_brapi_servers_title">Community Servers</string>
     <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
     <string name="preferences_brapi_server_scan_error">Scan Error</string>
-    <string name="preferences_brapi_server_cassavabase" translatable="false">CassavaBase</string>
-    <string name="preferences_brapi_server_t3_wheat" translatable="false">T3 Wheat Sandbox</string>
-    <string name="preferences_brapi_server_t3_oat" translatable="false">T3 Oat Sandbox</string>
-    <string name="preferences_brapi_server_t3_barley" translatable="false">T3 Barley Sandbox</string>
-    <string name="preferences_brapi_server_test">BrAPI Test Server</string>
     <string name="preferences_brapi_server_add">Submit a server</string>
+
+    <!-- Community Servers -->
+    <string-array name="community_servers_names">
+        <item>CassavaBase</item>
+        <item>T3/Wheat</item>
+        <item>T3/Oat</item>
+        <item>T3/Barley</item>
+        <item>Default Test Server</item>
+    </string-array>
+    <string-array name="community_servers_urls">
+        <item>https://www.cassavabase.org</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org</item>
+        <item>https://test-server.brapi.org</item>
+    </string-array>
+    <string-array name="community_servers_oidc_urls">
+        <item>https://www.cassavabase.org/.well-known/openid-configuration</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
+    </string-array>
+    <string-array name="community_servers_grant_types">
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+    </string-array>
 
     <!-- Authorization -->
     <string name="brapi_save_authorize">Authorize</string>
@@ -1156,6 +1253,7 @@
     <string name="repeated_values_left_button_content_description">left</string>
     <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
     <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
+    <string name="activity_file_explorer_up_directory_name">Up</string>
 
     <!-- base camera strings -->
     <string name="trait_camera_connect_content_description">Starts a device connection.</string>

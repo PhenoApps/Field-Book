@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:key="transfer_defaults"
+        android:title="@string/preferences_system_defaults_title"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:defaultValue="0"
+            android:icon="@drawable/ic_pref_source_import_default"
+            app:dialogTitle="@string/preferences_source_default_import"
+            app:entries="@array/pref_import_source_entries"
+            app:entryValues="@array/pref_import_source_values"
+            app:key="IMPORT_SOURCE_DEFAULT"
+            app:title="@string/preferences_source_default_import"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:icon="@drawable/ic_pref_source_export_default"
+            app:allowDividerBelow="true"
+            app:dialogTitle="@string/preferences_source_default_export"
+            app:entries="@array/pref_export_source_entries"
+            app:entryValues="@array/pref_export_source_values"
+            app:key="EXPORT_SOURCE_DEFAULT"
+            app:title="@string/preferences_source_default_export"
+            app:useSimpleSummaryProvider="true" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_share"
+            android:key="EnableShare"
+            android:summary="@string/preferences_general_share_enable_description"
+            android:title="@string/preferences_general_share_enable" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="crashlytics_category"
+        android:title="@string/preferences_profile_crashlytics"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_card_account_details_outline"
+            android:key="com.tracker.fieldbook.preference.crashlytics.user_id_enabled"
+            android:title="@string/pref_profile_crashlytics_user_id_enabled"
+            android:summary="@string/pref_profile_crashlytics_user_id_enabled_summary"/>
+
+        <Preference
+            app:isPreferenceVisible="false"
+            android:icon="@drawable/ic_refresh"
+            android:key="com.tracker.fieldbook.preference.crashlytics.refresh"
+            android:summary="@string/pref_profile_crashlytics_refresh_summary"
+            android:title="@string/pref_profile_crashlytics_refresh_title" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

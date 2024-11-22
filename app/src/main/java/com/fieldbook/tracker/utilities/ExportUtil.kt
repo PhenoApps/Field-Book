@@ -131,7 +131,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
         val exportArray = arrayOf(
             context.getString(R.string.export_source_local),
-            preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.preferences_brapi_server_test))
+            preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.brapi_edit_display_name_default))
         )
 
         val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
@@ -618,7 +618,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
      * Scan file to update file list and share exported file
      */
     private fun shareFile(docFile: DocumentFile) {
-        if (!preferences.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
+        if (preferences.getBoolean(GeneralKeys.ENABLE_SHARE, true)) {
             val intent = Intent()
             intent.action = Intent.ACTION_SEND
             intent.type = "text/plain"

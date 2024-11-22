@@ -7,6 +7,17 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
+    <ImageView
+        android:id="@+id/list_item_infobar_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingEnd="8dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/list_item_infobar_value"
+        app:layout_constraintBottom_toBottomOf="@id/list_item_infobar_value"
+        tools:src="@drawable/ic_infobar_rhombus" />
+
     <TextView
         android:id="@+id/list_item_infobar_prefix"
         android:layout_width="wrap_content"
@@ -18,7 +29,7 @@
         android:textSize="?attr/fb_title_text_size"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/list_item_infobar_value"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/list_item_infobar_icon"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="1" />
 

@@ -15,7 +15,9 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:label">
-
+        <activity
+            android:name=".activities.StatisticsActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.ScannerActivity"
             android:exported="false" />
@@ -215,6 +217,7 @@
             <action android:name="android.intent.action.GET_CONTENT" />
         </intent>
     </queries>
+
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
@@ -251,13 +254,9 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"/>
-
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
 
     <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />

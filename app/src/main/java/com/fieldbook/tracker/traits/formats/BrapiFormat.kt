@@ -15,7 +15,7 @@ class BrapiFormat : TraitFormat(
         PreferenceManager.getDefaultSharedPreferences(context)
             .getString(
                 GeneralKeys.BRAPI_DISPLAY_NAME,
-                context.getString(R.string.preferences_brapi_server_test)
+                context.getString(R.string.brapi_edit_display_name_default)
             )
     }
 )
