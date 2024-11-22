@@ -1,6 +1,23 @@
 <changelog>
 
     <release
+        date="2024-12-01"
+        versionCode="60000"
+        versionName="v6.0">
+        <new>Fields list updated to include bulk actions and individual field pages</new>
+        <new>Data statistics added to each field</new>
+        <new>App-wide statistics added to main screen</new>
+        <new>Trait progress bar in Collect now shows individual traits</new>
+        <new>Documentation updated</new>
+        <new>App intro and setup process</new>
+        <new>Camera expanded with embedded preview</new>
+        <new>Preferences reorganized and better described</new>
+        <new>InfoBars updated to support wrapping and prefix replacement</new>
+        <bugfix>GoPro, USB, and Canon camera improvements</bugfix>
+        <bugfix>Numerous bug fixes</bugfix>
+    </release>
+
+    <release
         date="2023-12-08"
         versionCode="50614"
         versionName="v5.6">
