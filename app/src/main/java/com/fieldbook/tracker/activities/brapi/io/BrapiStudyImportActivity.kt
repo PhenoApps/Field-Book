@@ -248,7 +248,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         listView.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_list_item_single_choice,
-            observationLevels.toList().toTypedArray()
+            existingLevels()
         )
 
         listView.setItemChecked(selectedLevel, true)
