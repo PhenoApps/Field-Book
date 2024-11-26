@@ -1156,6 +1156,8 @@
     <string name="oauth_configured_incorrectly">Authorization request failed, please check your BrAPI settings.</string>
     <string name="brapi_programs_activity_title">Choose your Program</string>
     <string name="import_brapi_title">BrAPI Import</string>
+    <string name="import_brapi_field_title">BrAPI Field Import</string>
+    <string name="import_brapi_trait_title">BrAPI Trait Import</string>
     <string name="menu_action_brapi_filter">Filter</string>
 
     <string name="act_brapi_filter_apply">Filter</string>

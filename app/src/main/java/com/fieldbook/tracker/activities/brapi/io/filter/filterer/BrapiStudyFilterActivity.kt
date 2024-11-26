@@ -134,7 +134,7 @@ class BrapiStudyFilterActivity(
 
     private fun setupMainToolbar() {
 
-        supportActionBar?.title = getString(R.string.import_brapi_title)
+        supportActionBar?.title = getString(R.string.import_brapi_field_title)
 
         //enable home button as back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
