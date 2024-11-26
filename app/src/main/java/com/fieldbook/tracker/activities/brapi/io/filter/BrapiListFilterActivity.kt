@@ -513,6 +513,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             android.R.id.home -> {
+                saveFilter()
                 finish()
                 return true
             }

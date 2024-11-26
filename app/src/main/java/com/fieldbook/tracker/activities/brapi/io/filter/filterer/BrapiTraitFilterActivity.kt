@@ -144,7 +144,7 @@ class BrapiTraitFilterActivity(
 
         setupMainToolbar()
 
-        prefs.edit().remove(filterName).apply()
+        //prefs.edit().remove(filterName).apply()
 
         importTextView.text = getString(R.string.act_brapi_filter_import)
 
@@ -252,6 +252,7 @@ class BrapiTraitFilterActivity(
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
+            saveFilter()
             onBackPressed()
             return true
         } else if (item.itemId == R.id.action_brapi_filter) {
@@ -272,6 +273,8 @@ class BrapiTraitFilterActivity(
         val cropCount = models.mapNotNull { it.study.commonCropName }.distinct().size
         val studyCount = models.filter { if (tids.isNotEmpty()) it.trialDbId in tids else true }
             .mapNotNull { it.study.studyDbId }.distinct().size
+
+        saveFilter()
 
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_brapi_filter_choices_title)
