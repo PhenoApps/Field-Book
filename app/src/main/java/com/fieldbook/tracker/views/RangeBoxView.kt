@@ -608,9 +608,9 @@ class RangeBoxView : ConstraintLayout {
         //three skipMode options: 0. disabled 1. skip active trait 2. skip but check all traits
 
         val skipMode = if (fromToolbar) {
-            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1")?.toIntOrNull() ?: 1
+            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0")?.toIntOrNull() ?: 0
         } else {
-            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1")?.toIntOrNull() ?: 1
+            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "0")?.toIntOrNull() ?: 0
         }
 
         return when (skipMode) {
