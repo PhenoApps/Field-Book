@@ -9,14 +9,21 @@ class UriPresenter : ValuePresenter {
 
         var repr = value.toString()
 
-        //query the content resolver for the value uri and return the human readable string file name
-        context.contentResolver.query(Uri.parse(repr), null, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                if (index > -1) {
-                    repr = cursor.getString(index)
+        try {
+            //query the content resolver for the value uri and return the human readable string file name
+            context.contentResolver.query(Uri.parse(repr), null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (index > -1) {
+                        repr = cursor.getString(index)
+                    }
                 }
             }
+
+        } catch (e: Exception) {
+
+            return repr.split("%2F").lastOrNull() ?: repr
+
         }
 
         return repr

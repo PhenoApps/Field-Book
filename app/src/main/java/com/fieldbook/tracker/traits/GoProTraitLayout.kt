@@ -79,7 +79,7 @@ class GoProTraitLayout :
 
     private fun setupWaitForStreamDialog() {
 
-        dialogWaitForStream = AlertDialog.Builder(context)
+        dialogWaitForStream = AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(R.string.dialog_go_pro_wait_stream_title)
             .setMessage(R.string.dialog_go_pro_wait_stream_message)
             .setPositiveButton(android.R.string.cancel) { dialog, _ ->

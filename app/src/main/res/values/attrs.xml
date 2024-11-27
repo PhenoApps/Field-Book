@@ -294,6 +294,12 @@
     <!-- within-dialog error message color -->
     <attr name="fb_error_message_color" format="color" />
 
+    <!-- statistics activity heatmap colors -->
+    <attr name="fb_heatmap_color_low" format="color"/>
+    <attr name="fb_heatmap_color_medium" format="color"/>
+    <attr name="fb_heatmap_color_high" format="color"/>
+    <attr name="fb_heatmap_color_max" format="color"/>
+
     <!-- action mode selected item color -->
     <attr name="selectedItemBackground" format="color"/>
 

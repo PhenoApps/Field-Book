@@ -148,7 +148,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
         val initialMaxIndexSelected = supportedSizes?.maxByOrNull { it.height * it.width }?.let { supportedSizes.indexOf(it) } ?: 0
         val settingsView = UsbCameraTraitSettingsView(context, supportedSizes ?: listOf(), initialMaxIndexSelected)
 
-        AlertDialog.Builder(context)
+        AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(R.string.trait_usb_photo_settings_title)
             .setPositiveButton(R.string.dialog_ok) { dialog, _ ->
                 settingsView.commitChanges()

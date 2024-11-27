@@ -192,6 +192,7 @@ class ZipUtil {
 
                                 // if the preferences are stored in .xml file
                                 if (zipEntry != null && zipEntry.endsWith(".xml")){
+                                    Log.d("ZipUtil", "Unzip - Found preference file: $zipEntry")
                                     val tempZipFile = File.createTempFile("temp", ".xml", ctx.cacheDir)
                                     tempZipFile.outputStream().use { output ->
                                         zin.copyTo(output)
@@ -207,6 +208,7 @@ class ZipUtil {
                                     }
                                 } else{
                                     // if the preferences are encoded in a file
+                                    Log.d("ZipUtil", "Unzip - Found encoded preference file: ${ze?.name}")
                                     ObjectInputStream(zin).use { objectStream ->
                                         prefMap = objectStream.readObject() as Map<*, *>
                                     }
@@ -232,6 +234,7 @@ class ZipUtil {
             val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
             with (prefs.edit()) {
 
+                Log.d("ZipUtil", "UpdatePreferences - Replacing existing preferences with preferences from file")
                 clear()
 
                 //keys are always string, do a quick map to type cast

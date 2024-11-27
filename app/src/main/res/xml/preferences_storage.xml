@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:key="storage_definer"
+        android:title="@string/preferences_storage_storage_title"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:icon="@drawable/ic_pref_general_root_directory"
+            android:key="DEFAULT_STORAGE_LOCATION_PREFERENCE"
+            android:summary="@string/preferences_storage_files_base_directory_description"
+            android:title="@string/preferences_storage_files_base_directory_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="database_operations"
+        android:title="@string/preferences_storage_database_title"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:icon="@drawable/ic_pref_database_import"
+            android:key="pref_database_import"
+            android:summary=""
+            android:title="@string/database_import" />
+
+        <Preference
+            android:icon="@drawable/ic_pref_database_export"
+            android:key="pref_database_export"
+            android:summary=""
+            android:title="@string/database_export" />
+
+        <Preference
+            android:icon="@drawable/ic_pref_database_delete"
+            android:key="pref_database_delete"
+            android:summary=""
+            android:title="@string/database_reset" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

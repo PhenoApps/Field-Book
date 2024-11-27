@@ -180,7 +180,7 @@ dependencies {
     //noinspection GradleDependency
     implementation "com.mikepenz:aboutlibraries:6.2.3"
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.13.2'
-    implementation 'com.github.ByteHamster:SearchPreference:v2.0.0'
+    implementation 'com.github.ByteHamster:SearchPreference:v2.5.1'
     implementation "com.github.skydoves:colorpickerpreference:2.0.4"
     implementation 'com.github.evrencoskun:TableView:v0.8.9.4'
 
@@ -232,6 +232,13 @@ dependencies {
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
     implementation "androidx.camera:camera-view:$camerax_version"
     implementation "androidx.camera:camera-core:$camerax_version"
+
+    // The view and compose calendar library
+    implementation 'com.kizitonwose.calendar:view:2.5.0'
+    implementation 'com.kizitonwose.calendar:compose:2.5.0'
+
+    // Calendar date range picker library
+    implementation 'io.github.architshah248.calendar:awesome-calendar:2.0.0'
 
     //AppIntro
     implementation 'com.github.AppIntro:AppIntro:6.3.1'

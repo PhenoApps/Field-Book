@@ -69,7 +69,7 @@ class ImportDBFragment : Fragment(){
             try {
                 val sampleDatabase = BaseDocumentTreeUtil.getFile(
                     mContext,
-                    R.string.dir_database, "sample.db"
+                    R.string.dir_database, "sample_db.zip"
                 )
                 if (sampleDatabase != null && sampleDatabase.exists()) {
                     // database import might take some time

@@ -54,6 +54,10 @@ class AppIntroActivity : AppIntro() {
 
         uri?.let { nonNullUri ->
 
+            val flags =
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+          
+            this@AppIntroActivity.contentResolver.takePersistableUriPermission(nonNullUri, flags)
             runBlocking {
 
                 directories?.let { dirs ->
@@ -67,12 +71,6 @@ class AppIntroActivity : AppIntro() {
 
                             BaseDocumentTreeUtil.copyAsset(this@AppIntroActivity, sampleAsset.name, sampleAsset.dir, dir)
                         }
-
-                        val flags =
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-
-                        this@AppIntroActivity.contentResolver.takePersistableUriPermission(uri, flags)
-
                     }
                 }
             }

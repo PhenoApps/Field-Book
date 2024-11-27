@@ -164,7 +164,7 @@ class CanonTraitLayout :
 
         val settingsView = CanonCameraTraitSettingsView(context)
 
-        AlertDialog.Builder(context)
+        AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(R.string.canon_trait_settings_title)
             .setView(settingsView)
             .setPositiveButton(android.R.string.ok) { dialog, _ ->
