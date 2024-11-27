@@ -121,12 +121,20 @@ abstract class ListFilterActivity : ThemedActivity(),
         progressBar.max = progressMax
     }
 
+    open fun resetSelectionCountDisplay() = Unit
+
     private fun setupRecyclerView() {
 
         recyclerView.adapter = CheckboxListAdapter { checked, position ->
-            cache[position].checked = checked
-            //submitAdapterItems(cache)
-            importTextView.visibility = if (showNextButton()) View.VISIBLE else View.GONE
+            if (position in cache.indices) {
+
+                val item = cache[position]
+
+                item.checked = checked
+
+                importTextView.visibility = if (showNextButton()) View.VISIBLE else View.GONE
+                resetSelectionCountDisplay()
+            }
         }
     }
 

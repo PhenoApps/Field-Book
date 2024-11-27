@@ -26,6 +26,10 @@ import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.Formats
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.badge.BadgeUtils
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -69,7 +73,6 @@ class BrapiTraitFilterActivity(
             .filter { if (trialDbIds.isNotEmpty()) it.trialDbId in trialDbIds else true }
             .map { it.study.observationVariableDbIds ?: listOf() }.flatten()
 
-        println(observationVariableIds.size)
         val filteredVars = this.variables.values
             .filter { if (observationVariableIds.isNotEmpty()) it.observationVariableDbId in observationVariableIds else true }
             .filter { if (commonCropNames.isNotEmpty()) it.commonCropName in commonCropNames else true}
@@ -144,8 +147,6 @@ class BrapiTraitFilterActivity(
 
         setupMainToolbar()
 
-        //prefs.edit().remove(filterName).apply()
-
         importTextView.text = getString(R.string.act_brapi_filter_import)
 
         fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_variables)
@@ -157,11 +158,10 @@ class BrapiTraitFilterActivity(
         BrapiTraitImporterActivity.getIntent(this).also {
            intentLauncher.launch(it.also {
                it.putStringArrayListExtra(BrapiTraitImporterActivity.EXTRA_TRAIT_DB_ID,
-                   ArrayList(cache.filter { it.checked }.map { it.id })
+                   ArrayList((recyclerView.adapter as CheckboxListAdapter).selected.map { it.id })
                )
            })
         }
-        finish()
     }
 
     override suspend fun loadData() {
@@ -230,7 +230,7 @@ class BrapiTraitFilterActivity(
         return BrapiFilterCache.getStoredModels(this).variables.isNotEmpty() or queried
     }
 
-    override fun showNextButton() = cache.any { it.checked }
+    override fun showNextButton() = (recyclerView.adapter as CheckboxListAdapter).selected.isNotEmpty()
 
     private fun setupMainToolbar() {
 
@@ -247,6 +247,7 @@ class BrapiTraitFilterActivity(
         menu?.findItem(R.id.action_check_all)?.isVisible = false
         menu?.findItem(R.id.action_reset_cache)?.isVisible = true
         menu?.findItem(R.id.action_brapi_filter)?.isVisible = true
+        selectionMenuItem = menu?.findItem(R.id.action_clear_selection)
         return true
     }
 

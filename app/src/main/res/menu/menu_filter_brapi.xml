@@ -14,6 +14,12 @@
         app:showAsAction="ifRoom" />
     <item
         android:visible="false"
+        android:id="@+id/action_clear_selection"
+        android:title="@string/menu_filter_brapi_clear_selection"
+        android:icon="@drawable/tray_remove"
+        app:showAsAction="always" />
+    <item
+        android:visible="false"
         android:id="@+id/action_clear_filters"
         android:title="@string/menu_filter_brapi_clear_filters"
         android:icon="@drawable/delete_sweep"

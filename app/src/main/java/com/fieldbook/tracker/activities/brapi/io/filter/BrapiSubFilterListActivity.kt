@@ -1,10 +1,16 @@
 package com.fieldbook.tracker.activities.brapi.io.filter
 
 import android.text.TextWatcher
+import android.view.MenuItem
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.annotation.OptIn
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.badge.BadgeUtils
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,6 +35,8 @@ abstract class BrapiSubFilterListActivity<T> : BrapiListFilterActivity<T>() {
             }
         }
     }
+
+    protected var numFilterBadge: BadgeDrawable? = null
 
     override fun setupSearch(models: List<CheckboxListAdapter.Model>) {
 
@@ -57,11 +65,27 @@ abstract class BrapiSubFilterListActivity<T> : BrapiListFilterActivity<T>() {
         searchEditText.addTextChangedListener(textWatcher)
     }
 
-    override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
-        super.onCreateOptionsMenu(menu)
-        menu?.findItem(R.id.action_check_all)?.isVisible = true
-        menu?.findItem(R.id.action_reset_cache)?.isVisible = false
-        menu?.findItem(R.id.action_brapi_filter)?.isVisible = false
-        return true
+    @OptIn(ExperimentalBadgeUtils::class)
+    override fun resetSelectionCountDisplay() {
+
+        val toolbar = findViewById<MaterialToolbar>(R.id.act_list_filter_tb)
+
+        val numSelected = (recyclerView.adapter as CheckboxListAdapter).selected.size
+
+        if (numFilterBadge != null) BadgeUtils.detachBadgeDrawable(numFilterBadge, toolbar, R.id.action_clear_selection)
+
+        if (numSelected > 0) {
+            selectionMenuItem?.isVisible = true
+            numFilterBadge = BadgeDrawable.create(this).apply {
+                isVisible = true
+                number = numSelected
+                horizontalOffset = 16
+                maxNumber = 9
+            }.also {
+                BadgeUtils.attachBadgeDrawable(it, toolbar, R.id.action_clear_selection)
+            }
+        } else {
+            selectionMenuItem?.isVisible = false
+        }
     }
 }

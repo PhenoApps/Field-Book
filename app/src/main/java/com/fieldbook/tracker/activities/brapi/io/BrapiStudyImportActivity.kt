@@ -131,42 +131,34 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
         when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                setResult(Activity.RESULT_CANCELED)
+                finish()
+                return true
             }
         }
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        startActivity(BrapiStudyFilterActivity.getIntent(this))
-    }
-
     private fun parseIntentExtras() {
         val programDbId = intent.getStringExtra(EXTRA_PROGRAM_DB_ID)
-        if (programDbId == null) {
-            Toast.makeText(this, getString(R.string.no_programdbid_provided), Toast.LENGTH_SHORT).show()
+        val studyDbIds =
+            intent.getStringArrayExtra(EXTRA_STUDY_DB_IDS)?.toList()
+                ?: listOf()
+
+        if (studyDbIds.isEmpty()) {
+            // fetch study info
+            Toast.makeText(this, getString(R.string.no_studydbids_provided), Toast.LENGTH_SHORT).show()
             setResult(Activity.RESULT_CANCELED)
             finish()
         } else {
-            val studyDbIds =
-                intent.getStringArrayExtra(EXTRA_STUDY_DB_IDS)?.toList()
-                    ?: listOf()
 
-            if (studyDbIds.isEmpty()) {
-                // fetch study info
-                Toast.makeText(this, getString(R.string.no_studydbids_provided), Toast.LENGTH_SHORT).show()
-                setResult(Activity.RESULT_CANCELED)
-                finish()
-            } else {
+            studies.addAll(BrapiFilterCache.getStoredModels(this).studies.map { it.study }
+                .filter { it.studyDbId in studyDbIds })
 
-                studies.addAll(BrapiFilterCache.getStoredModels(this).studies.map { it.study }
-                    .filter { it.studyDbId in studyDbIds })
-
-                fetchStudyInfo(programDbId, studyDbIds)
-            }
+            fetchStudyInfo(programDbId ?: "", studyDbIds)
         }
     }
 

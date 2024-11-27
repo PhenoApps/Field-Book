@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -38,13 +39,18 @@
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/act_brapi_trait_import_finish_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="8dp"
+        android:minHeight="?attr/actionBarSize"
         android:text="@string/dialog_import"
-        android:id="@+id/act_brapi_trait_import_finish_button"
-        android:layout_margin="8dp"/>
+        android:visibility="visible"
+        android:textColor="?attr/fb_color_text_high_contrast_inverted"
+        android:background="@drawable/cell"
+        android:backgroundTint="?attr/fb_color_primary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

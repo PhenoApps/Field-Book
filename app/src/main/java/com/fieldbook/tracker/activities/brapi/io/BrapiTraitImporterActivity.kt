@@ -11,14 +11,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
-import com.fieldbook.tracker.activities.brapi.io.BrapiStudyImportActivity.Companion.EXTRA_PROGRAM_DB_ID
-import com.fieldbook.tracker.activities.brapi.io.BrapiStudyImportActivity.Companion.EXTRA_STUDY_DB_IDS
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.mapper.DataTypes
 import com.fieldbook.tracker.activities.brapi.io.mapper.toTraitObject
 import com.fieldbook.tracker.adapters.BrapiTraitImportAdapter
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
-import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
-import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.NewTraitDialog
 import com.fieldbook.tracker.objects.TraitObject
@@ -70,12 +67,6 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
         recyclerView = findViewById(R.id.act_brapi_trait_import_rv)
         progressBar = findViewById(R.id.act_brapi_trait_import_pb)
 
-        cache = BrapiFilterTypeAdapter.toModelList(prefs, BrapiTraitFilterActivity.FILTER_NAME)
-
-        recyclerView?.adapter = BrapiTraitImportAdapter(this).also {
-            it.submitList(cache)
-        }
-
         finishButton = findViewById(R.id.act_brapi_trait_import_finish_button)
 
         setupToolbar()
@@ -89,6 +80,27 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
         if (dbIds == null) {
             setResult(Activity.RESULT_CANCELED)
             finish()
+        }
+
+        cache = BrapiFilterCache.getStoredModels(this).variables.values
+            .filter { it.observationVariableDbId != null && dbIds?.contains(it.observationVariableDbId) == true }
+            .map { model ->
+                CheckboxListAdapter.Model(
+                    checked = false,
+                    id = model.observationVariableDbId,
+                    label = model.synonyms?.firstOrNull() ?: model.observationVariableName ?: model.observationVariableDbId,
+                    subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}"
+                ).also {
+                    model.scale?.dataType?.name?.let { dataType ->
+                        Formats.findTrait(DataTypes.convertBrAPIDataType(dataType))?.iconDrawableResourceId?.let { icon ->
+                            it.iconResId = icon
+                        }
+                    }
+                }
+            }.toList()
+
+        recyclerView?.adapter = BrapiTraitImportAdapter(this).also {
+            it.submitList(cache)
         }
 
         finishButton?.setOnClickListener {
@@ -108,6 +120,8 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
                     database.insertTraits(u)
                 }
             }
+
+            prefs.edit().remove(BrapiTraitFilterActivity.FILTER_NAME).apply()
 
             setResult(Activity.RESULT_OK)
             finish()

@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.OptIn
 import androidx.appcompat.content.res.AppCompatResources
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
@@ -26,7 +27,6 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -62,12 +62,12 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     private var filterer: String = ""
 
-    private var numFilterBadge: BadgeDrawable? = null
-
     private var trialModels = mutableListOf<BrAPITrial>()
 
     private var queryStudiesJob: Job? = null
     private var queryTrialsJob: Job? = null
+
+    protected var selectionMenuItem: MenuItem? = null
 
     protected lateinit var paginationManager: BrapiPaginationManager
 
@@ -90,8 +90,9 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     open fun List<CheckboxListAdapter.Model>.filterBySearchTextPreferences(): List<CheckboxListAdapter.Model> = this
 
     protected val intentLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
-            restoreModels()
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) finish()
+            else restoreModels()
         }
 
     protected val brapiService: BrAPIService by lazy {
@@ -108,6 +109,10 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 }
             }
         }
+    }
+
+    override fun showNextButton(): Boolean {
+        return cache.any { it.checked }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -332,54 +337,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     }
 
     override fun onFinishButtonClicked() {
-        if (this is BrapiStudyFilterActivity) {
-
-            val models = associateProgramStudy()
-            val programDbIds = models.map { it.programDbId }.distinct()
-
-            if (isFilterMode) {
-                saveFilter()
-                finish()
-                return
-            }
-
-            if (programDbIds.size > 1) {
-                Toast.makeText(
-                    this,
-                    getString(R.string.act_brapi_list_filter_error_multiple_programs),
-                    Toast.LENGTH_SHORT
-                ).show()
-                return
-            } else if (programDbIds.isNotEmpty()) {
-                intentLauncher.launch(BrapiStudyImportActivity.getIntent(this).also { intent ->
-                    intent.putExtra(
-                        BrapiStudyImportActivity.EXTRA_STUDY_DB_IDS,
-                        associateProgramStudy().map { it.study.studyDbId }.toTypedArray()
-                    )
-                    intent.putExtra(
-                        BrapiStudyImportActivity.EXTRA_PROGRAM_DB_ID,
-                        programDbIds.first()
-                    )
-                })
-            }
-
-        } else {
-            saveFilter()
-        }
-
+        saveFilter()
         finish()
-    }
-
-    private fun associateProgramStudy(): List<TrialStudyModel> {
-
-        val models = arrayListOf<TrialStudyModel>()
-
-        val checkedIds = cache.filter { it.checked }.map { it.id }
-        models.addAll(BrapiFilterCache.getStoredModels(this).studies.filter {
-            it.study.studyDbId in checkedIds
-        })
-
-        return models
     }
 
     private fun loadFilter() = BrapiFilterTypeAdapter.toModelList(prefs, getFilterKey())
@@ -390,9 +349,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     protected fun saveFilter() {
 
         //get ids and names of selected programs from the adapter
-        val selected = cache.filter { p -> p.checked }
-
-        BrapiFilterTypeAdapter.saveFilter(prefs, getFilterKey(), selected)
+        BrapiFilterTypeAdapter.saveFilter(prefs, getFilterKey(),
+            (recyclerView.adapter as CheckboxListAdapter).selected)
     }
 
     protected fun getCheckedModels(filterName: String) =
@@ -423,6 +381,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         resetFilterCountDisplay()
 
+        resetSelectionCountDisplay()
     }
 
     private fun resetFilterCountDisplay() {
@@ -438,7 +397,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     private fun List<CheckboxListAdapter.Model>.persistCheckBoxes(): List<CheckboxListAdapter.Model> {
 
-        val selected = loadFilter()
+        val selected = (loadFilter() + (recyclerView.adapter as CheckboxListAdapter).selected).distinct()
 
         return map { model ->
             model.checked = selected.any { it.id == model.id }
@@ -479,6 +438,15 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         BrapiFilterCache.saveStudyTrialsToFile(this, studyTrials)
     }
 
+    override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
+        super.onCreateOptionsMenu(menu)
+        menu?.findItem(R.id.action_check_all)?.isVisible = true
+        menu?.findItem(R.id.action_reset_cache)?.isVisible = false
+        menu?.findItem(R.id.action_brapi_filter)?.isVisible = false
+        selectionMenuItem = menu?.findItem(R.id.action_clear_selection)
+        return true
+    }
+
     override fun onResume() {
         super.onResume()
         if (::paginationManager.isInitialized) paginationManager.reset()
@@ -504,6 +472,18 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                     .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
                     .setPositiveButton(android.R.string.ok) { dialog, _ ->
                         resetStorageCache()
+                        dialog.dismiss()
+                    }.show()
+            }
+
+            R.id.action_clear_selection -> {
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.act_brapi_list_filter_reset_cache_title)
+                    .setMessage(getString(R.string.act_brapi_list_filter_reset_selection_message))
+                    .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
+                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                        (recyclerView.adapter as CheckboxListAdapter).selected.clear()
+                        loadStorageItems(BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity))
                         dialog.dismiss()
                     }.show()
             }

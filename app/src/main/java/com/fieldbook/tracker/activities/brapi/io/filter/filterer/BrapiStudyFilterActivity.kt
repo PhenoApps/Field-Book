@@ -11,6 +11,8 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterTypeAdapter
+import com.fieldbook.tracker.activities.brapi.io.BrapiStudyImportActivity
+import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiProgramFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity
@@ -118,10 +120,6 @@ class BrapiStudyFilterActivity(
 
         isFilterMode = intent?.hasExtra(EXTRA_MODE) == true
 
-        if (!isFilterMode) {
-            prefs.edit().remove(FILTER_NAME).apply()
-        }
-
         importTextView.text = getString(if (isFilterMode) R.string.act_brapi_study_filter else R.string.act_brapi_filter_import)
 
         fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_studies)
@@ -129,7 +127,7 @@ class BrapiStudyFilterActivity(
     }
 
     override fun showNextButton(): Boolean {
-        return if (isFilterMode) true else cache.any { it.checked }
+        return if (isFilterMode) true else (recyclerView.adapter as CheckboxListAdapter).selected.isNotEmpty()
     }
 
     private fun setupMainToolbar() {
@@ -147,6 +145,7 @@ class BrapiStudyFilterActivity(
         menu?.findItem(R.id.action_check_all)?.isVisible = isFilterMode
         menu?.findItem(R.id.action_reset_cache)?.isVisible = !isFilterMode
         menu?.findItem(R.id.action_brapi_filter)?.isVisible = !isFilterMode
+        selectionMenuItem = menu?.findItem(R.id.action_clear_selection)
         return true
     }
 
@@ -158,6 +157,43 @@ class BrapiStudyFilterActivity(
             showFilterChoiceDialog()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onFinishButtonClicked() {
+
+        val models = associateProgramStudy()
+        val programDbIds = models.map { it.programDbId }.distinct()
+
+        if (isFilterMode) {
+            saveFilter()
+            finish()
+            return
+        }
+
+        if (programDbIds.isNotEmpty()) {
+            intentLauncher.launch(BrapiStudyImportActivity.getIntent(this).also { intent ->
+                intent.putExtra(
+                    BrapiStudyImportActivity.EXTRA_STUDY_DB_IDS,
+                    associateProgramStudy().map { it.study.studyDbId }.toTypedArray()
+                )
+                intent.putExtra(
+                    BrapiStudyImportActivity.EXTRA_PROGRAM_DB_ID,
+                    programDbIds.first()
+                )
+            })
+        }
+    }
+
+    private fun associateProgramStudy(): List<TrialStudyModel> {
+
+        val models = arrayListOf<TrialStudyModel>()
+
+        val checkedIds = (recyclerView.adapter as CheckboxListAdapter).selected.map { it.id }
+        models.addAll(BrapiFilterCache.getStoredModels(this).studies.filter {
+            it.study.studyDbId in checkedIds
+        })
+
+        return models
     }
 
     private fun showFilterChoiceDialog() {

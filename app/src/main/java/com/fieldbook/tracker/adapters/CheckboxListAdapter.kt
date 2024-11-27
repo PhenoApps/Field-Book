@@ -51,6 +51,8 @@ class CheckboxListAdapter(
         }
     }
 
+    var selected = mutableListOf<Model>()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val v = LayoutInflater.from(parent.context)
             .inflate(R.layout.list_item_label_checkbox, parent, false)
@@ -60,6 +62,8 @@ class CheckboxListAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         with(currentList[position]) {
+
+            holder.itemView.tag = this
 
             holder.textView.text = label
 
@@ -92,11 +96,25 @@ class CheckboxListAdapter(
 
             //get model from tag and call listener when checkbox is clicked
             checkBox.setOnCheckedChangeListener { _, isChecked ->
+
+                val model = itemView.tag as Model
+
+                model.checked = isChecked
+
+                if (isChecked) {
+                    if (model !in selected) {
+                        selected.add(model)
+                    }
+                } else {
+                    selected.remove(model)
+                }
+
                 listener.onCheckChanged(isChecked, bindingAdapterPosition)
+
             }
 
             card.setOnClickListener {
-                checkBox.isChecked = !checkBox.isChecked
+                checkBox.toggle()
             }
         }
     }
