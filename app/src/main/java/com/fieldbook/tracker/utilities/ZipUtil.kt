@@ -192,6 +192,7 @@ class ZipUtil {
 
                                 // if the preferences are stored in .xml file
                                 if (zipEntry != null && zipEntry.endsWith(".xml")){
+                                    Log.d("ZipUtil", "Unzip - Found preference file: $zipEntry")
                                     val tempZipFile = File.createTempFile("temp", ".xml", ctx.cacheDir)
                                     tempZipFile.outputStream().use { output ->
                                         zin.copyTo(output)
@@ -207,6 +208,7 @@ class ZipUtil {
                                     }
                                 } else{
                                     // if the preferences are encoded in a file
+                                    Log.d("ZipUtil", "Unzip - Found encoded preference file: ${ze?.name}")
                                     ObjectInputStream(zin).use { objectStream ->
                                         prefMap = objectStream.readObject() as Map<*, *>
                                     }
@@ -226,34 +228,39 @@ class ZipUtil {
         }
 
         /**
-         * Updates the preferences by merging.
-         * Only adds or updates preferences that are not already set.
+         * Updates the preferences
          */
         private fun updatePreferences(ctx: Context, prefMap: Map<*, *>) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
-            val currentPrefs = prefs.all // Get current preferences as a map
+            with (prefs.edit()) {
 
-            with(prefs.edit()) {
-                // Loop through the new preferences map
+                Log.d("ZipUtil", "UpdatePreferences - Replacing existing preferences with preferences from file")
+                clear()
+
+                //keys are always string, do a quick map to type cast
+                //put values into preferences based on their types
                 prefMap.entries.map { it.key as String to it.value }
-                    .forEach { (key, value) ->
-                        // Only add/update if the key does not exist or has no value
-                        if (!currentPrefs.containsKey(key) || currentPrefs[key] == null) {
-                            when (value) {
-                                is Boolean -> putBoolean(key, value)
-                                is String -> putString(key, value)
-                                is Int -> putInt(key, value)
-                                is Set<*> -> {
-                                    val stringSet = value.filterIsInstance<String>().toSet()
-                                    putStringSet(key, stringSet)
-                                }
-                                // Handle other data types as needed
+                    .forEach {
+
+                        val key = it.first
+
+                        when (val x = it.second) {
+
+                            is Boolean -> putBoolean(key, x)
+
+                            is String -> putString(key, x)
+
+                            is Int -> putInt(key, x)
+
+                            is Set<*> -> {
+
+                                val newStringSet = hashSetOf<String>()
+                                newStringSet.addAll(x.map { value -> value.toString() })
+                                putStringSet(key, newStringSet)
                             }
-                        } else {
-                            // Log skipped keys for debugging purposes
-                            Log.d("PreferencesMerge", "Skipping existing key: $key, Current Value: ${currentPrefs[key]}")
                         }
                     }
+
                 apply()
             }
         }
