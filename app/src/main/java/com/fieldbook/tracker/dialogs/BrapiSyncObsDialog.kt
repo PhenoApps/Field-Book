@@ -261,7 +261,7 @@ internal class ImportRunnableTask(
         try {
             // Calculate rep numbers for new observations based on existing observations
             val hostURL = BrAPIService.getHostUrl(context)
-            val existingObservations = dataHelper.getObservations(hostURL)
+            val existingObservations = dataHelper.getObservations(studyObservations.fieldBookStudyDbId, hostURL)
 
             // Track the count of existing observations for each unit-variable pair
             val observationRepBaseMap = mutableMapOf<Pair<String?, String?>, Int>()
