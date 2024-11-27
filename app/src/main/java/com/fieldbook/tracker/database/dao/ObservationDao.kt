@@ -84,6 +84,32 @@ class ObservationDao {
 
             } ?: emptyArray()
 
+//        fun getAllFromAYear(startDate: String, endDate: String): Array<ObservationModel> = withDatabase { db ->
+//
+//            db.query(
+//                    Observation.tableName,
+//                    where = "SUBSTR(observation_time_stamp, 1, 10) BETWEEN ? AND ? AND study_id > 0",
+//                    whereArgs = arrayOf(startDate, endDate)
+//            )
+//                    .toTable()
+//                    .map { ObservationModel(it) }
+//                    .toTypedArray()
+//
+//        } ?: emptyArray()
+
+        fun getAllFromAYear(year: String): Array<ObservationModel> = withDatabase { db ->
+
+            db.query(
+                    Observation.tableName,
+                    where = "observation_time_stamp LIKE ? AND study_id > 0",
+                    whereArgs = arrayOf("$year%")
+            )
+                    .toTable()
+                    .map { ObservationModel(it) }
+                    .toTypedArray()
+
+        } ?: emptyArray()
+
         fun getAllRepeatedValues(studyId: String, obsUnit: String, traitDbId: String) =
             getAll(studyId, obsUnit, traitDbId)
 

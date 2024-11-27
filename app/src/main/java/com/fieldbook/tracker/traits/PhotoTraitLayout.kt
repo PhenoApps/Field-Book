@@ -224,7 +224,7 @@ class PhotoTraitLayout : CameraTrait {
     override fun showSettings() {
 
         val settingsView = CameraTraitSettingsView(context, supportedResolutions)
-        AlertDialog.Builder(context)
+        AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(R.string.trait_system_photo_settings_title)
             .setPositiveButton(R.string.dialog_ok) { dialog, _ ->
                 settingsView.commitChanges()

@@ -29,18 +29,16 @@ public class PreferencesFragment extends BasePreferenceFragment {
         SearchConfiguration config = searchPreference.getSearchConfiguration();
         config.setActivity((AppCompatActivity) getActivity());
         config.setFragmentContainerViewId(android.R.id.content);
-
-        config.index(R.xml.preferences);
+        
         config.index(R.xml.preferences_appearance);
         config.index(R.xml.preferences_theme);
         config.index(R.xml.preferences_behavior);
         config.index(R.xml.preferences_brapi);
-        config.index(R.xml.preferences_database);
-        config.index(R.xml.preferences_general);
+        config.index(R.xml.preferences_system);
         config.index(R.xml.preferences_profile);
         config.index(R.xml.preferences_sounds);
         config.index(R.xml.preferences_experimental);
-        config.index(R.xml.preferences_geonav);
+        config.index(R.xml.preferences_location);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
     }

@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.FieldDetailAdapter
 import com.fieldbook.tracker.adapters.FieldDetailItem
+import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
 import com.fieldbook.tracker.interfaces.FieldAdapterController
@@ -267,7 +268,11 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             cardViewSync.visibility = View.VISIBLE
             cardViewSync.setOnClickListener {
                 if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
-                    startSync(field)
+                    if (BrAPIService.checkMatchBrapiUrl(requireContext(), field.exp_source)) {
+                        startSync(field)
+                    } else {
+                        showWrongSourceDialog(field)
+                    }
                 } else {
                     Toast.makeText(context, getString(R.string.brapi_enable_before_sync), Toast.LENGTH_LONG).show()
                 }
@@ -361,6 +366,17 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
             true
         }
+    }
+
+    private fun showWrongSourceDialog(field: FieldObject) {
+        val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+            .setTitle(getString(R.string.brapi_field_non_matching_sources_title))
+            .setMessage(String.format(getString(R.string.brapi_field_non_matching_sources), field.exp_source, BrAPIService.getHostUrl(context)))
+            .setPositiveButton(getString(R.string.dialog_ok)) { d, _ ->
+                d.dismiss()
+            }
+
+        builder.create().show()
     }
 
     private fun showEditDisplayNameDialog(field: FieldObject) {

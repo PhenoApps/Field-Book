@@ -93,7 +93,7 @@ public class AboutActivity extends MaterialAboutActivity {
                 getResources().getDrawable(R.drawable.book_open_variant),
                 getString(R.string.about_manual_title),
                 false,
-                Uri.parse("https://docs.fieldbook.phenoapps.org/en/latest/field-book.html")));
+                Uri.parse("https://fieldbook.phenoapps.org/")));
 
         appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(R.string.citation_card_title)

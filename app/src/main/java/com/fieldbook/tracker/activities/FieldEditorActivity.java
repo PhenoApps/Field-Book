@@ -51,11 +51,11 @@ import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilte
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity;
 import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
-import com.fieldbook.tracker.brapi.BrapiInfoDialog;
+import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
-import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
-import com.fieldbook.tracker.dialogs.FieldSortDialog;
+import com.fieldbook.tracker.dialogs.FieldCreatorDialogFragment;
+import com.fieldbook.tracker.dialogs.FieldSortDialogFragment;
 import com.fieldbook.tracker.dialogs.ListAddDialog;
 import com.fieldbook.tracker.dialogs.ListSortDialog;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
@@ -64,9 +64,7 @@ import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
-import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.ArrayIndexComparator;
 import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
@@ -379,7 +377,7 @@ public class FieldEditorActivity extends ThemedActivity
         importArray[1] = getString(R.string.import_source_cloud);
         importArray[2] = getString(R.string.fields_new_create_field);
         if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
-            String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.preferences_brapi_server_test));
+            String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
             importArray = Arrays.copyOf(importArray, importArray.length + 1);
             importArray[3] = displayName;
         }
@@ -403,15 +401,15 @@ public class FieldEditorActivity extends ThemedActivity
                         loadCloud();
                         break;
                     case 2:
-                        FieldCreatorDialog dialog = new FieldCreatorDialog((ThemedActivity) FieldEditorActivity.this);
-                        dialog.setFieldCreationCallback(new FieldCreatorDialog.FieldCreationCallback() {
+                        FieldCreatorDialogFragment dialog = new FieldCreatorDialogFragment((ThemedActivity) FieldEditorActivity.this);
+                        dialog.setFieldCreationCallback(new FieldCreatorDialogFragment.FieldCreationCallback() {
                             @Override
                             public void onFieldCreated(int studyDbId) {
                                 fieldSwitcher.switchField(studyDbId);
                                 queryAndLoadFields();
                             }
                         });
-                        dialog.show();
+                        dialog.show(getSupportFragmentManager(), "FieldCreatorDialogFragment");
                         break;
                     case 3:
                         loadBrAPI();
@@ -728,8 +726,8 @@ public class FieldEditorActivity extends ThemedActivity
                 int fieldId = data.getIntExtra("fieldId", -1);
                 if (fieldId != -1) {
                     getFieldSwitcher().switchField(fieldId);
-                    BrapiInfoDialog brapiInfo = new BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
-                    brapiInfo.show();
+                    BrapiInfoDialogFragment dialogFragment = new BrapiInfoDialogFragment().newInstance(getResources().getString(R.string.brapi_info_message));
+                    dialogFragment.show(this.getSupportFragmentManager(), "brapiInfoDialogFragment");
                 }
             }
         }
@@ -996,11 +994,14 @@ public class FieldEditorActivity extends ThemedActivity
         }
 
         //initialize: initial items are the current sort order, selectable items are the obs. unit attributes.
-        FieldSortDialog d = new FieldSortDialog(this, field,
+        FieldSortDialogFragment dialogFragment = new FieldSortDialogFragment().newInstance(
+                this,
+                field,
                 sortOrderList.toArray(new String[]{}),
-                database.getRangeColumnNames());
+                database.getRangeColumnNames()
+        );
 
-        d.show();
+        dialogFragment.show(this.getSupportFragmentManager(), "FieldSortDialogFragment");
     }
 
     @Override

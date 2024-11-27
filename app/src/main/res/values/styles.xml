@@ -116,13 +116,19 @@
         <item name="fb_error_message_color">@color/RED</item>
 
         <item name="colorSecondary">?attr/fb_color_accent</item>
-
+      
         <item name="fb_first_chip_color">@color/main_chip_first_color</item>
         <item name="fb_second_chip_color">@color/main_chip_second_color</item>
         <item name="fb_third_chip_color">@color/main_chip_third_color</item>
         <item name="fb_fourth_chip_color">@color/main_chip_third_color</item>
 
         <item name="bottomSheetDragHandleStyle">@style/Widget.MaterialComponents.BottomSheet.DragHandle</item>
+        <item name="fb_heatmap_color_high">@color/main_heatmap_color_high</item>
+        <item name="fb_heatmap_color_medium">@color/main_heatmap_color_medium</item>
+        <item name="fb_heatmap_color_low">@color/main_heatmap_color_low</item>
+        <item name="fb_heatmap_color_max">@color/main_heatmap_color_max</item>
+
+        <item name="selected_date_circle_color">?fb_heatmap_color_medium</item>
     </style>
 
     <!-- Blue Theme -->
@@ -159,12 +165,18 @@
         <item name="colorPrimaryVariant">?attr/fb_color_primary_dark</item>
         <item name="colorAccent">?attr/fb_color_accent</item>
         <item name="android:colorAccent">?attr/fb_color_accent</item>
-
+      
         <item name="fb_first_chip_color">@color/blue_chip_first_color</item>
         <item name="fb_second_chip_color">@color/blue_chip_second_color</item>
         <item name="fb_third_chip_color">@color/blue_chip_third_color</item>
         <item name="fb_fourth_chip_color">@color/blue_chip_third_color</item>
+      
+        <item name="fb_heatmap_color_high">@color/blue_heatmap_color_high</item>
+        <item name="fb_heatmap_color_medium">@color/blue_heatmap_color_medium</item>
+        <item name="fb_heatmap_color_low">@color/blue_heatmap_color_low</item>
+        <item name="fb_heatmap_color_max">@color/blue_heatmap_color_max</item>
 
+        <item name="selected_date_circle_color">?fb_heatmap_color_medium</item>
     </style>
 
     <!-- High Contrast Theme -->
@@ -285,7 +297,14 @@
         <item name="android:stateListAnimator">@null</item>
 
         <item name="fb_error_message_color">@color/GRAY</item>
+      
+        <item name="fb_heatmap_color_high">@color/high_heatmap_color_high</item>
+        <item name="fb_heatmap_color_medium">@color/high_heatmap_color_medium</item>
+        <item name="fb_heatmap_color_low">@color/high_heatmap_color_low</item>
+        <item name="fb_heatmap_color_max">@color/high_heatmap_color_max</item>
 
+        <item name="selected_date_circle_color">?fb_heatmap_color_medium</item>
+      
         <item name="fb_first_chip_color">@color/high_contrast_chip_first_color</item>
         <item name="fb_second_chip_color">@color/high_contrast_chip_second_color</item>
         <item name="fb_third_chip_color">@color/high_contrast_chip_third_color</item>
@@ -297,6 +316,7 @@
     <!-- these are for chips, three defined for now to be used generically across filter layers -->
     <style name="FirstChipTheme" parent="Theme.MaterialComponents">
         <item name="chipStyle">@style/FirstChipStyle</item>
+
     </style>
 
     <style name="SecondChipTheme" parent="Theme.MaterialComponents">

@@ -30,6 +30,7 @@ import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.fragments.ImportDBFragment;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -293,9 +294,9 @@ public class ConfigActivity extends ThemedActivity {
         settingsList = findViewById(R.id.myList);
 
         String[] configList = new String[]{getString(R.string.settings_fields),
-                getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)};
+                getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.settings_statistics), getString(R.string.about_title)};
 
-        Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
+        Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_nav_drawer_statistics, R.drawable.ic_tb_info};
 
         settingsList.setOnItemClickListener((av, arg1, position, arg3) -> {
             Intent intent = new Intent();
@@ -325,6 +326,13 @@ public class ConfigActivity extends ThemedActivity {
                     startActivity(intent);
                     break;
                 case 5:
+                    if (checkObservationsExist() > 0) {
+                        intent.setClassName(ConfigActivity.this,
+                                StatisticsActivity.class.getName());
+                        startActivity(intent);
+                    }
+                    break;
+                case 6:
                     intent.setClassName(ConfigActivity.this,
                             AboutActivity.class.getName());
                     startActivity(intent);
@@ -374,6 +382,19 @@ public class ConfigActivity extends ThemedActivity {
             return -1;
         }
 
+        return 1;
+    }
+
+    /**
+     * Checks if any observations are collected.
+     * @return -1 if there are no observations, else 1
+     */
+    private int checkObservationsExist() {
+        final ObservationModel[] observations = database.getAllObservations();
+        if (observations.length == 0) {
+            Utils.makeToast(getApplicationContext(), getString(R.string.warning_no_observations));
+            return -1;
+        }
         return 1;
     }
 

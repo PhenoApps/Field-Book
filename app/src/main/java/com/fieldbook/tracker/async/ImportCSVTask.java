@@ -73,10 +73,6 @@ public class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
 
                 data = columns;
 
-                if (database.isTableExists(DataHelper.TRAITS)) {
-                    database.deleteTraitsTable();
-                }
-
                 //get variable with largest real position
                 Optional<TraitObject> maxPosition = database.getAllTraitObjects().stream()
                         .max(Comparator.comparingInt(TraitObject::getRealPosition));
