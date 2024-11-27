@@ -168,6 +168,7 @@ class ZipUtil {
                         // But the code below still involves "Output" to keep the
                         // unzip functionality working with files that contained
                         // both, the presence or the absence of the Output folder at the root
+                        Log.d("ZipUtil", "Unzip - Processing file: ${ze?.name}")
 
                         when (ze?.name) {
 
@@ -192,7 +193,6 @@ class ZipUtil {
 
                                 // if the preferences are stored in .xml file
                                 if (zipEntry != null && zipEntry.endsWith(".xml")){
-                                    Log.d("ZipUtil", "Unzip - Found preference file: $zipEntry")
                                     val tempZipFile = File.createTempFile("temp", ".xml", ctx.cacheDir)
                                     tempZipFile.outputStream().use { output ->
                                         zin.copyTo(output)
@@ -209,8 +209,13 @@ class ZipUtil {
                                 } else{
                                     // if the preferences are encoded in a file
                                     Log.d("ZipUtil", "Unzip - Found encoded preference file: ${ze?.name}")
-                                    ObjectInputStream(zin).use { objectStream ->
-                                        prefMap = objectStream.readObject() as Map<*, *>
+
+                                    // Read the entry into a temporary byte array to avoid corrupting the ZipInputStream, then process it
+                                    val tempData = zin.readBytes()
+                                    ByteArrayInputStream(tempData).use { byteStream ->
+                                        ObjectInputStream(byteStream).use { objectStream ->
+                                            prefMap = objectStream.readObject() as Map<*, *>
+                                        }
                                     }
                                 }
 
@@ -218,6 +223,8 @@ class ZipUtil {
                             }
                         }
                     }
+
+                    Log.d("ZipUtil", "Unzip - Completed processing all files.")
                 }
 
             } catch (e: Exception) {
