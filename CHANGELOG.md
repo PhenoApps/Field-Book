@@ -491,4 +491,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v5.4]: https://github.com/PhenoApps/Field-Book/releases/tag/5.4.18.23
 [v5.5]: https://github.com/PhenoApps/Field-Book/releases/tag/5.5.26
 [v5.6]: https://github.com/PhenoApps/Field-Book/releases/tag/5.6.25
-[v5.6.26]: https://github.com/PhenoApps/Field-Book/releases/tag/v5.6.26
+[v5.6.26]: https://github.com/PhenoApps/Field-Book/releases/tag/5.6.26
