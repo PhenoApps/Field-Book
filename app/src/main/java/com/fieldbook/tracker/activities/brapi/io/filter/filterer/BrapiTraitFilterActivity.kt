@@ -154,7 +154,7 @@ class BrapiTraitFilterActivity(
     }
 
     override fun onFinishButtonClicked() {
-        saveFilter()
+        //saveFilter()
         BrapiTraitImporterActivity.getIntent(this).also {
            intentLauncher.launch(it.also {
                it.putStringArrayListExtra(BrapiTraitImporterActivity.EXTRA_TRAIT_DB_ID,
@@ -253,7 +253,6 @@ class BrapiTraitFilterActivity(
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            saveFilter()
             onBackPressed()
             return true
         } else if (item.itemId == R.id.action_brapi_filter) {

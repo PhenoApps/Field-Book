@@ -361,9 +361,14 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     protected fun getIds(filterName: String) = getModels(filterName).map { it.id }
 
-    private fun loadStorageItems(models: BrapiCacheModel) {
+    private fun loadStorageItems(models: BrapiCacheModel, deselect: Boolean = false) {
 
         cache.clear()
+
+        if (deselect) {
+            (recyclerView.adapter as CheckboxListAdapter).selected.clear()
+            BrapiFilterTypeAdapter.saveFilter(prefs, getFilterKey(), listOf())
+        }
 
         val uiModels = models
             .filterByPreferences()
@@ -482,8 +487,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                     .setMessage(getString(R.string.act_brapi_list_filter_reset_selection_message))
                     .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
                     .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                        (recyclerView.adapter as CheckboxListAdapter).selected.clear()
-                        loadStorageItems(BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity))
+                        loadStorageItems(BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity), deselect = true)
                         dialog.dismiss()
                     }.show()
             }
