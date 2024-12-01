@@ -8,12 +8,15 @@
     <string name="dialog_ok">ठीक</string>
     <string name="dialog_yes">हां</string>
     <string name="dialog_no">नहीं</string>
+    <string name="dialog_clear">मिटाएँ</string>
     <string name="dialog_close">बंद करें</string>
     <string name="dialog_confirm">क्या आप यही चाहते हैं?</string>
     <string name="dialog_import">आयात करें</string>
     <string name="dialog_warning">चेतावनी</string>
     <string name="dialog_save">सुरक्षित करें</string>
     <!-- Startup  -->
+    <!-- App Intro -->
+    <string name="app_intro_tutorial_title">मदद</string>
     <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
@@ -43,7 +46,9 @@
     <string name="import_error_unique">अद्वितीय पहचानकर्ता में नकल</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
@@ -146,37 +151,26 @@
     <!-- Citation -->
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_feature_next_missing">उपभोगता को बिना आंकड़े की अगली प्रविष्टि पर ले जाने के लिए बटन सक्षम करता है</string>
-    <string name="preferences_general_skip_entries_default">पूर्व निर्धारित</string>
-    <string name="preferences_general_feature_barcode_text">विशिष्ट अद्वितीय पहचानकर्ता पे जाने के लिए विकल्प को सक्षम करता है</string>
     <!-- Profile -->
-    <string name="profile_person">व्यक्ति</string>
-    <string name="profile_person_title">व्यक्ति स्थापित करें</string>
-    <string name="profile_name_first">प्रथम नाम</string>
-    <string name="profile_name_last">अंतिम नाम</string>
-    <string name="profile_reset">सेटिंग मिटाएँ</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="theme_default">पूर्व निर्धारित</string>
     <string name="preferences_appearance_language">भाषा</string>
     <string name="preferences_appearance_toolbar_customize_search">खोजें</string>
     <string name="preferences_appearance_toolbar_customize_resources">संसाधन</string>
     <!-- Behavior -->
-    <string name="preferences_behavior_cycle_traits">पिछली विशेषता से आगे जाना अगली प्रविष्टि की पहली विशेषता पर ले जाता है</string>
-    <string name="preferences_general_use_day_number">तारीख की जगह वर्ष के दिन का उपयोग करें</string>
-    <string name="preferences_general_skip_entries_with_data">एकत्रित आंकड़ों वाली प्रविष्टियाँ छुपाएँ</string>
-    <!-- GeoNav -->
+    <!-- Location -->
     <!-- Sounds -->
-    <string name="preferences_sound_primary_order_sound">प्राथमिक क्रम में बदलाव होने पर अधिसूचना ध्वनि</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">आंकड़ा कोष</string>
     <string name="database_dialog_title">आंकड़ा कोष</string>
-    <string name="database_import">आंकड़ा कोष आयात करें</string>
-    <string name="database_export">आंकड़ा कोष निर्यात करें</string>
-    <string name="database_reset">आंकड़ा कोष पुनः तैयार करें</string>
     <string name="database_reset_warning1">पुनः तैयारी पर सभी आंकड़े मिटा दिए जाएँगे। क्या आप यही चाहते हैं?</string>
     <string name="database_reset_warning2">इस क्रिया को उल्टा नहीं जा सकता। एप्लिकेशन आंकड़ा कोष को साफ करने के बाद बंद हो जाएगी। क्या आप अभी भी यही चाहते हैं?</string>
     <string name="database_reset_message">आंकड़ा कोष मिटा दिया गया है</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">खेत</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">के बारे में</string>
@@ -190,12 +184,17 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">रद्द करें</string>
     <string name="brapi_choice_to_make_default_positive">सुरक्षित करें</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">निर्यात करें</string>
+    <string name="brapi_close_button">बंद करें</string>
     <!-- Pagination -->
     <!-- General -->
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">हां</string>
+    <string name="intro_tutorial_radio_item_no">नहीं</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">मदद</string>
     <string name="tutorial_dialog_description">क्या आप मदद सक्षम करना चाहते है? \'उच्च सेटिंग\' में यह सेटिंग बदली जा सकती है।</string>
@@ -207,4 +206,12 @@
     <string name="tutorial_settings_traits_title">विशेषताएँ</string>
     <string name="tutorial_settings_settings_title">उच्च श्रेणी सेटिंग</string>
     <string name="tutorial_settings_export_title">निर्यात करें</string>
+    <string name="act_brapi_filter_import">आयात करें</string>
+    <string name="act_brapi_filter_clear">मिटाएँ</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">पूर्व निर्धारित</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">विशेषताएँ</string>
 </resources>

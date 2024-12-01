@@ -8,15 +8,18 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Sì</string>
     <string name="dialog_no">No</string>
+    <string name="dialog_clear">Cancellare</string>
     <string name="dialog_close">Chiudi</string>
     <string name="dialog_confirm">Sei sicuro?</string>
     <string name="dialog_import">Importa</string>
     <string name="dialog_warning">Attenzione</string>
     <string name="dialog_save">Salva</string>
+    <string name="dialog_delete">Cancella</string>
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dati di prova</string>
     <string name="startup_sample_data_message">Vuoi caricare i dati di prova forniti?</string>
+    <!-- App Intro -->
     <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
@@ -51,7 +54,6 @@
     <string name="fields_delete_study">Cancella campo</string>
     <string name="fields_delete_study_confirmation">Sei sicuro di voler cancellare questo campo? Verranno cancellati anche tutti i dati associati a questo campo.</string>
     <!-- Import -->
-    <string name="import_dialog_title_fields">Importa campo</string>
     <string name="import_dialog_unique">Identificatore unico</string>
     <string name="import_dialog_primary">Ordine primario</string>
     <string name="import_dialog_secondary">Ordine secondario</string>
@@ -64,12 +66,12 @@
     <string name="fields_study_exists_message">Un campo con questo nome esiste già. Vuoi sovrascrivere?</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
-    <string name="traits_toolbar_sort">Ordina</string>
-    <string name="traits_sort_title">Ordina</string>
     <string name="traits_sort_name">Nome del carattere</string>
     <string name="traits_sort_visibility">Visibilità</string>
     <string name="traits_sort_format">Formato</string>
@@ -206,74 +208,40 @@
     <string name="citation_string">Se si utilizza Field Book per la ricerca, si prega di citare il seguente articolo di giornale:</string>
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_title">Generale</string>
-    <string name="preferences_general_system_title">Dati predefiniti</string>
-    <string name="preferences_source_default_import">Fonte di importazione predefinita</string>
-    <string name="preferences_source_default_export">Fonte di esportazione predefinita</string>
-    <string name="preferences_general_feature_next_missing">Prossima voce senza dati</string>
-    <string name="preferences_general_feature_next_missing_description">Aggiunge un bottone alla barra degli strumenti</string>
-    <string name="preferences_general_skip_entries_default">Impostazioni predefinite</string>
-    <string name="preferences_general_feature_barcode_text">Passa all\'identificatore unico</string>
-    <string name="preferences_general_feature_datagrid">Griglia di dati</string>
-    <string name="preferences_general_feature_datagrid_description">Visualizza un foglio elettronico con parcelle e caratteri che mostrano i dati raccolti</string>
     <!-- Profile -->
-    <string name="profile_person">Utente</string>
-    <string name="profile_person_title">Imposta utente</string>
-    <string name="profile_name_first">Nome</string>
-    <string name="profile_name_last">Cognome</string>
-    <string name="profile_reset">Cancella impostazioni</string>
+    <string name="preferences_profile_title">Profilo</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="preferences_appearance_title">Aspetto</string>
-    <string name="preferences_appearance_system_category_title">Applicazione</string>
     <string name="preferences_appearance_theme_title">Tema</string>
     <string name="theme_default">Impostazioni predefinite</string>
     <string name="preferences_appearance_language">Lingua</string>
     <string name="preferences_appearance_language_description">Lingua impostata dal sistema</string>
-    <string name="preferences_appearance_tutorial_description">Aggiunge un\'icona tutorial alle schermate di raccolta, impostazioni, campi e caratteri</string>
-    <string name="preferences_appearance_collection_category_title">Schermata di raccolta</string>
-    <string name="preferences_appearance_toolbar_customize">Personalizza le icone della barra degli strumenti</string>
-    <string name="preferences_appearance_toolbar_customize_description">Modifica le icone predefinite nella schermata di raccolta</string>
     <string name="preferences_appearance_toolbar_customize_search">Cerca</string>
     <string name="preferences_appearance_toolbar_customize_resources">Risorse</string>
     <string name="preferences_appearance_toolbar_customize_summary">Riassunto</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloccare</string>
-    <string name="preferences_appearance_infobar_number">Numero di InfoBars</string>
+    <string name="preferences_general_feature_datagrid">Griglia di dati</string>
     <string name="preferences_appearance_infobar_number_description">Regola il numero di Infobars visualizzate nella schermata principale</string>
     <string name="preferences_appearance_quickgoto">Tasto Rapido</string>
-    <string name="preferences_appearance_quickgoto_description">Cambia la sezione centrale della schermata principale in Tasto Rapido legacy</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
-    <string name="preferences_behavior_cycle_traits">Al termine delle caratteri, passare alla voce successiva</string>
-    <string name="preferences_behavior_cycle_traits_description">Dopo aver attraversato tutti i caratteri, Field Book passa alla voce successiva</string>
-    <string name="preferences_behavior_return_character">Segnale pulsante di ritorno</string>
-    <string name="preferences_behavior_return_character_next_plot">Parcella successiva</string>
-    <string name="preferences_behavior_return_character_next_trait">Carattere successivo</string>
     <string name="preferences_behavior_return_character_do_nothing">Fare niente</string>
-    <string name="preferences_behavior_disable_entry_arrow">Disabilita la freccia della voce</string>
-    <string name="preferences_behavior_disable_entry_arrow_left">Sinistra</string>
-    <string name="preferences_behavior_disable_entry_arrow_right">Destra</string>
-    <string name="preferences_behavior_disable_entry_arrow_both">Ambo</string>
-    <string name="preferences_general_share_disable">Disabilita condivisione file</string>
-    <string name="preferences_general_share_disable_description">Quando i file vengono esportati, la finestra di dialogo non viene mostrata</string>
-    <string name="preferences_general_use_day_number">Usa giorno dell\'anno</string>
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
-    <string name="preferences_general_skip_entries_with_data">Nascondi voci con dati</string>
-    <string name="preferences_general_skip_entries_with_data_description">Salta le voci che hanno gia\' un dato per questo carattere</string>
-    <!-- GeoNav -->
+    <!-- Location -->
+    <string name="preferences_location_title">Posizione</string>
     <string name="pref_geonav_log_both">Ambo</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Suoni</string>
-    <string name="preferences_sound_primary_order_sound">Suono dell\'ordine primario</string>
-    <string name="preferences_sound_primary_order_sound_description">Notifica sonora quando l\'ordine primario cambia</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
-    <string name="database_import">Importa il database</string>
-    <string name="database_export">Esporta il database</string>
-    <string name="database_reset">Cancella database</string>
+    <!-- Storage -->
     <string name="database_reset_warning1">Tutti i dati saranno cancellati. Sei sicuro di voler ripristinare il database?</string>
     <string name="database_reset_warning2">Un database cancellato non potrà essere ripristinato. L\'applicazione si chiuderà subito dopo. Sei sicuro di voler continuare?</string>
     <string name="database_reset_message">Il database è stato cancellato</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">Campi</string>
+    <string name="stat_title_entries">Voci</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">A proposito</string>
@@ -295,6 +263,7 @@
     <string name="brapi_base_url_desc">L\'URL di base per il server BrAPI collegato</string>
     <string name="brapi_choice_to_make_default_negative">Cancella</string>
     <string name="brapi_choice_to_make_default_positive">Salva</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_save_authorize">Salva e autorizza</string>
     <string name="brapi_revoke_auth">Disconnettersi</string>
@@ -303,10 +272,6 @@
     <string name="brapi_auth_deny">Autorizzazione BrAPI negata</string>
     <string name="brapi_auth_error_starting">Errore durante l\'avvio dell\'autenticazione BrAPI</string>
     <string name="brapi_auth_needed_title">Accesso necessario</string>
-    <string name="brapi_auth_needed">Devi aver effettuato l\'accesso al sistema con cui stai tentando di sincronizzare i dati in ordine
-per sincronizzare i tuoi dati.
-
-Vorresti autenticarti ora?</string>
     <!-- BrAPI Import -->
     <string name="brapi_load_data_button">Carica Campi</string>
     <string name="brapi_load_traits_button">Carica Caratteri</string>
@@ -339,6 +304,7 @@ Vorresti autenticarti ora?</string>
     <string name="brapi_traits_saved_success">Caratteri selezionati salvati correttamente.</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Esporta</string>
+    <string name="brapi_close_button">Chiudi</string>
     <string name="brapi_export_title">Statistiche di esportazione BrAPI</string>
     <string name="brapi_export_observations">Osservazioni</string>
     <string name="brapi_export_num_new_obs">Nuove osservazioni</string>
@@ -363,6 +329,9 @@ Vorresti autenticarti ora?</string>
     <string name="device_offline_warning">Dispositivo offline: connettersi a una rete e riprovare</string>
     <string name="brapi_info_message">Caratteri e campi importati tramite BrAPI saranno in grado di esportare le loro osservazioni tramite l\'esportazione BrAPI.
 Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esportati tramite formato CSV.</string>
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">Sì</string>
+    <string name="intro_tutorial_radio_item_no">No</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_description">Vuoi attivare il tutorial? Questa impostazione può essere cambiata in Impostazioni Avanzate</string>
     <string name="tutorial_main_infobars_description">Le InfoBars mostrano dati aggiuntivi per ciascuna voce e possono essere modificate utilizzando i menu a discesa.</string>
@@ -413,4 +382,12 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_traits_visibility_title">Visibilità del carettere</string>
     <string name="tutorial_traits_visibility_description">I caretteri possono essere disabilitati dalla raccolta selezionando la casella di controllo.</string>
     <string name="tutorial_main_datagrid_title">Griglia di dati</string>
+    <string name="act_brapi_filter_import">Importa</string>
+    <string name="act_brapi_filter_clear">Cancellare</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">Impostazioni predefinite</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">Caratteri</string>
 </resources>

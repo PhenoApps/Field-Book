@@ -8,15 +8,19 @@
     <string name="dialog_ok">決定</string>
     <string name="dialog_yes">はい</string>
     <string name="dialog_no">いいえ</string>
+    <string name="dialog_clear">消去</string>
     <string name="dialog_close">閉じる</string>
     <string name="dialog_confirm">よろしいですか？</string>
     <string name="dialog_import">インポート</string>
     <string name="dialog_warning">警告</string>
     <string name="dialog_save">保存</string>
+    <string name="dialog_delete">削除</string>
     <string name="barcode_scanner_text">バーコードを読み取る</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">サンプルデータ</string>
     <string name="startup_sample_data_message">サンプルデータをロードしますか？</string>
+    <!-- App Intro -->
+    <string name="app_intro_tutorial_title">チュートリアル</string>
     <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">ファイルのインポートにはデバイスのファイルへのアクセスが必要です。</string>
@@ -51,7 +55,6 @@
     <string name="fields_delete_study">圃場を削除</string>
     <string name="fields_delete_study_confirmation">この圃場を削除してもよろしいでしょうか？この圃場の全てのデータが削除されます。</string>
     <!-- Import -->
-    <string name="import_dialog_title_fields">圃場のインポート</string>
     <string name="import_dialog_unique">ユニークID</string>
     <string name="import_dialog_primary">第1オーダー</string>
     <string name="import_dialog_secondary">第2オーダー</string>
@@ -64,12 +67,12 @@
     <string name="fields_study_exists_message">この圃場は既に存在しています。</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
-    <string name="traits_toolbar_sort">並べ替え</string>
-    <string name="traits_sort_title">並べ替え</string>
     <string name="traits_sort_name">名前</string>
     <string name="traits_sort_visibility">表示/非表示</string>
     <string name="traits_sort_format">フォーマット</string>
@@ -208,75 +211,42 @@
     <string name="citation_string">Field Bookを研究に使用されている方は次の論文を引用してください：</string>
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_title">一般</string>
-    <string name="preferences_general_system_title">デフォルトのデータ</string>
-    <string name="preferences_source_default_import">デフォルトのインポートソース</string>
-    <string name="preferences_source_default_export">デフォルトのエクスポートソース</string>
-    <string name="preferences_general_feature_next_missing">次のデータ未収集エントリーへ移動</string>
-    <string name="preferences_general_feature_next_missing_description">選択中の形質の次のデータ未収集エントリーに移動するためのボタンをツールバーに追加</string>
-    <string name="preferences_general_skip_entries_default">初期値</string>
-    <string name="preferences_general_feature_barcode_text">ユニークIDへ移動</string>
-    <string name="preferences_general_feature_datagrid">データグリッド</string>
-    <string name="preferences_general_feature_datagrid_description">形質の収集データをスプレッドシートにより表示</string>
     <!-- Profile -->
-    <string name="profile_person">調査員</string>
-    <string name="profile_person_title">調査員の設定</string>
-    <string name="profile_name_first">名</string>
-    <string name="profile_name_last">姓</string>
-    <string name="profile_reset">設定の消去</string>
+    <string name="preferences_profile_title">プロフィール</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="preferences_appearance_title">表示</string>
-    <string name="preferences_appearance_system_category_title">アプリケーション</string>
     <string name="preferences_appearance_theme_title">テーマ</string>
     <string name="theme_default">初期値</string>
     <string name="preferences_appearance_language">言語</string>
     <string name="preferences_appearance_language_description">システムによる言語設定</string>
-    <string name="preferences_appearance_tutorial_description">収集、設定、圃場および形質画面にチュートリアルアイコンを追加</string>
-    <string name="preferences_appearance_collection_category_title">収集画面</string>
-    <string name="preferences_appearance_toolbar_customize">ツールバーアイコンのカスタマイズ</string>
-    <string name="preferences_appearance_toolbar_customize_description">収集画面のデフォルトアイコンを変更</string>
     <string name="preferences_appearance_toolbar_customize_search">検索</string>
     <string name="preferences_appearance_toolbar_customize_resources">リソース</string>
     <string name="preferences_appearance_toolbar_customize_summary">総括</string>
     <string name="preferences_appearance_toolbar_customize_lock">保護</string>
-    <string name="preferences_appearance_infobar_number">インフォバーの数</string>
+    <string name="preferences_general_feature_datagrid">データグリッド</string>
     <string name="preferences_appearance_infobar_number_description">メイン画面に表示するインフォバー数の調整</string>
     <string name="preferences_appearance_quickgoto">Quick GoTo機能</string>
-    <string name="preferences_appearance_quickgoto_description">メイン画面の中央セクションをQuick GoToに変更</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">動作設定</string>
-    <string name="preferences_behavior_cycle_traits">繰り返し調査設定</string>
-    <string name="preferences_behavior_cycle_traits_description">全ての形質を調査した後、次のエントリーに移動</string>
-    <string name="preferences_behavior_return_character">リターンキーの動作設定</string>
-    <string name="preferences_behavior_return_character_next_plot">次のプロット</string>
-    <string name="preferences_behavior_return_character_next_trait">次の形質</string>
     <string name="preferences_behavior_return_character_do_nothing">何もしない</string>
-    <string name="preferences_behavior_disable_entry_arrow">エントリー矢印の非表示</string>
-    <string name="preferences_behavior_disable_entry_arrow_left">左</string>
-    <string name="preferences_behavior_disable_entry_arrow_right">右</string>
-    <string name="preferences_behavior_disable_entry_arrow_both">両方</string>
-    <string name="preferences_general_share_disable">ファイル共有の非許可</string>
-    <string name="preferences_general_share_disable_description">ファイルをエクスポートした時に共有ダイアログを非表示</string>
-    <string name="preferences_general_use_day_number">日付の代わりに1月1日からの累積日数を使用</string>
     <string name="preferences_general_use_day_number_description">データ収集時に日付の代わりに日数を用いる。</string>
-    <string name="preferences_general_skip_entries_with_data">入力済エントリーのスキップ</string>
-    <string name="preferences_general_skip_entries_with_data_description">調査中形質のデータ入力済エントリーをスキップ</string>
-    <!-- GeoNav -->
+    <!-- Location -->
+    <string name="preferences_location_title">位置</string>
     <string name="pref_geonav_log_both">両方</string>
     <!-- Sounds -->
     <string name="preferences_sounds">音声</string>
-    <string name="preferences_sound_primary_order_sound">第1オーダーの音</string>
-    <string name="preferences_sound_primary_order_sound_description">第1オーダーが変わった時に音声で通知</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">データベース</string>
     <string name="database_dialog_title">データベース</string>
-    <string name="database_import">データベースのインポート</string>
-    <string name="database_export">データベースのエクスポート</string>
-    <string name="database_reset">データベースのリセット</string>
     <string name="database_reset_warning1">リセットにより全てのデータが削除されます。よろしいですか？</string>
     <string name="database_reset_warning2">この作業は戻れません。データベースを消去した後、アプリを終了します。続けますか？</string>
     <string name="database_reset_message">データベースは削除されました。</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">圃場</string>
+    <string name="stat_title_entries">エントリー</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">バージョン情報</string>
@@ -298,6 +268,7 @@
     <string name="brapi_base_url_desc">BrAPIサーバー接続のための基本URL</string>
     <string name="brapi_choice_to_make_default_negative">キャンセル</string>
     <string name="brapi_choice_to_make_default_positive">保存</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_save_authorize">保存と認証</string>
     <string name="brapi_revoke_auth">ログアウト</string>
@@ -306,9 +277,6 @@
     <string name="brapi_auth_deny">BrAPI認証拒否</string>
     <string name="brapi_auth_error_starting">BrAPI認証開始エラー</string>
     <string name="brapi_auth_needed_title">ログイン必要</string>
-    <string name="brapi_auth_needed">データを同期するためにはシステムにログインが必要です。
-
-今、認証をしますか？</string>
     <!-- BrAPI Import -->
     <string name="brapi_load_data_button">圃場のロード</string>
     <string name="brapi_load_traits_button">形質のロード</string>
@@ -341,6 +309,7 @@
     <string name="brapi_traits_saved_success">選択した形質の保存に成功しました。</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">エクスポート</string>
+    <string name="brapi_close_button">閉じる</string>
     <string name="brapi_export_title">BrAPI出力統計値</string>
     <string name="brapi_export_observations">観測値</string>
     <string name="brapi_export_num_new_obs">新しい観測値</string>
@@ -366,6 +335,9 @@
     <string name="brapi_info_message">BrAPIを介してインポートした形質や圃場はBrAPIを介して観測値をエクスポートすることができます。
 手動あるいはCSVを介して作成した形質や圃場はCSVフォーマットを介してエクスポートする必要があります。</string>
     <string name="brapi_na">欠測値</string>
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">はい</string>
+    <string name="intro_tutorial_radio_item_no">いいえ</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">チュートリアル</string>
     <string name="tutorial_dialog_description">チュートリアルを使用しますか？この設定は「高度な設定」で変更できます。</string>
@@ -418,4 +390,12 @@
     <string name="tutorial_traits_visibility_title">形質の表示/非表示</string>
     <string name="tutorial_traits_visibility_description">チェックボックスをチェックすることでデータ収集をできないようにします。</string>
     <string name="tutorial_main_datagrid_title">データグリッド</string>
+    <string name="act_brapi_filter_import">インポート</string>
+    <string name="act_brapi_filter_clear">消去</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">初期値</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">形質</string>
 </resources>
