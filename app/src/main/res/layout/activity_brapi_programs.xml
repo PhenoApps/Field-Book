@@ -10,13 +10,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
-        android:minHeight="?attr/actionBarSize" />
+        android:minHeight="?attr/actionBarSize">
+
+        <TextView style="@style/TextViewStyle.Bold.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/brapi_programs_activity_title"/>
+
+    </androidx.appcompat.widget.Toolbar>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <Button
             android:id="@+id/loadPrograms"
@@ -61,6 +69,7 @@
     </RelativeLayout>
 
     <LinearLayout
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="bottom|center"

@@ -1,36 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/field_editor_parent_linear_layout"
+    android:background="?attr/fb_color_background"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <LinearLayout
+        android:id="@+id/field_editor_parent_linear_layout"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            android:minHeight="?attr/actionBarSize"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/main_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+                    <ListView
+                        android:id="@+id/myList"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:choiceMode="singleChoice"
+                        android:dividerHeight="1px"
+                        android:minHeight="48dp"
+                        android:padding="3dp" />
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/newField"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        android:minHeight="?attr/actionBarSize"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_margin="8dp"
+        android:src="@drawable/ic_add_white"
+        android:contentDescription="@string/fields_new_button_content_description"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:id="@+id/main_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-                <ListView
-                    android:id="@+id/myList"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:choiceMode="singleChoice"
-                    android:dividerHeight="1px"
-                    android:minHeight="48dp"
-                    android:padding="3dp" />
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

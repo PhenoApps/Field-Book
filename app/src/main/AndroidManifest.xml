@@ -15,7 +15,9 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:label">
-
+        <activity
+            android:name=".activities.StatisticsActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.ScannerActivity"
             android:exported="false" />
@@ -39,14 +41,6 @@
         <!-- - File Import activity (field manager, local and brapi) -->
         <activity
             android:name=".activities.FieldEditorActivity"
-            android:alwaysRetainTaskState="false"
-            android:configChanges="keyboardHidden|orientation"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".activities.FieldEditorActivityOld"
             android:alwaysRetainTaskState="false"
             android:configChanges="keyboardHidden|orientation"
             android:finishOnTaskLaunch="true"
@@ -89,6 +83,51 @@
         <!-- The settings page, each category has its own fragment class -->
         <activity
             android:name=".activities.PreferencesActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.io.filter.filterer.BrapiStudyFilterActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.io.filter.filterer.BrapiTraitFilterActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.io.filter.ListFilterActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.io.filter.BrapiProgramFilterActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.io.filter.BrapiSeasonsFilterActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.io.filter.BrapiTrialsFilterActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.io.filter.BrapiCropsFilterActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.io.BrapiStudyImportActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.brapi.io.BrapiTraitImporterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
@@ -194,6 +233,10 @@
             android:exported="true"
             android:theme="@style/AppTheme" />
 
+        <!-- AppIntroActivity uses the AppIntro package -->
+        <activity android:name=".activities.AppIntroActivity"
+            android:label="My Custom AppIntro" />
+
         <provider
             android:name=".provider.GenericFileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -219,6 +262,7 @@
             <action android:name="android.intent.action.GET_CONTENT" />
         </intent>
     </queries>
+
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
@@ -232,6 +276,11 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+
+    <uses-feature android:name="android.software.companion_device_setup" />
+
+    <uses-feature android:name="android.hardware.usb.host" android:required="false"/>
+
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -250,10 +299,10 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
 
     <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
 

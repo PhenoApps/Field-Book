@@ -116,6 +116,11 @@ class RangeBoxView : ConstraintLayout {
         defStyleRes
     )
 
+    fun toggleNavigation(toggle: Boolean) {
+        rangeLeft.isEnabled = toggle
+        rangeRight.isEnabled = toggle
+    }
+
     fun getRangeID(): IntArray {
         return rangeID
     }
@@ -600,19 +605,21 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun movePaging(pos: Int, step: Int, fromToolbar: Boolean): Int {
+        //three skipMode options: 0. disabled 1. skip active trait 2. skip but check all traits
+
         val skipMode = if (fromToolbar) {
-            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1")?.toIntOrNull() ?: 1
+            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0")?.toIntOrNull() ?: 0
         } else {
-            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1")?.toIntOrNull() ?: 1
+            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "0")?.toIntOrNull() ?: 0
         }
 
         return when (skipMode) {
-            2 -> {
+            1 -> {
                 val currentTraitString = controller.getTraitBox().currentTrait?.name
                 val currentTraitObj = controller.getDatabase().getDetail(currentTraitString)
                 moveToNextUncollectedObs(pos, step, arrayListOf(currentTraitObj))
             }
-            3 -> {
+            2 -> {
                 val visibleTraits = ArrayList(controller.getDatabase().visibleTraitObjects.filterNotNull())
                 moveToNextUncollectedObs(pos, step, visibleTraits)
             }

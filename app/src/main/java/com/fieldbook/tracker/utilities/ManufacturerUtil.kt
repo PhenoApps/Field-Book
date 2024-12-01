@@ -91,41 +91,5 @@ class ManufacturerUtil {
 
             }
         }
-
-        fun eInkDeviceSetup(
-            context: Context,
-            prefs: SharedPreferences,
-            resources: Resources,
-            onPositive: () -> Unit
-        ) {
-            if (isEInk()) {
-                if (isOnyx()) {
-
-                    transferHighContrastIcon(resources)
-                }
-                if (!SharedPreferenceUtils.isHighContrastTheme(prefs)) {
-                    askUserSwitchToHighContrastTheme(context, prefs, onPositive)
-                }
-            }
-        }
-
-        fun askUserSwitchToHighContrastTheme(
-            context: Context,
-            prefs: SharedPreferences,
-            onPositive: () -> Unit
-        ) {
-            AlertDialog.Builder(context, R.style.AppAlertDialog)
-                .setTitle(R.string.dialog_ask_high_contrast_title)
-                .setMessage(R.string.dialog_ask_high_contrast_message)
-                .setPositiveButton(android.R.string.ok) { d: DialogInterface?, _: Int ->
-                    prefs.edit()
-                        .putString(GeneralKeys.THEME, ThemedActivity.HIGH_CONTRAST.toString())
-                        .putString(GeneralKeys.TEXT_THEME, ThemedActivity.MEDIUM.toString())
-                        .apply()
-                    onPositive.invoke()
-                }
-                .setNegativeButton(R.string.dialog_no) { d, _ -> d.dismiss() }
-                .create().show()
-        }
     }
 }

@@ -30,10 +30,10 @@ open class ThemedActivity: AppCompatActivity() {
         const val HIGH_CONTRAST = 1
         const val BLUE = 2
 
-        const val SMALL = 1
-        const val MEDIUM = 2
-        const val LARGE = 3
-        const val EXTRA_LARGE = 4
+        const val SMALL = 0
+        const val MEDIUM = 1
+        const val LARGE = 2
+        const val EXTRA_LARGE = 3
 
         fun applyTheme(activity: Activity) {
 
@@ -43,7 +43,7 @@ open class ThemedActivity: AppCompatActivity() {
             val (themeIndex, textIndex) = with(prefs) {
 
                 (getString(GeneralKeys.THEME, "0")?.toInt()
-                    ?: 0) to (getString(GeneralKeys.TEXT_THEME, "2")?.toInt() ?: 2)
+                    ?: 0) to (getString(GeneralKeys.TEXT_THEME, "1")?.toInt() ?: 1)
 
             }
 
