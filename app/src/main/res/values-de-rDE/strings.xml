@@ -8,12 +8,14 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Ja</string>
     <string name="dialog_no">Nein</string>
+    <string name="dialog_clear">Löschen</string>
     <string name="dialog_close">Schliessen</string>
     <string name="dialog_confirm">Sind Sie sicher?</string>
     <string name="dialog_import">Import</string>
     <string name="dialog_warning">Warnung</string>
     <string name="dialog_save">Speichern</string>
     <!-- Startup  -->
+    <!-- App Intro -->
     <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
@@ -43,7 +45,9 @@
     <string name="import_error_unique">Eindeutiges Zuordnungsmerkmal kommt mehr als nur einmal vor</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
@@ -139,36 +143,26 @@
     <!-- Citation -->
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_feature_next_missing">Ermöglicht beim Drücken des Vorwärtspfeiles zur nächsten Versuchsparzelle ohne Daten für ein bestimmtes Merkmal zu gelangen. Versuchsparzellen mit Daten werden übersprungen und nur diejenigen Versuchsparzellen angezeigt, die noch keine Daten erhalten.</string>
-    <string name="preferences_general_skip_entries_default">Vorgegeben</string>
-    <string name="preferences_general_feature_barcode_text">Aktiviert die Option zu einem bestimmten einzigartigen Zuordnungsmerkmal zu navigieren</string>
     <!-- Profile -->
-    <string name="profile_person_title">Person bestimmen</string>
-    <string name="profile_name_first">Name</string>
-    <string name="profile_name_last">Nachname</string>
-    <string name="profile_reset">Alle Einstellungen löschen</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="theme_default">Vorgegeben</string>
     <string name="preferences_appearance_language">Sprache</string>
     <string name="preferences_appearance_toolbar_customize_search">Suchen</string>
     <string name="preferences_appearance_toolbar_customize_resources">Resourcen</string>
     <!-- Behavior -->
-    <string name="preferences_behavior_cycle_traits">Durch drücken des Pfeils vorwärts, gelangt man vom letzten Merkmal zum ersten Merkmal der nächsten Einheit (z.B. nächsten Versuchsparzelle)</string>
-    <string name="preferences_general_use_day_number">Verwende den aktuellen Tag im Jahr anstelle des Datums (z.B. 40 anstelle von 9. Februar)</string>
-    <string name="preferences_general_skip_entries_with_data">Ignoriere Einträge die bereits Daten enthalten</string>
-    <!-- GeoNav -->
+    <!-- Location -->
     <!-- Sounds -->
-    <string name="preferences_sound_primary_order_sound">Notifikationsgeräusch ein beim Wechsel der ersten Ordnung (ein Geräusch macht den Nutzer darauf aufmerksam, dass die letzte Versuchsparzelle in einer Reihe (erste Ordnung) erreicht wurde und die nächste Parzelle in der nächsten Reihe liegt.)</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">Datenbank</string>
     <string name="database_dialog_title">Datenbank</string>
-    <string name="database_import">Datenbank importieren</string>
-    <string name="database_export">Datenbank exportieren</string>
-    <string name="database_reset">Datenbank zurücksetzen</string>
     <string name="database_reset_warning1">Alle Daten werden gelöscht beim Zurücksetzen der Datenbank. Sind Sie sicher?</string>
     <string name="database_reset_warning2">Dieser Vorgang kann nicht rückgängig gemacht werden. Die Applikation wird gestoppt nach dem die Datenbank gelöscht wurde. Wollen Sie den Vorgang trotzdem fortsetzen?</string>
     <string name="database_reset_message">Datenbank wurde gelöscht</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">Felder</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Information</string>
@@ -181,12 +175,17 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">Abbrechen</string>
     <string name="brapi_choice_to_make_default_positive">Speichern</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Export</string>
+    <string name="brapi_close_button">Schliessen</string>
     <!-- Pagination -->
     <!-- General -->
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">Ja</string>
+    <string name="intro_tutorial_radio_item_no">Nein</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_description">Wollen sie das Tutorial aktivieren? Diese Einstellung kann unter Weiteren Einstellungen geändert werden.</string>
     <string name="tutorial_main_traits_title">Merkmale</string>
@@ -197,4 +196,12 @@
     <string name="tutorial_settings_traits_title">Merkmale</string>
     <string name="tutorial_settings_settings_title">Weitere Einstellungen</string>
     <string name="tutorial_settings_export_title">Export</string>
+    <string name="act_brapi_filter_import">Import</string>
+    <string name="act_brapi_filter_clear">Löschen</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">Vorgegeben</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">Merkmale</string>
 </resources>
