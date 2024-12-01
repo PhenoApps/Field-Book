@@ -201,6 +201,7 @@ dependencies {
 
     //hilt dependency injection
     implementation "com.google.dagger:hilt-android:2.49"
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     kapt "com.google.dagger:hilt-compiler:2.49"
 
     implementation 'androidx.test.ext:junit-ktx:1.1.5'

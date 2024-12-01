@@ -28,17 +28,29 @@ import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
+import io.swagger.client.model.Trait
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class NewTraitDialog(
-    private val activity: Activity,
-    private val onNewTraitDialogDismiss: () -> Unit
+    private val activity: Activity
 ) :
     DialogFragment(),
     TraitFormatAdapter.FormatSelectionListener,
     TraitFormatParametersAdapter.TraitFormatAdapterController {
+
+    interface TraitDialogDismissListener {
+        fun onNewTraitDialogDismiss() = Unit
+    }
+
+    interface TraitDialogFormatListener {
+        fun onFormatSelected(format: Formats) = Unit
+    }
+
+    interface TraitObjectUpdateListener {
+        fun onTraitObjectUpdated(traitObject: TraitObject) = Unit
+    }
 
     @Inject
     lateinit var soundHelperImpl: SoundHelperImpl
@@ -51,6 +63,12 @@ class NewTraitDialog(
 
     @Inject
     lateinit var database: DataHelper
+
+    //flag to just return selectable format
+    var isSelectingFormat: Boolean = false
+
+    //flag for editing existing brapi variable being imported
+    var isBrapiTraitImport: Boolean = false
 
     // UI elements of new trait dialog
     private lateinit var traitFormatsRv: RecyclerView
@@ -71,7 +89,9 @@ class NewTraitDialog(
     private var brapiDialogShown = false
 
     init {
-        setBrAPIDialogShown((activity as TraitEditorActivity).brAPIDialogShown)
+        (activity as? TraitEditorActivity)?.brAPIDialogShown?.let {
+            setBrAPIDialogShown(it)
+        }
     }
 
     fun setTraitObject(traitObject: TraitObject?) {
@@ -282,8 +302,9 @@ class NewTraitDialog(
 
             traitFormatsRv.adapter = formatsAdapter
 
-            formatsAdapter.submitList(formats)
-
+            if (isSelectingFormat) { //remove brapi format
+                formatsAdapter.submitList(formats.filter { it != Formats.BRAPI })
+            } else formatsAdapter.submitList(formats)
         }
     }
 
@@ -316,7 +337,7 @@ class NewTraitDialog(
 
             initialTraitObject?.let { traitObject ->
 
-                if (validateFormat().result != true) {
+                if (validateFormat().result != true && !isBrapiTraitImport) {
 
                     pass = false
 
@@ -328,7 +349,15 @@ class NewTraitDialog(
 
                         t.format = format.getDatabaseName()
 
-                        updateDatabaseTrait(t)
+                        if (isBrapiTraitImport) {
+
+                            (activity as? TraitObjectUpdateListener)?.onTraitObjectUpdated(t)
+
+                        } else {
+
+                            updateDatabaseTrait(t)
+
+                        }
 
                         onSaveFinish()
                     }
@@ -346,24 +375,30 @@ class NewTraitDialog(
 
     private fun onSaveFinish() {
 
-        val ed = this.prefs.edit()
-        ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false)
-        ed.apply()
+        if (!isSelectingFormat && !isBrapiTraitImport) {
 
-        // Display our BrAPI dialog if it has not been show already
-        // Get our dialog state from our adapter to see if a trait has been selected
-        setBrAPIDialogShown((activity as TraitEditorActivity).adapter.infoDialogShown)
-        if (!brapiDialogShown) {
-            setBrAPIDialogShown(
-                activity.displayBrapiInfo(activity, null, true)
-            )
+            val ed = this.prefs.edit()
+            ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false)
+            ed.apply()
+
+            // Display our BrAPI dialog if it has not been show already
+            // Get our dialog state from our adapter to see if a trait has been selected
+            (activity as? TraitEditorActivity)?.adapter?.infoDialogShown?.let {
+                setBrAPIDialogShown(it)
+
+                if (!brapiDialogShown) {
+                    setBrAPIDialogShown(
+                        activity.displayBrapiInfo(activity, null, true)
+                    )
+                }
+            }
+
+            CollectActivity.reloadData = true
+
+            soundHelperImpl.playCelebrate()
         }
 
-        onNewTraitDialogDismiss()
-
-        CollectActivity.reloadData = true
-
-        soundHelperImpl.playCelebrate()
+        (activity as? TraitDialogDismissListener)?.onNewTraitDialogDismiss()
 
         dismiss()
     }
@@ -483,8 +518,10 @@ class NewTraitDialog(
     // when this value changes in this class,
     // the value in TraitEditorActivity must change
     private fun setBrAPIDialogShown(b: Boolean) {
-        brapiDialogShown = b
-        (activity as TraitEditorActivity).brAPIDialogShown = b
+        if (!isSelectingFormat) {
+            brapiDialogShown = b
+            (activity as? TraitEditorActivity)?.brAPIDialogShown = b
+        }
     }
 
     private fun showFormatParameters() {
@@ -520,7 +557,7 @@ class NewTraitDialog(
 
                 dismiss()
 
-                (activity as TraitEditorActivity).startBrapiTraitActivity(true)
+                (activity as? TraitEditorActivity)?.startBrapiTraitActivity(true)
             }
 
         } else if (format == Formats.BASE_PHOTO && !isShowingCameraOptions) {
@@ -533,8 +570,13 @@ class NewTraitDialog(
 
         } else {
 
-            showFormatParameters(format)
-
+            if (isSelectingFormat) {
+                (activity as? TraitDialogFormatListener)?.onFormatSelected(format)
+                (activity as? TraitDialogDismissListener)?.onNewTraitDialogDismiss()
+                dismiss()
+            } else {
+                showFormatParameters(format)
+            }
         }
     }
 }

@@ -43,6 +43,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity;
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
+import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapterController;
 import com.fieldbook.tracker.async.ImportCSVTask;
@@ -55,6 +57,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.utilities.ArrayIndexComparator;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.FileUtil;
@@ -89,7 +92,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
-public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController, TraitAdapter.TraitSorter {
+public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController, TraitAdapter.TraitSorter, NewTraitDialog.TraitDialogDismissListener {
 
     public static final String TAG = "TraitEditor";
     public static int REQUEST_CLOUD_FILE_CODE = 5;
@@ -559,9 +562,20 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     public void startBrapiTraitActivity(boolean fromTraitCreator) {
-        Intent intent = new Intent();
-        intent.setClassName(this, BrapiTraitActivity.class.getName());
-        startActivityForResult(intent, REQUEST_CODE_BRAPI_TRAIT_ACTIVITY);
+
+        if (Utils.isConnected(this)) {
+            if (prefs.getBoolean(GeneralKeys.EXPERIMENTAL_NEW_BRAPI_UI, false)) {
+                Intent intent = new Intent(this, BrapiTraitFilterActivity.class);
+                BrapiFilterCache.Companion.checkClearCache(this);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent();
+                intent.setClassName(this, BrapiTraitActivity.class.getName());
+                startActivityForResult(intent, REQUEST_CODE_BRAPI_TRAIT_ACTIVITY);
+            }
+        } else {
+            Toast.makeText(this, R.string.opening_brapi_no_network_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showFileDialog() {
@@ -892,10 +906,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     private void showTraitDialog(@Nullable TraitObject traitObject) {
         queryAndLoadTraits();
-        NewTraitDialog traitDialog = new NewTraitDialog(this, () -> {
-            queryAndLoadTraits();
-            return null;
-        });
+        NewTraitDialog traitDialog = new NewTraitDialog(this);
         traitDialog.setTraitObject(traitObject);
         traitDialog.show(getSupportFragmentManager(), "NewTraitDialog");
     }
@@ -959,5 +970,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         queryAndLoadTraits();
 
         CollectActivity.reloadData = true;
+    }
+
+    @Override
+    public void onNewTraitDialogDismiss() {
+        queryAndLoadTraits();
     }
 }

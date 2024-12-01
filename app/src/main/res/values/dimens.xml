@@ -9,6 +9,8 @@
     <dimen name="camera_preview_portrait_width">230dp</dimen>
     <dimen name="camera_preview_portrait_height">300dp</dimen>
 
+    <dimen name="brapi_importer_filter_height">40dp</dimen>
+
     <!-- text sizes -->
     <!-- regular text -->
     <dimen name="text_size_small">14sp</dimen>
@@ -42,8 +44,9 @@
     <dimen name="fb_trait_big_fab_size">176dp</dimen>
     <dimen name="fb_trait_fab_image_size">38dp</dimen>
   
-    <dimen name="fb_trait_status_bar_icon_default_max_size">25dp</dimen>
+    <dimen name="brapi_filter_tv_padding">8dp</dimen>
+    <dimen name="brapi_filter_pb_size">200dp</dimen>
   
+    <dimen name="fb_trait_status_bar_icon_default_max_size">25dp</dimen>
     <dimen name="act_file_explorer_progress_bar_size">64dp</dimen>
-
 </resources>

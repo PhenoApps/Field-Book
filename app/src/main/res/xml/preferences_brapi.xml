@@ -41,7 +41,6 @@
             android:icon="@drawable/ic_pref_brapi_logout"
             android:key="revokeBrapiAuth"
             android:title="@string/brapi_revoke_auth" />
-
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -135,6 +134,16 @@
             android:summary="%s"
             android:title="@string/brapi_timeout" />
 
+        <ListPreference
+            android:defaultValue="value"
+            android:dialogTitle="@string/preferences_brapi_cache_invalidate_dialog_title"
+            android:entries="@array/pref_brapi_cache_invalidate_entries"
+            android:entryValues="@array/pref_brapi_cache_invalidate_values"
+            android:icon="@drawable/ic_tb_changelog"
+            android:key="BRAPI_CACHE_INVALIDATE_INTERVAL"
+            android:summary="@string/preferences_brapi_cache_invalidate_summary"
+            android:title="@string/preferences_brapi_cache_invalidate_title" />
+      
     </PreferenceCategory>
 
     <PreferenceCategory

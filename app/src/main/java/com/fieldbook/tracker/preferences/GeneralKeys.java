@@ -81,6 +81,9 @@ public class GeneralKeys {
 
     public static final String BRAPI_DISPLAY_NAME                   = "BRAPI_DISPLAY_NAME";
 
+    public static final String BRAPI_INVALIDATE_CACHE_INTERVAL      = "BRAPI_CACHE_INVALIDATE_INTERVAL";
+    public static final String BRAPI_INVALIDATE_CACHE_LAST_CLEAR    = "BRAPI_INVALIDATE_CACHE_LAST_CLEAR";
+
     //GeoNav
     private static final String GEONAV_PREFIX                       = "com.fieldbook.tracker.geonav.";
     public static final String ENABLE_GEONAV                        = GEONAV_PREFIX + "ENABLE_GEONAV";
@@ -250,6 +253,8 @@ public class GeneralKeys {
 
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
+    @Nullable
+    public static final String LIST_FILTER_TEXTS = ".list_filter_texts";
 
     @NotNull
     public static final String FIELDS_LIST_SORT_ORDER = "com.fieldbook.tracker.fields_list_sort_order";
@@ -264,6 +269,9 @@ public class GeneralKeys {
 
     @Nullable
     public static final String FROM_INTRO_AUTOMATIC = "com.fieldbook.tracker.activities.intro.from_intro_automatic";
+
+    @NotNull
+    public static final String EXPERIMENTAL_NEW_BRAPI_UI = "com.tracker.fieldbook.preferences.keys.enable_enhanced_brapi_import";
 
     private GeneralKeys() {
 
