@@ -8,12 +8,15 @@
     <string name="dialog_ok">Правильно</string>
     <string name="dialog_yes">Да</string>
     <string name="dialog_no">Нет</string>
+    <string name="dialog_clear">Удалить</string>
     <string name="dialog_close">Закрыть</string>
     <string name="dialog_confirm">Вы уверены?</string>
     <string name="dialog_import">Импорт</string>
     <string name="dialog_warning">Предупреждение</string>
     <string name="dialog_save">Сохранить</string>
     <!-- Startup  -->
+    <!-- App Intro -->
+    <string name="app_intro_tutorial_title">Обучение</string>
     <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
@@ -43,7 +46,9 @@
     <string name="import_error_unique">Уникальный идентификатор содержит повторения</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
@@ -146,37 +151,26 @@
     <!-- Citation -->
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_feature_next_missing">разрешить пользователю перейти к вводу отсутсвующих данных ???</string>
-    <string name="preferences_general_skip_entries_default">значение по умолчанию</string>
-    <string name="preferences_general_feature_barcode_text">Дополнительные опции для уникального идентификаторас</string>
     <!-- Profile -->
-    <string name="profile_person">Пользователь</string>
-    <string name="profile_person_title">Ввести имя пользователя</string>
-    <string name="profile_name_first">Имя</string>
-    <string name="profile_name_last">Фамилия</string>
-    <string name="profile_reset">Удалить изменения настроек</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="theme_default">значение по умолчанию</string>
     <string name="preferences_appearance_language">Язык</string>
     <string name="preferences_appearance_toolbar_customize_search">Поиск</string>
     <string name="preferences_appearance_toolbar_customize_resources">Ресурсы</string>
     <!-- Behavior -->
-    <string name="preferences_behavior_cycle_traits">Переход от последнего показателя к первому показателю следующей группы данных</string>
-    <string name="preferences_general_use_day_number">Использовать номер дня в году вместо даты</string>
-    <string name="preferences_general_skip_entries_with_data">Скрыть введенные данные</string>
-    <!-- GeoNav -->
+    <!-- Location -->
     <!-- Sounds -->
-    <string name="preferences_sound_primary_order_sound">Звуковой сигнал сопровождает изменение основного порядка</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">База данных</string>
     <string name="database_dialog_title">База данных</string>
-    <string name="database_import">Импорт базы данных</string>
-    <string name="database_export">Экспорт базы данных</string>
-    <string name="database_reset">Восстановить исходную базу данных</string>
     <string name="database_reset_warning1">Все данные будут удалены при возвращении к исходным установкам. Продолжать?</string>
     <string name="database_reset_warning2">Это действие нельзя отменить. Приложение закончит работу после удаления данных. Продолжать?</string>
     <string name="database_reset_message">База данных удалена</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">Поле</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">О программе</string>
@@ -190,12 +184,17 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">Отменить</string>
     <string name="brapi_choice_to_make_default_positive">Сохранить</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Экспорт</string>
+    <string name="brapi_close_button">Закрыть</string>
     <!-- Pagination -->
     <!-- General -->
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">Да</string>
+    <string name="intro_tutorial_radio_item_no">Нет</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">Обучение</string>
     <string name="tutorial_dialog_description">Включить обучение? Эта Настройка может быть изменена в меню Дополнительные настройки</string>
@@ -207,4 +206,12 @@
     <string name="tutorial_settings_traits_title">Показатели</string>
     <string name="tutorial_settings_settings_title">Дополнителные установки</string>
     <string name="tutorial_settings_export_title">Экспорт</string>
+    <string name="act_brapi_filter_import">Импорт</string>
+    <string name="act_brapi_filter_clear">Удалить</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">значение по умолчанию</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">Показатели</string>
 </resources>
