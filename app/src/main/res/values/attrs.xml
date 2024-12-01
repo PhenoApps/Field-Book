@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- custom attributes for TItledEditText View -->
+    <declare-styleable name="TitledEditView">
+        <attr name="title" format="string"/>
+        <attr name="android:hint" format="string"/>
+        <attr name="android:inputType" format="integer"/>
+    </declare-styleable>
+
     <!-- Give ourselves access to MarginLayout's styleables -->
     <declare-styleable name="ViewGroup_MarginLayout">
         <attr name="android:layout_margin" />
@@ -215,6 +222,7 @@
     <attr format="color" name="fb_color_text_light"/>
     <attr format="color" name="fb_color_text_dark"/>
     <attr format="color" name="fb_color_text_secondary"/>
+    <attr format="color" name="fb_color_text_high_contrast_inverted"/>
 
     <!-- color of edit text hint -->
     <attr format="color" name="fb_color_hint_text"/>
@@ -285,5 +293,25 @@
 
     <!-- within-dialog error message color -->
     <attr name="fb_error_message_color" format="color" />
+
+    <!-- statistics activity heatmap colors -->
+    <attr name="fb_heatmap_color_low" format="color"/>
+    <attr name="fb_heatmap_color_medium" format="color"/>
+    <attr name="fb_heatmap_color_high" format="color"/>
+    <attr name="fb_heatmap_color_max" format="color"/>
+
+    <!-- action mode selected item color -->
+    <attr name="selectedItemBackground" format="color"/>
+
+    <!-- chip colors -->
+    <attr name="defaultChipBackground" format="color"/>
+    <attr name="selectableChipBackground" format="color"/>
+    <attr name="selectableChipStroke" format="color"/>
+
+    <!-- generic chip colors for the different filtering layers / themes -->
+    <attr name="fb_first_chip_color" format="color" />
+    <attr name="fb_second_chip_color" format="color" />
+    <attr name="fb_third_chip_color" format="color" />
+    <attr name="fb_fourth_chip_color" format="color" />
 
 </resources>

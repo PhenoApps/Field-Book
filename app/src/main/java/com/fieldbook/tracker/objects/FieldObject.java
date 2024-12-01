@@ -32,18 +32,29 @@ public class FieldObject {
     public static class TraitDetail {
         private final String traitName;
         private final String format;
+        private String categories;
         private final int count;
+        private final List<String> observations;
+        private final float completeness;  // Add this line
 
-        public TraitDetail(String traitName, String format, int count) {
+        public TraitDetail(String traitName, String format, String categories, int count, List<String> observations, float completeness) {
             this.traitName = traitName;
             this.format = format;
+            this.categories = categories;
             this.count = count;
+            this.observations = observations;
+            this.completeness = completeness;  // Add this line
         }
 
         // Getters
         public String getTraitName() { return traitName; }
         public String getFormat() { return format; }
+        public String getCategories() {
+            return categories;
+        }
         public int getCount() { return count; }
+        public List<String> getObservations() { return observations; }
+        public float getCompleteness() { return completeness; }  // Add this line
     }
 
     private List<TraitDetail> traitDetails;

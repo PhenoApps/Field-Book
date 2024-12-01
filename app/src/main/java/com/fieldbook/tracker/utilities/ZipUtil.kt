@@ -168,6 +168,7 @@ class ZipUtil {
                         // But the code below still involves "Output" to keep the
                         // unzip functionality working with files that contained
                         // both, the presence or the absence of the Output folder at the root
+                        Log.d("ZipUtil", "Unzip - Processing file: ${ze?.name}")
 
                         when (ze?.name) {
 
@@ -207,8 +208,14 @@ class ZipUtil {
                                     }
                                 } else{
                                     // if the preferences are encoded in a file
-                                    ObjectInputStream(zin).use { objectStream ->
-                                        prefMap = objectStream.readObject() as Map<*, *>
+                                    Log.d("ZipUtil", "Unzip - Found encoded preference file: ${ze?.name}")
+
+                                    // Read the entry into a temporary byte array to avoid corrupting the ZipInputStream, then process it
+                                    val tempData = zin.readBytes()
+                                    ByteArrayInputStream(tempData).use { byteStream ->
+                                        ObjectInputStream(byteStream).use { objectStream ->
+                                            prefMap = objectStream.readObject() as Map<*, *>
+                                        }
                                     }
                                 }
 
@@ -216,6 +223,8 @@ class ZipUtil {
                             }
                         }
                     }
+
+                    Log.d("ZipUtil", "Unzip - Completed processing all files.")
                 }
 
             } catch (e: Exception) {
@@ -232,6 +241,7 @@ class ZipUtil {
             val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
             with (prefs.edit()) {
 
+                Log.d("ZipUtil", "UpdatePreferences - Replacing existing preferences with preferences from file")
                 clear()
 
                 //keys are always string, do a quick map to type cast

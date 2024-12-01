@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="4dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="@dimen/camera_preview_portrait_width"
+        android:layout_height="@dimen/camera_preview_portrait_height"
+        android:id="@+id/list_item_camera_cv"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.camera.view.PreviewView
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:id="@+id/trait_camera_pv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            app:implementationMode="compatible"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Trevor's 'embiggen' button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        style="@style/FloatingActionButtonStyle.SmallTraitButtons"
+        android:id="@+id/trait_camera_expand_btn"
+        android:layout_width="@dimen/fb_trait_fab_size_small"
+        android:layout_height="@dimen/fb_trait_fab_size_small"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:src="@drawable/arrow_expand"
+        app:layout_constraintTop_toTopOf="@id/list_item_camera_cv"
+        app:layout_constraintBottom_toBottomOf="@id/list_item_camera_cv"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintEnd_toEndOf="@id/list_item_camera_cv"
+        android:contentDescription="@string/trait_camera_capture_content_description" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

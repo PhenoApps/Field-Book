@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/act_list_filter_tb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/fb_color_primary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <ProgressBar style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:visibility="visible"
+        android:id="@+id/act_list_filter_pb"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:layout_marginTop="-7dp"
+        app:layout_constraintTop_toBottomOf="@id/act_list_filter_tb"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/act_brapi_importer_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Loading text to be displayed..."
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/act_list_filter_pb"/>
+
+    <com.google.android.material.tabs.TabLayout
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:id="@+id/brapi_importer_tl"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tv">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/level"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/primary"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/secondary"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sort"/>
+
+    </com.google.android.material.tabs.TabLayout>
+    
+    <ListView
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_margin="8dp"
+        android:background="@drawable/cell"
+        android:id="@+id/act_study_importer_lv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/brapi_importer_tl"
+        app:layout_constraintBottom_toTopOf="@id/act_list_filter_rv"
+        android:choiceMode="singleChoice"
+        app:layout_constraintVertical_weight="0.25"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/act_list_filter_rv"
+        android:orientation="vertical"
+        tools:listitem="@layout/list_item_study"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintTop_toBottomOf="@id/act_study_importer_lv"
+        app:layout_constraintBottom_toTopOf="@id/act_study_importer_import_button"
+        app:layout_constraintVertical_weight="0.5"/>
+
+    <!-- hidden pagination ui that brapi service is coupled to -->
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom|center"
+        android:orientation="vertical">
+
+        <include
+            layout="@layout/brapi_pagination_buttons"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom|center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:onClick="buttonClicked"
+                android:text="@string/brapi_save_data_button" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:id="@+id/act_study_importer_import_button"
+        android:layout_margin="8dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="@string/dialog_save"
+        android:textColor="?attr/fb_color_text_high_contrast_inverted"
+        android:background="@drawable/cell"
+        android:backgroundTint="?attr/fb_color_primary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/act_list_filter_rv"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

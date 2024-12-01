@@ -48,9 +48,9 @@
     </string-array>
 
     <string-array name="pref_return_character">
+        <item>@string/preferences_behavior_return_character_do_nothing</item>
         <item>@string/preferences_behavior_return_character_next_plot</item>
         <item>@string/preferences_behavior_return_character_next_trait</item>
-        <item>@string/preferences_behavior_return_character_do_nothing</item>
     </string-array>
 
     <string-array name="pref_return_character_values">
@@ -87,29 +87,27 @@
 
     <!-- Yes, they are entry entries -->
     <string-array name="pref_behavior_skip_entries_entries">
-        <item>@string/preferences_general_skip_entries_disabled</item>
-        <item>@string/preferences_general_skip_entries_with_data</item>
-        <item>@string/preferences_general_skip_entries_across_all_traits</item>
+        <item>@string/preferences_behavior_skip_entries_disabled</item>
+        <item>@string/preferences_behavior_skip_entries_with_data</item>
+        <item>@string/preferences_behavior_skip_entries_across_all_traits</item>
     </string-array>
 
     <string-array name="pref_behavior_skip_entries_values">
+        <item>0</item>
         <item>1</item>
         <item>2</item>
-        <item>3</item>
     </string-array>
 
     <string-array name="pref_general_skip_entries_entries">
         <item>@string/preferences_general_skip_entries_disabled</item>
         <item>@string/preferences_general_skip_entries_with_data</item>
         <item>@string/preferences_general_skip_entries_across_all_traits</item>
-        <item>@string/preferences_general_skip_entries_default</item>
     </string-array>
 
     <string-array name="pref_general_skip_entries_values">
+        <item>0</item>
         <item>1</item>
         <item>2</item>
-        <item>3</item>
-        <item>4</item>
     </string-array>
 
     <string-array name="pref_brapi_version">
@@ -141,9 +139,19 @@
 
     <string-array name="pref_general_location_acquisition_level_entries">
         <item>@string/location_level_off</item>
+        <item>@string/location_level_study</item>
         <item>@string/location_level_observation_unit</item>
         <item>@string/location_level_observation</item>
-        <item>@string/location_level_study</item>
+    </string-array>
+
+    <string-array name="pref_coordinate_format_entries">
+        <item>@string/location_format_iso</item>
+        <item>@string/location_format_geojson</item>
+    </string-array>
+
+    <string-array name="pref_coordinate_format_values">
+        <item>0</item>
+        <item>1</item>
     </string-array>
 
     <string-array name="pref_geonav_logging_modes">
@@ -167,9 +175,9 @@
     </string-array>
 
     <string-array name="pref_general_move_to_unique_id_values">
+        <item>0</item>
         <item>1</item>
         <item>2</item>
-        <item>3</item>
     </string-array>
 
 

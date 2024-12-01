@@ -4,7 +4,7 @@
 
     <PreferenceCategory
         android:key="category_appearance_system"
-        android:title="@string/preferences_appearance_system_category_title"
+        android:title="@string/preferences_appearance_application_title"
         app:iconSpaceReserved="false">
 
         <Preference
@@ -21,18 +21,11 @@
             android:title="@string/preferences_appearance_language"
             app:fragment="com.fieldbook.tracker.preferences.LanguagePreferenceFragment"/>
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_tb_help"
-            android:key="Tips"
-            android:summary="@string/preferences_appearance_tutorial_description"
-            android:title="@string/tutorial_dialog_title"
-            app:allowDividerBelow="true" />
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="category_appearance_collect"
-        android:title="@string/preferences_appearance_collection_category_title"
+        android:title="@string/preferences_appearance_collect_screen_title"
         app:allowDividerAbove="true"
         app:iconSpaceReserved="false">
 
@@ -54,6 +47,13 @@
             android:defaultValue="3"
             app:nppc_maxValue="20"
             app:nppc_minValue="1" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_hide_infobar_prefix"
+            android:key="HIDE_INFOBAR_PREFIX"
+            android:summary="@string/preferences_appearance_infobar_hide_prefix_description"
+            android:title="@string/preferences_appearance_infobar_hide_prefix" />
 
         <CheckBoxPreference
             android:defaultValue="false"
