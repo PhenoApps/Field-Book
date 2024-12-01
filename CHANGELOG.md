@@ -8,10 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Fields list updated to include bulk actions and individual field pages
+- Data statistics added to each field
+- App-wide statistics added to main screen
+- Trait progress bar in Collect now shows individual traits
+- Camera expanded with embedded preview
 
 ### Changed
+- Documentation updated
+- App intro and setup process
+- Preferences reorganized and better described
+- InfoBars updated to support wrapping and prefix replacement
 
 ### Fixed
+- Numerous bug fixes and enhancements
+- GoPro, USB, and Canon camera improvements
 
 ## [v5.6.26] - 2024-11-06
 
