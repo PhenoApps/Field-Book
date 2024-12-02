@@ -1,46 +1,46 @@
-## Description
+### Description
 
-_Provide a summary of your changes including motivation and context.
-If these changes fix a bug or resolves a feature request, be sure to link to that issue._
+_Provide a summary of your changes including motivation and context.  
+If these changes fix a bug or resolve a feature request, be sure to link to that issue._
 
 
 
-## Type of change
+### Change Type
 
-_What type of changes does your code introduce? Put an `x` in the box that best applies._
+_Select the most applicable option by placing an `x` in the box._
 
-- [ ] `ADDITION` (non-breaking change which adds functionality)
-- [ ] `CHANGE` (fix or feature that would cause existing functionality to not work as expected)
-- [ ] `FIX` (non-breaking change which fixes an issue)
-- [ ] `OTHER` (if none of the other choices apply. Example, tooling, build system, CI, docs, etc.)
+- [ ] **`ADDITION`** (non-breaking change that adds functionality)
+- [ ] **`CHANGE`** (fix or feature that alters existing functionality)
+- [ ] **`FIX`** (non-breaking change that resolves an issue)
+- [ ] **`OTHER`** (use only for changes like tooling, build system, CI, docs, etc.)
 
-_Should this code trigger a major, minor, or patch release? Choose no release if the answer is no, otherwise put an `x` in the box that applies._
+**NOTE:**  
+If you select `OTHER`, there is no need to fill in the **Release Note** section. For all other types, a release note is required.
 
-- [ ] `MAJOR`
-- [ ] `MINOR`
-- [ ] `PATCH`
-- [ ] `NO RELEASE`
+### Release Note
 
-## Checklist:
+_Provide a brief, user-friendly release note in the fenced block below. This will be included in the changelog file during the release process.  
+Release notes are **required** for all change types except `OTHER`._
 
-- [ ] I have performed a self-review of my code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have updated relevant documentation
-
-## Changelog entry
-
-_Please add a one-line changelog entry below. This will be copied to the changelog file during the release process._
-
-<!-- 
-Your release note should be written in clear and straightforward sentences. Most often, users aren't familiar with
-the technical details of your PR, so consider what they need to know when you write your release note.
-
-Some brief examples of release notes:
+Examples of release notes:
 - Fixed a bug causing Field Book to crash when collecting categorical data.
 - Added a new option to enable a sound when data is deleted.
-- Modified the behavior trait drag and drop behavior.
--->
+- Modified the drag-and-drop behavior for traits.
 
 ```release-note
 
 ```
+___
+
+### Release Type
+
+_For maintainer's use when completing the PR merge:_
+
+- Please leave these unchecked unless you are the one completing the merge.
+- On merge:
+  - If `MAJOR` or `MINOR` is checked, a release action will be dispatched to create a release of the selected type.
+  - If `WAIT` is checked, the release action will be skipped. The merged changes will wait to be included in the next dispatched or scheduled release (A scheduled check for unreleased changes runs every Monday at 3pm EST).
+
+- [ ] **`MAJOR`**
+- [ ] **`MINOR`**
+- [ ] **`WAIT`** (No immediate release, but the changelog will be still be updated if there is a release note.)

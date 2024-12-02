@@ -78,17 +78,14 @@ jobs:
           pr_body=$(gh api -X GET "repos/${{ github.repository }}/pulls/${{ env.pr_number }}" --jq '.body' | sed 's/\r//g')
           major_checked=$(echo "$pr_body" | grep -q '\[x\] `MAJOR`' && echo "true" || echo "false")
           minor_checked=$(echo "$pr_body" | grep -q '\[x\] `MINOR`' && echo "true" || echo "false")
-          patch_checked=$(echo "$pr_body" | grep -q '\[x\] `PATCH`' && echo "true" || echo "false")
+          wait_checked=$(echo "$pr_body" | grep -q '\[x\] `WAIT`' && echo "true" || echo "false")
 
           if [ "$major_checked" == "true" ]; then
             echo "BUMP_TYPE=major" >> $GITHUB_ENV
           elif [ "$minor_checked" == "true" ]; then
             echo "BUMP_TYPE=minor" >> $GITHUB_ENV
-          elif [ "$patch_checked" == "true" ]; then
-            echo "BUMP_TYPE=patch" >> $GITHUB_ENV
-          else
-            echo "No release bump required."
-            exit 0
+          elif [ "$wait_checked" == "true" ]; then
+            echo "WAIT was checked. No release required."
           fi
 
       - name: Add entry to changelog
@@ -112,7 +109,7 @@ jobs:
           push: true
 
       - name: Dispatch GitHub Release Action
-        if: env.BUMP_TYPE != '' # Ensures no action if NO RELEASE is selected
+        if: env.BUMP_TYPE != '' # Ensures no action if WAIT is selected
         run: |
           echo "Triggering release action with bump type: ${{ env.BUMP_TYPE }}"
           curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
