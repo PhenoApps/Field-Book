@@ -19,8 +19,8 @@ jobs:
           token: ${{ secrets.ACTIONS_PAT }}
           fetch-depth: 0
       
-      - name: Extract changelog entry from PR
-        id: extract_changelog
+      - name: Extract release note from PR
+        id: extract_release_note
         run: |
           # Get the latest commit SHA
           commit_sha=$(git log -1 --format="%H")
@@ -37,16 +37,11 @@ jobs:
 
           # Get the PR body and extract release note
           pr_body=$(gh api -X GET "repos/${{ github.repository }}/pulls/$pr_number" --jq '.body' | sed 's/\r//g')
-          changelog_entry=$(echo "$pr_body" | awk 'BEGIN { found=0 } /```release-note/ { found=1; next } /```/ { found=0 } found { print }' | sed '/^$/d')
-
-          # Exit if no changelog entry found
-          if [ -z "$changelog_entry" ]; then
-            echo "No changelog entry found."
-            exit 0
-          fi
+          release_note=$(echo "$pr_body" | awk 'BEGIN { found=0 } /```release-note/ { found=1; next } /```/ { found=0 } found { print }' | sed '/^$/d')
 
           # Detect change type
           change_type=$(echo "$pr_body" | grep -oP '(?<=- \[x\] `)[A-Z]+(?=`)' | head -n 1)
+          change_type=$(echo "$pr_body" | grep -oP '(?<=- \[x\] \*\*`)[A-Z]+(?=`\*\*)' | head -n 1)
           case "$change_type" in
             "ADDITION")
               section="### Added"
@@ -58,7 +53,8 @@ jobs:
               section="### Fixed"
               ;;
             "OTHER")
-              section="### Miscellaneous"
+              echo "Change type is 'OTHER'. Skipping release note as it is not required."
+              exit 0
               ;;
             *)
               echo "Unknown change type: $change_type"
@@ -66,9 +62,15 @@ jobs:
               ;;
           esac
 
+          # Exit if no release note is found (only applicable for non-OTHER types)
+          if [ -z "$release_note" ]; then
+            echo "No release note found for change type: $change_type."
+            exit 1
+          fi
+
           # Store the extracted information in environment variables
           pr_url="https://github.com/${{ github.repository }}/pull/$pr_number"
-          echo "changelog=${changelog_entry} ($pr_url)" >> $GITHUB_ENV
+          echo "release_note=${release_note} ($pr_url)" >> $GITHUB_ENV
           echo "section=$section" >> $GITHUB_ENV
           echo "pr_number=$pr_number" >> $GITHUB_ENV
 
@@ -76,9 +78,9 @@ jobs:
         id: extract_version_bump
         run: |
           pr_body=$(gh api -X GET "repos/${{ github.repository }}/pulls/${{ env.pr_number }}" --jq '.body' | sed 's/\r//g')
-          major_checked=$(echo "$pr_body" | grep -q '\[x\] `MAJOR`' && echo "true" || echo "false")
-          minor_checked=$(echo "$pr_body" | grep -q '\[x\] `MINOR`' && echo "true" || echo "false")
-          wait_checked=$(echo "$pr_body" | grep -q '\[x\] `WAIT`' && echo "true" || echo "false")
+          major_checked=$(echo "$pr_body" | grep -q '\[x\] \*\*`MAJOR`' && echo "true" || echo "false")
+          minor_checked=$(echo "$pr_body" | grep -q '\[x\] \*\*`MINOR`' && echo "true" || echo "false")
+          wait_checked=$(echo "$pr_body" | grep -q '\[x\] \*\*`WAIT`' && echo "true" || echo "false")
 
           if [ "$major_checked" == "true" ]; then
             echo "BUMP_TYPE=major" >> $GITHUB_ENV
@@ -88,11 +90,11 @@ jobs:
             echo "WAIT was checked. No release required."
           fi
 
-      - name: Add entry to changelog
+      - name: Add release note to changelog
         if: env.pr_number != ''
         run: |
-          # Insert the changelog entry under the first matching section in Unreleased (avoids / delimeter to not conflict with url)
-          sed -i "0,/${{ env.section }}/s@${{ env.section }}@${{ env.section }}\n- ${{ env.changelog }}@" CHANGELOG.md
+          # Insert the release note under the first matching section in Unreleased
+          sed -i "0,/${{ env.section }}/s@${{ env.section }}@${{ env.section }}\n- ${{ env.release_note }}@" CHANGELOG.md
 
           # Show the updated changelog
           cat CHANGELOG.md
@@ -102,7 +104,7 @@ jobs:
         uses: EndBug/add-and-commit@v7
         with:
           add: 'CHANGELOG.md'
-          message: "Update CHANGELOG.md with entry from PR #${{ env.pr_number }}"
+          message: "Update CHANGELOG.md with release note from PR #${{ env.pr_number }}"
           author_email: git-action-bot@example.com
           author_name: Git Action Bot
           token: ${{ secrets.GITHUB_TOKEN }}
