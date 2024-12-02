@@ -260,11 +260,17 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             studyList.adapter?.notifyDataSetChanged()
 
         }
+
+        if (existingLevels().isEmpty()) {
+            listView.visibility = View.GONE
+        }
     }
 
     private fun getAttributeKeys() = attributesTable?.values?.flatMap { it.values }?.flatMap { it.keys }?.distinct() ?: listOf()
 
     private fun setSortListOptions() {
+
+        listView.visibility = View.VISIBLE
 
         listView.adapter = ArrayAdapter(
             this,
@@ -289,6 +295,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     }
 
     private fun setPrimaryOrderListOptions() {
+
+        listView.visibility = View.VISIBLE
 
         val attributes = getAttributeKeys()
 
@@ -315,6 +323,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     }
 
     private fun setSecondaryOrderListOptions() {
+
+        listView.visibility = View.VISIBLE
 
         val attributes = getAttributeKeys()
 
@@ -609,7 +619,11 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         val level = BrapiObservationLevel().also {
             it.observationLevelName = try {
-                existingLevels().elementAt(selectedLevel)
+                if (selectedLevel in existingLevels().indices) {
+                    existingLevels().elementAt(selectedLevel)
+                } else {
+                    "plot"
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get observation level", e)
                 finish()
@@ -619,7 +633,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
-            observationUnits[study.studyDbId]?.filter { it.observationUnitPosition.observationLevel.levelName == level.observationLevelName }
+            observationUnits[study.studyDbId]?.filter {
+                    if (it.observationUnitPosition.entryType.name == "TEST") true
+                    else it.observationUnitPosition.observationLevel.levelName == level.observationLevelName }
                 ?.let { units ->
 
                     val details = BrapiStudyDetails()

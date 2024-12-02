@@ -263,6 +263,8 @@ internal class ImportRunnableTask(
             val hostURL = BrAPIService.getHostUrl(context)
             val existingObservations = dataHelper.getObservations(studyObservations.fieldBookStudyDbId, hostURL)
 
+            val existingDbIds = existingObservations.map { it.dbId }
+
             // Track the count of existing observations for each unit-variable pair
             val observationRepBaseMap = mutableMapOf<Pair<String?, String?>, Int>()
             for (obs in existingObservations) {
@@ -274,6 +276,11 @@ internal class ImportRunnableTask(
             val observationList = studyObservations.observationList.sortedBy { it.timestamp }
 
             for (obs in observationList) {
+
+                if (obs.dbId in existingDbIds) {
+                    continue
+                }
+
                 val key = Pair(obs.unitDbId, obs.variableDbId)
                 val baseRep = observationRepBaseMap.getOrDefault(key, 0)
                 val nextRep = baseRep + 1
