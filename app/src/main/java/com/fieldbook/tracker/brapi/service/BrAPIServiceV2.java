@@ -988,10 +988,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     if (response.getResult() != null) {
 
                         Map<String, String> extVariableDbIdMap = getExtVariableDbIdMapping();
-                        Map<String, String> extUnitDbIdMap = getExtUnitDbIdMapping();
                         // Result contains a list of observation variables
                         List<BrAPIObservation> brapiObservationList = response.getResult().getData();
-                        final List<Observation> observationList = mapObservations(brapiObservationList, extVariableDbIdMap, extUnitDbIdMap);
+                        final List<Observation> observationList = mapObservations(brapiObservationList, extVariableDbIdMap);
 
                         function.apply(observationList);
 
@@ -1066,74 +1065,56 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         return externalIdToInternalMap;
     }
 
-    private Observation mapToObservation(BrAPIObservation obs) {
-        Observation newObservation = new Observation();
-        newObservation.setDbId(obs.getObservationDbId());
-        newObservation.setUnitDbId(obs.getObservationUnitDbId());
-        newObservation.setVariableDbId(obs.getObservationVariableDbId());
-
-        newObservation.setTimestamp(
-                OffsetDateTime.parse(
-                        obs.getObservationTimeStamp().toString()
-                )
-        );
-        newObservation.setLastSyncedTime(OffsetDateTime.now()); // We just received this!
-
-        //search imported obs references for first field book id
-        List<BrAPIExternalReference> references = obs.getExternalReferences();
-        if (references != null && !references.isEmpty()) {
-            for (BrAPIExternalReference ref : references) {
-                String source = ref.getReferenceSource();
-                if (source != null && source.equals(fieldBookReferenceSource)) {
-                    String id = ref.getReferenceId();
-                    if (id != null && !id.isEmpty()) {
-                        newObservation.setFieldBookDbId(id);
-                        break;
-                    }
-                    // Check obsolete referenceID
-                    id = ref.getReferenceID();
-                    if (id != null && !id.isEmpty()) {
-                        newObservation.setFieldBookDbId(id);
-                        break;
-                    }
-                }
-            }
-        }
-
-        return newObservation;
-    }
-
     /**
      * Function to map the observations from Brapi to the Fieldbook Observation variable.
      *
      * @param brapiObservationList
      * @return list of Fieldbook Observation objects
      */
-    private List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList, Map<String, String> extVariableDbIdMap, Map<String, String> extUnitDbIdMap) {
+    private List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList, Map<String, String> extVariableDbIdMap) {
         List<Observation> outputList = new ArrayList<>();
         for (BrAPIObservation brapiObservation : brapiObservationList) {
+
             Observation newObservation = new Observation();
-
             newObservation.setStudyId(brapiObservation.getStudyDbId());
-
             newObservation.setVariableName(brapiObservation.getObservationVariableName());
             newObservation.setDbId(brapiObservation.getObservationDbId());
-            String internalUnitId = extUnitDbIdMap.get(brapiObservation.getObservationUnitDbId());
 
-            newObservation.setUnitDbId(brapiObservation.getObservationUnitDbId());
+            String internalUnitId = brapiObservation.getObservationUnitDbId();//extUnitDbIdMap.getOrDefault(brapiObservation.getObservationUnitDbId(), null);
+            newObservation.setUnitDbId(internalUnitId);
+
             //need to get out the internal observation variable DB ID or else we will store the wrong thing in the table
-            String internalVarId = extVariableDbIdMap.get(brapiObservation.getObservationVariableDbId());
+            String internalVarId = extVariableDbIdMap.getOrDefault(brapiObservation.getObservationVariableDbId(), null);
             newObservation.setVariableDbId(internalVarId);
+
             newObservation.setValue(brapiObservation.getValue());
+
             if (brapiObservation.getObservationTimeStamp() != null) {
                 newObservation.setTimestamp(TimeAdapter.convertFrom(brapiObservation.getObservationTimeStamp()));
             }
+
             newObservation.setLastSyncedTime(OffsetDateTime.now()); // Use current time as sync time
-            newObservation.setTimestamp(
-                    OffsetDateTime.parse(
-                            brapiObservation.getObservationTimeStamp().toString()
-                    )
-            );
+
+            //search imported obs references for first field book id
+            List<BrAPIExternalReference> references = brapiObservation.getExternalReferences();
+            if (references != null && !references.isEmpty()) {
+                for (BrAPIExternalReference ref : references) {
+                    String source = ref.getReferenceSource();
+                    if (source != null && source.equals(fieldBookReferenceSource)) {
+                        String id = ref.getReferenceID();
+                        if (id != null && !id.isEmpty()) {
+                            newObservation.setFieldBookDbId(id);
+                            break;
+                        }
+
+                        String refId = ref.getReferenceId();
+                        if (refId != null && !refId.isEmpty()) {
+                            newObservation.setFieldBookDbId(refId);
+                            break;
+                        }
+                    }
+                }
+            }
 
             //Make sure we are on the right experiment level.
             // This will cause bugs if there have been plot and plant level traits found as the observations retrieves all of them
@@ -1142,6 +1123,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             }
 
         }
+
         return outputList;
     }
 
@@ -1157,9 +1139,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                         List<Observation> newObservations = new ArrayList<>();
                         if (phenotypesResponse.getResult() != null && phenotypesResponse.getResult().getData() != null) {
-                            for (BrAPIObservation obs : phenotypesResponse.getResult().getData()) {
-                                newObservations.add(mapToObservation(obs));
-                            }
+                            newObservations.addAll(
+                                    mapObservations(
+                                            phenotypesResponse.getResult().getData(),
+                                            getExtVariableDbIdMapping()
+                                    )
+                            );
                         }
 
                         function.apply(newObservations);
@@ -1203,9 +1188,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     try {
                         List<Observation> newObservations = new ArrayList<>();
                         if (observationsResponse.getResult() != null && observationsResponse.getResult().getData() != null) {
-                            for (BrAPIObservation obs : observationsResponse.getResult().getData()) {
-                                newObservations.add(mapToObservation(obs));
-                            }
+                            newObservations.addAll(
+                                    mapObservations(
+                                            observationsResponse.getResult().getData(),
+                                            getExtVariableDbIdMapping()
+                                    )
+                            );
                         }
                         function.apply(newObservations);
 
