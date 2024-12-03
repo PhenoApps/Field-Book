@@ -278,7 +278,11 @@ internal class ImportRunnableTask(
             for (obs in observationList) {
 
                 if (obs.dbId in existingDbIds) {
-                    continue
+                    val existingObs = existingObservations.first { it.dbId == obs.dbId }
+                    if (existingObs.timestamp.isEqual(obs.timestamp) || existingObs.timestamp.isBefore(obs.timestamp)) {
+                        // Skip saving this observation if it is older than the existing one
+                        continue
+                    }
                 }
 
                 val key = Pair(obs.unitDbId, obs.variableDbId)
