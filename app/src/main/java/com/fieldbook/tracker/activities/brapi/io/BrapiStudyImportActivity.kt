@@ -747,7 +747,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     models.forEach { unit ->
 
                         (unit as? BrAPIGermplasm)?.let { g ->
-                            Log.d("Unit", g.germplasmName)
+                            Log.d("Unit", g.germplasmName ?: "No name")
                             germs.add(g)
                             if (total == germs.size) {
                                 germplasms.getOrPut(studyDbId) { hashSetOf() }
