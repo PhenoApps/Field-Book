@@ -57,4 +57,5 @@ interface CollectController: FieldController {
     fun advisor(): SecureBluetooth
     fun getFfmpegHelper(): FfmpegHelper
     fun getCanonApi(): CanonApi
+    fun takePicture()
 }
