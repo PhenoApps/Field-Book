@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v6.0.0] - 2024-12-02
+
+### Added
 - Fields list updated to include bulk actions and individual field pages
 - Data statistics added to each field
 - App-wide statistics added to main screen
@@ -502,4 +510,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v5.4]: https://github.com/PhenoApps/Field-Book/releases/tag/5.4.18.23
 [v5.5]: https://github.com/PhenoApps/Field-Book/releases/tag/5.5.26
 [v5.6]: https://github.com/PhenoApps/Field-Book/releases/tag/5.6.25
-[v5.6.26]: https://github.com/PhenoApps/Field-Book/releases/tag/v5.6.26
+[v5.6.26]: https://github.com/PhenoApps/Field-Book/releases/tag/5.6.26
+
+[v6.0.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.0
