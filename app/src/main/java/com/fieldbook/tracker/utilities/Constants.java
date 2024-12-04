@@ -33,6 +33,11 @@ public class Constants extends Application {
             Manifest.permission.RECORD_AUDIO, Manifest.permission.SYSTEM_ALERT_WINDOW,
             Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.CAMERA};
 
+    public final static String[] permissionsTemp = new String[]{
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.CAMERA};
+
     public final static int PERM_REQ = 100;
 
     public static final String BRAPI_PATH_V1 = "/brapi/v1";

@@ -8,14 +8,19 @@
     <string name="dialog_ok">Đồng ý</string>
     <string name="dialog_yes">Có</string>
     <string name="dialog_no">Không</string>
+    <string name="dialog_clear">Xóa</string>
     <string name="dialog_close">Đóng</string>
     <string name="dialog_confirm">Bạn có chắc chắn không?</string>
     <string name="dialog_import">Nhập</string>
     <string name="dialog_warning">Cảnh báo</string>
     <string name="dialog_save">Lưu</string>
+    <string name="dialog_delete">Xóa</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dữ liệu mẫu</string>
     <string name="startup_sample_data_message">Nạp dữ liệu mẫu</string>
+    <!-- App Intro -->
+    <string name="app_intro_tutorial_title">Hướng dẫn</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">Chức năng nhập liệu từ tập tin yêu cầu quyền truy cập các tập tin của thiết bị.</string>
     <string name="permission_rationale_storage_export">Chức năng xuất dữ liệu yêu cầu quyền truy cập các tập tin của thiết bị.</string>
@@ -49,7 +54,6 @@
     <string name="fields_delete_study">Xóa ruộng</string>
     <string name="fields_delete_study_confirmation">Bạn có chắc chắn là muốn xóa ruộng này không? Việc này sẽ xóa toàn bộ dữ liệu khỏi ruộng này.</string>
     <!-- Import -->
-    <string name="import_dialog_title_fields">Nhập ruộng</string>
     <string name="import_dialog_unique">Định danh độc nhất</string>
     <string name="import_dialog_primary">Trật tự chủ yếu</string>
     <string name="import_dialog_secondary">Trật tự thứ yếu</string>
@@ -62,12 +66,12 @@
     <string name="fields_study_exists_message">Ruộng này đã tồn tại.</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
-    <string name="traits_toolbar_sort">Sắp xếp</string>
-    <string name="traits_sort_title">Sắp xếp</string>
     <string name="traits_sort_name">Tên</string>
     <string name="traits_sort_visibility">Sự hiển thị</string>
     <string name="traits_sort_format">Định dạng</string>
@@ -153,6 +157,7 @@
     <string name="activity_collect_dialog_verify_no_button">Không</string>
     <string name="activity_collect_dialog_verify_yes_button">Có</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Thiết bị của bạn không chứa phần cứng cần thiết cho tính năng này</string>
     <string name="trait_delete_warning_photo">Bạn có chắc chắn muốn xóa ảnh này?</string>
@@ -179,6 +184,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Bộ nhớ máy</string>
@@ -204,79 +210,46 @@
     <string name="citation_string">Nếu bạn sử dụng Nhật ký Đồng ruộng cho mục đích nghiên cứu, xin vui lòng trích dẫn bài báo sau:</string>
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_title">Chung</string>
-    <string name="preferences_source_default_import">Nguồn nhập chính</string>
-    <string name="preferences_source_default_export">Nguồn xuất chính</string>
-    <string name="preferences_general_feature_next_missing">Nghiệm thức tiếp theo chưa có dữ liệu</string>
-    <string name="preferences_general_feature_next_missing_description">Thêm một nút trên thanh công cụ có tác dụng chuyển đến nghiệm thức chưa có dữ liệu tiếp theo đối với tính trạng hiện tại</string>
-    <string name="preferences_general_skip_entries_default">Mặc định</string>
-    <string name="preferences_general_feature_barcode_text">Chuyển đến định danh độc nhất</string>
-    <string name="preferences_general_feature_datagrid">Lưới dữ liệu</string>
-    <string name="preferences_general_feature_datagrid_description">Hiển thị một bảng tính gồm các nghiệm thức và các tính trạng để trình bày dữ liệu đã thu thập</string>
     <!-- Profile -->
-    <string name="profile_person">Người sử dụng</string>
-    <string name="profile_person_title">Nhập người sử dụng</string>
-    <string name="profile_name_first">Tên</string>
-    <string name="profile_name_last">Họ</string>
-    <string name="profile_reset">Xóa các tùy chỉnh</string>
+    <string name="preferences_profile_title">Hồ sơ</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="preferences_appearance_title">Diện mạo</string>
-    <string name="preferences_appearance_system_category_title">Chương trình</string>
     <string name="preferences_appearance_theme_title">Nền</string>
     <string name="theme_default">Mặc định</string>
     <string name="preferences_appearance_language">Ngôn ngữ</string>
     <string name="preferences_appearance_language_description">Ngôn ngữ được thiết lập bởi hệ thống</string>
-    <string name="preferences_appearance_tutorial_description">Thêm một biểu tượng hướng dẫn vào các màn hình thu thập dữ liệu, tùy chỉnh, đồng ruộng và tính trạng</string>
-    <string name="preferences_appearance_collection_category_title">Màn hình Thu thập</string>
-    <string name="preferences_appearance_toolbar_customize">Tùy chọn biểu tượng thanh công cụ</string>
-    <string name="preferences_appearance_toolbar_customize_description">Điều chỉnh biểu tượng mặc định trên màn hình thu thập</string>
     <string name="preferences_appearance_toolbar_customize_search">Tìm kiếm</string>
     <string name="preferences_appearance_toolbar_customize_resources">Tài nguyên</string>
     <string name="preferences_appearance_toolbar_customize_summary">Tóm tắt</string>
     <string name="preferences_appearance_toolbar_customize_lock">Khóa</string>
-    <string name="preferences_appearance_infobar_number">Số lượng thanh thông tin</string>
+    <string name="preferences_general_feature_datagrid">Lưới dữ liệu</string>
     <string name="preferences_appearance_infobar_number_description">Điều chỉnh số lượng thanh thông tin được hiển thị trên màn hình chính</string>
     <string name="preferences_appearance_quickgoto">Đi đến (nghiệm thức) nhanh</string>
-    <string name="preferences_appearance_quickgoto_description">Thay đổi phần giữa màn hình chính sang kiểu cũ Đi đến (nghiệm thức) nhanh</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Hành vi</string>
-    <string name="preferences_behavior_cycle_traits">Xoay vòng tính trạng tăng lên nghiệm nghiệm thức</string>
-    <string name="preferences_behavior_cycle_traits_description">Sau khi đi qua tất cả các tính trạng, Sổ tay đồng ruộng đi đến nghiệm thức tiếp theo</string>
-    <string name="preferences_behavior_return_character">Nút Return (Enter)</string>
-    <string name="preferences_behavior_return_character_next_plot">Nghiệm thức tiếp theo</string>
-    <string name="preferences_behavior_return_character_next_trait">Tính trạng tiếp theo</string>
     <string name="preferences_behavior_return_character_do_nothing">Không làm gì</string>
-    <string name="preferences_behavior_disable_entry_arrow">Vô hiệu hóa mũi tên nghiệm thức</string>
-    <string name="preferences_behavior_disable_entry_arrow_left">Trái</string>
-    <string name="preferences_behavior_disable_entry_arrow_right">Phải</string>
-    <string name="preferences_behavior_disable_entry_arrow_both">Cả hai</string>
-    <string name="preferences_general_share_disable">Vô hiệu hóa chia sẻ tập tin</string>
-    <string name="preferences_general_share_disable_description">Khi các tập tin được xuất, khung tương tác chia sẽ sẽ không được hiển thị</string>
-    <string name="preferences_general_use_day_number">Sử dụng ngày trong năm</string>
     <string name="preferences_general_use_day_number_description">Sử dụng số thứ tự ngày trong năm khi thu thập dữ liệu thay vì ngày tháng</string>
-    <string name="preferences_general_skip_entries_with_data">Bỏ qua nghiệm thức có dữ liệu</string>
-    <string name="preferences_general_skip_entries_with_data_description">Bỏ qua những nghiệm thức có dữ liệu đối với tính trạng hiện tại</string>
-    <!-- GeoNav -->
+    <!-- Location -->
+    <string name="preferences_location_title">Địa điểm</string>
     <string name="pref_geonav_log_both">Cả hai</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Tiếng</string>
-    <string name="preferences_sound_primary_order_sound">Tiếng trật tự chính</string>
-    <string name="preferences_sound_primary_order_sound_description">Tiếng thông báo khi trật tự chính thay đổi</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">Cơ sở dữ liệu</string>
     <string name="database_dialog_title">Cơ sở dữ liệu</string>
-    <string name="database_import">Nhập cơ sở dữ liệu</string>
-    <string name="database_export">Xuất cơ sở dữ liệu</string>
-    <string name="database_reset">Xóa cơ sở dữ liệu</string>
     <string name="database_reset_warning1">Tất cả dữ liệu sẽ bị xóa. Bạn có chắc bạn muốn thiết lập lại cơ sở dữ liệu?</string>
     <string name="database_reset_warning2">Việc thiết lập lại cơ sở dữ liệu không thể đảo ngược lại. Phần mềm sẽ tắt sau khi xóa cơ sở dữ liệu. Bạn có thực sự chắc chắn bạn muốn tiếp tục?</string>
     <string name="database_reset_message">Cơ sở dữ liệu đã được xóa</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">Ruộng</string>
+    <string name="stat_title_entries">(Các) nghiệm thức</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Thông tin phần mềm</string>
     <string name="about_version_title">Phiên bản</string>
-    <string name="about_rate">Đánh giá phần mềm</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Người đứng đầu dự án</string>
     <!-- Support  -->
@@ -293,6 +266,7 @@
     <string name="brapi_base_url_desc">Dường dẫn gốc đến máy chủ BrAPI</string>
     <string name="brapi_choice_to_make_default_negative">Bỏ qua</string>
     <string name="brapi_choice_to_make_default_positive">Lưu</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_save_authorize">Lưu và đăng nhập</string>
     <string name="brapi_revoke_auth">Đăng xuất</string>
@@ -301,9 +275,6 @@
     <string name="brapi_auth_deny">Từ chối phê duyệt BrAPI</string>
     <string name="brapi_auth_error_starting">Lỗi khởi động phê duyệt BrAPI</string>
     <string name="brapi_auth_needed_title">Yêu cầu đăng nhập</string>
-    <string name="brapi_auth_needed">Bạn phải đăng nhập hệ thống mà bạn đang muốn đồng bộ dữ liệu để có thể đồng bộ dữ liệu của bạn. 
-
-Bạn có muốn thực hiện bây giờ không?</string>
     <!-- BrAPI Import -->
     <string name="brapi_load_data_button">Nạp ruộng</string>
     <string name="brapi_load_traits_button">Nạp tính trạng</string>
@@ -336,6 +307,7 @@ Bạn có muốn thực hiện bây giờ không?</string>
     <string name="brapi_traits_saved_success">Các tính trạng được chọn đã được lưu thành công.</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Xuất</string>
+    <string name="brapi_close_button">Đóng</string>
     <string name="brapi_export_title">Thống kê việc xuất lên BrAPI</string>
     <string name="brapi_export_observations">Đánh giá</string>
     <string name="brapi_export_num_new_obs">Đánh giá mới</string>
@@ -360,6 +332,9 @@ Bạn có muốn thực hiện bây giờ không?</string>
     <string name="device_offline_warning">Thiết bị ngoại tuyến: Xin vui lòng kết nối mạng và thử lại</string>
     <string name="brapi_info_message">Các tính trạng và ruộng được nhập từ BrAPI sẽ có thể được xuất các đánh giá của chúng qua hệ thống xuất của BrAPI.
 Các tính trạng và ruộng được tạo thủ công hoặc được nhập từ CSV sẽ cần phải được xuất dưới định dạng CSV.</string>
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">Có</string>
+    <string name="intro_tutorial_radio_item_no">Không</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">Hướng dẫn</string>
     <string name="tutorial_dialog_description">Bạn có muốn kích kích hoạt hướng dẫn? Tùy chỉnh này có thể được thay đổi trong phần Tùy chỉnh</string>
@@ -412,4 +387,12 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <string name="tutorial_traits_visibility_title">Hiển thị tính trạng</string>
     <string name="tutorial_traits_visibility_description">Các tính trạng có thể được vô hiệu hóa khỏi danh sách bằng cách bỏ đánh dấu trong ô.</string>
     <string name="tutorial_main_datagrid_title">Lưới dữ liệu</string>
+    <string name="act_brapi_filter_import">Nhập</string>
+    <string name="act_brapi_filter_clear">Xóa</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">Mặc định</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">(Các) Tính trạng</string>
 </resources>

@@ -8,12 +8,16 @@
     <string name="dialog_ok">Eeyyeee</string>
     <string name="dialog_yes">Eeyee</string>
     <string name="dialog_no">Lakki</string>
+    <string name="dialog_clear">Balleessi</string>
     <string name="dialog_close">Cufi</string>
     <string name="dialog_confirm">Dhuguma keetii?</string>
     <string name="dialog_import">kara biraatii galchuu</string>
     <string name="dialog_warning">Ofeegannoo</string>
     <string name="dialog_save">Olkaa\'i</string>
     <!-- Startup  -->
+    <!-- App Intro -->
+    <string name="app_intro_tutorial_title">Ibsa</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
     <string name="settings_fields">Dirree</string>
@@ -39,7 +43,9 @@
     <string name="import_error_unique">Maqaan dhuunfa deddeebi\'e</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
@@ -108,6 +114,7 @@
     <string name="activity_collect_dialog_verify_no_button">Lakki</string>
     <string name="activity_collect_dialog_verify_yes_button">Eeyee</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <!-- Trait Layout: GNSS -->
     <!-- Trait Layout: Date -->
@@ -124,6 +131,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">Kusaa odeeffanoo</string>
@@ -139,37 +147,26 @@
     <!-- Citation -->
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_feature_next_missing">Iddoo ragaan hin jirreetti akka darbuu danda\'amu taasisuu</string>
-    <string name="preferences_general_skip_entries_default">Akkuma jirutti</string>
-    <string name="preferences_general_feature_barcode_text">Maqaa dhuunfatti akka darbuun danda\'amu taasisuu</string>
     <!-- Profile -->
-    <string name="profile_person">Nama</string>
-    <string name="profile_person_title">Maqaa qopeessi</string>
-    <string name="profile_name_first">Maqaa duraa</string>
-    <string name="profile_name_last">Maqaa dhumaa</string>
-    <string name="profile_reset">Kessa jijjiraa ballessuu</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="theme_default">Akkuma jirutti</string>
     <string name="preferences_appearance_language">Qooqa</string>
     <string name="preferences_appearance_toolbar_customize_search">Barbaacha</string>
     <string name="preferences_appearance_toolbar_customize_resources">Qabiyeee</string>
     <!-- Behavior -->
-    <string name="preferences_behavior_cycle_traits">Dhumarratti bakka jirturra gara jalqaba itti aanutti darbi</string>
-    <string name="preferences_general_use_day_number">Guyyaa odoo hin ta\'in guyya waggaa fayyadami</string>
-    <string name="preferences_general_skip_entries_with_data">Ideeffanoo guurame dhoksi</string>
-    <!-- GeoNav -->
+    <!-- Location -->
     <!-- Sounds -->
-    <string name="preferences_sound_primary_order_sound">Tartiibni jalqabaa yoo jijirame sagalee beeksisaa</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">Kusaa odeeffanoo</string>
     <string name="database_dialog_title">Kuusaa ragaa</string>
-    <string name="database_import">Kuusaa ragaa galchi</string>
-    <string name="database_export">Kuusaa ragaa baasi.</string>
-    <string name="database_reset">Kuusa irra deeebi\'ii qopheessi</string>
     <string name="database_reset_warning1">Ragaan hindinuu ni bada. Dhugaa keetii?</string>
     <string name="database_reset_warning2">Wanti dalagame duubatti hin deeb\'u. Meeshan erga kuusaa qul\'qullessen booda hojii ni dhaaba. Akkanumatti itti fufuu ni barbaaddaa?</string>
     <string name="database_reset_message">Kuusan badee jira</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">Dirree</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Waa\'ee</string>
@@ -183,12 +180,17 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">Ballessi</string>
     <string name="brapi_choice_to_make_default_positive">Olkaa\'i</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">kara biraatti baasuu</string>
+    <string name="brapi_close_button">Cufi</string>
     <!-- Pagination -->
     <!-- General -->
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">Eeyee</string>
+    <string name="intro_tutorial_radio_item_no">Lakki</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">Ibsa</string>
     <string name="tutorial_dialog_description">Ibsaa akka qophaa\'uu ni barbaaddaa? Kun qopheessa ol\'aanaa kessatti jijjiramuu ni danda\'a</string>
@@ -200,4 +202,12 @@
     <string name="tutorial_settings_traits_title">Wanta ideefanonn guuramuuf</string>
     <string name="tutorial_settings_settings_title">Haala ittin jijiiramu ol\'aanaa</string>
     <string name="tutorial_settings_export_title">kara biraatti baasuu</string>
+    <string name="act_brapi_filter_import">kara biraatii galchuu</string>
+    <string name="act_brapi_filter_clear">Balleessi</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">Akkuma jirutti</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">Wanta ideefanonn guuramuuf</string>
 </resources>

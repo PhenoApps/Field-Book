@@ -8,14 +8,19 @@
     <string name="dialog_ok">ok</string>
     <string name="dialog_yes">oui</string>
     <string name="dialog_no">non</string>
+    <string name="dialog_clear">effacer</string>
     <string name="dialog_close">fermer</string>
     <string name="dialog_confirm">êtes-vous sûr?</string>
     <string name="dialog_import">importer</string>
     <string name="dialog_warning">avertissement</string>
     <string name="dialog_save">enregistrer</string>
+    <string name="dialog_delete">Effacer</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Données tests</string>
     <string name="startup_sample_data_message">Charger les données tests ?</string>
+    <!-- App Intro -->
+    <string name="app_intro_tutorial_title">tutoriel</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">L\'importation de nouveaux fichiers requiert le droit d\'accès aux fichiers de votre appareil.</string>
     <string name="permission_rationale_storage_export">L\'exportation des données requiert le droit d\'accès aux fichiers de votre appareil.</string>
@@ -48,7 +53,6 @@
     <string name="fields_delete_study">Effacer cet essai</string>
     <string name="fields_delete_study_confirmation">Êtes-vous certain de vouloir supprimer cet essai ? Cette action entraînera  la perte de toutes les données de cet essai.</string>
     <!-- Import -->
-    <string name="import_dialog_title_fields">Importer essai</string>
     <string name="import_dialog_unique">identifiant unique</string>
     <string name="import_dialog_primary">premier ordre</string>
     <string name="import_dialog_secondary">deuxième ordre</string>
@@ -61,12 +65,12 @@
     <string name="fields_study_exists_message">Cet essai existe déjà.</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
-    <string name="traits_toolbar_sort">Trier</string>
-    <string name="traits_sort_title">Trier</string>
     <string name="traits_sort_name">Nom</string>
     <string name="traits_sort_visibility">Visibilité</string>
     <string name="warning_traits_missing_modify">Créé les caractères avant de les modifier.</string>
@@ -150,6 +154,7 @@
     <string name="activity_collect_dialog_verify_no_button">non</string>
     <string name="activity_collect_dialog_verify_yes_button">oui</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">votre appareil ne possède pas le disque dur nécessaire pour cette application</string>
     <string name="trait_delete_warning_photo">Etes-vous sûre de vouloir effacer cette photo?</string>
@@ -175,6 +180,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_dialog_title">Export Données</string>
@@ -198,78 +204,45 @@
     <string name="citation_string">Si vous utilisez Field Book pour la recherche, citez l\'article suivant:</string>
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_title">Général</string>
-    <string name="preferences_source_default_import">Source d \'import par défault</string>
-    <string name="preferences_source_default_export">Source d \'export par défault</string>
-    <string name="preferences_general_feature_next_missing">activer le bouton pour avancer l\'utilisateur à la prochaine entrée sans donnée</string>
-    <string name="preferences_general_feature_next_missing_description">Ajouter le bouton pour avancer l\'utilisateur à la prochaine entrée sans donnée pour le caractère sélectioné</string>
-    <string name="preferences_general_skip_entries_default">défaut</string>
-    <string name="preferences_general_feature_barcode_text">activer l\'option pour passer à un identifiant unique spécifique</string>
-    <string name="preferences_general_feature_datagrid">Grille de données</string>
-    <string name="preferences_general_feature_datagrid_description">Afficher une feuille des parcelles et caractères avec des données collectées</string>
     <!-- Profile -->
-    <string name="profile_person">personne</string>
-    <string name="profile_person_title">définir la personne</string>
-    <string name="profile_name_first">prénom</string>
-    <string name="profile_name_last">nom</string>
-    <string name="profile_reset">effacer les paramètres</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="preferences_appearance_title">Apparence</string>
     <string name="preferences_appearance_theme_title">Thème</string>
     <string name="theme_default">défaut</string>
     <string name="preferences_appearance_language">Langue</string>
     <string name="preferences_appearance_language_description">Sélection automatique de la langue</string>
-    <string name="preferences_appearance_tutorial_description">Ajouter l\'icone tutoriel aux fenêtres de collecte de données, paramètres, essais et caractères</string>
-    <string name="preferences_appearance_collection_category_title">Ecran de collecte de donnée</string>
-    <string name="preferences_appearance_toolbar_customize">Modifier les icônes de la barre-outil</string>
-    <string name="preferences_appearance_toolbar_customize_description">Modifier les icônes de l\'écran de collecte de données</string>
     <string name="preferences_appearance_toolbar_customize_search">Recherche</string>
     <string name="preferences_appearance_toolbar_customize_resources">Ressources</string>
     <string name="preferences_appearance_toolbar_customize_summary">Sommaire</string>
     <string name="preferences_appearance_toolbar_customize_lock">Vérouiller</string>
-    <string name="preferences_appearance_infobar_number">Nombre de barres d\'informations</string>
+    <string name="preferences_general_feature_datagrid">Grille de données</string>
     <string name="preferences_appearance_infobar_number_description">Ajuster le nombre de barres d\'informations sur l\'écran principal</string>
     <string name="preferences_appearance_quickgoto">Raccourci rapide</string>
-    <string name="preferences_appearance_quickgoto_description">Changer la section intermédiaire de l\'écran principal pour l\'ancienne version du Quick GoTo</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportement</string>
-    <string name="preferences_behavior_cycle_traits">passer au premier caractère de l\'entrée suivante</string>
-    <string name="preferences_behavior_cycle_traits_description">Après avoir passe tout les caractères en revue, Field Book passe a l\'entrée suivante</string>
-    <string name="preferences_behavior_return_character">Signal de touche retour</string>
-    <string name="preferences_behavior_return_character_next_plot">Parcelle suivante</string>
-    <string name="preferences_behavior_return_character_next_trait">Caractère suivant</string>
     <string name="preferences_behavior_return_character_do_nothing">Ne rien faire</string>
-    <string name="preferences_behavior_disable_entry_arrow">Désactiver la flèche d\'entrée</string>
-    <string name="preferences_behavior_disable_entry_arrow_left">Gauche</string>
-    <string name="preferences_behavior_disable_entry_arrow_right">Droite</string>
-    <string name="preferences_behavior_disable_entry_arrow_both">Les deux</string>
-    <string name="preferences_general_share_disable">Désactiver le partage fichier</string>
-    <string name="preferences_general_share_disable_description">Lorsque les fichiers sont exportés, le message de partage ne sera pas affiché</string>
-    <string name="preferences_general_use_day_number">remplacer la date par le numéro du jour de l\'année</string>
     <string name="preferences_general_use_day_number_description">Utiliser le jour de l\'année au lieu de la date</string>
-    <string name="preferences_general_skip_entries_with_data">cacher les données déjà existantes</string>
-    <string name="preferences_general_skip_entries_with_data_description">Exclure les entrées qui ont des données existantes pour ce caractère</string>
-    <!-- GeoNav -->
+    <!-- Location -->
+    <string name="preferences_location_title">Lieu</string>
     <string name="pref_geonav_log_both">Les deux</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Sons</string>
-    <string name="preferences_sound_primary_order_sound">Son pour prévenir d\'un changement de premier ordre.</string>
-    <string name="preferences_sound_primary_order_sound_description">Son pour prévenir d\'un changement de premier ordre.</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">base de données</string>
     <string name="database_dialog_title">Base de données</string>
-    <string name="database_import">Importer la Base de données</string>
-    <string name="database_export">Exporter la Base de données</string>
-    <string name="database_reset">réinitialiser la base de données</string>
     <string name="database_reset_warning1">Toutes les données seront supprimées lors de la réinitialisation. Etes-vous sûr(e)?</string>
     <string name="database_reset_warning2">Cette action est irréversible. L\'application fermera après avoir effacé la base de données. Voulez-vous continuer?</string>
     <string name="database_reset_message">la base de données a été supprimée</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">essais</string>
+    <string name="stat_title_entries">Entrées</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">à propos</string>
     <string name="about_version_title">version</string>
-    <string name="about_rate">Evaluer cette application</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Chef de projet</string>
     <!-- Support  -->
@@ -285,6 +258,7 @@
     <string name="brapi_base_url_desc">L\'URL de base pour se connecter a un serveur BrAPI</string>
     <string name="brapi_choice_to_make_default_negative">Annuler</string>
     <string name="brapi_choice_to_make_default_positive">enregistrer</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_save_authorize">Sauvegarder et autoriser</string>
     <string name="brapi_revoke_auth">Se déconnecter</string>
@@ -293,9 +267,6 @@
     <string name="brapi_auth_deny">Autorisation BrAPI refusée</string>
     <string name="brapi_auth_error_starting">Erreur au démarrage de l\'authentification BrAPI</string>
     <string name="brapi_auth_needed_title">Connection requise</string>
-    <string name="brapi_auth_needed">Vous devez être connecté au système avec lequel vous souhaitez synchroniser les données pour pouvoir synchroniser.
-
-Souhaitez-vous vous authentifier maintenant?</string>
     <!-- BrAPI Import -->
     <string name="brapi_load_data_button">Charger les champs</string>
     <string name="brapi_load_traits_button">Charger les caractères</string>
@@ -327,6 +298,7 @@ Souhaitez-vous vous authentifier maintenant?</string>
     <string name="brapi_traits_saved_success">Les caractères sélectionnés on été sauvegradés avec succès.</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">exporter</string>
+    <string name="brapi_close_button">fermer</string>
     <string name="brapi_export_title">Export Stats BrAPI</string>
     <string name="brapi_export_num_new_obs">Nouvelle Observations</string>
     <string name="brapi_export_num_synced_obs">Synchronisation des observations</string>
@@ -349,6 +321,9 @@ Souhaitez-vous vous authentifier maintenant?</string>
     <string name="device_offline_warning">Appareil hors-ligne. Connectez vous a un réseau et ré-essayez.</string>
     <string name="brapi_info_message">Phenotypes et essais importés via BrAPI pourront exporter leurs observations via l\'export BrAPI.
 Phenotypes et essais créés manuellement ou importés via CSV devront être exportés  via le format CSV.</string>
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">oui</string>
+    <string name="intro_tutorial_radio_item_no">non</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">tutoriel</string>
     <string name="tutorial_dialog_description">Voulez-vous activer le tutoriel? Cette configuration peut être modifiée dans Paramètres Avancés.</string>
@@ -401,4 +376,12 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <string name="tutorial_traits_visibility_title">Visibilité du caractère</string>
     <string name="tutorial_traits_visibility_description">Les caractères peuvent être désactivés de la collecte en décochant la case associée.</string>
     <string name="tutorial_main_datagrid_title">Grille de données</string>
+    <string name="act_brapi_filter_import">importer</string>
+    <string name="act_brapi_filter_clear">effacer</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">défaut</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">caractères</string>
 </resources>

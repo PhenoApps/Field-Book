@@ -84,6 +84,10 @@ public class BrapiPaginationManager {
 
     public Integer getTotalPages() { return totalPages; }
 
+    public void setTotalPages(int totalPages) {
+        this.totalPages = totalPages;
+    }
+
     /**
      * Function to move the paginationManager to the next page
      */

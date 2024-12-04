@@ -8,12 +8,16 @@
     <string name="dialog_ok">ይሁን</string>
     <string name="dialog_yes">አዎ፤</string>
     <string name="dialog_no">አይደለም፤</string>
+    <string name="dialog_clear">ንጹህ አርገዉ enter የምለዉን ንካዉ፤</string>
     <string name="dialog_close">ዝጋዉ</string>
     <string name="dialog_confirm">እርግጠኛ ነህ፤</string>
     <string name="dialog_import">ማስገባት፤</string>
     <string name="dialog_warning">ማስጠንቀቂያ፤</string>
     <string name="dialog_save">አስቀምጥ</string>
     <!-- Startup  -->
+    <!-- App Intro -->
+    <string name="app_intro_tutorial_title">መግለጫ</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
     <string name="settings_fields">ቦታዎች</string>
@@ -42,7 +46,9 @@
     <string name="import_error_unique">መለያዉ ተመላልስዋል</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
@@ -111,6 +117,7 @@
     <string name="activity_collect_dialog_verify_no_button">አይደለም፤</string>
     <string name="activity_collect_dialog_verify_yes_button">አዎ፤</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">መሳሪያህ ለዚህ የሚያስፈልገውን ዕቃ የለውም፤</string>
     <!-- Trait Layout: GNSS -->
@@ -128,6 +135,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">የመረጃ ማህደር</string>
@@ -143,37 +151,26 @@
     <!-- Citation -->
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_feature_next_missing">ተጥቃሚው መረጃ ወደሌለው ናሙና እንዲሄድ ቅልፉ ኢንዲሰራ ያደርጋል።</string>
-    <string name="preferences_general_skip_entries_default">እንደነበረ</string>
-    <string name="preferences_general_feature_barcode_text">ወደ መለያ ለማለፍ የሚያስችለውን አማራጭ እንዲሰራ ማድረግ፤</string>
     <!-- Profile -->
-    <string name="profile_person">ሰዉ፤</string>
-    <string name="profile_person_title">ስም ማስተካከል፤</string>
-    <string name="profile_name_first">የመጀመሪያ ስም፤</string>
-    <string name="profile_name_last">የመጨረሻ ስም፤</string>
-    <string name="profile_reset">የተዘጋጀዉን አጥፋዉ፤</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="theme_default">እንደነበረ</string>
     <string name="preferences_appearance_language">ቀወንቀ፤</string>
     <string name="preferences_appearance_toolbar_customize_search">መፈለግ፤</string>
     <string name="preferences_appearance_toolbar_customize_resources">የመረጀ ምንጮች፤</string>
     <!-- Behavior -->
-    <string name="preferences_behavior_cycle_traits">ከመጨረሻ መስመር ወደ ፊት መሄድ ወደሚቀጥለው መጀመሪያ መስመር ይወስዳል</string>
-    <string name="preferences_general_use_day_number">ከተለመደው ቀን አቆጣጠር ይልቅ ዓመትን መሰረት ያደረጋ ቀን አቆጣጠር ተጠቀም</string>
-    <string name="preferences_general_skip_entries_with_data">መረጃ የተሰበሰበለት መስመር ደብቅ</string>
-    <!-- GeoNav -->
+    <!-- Location -->
     <!-- Sounds -->
-    <string name="preferences_sound_primary_order_sound">የመጀመሪያ ቅደምተከተል ስለወጥ ያማሳወቂያ ድምጽ፤</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">የመረጃ ማህደር</string>
     <string name="database_dialog_title">የመረጃ ማህደር፤</string>
-    <string name="database_import">የመረጃ ማህደሩን አስገባው፤</string>
-    <string name="database_export">የመረጃ ማህደሩን አውጣው</string>
-    <string name="database_reset">የመረጃ ማህደር እንደገና ማስተካከል፤</string>
     <string name="database_reset_warning1">በመለሶ ማስተካከል ጊዜ መረጃ ልጠፋ ይችላል፤ ይሁን?</string>
     <string name="database_reset_warning2">ይህ ዉሳኔ አይቀየርም፤ መሳሪያው የመራጃ ማህደሩን ካጸዳ ብሃላ መስራት ይትዋል፤ ቢሆንም ለመቀጠል ትፈልጋለህ?</string>
     <string name="database_reset_message">የመረጃ ማህደሩ ጠፍትዋል</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">ቦታዎች</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">ስለ፤</string>
@@ -187,12 +184,17 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">ታወው</string>
     <string name="brapi_choice_to_make_default_positive">አስቀምጥ</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">ማውጣት፤</string>
+    <string name="brapi_close_button">ዝጋዉ</string>
     <!-- Pagination -->
     <!-- General -->
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">አዎ፤</string>
+    <string name="intro_tutorial_radio_item_no">አይደለም፤</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">መግለጫ</string>
     <string name="tutorial_dialog_description">መግለጫ እንዲሰራ ትፈልጋለህ? ይህ በረቀቃ አዘገጃጀት ሊለወጥ ይችላል፤</string>
@@ -204,4 +206,12 @@
     <string name="tutorial_settings_traits_title">ጸባዮች</string>
     <string name="tutorial_settings_settings_title">የረቀቃ አዘጋጃጀት</string>
     <string name="tutorial_settings_export_title">ማውጣት፤</string>
+    <string name="act_brapi_filter_import">ማስገባት፤</string>
+    <string name="act_brapi_filter_clear">ንጹህ አርገዉ enter የምለዉን ንካዉ፤</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">እንደነበረ</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">ጸባዮች</string>
 </resources>

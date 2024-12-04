@@ -8,14 +8,19 @@
     <string name="dialog_ok">موافق</string>
     <string name="dialog_yes">نعم</string>
     <string name="dialog_no">لا</string>
+    <string name="dialog_clear">إزالة</string>
     <string name="dialog_close">إغلاق</string>
     <string name="dialog_confirm">هل أنت متأكد؟</string>
     <string name="dialog_import">إستيراد</string>
     <string name="dialog_warning">تحذير</string>
     <string name="dialog_save">حفظ</string>
+    <string name="dialog_delete">حذف</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">بيانات نموذجية</string>
     <string name="startup_sample_data_message">تحميل البيانات النموذجية</string>
+    <!-- App Intro -->
+    <string name="app_intro_tutorial_title">دليل تعليمي</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">استيراد الملفات يتطلب الوصول إلى ملفات الجهاز.</string>
     <string name="permission_rationale_storage_export">تصدير الملفات يتطلب الوصول إلى ملفات الجهاز.</string>
@@ -49,7 +54,6 @@
     <string name="fields_delete_study">حذف الحقل</string>
     <string name="fields_delete_study_confirmation">هل أنت متأكد أنك تريد حذف هذا الحقل؟ سيؤدي هذا إلى حذف جميع البيانات من هذا الحقل.</string>
     <!-- Import -->
-    <string name="import_dialog_title_fields">استيراد حقل</string>
     <string name="import_dialog_unique">معرف فريد</string>
     <string name="import_dialog_primary">ترتيب رئيسي</string>
     <string name="import_dialog_secondary">ترتيب ثانوي</string>
@@ -62,12 +66,12 @@
     <string name="fields_study_exists_message">هذا الحقل موجود مسبقا.</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
-    <string name="traits_toolbar_sort">ترتيب</string>
-    <string name="traits_sort_title">ترتيب</string>
     <string name="traits_sort_name">اسم</string>
     <string name="traits_sort_visibility">رؤية</string>
     <string name="traits_sort_format">تنسيق</string>
@@ -153,6 +157,7 @@
     <string name="activity_collect_dialog_verify_no_button">لا</string>
     <string name="activity_collect_dialog_verify_yes_button">نعم</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">لا يتضمن جهازك العتاد الضروري لهذه الميزة</string>
     <string name="trait_delete_warning_photo">هل أنت متأكد من رغبتك بحذف هذه الصورة؟</string>
@@ -179,6 +184,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">محلي</string>
@@ -204,79 +210,46 @@
     <string name="citation_string">إذا كنت تستخدم Field Book للبحث ، فيرجى الاستشهاد بمقالة المجلة التالية:</string>
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_title">عام</string>
-    <string name="preferences_source_default_import">مصدر الإستيراد الأساسي</string>
-    <string name="preferences_source_default_export">مصدر التصدير الأساسي</string>
-    <string name="preferences_general_feature_next_missing">تفعيل زر الانتقال إلى المدخل التالي الذي لا يتضمن بيانات للمستخدم المتقدم</string>
-    <string name="preferences_general_feature_next_missing_description">إضافة زر إلى شريط الأدوات ينتقل إلى المدخل التالي بدون بيانات للسمة الحالية</string>
-    <string name="preferences_general_skip_entries_default">افتراضي</string>
-    <string name="preferences_general_feature_barcode_text">تفعيل الخيار للمتقدم لتحديد المعرف الفريد</string>
-    <string name="preferences_general_feature_datagrid">جدول البيانات</string>
-    <string name="preferences_general_feature_datagrid_description">عرض جدول للقطع التجريبية والسمات يظهر البيانات المجموعة</string>
     <!-- Profile -->
-    <string name="profile_person">شخص</string>
-    <string name="profile_person_title">تحديد الشخص</string>
-    <string name="profile_name_first">الإسم</string>
-    <string name="profile_name_last">الكنية</string>
-    <string name="profile_reset">إزالة الإعدادات</string>
+    <string name="preferences_profile_title">الملف الشخصي</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="preferences_appearance_title">مظهر خارجي</string>
-    <string name="preferences_appearance_system_category_title">تطبيق</string>
     <string name="preferences_appearance_theme_title">الموضوع</string>
     <string name="theme_default">افتراضي</string>
     <string name="preferences_appearance_language">اللغة</string>
     <string name="preferences_appearance_language_description">اللغة التي يحددها النظام</string>
-    <string name="preferences_appearance_tutorial_description">إضافة أيقونة الدليل التعليمي إلى كل من النوافذ الرئيسية والإعدادات والحقول والصفات</string>
-    <string name="preferences_appearance_collection_category_title">شاشة جمع البيانات</string>
-    <string name="preferences_appearance_toolbar_customize">شريط الأدوات</string>
-    <string name="preferences_appearance_toolbar_customize_description">تعديل الرموز الافتراضية على شاشة التجميع</string>
     <string name="preferences_appearance_toolbar_customize_search">بحث</string>
     <string name="preferences_appearance_toolbar_customize_resources">مصادر</string>
     <string name="preferences_appearance_toolbar_customize_summary">ملخص</string>
     <string name="preferences_appearance_toolbar_customize_lock">قفل</string>
-    <string name="preferences_appearance_infobar_number">عدد أشرطة المعلومات</string>
+    <string name="preferences_general_feature_datagrid">جدول البيانات</string>
     <string name="preferences_appearance_infobar_number_description">اضبط عدد أشرطة المعلومات المعروضة على الشاشة الرئيسية</string>
     <string name="preferences_appearance_quickgoto">إنتقل مباشرة إلى</string>
-    <string name="preferences_appearance_quickgoto_description">تغيير القسم الأوسط من الشاشة الرئيسية إلى \"السريع GoTo\" القديم</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">سلوك</string>
-    <string name="preferences_behavior_cycle_traits">تحرك متقدما من آخر سمة للمدخل السابق إلى السمة الأولى في المدخل التالي</string>
-    <string name="preferences_behavior_cycle_traits_description">بعد المرور بجميع السمات ، ينتقل Field Book إلى المدخل التالي</string>
-    <string name="preferences_behavior_return_character">إشارة مفتاح العودة</string>
-    <string name="preferences_behavior_return_character_next_plot">القطعة تجريبية الموالية</string>
-    <string name="preferences_behavior_return_character_next_trait">السمة الموالية</string>
     <string name="preferences_behavior_return_character_do_nothing">لا تفعل شيئا</string>
-    <string name="preferences_behavior_disable_entry_arrow">تعطيل سهم الإدخال</string>
-    <string name="preferences_behavior_disable_entry_arrow_left">يسار</string>
-    <string name="preferences_behavior_disable_entry_arrow_right">يمين</string>
-    <string name="preferences_behavior_disable_entry_arrow_both">كلاهما</string>
-    <string name="preferences_general_share_disable">تعطيل مشاركة الملفات</string>
-    <string name="preferences_general_share_disable_description">عند تصدير الملفات لن يتم عرض الصندوق الخاص بالمشاركة</string>
-    <string name="preferences_general_use_day_number">استخدم رقم اليوم بالسنة عوض التاريخ</string>
     <string name="preferences_general_use_day_number_description">استخدم رقم اليوم بالسنة عند جمع البيانات عوضا عن التاريخ</string>
-    <string name="preferences_general_skip_entries_with_data">إخفاء المدخلات التي سبق جمعها</string>
-    <string name="preferences_general_skip_entries_with_data_description">تجاوز المدخلات التي لديها بيانات للسمة الحالية</string>
-    <!-- GeoNav -->
+    <!-- Location -->
+    <string name="preferences_location_title">موقع</string>
     <string name="pref_geonav_log_both">كلاهما</string>
     <!-- Sounds -->
     <string name="preferences_sounds">اصوات</string>
-    <string name="preferences_sound_primary_order_sound">صوت التنبيه عند تغيير الترتيب الأساسي</string>
-    <string name="preferences_sound_primary_order_sound_description">صوت التنبيه عند تغيير الترتيب الأساسي</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">قاعدة بيانات</string>
     <string name="database_dialog_title">قاعدة بيانات</string>
-    <string name="database_import">استيراد قاعدة البيانات</string>
-    <string name="database_export">تصدير قاعدة البيانات</string>
-    <string name="database_reset">إعادة تعيين قاعدة البيانات</string>
     <string name="database_reset_warning1">سيتم حذف كل البيانات عند إعادة التعيين، هل أنت متأكد؟</string>
     <string name="database_reset_warning2">لا يمكن التراجع عن هذه العملية، سيتم الخروج من التطبيق بعد محي قاعدة البيانات. هل لازلت ترغب في المتابعة؟</string>
     <string name="database_reset_message">تم حذف قاعدة البيانات</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">حقول</string>
+    <string name="stat_title_entries">المدخلات</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">حول</string>
     <string name="about_version_title">الإصدار</string>
-    <string name="about_rate">قيم هذا التطبيق</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">مدير المشروع</string>
     <!-- Support  -->
@@ -293,6 +266,7 @@
     <string name="brapi_base_url_desc">عنوان URL الأساسي لخادم BrAPI المتصل</string>
     <string name="brapi_choice_to_make_default_negative">إلغاء</string>
     <string name="brapi_choice_to_make_default_positive">حفظ</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_save_authorize">حفظ وسماح</string>
     <string name="brapi_revoke_auth">الخروج</string>
@@ -301,10 +275,6 @@
     <string name="brapi_auth_deny">تم رفض ترخيص BrAPI</string>
     <string name="brapi_auth_error_starting">خطأ في بدء مصادقة BrAPI</string>
     <string name="brapi_auth_needed_title">مطلوب تسجيل الدخول</string>
-    <string name="brapi_auth_needed">تحتاج إلى تسجيل الدخول إلى النظام الذي تحاول مزامنة البيانات معه بالترتيب
-لمزامنة بياناتك.
-
-هل تريد المصادقة الآن؟</string>
     <!-- BrAPI Import -->
     <string name="brapi_load_data_button">تحميل الحقول</string>
     <string name="brapi_load_traits_button">تحميل السمات</string>
@@ -337,6 +307,7 @@
     <string name="brapi_traits_saved_success">تم حفظ السمات المحددة بنجاح.</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">تصدير</string>
+    <string name="brapi_close_button">إغلاق</string>
     <string name="brapi_export_title">تصدير إحصائيات BrAPI</string>
     <string name="brapi_export_observations">ملاحظات</string>
     <string name="brapi_export_num_new_obs">ملاحظات جديدة</string>
@@ -361,6 +332,9 @@
     <string name="device_offline_warning">الجهاز غير متصل: الرجاء الاتصال بشبكة وإعادة المحاولة</string>
     <string name="brapi_info_message">الصفات والحقول المستوردة عبر BrAPI ستكون قادرة على تصدير هذه الملاحظات عبر تصدير BrAPI.
 السمات والحقول التي تم إنشاؤها يدويًا أو استيرادها عبر CSV يجب تصديرها عبرCSV.</string>
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">نعم</string>
+    <string name="intro_tutorial_radio_item_no">لا</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">دليل تعليمي</string>
     <string name="tutorial_dialog_description">هل ترغب في تفعيل الدليل التعليمي؟ هذا الإعداد يمكن تغييره ضمن الإعدادات المتقدمة.</string>
@@ -413,4 +387,12 @@
     <string name="tutorial_traits_visibility_title">رؤية السمة</string>
     <string name="tutorial_traits_visibility_description">يمكن تعطيل السمات من الجمع من خلال تبديل مربع الاختيار.</string>
     <string name="tutorial_main_datagrid_title">جدول البيانات</string>
+    <string name="act_brapi_filter_import">إستيراد</string>
+    <string name="act_brapi_filter_clear">إزالة</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">افتراضي</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">السمات</string>
 </resources>

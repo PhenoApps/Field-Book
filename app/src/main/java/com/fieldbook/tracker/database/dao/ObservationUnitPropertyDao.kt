@@ -7,11 +7,9 @@ import android.util.Log
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
-import com.fieldbook.tracker.database.Migrator.Observation
 import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
-import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.query
 import com.fieldbook.tracker.database.toFirst
@@ -30,8 +28,8 @@ class ObservationUnitPropertyDao {
 //            db.query(sObservationUnitPropertyViewName).toTable().toTypedArray()
 //        }
 
-        fun getObservationUnitPropertyByPlotId(column: String, plot_id: String): String = withDatabase { db ->
-            db.query("ObservationUnitProperty", select = arrayOf(column), where = "plot_id = ?", whereArgs = arrayOf(plot_id))
+        fun getObservationUnitPropertyByUniqueId(uniqueName: String, column: String, uniqueId: String): String = withDatabase { db ->
+            db.query(sObservationUnitPropertyViewName, select = arrayOf(column), where = "`${uniqueName}` = ?", whereArgs = arrayOf(uniqueId))
                     .toFirst()[column].toString()
         }?: ""
 
@@ -184,7 +182,7 @@ class ObservationUnitPropertyDao {
                     LEFT JOIN observation_units AS units ON units.observation_unit_db_id = obs.observation_unit_id
                     LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                     LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
-                    WHERE units.study_id = ?
+                    WHERE obs.study_id = ?
                       AND obs.observation_variable_name IN ($placeholders)
                     GROUP BY obs.internal_id_observation
                     $sortOrderClause
@@ -291,7 +289,7 @@ class ObservationUnitPropertyDao {
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
-                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id
+                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = $expId
                 WHERE units.study_id = $expId
                 GROUP BY units.internal_id_observation_unit
                 $orderByClause
@@ -442,7 +440,7 @@ class ObservationUnitPropertyDao {
                     .joinToString(",") { col -> "cast(`$col` as integer), `$col`" } + (if (sortCols.isNotEmpty()) ", " else "")
             }
 
-            if (sortCols.isNotEmpty()) "ORDER BY $sortCols $sortOrder" else ""
+            if (sortCols.isNotEmpty()) "ORDER BY $sortCols COLLATE NOCASE $sortOrder" else ""
         }
 
 

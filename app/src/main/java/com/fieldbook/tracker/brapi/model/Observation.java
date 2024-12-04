@@ -7,6 +7,7 @@ public class Observation extends BrapiObservation {
     private String collector;
     private String season;
     private String studyId;
+    private String internalVariableDbId;
     private String value;
     private String rep;
 
@@ -47,6 +48,14 @@ public class Observation extends BrapiObservation {
 
     public void setStudyId(String studyId) {
         this.studyId = studyId;
+    }
+
+    public String getInternalVariableDbId() {
+        return internalVariableDbId;
+    }
+
+    public void setInternalVariableDbId(String internalVariableDbId) {
+        this.internalVariableDbId = internalVariableDbId;
     }
 
     public String getValue() {

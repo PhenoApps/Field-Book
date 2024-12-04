@@ -168,6 +168,8 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                     String labelNumber = String.valueOf(numLabels);
                     // Use the number of labels printed to record each print event
                     ((CollectActivity) getContext()).insertPrintObservation(labelNumber);
+
+                    ((CollectActivity) getContext()).refreshRepeatedValuesToolbarIndicator();
                 }
             }
         }
@@ -230,6 +232,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
 
         try {
 
@@ -316,17 +319,19 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         }
         connectPrinter.setOnClickListener(view -> {
-
-            mBluetoothUtil.choose(getContext(), new BluetoothChooseCallback() {
-                @Override
-                public void onDeviceChosen(String newDeviceName) {
-                    saveDeviceNamePreference(newDeviceName);
-                }
-            });
-
+            if (checkPermissions(mActivity)) {
+                mBluetoothUtil.choose(getContext(), new BluetoothChooseCallback() {
+                    @Override
+                    public void onDeviceChosen(String newDeviceName) {
+                        saveDeviceNamePreference(newDeviceName);
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), R.string.permission_ask_bluetooth, Toast.LENGTH_SHORT).show();
+            }
         });
 
-        /*
+        /*j
          * This section handles print events. TODO: Create a label prototype based class. Move most of this logic to a function/class. chaneylc 8/26/2020
          * More info on prototyping: https://refactoring.guru/design-patterns/prototype
          */

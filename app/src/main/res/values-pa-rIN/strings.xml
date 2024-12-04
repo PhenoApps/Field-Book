@@ -4,6 +4,8 @@
     <!-- App -->
     <!-- Dialog -->
     <!-- Startup  -->
+    <!-- App Intro -->
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
     <!-- Config Activity Fuzzy Search  -->
@@ -18,7 +20,9 @@
     <!-- Import -->
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
@@ -34,6 +38,7 @@
     <!-- Search  -->
     <!--- Profile -->
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <!-- Trait Layout: GNSS -->
     <!-- Trait Layout: Date -->
@@ -49,19 +54,22 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <!-- Citation -->
     <!-- SETTINGS -->
     <!-- General -->
     <!-- Profile -->
+    <!-- Features -->
     <!-- Appearance -->
     <!-- Behavior -->
-    <!-- GeoNav -->
+    <!-- Location -->
     <!-- Sounds -->
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
     <!-- Experimental -->
+    <!-- STATISTICS -->
     <!-- ABOUT -->
     <!-- App  -->
     <!-- Lead  -->
@@ -71,10 +79,16 @@
     <!-- Update -->
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <!-- Pagination -->
     <!-- General -->
+    <!-- APP INTRO  -->
     <!-- TUTORIAL -->
+    <!-- base camera strings -->
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
 </resources>

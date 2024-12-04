@@ -8,6 +8,7 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Sim</string>
     <string name="dialog_no">Não</string>
+    <string name="dialog_clear">Limpar</string>
     <string name="dialog_close">Fechar</string>
     <string name="dialog_confirm">Você tem certeza disso?</string>
     <string name="dialog_import">Importar</string>
@@ -17,10 +18,13 @@
     <string name="dialog_save_error_title">Erro ao Salvar</string>
     <string name="dialog_back">Voltar</string>
     <string name="dialog_scan">Escanear</string>
+    <string name="dialog_delete">Excluir</string>
     <string name="barcode_scanner_text">Escanear código de barras</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dados de amostra</string>
     <string name="startup_sample_data_message">Carregar dados de amostra?</string>
+    <!-- App Intro -->
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">A importação de arquivos requer acesso aos arquivos do dispositivo.</string>
     <string name="permission_rationale_storage_export">A exportação de dados requer acesso aos arquivos do dispositivo.</string>
@@ -51,13 +55,13 @@
     <string name="changelog_title">Alterar registro</string>
     <!-- FIELDS -->
     <!-- General -->
+    <string name="fields_sort_by_name">Nome</string>
     <string name="list_item_field_popup_menu_content_description">Abre um menu para o campo selecionado.</string>
     <string name="selected_count">%1$d selecionado</string>
     <string name="fields_select_all">Selecionar Tudo</string>
     <string name="field_generic_observation_level">entradas</string>
     <string name="field_observation_count_format">%1$s %2$s</string>
     <!-- Sort -->
-    <string name="fields_sort_update">Classificar</string>
     <string name="sort_dialog_saved">Classificação atualizada</string>
     <string name="sort_dialog_error_saving">Erro ao atualizar classificação</string>
     <string name="list_item_field_sort_delete_content_description">Excluir o atributo classificado.</string>
@@ -81,8 +85,6 @@
         <item quantity="other">Tem certeza que deseja excluir estes campos: %s?</item>
     </plurals>
     <!-- Import -->
-    <string name="fields_toolbar_add_field">Importar Campo</string>
-    <string name="import_dialog_title_fields">Importar campo</string>
     <string name="import_dialog_unique">Identificador único</string>
     <string name="import_dialog_primary">Ordem primária</string>
     <string name="import_dialog_secondary">ordem secundária</string>
@@ -131,7 +133,7 @@
     <string name="activity_field_editor_switch_field_action">Alternar</string>
     <string name="activity_field_editor_no_location_yet">Nenhuma localização encontrada ainda.</string>
     <string name="activity_field_editor_switch_field_same">O campo mais próximo já está selecionado.</string>
-    <!-- Field details -->
+    <!-- Field Details -->
     <string name="field_detail_title">Detalhes do Campo</string>
     <string name="field_edit_display_name">Editar Nome de Exibição do Campo</string>
     <string name="name_cannot_be_empty">Nome não pode estar vazio.</string>
@@ -139,14 +141,10 @@
     <string name="name_conflict_message">\"%1$s\" já está sendo usado como um %2$s para outro campo.</string>
     <string name="name_conflict_import_name">nome da importação</string>
     <string name="name_conflict_display_name">nome de exibição</string>
-    <string name="field_import_string">Importado de</string>
-    <string name="field_create_string">Criado dentro</string>
-    <string name="field_detail_narrative">"%1$s\"%2$s\" com o nome \"%3$s\". Contém \"%4$s\" entradas e \"%5$s\" atributos. Classificado por \"%6$s"</string>
-    <string name="field_default_sort_order">classificação de importação</string>
+    <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_data_title">Dados</string>
-    <string name="field_trait_total">\"&lt;b&gt;%1$s&lt;/b&gt;\" caracteres</string>
-    <string name="field_observation_total">\"&lt;b&gt;%1$s&lt;/b&gt;\" observações</string>
     <string name="field_trait_observation_total">\"%d\"observações</string>
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <string name="today">Hoje</string>
     <string name="yesterday">Ontem</string>
@@ -158,8 +156,6 @@
     <string name="invalid_date">Data inválida</string>
     <!-- TRAITS -->
     <!-- Sort -->
-    <string name="traits_toolbar_sort">Classificar</string>
-    <string name="traits_sort_title">Classificar</string>
     <string name="traits_sort_name">Nome</string>
     <string name="traits_sort_visibility">Visibilidade</string>
     <string name="traits_sort_format">Formato</string>
@@ -251,6 +247,7 @@
     <string name="activity_collect_dialog_verify_no_button">Não</string>
     <string name="activity_collect_dialog_verify_yes_button">Sim</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">O dispositivo não contém o hardware necessário para esta função</string>
     <!-- Trait Layout: GNSS -->
@@ -270,6 +267,7 @@
     <!--- Content Descriptions -->
     <!-- Observation Info -->
     <string name="observation_info_trait_format">Formato de Caractere</string>
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">Base de dados</string>
@@ -285,37 +283,30 @@
     <!-- Citation -->
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_feature_next_missing">Habilitar botão para o usuário prosseguir para uma próxima entrada de dados</string>
-    <string name="preferences_general_skip_entries_default">Padrão</string>
-    <string name="preferences_general_feature_barcode_text">Habilitar opção para avançar para um identificador único</string>
     <!-- Profile -->
-    <string name="profile_person">Usuário</string>
-    <string name="profile_person_title">Definir usuário</string>
-    <string name="profile_name_first">Primeiro nome</string>
-    <string name="profile_name_last">Último nome</string>
-    <string name="profile_reset">Limpar configurações</string>
+    <string name="preferences_profile_title">Perfil</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="theme_default">Padrão</string>
     <string name="preferences_appearance_language">Idioma</string>
     <string name="preferences_appearance_toolbar_customize_search">Buscar</string>
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
     <!-- Behavior -->
-    <string name="preferences_behavior_cycle_traits">Avançando a partir do último caractere avança para primeiro caractere da próxima entrada</string>
-    <string name="preferences_general_use_day_number">Use dia numérico do ano, em vez de data</string>
-    <string name="preferences_general_skip_entries_with_data">Esconder entradas com dados já coletados</string>
-    <!-- GeoNav -->
+    <string name="preferences_behavior_data_title">Dados</string>
+    <!-- Location -->
+    <string name="preferences_location_title">Localização</string>
     <!-- Sounds -->
-    <string name="preferences_sound_primary_order_sound">Som de notificação muda quando ordem primária é alterada</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">Base de dados</string>
     <string name="database_dialog_title">Base de dados</string>
-    <string name="database_import">Importar a base de dados</string>
-    <string name="database_export">Exportar a base de dados</string>
-    <string name="database_reset">Redefinir o banco de dados</string>
     <string name="database_reset_warning1">Todos os dados serão excluídos em Redefinir. Você tem certeza disso?</string>
     <string name="database_reset_warning2">Essa ação não pode ser revertida. O aplicativo vai fechar depois de limpar o banco de dados. Você ainda deseja continuar?</string>
     <string name="database_reset_message">O banco de dados foi excluído</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">Campos</string>
+    <string name="stat_title_data">Dados</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Sobre</string>
@@ -329,14 +320,19 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">Cancelar</string>
     <string name="brapi_choice_to_make_default_positive">Salvar</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->
     <string name="brapi_study_name">Nome</string>
     <string name="brapi_study_location">Localização</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Exportar</string>
+    <string name="brapi_close_button">Fechar</string>
     <!-- Pagination -->
     <!-- General -->
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">Sim</string>
+    <string name="intro_tutorial_radio_item_no">Não</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_description">Você deseja habilitar o tutorial? Esta configuração pode ser alterada nas configurações avançadas.</string>
     <string name="tutorial_main_traits_title">Caracteres</string>
@@ -347,4 +343,12 @@
     <string name="tutorial_settings_traits_title">Caracteres</string>
     <string name="tutorial_settings_settings_title">Configurações avançadas</string>
     <string name="tutorial_settings_export_title">Exportar</string>
+    <string name="act_brapi_filter_import">Importar</string>
+    <string name="act_brapi_filter_clear">Limpar</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">Padrão</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">Caracteres</string>
 </resources>

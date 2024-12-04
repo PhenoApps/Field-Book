@@ -12,9 +12,13 @@
     <string name="dialog_import">Importera</string>
     <string name="dialog_warning">Varning</string>
     <string name="dialog_save">Spara</string>
+    <string name="dialog_delete">Radera</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Exempeldata</string>
     <string name="startup_sample_data_message">Ladda exempeldata?</string>
+    <!-- App Intro -->
+    <string name="app_intro_tutorial_title">Vägledning</string>
+    <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">För att importera filer krävs åtkomst till enhetens filer.</string>
     <string name="permission_rationale_storage_export">För att exportera data krävs åtkomst till enhetens filer.</string>
@@ -46,12 +50,12 @@
     <string name="fields_study_exists_message">Fältet finns redan.</string>
     <!-- Field Creator  -->
     <!-- Geo-Navigate to Field -->
-    <!-- Field details -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
     <!-- Semantic dates -->
     <!-- TRAITS -->
     <!-- Sort -->
-    <string name="traits_toolbar_sort">Sortera</string>
-    <string name="traits_sort_title">Sortera</string>
     <string name="traits_sort_name">Namn</string>
     <string name="traits_sort_visibility">Synlighet</string>
     <string name="traits_sort_format">Formattera</string>
@@ -120,6 +124,7 @@
     <string name="activity_collect_dialog_verify_no_button">Nej</string>
     <string name="activity_collect_dialog_verify_yes_button">Ja</string>
     <!--- Datagrid -->
+    <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Din enhet saknar nödvändig hårdvara för denna funktion.</string>
     <string name="trait_delete_warning_photo">Är su säker på att du vill ta bort bilden?</string>
@@ -142,6 +147,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_format_database">Databas</string>
@@ -163,76 +169,45 @@
     <!-- Citation -->
     <!-- SETTINGS -->
     <!-- General -->
-    <string name="preferences_general_title">Allmänt</string>
-    <string name="preferences_source_default_import">Standardkälla för import</string>
-    <string name="preferences_source_default_export">Standardmål för export</string>
-    <string name="preferences_general_feature_next_missing">Nästa post utan data</string>
-    <string name="preferences_general_feature_next_missing_description">Lägger till en knapp i verktygsfältet som hoppar till nästa post som saknar data för aktuell karaktär </string>
-    <string name="preferences_general_skip_entries_default">Standard</string>
-    <string name="preferences_general_feature_barcode_text">Gå till unikt ID</string>
-    <string name="preferences_general_feature_datagrid">Tabell</string>
-    <string name="preferences_general_feature_datagrid_description">Visar ett datablad över parceller och karaktärer med registrerad data</string>
     <!-- Profile -->
-    <string name="profile_person_title">Ställ in person</string>
-    <string name="profile_name_first">Förnamn</string>
-    <string name="profile_name_last">Efternamn</string>
+    <string name="preferences_profile_title">Profil</string>
+    <!-- Features -->
     <!-- Appearance -->
     <string name="preferences_appearance_title">Utseende</string>
-    <string name="preferences_appearance_system_category_title">App</string>
     <string name="preferences_appearance_theme_title">Tema</string>
     <string name="theme_default">Standard</string>
     <string name="preferences_appearance_language">Språk</string>
     <string name="preferences_appearance_language_description">Systemets språk</string>
-    <string name="preferences_appearance_tutorial_description">Lägger till vägledningsikon på samla in-, inställnings-, fält- och karaktärsskärmarna.</string>
-    <string name="preferences_appearance_collection_category_title">Registreringsvy</string>
-    <string name="preferences_appearance_toolbar_customize">Modifiera ikoner i verktygsfältet</string>
-    <string name="preferences_appearance_toolbar_customize_description">Modifiera standardikoner på insamlingsvyn </string>
     <string name="preferences_appearance_toolbar_customize_search">Sök</string>
     <string name="preferences_appearance_toolbar_customize_resources">Resurser</string>
     <string name="preferences_appearance_toolbar_customize_summary">Sammanfattning </string>
     <string name="preferences_appearance_toolbar_customize_lock">Lås</string>
-    <string name="preferences_appearance_infobar_number">Antal InfoBars</string>
+    <string name="preferences_general_feature_datagrid">Tabell</string>
     <string name="preferences_appearance_infobar_number_description">Justera antal InfoBars som visas i huvudvyn</string>
     <string name="preferences_appearance_quickgoto">Snabbhopp</string>
-    <string name="preferences_appearance_quickgoto_description">Ändrar mittdelen av huvudskärmen till Snabbhopp, som i äldre versioner av appen</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Beteende</string>
-    <string name="preferences_behavior_cycle_traits">Bläddring bland karaktärer leder till nästa post</string>
-    <string name="preferences_behavior_cycle_traits_description">Efter att sista karaktären nåtts fortsätter bläddringen till nästa post</string>
-    <string name="preferences_behavior_return_character">Signal för bakåtknappen</string>
-    <string name="preferences_behavior_return_character_next_plot">Nästa parcell</string>
-    <string name="preferences_behavior_return_character_next_trait">Nästa karaktär</string>
     <string name="preferences_behavior_return_character_do_nothing">Gör ingenting</string>
-    <string name="preferences_behavior_disable_entry_arrow">Avaktivera postpil</string>
-    <string name="preferences_behavior_disable_entry_arrow_left">Vänster </string>
-    <string name="preferences_behavior_disable_entry_arrow_right">Höger</string>
-    <string name="preferences_behavior_disable_entry_arrow_both">Båda</string>
-    <string name="preferences_general_share_disable">Stäng av fildelning</string>
-    <string name="preferences_general_share_disable_description">När filer exporteras kommer inte dialogrutan för delning visas</string>
-    <string name="preferences_general_use_day_number">Använd dag på året</string>
     <string name="preferences_general_use_day_number_description">Använd dig på året istället för datum vid registrering</string>
-    <string name="preferences_general_skip_entries_with_data">Hoppa över poster med data </string>
-    <string name="preferences_general_skip_entries_with_data_description">Hoppa över poster som har data för aktuell karaktär</string>
-    <!-- GeoNav -->
+    <!-- Location -->
+    <string name="preferences_location_title">Plats</string>
     <string name="pref_geonav_log_both">Båda</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Ljud</string>
-    <string name="preferences_sound_primary_order_sound">Första ordningens ljud</string>
-    <string name="preferences_sound_primary_order_sound_description">Notifierinsljud när första ordningen ändras</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
-    <!-- Database -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">Databas</string>
     <string name="database_dialog_title">Databas</string>
-    <string name="database_import">Importera databas</string>
-    <string name="database_export">Exportera databas</string>
-    <string name="database_reset">Ta bort databas</string>
     <string name="database_reset_warning1">All data kommer raderas. Är du säker på att du vill återställa databasen?</string>
     <string name="database_reset_warning2">En databasåterställning kan inte ångras. Appen kommer stängas efter att databasen tömts. Är du verkligen säker på att du vill förtsätta?</string>
     <string name="database_reset_message">Databasen har tagits bort.</string>
     <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">Fält</string>
+    <string name="stat_title_entries">Poster </string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Om</string>
-    <string name="about_rate">Betygsätt appen</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Projektledare</string>
     <!-- Support  -->
@@ -246,21 +221,24 @@
     <string name="brapi_info_title">Information om BrAPI-synkning</string>
     <string name="brapi_choice_to_make_default_negative">Avbryt</string>
     <string name="brapi_choice_to_make_default_positive">Spara</string>
+    <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_auth_btn">Logga in på sida</string>
     <string name="brapi_auth_needed_title">Inloggning krävs</string>
-    <string name="brapi_auth_needed">För att kunna synka data behöver du vara inloggad i systemet du försöker synka mot.
-Vill du autentisera dig nu?</string>
     <!-- BrAPI Import -->
     <string name="brapi_study_location">Plats</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Exportera </string>
+    <string name="brapi_close_button">Stäng</string>
     <!-- Pagination -->
     <string name="prev">Föreg.</string>
     <string name="page_one_of_one">Sida 1 av 1</string>
     <!-- General -->
     <string name="brapi_info_message">Karaktärer och fält som importerats via BrAPI kommer kunna exportera sina observationer via BrAPI-exportfunktionen. 
 Karaktärer och fält som skapats manuellt eller importerats via CSV kommer behöva exporteras via CSV.</string>
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">Ja</string>
+    <string name="intro_tutorial_radio_item_no">Nej</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">Vägledning</string>
     <string name="tutorial_dialog_description">Vill du ha igång vägledningen? Inställningen kan ändras i inställningsmenyn.</string>
@@ -305,4 +283,11 @@ Karaktärer och fält som skapats manuellt eller importerats via CSV kommer beh�
     <string name="tutorial_fields_select_description">Ett fält väljs för datainsamling efter att ha importerats.</string>
     <string name="tutorial_fields_delete_title">Ta bort fält</string>
     <string name="tutorial_main_datagrid_title">Tabell</string>
+    <string name="act_brapi_filter_import">Importera</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">Standard</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <string name="brapi_traits_filter_title">Karaktärer</string>
 </resources>
