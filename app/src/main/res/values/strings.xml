@@ -1381,4 +1381,6 @@
     <string name="pref_alpha_brapi_import_title">New BrAPI Import UI</string>
     <string name="opening_brapi_no_network_error">Networking must be enabled to use BrAPI features.</string>
     <string name="act_brapi_list_filter_reset_selection_message">This will clear the running list of selected items.</string>
+    <string name="pref_alpha_media_keycode_events_summary">Enable to use media commands for app interactions</string>
+    <string name="pref_alpha_media_keycode_events_title">Enable Media Commands</string>
 </resources>

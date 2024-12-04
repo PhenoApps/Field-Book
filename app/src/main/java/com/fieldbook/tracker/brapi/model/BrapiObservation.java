@@ -65,6 +65,9 @@ public class BrapiObservation {
     public void setLastSyncedTime(String timestamp) {
         this.lastSyncedTime = convertTime(timestamp);
     }
+    public void setLastSyncedTime(OffsetDateTime timestamp) {
+        this.lastSyncedTime = timestamp;
+    }
 
     public BrapiObservation.Status getStatus() {
 
@@ -74,9 +77,9 @@ public class BrapiObservation {
             status = BrapiObservation.Status.NEW;
         } else if (lastSyncedTime == null) {
             status = BrapiObservation.Status.INCOMPLETE;
-        } else if (dbId != null && lastSyncedTime != null && timestamp != null && timestamp.compareTo(lastSyncedTime) < 0) {
+        } else if (timestamp == null || timestamp.compareTo(lastSyncedTime) <= 0) {
             status = BrapiObservation.Status.SYNCED;
-        } else if (dbId != null && lastSyncedTime != null && timestamp != null && timestamp.compareTo(lastSyncedTime) > 0) {
+        } else if (timestamp != null && timestamp.compareTo(lastSyncedTime) > 0) {
             status = BrapiObservation.Status.EDITED;
         }
 

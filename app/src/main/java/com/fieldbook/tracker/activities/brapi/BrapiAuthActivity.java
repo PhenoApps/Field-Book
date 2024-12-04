@@ -16,6 +16,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.ThemedActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
+import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationResponse;
@@ -114,6 +115,38 @@ public class BrapiAuthActivity extends ThemedActivity {
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
 
+    private ConnectionBuilder getConnectionBuilder() {
+        return uri -> {
+            Log.d("ConnectionBuilder", "DOING CUSTOM URL");
+            Preconditions.checkNotNull(uri, "url must not be null");
+            Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
+                    "scheme or uri must be http or https");
+            HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
+//                    conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
+//                    conn.setReadTimeout(READ_TIMEOUT_MS);
+            conn.setInstanceFollowRedirects(true);
+
+            // normally, 3xx is redirect
+            int status = conn.getResponseCode();
+            if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                    || status == HttpURLConnection.HTTP_MOVED_PERM
+                    || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                // get redirect url from "location" header field
+                String newUrl = conn.getHeaderField("Location");
+                // get the cookie if need, for login
+                String cookies = conn.getHeaderField("Set-Cookie");
+                conn.disconnect();
+                // open the new connection again
+                conn = (HttpURLConnection) new URL(newUrl).openConnection();
+                conn.setRequestProperty("Cookie", cookies);
+            } else {
+                conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
+            }
+
+            return conn;
+        };
+    }
+
     public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(GeneralKeys.BRAPI_TOKEN, null);
@@ -133,35 +166,7 @@ public class BrapiAuthActivity extends ThemedActivity {
                     Uri.parse("https://phenoapps.org/field-book") : Uri.parse("fieldbook://app/auth");
             Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_URL, ""));
 
-            ConnectionBuilder builder = uri -> {
-
-                Preconditions.checkNotNull(uri, "url must not be null");
-                Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
-                        "scheme or uri must be http or https");
-                HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
-//                    conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
-//                    conn.setReadTimeout(READ_TIMEOUT_MS);
-                conn.setInstanceFollowRedirects(true);
-
-                // normally, 3xx is redirect
-                int status = conn.getResponseCode();
-                if (status == HttpURLConnection.HTTP_MOVED_TEMP
-                        || status == HttpURLConnection.HTTP_MOVED_PERM
-                        || status == HttpURLConnection.HTTP_SEE_OTHER) {
-                    // get redirect url from "location" header field
-                    String newUrl = conn.getHeaderField("Location");
-                    // get the cookie if need, for login
-                    String cookies = conn.getHeaderField("Set-Cookie");
-                    conn.disconnect();
-                    // open the new connection again
-                    conn = (HttpURLConnection) new URL(newUrl).openConnection();
-                    conn.setRequestProperty("Cookie", cookies);
-                } else {
-                    conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
-                }
-
-                return conn;
-            };
+            ConnectionBuilder builder = getConnectionBuilder();
 
             AuthorizationServiceConfiguration.fetchFromUrl(oidcConfigURI,
                     new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
@@ -220,7 +225,7 @@ public class BrapiAuthActivity extends ThemedActivity {
 
         AuthorizationRequest authRequest = authRequestBuilder.setPrompt("login").build();
 
-        AuthorizationService authService = new AuthorizationService(context);
+        AuthorizationService authService = getAuthorizationService();
 
         Intent responseIntent = new Intent(context, BrapiAuthActivity.class);
         responseIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -307,8 +312,18 @@ public class BrapiAuthActivity extends ThemedActivity {
         }
     }
 
+    /**
+     * Create an instance of AuthorizationService with custom connection builder.
+     * @return Configured auth service
+     */
+    private AuthorizationService getAuthorizationService() {
+        AppAuthConfiguration.Builder builder = new AppAuthConfiguration.Builder();
+        builder.setConnectionBuilder(getConnectionBuilder());
+        return new AuthorizationService(this, builder.build());
+    }
+
     public void checkBrapiAuth(Uri data) {
-        AuthorizationService authService = new AuthorizationService(this);
+        AuthorizationService authService = getAuthorizationService();
         AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
         AuthorizationResponse response = AuthorizationResponse.fromIntent(getIntent());
 

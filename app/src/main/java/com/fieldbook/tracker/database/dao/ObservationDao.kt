@@ -387,24 +387,6 @@ class ObservationDao {
 
         } ?: -1L
 
-        fun insertObservation(model: ObservationModel): Int = withDatabase { db ->
-
-            db.insert(Observation.tableName, null, contentValuesOf(
-                    "observation_variable_name" to model.observation_variable_name,
-                    "observation_variable_field_book_format" to model.observation_variable_field_book_format,
-                    "value" to model.value,
-                    "observation_time_stamp" to model.observation_time_stamp,
-                    "collector" to model.collector,
-                    "geoCoordinates" to model.geo_coordinates,
-                    "last_synced_time" to model.last_synced_time,
-                    "additional_info" to model.additional_info,
-                    Study.FK to model.study_id,
-                    ObservationUnit.FK to model.observation_unit_id,
-                    ObservationVariable.FK to model.observation_variable_db_id
-            )).toInt()
-
-        } ?: -1
-
         fun insertObservation(studyId: Int, model: BrapiObservation, traitIdToTypeMap:Map<String,String>): Int = withDatabase { db ->
 
             if (getObservation("$studyId", model.unitDbId, model.variableDbId, model.rep ?: "1")?.dbId != null) {
@@ -422,16 +404,16 @@ class ObservationDao {
             }
             else {
                 //get observationVariableFieldbookformat based on the variableName
-                val variableFormat = traitIdToTypeMap[model.variableDbId]?:ObservationVariableDao.Companion.getTraitByName(model.variableName)!!.format
+                val variableFormat = traitIdToTypeMap[model.variableDbId]?: ObservationVariableDao.getTraitByName(model.variableName)!!.format
                 val varRowId =  db.insert(Observation.tableName, null, contentValuesOf(
                     "observation_variable_name" to model.variableName,
                     "observation_variable_field_book_format" to variableFormat,
                     "value" to model.value,
-                    "observation_time_stamp" to model.timestamp.toString(),
+                    "observation_time_stamp" to model.timestamp?.format(internalTimeFormatter),
                     "collector" to model.collector,
 //                "geoCoordinates" to model.geo_coordinates,
                     "geoCoordinates" to null,
-                    "last_synced_time" to model.lastSyncedTime,
+                    "last_synced_time" to model.lastSyncedTime?.format(internalTimeFormatter),
 //                "additional_info" to model.additional_info,
                     "additional_info" to null,
                     "observation_db_id" to model.dbId,

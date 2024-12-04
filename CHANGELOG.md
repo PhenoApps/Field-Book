@@ -8,10 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Experimental setting to use media keys for entry/trait navigation and picture capture (https://github.com/PhenoApps/Field-Book/pull/1089)
 
 ### Changed
+- Current time now used as lastSyncedTime when downloading Observations via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1071)
+- lastSyncedTime updated after creating/updating Observations (https://github.com/PhenoApps/Field-Book/pull/1071)
+- Improved support for BrAPI servers not using https (https://github.com/PhenoApps/Field-Book/pull/1071)
 
 ### Fixed
+- "observation_time_stamp" and "last_synced_time" now correctly saved in DAO (https://github.com/PhenoApps/Field-Book/pull/1071)
+- Synced and updated records now correctly identified (https://github.com/PhenoApps/Field-Book/pull/1071)
 
 ## [v6.0.0] - 2024-12-02
 

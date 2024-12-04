@@ -87,6 +87,7 @@ import com.fieldbook.tracker.utilities.InfoBarHelper;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
+import com.fieldbook.tracker.utilities.MediaKeyCodeActionHelper;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -1840,41 +1841,20 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+
         int action = event.getAction();
         int keyCode = event.getKeyCode();
-        String volumeNavigation = preferences.getString(GeneralKeys.VOLUME_NAVIGATION, "0");
-        switch (keyCode) {
+        switch (event.getKeyCode()) {
+
+            //delegate media key events to a helper class that interprets preferences
             case KeyEvent.KEYCODE_VOLUME_UP:
-                if (volumeNavigation.equals("1")) {
-                    if (action == KeyEvent.ACTION_UP) {
-                        traitBox.moveTrait("right");
-                    }
-                    return true;
-                } else if (volumeNavigation.equals("2")) {
-                    if (action == KeyEvent.ACTION_UP) {
-                        rangeBox.moveEntryRight();
-                    }
-                    return true;
-                }
-                return false;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-                if (volumeNavigation.equals("1")) {
-                    if (action == KeyEvent.ACTION_UP) {
-                        traitBox.moveTrait("left");
-                    }
-                    return true;
-                } else if (volumeNavigation.equals("2")) {
-                    if (action == KeyEvent.ACTION_UP) {
-                        rangeBox.moveEntryLeft();
-                    }
-                    return true;
-                }
-                return false;
-//                else if (event.action == KeyEvent.ACTION_UP
-//                    && code == KeyEvent.KEYCODE_ENTER || code == KeyEvent.KEYCODE_TAB) {
-//
-//                inputEditText?.requestFocus()
-//            }
+            case KeyEvent.KEYCODE_MEDIA_NEXT:
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+            case KeyEvent.KEYCODE_MEDIA_PLAY:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                return MediaKeyCodeActionHelper.Companion.dispatchKeyEvent(this, event);
+
             default:
 
                 if (action == KeyEvent.ACTION_UP) {
@@ -2131,6 +2111,22 @@ public class CollectActivity extends ThemedActivity
 
                 item.setVisible(false);
 
+            }
+        }
+    }
+
+    @Override
+    public void takePicture() {
+
+        TraitObject trait = getCurrentTrait();
+
+        if (trait != null && trait.getFormat() != null) {
+
+            BaseTraitLayout layout = traitLayouts.getTraitLayout(trait.getFormat());
+
+            if (layout instanceof AbstractCameraTrait) {
+
+                ((AbstractCameraTrait) layout).requestPicture();
             }
         }
     }
