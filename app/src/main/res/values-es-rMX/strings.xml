@@ -793,8 +793,6 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_traits_visibility_title">Visibilidad de variable</string>
     <string name="tutorial_traits_visibility_description">Las variables se pueden habilitar/deshabilitar usando casilla de verificación.</string>
     <string name="shutter_capture_content_description">Botón obturador para tomar una imagen.</string>
-    <string name="app_intro_high_contrast_title">¿Cambiar al Tema de Contraste Alto?</string>
-    <string name="app_intro_high_contrast_summary">Se ha detectado el dispositivo eInk, sugerimos cambiar al tema de contraste alto para una experiencia óptima</string>
     <string name="dialog_geonav_prefs_sensor_missing_title">Sensor requerido no encontrado</string>
     <string name="dialog_geonav_prefs_sensor_missing_message">El método trapezoidal requiere un acelerómetro y giroscopio para usar la entrada de la brújula.</string>
     <string name="trait_audio_button_content_description">Controla la grabación de audio.</string>
