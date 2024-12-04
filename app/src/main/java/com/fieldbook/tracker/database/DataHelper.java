@@ -2310,19 +2310,19 @@ public class DataHelper {
 //        return -1;
     }
 
-    public int checkFieldNameAndObsLvl(String name, String observationLevel) {
+    public int checkBrapiStudyUnique(String observationLevel, String brapiId) {
 
         open();
 
-        return StudyDao.Companion.checkFieldNameAndObsLvl(name, observationLevel);
+        return StudyDao.Companion.checkBrapiStudyUnique(observationLevel, brapiId);
     }
 
-    public int createField(FieldObject e, List<String> columns) {
+    public int createField(FieldObject e, List<String> columns, Boolean fromBrapi) {
         // String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns){
 
         open();
 
-        return StudyDao.Companion.createField(e, timeStamp.format(Calendar.getInstance().getTime()), columns);
+        return StudyDao.Companion.createField(e, timeStamp.format(Calendar.getInstance().getTime()), columns, fromBrapi);
 
 //        long exp_id = checkFieldName(e.getExp_name());
 //        if (exp_id != -1) {
