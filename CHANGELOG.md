@@ -10,8 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- Current time now used as lastSyncedTime when downloading Observations via BrAPI
+- lastSyncedTime updated after creating/updating Observations
+- Improved support for BrAPI servers not using https
 
 ### Fixed
+- "observation_time_stamp" and "last_synced_time" now correctly saved in DAO
+- Synced and updated records now correctly identified
 
 ## [v6.0.0] - 2024-12-02
 
