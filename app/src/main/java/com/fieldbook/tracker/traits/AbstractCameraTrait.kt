@@ -153,6 +153,17 @@ abstract class AbstractCameraTrait :
 
     abstract fun onSettingsChanged()
 
+    fun requestPicture() {
+
+        if (!isLocked) {
+
+            if (checkPictureLimit()) {
+
+                shutterButton?.performClick()
+            }
+        }
+    }
+
     protected fun saveJpegToStorage(
         format: String,
         data: ByteArray,
