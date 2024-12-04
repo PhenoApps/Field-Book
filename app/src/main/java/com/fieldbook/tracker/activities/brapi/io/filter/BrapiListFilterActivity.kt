@@ -80,6 +80,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     abstract fun BrapiCacheModel.mapToUiModel(): List<CheckboxListAdapter.Model>
 
+    abstract fun List<CheckboxListAdapter.Model>.filterExists(): List<CheckboxListAdapter.Model>
+
     /**
      * By default pass the same list.
      * Only affects data in the study list activity, uses shared preferences saved from other activities
@@ -375,6 +377,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             .mapToUiModel()
             .distinct()
             .filterBySearchTextPreferences()
+            .filterExists()
             .persistCheckBoxes()
             .sortedBy { it.label }
 
