@@ -52,7 +52,9 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
     DataHelper database;
     List<String> seasons;
     private final SimpleDateFormat timeStampFormat;
+    private final SimpleDateFormat failTimeStampFormat;
     private static final String TIME_STAMP_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
+    private static final String FAIL_TIME_STAMP_PATTERN = "yyyy-MM-dd HH:mm:ss";
     private static final String DATE_FORMAT_PATTERN = "MM-dd-yy";
     private static final String YEAR_MONTH_PATTERN = "yyyy-MM";
     private static final String MONTH_VIEW_CARD_TITLE_PATTERN ="MMMM yyyy";
@@ -67,6 +69,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         this.database = originActivity.getDatabase();
         this.seasons = seasons;
         this.timeStampFormat = new SimpleDateFormat(TIME_STAMP_PATTERN, Locale.getDefault());
+        this.failTimeStampFormat = new SimpleDateFormat(FAIL_TIME_STAMP_PATTERN, Locale.getDefault());
         this.yearMonthFormat = new SimpleDateFormat(YEAR_MONTH_PATTERN, Locale.getDefault());
         this.monthViewCardTitle = new SimpleDateFormat(MONTH_VIEW_CARD_TITLE_PATTERN, Locale.getDefault());
         this.cardType = cardType;
@@ -123,7 +126,16 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             try {
                 dateObject = timeStampFormat.parse(time);
             } catch (ParseException e) {
-                throw new RuntimeException(e);
+                try {
+                    if (time != null) {
+                        String split = time.split("\\.")[0];
+                        dateObject = failTimeStampFormat.parse(split);
+                    } else {
+                        dateObject = new Date();
+                    }
+                } catch (ParseException pe) {
+                    throw new RuntimeException(pe);
+                }
             }
             dateObjects.add(dateObject);
 

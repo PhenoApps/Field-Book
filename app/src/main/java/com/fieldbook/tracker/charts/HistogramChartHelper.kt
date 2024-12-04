@@ -190,7 +190,7 @@ object HistogramChartHelper {
         Log.d(TAG, "Max bin count: $maxBinCount, Ideal bin count: $idealBinCount, Final bin count: ${minOf(maxBinCount, idealBinCount)}")
 
         // Use the lesser of maxBinCount and idealBinCount
-        return minOf(maxBinCount, idealBinCount)
+        return maxOf(1, minOf(maxBinCount, idealBinCount)) // at least one bin
     }
 
 }

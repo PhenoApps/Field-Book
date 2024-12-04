@@ -707,13 +707,6 @@ public class FieldEditorActivity extends ThemedActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 2) {
-            if (resultCode == RESULT_OK) {
-                final String chosenFile = data.getStringExtra("result");
-                showFieldFileDialog(chosenFile, null);
-            }
-        }
-
         if (requestCode == REQUEST_FILE_EXPLORER_CODE) {
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
