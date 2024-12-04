@@ -26,6 +26,7 @@ import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
+import org.phenoapps.utils.SoftKeyboardUtil
 import java.util.*
 
 class RangeBoxView : ConstraintLayout {
@@ -436,7 +437,7 @@ class RangeBoxView : ConstraintLayout {
         secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
         uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
-        switchVisibility(controller.getPreferences().getBoolean(GeneralKeys.QUICK_GOTO, false))
+        refreshQuickGoToUi()
         setName(8)
         paging = 1
         setAllRangeID()
@@ -454,6 +455,7 @@ class RangeBoxView : ConstraintLayout {
     // Refresh onscreen controls
     fun refresh() {
         updateCurrentRange(rangeID[paging - 1])
+        refreshQuickGoToUi()
         display()
         if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
             if (cRange.range != lastRange && lastRange != "") {
@@ -493,8 +495,11 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
-    private fun switchVisibility(textview: Boolean) {
-        if (textview) {
+    private fun refreshQuickGoToUi() {
+
+        val enabled = controller.getPreferences().getBoolean(GeneralKeys.QUICK_GOTO, false)
+
+        if (enabled) {
             tvRange.visibility = GONE
             tvPlot.visibility = GONE
             rangeEt.visibility = VISIBLE
@@ -503,6 +508,15 @@ class RangeBoxView : ConstraintLayout {
             //when the et's are visible create text watchers to listen for changes
             rangeEt.addTextChangedListener(createTextWatcher("range"))
             plotEt.addTextChangedListener(createTextWatcher("plot"))
+
+            post {
+                plotEt.isCursorVisible = true
+                plotEt.isFocusableInTouchMode = true
+                plotEt.requestFocus()
+                plotEt.setSelection(plotEt.text.length)
+                SoftKeyboardUtil.showKeyboard(context, plotEt)
+            }
+
         } else {
             tvRange.visibility = VISIBLE
             tvPlot.visibility = VISIBLE
