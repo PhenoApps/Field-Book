@@ -136,6 +136,8 @@ class CanonTraitLayout :
                     FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter))
                 )
 
+                controller.getSoundHelper().playShutter()
+
                 controller.getRangeBox().toggleNavigation(false)
 
                 Handler(Looper.getMainLooper()).postDelayed({

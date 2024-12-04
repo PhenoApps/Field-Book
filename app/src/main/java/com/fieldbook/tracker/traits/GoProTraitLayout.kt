@@ -141,6 +141,8 @@ class GoProTraitLayout :
 
             shutterButton?.isEnabled = false
 
+            controller.getSoundHelper().playShutter()
+
             controller.getGoProApi().range.add(getImageRequestData())
 
             controller.getGoProApi().shutterOn()

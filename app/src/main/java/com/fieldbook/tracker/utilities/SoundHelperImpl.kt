@@ -18,6 +18,11 @@ class SoundHelperImpl @Inject constructor(@ActivityContext private val context: 
         const val CELEBRATE = "hero_simple_celebration"
         const val ALERT_ERROR = "alert_error"
         const val DELETE = "delete"
+        const val SHUTTER = "shutter"
+    }
+
+    fun playShutter() {
+        playSound(SHUTTER)
     }
 
     fun playPlonk() {

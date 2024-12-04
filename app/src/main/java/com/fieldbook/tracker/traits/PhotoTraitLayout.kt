@@ -74,6 +74,8 @@ class PhotoTraitLayout : CameraTrait {
 
                 if (checkPictureLimit()) {
 
+                    controller.getSoundHelper().playShutter()
+
                     takePictureCallback()
 
                 } else {
