@@ -8,7 +8,7 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Sí</string>
     <string name="dialog_no">No</string>
-    <string name="dialog_clear">Borrar</string>
+    <string name="dialog_clear">Limpiar</string>
     <string name="dialog_close">Cerrar</string>
     <string name="dialog_confirm">¿Seguro(a)?</string>
     <string name="dialog_import">Importar</string>
@@ -600,7 +600,12 @@
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamiento</string>
     <string name="preferences_behavior_data_title">Datos</string>
+    <string name="preferences_behavior_cycle_traits">Auto-Avance Entrada</string>
+    <string name="preferences_behavior_cycle_traits_description">Ciclando a través de la lista de variables automáticamente avanza la entrada</string>
+    <string name="preferences_behavior_cycle_sound_title">¿Activar efecto de sonido?</string>
+    <string name="preferences_behavior_cycle_sound_description">Un efecto de sonido se reproducirá cuando se ciclen las variables (recomendado)</string>
     <string name="preferences_behavior_disable_entry_arrow_neither">Desactivado</string>
+    <string name="preferences_behavior_skip_entries_title">Omitir Entradas</string>
     <string name="preferences_behavior_skip_entries_disabled">Desactivado</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Desactivado</string>
     <string name="preferences_behavior_return_character_do_nothing">Hacer nada</string>
@@ -629,6 +634,10 @@
     <string name="pref_behavior_geonav_internal_gps_choice">GPS interno</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Sonido</string>
+    <string name="preferences_sound_entry_title">Cambiar Entrada</string>
+    <string name="preferences_sound_entry_description">Reproducir sonido al mover entre entradas</string>
+    <string name="preferences_sound_cycle_traits_title">Variables Cíclicas</string>
+    <string name="preferences_sound_cycle_traits_description">Reproducir un sonido cuando las variables son completamente cícladas</string>
     <string name="preferences_sound_delete_obs_description">Reproducir sonido al eliminar observación</string>
     <string name="preferences_category_audio_tts_title">Texto a Voz</string>
     <string name="preferences_general_tts_title">Texto a Voz</string>
@@ -779,6 +788,34 @@
     <string name="preferences_brapi_server_scan_error">Error al Escanear</string>
     <string name="preferences_brapi_server_add">Enviar un servidor</string>
     <!-- Community Servers -->
+    <string-array name="community_servers_names">
+        <item>CassavaBase</item>
+        <item>T3/Wheat</item>
+        <item>T3/Oat</item>
+        <item>T3/Barley</item>
+        <item>Servidor de Prueba por Defecto</item>
+    </string-array>
+    <string-array name="community_servers_urls">
+        <item>https://www.cassavabase.org</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org</item>
+        <item>https://test-server.brapi.org</item>
+    </string-array>
+    <string-array name="community_servers_oidc_urls">
+        <item>https://www.cassavabase.org/.well-known/openid-configuration</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
+    </string-array>
+    <string-array name="community_servers_grant_types">
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+    </string-array>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Salvar y Autorizar</string>
     <string name="brapi_display_name">Mostrar Nombre</string>
@@ -942,15 +979,27 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_main_field_audio_mic_description">Esto iniciará una grabación de audio de nivel de campo.</string>
     <string name="tutorial_main_repeated_values_title">Valores Repetidos</string>
     <string name="tutorial_main_repeated_values_description">Esto abrirá un diálogo para administrar los valores repetidos para la unidad de observación actual.</string>
+    <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="tutorial_main_geonav_description">Esto abrirá un diálogo de configuración para ayudar con la navegación del campo.</string>
     <string name="oauth_configured_incorrectly">Falló la solicitud de autorización, por favor compruebe la configuración de BrAPI.</string>
+    <string name="brapi_programs_activity_title">Elige tu Programa</string>
     <string name="import_brapi_field_title">Importar Campo con BrAPI</string>
     <string name="menu_action_brapi_filter">Filtro</string>
     <string name="act_brapi_filter_apply">Filtro</string>
     <string name="act_brapi_filter_import">Importar</string>
-    <string name="act_brapi_filter_clear">Borrar</string>
+    <string name="act_brapi_filter_clear">Limpiar</string>
+    <string name="repeated_values_pager_content_description">valores repetidos</string>
+    <string name="repeated_values_right_button_content_description">derecho</string>
+    <string name="repeated_values_left_button_content_description">izquierdo</string>
+    <string name="export_util_repeated_measures_table_warning_title">Tabla de Medidas Repetidas</string>
+    <string name="export_util_repeated_measures_table_warning_message">Sólo el ultimo valor de las medidas repetidas será exportado en formato de tabla.</string>
+    <string name="activity_file_explorer_up_directory_name">Subir</string>
     <!-- base camera strings -->
+    <string name="trait_camera_connect_content_description">Inicia una conexión de dispositivo.</string>
+    <string name="trait_camera_preview_content_description">Esta vista previa de la pantalla de la cámara.</string>
+    <string name="trait_camera_capture_content_description">Capturar una foto</string>
     <string name="delete_local_photo">Eliminar Imagen</string>
+    <string name="trait_system_photo_settings_title">Ajustes del Sistema de Fotos</string>
     <string name="trait_name_alt_photo_system">Sistema</string>
     <string name="view_trait_photo_settings_camera_custom">Predeterminado</string>
     <!-- usb camera trait -->
@@ -983,8 +1032,54 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="brapi_filter_dialog_title">Filtrar por</string>
     <string name="brapi_filter_type_program">Programa</string>
     <string name="brapi_filter_type_season">Temporada</string>
+    <string name="brapi_filter_type_trial">Ensayo</string>
+    <string name="brapi_filter_type_crop">Cultivo</string>
+    <string name="brapi_importer_search_hint">Buscar Texto</string>
+    <string name="act_brapi_filter_by_title">Filtrar por: %s</string>
+    <string name="check_all">Marcar Todos los Filtros</string>
+    <string name="menu_action_brapi_filter_clear_all">Limpiar todos los filtros</string>
+    <string name="brapi_filter_error">Algo salió mal al consultar por %s</string>
+    <string name="brapi_importer_fetch_data">Obteniendo datos, la primera ejecución puede tardar un minuto.</string>
+    <string name="menu_filter_brapi_reset_cache_title">Restablecer Cache</string>
+    <string name="brapi_filter_bottom_sheet_delete_all_description">limpiar todos los filtros</string>
+    <string name="act_brapi_study_import_fetch_levels">Obteniendo niveles de observación...</string>
+    <string name="act_brapi_study_import_fetch_variables">Obteniendo variables para %s...</string>
+    <string name="act_brapi_study_import_fetch_units">Obteniendo unidades de observación para %s...</string>
+    <string name="act_brapi_study_import_fetch_germplasm">Obteniendo germplasma para %s...</string>
+    <string name="act_brapi_list_filter_loading_trials">Cargando ensayos, por favor espere.</string>
+    <string name="act_brapi_list_filter_loading_studies">Cargando estudios, por favor espere.</string>
+    <string name="act_brapi_list_filter_loading_variables">Cargando variables, por favor espere.</string>
+    <string name="act_brapi_list_filter_loading_complete">Completo</string>
+    <string name="act_brapi_list_filter_error_multiple_programs">Por favor, seleccione estudios del mismo programa.</string>
+    <string name="act_brapi_study_import_saving">Guardando...</string>
+    <string name="act_brapi_study_import_title">Importar Estudio</string>
     <string name="select">Seleccionar</string>
+    <string name="results">resultados</string>
+    <string name="failed_to_fetch_observation_units">Error al obtener las unidades de observación</string>
+    <string name="menu_filter_brapi_clear_filters">Limpiar Filtros</string>
+    <string name="menu_filter_brapi_clear_selection">Limpiar Selección</string>
+    <string name="level">Nivel</string>
+    <string name="primary">Primario</string>
+    <string name="secondary">Secundario</string>
     <string name="sort">Ordenar</string>
     <string name="brapi_traits_filter_title">Variables</string>
+    <string name="brapi_filter_type_study">Estudio</string>
     <string name="act_brapi_study_filter">Filtro</string>
+    <string name="act_brapi_trait_preprocess_title">Selector de Formato de Field Book</string>
+    <string name="act_brapi_trait_import_title">Elegir Formatos</string>
+    <plurals name="act_brapi_list_filter">
+        <item quantity="one">%s resultados</item>
+        <item quantity="other">%s resultados</item>
+    </plurals>
+    <string name="brapi_filter_type_program_count">Programa (%s)</string>
+    <string name="brapi_filter_type_season_count">Temporada (%s)</string>
+    <string name="brapi_filter_type_trial_count">Ensayo (%s)</string>
+    <string name="brapi_filter_type_crop_count">Cultivo (%s)</string>
+    <string name="brapi_filter_type_study_count">Estudio (%s)</string>
+    <string name="pref_alpha_enhanced_brapi_import_summary">Cuando se activa, se utilizará una nueva interfaz de importación de BrAPI para estudios y variables.</string>
+    <string name="pref_alpha_brapi_import_title">Nueva Interfaz de Importación BrAPI</string>
+    <string name="opening_brapi_no_network_error">La red debe estar activada para usar funcionalidad BrAPI.</string>
+    <string name="act_brapi_list_filter_reset_selection_message">Esto limpiará la lista en ejecución de los elementos seleccionados.</string>
+    <string name="pref_alpha_media_keycode_events_summary">Activar para usar comandos multimedia para interacciones de aplicaciones</string>
+    <string name="pref_alpha_media_keycode_events_title">Habilitar Comandos Multimedia</string>
 </resources>
