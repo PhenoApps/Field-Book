@@ -640,8 +640,12 @@
     <string name="preferences_storage_title">Almacenamiento</string>
     <string name="preferences_storage_storage_title">Almacenamiento</string>
     <string name="preferences_storage_files_base_directory_title">Definir Ubicación de Almacenamiento</string>
+    <string name="preferences_storage_files_base_directory_description">Migrar o definir una nueva estructura de directorio raíz. Los archivos de exportación se guardarán aquí automáticamente.</string>
     <string name="preferences_storage_database_title">Base de datos</string>
     <string name="database_dialog_title">Base de datos</string>
+    <string name="database_import">Importar Base de Datos</string>
+    <string name="database_export">Exportar Base de Datos</string>
+    <string name="database_reset">Eliminar Base de Datos</string>
     <string name="database_reset_warning1">Todos los datos serán eliminados. ¿Estás seguro(a) de que quieres restablecer la base de datos?</string>
     <string name="database_reset_warning2">Un restablecimiento de la base de datos no se puede revertir. La aplicación se cerrará después de borrar la base de datos. ¿Estás realmente seguro(a) de que quieres continuar?</string>
     <string name="database_reset_message">Base de datos ha sido eliminada</string>
