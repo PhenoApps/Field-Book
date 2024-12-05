@@ -180,7 +180,6 @@
         <item>2</item>
     </string-array>
 
-
     <!-- degrees of precision to be used in spinner -->
     <string-array name="dialog_geonav_collect_degrees_of_precision">
         <item>Any</item>
@@ -188,4 +187,21 @@
         <item>RTK</item>
         <item>Float RTK</item>
     </string-array>
+
+    <!-- BrAPI sort display names -->
+    <string-array name="brapi_study_sort_options">
+        <item>@string/brapi_sort_study_name_asc</item>
+        <item>@string/brapi_sort_study_name_desc</item>
+        <item>@string/brapi_sort_study_id_asc</item>
+        <item>@string/brapi_sort_study_id_desc</item>
+    </string-array>
+
+    <!-- Corresponding API values -->
+    <string-array name="brapi_study_sort_values">
+        <item>studyName ASC</item>
+        <item>studyName DESC</item>
+        <item>studyDbId ASC</item>
+        <item>studyDbId DESC</item>
+    </string-array>
+
 </resources>
