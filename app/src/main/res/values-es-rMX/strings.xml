@@ -448,7 +448,6 @@
     <string name="menu_collect_repeated_values_indicator">Muestra el número de valores repetidos.</string>
     <string name="dialog_multi_measure_delete_no_observations">No existen observaciones.</string>
     <string name="dialog_multi_measure_delete_title">Observaciones</string>
-    <string name="dialog_multi_measure_confirm_delete_title">Estas observaciones se eliminarán permanentemente.</string>
     <string name="dialog_multi_measure_delete">Eliminar</string>
     <string name="dialog_multi_measure_select_all">Seleccionar todo</string>
     <!--- GeoNav -->
@@ -542,11 +541,21 @@
     <string name="preferences_profile_person_dialog_title">Establecer Persona</string>
     <string name="preferences_profile_name_first">Nombre</string>
     <string name="preferences_profile_name_last">Apellido</string>
+    <string name="preferences_profile_name_error">Ambos campos no pueden estar vacíos</string>
+    <string name="preferences_profile_require_interval_title">Intervalo de Verificación</string>
+    <string name="verification_interval_every_open">Cada vez que se abre la aplicación</string>
+    <string name="verification_interval_every_12">Cada 12 horas</string>
+    <string name="verification_interval_every_24">Cada 24 horas</string>
+    <string name="verification_interval_never">Nunca</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Único</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">Incluye un ID único y anónimo en los registros de fallos para ayudar al equipo de desarrollo a corregir errores</string>
     <string name="pref_profile_crashlytics_refresh_title">Refrescar ID</string>
+    <string name="pref_profile_crashlytics_refresh_summary">Esto asignará un nuevo ID único</string>
     <!-- Features -->
+    <string name="preferences_features_title">Funcionalidades</string>
     <!-- Appearance -->
     <string name="preferences_appearance_title">Apariencia</string>
+    <string name="preferences_appearance_application_title">Applicación</string>
     <string name="preferences_appearance_theme_title">Tema</string>
     <string name="preferences_appearance_theme_summary">Modificar colores específicos o todo el tema de Field Book</string>
     <string name="preferences_theme_theme_title">Tema de la App</string>
@@ -565,14 +574,28 @@
     <string name="preferences_appearance_language">Idioma</string>
     <string name="preferences_appearance_language_description">Idioma establecido por el sistema</string>
     <string name="preference_language_default">Idioma del Sistema</string>
+    <string name="preferences_appearance_collect_toolbar_title">Barra de Herramientas en Captura</string>
+    <string name="preferences_appearance_tutorial_description">Añadir un botón en barra de herramientas que abre el tutorial</string>
+    <string name="preferences_appearance_toolbar_customize">Acciones de la Barra de Herramientas</string>
+    <string name="preferences_appearance_toolbar_customize_description">Alternar la visibilidad de las funcionalidades predeterminadas</string>
     <string name="preferences_appearance_toolbar_customize_search">Buscar</string>
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
     <string name="preferences_appearance_toolbar_customize_summary">Resumen</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloquear</string>
     <string name="preferences_general_feature_datagrid">Cuadrícula de datos</string>
+    <string name="preferences_general_feature_datagrid_description">Añadir un botón para mostrar una grilla de datos capturados</string>
+    <string name="preferences_general_feature_next_missing">Siguiente Entrada Sin Datos</string>
     <string name="preferences_general_skip_entries_disabled">Desactivado</string>
+    <string name="preferences_general_skip_entries_with_data">Botón omite las entradas que ya tienen valores para la variable actual</string>
+    <string name="preferences_general_skip_entries_across_all_traits">Botón omite entradas que ya tienen valores para todas las variables</string>
+    <string name="preferences_general_feature_barcode_text">Pasar al ID Único</string>
     <string name="move_to_unique_id_disabled">Desactivado</string>
+    <string name="move_to_unique_id_text_or_scan">El botón usa entrada de texto con escaneo opcional de cámara</string>
+    <string name="move_to_unique_id_direct_camera_scan">Botón utiliza escaneo directo de cámara</string>
+    <string name="preferences_appearance_collect_screen_title">Pantalla de Captura</string>
+    <string name="preferences_appearance_infobar_number">Número de InfoBars</string>
     <string name="preferences_appearance_infobar_number_description">Ajuste la cantidad de InfoBars que se muestran en la pantalla principal</string>
+    <string name="preferences_appearance_infobar_hide_prefix">Ocultar prefijo Infobar</string>
     <string name="preferences_appearance_quickgoto">Rápido Ir a</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamiento</string>
@@ -606,11 +629,17 @@
     <string name="pref_behavior_geonav_internal_gps_choice">GPS interno</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Sonido</string>
+    <string name="preferences_sound_delete_obs_description">Reproducir sonido al eliminar observación</string>
     <string name="preferences_category_audio_tts_title">Texto a Voz</string>
     <string name="preferences_general_tts_title">Texto a Voz</string>
+    <string name="preferences_general_tts_description">Activar Texto a Voz cuando los datos son introducidos en la actividad de Captura</string>
     <string name="preferences_general_tts_language_title">Elegir idioma</string>
+    <string name="preferences_general_tts_language_description">Eligir un idioma de Texto a Voz compatible</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
     <!-- Storage -->
+    <string name="preferences_storage_title">Almacenamiento</string>
+    <string name="preferences_storage_storage_title">Almacenamiento</string>
+    <string name="preferences_storage_files_base_directory_title">Definir Ubicación de Almacenamiento</string>
     <string name="preferences_storage_database_title">Base de datos</string>
     <string name="database_dialog_title">Base de datos</string>
     <string name="database_reset_warning1">Todos los datos serán eliminados. ¿Estás seguro(a) de que quieres restablecer la base de datos?</string>
