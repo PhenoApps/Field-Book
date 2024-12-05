@@ -26,8 +26,29 @@
     <string name="startup_sample_data_title">Datos de ejemplo</string>
     <string name="startup_sample_data_message">¿Cargar datos de ejemplo?</string>
     <!-- App Intro -->
+    <string name="app_intro_intro_title_slide1">¡Bienvenido a Field Book!</string>
+    <string name="app_intro_intro_summary_slide1">Tradicionalmente, la captura de datos en el campo requería la escritura y transcripción desde papel. Field Book se creó como una solución digital para la captura de datos que aumenta la velocidad de recolección con una mayor integridad de los mismos.</string>
+    <string name="app_intro_intro_title_slide2">Funcionalidad y Personalización</string>
+    <string name="app_intro_intro_summary_slide2">Los datos se introducen en Field Book con diseños de variables personalizadas y diseñadas para simplificar la captura de datos y minimizar los errores.\n\n Por defecto, los datos recolectados se almacenan localmente, ademas Field Book soporta la Breeding API que permite enviar datos a sistemas compatibles con BrAPI.</string>
+    <string name="app_intro_required_setup_title">Ajustes Requeridos</string>
+    <string name="app_intro_required_setup_summary">Para empezar a usar Field Book, otorga los permisos necesarios para la aplicación y luego define una carpeta donde tus datos serán almacenados.</string>
+    <string name="app_intro_permissions_title">Permisos</string>
+    <string name="app_intro_permissions_warning">Por favor, otorga los permisos necesarios</string>
+    <string name="app_intro_storage_title">Definir Almacenamiento</string>
+    <string name="app_intro_storage_summary">Defina una carpeta donde se almacenarán sus datos.</string>
+    <string name="app_intro_storage_warning">Por favor, establezca la ubicación de almacenamiento</string>
+    <string name="app_intro_required_optional_title">Ajuste Opcional</string>
+    <string name="app_intro_required_optional_summary">Estos ajustes opcionales personalizan Field Book y se pueden realizar en los Ajustes.</string>
+    <string name="app_intro_load_sample_data_title">Cargar Datos de Ejemplo</string>
+    <string name="app_intro_load_sample_data_summary">Importe una base de datos de ejemplo que incluye campos y variables de ejemplo.</string>
     <string name="app_intro_tutorial_title">Tutorial</string>
+    <string name="app_intro_tutorial_summary">Agrega un icono de ayuda a la barra de herramientas superior que describe las funcionalidades de la aplicación.</string>
+    <string name="app_intro_high_contrast_title">Tema de Alto Contraste</string>
+    <string name="app_intro_high_contrast_summary">Activa un tema de alto contraste para una mejor visibilidad en los dispositivos.</string>
     <!-- Storage Definer -->
+    <string name="storage_definer_title">Ubicación de Almacenamiento</string>
+    <string name="storage_definer_summary">Por favor, seleccione o cree una carpeta que Field Book pueda utilizar para almacenar datos.</string>
+    <string name="define_button_text">Elegir Carpeta</string>
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">La importación de archivos requiere acceso a los archivos del dispositivo.</string>
     <string name="permission_rationale_storage_export">La exportación de datos requiere acceso a los archivos del dispositivo.</string>
@@ -40,6 +61,7 @@
     <string name="settings_export">Exportar</string>
     <string name="settings_advanced">Ajustes</string>
     <string name="settings_profile">Perfil</string>
+    <string name="settings_statistics">Estadística</string>
     <!-- Config Activity Fuzzy Search  -->
     <string name="act_config_fuzzy_search_failed">La base de datos no pudo recuperar un campo o parcela con el código: %s</string>
     <string name="act_config_fuzzy_search_error">Algo salió mal buscando %s</string>
@@ -58,13 +80,21 @@
     <string name="changelog_title">Registro de Cambios</string>
     <!-- FIELDS -->
     <!-- General -->
+    <string name="menu_fields_sort_list">Ordenar Lista de Campos</string>
+    <string name="fields_sort_reset">Restablecer</string>
     <string name="fields_sort_by_name">Variable</string>
+    <string name="fields_sort_by_import_format">Importar Formato</string>
+    <string name="fields_sort_by_import_date">Fecha de Importación</string>
+    <string name="fields_sort_by_edit_date">Editar Fecha</string>
+    <string name="fields_sort_by_sync_date">Fecha de Sincronización</string>
+    <string name="fields_sort_by_export_date">Fecha de Exportación</string>
     <string name="list_item_field_popup_menu_content_description">Abre un menú para el campo seleccionado.</string>
     <string name="selected_count">%1$d seleccionado</string>
     <string name="fields_select_all">Seleccionar Todo</string>
     <string name="field_generic_observation_level">entradas</string>
     <string name="field_observation_count_format">%1$s %2$s</string>
     <!-- Sort -->
+    <string name="field_sort_entries">Ordenar</string>
     <string name="sort_dialog_saved">Orden actualizado</string>
     <string name="sort_dialog_error_saving">Error al actualizar el orden</string>
     <string name="list_item_field_sort_delete_content_description">Eliminar el atributo de ordenación.</string>
@@ -88,6 +118,9 @@
         <item quantity="other">¿Estás seguro de que deseas eliminar los campos: \"%s\"?</item>
     </plurals>
     <!-- Import -->
+    <string name="fields_new_button_content_description">Añadir un nuevo campo.</string>
+    <string name="fields_new_dialog_title">Nuevo campo</string>
+    <string name="fields_new_create_field">Crear nuevo</string>
     <string name="import_dialog_unique">Identificador único</string>
     <string name="import_dialog_primary">Orden primario</string>
     <string name="import_dialog_secondary">Orden secundario</string>
@@ -148,6 +181,9 @@
     <string name="field_data_title">Datos</string>
     <string name="field_trait_observation_total">\"%d\" observaciones</string>
     <!-- Field Detail Charts -->
+    <string name="field_trait_chart_no_data">No hay datos para graficar</string>
+    <string name="field_trait_chart_incompatible_format">Este formato de variable no puede ser graficado</string>
+    <string name="field_trait_chart_excess_data">Demasiados valores distintos para graficar</string>
     <!-- Semantic dates -->
     <string name="today">Hoy</string>
     <string name="yesterday">Ayer</string>
@@ -159,7 +195,9 @@
     <string name="invalid_date">Fecha inválida</string>
     <!-- TRAITS -->
     <!-- Sort -->
+    <string name="traits_toolbar_sort">Ordenar Variables</string>
     <string name="traits_sort_name">Nombre</string>
+    <string name="traits_sort_import_order">Orden de Importación</string>
     <string name="traits_sort_visibility">Visibilidad</string>
     <string name="traits_sort_format">Formato</string>
     <string name="warning_traits_missing_modify">Crear variables antes de modificarlas.</string>
@@ -202,6 +240,7 @@
     <string name="traits_toolbar_add_trait">Formato de Variable</string>
     <string name="trait_creator_title_layout">Diseño de Variable</string>
     <string name="trait_creator_parameters_title">Parámetros %s</string>
+    <string name="activity_traits_new_button_content_description">Agregar un nueva variable.</string>
     <string name="traits_create_name">Variable</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Predeterminado</string>
@@ -214,6 +253,7 @@
     <string name="traits_create_true">Verdadero</string>
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_categories_text">Use / para separar categorías</string>
+    <string name="traits_create_camera">Cámara</string>
     <string name="traits_create_warning_name_blank">Nombre de la variable no puede estar vacío</string>
     <string name="traits_create_warning_duplicate">Variable ya existe</string>
     <string name="traits_create_warning_numeric_required">Los valores predeterminado, mínimo y máximo deben ser numéricos</string>
@@ -260,6 +300,8 @@
     <string name="dialog_infobar_att_chooser_title">InfoBar %d</string>
     <string name="infobars_attribute_placeholder">Seleccionar</string>
     <string name="field_name_attribute">campo_nombre</string>
+    <string name="infobar_word_wrap_enabled">Ajuste de texto habilitado en Infobar %s</string>
+    <string name="infobar_word_wrap_disabled">Ajuste de texto deshabilitado en Infobar %s</string>
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">Este ID está en %s</string>
     <string name="main_toolbar_moveto_no_match">Sin valor coincidente</string>
@@ -296,6 +338,7 @@
     <string name="menu_action_header_view_data_grid_title">Actualizar Fila de Encabezados</string>
     <!--- Lock -->
     <string name="activity_collect_locked_state">Bloqueado - entrada, modificación y eliminación de datos están desactivados</string>
+    <string name="activity_collect_frozen_state">Bloqueado - una vez guardados los datos no se pueden modificar o eliminar</string>
     <string name="activity_collect_unlocked_state">Desbloqueado: no hay restricciones en la entrada, modificación o eliminación de datos</string>
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">El dispositivo no contiene el hardware necesario para esta opción</string>
@@ -449,6 +492,9 @@
     <string name="observation_info_rep">Rep</string>
     <string name="observation_info_other">Otro</string>
     <!-- Skip Entries -->
+    <string name="collect_sole_entry_without_data">Esta es la única entrada sin datos</string>
+    <string name="collect_all_entries_complete_for_current_trait">Todas las entradas tienen datos para la variable actual</string>
+    <string name="collect_all_entries_complete_for_all_traits">Todas las entradas tienen datos para todas las variables</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Local</string>
@@ -474,14 +520,28 @@
     <string name="export_multiple_fields_name">campos_múltiples</string>
     <string name="export_multiple_fields_message">Nota: Múltiples exportaciones de campos se incluyen en un archivo ZIP</string>
     <!-- Citation -->
+    <string name="citation_card_title">Citar Field Book</string>
     <string name="citation_title">Cita</string>
     <string name="citation_string">Si utiliza Field Book para la investigación, cite la siguiente publicación:</string>
     <!-- SETTINGS -->
     <!-- General -->
+    <string name="preferences_system_title">Sistema</string>
+    <string name="preferences_system_defaults_title">Predeterminados</string>
     <string name="preferences_source_default_import">Origen de Importación</string>
     <string name="preferences_source_default_export">Origen de Exportación</string>
+    <string name="brapi_disabled_alert_title">BrAPI Desactivado</string>
+    <string name="brapi_disabled_alert_message">BrAPI debe estar activado primero en los ajustes de BrAPI.</string>
+    <string name="preferences_general_share_enable">Activar Compartir Archivos</string>
+    <string name="preferences_general_share_enable_description">Cuando se exportan archivos, se mostrará un diálogo compartir</string>
     <!-- Profile -->
     <string name="preferences_profile_title">Perfil</string>
+    <string name="preferences_profile_person_title">Persona</string>
+    <string name="preferences_profile_require_person">Requiere Persona</string>
+    <string name="preferences_profile_require_person_summary">Registra el nombre de la persona que captura datos</string>
+    <string name="preferences_profile_set_person">Nombre de la Persona</string>
+    <string name="preferences_profile_person_dialog_title">Establecer Persona</string>
+    <string name="preferences_profile_name_first">Nombre</string>
+    <string name="preferences_profile_name_last">Apellido</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Único</string>
     <string name="pref_profile_crashlytics_refresh_title">Refrescar ID</string>
     <!-- Features -->
@@ -818,11 +878,13 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="act_brapi_filter_clear">Borrar</string>
     <!-- base camera strings -->
     <string name="delete_local_photo">Eliminar Imagen</string>
+    <string name="trait_name_alt_photo_system">Sistema</string>
     <string name="view_trait_photo_settings_camera_custom">Predeterminado</string>
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
     <string name="select">Seleccionar</string>
+    <string name="sort">Ordenar</string>
     <string name="brapi_traits_filter_title">Variables</string>
     <string name="act_brapi_study_filter">Filtro</string>
 </resources>
