@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Experimental setting to use media keys for entry/trait navigation and picture capture (https://github.com/PhenoApps/Field-Book/pull/1089)
 
 ### Changed
+- Fields and traits that have already been imported are now hidden on the BrAPI import screen (https://github.com/PhenoApps/Field-Book/pull/1091)
 - Long-pressing delete button on bottom toolbar will remove all observations for that trait (https://github.com/PhenoApps/Field-Book/pull/1099)
 - Current time now used as lastSyncedTime when downloading Observations via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1071)
 - lastSyncedTime updated after creating/updating Observations (https://github.com/PhenoApps/Field-Book/pull/1071)
