@@ -15,21 +15,13 @@ import com.fieldbook.tracker.activities.brapi.io.BrapiFilterTypeAdapter
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSubFilterListActivity
 import com.fieldbook.tracker.activities.brapi.io.BrapiTraitImporterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity
-import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
-import com.fieldbook.tracker.activities.brapi.io.filter.BrapiProgramFilterActivity
-import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity
-import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity.Companion.filterByProgramAndTrial
-import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity.Companion.filterByProgram
-import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity.FilterChoice
 import com.fieldbook.tracker.activities.brapi.io.mapper.DataTypes
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
+import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.Formats
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.badge.BadgeDrawable
-import com.google.android.material.badge.BadgeUtils
-import com.google.android.material.badge.ExperimentalBadgeUtils
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -39,7 +31,9 @@ import kotlinx.coroutines.withContext
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
 import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class BrapiTraitFilterActivity(
     override val defaultRootFilterKey: String = FILTERER_KEY,
     override val filterName: String = "traits",
@@ -57,6 +51,9 @@ class BrapiTraitFilterActivity(
         STUDY,
         CROP
     }
+
+    @Inject
+    lateinit var database: DataHelper
 
     private var queryVariablesJob: Job? = null
 
@@ -93,6 +90,11 @@ class BrapiTraitFilterActivity(
                 tokens in model.label.lowercase() || tokens in model.subLabel.lowercase() || tokens in model.id.lowercase()
             }
         }
+    }
+
+    override fun List<CheckboxListAdapter.Model>.filterExists(): List<CheckboxListAdapter.Model> {
+        val brapiIds = database.allTraitObjects.map { it.externalDbId }
+        return filter { it.id !in brapiIds }
     }
 
     override fun onSearchTextComplete(searchText: String) {
