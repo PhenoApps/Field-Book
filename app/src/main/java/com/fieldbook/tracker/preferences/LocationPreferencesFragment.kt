@@ -93,6 +93,12 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
             }
         }
 
+        findPreference<EditTextPreference>(GeneralKeys.GEONAV_DISTANCE_THRESHOLD)?.let { distPref ->
+            distPref.setOnBindEditTextListener { editText ->
+                editText.inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+            }
+        }
+
         setPreferenceChangeListeners(
             listOf(
                 GeneralKeys.GEONAV_PARAMETER_D1,
