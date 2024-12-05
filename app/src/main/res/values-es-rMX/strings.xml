@@ -599,6 +599,8 @@
     <string name="preferences_appearance_quickgoto">Rápido Ir a</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamiento</string>
+    <string name="preferences_behavior_movement_title">Movimiento</string>
+    <string name="preferences_behavior_hardware_title">Hardware</string>
     <string name="preferences_behavior_data_title">Datos</string>
     <string name="preferences_behavior_cycle_traits">Auto-Avance Entrada</string>
     <string name="preferences_behavior_cycle_traits_description">Ciclando a través de la lista de variables automáticamente avanza la entrada</string>
@@ -612,8 +614,17 @@
     <string name="preferences_general_use_day_number_description">Usar número de día del año para capturar datos en lugar de la fecha</string>
     <!-- Location -->
     <string name="preferences_location_title">Ubicación</string>
+    <string name="pref_general_location_collection_title">Nivel de Captura</string>
     <string name="location_level_off">Apagado</string>
+    <string name="location_level_study">Campo</string>
+    <string name="location_level_observation_unit">Entrada</string>
+    <string name="location_level_observation">Observación (mayor uso de la batería)</string>
+    <string name="pref_coordinate_format_title">Formato de Captura</string>
+    <string name="location_format_iso">ISO 6709</string>
+    <string name="location_format_geojson">GeoJSON</string>
+    <string name="pref_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_enable_title">Activar GeoNav</string>
+    <string name="pref_geonav_enable_summary">Navegar campos usando la ubicación del dispositivo</string>
     <string name="pref_geonav_search_method_title">Método de Búsqueda</string>
     <string name="pref_geonav_method_distance">Distancia</string>
     <string name="pref_geonav_method_trapezoid">Trapezoidal</string>
@@ -631,6 +642,7 @@
     <string name="pref_geonav_log_both">Ambos</string>
     <string name="pref_geonav_log_both_description">Ambos: Registrando todas las actualizaciones de ubicación y los pasos del algoritmo para storage/geonav/log.txt, la entrada más cercana al storage/geonav/limited_log.txt</string>
     <string name="pref_geonav_update_interval_title">Intervalo de Actualización (s)</string>
+    <string name="pref_geonav_pair">Proveedor de Ubicación</string>
     <string name="pref_behavior_geonav_internal_gps_choice">GPS interno</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Sonido</string>
@@ -638,6 +650,7 @@
     <string name="preferences_sound_entry_description">Reproducir sonido al mover entre entradas</string>
     <string name="preferences_sound_cycle_traits_title">Variables Cíclicas</string>
     <string name="preferences_sound_cycle_traits_description">Reproducir un sonido cuando las variables son completamente cícladas</string>
+    <string name="preferences_sound_delete_obs_title">Eliminar Observación</string>
     <string name="preferences_sound_delete_obs_description">Reproducir sonido al eliminar observación</string>
     <string name="preferences_category_audio_tts_title">Texto a Voz</string>
     <string name="preferences_general_tts_title">Texto a Voz</string>
@@ -866,6 +879,7 @@
     <string name="brapi_export_unknown_error">ERROR: error desconocido</string>
     <string name="brapi_export_successful">Exportación por BrAPI exitosa</string>
     <string name="brapi_saving_indicator">Guardando Observaciones...</string>
+    <string name="brapi_field_non_matching_sources_title">Orígenes No Coinciden</string>
     <string name="brapi_field_non_matching_sources">No se pueden sincronizar datos. Los datos de campo se originan en %1$s, la url de BrAPI  establecida actualmente en %2$s. Los origenes deben coincidir.</string>
     <string name="brapi_enable_before_sync">BRAPI está desactivado. Por favor, actívalo en la configuración antes de usar la sincronización.</string>
     <string name="brapi_trait_already_exists">La variable ya existe: %1$s. No guardado</string>
@@ -883,6 +897,7 @@
     <!-- BrAPI Export -->
     <string name="act_brapi_export_title">Exportación BrAPI</string>
     <string name="brapi_export_button">Exportar</string>
+    <string name="brapi_next_field_button">Siguiente Campo</string>
     <string name="brapi_close_button">Cerrar</string>
     <string name="brapi_export_title">Estadísticas de exportación de BrAPI</string>
     <string name="brapi_export_observations">Observaciones</string>
@@ -911,8 +926,10 @@
 Las variables y los campos creados manualmente o importados a través de CSV deberán exportarse a través de formato CSV.</string>
     <string name="brapi_na">NA</string>
     <!-- APP INTRO  -->
+    <string name="intro_tutorial_title">¿Quieres activar el tutorial?</string>
     <string name="intro_tutorial_radio_item_yes">Sí</string>
     <string name="intro_tutorial_radio_item_no">No</string>
+    <string name="intro_tutorial_warning">Por favor, elija</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">¿Desea habilitar el tutorial? Esta configuración se puede cambiar en Ajustes.</string>
@@ -983,7 +1000,9 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_main_geonav_description">Esto abrirá un diálogo de configuración para ayudar con la navegación del campo.</string>
     <string name="oauth_configured_incorrectly">Falló la solicitud de autorización, por favor compruebe la configuración de BrAPI.</string>
     <string name="brapi_programs_activity_title">Elige tu Programa</string>
+    <string name="import_brapi_title">Importación BrAPI</string>
     <string name="import_brapi_field_title">Importar Campo con BrAPI</string>
+    <string name="import_brapi_trait_title">Importación de Variable BrAPI</string>
     <string name="menu_action_brapi_filter">Filtro</string>
     <string name="act_brapi_filter_apply">Filtro</string>
     <string name="act_brapi_filter_import">Importar</string>
@@ -1000,9 +1019,16 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="trait_camera_capture_content_description">Capturar una foto</string>
     <string name="delete_local_photo">Eliminar Imagen</string>
     <string name="trait_system_photo_settings_title">Ajustes del Sistema de Fotos</string>
+    <string name="trait_photos_no_settings">Este variable no tiene ajustes.</string>
+    <string name="view_trait_photo_settings_preview_title">Vista Previa</string>
+    <string name="view_trait_photo_settings_resolution_title">Resolución del Objetivo</string>
+    <string name="view_trait_photo_settings_system_title">Cámara del Sistema</string>
     <string name="trait_name_alt_photo_system">Sistema</string>
+    <string name="trait_name_alt_usb">USB</string>
     <string name="view_trait_photo_settings_camera_custom">Predeterminado</string>
+    <string name="view_trait_photo_settings_camera_system">Android</string>
     <!-- usb camera trait -->
+    <string name="usb_camera_plug_in_camera">Por favor, conecta una cámara web compatible con UVC.</string>
     <string name="view_trait_photo_settings_white_balance_title">Auto Balance de Blancos</string>
     <string name="view_trait_photo_settings_auto_focus_title">Auto Enfoque</string>
     <!-- gopro -->
@@ -1056,6 +1082,16 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="select">Seleccionar</string>
     <string name="results">resultados</string>
     <string name="failed_to_fetch_observation_units">Error al obtener las unidades de observación</string>
+    <string name="preferences_brapi_cache_invalidate_dialog_title">Invalidar Opciones de Intervalo de Caché</string>
+    <string name="preferences_brapi_cache_invalidate_summary">%s</string>
+    <string name="preferences_brapi_cache_invalidate_title">Invalidación del Caché</string>
+    <string name="brapi_v1_is_not_compatible">BrAPI V1 no es compatible.</string>
+    <string name="no_programdbid_provided">No se ha proporcionado programDbId</string>
+    <string name="no_studydbids_provided">No se ha proporcionado studyDbIds</string>
+    <string name="act_brapi_list_api_exception">Error desconocido. Por favor, comprueba las preferencias de BrAPI o contacta con los desarrolladores.</string>
+    <string name="act_brapi_list_filter_reset_cache_title">Confirmar Restablecimiento</string>
+    <string name="act_brapi_list_filter_reset_cache_message">Esto eliminará los datos locales de BrAPI utilizados para buscar e importar.</string>
+    <string name="search_bar_hint">Buscando… %s</string>
     <string name="menu_filter_brapi_clear_filters">Limpiar Filtros</string>
     <string name="menu_filter_brapi_clear_selection">Limpiar Selección</string>
     <string name="level">Nivel</string>
