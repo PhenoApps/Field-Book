@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
+import android.util.Log
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
@@ -349,35 +350,54 @@ class ObservationVariableDao {
         //TODO missing obs. vars. for min/max/categories
         fun insertTraits(t: TraitObject) = withDatabase { db ->
 
-            if (getTraitByName(t.name) != null) -1
-            else {
+            if (getTraitByName(t.name) != null) {
+                Log.d("ObservationVariableDao", "Trait ${t.name} already exists, skipping insertion.")
+                -1
+            } else {
+                val contentValues = ContentValues().apply {
+                    put("external_db_id", t.externalDbId)
+                    put("trait_data_source", t.traitDataSource)
+                    put("observation_variable_name", t.name)
+                    put("observation_variable_details", t.details)
+                    put("observation_variable_field_book_format", t.format)
+                    put("default_value", t.defaultValue)
+                    put("visible", t.visible.toString())
+                    put("position", t.realPosition)
+                    put("additional_info", t.additionalInfo)
+                }
 
-                val varRowId = db.insert(
-                    ObservationVariable.tableName, null,
-                    ContentValues().apply {
-//                            put(PK, t.id)
-                        put("external_db_id", t.externalDbId)
-                        put("trait_data_source", t.traitDataSource)
-                        put("observation_variable_name", t.name)
-                        put("observation_variable_details", t.details)
-                        put("observation_variable_field_book_format", t.format)
-                        put("default_value", t.defaultValue)
-                        put("visible", t.visible.toString())
-                        put("position", t.realPosition)
-                        put("additional_info", t.additionalInfo)
-                        })
+                // Log trait values being inserted
+                Log.d("ObservationVariableDao", "Saving trait ${t.name} with values:")
+                contentValues.keySet().forEach { key ->
+                    contentValues.get(key)?.let { value ->
+                        Log.d("ObservationVariableDao", "$key: $value")
+                    }
+                }
 
-                ObservationVariableValueDao.insert(
+                // Log additional values: min, max, categories
+                Log.d("ObservationVariableDao", "And additional attributes:")
+                Log.d("ObservationVariableDao", "minimum: ${t.minimum.orEmpty()}")
+                Log.d("ObservationVariableDao", "maximum: ${t.maximum.orEmpty()}")
+                Log.d("ObservationVariableDao", "categories: ${t.categories.orEmpty()}")
+
+                val varRowId = db.insert(ObservationVariable.tableName, null, contentValues)
+
+                if (varRowId != -1L) {
+                    ObservationVariableValueDao.insert(
                         t.minimum.orEmpty(),
                         t.maximum.orEmpty(),
                         t.categories.orEmpty(),
-                        varRowId.toString())
+                        varRowId.toString()
+                    )
+                    Log.d("ObservationVariableDao", "Trait ${t.name} inserted successfully with row ID: $varRowId")
+                } else {
+                    Log.e("ObservationVariableDao", "Failed to insert trait ${t.name}")
+                }
 
                 varRowId
-
             }
-
         } ?: -1
+
 
         fun deleteTrait(id: String) = withDatabase { db ->
             db.delete(ObservationVariable.tableName,
