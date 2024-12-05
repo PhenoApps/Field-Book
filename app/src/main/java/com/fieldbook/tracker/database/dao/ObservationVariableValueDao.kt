@@ -27,17 +27,28 @@ class ObservationVariableValueDao {
 
         }
 
-        fun insert(min: String, max: String, categories: String, id: String) = withDatabase { db ->
+        fun insertCloseKeyboard(closeKeyboardOnOpen: String, id: String) = withDatabase { db ->
 
-            //iterate trhough mapping of the old columns that are now attr/vals
+            val attrId = ObservationVariableAttributeDao.getAttributeIdByName("closeKeyboardOnOpen")
+
+            db.insert(ObservationVariableValue.tableName, null, contentValuesOf(
+
+                ObservationVariable.FK to id,
+                Migrator.ObservationVariableAttribute.FK to attrId,
+                "observation_variable_attribute_value" to closeKeyboardOnOpen
+
+            ))
+        }
+
+        fun insert(min: String, max: String, categories: String, closeKeyboardOnOpen: String, id: String) = withDatabase { db ->
+
+            //iterate through mapping of the old columns that are now attr/vals
             mapOf(
                     "validValuesMin" to min,
                     "validValuesMax" to max,
                     "category" to categories,
+                    "closeKeyboardOnOpen" to closeKeyboardOnOpen
             ).asSequence().forEach { attrValue ->
-
-                //TODO: commenting this out would create a sparse table from the unused attribute values
-//                    if (attrValue.value.isNotEmpty()) {
 
                 val attrId = ObservationVariableAttributeDao.getAttributeIdByName(attrValue.key)
 
@@ -48,10 +59,7 @@ class ObservationVariableValueDao {
                         "observation_variable_attribute_value" to attrValue.value
 
                 ))
-//                    }
             }
         }
-
-//        fun getAll() = withDatabase { it.query(ObservationVariableValue.tableName).toTable() }
     }
 }

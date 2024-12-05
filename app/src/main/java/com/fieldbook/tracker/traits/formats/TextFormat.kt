@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits.formats
 
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.traits.formats.parameters.CloseKeyboardParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
@@ -15,5 +16,6 @@ class TextFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DefaultValueParameter(),
-    DetailsParameter()
+    DetailsParameter(),
+    CloseKeyboardParameter(false)
 )
