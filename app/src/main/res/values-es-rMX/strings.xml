@@ -658,9 +658,13 @@
     <string name="pref_experimental_repeated_values_title">Medidas Repetidas</string>
     <string name="pref_experimental_repeated_values_summary">Activa captura de multiples valores para cada entrada/variable</string>
     <string name="pref_experimental_repeated_values_disabled_title">Medidas Repetidas Desactivadas</string>
+    <string name="pref_experimental_repeated_values_disabled_message">Cualquier valor repetido que se haya capturado se ocultará hasta que esta funcionalidad esté activada de nuevo</string>
     <string name="pref_experimental_enable_field_audio_title">Activar Audio en Campo</string>
+    <string name="pref_experimental_enable_field_audio_summary">Activar función de grabación de audio para todo el campo</string>
     <string name="menu_collect_start_field_audio">Iniciar Grabadora</string>
     <string name="menu_collect_stop_field_audio">Detener Grabadora</string>
+    <string name="field_audio_recording_start">Grabando audio a nivel de el campo</string>
+    <string name="field_audio_recording_stop">Un nuevo archivo de audio a nivel de campo fue guardado</string>
     <string name="field_audio_recording_warning">El audio a nivel de campo ya se está grabando. Deténgalo primero.</string>
     <string name="trait_audio_recording_warning">El audio a nivel de variable ya se está grabando. Deténgalo primero.</string>
     <string name="trait_audio_playing_warning">El audio a nivel de variable se está reproduciendo. Deténgalo primero.</string>
@@ -670,15 +674,46 @@
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
     <string name="pref_beta_mlkit_summary">Esta opción utiliza la biblioteca MLKit en lugar de la biblioteca ZXing para escanear códigos de barras</string>
     <string name="pref_beta_mlkit_enabled_title">Escaneo de código de barras usando MLKit activado</string>
+    <string name="pref_beta_mlkit_enabled_message">Activando esta funcionalidad cambiará la biblioteca de escaneo de códigos de barras de ZXing a MLKit</string>
     <!-- STATISTICS -->
+    <string name="warning_no_observations">No se han capturado observaciones</string>
+    <string name="warning_no_data">No hay datos para mostrar</string>
+    <string name="warning_invalid_date_range">Seleccione un rango de fechas válido</string>
+    <string name="stats_heatmap_title">Mapa de calor</string>
+    <string name="stats_heatmap">Ver un mapa de calor de las observaciones capturadas</string>
+    <string name="stats_loading">Cargando…</string>
+    <string name="stats_first_day">Desplazarse hasta el primer día con una observación capturada</string>
+    <string name="stats_last_day">Desplazarse hasta el último día con una observación capturada</string>
+    <string name="stats_calendar_range">Seleccione un rango de fechas para filtrar las fechas mostradas</string>
+    <string name="stats_counter">Intercambia la fecha con el número de observaciones capturadas ese día</string>
+    <string name="stats_date_range_picker_title">Seleccione un rango de fechas</string>
+    <string name="stats_tab_layout_total">Total</string>
+    <string name="stats_tab_layout_year">Año</string>
+    <string name="stats_tab_layout_month">Mes</string>
+    <string name="stat_card_export_title_total">Estadísticas totales de Field Book</string>
+    <string name="stat_card_export_title">Estadísticas de Field Book para</string>
     <string name="stat_title_fields">Campos</string>
     <string name="stat_title_entries">Entradas</string>
     <string name="stat_title_data">Datos</string>
+    <string name="stat_title_hours">Horas</string>
+    <string name="stat_title_people">Personas</string>
+    <string name="stat_title_photos">Fotos</string>
+    <string name="stat_title_busiest">Más ocupados</string>
+    <string name="stat_title_most">Mayor</string>
+    <string name="stat_fields_dialog_title">Campos importados en</string>
+    <string name="stat_people_dialog_title">Lista de Personas</string>
+    <string name="stat_most_dialog_title">Lista de Observaciones</string>
+    <string name="stat_entries_toast_message">entradas han sido fenotipeadas</string>
+    <string name="stat_data_toast_message">observaciones han sido capturadas</string>
+    <string name="stat_hours_toast_message">horas dedicadas al fenotipeado</string>
+    <string name="stat_photos_toast_message">fotos han sido capturadas</string>
+    <string name="stat_busiest_toast_message">observaciones se capturaron en </string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Acerca de</string>
     <string name="about_version_title">Versión</string>
     <string name="about_manual_title">Manual</string>
+    <string name="about_rate">Valorar Field Book</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Líder del Projecto</string>
     <string name="about_email_title">Email</string>
@@ -699,6 +734,7 @@
     <string name="brapi_info_title">Información de sincronización de BrAPI</string>
     <string name="preferences_brapi_enable_title">Activar BrAPI</string>
     <string name="preferences_brapi_enable_summary">Las BrAPI permiten una simple transferencia de datos a bases de datos compatibles.</string>
+    <string name="preferences_brapi_server_title">Servidor</string>
     <string name="preferences_brapi_barcode_config_title">Auto-Configuración</string>
     <string name="preferences_brapi_barcode_config_summary">Administrar ajustes con códigos QR</string>
     <string name="preferences_brapi_barcode_config_scan">Importar nuevos ajustes</string>
@@ -717,10 +753,13 @@
     <string name="brapi_choice_to_make_default_positive">Guardar</string>
     <string name="brapi_edit_display_name">Editar Nombre a Mostrar</string>
     <string name="brapi_edit_display_name_server">Nombre del Servidor</string>
+    <string name="brapi_edit_display_name_default">Servidor de Prueba BrAPI</string>
     <string name="preferences_brapi_version">Versión BrAPI</string>
     <string name="brapi_pagination">Tamaño de la página</string>
     <string name="brapi_timeout">Tiempo de Espera del Servidor</string>
     <string name="brapi_chunk_size">Tamaño del Chunk</string>
+    <string name="preferences_brapi_authorization_title">Autorización</string>
+    <string name="preferences_brapi_advanced_title">Avanzado</string>
     <string name="preferences_brapi_oidc_flow_oauth_code">Código de Autorización OAuth2</string>
     <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Concesión Implícita</string>
     <string name="preferences_brapi_oidc_flow_old_custom">Field Book Original Personalizado</string>
@@ -730,6 +769,7 @@
     <string name="brapi_oidc_clientid_desc">El ID de Cliente a ser usado en el proveedor de autenticación</string>
     <string name="brapi_oidc_scope">Alcance OIDC</string>
     <string name="brapi_oidc_scope_desc">El Alcance a ser utilizado en el proveedor de autenticación</string>
+    <string name="preferences_brapi_traits_title">Preferencias</string>
     <string name="preferences_appearance_collect_labelval_customize">Mostrar Categoria Valor vs Etiqueta</string>
     <string name="preferences_appearance_collect_labelval_customize_description">Mostrar valores o etiquetas de categorias en la pantalla de captura</string>
     <string name="preferences_appearance_collect_labelval_customize_value">Valor</string>
@@ -914,8 +954,35 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="trait_name_alt_photo_system">Sistema</string>
     <string name="view_trait_photo_settings_camera_custom">Predeterminado</string>
     <!-- usb camera trait -->
+    <string name="view_trait_photo_settings_white_balance_title">Auto Balance de Blancos</string>
+    <string name="view_trait_photo_settings_auto_focus_title">Auto Enfoque</string>
     <!-- gopro -->
+    <string name="dialog_go_pro_wait_stream_title">Esperando vista previa en vivo</string>
+    <string name="dialog_go_pro_wait_stream_message">Esto puede tardar un minuto.</string>
     <!-- canon camera strings -->
+    <string name="canon_frag_connect_btn_content_description">botón de disparo</string>
+    <string name="traits_format_canon">Canon</string>
+    <string name="pref_canon_ip_title">Dirección IP Canon</string>
+    <string name="pref_canon_port_title">Puerto de Canon</string>
+    <string name="preferences_canon_title">Canon</string>
+    <string name="pref_canon_ssid_summary">Este nombre se utiliza para encontrar el AP de tu dispositivo. Este nombre debe estar contenido en el SSID actual.</string>
+    <string name="pref_canon_title">Nombre SSID</string>
+    <string name="pref_canon_ip_summary">Esta es la IP que se muestra en la cámara cuando se configura el AP.</string>
+    <string name="pref_canon_port_summary">Este es el puerto que se muestra en la cámara cuando se configura el AP.</string>
+    <string name="pref_canon_help_title">Ayuda</string>
+    <string name="pref_canon_help_summary">Esto abrirá una URL al manual de Canon FieldBook.</string>
+    <string name="pref_canon_debug_title">Debug</string>
+    <string name="pref_canon_debug_summary">Preferencias para que los desarrolladores monitoricen la salida del dispositivo.</string>
+    <string name="trait_usb_photo_settings_title">Ajustes de Foto USB</string>
+    <string name="canon_trait_settings_title">Ajustes de Canon</string>
+    <string name="dialog_brapi_filter_title">Filtros</string>
+    <string name="dialog_brapi_filter_active">Activo</string>
+    <string name="dialog_brapi_filter_choices_title">Filtrar por</string>
+    <string name="brapi_studies_filter_title">Estudios</string>
+    <string name="brapi_trials_filter_title">Ensayos</string>
+    <string name="brapi_filter_dialog_title">Filtrar por</string>
+    <string name="brapi_filter_type_program">Programa</string>
+    <string name="brapi_filter_type_season">Temporada</string>
     <string name="select">Seleccionar</string>
     <string name="sort">Ordenar</string>
     <string name="brapi_traits_filter_title">Variables</string>
