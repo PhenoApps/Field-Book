@@ -18,6 +18,8 @@
     <string name="dialog_save_error_title">Error al Guardar</string>
     <string name="dialog_back">Atrás</string>
     <string name="dialog_scan">Escanear</string>
+    <string name="dialog_sort_by">Ordenar Por</string>
+    <string name="dialog_enable">Activar</string>
     <string name="dialog_delete">Eliminar</string>
     <string name="barcode_scanner_text">Escanear un código de barras</string>
     <!-- Startup  -->
