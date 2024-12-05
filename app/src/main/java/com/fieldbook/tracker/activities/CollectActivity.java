@@ -731,6 +731,18 @@ public class CollectActivity extends ThemedActivity
             triggerTts(deleteTts);
         });
 
+        deleteValue.setOnLongClickListener(v -> {
+
+            ObservationModel[] models = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
+
+            if (models.length > 0) {
+
+                showConfirmMultiMeasureDeleteDialog(List.of(models));
+
+            }
+
+            return true;
+        });
     }
 
     /**

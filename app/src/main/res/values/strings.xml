@@ -518,7 +518,7 @@
     <string name="menu_collect_repeated_values_indicator">Displays the number of repeated values.</string>
     <string name="dialog_multi_measure_delete_no_observations">No observations exist.</string>
     <string name="dialog_multi_measure_delete_title">Observations</string>
-    <string name="dialog_multi_measure_confirm_delete_title">These observations will be permanently deleted.</string>
+    <string name="dialog_multi_measure_confirm_delete_title">All observations for this trait will be permanently deleted.</string>
     <string name="dialog_multi_measure_delete">Delete</string>
     <string name="dialog_multi_measure_select_all">Select all</string>
 
