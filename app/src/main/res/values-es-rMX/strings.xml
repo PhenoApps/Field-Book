@@ -590,7 +590,7 @@
     <string name="preferences_general_skip_entries_disabled">Desactivado</string>
     <string name="preferences_general_skip_entries_with_data">Botón omite las entradas que ya tienen valores para la variable actual</string>
     <string name="preferences_general_skip_entries_across_all_traits">Botón omite entradas que ya tienen valores para todas las variables</string>
-    <string name="preferences_general_feature_barcode_text">Pasar al ID Único</string>
+    <string name="preferences_general_feature_barcode_text">Moverse al ID Único</string>
     <string name="move_to_unique_id_disabled">Desactivado</string>
     <string name="move_to_unique_id_text_or_scan">El botón usa entrada de texto con escaneo opcional de cámara</string>
     <string name="move_to_unique_id_direct_camera_scan">Botón usa escaneo directo de cámara</string>
@@ -677,7 +677,7 @@
     <string name="preferences_sound_primary_order_title">Cambiar Orden Primario</string>
     <string name="preferences_sound_primary_order_description">Sonido de \'plonk\' cuando cambia el orden primario</string>
     <string name="preferences_sound_entry_title">Cambiar Entrada</string>
-    <string name="preferences_sound_entry_description">Reproducir sonido al mover entre entradas</string>
+    <string name="preferences_sound_entry_description">Reproducir sonido al moverse entre entradas</string>
     <string name="preferences_sound_cycle_traits_title">Variables Cíclicas</string>
     <string name="preferences_sound_cycle_traits_description">Reproducir un sonido cuando las variables son completamente cícladas</string>
     <string name="preferences_sound_delete_obs_title">Eliminar Observación</string>
@@ -860,7 +860,7 @@
         <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
     </string-array>
     <!-- Authorization -->
-    <string name="brapi_save_authorize">Salvar y Autorizar</string>
+    <string name="brapi_save_authorize">Autorizar</string>
     <string name="brapi_display_name">Mostrar Nombre</string>
     <string name="brapi_revoke_auth">Cerrar sesión</string>
     <string name="brapi_auth_btn">Iniciar sesión en el Sitio</string>
@@ -874,7 +874,7 @@
     <string name="import_dialog_title_brapi_fields">Importar Campo con BrAPI</string>
     <string name="brapi_load_data_button">Cargar Campos</string>
     <string name="brapi_load_traits_button">Cargar Variables</string>
-    <string name="brapi_save_data_button">Salvar Campo</string>
+    <string name="brapi_save_data_button">Vista previa Campo</string>
     <string name="brapi_study_name">Nombre</string>
     <string name="brapi_study_description">Descripción</string>
     <string name="brapi_study_location">Ubicación</string>
@@ -1050,7 +1050,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="trait_camera_preview_content_description">Esta vista previa de la pantalla de la cámara.</string>
     <string name="trait_camera_capture_content_description">Capturar una foto</string>
     <string name="delete_local_photo">Eliminar Imagen</string>
-    <string name="trait_system_photo_settings_title">Ajustes del Sistema de Fotos</string>
+    <string name="trait_system_photo_settings_title">Ajustes de Fotos del Sistema</string>
     <string name="trait_photos_no_settings">Este variable no tiene ajustes.</string>
     <string name="view_trait_photo_settings_preview_title">Vista Previa</string>
     <string name="view_trait_photo_settings_resolution_title">Resolución del Objetivo</string>
@@ -1059,7 +1059,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="trait_name_alt_usb">USB</string>
     <string name="view_trait_photo_settings_camera_custom">Predeterminado</string>
     <string name="view_trait_photo_settings_camera_system">Android</string>
-    <string name="view_trait_photo_settings_camera_choice_description">Elija entre la cámara predeterminada de Field Book o la cámara predeterminada de Android.</string>
+    <string name="view_trait_photo_settings_camera_choice_description">Elija entre la cámara predeterminada de Field Book o la cámara app predeterminada de Android.</string>
     <!-- usb camera trait -->
     <string name="usb_camera_resolution_options_title">Resoluciones Soportadas</string>
     <string name="usb_camera_plug_in_camera">Por favor, conecta una cámara web compatible con UVC.</string>
@@ -1080,7 +1080,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="pref_canon_port_summary">Este es el puerto que se muestra en la cámara cuando se configura el AP.</string>
     <string name="pref_canon_help_title">Ayuda</string>
     <string name="pref_canon_help_summary">Esto abrirá una URL al manual de Canon FieldBook.</string>
-    <string name="pref_canon_debug_title">Debug</string>
+    <string name="pref_canon_debug_title">Depurar</string>
     <string name="pref_canon_debug_summary">Preferencias para que los desarrolladores monitoricen la salida del dispositivo.</string>
     <string name="trait_usb_photo_settings_title">Ajustes de Foto USB</string>
     <string name="canon_trait_settings_title">Ajustes de Canon</string>
