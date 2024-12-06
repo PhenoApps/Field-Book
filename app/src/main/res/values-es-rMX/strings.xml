@@ -30,14 +30,14 @@
     <string name="app_intro_intro_summary_slide1">Tradicionalmente, la captura de datos en el campo requería la escritura y transcripción desde papel. Field Book se creó como una solución digital para la captura de datos que aumenta la velocidad de recolección con una mayor integridad de los mismos.</string>
     <string name="app_intro_intro_title_slide2">Funcionalidad y Personalización</string>
     <string name="app_intro_intro_summary_slide2">Los datos se introducen en Field Book con diseños de variables personalizadas y diseñadas para simplificar la captura de datos y minimizar los errores.\n\n Por defecto, los datos recolectados se almacenan localmente, ademas Field Book soporta la Breeding API que permite enviar datos a sistemas compatibles con BrAPI.</string>
-    <string name="app_intro_required_setup_title">Ajustes Requeridos</string>
+    <string name="app_intro_required_setup_title">Configuración Requerida</string>
     <string name="app_intro_required_setup_summary">Para empezar a usar Field Book, otorga los permisos necesarios para la aplicación y luego define una carpeta donde tus datos serán almacenados.</string>
     <string name="app_intro_permissions_title">Permisos</string>
     <string name="app_intro_permissions_warning">Por favor, otorga los permisos necesarios</string>
     <string name="app_intro_storage_title">Definir Almacenamiento</string>
     <string name="app_intro_storage_summary">Defina una carpeta donde se almacenarán sus datos.</string>
     <string name="app_intro_storage_warning">Por favor, establezca la ubicación de almacenamiento</string>
-    <string name="app_intro_required_optional_title">Ajuste Opcional</string>
+    <string name="app_intro_required_optional_title">Configuración Opcional</string>
     <string name="app_intro_required_optional_summary">Estos ajustes opcionales personalizan Field Book y se pueden realizar en los Ajustes.</string>
     <string name="app_intro_load_sample_data_title">Cargar Datos de Ejemplo</string>
     <string name="app_intro_load_sample_data_summary">Importe una base de datos de ejemplo que incluye campos y variables de ejemplo.</string>
@@ -122,8 +122,8 @@
     <string name="fields_new_dialog_title">Nuevo campo</string>
     <string name="fields_new_create_field">Crear nuevo</string>
     <string name="import_dialog_unique">Identificador único</string>
-    <string name="import_dialog_primary">Orden primario</string>
-    <string name="import_dialog_secondary">Orden secundario</string>
+    <string name="import_dialog_primary">Identificador primario</string>
+    <string name="import_dialog_secondary">Identificador secundario</string>
     <string name="import_dialog_sort">Orden de Ordenación</string>
     <string name="import_error_unsupported">Este tipo de archivo no es compatible actualmente</string>
     <string name="import_error_columns_replaced">Los nombres de columnas contienen caracteres no válidos que se reemplazarán durante la importación.</string>
@@ -217,7 +217,7 @@
     <string name="traits_options_edit">Editar</string>
     <string name="traits_options_delete">Eliminar</string>
     <string name="traits_options_delete_title">Eliminar variable</string>
-    <string name="traits_warning_delete">Al eliminar una variable también se eliminan los datos que se han capturado para esta variable. ¿Estás seguro(a) de que quieres eliminar esta variable?</string>
+    <string name="traits_warning_delete">Eliminando una variable también se eliminan los datos que se han capturado para esta variable. ¿Estás seguro(a) de que quieres eliminar esta variable?</string>
     <!-- Trait formats -->
     <string name="traits_format_numeric">Numérico</string>
     <string name="traits_format_categorical">Categórico</string>
@@ -232,7 +232,7 @@
     <string name="traits_format_multicategorical">Categorías multiples</string>
     <string name="traits_format_location">Ubicación</string>
     <string name="traits_format_gnss">GNSS</string>
-    <string name="traits_format_barcode">Codigo de barras</string>
+    <string name="traits_format_barcode">Código de barras</string>
     <string name="traits_format_labelprint">Impresión de etiqueta Zebra</string>
     <string name="traits_format_usb_camera">Cámara USB</string>
     <string name="traits_format_go_pro_camera">GoPro</string>
@@ -306,7 +306,7 @@
     <string name="act_collect_barcode_search_exists_in_other_field">Este ID está en %s</string>
     <string name="main_toolbar_moveto_no_match">Sin valor coincidente</string>
     <string name="main_toolbar_moveto">Ir a ID</string>
-    <string name="main_toolbar_barcode_scan">Escanear codigo de barras</string>
+    <string name="main_toolbar_barcode_scan">Escanear el código de barras</string>
     <string name="main_toolbar_moveto_scan">Escanear</string>
     <string name="act_collect_plot_with_code_not_found">Código de barras no encontrado.\n</string>
     <!-- Search  -->
@@ -341,7 +341,7 @@
     <string name="activity_collect_frozen_state">Bloqueado - una vez guardados los datos no se pueden modificar o eliminar</string>
     <string name="activity_collect_unlocked_state">Desbloqueado: no hay restricciones en la entrada, modificación o eliminación de datos</string>
     <!-- Trait Layout: Photo -->
-    <string name="trait_error_hardware_missing">El dispositivo no contiene el hardware necesario para esta opción</string>
+    <string name="trait_error_hardware_missing">El dispositivo no tiene una cámara que pueda utilizarse para tomar una imagen.</string>
     <string name="trait_delete_warning_photo">¿Estás seguro(a) de que quieres eliminar esta imagen?</string>
     <string name="trait_photo_capture_button_content_description">Presione para abrir una vista de la cámara para capturar.</string>
     <string name="photo_failed_to_delete">Error al eliminar el archivo.</string>
@@ -392,7 +392,7 @@
     <string name="trait_usb_camera_capture_content_description">Capturar una imagen.</string>
     <string name="trait_usb_camera_capture_button_text">Capturar</string>
     <!--- Trait Layout: Zebra label print -->
-    <string name="trait_layout_data_stored">Salvado</string>
+    <string name="trait_layout_data_stored">Guardado</string>
     <string name="trait_layout_print_label_size_title">Tamaño:</string>
     <string name="trait_layout_print_text_field_title">Texto:</string>
     <string name="trait_layout_print_text_field_title_2">Texto2:</string>
@@ -503,7 +503,7 @@
     <string name="export_format_table">Tabla</string>
     <string name="export_file_name">Nombre de archivo</string>
     <string name="export_content_columns_title">Columnas de campo</string>
-    <string name="export_content_columns_all">Todas las columnas de campo.</string>
+    <string name="export_content_columns_all">Todas las columnas importadas</string>
     <string name="export_content_columns_unique">Solo identificador único</string>
     <string name="export_content_traits_all">Todas las variables</string>
     <string name="export_content_traits_active">Solo variables activas</string>
@@ -582,7 +582,7 @@
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
     <string name="preferences_appearance_toolbar_customize_summary">Resumen</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloquear</string>
-    <string name="preferences_general_feature_datagrid">Cuadrícula de datos</string>
+    <string name="preferences_general_feature_datagrid">Grilla de datos</string>
     <string name="preferences_general_feature_datagrid_description">Añadir un botón para mostrar una grilla de datos capturados</string>
     <string name="preferences_general_feature_next_missing">Siguiente Entrada Sin Datos</string>
     <string name="preferences_general_skip_entries_disabled">Desactivado</string>
@@ -745,7 +745,7 @@
     <string name="about_contributors_funding_title">Fuente de financiamiento</string>
     <!-- PhenoApps  -->
     <!-- Technical  -->
-    <string name="about_technical_title">Detalles Tecnicos</string>
+    <string name="about_technical_title">Detalles Técnicos</string>
     <string name="about_libraries_title">Bibliotecas</string>
     <!-- Update -->
     <string name="check_updates_title">Buscando actualizaciones…</string>
@@ -858,11 +858,11 @@
     <string name="brapi_save_field_error">Error al guardar el Campo</string>
     <string name="brapi_field_not_selected">El Campo seleccionado debe importarse desde BrAPI.</string>
     <string name="brapi_fields_filter_by_program">Filtrar por programa</string>
-    <string name="brapi_fields_filter_by_trial">Filtrar por trial</string>
+    <string name="brapi_fields_filter_by_trial">Filtrar por ensayo</string>
     <string name="brapi_programs_load">Cargar programas</string>
     <string name="brapi_programs_select">Seleccionar programa</string>
     <string name="brapi_programs_error">Error al cargar los programas.</string>
-    <string name="brapi_trials_load">Cargar trials</string>
+    <string name="brapi_trials_load">Cargar ensayos</string>
     <string name="brapi_trials_select">Seleccionar trial</string>
     <string name="brapi_trials_error">Error al cargar los ensayos.</string>
     <string name="brapi_save_trait">Guardar variables</string>
@@ -905,14 +905,14 @@
     <string name="brapi_export_num_synced_obs">Observaciones sincronizadas</string>
     <string name="brapi_export_num_ed_obs">Observaciones editadas</string>
     <string name="brapi_export_skipped_observations">Observaciones omitidas</string>
-    <string name="brapi_export_skipped_user_created">Siguiente entrada sin datos</string>
+    <string name="brapi_export_skipped_user_created">Variables de Observacion creadas por Usuario</string>
     <string name="brapi_export_skipped_wrong_source">Origen de datos diferente</string>
     <string name="brapi_export_num_new_imgs">Imágenes nuevas</string>
     <string name="brapi_export_num_synced_imgs">Imágenes sincronizadas</string>
     <string name="brapi_export_num_ed_imgs">Imágenes editadas</string>
     <string name="brapi_export_num_incomplete_imgs">Imágenes sincronizadas incompletas</string>
     <string name="brapi_export_skipped_images">Imágenes omitidas</string>
-    <string name="brapi_export_skipped_user_created_images">Imágenes de variables creadas por el usuario</string>
+    <string name="brapi_export_skipped_user_created_images">Variable de Imágenes creadas por el usuario</string>
     <string name="brapi_export_images">Imágenes</string>
     <string name="brapi_delete_message">No se puede eliminar la observación BrAPI sincronizada, utilizando NA en su lugar</string>
     <string name="act_brapi_export_image_load_failed">Error al cargar la imagen.</string>
@@ -945,7 +945,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_main_navinfo_description">Aquí es donde se muestran el orden primario y secundario.</string>
     <string name="tutorial_main_datacollect_title">Entrada de datos</string>
     <string name="tutorial_main_datacollect_description">Los datos se ingresan en el área inferior de la pantalla. Los diferentes tipos de variables tienen diferentes diseños.</string>
-    <string name="tutorial_main_na_title">Datos perdidos</string>
+    <string name="tutorial_main_na_title">Datos faltantes</string>
     <string name="tutorial_main_na_description">El botón NA se usa para marcar valores como faltantes.</string>
     <string name="tutorial_main_delete_title">Eliminar dato</string>
     <string name="tutorial_main_delete_description">Los datos son eliminados usando este botón.</string>
@@ -961,7 +961,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_main_lockdata_description">Esto bloquea la entrada de datos actual</string>
     <string name="tutorial_settings_fields_title">Campos</string>
     <string name="tutorial_settings_fields_description">le permite importar y administrar campos.</string>
-    <string name="tutorial_settings_fields_import">Para comenzar a usar Field Book, primero importe un archivo de campo.</string>
+    <string name="tutorial_settings_fields_import">Para comenzar a usar Fieldbook, primero importe un archivo de campo.</string>
     <string name="tutorial_settings_traits_title">Variables</string>
     <string name="tutorial_settings_traits_description">le permite agregar, importar y administrar variables.</string>
     <string name="tutorial_settings_collect_title">Capturar dato</string>
@@ -980,7 +980,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_traits_format_title">Formatos de variables</string>
     <string name="tutorial_traits_format_description">Los diferentes formatos de variables se indican con diferentes iconos.</string>
     <string name="tutorial_traits_visibility_title">Visibilidad de variable</string>
-    <string name="tutorial_traits_visibility_description">Las variables se pueden habilitar/deshabilitar usando casilla de verificación.</string>
+    <string name="tutorial_traits_visibility_description">Las variables se pueden activar/desactivar usando casilla de verificación.</string>
     <string name="shutter_capture_content_description">Botón obturador para tomar una imagen.</string>
     <string name="dialog_geonav_prefs_sensor_missing_title">Sensor requerido no encontrado</string>
     <string name="dialog_geonav_prefs_sensor_missing_message">El método trapezoidal requiere un acelerómetro y giroscopio para usar la entrada de la brújula.</string>
@@ -990,7 +990,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="trait_date_minus_content_description">Resta un día de la fecha actual</string>
     <string name="trait_date_add_content_description">Agrega un día a la fecha actual</string>
     <string name="trait_percent_ui_min_max_error">Algo salió mal al mostrar mín/max del formato de variable</string>
-    <string name="tutorial_main_datagrid_title">Cuadrícula de datos</string>
+    <string name="tutorial_main_datagrid_title">Grilla de datos</string>
     <string name="tutorial_main_field_audio_mic_title">Audio en Campo</string>
     <string name="tutorial_main_datagrid_description">Esto abre una grilla de fenotipos 2D del campo seleccionado actualmente.</string>
     <string name="tutorial_main_field_audio_mic_description">Esto iniciará una grabación de audio de nivel de campo.</string>
