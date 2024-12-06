@@ -982,7 +982,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_main_delete_title">Eliminar dato</string>
     <string name="tutorial_main_delete_description">Los datos son eliminados usando este botón.</string>
     <string name="tutorial_main_search_title">Buscar</string>
-    <string name="tutorial_main_search_description">El icono de búsqueda permite realizar consultas en la base de datos.</string>
+    <string name="tutorial_main_search_description">El icono de búsqueda permite consultar la base de datos.</string>
     <string name="tutorial_main_resources_title">Recursos</string>
     <string name="tutorial_fields_add_title">Agregar Campo</string>
     <string name="tutorial_fields_add_description">Importar archivo de campo.</string>
@@ -1007,13 +1007,13 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_fields_select_description">Se selecciona un campo para la captura de datos después de ser importado.</string>
     <string name="tutorial_fields_delete_title">Eliminar Campo</string>
     <string name="tutorial_fields_delete_description">Para eliminar un campo, abra el menú en el lado izquierdo del nombre de un campo y seleccione Eliminar.</string>
-    <string name="tutorial_traits_add_title">Agregar variable</string>
+    <string name="tutorial_traits_add_title">Agregar Variable</string>
     <string name="tutorial_traits_add_description">Agregar variable crea una nueva variable. Los diferentes formatos de variables tienen diferentes diseños de colección.</string>
     <string name="tutorial_traits_format_title">Formatos de variables</string>
     <string name="tutorial_traits_format_description">Los diferentes formatos de variables se indican con diferentes iconos.</string>
     <string name="tutorial_traits_visibility_title">Visibilidad de variable</string>
     <string name="tutorial_traits_visibility_description">Las variables se pueden activar/desactivar usando casilla de verificación.</string>
-    <string name="shutter_capture_content_description">Botón obturador para tomar una imagen.</string>
+    <string name="shutter_capture_content_description">Botón obturador para tomar una foto.</string>
     <string name="dialog_geonav_prefs_sensor_missing_title">Sensor requerido no encontrado</string>
     <string name="dialog_geonav_prefs_sensor_missing_message">El método trapezoidal requiere un acelerómetro y giroscopio para usar la entrada de la brújula.</string>
     <string name="trait_audio_button_content_description">Controla la grabación de audio.</string>
