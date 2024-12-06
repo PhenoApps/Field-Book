@@ -145,7 +145,7 @@
     <string name="dialog_field_creator_ask_size">Por favor, eligir un nombre y tamaño de Campo.</string>
     <string name="dialog_field_creator_ask_start_point">Por favor, eligir un punto de partida del Campo.</string>
     <string name="dialog_field_creator_ask_pattern">Por favor, eligir un patrón de Campo.</string>
-    <string name="dialog_field_creator_ask_name_hint">Variable</string>
+    <string name="dialog_field_creator_ask_name_hint">Nombre</string>
     <string name="dialog_field_creator_ask_row_hint">Filas</string>
     <string name="dialog_field_creator_ask_columns_hint">Columnas</string>
     <string name="dialog_field_creator_top_left">Arriba a la izquierda</string>
@@ -155,7 +155,7 @@
     <string name="dialog_field_creator_insert_field">Creando filas de Campo: %1$s por columnas: %2$s</string>
     <string name="dialog_field_creator_insert_field_complete">Creando filas de Campo: %1$s por columnas: %2$s …completo.</string>
     <string name="dialog_field_creator_insert_plot">Insertando parcela %1$s en la fila %2$s columna %3$s</string>
-    <string name="dialog_field_creator_review_title">Revisión</string>
+    <string name="dialog_field_creator_review_title">Revisar</string>
     <string name="dialog_field_creator_size_group_error">Por favor, ingrese un nombre y formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">El nombre del Campo ya está en uso.</string>
     <string name="dialog_field_creator_large_field">Se detecta un Campo grande, la transacción puede tardar mucho.</string>
@@ -188,7 +188,7 @@
     <string name="today">Hoy</string>
     <string name="yesterday">Ayer</string>
     <plurals name="years_ago">
-        <item quantity="one">Hace %d año</item>
+        <item quantity="one">Hace %d años</item>
         <item quantity="other">Hace %d años</item>
     </plurals>
     <string name="no_activity">No hay actividad</string>
@@ -241,7 +241,7 @@
     <string name="trait_creator_title_layout">Diseño de Variable</string>
     <string name="trait_creator_parameters_title">Parámetros %s</string>
     <string name="activity_traits_new_button_content_description">Agregar un nueva variable.</string>
-    <string name="traits_create_name">Variable</string>
+    <string name="traits_create_name">Nombre</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Predeterminado</string>
     <string name="traits_create_value_minimum">Mínimo</string>
