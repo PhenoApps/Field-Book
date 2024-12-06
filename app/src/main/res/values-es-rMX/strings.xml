@@ -47,7 +47,7 @@
     <string name="app_intro_high_contrast_summary">Activa un tema de alto contraste para una mejor visibilidad en los dispositivos.</string>
     <!-- Storage Definer -->
     <string name="storage_definer_title">Ubicación de Almacenamiento</string>
-    <string name="storage_definer_summary">Por favor, seleccione o cree una carpeta que Field Book pueda utilizar para almacenar datos.</string>
+    <string name="storage_definer_summary">Por favor, seleccione o cree una carpeta que Field Book pueda usar para almacenar datos.</string>
     <string name="define_button_text">Elegir Carpeta</string>
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">La importación de archivos requiere acceso a los archivos del dispositivo.</string>
@@ -101,7 +101,7 @@
     <string name="dialog_field_sort_title">Ordenar Entradas</string>
     <string name="list_item_field_sort_drag_content_description">Arrastre para mover elemento.</string>
     <string name="dialog_field_sort_no_attributes_found">No se encontraron atributos.</string>
-    <string name="dialog_field_sort_no_more_attributes_found">Se han utilizado todos los atributos.</string>
+    <string name="dialog_field_sort_no_more_attributes_found">Se han usado todos los atributos.</string>
     <string name="dialog_field_sort_delete_all_content_description">Elimina todas las entradas de ordenación.</string>
     <string name="dialog_field_sort_toggle_order_content_description">Invierte el orden.</string>
     <string name="dialog_field_sort_add_content_description">Abre un diálogo para agregar un nuevo atributo para ordenar por.</string>
@@ -130,12 +130,12 @@
     <string name="import_error_column_name">El nombre de la columna en el archivo importado no puede ser:</string>
     <string name="import_error_unique_characters_illegal">La columna seleccionada contiene caracteres que no se pueden usar en el identificador único</string>
     <string name="import_error_column_choice">Las columnas no se pueden usar para la misma asignación</string>
-    <string name="import_error_unique">La columna de identificador único contiene duplicados o ya se ha utilizado en un archivo diferente</string>
+    <string name="import_error_unique">La columna de identificador único contiene duplicados o ya se ha usado en un archivo diferente</string>
     <string name="import_error_format_field">Solo los archivos CSV y XLS se pueden importar como campo</string>
     <string name="act_field_editor_no_suitable_columns_error">El archivo a importar no tiene columnas adecuadas entre las que elegir.</string>
     <string name="import_runnable_db_failed_to_switch">La base de datos no pudo cambiar los campos.</string>
     <string name="import_runnable_create_field_data_failed">Error al crear datos del campo para la línea %d en el archivo.</string>
-    <string name="import_runnable_duplicates_skipped">Se han encontrado columnas duplicadas, solo se utilizará la primera instancia.</string>
+    <string name="import_runnable_duplicates_skipped">Se han encontrado columnas duplicadas, solo se usará la primera instancia.</string>
     <string name="fields_study_exists_message">Esta campo ya existe</string>
     <string name="fields_study_and_obs_exists_message">Este Campo ya está importado en este nivel de observación.</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book no pudo cargar el archivo.</string>
@@ -342,7 +342,7 @@
     <string name="activity_collect_frozen_state">Bloqueado - una vez guardados los datos no se pueden modificar o eliminar</string>
     <string name="activity_collect_unlocked_state">Desbloqueado: no hay restricciones en la entrada, modificación o eliminación de datos</string>
     <!-- Trait Layout: Photo -->
-    <string name="trait_error_hardware_missing">El dispositivo no tiene una cámara que pueda utilizarse para tomar una imagen.</string>
+    <string name="trait_error_hardware_missing">El dispositivo no tiene una cámara que pueda usarse para tomar una imagen.</string>
     <string name="trait_delete_warning_photo">¿Estás seguro(a) de que quieres eliminar esta imagen?</string>
     <string name="trait_photo_capture_button_content_description">Presione para abrir una vista de la cámara para capturar.</string>
     <string name="photo_failed_to_delete">Error al eliminar el archivo.</string>
@@ -593,7 +593,7 @@
     <string name="preferences_general_feature_barcode_text">Pasar al ID Único</string>
     <string name="move_to_unique_id_disabled">Desactivado</string>
     <string name="move_to_unique_id_text_or_scan">El botón usa entrada de texto con escaneo opcional de cámara</string>
-    <string name="move_to_unique_id_direct_camera_scan">Botón utiliza escaneo directo de cámara</string>
+    <string name="move_to_unique_id_direct_camera_scan">Botón usa escaneo directo de cámara</string>
     <string name="preferences_appearance_collect_screen_title">Pantalla de Captura</string>
     <string name="preferences_appearance_infobar_number">Número de InfoBars</string>
     <string name="preferences_appearance_infobar_number_description">Ajuste la cantidad de InfoBars que se muestran en la pantalla principal</string>
@@ -619,11 +619,23 @@
     <string name="preferences_behavior_disable_entry_arrow_both">Requiere dato para moverse en cualquier dirección</string>
     <string name="preferences_behavior_skip_entries_title">Omitir Entradas</string>
     <string name="preferences_behavior_skip_entries_disabled">Desactivado</string>
+    <string name="preferences_behavior_skip_entries_with_data">Las flechas omiten las entradas que ya tienen valores para la variable actual</string>
+    <string name="preferences_behavior_skip_entries_across_all_traits">Las flechas omiten las entradas que ya tienen valores para todas las variables</string>
+    <string name="preferences_general_swap_navigation">Cambiar Navegación</string>
+    <string name="preferences_general_swap_navigation_description">Cambiar el comportamiento de las flechas de entrada y variables</string>
+    <string name="preferences_behavior_volume_buttons_navigate">Navegar con las Teclas de Volumen</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Desactivado</string>
+    <string name="preferences_behavior_volume_buttons_navigate_traits">Teclas de volumen navegan variables</string>
+    <string name="preferences_behavior_volume_buttons_navigate_entries">Teclas de volumen navegan entradas</string>
+    <string name="preferences_behavior_return_character">Acción de la Tecla de Retorno</string>
     <string name="preferences_behavior_return_character_do_nothing">Hacer nada</string>
+    <string name="preferences_behavior_return_character_next_plot">Tecla retorno avanza parcela</string>
+    <string name="preferences_behavior_return_character_next_trait">Tecla retorno avanza variable</string>
+    <string name="preferences_general_use_day_number">Usar Día del Año</string>
     <string name="preferences_general_use_day_number_description">Usar número de día del año para capturar datos en lugar de la fecha</string>
     <!-- Location -->
     <string name="preferences_location_title">Ubicación</string>
+    <string name="preferences_location_defaults_title">GeoCoordenadas</string>
     <string name="pref_general_location_collection_title">Nivel de Captura</string>
     <string name="location_level_off">Apagado</string>
     <string name="location_level_study">Campo</string>
@@ -636,11 +648,15 @@
     <string name="pref_geonav_enable_title">Activar GeoNav</string>
     <string name="pref_geonav_enable_summary">Navegar campos usando la ubicación del dispositivo</string>
     <string name="pref_geonav_search_method_title">Método de Búsqueda</string>
+    <string name="pref_geonav_search_method_summary">El método %s es usado para buscar parcelas en GeoNav</string>
     <string name="pref_geonav_method_distance">Distancia</string>
     <string name="pref_geonav_method_trapezoid">Trapezoidal</string>
     <string name="pref_behavior_geonav_parameters_category_title">Parámetros</string>
     <string name="pref_geonav_search_trapezoid_d1_title">Base del Trapezoide (km)</string>
+    <string name="pref_geonav_search_trapezoid_d1_summary">La base más corta del trapezoide es de %s km</string>
     <string name="pref_geonav_search_trapezoid_d2_title">Distancia del Trapezoide (km)</string>
+    <string name="pref_geonav_search_trapezoid_d2_summary">La distancia desde el usuario al extremo opuesto del trapezoide es %s km</string>
+    <string name="pref_geonav_search_angle_summary">GeoNav crea un trapezoide delante del usuario, el ángulo más cercano al usuario se define como %s°</string>
     <string name="pref_geonav_search_angle_title">Ángulo de Búsqueda GeoNav (grados)</string>
     <string name="pref_geonav_log">Registro de GeoNav</string>
     <string name="pref_geonav_log_off">Apagado</string>
@@ -652,10 +668,14 @@
     <string name="pref_geonav_log_both">Ambos</string>
     <string name="pref_geonav_log_both_description">Ambos: Registrando todas las actualizaciones de ubicación y los pasos del algoritmo para storage/geonav/log.txt, la entrada más cercana al storage/geonav/limited_log.txt</string>
     <string name="pref_geonav_update_interval_title">Intervalo de Actualización (s)</string>
+    <string name="pref_geonav_update_interval_summary">El tiempo entre actualizaciones de ubicación es %ss</string>
     <string name="pref_geonav_pair">Proveedor de Ubicación</string>
     <string name="pref_behavior_geonav_internal_gps_choice">GPS interno</string>
+    <string name="choose_paired_bluetooth_devices_title">Elige tu dispositivo Bluetooth vinculado</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Sonido</string>
+    <string name="preferences_sound_primary_order_title">Cambiar Orden Primario</string>
+    <string name="preferences_sound_primary_order_description">Sonido de \'plonk\' cuando cambia el orden primario</string>
     <string name="preferences_sound_entry_title">Cambiar Entrada</string>
     <string name="preferences_sound_entry_description">Reproducir sonido al mover entre entradas</string>
     <string name="preferences_sound_cycle_traits_title">Variables Cíclicas</string>
@@ -704,7 +724,7 @@
     <string name="pref_beta_enable_individual_field_page_title">Habilitar Páginas de Campos Individuales</string>
     <string name="pref_beta_enable_individual_field_page_summary">Seleccionar un campo en la lista de campos abre una página de detalles</string>
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
-    <string name="pref_beta_mlkit_summary">Esta opción utiliza la biblioteca MLKit en lugar de la biblioteca ZXing para escanear códigos de barras</string>
+    <string name="pref_beta_mlkit_summary">Esta opción usa la biblioteca MLKit en lugar de la biblioteca ZXing para escanear códigos de barras</string>
     <string name="pref_beta_mlkit_enabled_title">Escaneo de código de barras usando MLKit activado</string>
     <string name="pref_beta_mlkit_enabled_message">Activando esta funcionalidad cambiará la biblioteca de escaneo de códigos de barras de ZXing a MLKit</string>
     <!-- STATISTICS -->
@@ -800,7 +820,7 @@
     <string name="brapi_oidc_clientid">ID de Cliente OIDC</string>
     <string name="brapi_oidc_clientid_desc">El ID de Cliente a ser usado en el proveedor de autenticación</string>
     <string name="brapi_oidc_scope">Alcance OIDC</string>
-    <string name="brapi_oidc_scope_desc">El Alcance a ser utilizado en el proveedor de autenticación</string>
+    <string name="brapi_oidc_scope_desc">El Alcance a ser usado en el proveedor de autenticación</string>
     <string name="preferences_brapi_traits_title">Preferencias</string>
     <string name="preferences_appearance_collect_labelval_customize">Mostrar Categoria Valor vs Etiqueta</string>
     <string name="preferences_appearance_collect_labelval_customize_description">Mostrar valores o etiquetas de categorias en la pantalla de captura</string>
@@ -849,6 +869,7 @@
     <string name="brapi_auth_error_starting">Error al iniciar la autenticación BrAPI</string>
     <string name="brapi_auth_permission_deny">ERROR: no tiene los permisos necesarios para el sistema especificado.</string>
     <string name="brapi_auth_needed_title">Se necesita iniciar sesión</string>
+    <string name="brapi_auth_needed">Necesitas estar conectado al sistema con el que estás intentando sincronizar los datos para sincronizar tus datos.\n\n¿Quieres autenticarte ahora?</string>
     <!-- BrAPI Import -->
     <string name="import_dialog_title_brapi_fields">Importar Campo con BrAPI</string>
     <string name="brapi_load_data_button">Cargar Campos</string>
@@ -924,7 +945,7 @@
     <string name="brapi_export_skipped_images">Imágenes omitidas</string>
     <string name="brapi_export_skipped_user_created_images">Variable de Imágenes creadas por el usuario</string>
     <string name="brapi_export_images">Imágenes</string>
-    <string name="brapi_delete_message">No se puede eliminar la observación BrAPI sincronizada, utilizando NA en su lugar</string>
+    <string name="brapi_delete_message">No se puede eliminar la observación BrAPI sincronizada, usando NA en su lugar</string>
     <string name="act_brapi_export_image_load_failed">Error al cargar la imagen.</string>
     <!-- Pagination -->
     <string name="next">Siguiente</string>
@@ -937,6 +958,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="brapi_na">NA</string>
     <!-- APP INTRO  -->
     <string name="intro_tutorial_title">¿Quieres activar el tutorial?</string>
+    <string name="intro_tutorial_description">Esta configuración se puede cambiar en los Ajustes</string>
     <string name="intro_tutorial_radio_item_yes">Sí</string>
     <string name="intro_tutorial_radio_item_no">No</string>
     <string name="intro_tutorial_warning">Por favor, elija</string>
@@ -980,7 +1002,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="tutorial_settings_settings_description">permite configuración adicional para la captura de datos.</string>
     <string name="tutorial_settings_export_title">Exportar</string>
     <string name="tutorial_settings_export_description">Los datos se pueden exportar en dos formatos: base de datos o tabla.</string>
-    <string name="tutorial_fields_file_description">Los archivos deben contener tres columnas: un identificador único, un orden primario y un orden secundario. El orden primario/secundario se utiliza para la navegación en el campo.</string>
+    <string name="tutorial_fields_file_description">Los archivos deben contener tres columnas: un identificador único, un orden primario y un orden secundario. El orden primario/secundario se usa para la navegación en el campo.</string>
     <string name="tutorial_fields_select_title">Campo activo</string>
     <string name="tutorial_fields_select_description">Se selecciona un campo para la captura de datos después de ser importado.</string>
     <string name="tutorial_fields_delete_title">Eliminar Campo</string>
@@ -1037,7 +1059,9 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="trait_name_alt_usb">USB</string>
     <string name="view_trait_photo_settings_camera_custom">Predeterminado</string>
     <string name="view_trait_photo_settings_camera_system">Android</string>
+    <string name="view_trait_photo_settings_camera_choice_description">Elija entre la cámara predeterminada de Field Book o la cámara predeterminada de Android.</string>
     <!-- usb camera trait -->
+    <string name="usb_camera_resolution_options_title">Resoluciones Soportadas</string>
     <string name="usb_camera_plug_in_camera">Por favor, conecta una cámara web compatible con UVC.</string>
     <string name="view_trait_photo_settings_white_balance_title">Auto Balance de Blancos</string>
     <string name="view_trait_photo_settings_auto_focus_title">Auto Enfoque</string>
@@ -1050,7 +1074,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="pref_canon_ip_title">Dirección IP Canon</string>
     <string name="pref_canon_port_title">Puerto de Canon</string>
     <string name="preferences_canon_title">Canon</string>
-    <string name="pref_canon_ssid_summary">Este nombre se utiliza para encontrar el AP de tu dispositivo. Este nombre debe estar contenido en el SSID actual.</string>
+    <string name="pref_canon_ssid_summary">Este nombre se usa para encontrar el AP de tu dispositivo. Este nombre debe estar contenido en el SSID actual.</string>
     <string name="pref_canon_title">Nombre SSID</string>
     <string name="pref_canon_ip_summary">Esta es la IP que se muestra en la cámara cuando se configura el AP.</string>
     <string name="pref_canon_port_summary">Este es el puerto que se muestra en la cámara cuando se configura el AP.</string>
@@ -1100,7 +1124,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="no_studydbids_provided">No se ha proporcionado studyDbIds</string>
     <string name="act_brapi_list_api_exception">Error desconocido. Por favor, comprueba las preferencias de BrAPI o contacta con los desarrolladores.</string>
     <string name="act_brapi_list_filter_reset_cache_title">Confirmar Restablecimiento</string>
-    <string name="act_brapi_list_filter_reset_cache_message">Esto eliminará los datos locales de BrAPI utilizados para buscar e importar.</string>
+    <string name="act_brapi_list_filter_reset_cache_message">Esto eliminará los datos locales de BrAPI usados para buscar e importar.</string>
     <string name="search_bar_hint">Buscando… %s</string>
     <string name="menu_filter_brapi_clear_filters">Limpiar Filtros</string>
     <string name="menu_filter_brapi_clear_selection">Limpiar Selección</string>
@@ -1122,10 +1146,13 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="brapi_filter_type_trial_count">Ensayo (%s)</string>
     <string name="brapi_filter_type_crop_count">Cultivo (%s)</string>
     <string name="brapi_filter_type_study_count">Estudio (%s)</string>
-    <string name="pref_alpha_enhanced_brapi_import_summary">Cuando se activa, se utilizará una nueva interfaz de importación de BrAPI para estudios y variables.</string>
+    <string name="pref_alpha_enhanced_brapi_import_summary">Cuando se activa, se usará una nueva interfaz de importación de BrAPI para estudios y variables.</string>
     <string name="pref_alpha_brapi_import_title">Nueva Interfaz de Importación BrAPI</string>
     <string name="opening_brapi_no_network_error">La red debe estar activada para usar funcionalidad BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Esto limpiará la lista en ejecución de los elementos seleccionados.</string>
     <string name="pref_alpha_media_keycode_events_summary">Activar para usar comandos multimedia para interacciones de aplicaciones</string>
     <string name="pref_alpha_media_keycode_events_title">Habilitar Comandos Multimedia</string>
+    <string name="pref_geonav_distance_threshold_summary">GeoNav se detiene automáticamente cuando la distancia de todas las parcelas excede este valor en kilómetros.</string>
+    <string name="pref_geonav_distance_threshold_title">Verificación de Proximidad</string>
+    <string name="activity_collect_proximity_warning">GeoNav detenido, fuera de coordenadas de proximidad</string>
 </resources>
