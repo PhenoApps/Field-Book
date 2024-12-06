@@ -294,6 +294,7 @@
     <string name="traits_create_false">False</string>
     <string name="traits_create_categories_text">Use / to separate categories</string>
     <string name="traits_create_camera">Camera</string>
+    <string name="traits_create_close_keyboard">Close Keyboard</string>
 
     <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
     <string name="traits_create_warning_duplicate">Trait already exists</string>

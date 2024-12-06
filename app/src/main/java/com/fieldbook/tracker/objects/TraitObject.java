@@ -24,6 +24,7 @@ public class TraitObject {
     private String externalDbId;
     private String traitDataSource;
     private String additionalInfo;
+    private Boolean closeKeyboardOnOpen = false;
 
     /**
      * This is a BMS specific field. This will be populated when traits are imported from
@@ -191,12 +192,12 @@ public class TraitObject {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TraitObject that = (TraitObject) o;
-        return realPosition == that.realPosition && Objects.equals(name, that.name) && Objects.equals(format, that.format) && Objects.equals(defaultValue, that.defaultValue) && Objects.equals(minimum, that.minimum) && Objects.equals(maximum, that.maximum) && Objects.equals(details, that.details) && Objects.equals(categories, that.categories) && Objects.equals(id, that.id) && Objects.equals(visible, that.visible) && Objects.equals(externalDbId, that.externalDbId) && Objects.equals(traitDataSource, that.traitDataSource) && Objects.equals(additionalInfo, that.additionalInfo) && Objects.equals(observationLevelNames, that.observationLevelNames);
+        return realPosition == that.realPosition && Objects.equals(name, that.name) && Objects.equals(format, that.format) && Objects.equals(defaultValue, that.defaultValue) && Objects.equals(minimum, that.minimum) && Objects.equals(maximum, that.maximum) && Objects.equals(details, that.details) && Objects.equals(categories, that.categories) && Objects.equals(id, that.id) && Objects.equals(visible, that.visible) && Objects.equals(externalDbId, that.externalDbId) && Objects.equals(traitDataSource, that.traitDataSource) && Objects.equals(additionalInfo, that.additionalInfo) && Objects.equals(observationLevelNames, that.observationLevelNames) && Objects.equals(closeKeyboardOnOpen, that.closeKeyboardOnOpen);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, format, defaultValue, minimum, maximum, details, categories, realPosition, id, visible, externalDbId, traitDataSource, additionalInfo, observationLevelNames);
+        return Objects.hash(name, format, defaultValue, minimum, maximum, details, categories, realPosition, id, visible, externalDbId, traitDataSource, additionalInfo, observationLevelNames, closeKeyboardOnOpen);
     }
 
     public TraitObject clone() {
@@ -216,7 +217,16 @@ public class TraitObject {
         t.setTraitDataSource(this.traitDataSource);
         t.setAdditionalInfo(this.additionalInfo);
         t.setObservationLevelNames(this.observationLevelNames);
+        t.setCloseKeyboardOnOpen(this.closeKeyboardOnOpen);
 
         return t;
+    }
+
+    public Boolean getCloseKeyboardOnOpen() {
+        return closeKeyboardOnOpen;
+    }
+
+    public void setCloseKeyboardOnOpen(Boolean closeKeyboardOnOpen) {
+        this.closeKeyboardOnOpen = closeKeyboardOnOpen;
     }
 }

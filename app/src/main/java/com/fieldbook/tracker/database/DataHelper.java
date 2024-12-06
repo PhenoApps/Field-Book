@@ -2103,12 +2103,13 @@ public class DataHelper {
      * V2 - Edit existing trait
      */
     public long editTraits(String traitDbId, String trait, String format, String defaultValue,
-                           String minimum, String maximum, String details, String categories) {
+                           String minimum, String maximum, String details, String categories,
+                           Boolean closeKeyboardOnOpen) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
-                minimum, maximum, details, categories);
+                minimum, maximum, details, categories, closeKeyboardOnOpen);
 //        try {
 //            ContentValues c = new ContentValues();
 //            c.put("trait", trait);
@@ -2146,7 +2147,7 @@ public class DataHelper {
 
         return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
-                trait.getDetails(), trait.getCategories());
+                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
