@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Option added at trait creation to keep keyboard closed when navigating to text traits (https://github.com/PhenoApps/Field-Book/pull/1102)
 - Proximity check added to disable GeoNav when away from field (https://github.com/PhenoApps/Field-Book/pull/1098)
 - Experimental setting to use media keys for entry/trait navigation and picture capture (https://github.com/PhenoApps/Field-Book/pull/1089)
 
