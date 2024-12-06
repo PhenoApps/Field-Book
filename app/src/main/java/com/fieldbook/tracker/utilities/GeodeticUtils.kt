@@ -160,7 +160,8 @@ class GeodeticUtils {
             teslas: Double,
             geoNavMethod: String,
             d1: Double,
-            d2: Double
+            d2: Double,
+            distanceThreshold: Double
         ): Pair<ObservationUnitModel?, Double> {
 
             //greedy algorithm to find closest point, first point is set to inf
@@ -225,22 +226,25 @@ class GeodeticUtils {
             //after a full run of IZ, update the last CLOSEST_UPDATE to CLOSEST_FINAL
             izLogArray.findLast { it.closest == CLOSEST_UPDATE.toString() }?.closest = CLOSEST_FINAL.toString()
 
-            // limited mode
-            if (currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.LIMITED.value || currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.BOTH.value) {
-                //print only the closest plant to the log
-                izLogArray.forEach {
-                    if (it.closest == CLOSEST_FINAL.toString()) writeGeoNavLog(
-                        preferences,
-                        limitedLog,
-                        it
-                    )
-                }
-            }
+            if (closestDistance/1000 < distanceThreshold) {
 
-            // full mode
-            if (currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.FULL.value || currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.BOTH.value) {
-                //print the entire array to log
-                izLogArray.forEach { writeGeoNavLog(preferences, fullLog, it) }
+                // limited mode
+                if (currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.LIMITED.value || currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.BOTH.value) {
+                    //print only the closest plant to the log
+                    izLogArray.forEach {
+                        if (it.closest == CLOSEST_FINAL.toString()) writeGeoNavLog(
+                            preferences,
+                            limitedLog,
+                            it
+                        )
+                    }
+                }
+
+                // full mode
+                if (currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.FULL.value || currentLoggingMode == GeoNavHelper.GeoNavLoggingMode.BOTH.value) {
+                    //print the entire array to log
+                    izLogArray.forEach { writeGeoNavLog(preferences, fullLog, it) }
+                }
             }
 
             return closestPoint to closestDistance
