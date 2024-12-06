@@ -254,6 +254,7 @@
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_categories_text">Use / para separar categorías</string>
     <string name="traits_create_camera">Cámara</string>
+    <string name="traits_create_close_keyboard">Cerrar Teclado</string>
     <string name="traits_create_warning_name_blank">Nombre de la variable no puede estar vacío</string>
     <string name="traits_create_warning_duplicate">Variable ya existe</string>
     <string name="traits_create_warning_numeric_required">Los valores predeterminado, mínimo y máximo deben ser numéricos</string>
@@ -448,6 +449,7 @@
     <string name="menu_collect_repeated_values_indicator">Muestra el número de valores repetidos.</string>
     <string name="dialog_multi_measure_delete_no_observations">No existen observaciones.</string>
     <string name="dialog_multi_measure_delete_title">Observaciones</string>
+    <string name="dialog_multi_measure_confirm_delete_title">Todas las observaciones para esta variable se eliminarán permanentemente.</string>
     <string name="dialog_multi_measure_delete">Eliminar</string>
     <string name="dialog_multi_measure_select_all">Seleccionar todo</string>
     <!--- GeoNav -->
@@ -596,7 +598,9 @@
     <string name="preferences_appearance_infobar_number">Número de InfoBars</string>
     <string name="preferences_appearance_infobar_number_description">Ajuste la cantidad de InfoBars que se muestran en la pantalla principal</string>
     <string name="preferences_appearance_infobar_hide_prefix">Ocultar prefijo Infobar</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">El prefijo de infobar será reemplazado por un icono genérico</string>
     <string name="preferences_appearance_quickgoto">Rápido Ir a</string>
+    <string name="preferences_appearance_quickgoto_description">Cambia la sección central de la pantalla principal al legado \"Rapido Ir a\"</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamiento</string>
     <string name="preferences_behavior_movement_title">Movimiento</string>
@@ -606,7 +610,13 @@
     <string name="preferences_behavior_cycle_traits_description">Ciclando a través de la lista de variables automáticamente avanza la entrada</string>
     <string name="preferences_behavior_cycle_sound_title">¿Activar efecto de sonido?</string>
     <string name="preferences_behavior_cycle_sound_description">Un efecto de sonido se reproducirá cuando se ciclen las variables (recomendado)</string>
+    <string name="preferences_behavior_return_to_first_trait">Auto-Restablecer Variables</string>
+    <string name="preferences_behavior_return_to_first_trait_description">Avanzar la entrada se reinicia automáticamente en la primer variable</string>
+    <string name="preferences_behavior_disable_entry_arrow">Requiere Dato para Moverse de Entrada</string>
     <string name="preferences_behavior_disable_entry_arrow_neither">Desactivado</string>
+    <string name="preferences_behavior_disable_entry_arrow_left">Requiere dato para moverse a la izquierda</string>
+    <string name="preferences_behavior_disable_entry_arrow_right">Requiere dato para moverse a la derecha</string>
+    <string name="preferences_behavior_disable_entry_arrow_both">Requiere dato para moverse en cualquier dirección</string>
     <string name="preferences_behavior_skip_entries_title">Omitir Entradas</string>
     <string name="preferences_behavior_skip_entries_disabled">Desactivado</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Desactivado</string>
