@@ -227,9 +227,9 @@
     <string name="traits_format_disease_rating">Valoración de Enfermedades</string>
     <string name="traits_format_boolean">Lógico</string>
     <string name="traits_format_text">Texto</string>
-    <string name="traits_format_photo">Imagen</string>
+    <string name="traits_format_photo">Foto</string>
     <string name="traits_format_audio">Audio</string>
-    <string name="traits_format_multicategorical">Categorías multiples</string>
+    <string name="traits_format_multicategorical">Multi-Categorías</string>
     <string name="traits_format_location">Ubicación</string>
     <string name="traits_format_gnss">GNSS</string>
     <string name="traits_format_barcode">Código de barras</string>
@@ -249,7 +249,7 @@
     <string name="traits_create_details">Detalles</string>
     <string name="traits_create_optional">Opcional</string>
     <string name="traits_create_categories_title">Categorías</string>
-    <string name="traits_create_photo_maximum">Número máximo de imágenes</string>
+    <string name="traits_create_photo_maximum">Número máximo de fotos</string>
     <string name="traits_create_true">Verdadero</string>
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_categories_text">Use / para separar categorías</string>
@@ -313,7 +313,7 @@
     <!-- Search  -->
     <string name="main_toolbar_search">Buscar</string>
     <string name="search_dialog_add">Agregar</string>
-    <string name="search_dialog_clear">Borrar</string>
+    <string name="search_dialog_clear">Limpiar</string>
     <string name="search_dialog_search">Buscar</string>
     <string name="search_dialog_operator_dialog_title">Seleccionar un operador</string>
     <string name="search_dialog_query_is_equal_to">es igual a</string>
@@ -334,16 +334,16 @@
     <string name="activity_collect_dialog_new_collector">¿Desea guardar el nombre de la persona capturando datos?</string>
     <!--- Datagrid -->
     <string name="act_data_grid_cursor_failed">La grilla de datos no pudo cargar sus datos.</string>
-    <string name="dialog_data_grid_header_picker_title">Elegir Fila de Encabezados</string>
+    <string name="dialog_data_grid_header_picker_title">Elegir Encabezados de Fila</string>
     <string name="dialog_data_grid_repeated_measures_title">Elegir Observación</string>
-    <string name="menu_action_header_view_data_grid_title">Actualizar Fila de Encabezados</string>
+    <string name="menu_action_header_view_data_grid_title">Actualizar Encabezados de Fila</string>
     <!--- Lock -->
     <string name="activity_collect_locked_state">Bloqueado - entrada, modificación y eliminación de datos están desactivados</string>
-    <string name="activity_collect_frozen_state">Bloqueado - una vez guardados los datos no se pueden modificar o eliminar</string>
+    <string name="activity_collect_frozen_state">Congelado - una vez guardados los datos no se pueden modificar o eliminar</string>
     <string name="activity_collect_unlocked_state">Desbloqueado: no hay restricciones en la entrada, modificación o eliminación de datos</string>
     <!-- Trait Layout: Photo -->
-    <string name="trait_error_hardware_missing">El dispositivo no tiene una cámara que pueda usarse para tomar una imagen.</string>
-    <string name="trait_delete_warning_photo">¿Estás seguro(a) de que quieres eliminar esta imagen?</string>
+    <string name="trait_error_hardware_missing">El dispositivo no tiene una cámara que pueda usarse para tomar una foto.</string>
+    <string name="trait_delete_warning_photo">¿Estás seguro(a) de que quieres eliminar esta foto?</string>
     <string name="trait_photo_capture_button_content_description">Presione para abrir una vista de la cámara para capturar.</string>
     <string name="photo_failed_to_delete">Error al eliminar el archivo.</string>
     <!-- Trait Layout: GNSS -->
@@ -389,8 +389,8 @@
     <string name="trait_usb_camera_zoom_out_button_text">Alejar</string>
     <string name="trait_usb_camera_zoom_out_content_description">Alejar</string>
     <string name="trait_usb_camera_zoom_in_content_description">Acercar</string>
-    <string name="trait_usb_camera_delete_photo">Eliminar Imagen USB</string>
-    <string name="trait_usb_camera_capture_content_description">Capturar una imagen.</string>
+    <string name="trait_usb_camera_delete_photo">Eliminar Foto USB</string>
+    <string name="trait_usb_camera_capture_content_description">Capturar una foto.</string>
     <string name="trait_usb_camera_capture_button_text">Capturar</string>
     <!--- Trait Layout: Zebra label print -->
     <string name="trait_layout_data_stored">Guardado</string>
@@ -420,8 +420,8 @@
     <!--- Trait Layout: Location -->
     <string name="trait_location_save_content_description">Guardar la ubicación actual.</string>
     <!--- Text to Speech Strings -->
-    <string name="trait_photo_tts_success">Imagen tomada exitosamente.</string>
-    <string name="trait_photo_tts_fail">Error en la variable de imagen.</string>
+    <string name="trait_photo_tts_success">Foto tomada exitosamente.</string>
+    <string name="trait_photo_tts_fail">Error en la variable de Foto.</string>
     <string name="trait_print_label_success">Imprimiendo etiqueta.</string>
     <string name="trait_gnss_internal_tts">GPS interno</string>
     <string name="trait_gnss_external_device_tts">Dispositivo externo %s elegido.</string>
@@ -513,7 +513,7 @@
     <string name="export_error_data_missing">No hay datos para exportar.</string>
     <string name="export_complete">Exportación ha sido completada</string>
     <string name="export_progress">Exportando...</string>
-    <string name="export_error_missing_format">Formato de exportación debe ser seleccionado</string>
+    <string name="export_error_missing_format">Tipo de exportación debe ser seleccionado</string>
     <string name="export_error_missing_column">Se debe seleccionar el tipo de columna de campo</string>
     <string name="export_error_missing_trait">Se debe seleccionar el tipo de variable</string>
     <string name="export_overwrite">Sobrescribir exportación anterior</string>
@@ -706,7 +706,7 @@
     <string name="preferences_experimental_title">Experimental</string>
     <string name="preferences_experimental_stable_title">Estable</string>
     <string name="preferences_experimental_beta_title">Beta</string>
-    <string name="preferences_experimental_alpha_title">Alpha</string>
+    <string name="preferences_experimental_alpha_title">Alfa</string>
     <string name="pref_experimental_repeated_values_title">Medidas Repetidas</string>
     <string name="pref_experimental_repeated_values_summary">Activa captura de multiples valores para cada entrada/variable</string>
     <string name="pref_experimental_repeated_values_disabled_title">Medidas Repetidas Desactivadas</string>
@@ -798,7 +798,7 @@
     <string name="act_brapi_auth_http_warning_message">Ha introducido una url de http. No hay garantía de que esta conexión sea segura.</string>
     <string name="brapi_base_url">URL base</string>
     <string name="brapi_base_url_desc">La URL base para el servidor conectado por BrAPI</string>
-    <string name="brapi_choice_to_make_default_dialog_title">Hacer de este servidor BrAPI como predeterminado:</string>
+    <string name="brapi_choice_to_make_default_dialog_title">Hacer este servidor BrAPI el predeterminado:</string>
     <string name="brapi_choice_to_make_default_import">Origen de Importación</string>
     <string name="brapi_choice_to_make_default_export">Origen de Exportación</string>
     <string name="brapi_choice_to_make_default_negative">Cancelar</string>
@@ -807,7 +807,7 @@
     <string name="brapi_edit_display_name_server">Nombre del Servidor</string>
     <string name="brapi_edit_display_name_default">Servidor de Prueba BrAPI</string>
     <string name="preferences_brapi_version">Versión BrAPI</string>
-    <string name="brapi_pagination">Tamaño de la página</string>
+    <string name="brapi_pagination">Tamaño de Página</string>
     <string name="brapi_timeout">Tiempo de Espera del Servidor</string>
     <string name="brapi_chunk_size">Tamaño del Chunk</string>
     <string name="preferences_brapi_authorization_title">Autorización</string>
@@ -896,7 +896,7 @@
     <string name="brapi_trials_load">Cargar ensayos</string>
     <string name="brapi_trials_select">Seleccionar trial</string>
     <string name="brapi_trials_error">Error al cargar los ensayos.</string>
-    <string name="brapi_save_trait">Guardar variables</string>
+    <string name="brapi_save_trait">Guardar Variables</string>
     <string name="brapi_must_configure_url">Debe configurar una URL de BrAPI válida en Ajustes antes de continuar</string>
     <string name="brapi_warning_select_program">Por favor, seleccione un programa</string>
     <string name="brapi_warning_select_trial">Por favor, seleccione un ensayo</string>
@@ -932,21 +932,21 @@
     <string name="brapi_close_button">Cerrar</string>
     <string name="brapi_export_title">Estadísticas de exportación de BrAPI</string>
     <string name="brapi_export_observations">Observaciones</string>
-    <string name="brapi_export_num_new_obs">Nueva observacion</string>
-    <string name="brapi_export_num_synced_obs">Observaciones sincronizadas</string>
+    <string name="brapi_export_num_new_obs"> Nuevas Observaciones</string>
+    <string name="brapi_export_num_synced_obs"> Observaciones Sincronizadas</string>
     <string name="brapi_export_num_ed_obs">Observaciones editadas</string>
     <string name="brapi_export_skipped_observations">Observaciones omitidas</string>
     <string name="brapi_export_skipped_user_created">Variables de Observacion creadas por Usuario</string>
     <string name="brapi_export_skipped_wrong_source">Origen de datos diferente</string>
-    <string name="brapi_export_num_new_imgs">Imágenes nuevas</string>
-    <string name="brapi_export_num_synced_imgs">Imágenes sincronizadas</string>
-    <string name="brapi_export_num_ed_imgs">Imágenes editadas</string>
-    <string name="brapi_export_num_incomplete_imgs">Imágenes sincronizadas incompletas</string>
-    <string name="brapi_export_skipped_images">Imágenes omitidas</string>
-    <string name="brapi_export_skipped_user_created_images">Variable de Imágenes creadas por el usuario</string>
-    <string name="brapi_export_images">Imágenes</string>
+    <string name="brapi_export_num_new_imgs">Fotos Nuevas</string>
+    <string name="brapi_export_num_synced_imgs">Fotos Sincronizadas</string>
+    <string name="brapi_export_num_ed_imgs">Fotos Editadas</string>
+    <string name="brapi_export_num_incomplete_imgs">Fotos Sincronizadas Incompletas</string>
+    <string name="brapi_export_skipped_images">Fotos Omitidas</string>
+    <string name="brapi_export_skipped_user_created_images">Variable de Fotos Creada por el Usuario</string>
+    <string name="brapi_export_images">Fotos</string>
     <string name="brapi_delete_message">No se puede eliminar la observación BrAPI sincronizada, usando NA en su lugar</string>
-    <string name="act_brapi_export_image_load_failed">Error al cargar la imagen.</string>
+    <string name="act_brapi_export_image_load_failed">Error al cargar la Foto.</string>
     <!-- Pagination -->
     <string name="next">Siguiente</string>
     <string name="prev">Anterior</string>
@@ -1049,7 +1049,7 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="trait_camera_connect_content_description">Inicia una conexión de dispositivo.</string>
     <string name="trait_camera_preview_content_description">Esta vista previa de la pantalla de la cámara.</string>
     <string name="trait_camera_capture_content_description">Capturar una foto</string>
-    <string name="delete_local_photo">Eliminar Imagen</string>
+    <string name="delete_local_photo">Eliminar Foto</string>
     <string name="trait_system_photo_settings_title">Ajustes de Fotos del Sistema</string>
     <string name="trait_photos_no_settings">Este variable no tiene ajustes.</string>
     <string name="view_trait_photo_settings_preview_title">Vista Previa</string>
