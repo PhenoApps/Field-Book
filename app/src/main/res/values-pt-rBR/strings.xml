@@ -176,7 +176,7 @@
     <string name="traits_options_edit">Editar</string>
     <string name="traits_options_delete">Excluir</string>
     <string name="traits_options_delete_title">Excluir caractere</string>
-    <string name="traits_warning_delete">Excluindo um caractere também exclui dados que foram coletados para esse caractere. Tem certeza que deseja excluir esse caractere?</string>
+    <string name="traits_warning_delete">Eliminando una variable también se eliminan los datos que se han capturado para esta variable. ¿Estás seguro(a) de que quieres eliminar esta variable?</string>
     <!-- Trait formats -->
     <string name="traits_format_numeric">Numérico</string>
     <string name="traits_format_categorical">Categórico</string>
@@ -227,6 +227,7 @@
     <!-- ID/Barcode Search -->
     <string name="main_toolbar_moveto_no_match">Nenhum valor correspondente</string>
     <string name="main_toolbar_moveto">Ir para ID</string>
+    <string name="main_toolbar_barcode_scan">Escanear el código de barras</string>
     <string name="main_toolbar_moveto_scan">Escanear</string>
     <!-- Search  -->
     <string name="main_toolbar_search">Buscar</string>
@@ -249,14 +250,14 @@
     <!--- Datagrid -->
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
-    <string name="trait_error_hardware_missing">O dispositivo não contém o hardware necessário para esta função</string>
+    <string name="trait_error_hardware_missing">El dispositivo no tiene una cámara que pueda utilizarse para tomar una imagen.</string>
     <!-- Trait Layout: GNSS -->
     <!-- Trait Layout: Date -->
     <!-- Trait Layout: Boolean -->
     <!-- Trait Layout: GoPro -->
     <!-- Trait Layout: USB Camera -->
     <!--- Trait Layout: Zebra label print -->
-    <string name="trait_layout_data_stored">Os dados foram salvos</string>
+    <string name="trait_layout_data_stored">Guardado</string>
     <!--- Trait Layout: Counter -->
     <!--- Trait Layout: Location -->
     <!--- Text to Speech Strings -->
@@ -273,7 +274,7 @@
     <string name="export_format_database">Base de dados</string>
     <string name="export_format_table">Tabela</string>
     <string name="export_file_name">Nome do arquivo</string>
-    <string name="export_content_columns_all">Todas as colunas do campo</string>
+    <string name="export_content_columns_all">Todas las columnas importadas</string>
     <string name="export_content_traits_all">Todos os caracteres</string>
     <string name="export_error_general">Erro durante a exportação</string>
     <string name="export_error_data_missing">Não há dados para exportação</string>
@@ -291,6 +292,7 @@
     <string name="preferences_appearance_language">Idioma</string>
     <string name="preferences_appearance_toolbar_customize_search">Buscar</string>
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
+    <string name="preferences_general_feature_datagrid">Grilla de datos</string>
     <!-- Behavior -->
     <string name="preferences_behavior_data_title">Dados</string>
     <!-- Location -->
@@ -315,6 +317,7 @@
     <!-- Support  -->
     <!-- PhenoApps  -->
     <!-- Technical  -->
+    <string name="about_technical_title">Detalles Técnicos</string>
     <!-- Update -->
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
@@ -325,9 +328,13 @@
     <!-- BrAPI Import -->
     <string name="brapi_study_name">Nome</string>
     <string name="brapi_study_location">Localização</string>
+    <string name="brapi_fields_filter_by_trial">Filtrar por ensayo</string>
+    <string name="brapi_trials_load">Cargar ensayos</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Exportar</string>
     <string name="brapi_close_button">Fechar</string>
+    <string name="brapi_export_skipped_user_created">Variables de Observacion creadas por Usuario</string>
+    <string name="brapi_export_skipped_user_created_images">Variable de Imágenes creadas por el usuario</string>
     <!-- Pagination -->
     <!-- General -->
     <!-- APP INTRO  -->
@@ -337,12 +344,17 @@
     <string name="tutorial_dialog_description">Você deseja habilitar o tutorial? Esta configuração pode ser alterada nas configurações avançadas.</string>
     <string name="tutorial_main_traits_title">Caracteres</string>
     <string name="tutorial_main_traitlist_title">Caracteres</string>
+    <string name="tutorial_main_na_title">Datos faltantes</string>
+    <string name="tutorial_main_delete_description">Los datos son eliminados usando este botón.</string>
     <string name="tutorial_main_search_title">Buscar</string>
     <string name="tutorial_main_resources_title">Recursos</string>
     <string name="tutorial_settings_fields_title">Campos</string>
+    <string name="tutorial_settings_fields_import">Para comenzar a usar Fieldbook, primero importe un archivo de campo.</string>
     <string name="tutorial_settings_traits_title">Caracteres</string>
     <string name="tutorial_settings_settings_title">Configurações avançadas</string>
     <string name="tutorial_settings_export_title">Exportar</string>
+    <string name="tutorial_traits_visibility_description">Las variables se pueden activar/desactivar usando casilla de verificación.</string>
+    <string name="tutorial_main_datagrid_title">Grilla de datos</string>
     <string name="act_brapi_filter_import">Importar</string>
     <string name="act_brapi_filter_clear">Limpar</string>
     <!-- base camera strings -->
