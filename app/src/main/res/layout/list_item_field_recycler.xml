@@ -37,6 +37,18 @@
 
         <TextView
             style="@style/TextViewStyle.Sub"
+            android:id="@+id/brapiId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:minWidth="40dp"
+            android:singleLine="true"
+            tools:visibility="gone"
+            tools:text="brapiId"/>
+
+        <TextView
+            style="@style/TextViewStyle.Sub"
             android:id="@+id/fieldCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
