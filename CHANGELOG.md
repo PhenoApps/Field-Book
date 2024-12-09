@@ -8,9 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Accession number now included for germplasm imported via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1093)
+- Option added at trait creation to keep keyboard closed when navigating to text traits (https://github.com/PhenoApps/Field-Book/pull/1102)
+- Proximity check added to disable GeoNav when away from field (https://github.com/PhenoApps/Field-Book/pull/1098)
 - Experimental setting to use media keys for entry/trait navigation and picture capture (https://github.com/PhenoApps/Field-Book/pull/1089)
 
 ### Changed
+- Fields and traits that have already been imported are now hidden on the BrAPI import screen (https://github.com/PhenoApps/Field-Book/pull/1091)
+- Long-pressing delete button on bottom toolbar will remove all observations for that trait (https://github.com/PhenoApps/Field-Book/pull/1099)
 - Current time now used as lastSyncedTime when downloading Observations via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1071)
 - lastSyncedTime updated after creating/updating Observations (https://github.com/PhenoApps/Field-Book/pull/1071)
 - Improved support for BrAPI servers not using https (https://github.com/PhenoApps/Field-Book/pull/1071)

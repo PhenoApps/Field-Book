@@ -21,9 +21,13 @@ import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSubFilterListActivi
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity.Companion.filterByProgram
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
+import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
+import dagger.hilt.android.AndroidEntryPoint
 import org.brapi.v2.model.core.BrAPIStudy
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class BrapiStudyFilterActivity(
     override val defaultRootFilterKey: String = FILTERER_KEY,
     override val filterName: String = "studies",
@@ -45,6 +49,9 @@ class BrapiStudyFilterActivity(
         TRIAL,
         CROP
     }
+
+    @Inject
+    lateinit var database: DataHelper
 
     override fun BrapiCacheModel.filterByPreferences(): BrapiCacheModel {
 
@@ -73,6 +80,11 @@ class BrapiStudyFilterActivity(
                 tokens in model.label.lowercase() || tokens in model.subLabel.lowercase() || tokens in model.id.lowercase()
             }
         }
+    }
+
+    override fun List<CheckboxListAdapter.Model>.filterExists(): List<CheckboxListAdapter.Model> {
+        val brapiIds = database.allFieldObjects.map { it.study_db_id }
+        return filter { it.id !in brapiIds }
     }
 
     override fun onSearchTextComplete(searchText: String) {

@@ -533,16 +533,27 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         //run the algorithm and time how long it takes
         if (start != null && currentFixQuality) {
 
+            val distanceThreshKm = try {
+                (preferences.getString(GeneralKeys.GEONAV_DISTANCE_THRESHOLD, "10.0") ?: "10.0").toDouble()
+            } catch (e: NumberFormatException) {
+                10.0
+            }
+
             //long toc = System.currentTimeMillis();
-            val (first) = impactZoneSearch(
+            val (first, closestDistance) = impactZoneSearch(
                 mLimitedGeoNavLogWriter, mFullGeoNavLogWriter, preferences, currentLoggingMode(),
                 start, coordinates.toTypedArray(),
-                mAzimuth, theta, mTeslas, geoNavMethod, d1, d2
+                mAzimuth, theta, mTeslas, geoNavMethod, d1, d2, distanceThreshKm
             )
             //long tic = System.currentTimeMillis();
 
             //if we received a result then show it to the user, create a button to navigate to the plot
             if (first != null) {
+
+                if (closestDistance/1000 > distanceThreshKm) {
+                    return
+                }
+
                 val id = first.observation_unit_db_id
                 with((controller.getContext() as CollectActivity)) {
                     if (id != getRangeBox().cRange.plot_id && id != lastPlotIdNav) {
@@ -837,10 +848,14 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             mTeslas = calculateNoise(mGeomagneticField)
             if ((mTeslas < 25 || mTeslas > 65) && mNotWarnedInterference) {
                 mNotWarnedInterference = false
-                Toast.makeText(
-                    controller.getContext(), R.string.activity_collect_geomagnetic_noise_detected,
-                    Toast.LENGTH_SHORT
-                ).show()
+                val geoNavMethod: String =
+                    preferences.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
+                if (geoNavMethod != "0") {
+                    Toast.makeText(
+                        controller.getContext(), R.string.activity_collect_geomagnetic_noise_detected,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
             val R = FloatArray(9)
             val I = FloatArray(9)

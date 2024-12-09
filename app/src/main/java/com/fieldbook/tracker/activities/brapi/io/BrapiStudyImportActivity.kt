@@ -427,6 +427,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                 germs.firstOrNull { it.germplasmDbId == unit.germplasmDbId }?.let { germ ->
 
+                    germ.accessionNumber?.let { accession ->
+                        attributes["AccessionNumber"] = accession
+                    }
+
                     germ.pedigree?.let { pedigree ->
                         attributes["Pedigree"] = pedigree
                     }

@@ -38,6 +38,8 @@ abstract class BrapiSubFilterListActivity<T> : BrapiListFilterActivity<T>() {
 
     protected var numFilterBadge: BadgeDrawable? = null
 
+    override fun List<CheckboxListAdapter.Model>.filterExists(): List<CheckboxListAdapter.Model> = this
+
     override fun setupSearch(models: List<CheckboxListAdapter.Model>) {
 
         val searchEditText = searchBar.editText
