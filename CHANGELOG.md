@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v6.0.1] - 2024-12-09
+
+### Added
 - Accession number now included for germplasm imported via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1093)
 - Option added at trait creation to keep keyboard closed when navigating to text traits (https://github.com/PhenoApps/Field-Book/pull/1102)
 - Proximity check added to disable GeoNav when away from field (https://github.com/PhenoApps/Field-Book/pull/1098)
@@ -524,3 +532,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v5.6.26]: https://github.com/PhenoApps/Field-Book/releases/tag/5.6.26
 
 [v6.0.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.0
+
+[v6.0.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.1
