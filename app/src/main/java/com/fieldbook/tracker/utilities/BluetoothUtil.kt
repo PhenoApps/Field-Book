@@ -10,8 +10,6 @@ import android.widget.RadioGroup
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
 
-
-
 interface BluetoothChooseCallback {
     fun onDeviceChosen(deviceName: String)
 }
