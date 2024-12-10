@@ -1,9 +1,15 @@
 package com.fieldbook.tracker.objects;
 
+import android.graphics.Color;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -144,47 +150,38 @@ public class TraitObject {
         this.observationLevelNames = observationLevelNames;
     }
 
-    public boolean isValidValue(final String s) {
-        // this code is not perfect.
-        // I think that it is necessary to check
-        // the minimum and the maximum values
-        return !isUnder(s) && !isOver(s);
-    }
 
-    public boolean isUnder(final String s) {
-        if (!(format.equals("numeric")))
-            return false;
 
-        Log.d("FB",s);
-        if (minimum.length() > 0) {     // minimum exists
-            try {
-                final double v = Double.parseDouble(s);
-                final double lowerValue = Double.parseDouble(minimum);
-                return v < lowerValue;
-            } catch (NumberFormatException e) {
-                return true;
+    public boolean isValidCategoricalValue(final String inputCategory) {
+
+        //check if its the new json
+        try {
+
+            ArrayList<BrAPIScaleValidValuesCategories> c = CategoryJsonUtil.Companion.decode(inputCategory);
+
+            if (!c.isEmpty()) {
+
+                //get the value from the single-sized array
+                BrAPIScaleValidValuesCategories labelVal = c.get(0);
+
+                //check that this pair is a valid label/val pair in the category,
+                //if it is then set the text based on the preference
+                return CategoryJsonUtil.Companion.contains(c, labelVal);
             }
-        } else {
-            return false;
-        }
-    }
 
-    public boolean isOver(final String s) {
-        if (!(format.equals("numeric")))
-            return false;
+        } catch (Exception e) {
 
-        Log.d("FB",s);
-        if (maximum.length() > 0) {     // maximum exists
-            try {
-                final double v = Double.parseDouble(s);
-                final double upperValue = Double.parseDouble(maximum);
-                return v > upperValue;
-            } catch (NumberFormatException e) {
-                return true;
-            }
-        } else {
-            return false;
+            e.printStackTrace(); //if it fails to decode, assume its an old string
+
+//            if (CategoryJsonUtil.Companion.contains(cats, value)) {
+//
+//                getCollectInputView().setText(value);
+//
+//                getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
+//            }
         }
+
+        return false;
     }
 
     @Override

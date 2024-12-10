@@ -103,7 +103,7 @@ public class CounterTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        removeTrait(getCurrentTrait().getName());
+        removeTrait(getCurrentTrait());
         super.deleteTraitListener();
         ObservationModel model = getCurrentObservation();
         if (model != null) {
