@@ -172,11 +172,11 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                             } else {
                                 fail = true;
                                 if (data[uniqueIndex].isEmpty()) {
-                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_unique, unique, line);
+                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_unique, unique, line+1);
                                 } else if (data[primaryIndex].isEmpty()) {
-                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_primary, primary, line);
+                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_primary, primary, line+1);
                                 } else if (data[secondaryIndex].isEmpty()) {
-                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_secondary, secondary, line);
+                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_secondary, secondary, line+1);
                                 }
                             }
                         }

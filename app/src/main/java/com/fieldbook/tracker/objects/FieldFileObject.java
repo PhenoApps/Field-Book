@@ -4,6 +4,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import android.os.Build;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -106,7 +109,19 @@ public class FieldFileObject {
 
             if (value.contains("/") || value.contains("\\")) {
                 specialCharactersFail = true;
-                setLastError(ctx.getString(R.string.import_runnable_create_field_special_characters, value, rowIndex + 1));
+                String rawMessage = ctx.getString(
+                        R.string.import_runnable_create_field_special_characters,
+                        value,
+                        rowIndex + 1
+                );
+                Spanned formattedMessage;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    formattedMessage = Html.fromHtml(rawMessage, Html.FROM_HTML_MODE_LEGACY);
+                } else {
+                    formattedMessage = Html.fromHtml(rawMessage);
+                }
+
+                setLastError(formattedMessage.toString());
                 return false;
             }
 
@@ -550,43 +565,15 @@ public class FieldFileObject {
         }
 
         public String[] readNext() {
-
-            DataFormatter fmt = new DataFormatter();
             XSSFSheet sheet = wb.getSheetAt(0);
-            XSSFFormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
-
-            if (currentRow >= sheet.getPhysicalNumberOfRows()) {
+            if (currentRow > sheet.getLastRowNum()) {
                 return null;
             }
 
             XSSFRow row = sheet.getRow(currentRow);
-            ArrayList<String> data = new ArrayList<>();
-
-            int maxColumns = sheet.getRow(0).getLastCellNum(); // Get total number of columns from header
-
-            for (int colIdx = 0; colIdx < maxColumns; colIdx++) {
-                XSSFCell cell = (row == null) ? null : row.getCell(colIdx);
-
-                if (cell != null) {
-                    if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {//formula
-                        int type = evaluator.evaluateFormulaCell(cell);
-                        switch (type) {
-                            case CELL_TYPE_BOOLEAN:
-                                data.add(String.valueOf(cell.getBooleanCellValue()));
-                                break;
-                            case CELL_TYPE_NUMERIC:
-                                data.add(String.valueOf(cell.getNumericCellValue()));
-                                break;
-                            default:
-                                data.add(cell.getStringCellValue());
-                                break;
-                        }
-                    } else {
-                        data.add(fmt.formatCellValue(cell));
-                    }
-                } else {
-                    data.add(""); // Add empty string for missing/empty cells
-                }
+            if (row == null) {
+                currentRow++;
+                return new String[0];
             }
 
 
