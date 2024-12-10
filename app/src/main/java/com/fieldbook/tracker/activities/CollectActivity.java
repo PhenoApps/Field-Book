@@ -623,30 +623,20 @@ public class CollectActivity extends ThemedActivity
      */
     @Override
     public boolean validateData() {
-        final String strValue = collectInputView.getText();
+        final String data = collectInputView.getText();
         final TraitObject currentTrait = traitBox.getCurrentTrait();
 
         if (currentTrait == null) return false;
 
-        if (strValue.equals("NA")) return true;
+        if (data.equals("NA")) return true;
 
-        final String trait = currentTrait.getName();
+        if (data.isEmpty()) return true;
 
-        if (traitBox.existsNewTraits()
-                && traitBox.getCurrentTrait() != null
-                && strValue.length() > 0
-                && !traitBox.getCurrentTrait().isValidValue(strValue)) {
+        BaseTraitLayout layout = traitLayouts.getTraitLayout(currentTrait.getFormat());
+        if (!layout.validate(data)) {
 
-            //checks if the trait is numerical and within the bounds (otherwise returns false)
-            if (currentTrait.isOver(strValue)) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_maximum_value)
-                        + ": " + currentTrait.getMaximum());
-            } else if (currentTrait.isUnder(strValue)) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_minimum_value)
-                        + ": " + currentTrait.getMinimum());
-            }
+            removeTrait(currentTrait);
 
-            removeTrait(trait);
             collectInputView.clear();
 
             soundHelper.playError();
@@ -720,7 +710,7 @@ public class CollectActivity extends ThemedActivity
             // if a brapi observation that has been synced, don't allow deleting
             String format = getTraitFormat();
             if (status && !Formats.Companion.isCameraTrait(format)) {
-                brapiDelete(getTraitName(), false);
+                brapiDelete(getCurrentTrait(), false);
             } else {
                 traitLayouts.deleteTraitListener(getTraitFormat());
             }
@@ -1249,9 +1239,8 @@ public class CollectActivity extends ThemedActivity
                 .getLocationByCollectMode(this, preferences, expId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
     }
 
-    private void brapiDelete(String parent, Boolean hint) {
+    private void brapiDelete(TraitObject trait, Boolean hint) {
         Utils.makeToast(this, getString(R.string.brapi_delete_message));
-        TraitObject trait = traitBox.getCurrentTrait();
         updateObservation(trait, getString(R.string.brapi_na), null);
         if (hint) {
             setNaTextBrapiEmptyField();
@@ -1261,19 +1250,20 @@ public class CollectActivity extends ThemedActivity
     }
 
     // Delete trait, including from database
-    public void removeTrait(String parent) {
+    public void removeTrait(TraitObject trait) {
+
         if (rangeBox.isEmpty()) {
             return;
         }
 
-        String exp_id = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-        TraitObject trait = traitBox.getCurrentTrait();
-        if (database.isBrapiSynced(exp_id, getObservationUnit(), trait.getId(), getRep())) {
-            brapiDelete(parent, true);
+        String fieldId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+
+        if (database.isBrapiSynced(fieldId, getObservationUnit(), trait.getId(), getRep())) {
+            brapiDelete(trait, true);
         } else {
             // Always remove existing trait before inserting again
             // Based on plot_id, prevent duplicate
-            traitBox.remove(parent, getObservationUnit(), getRep());
+            traitBox.remove(trait, getObservationUnit(), getRep());
         }
     }
 

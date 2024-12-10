@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
@@ -68,6 +69,15 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public abstract void init(Activity act);
+
+    /**
+     * validate is used in collect activity to check if the collected data is within the
+     * specification of the trait, such as min/max.
+     */
+    @NonNull
+    public Boolean validate(String data) {
+        return true;
+    }
 
     /**
      * Override to block multi-measure navigation with specific condition
@@ -303,8 +313,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
         ((CollectActivity) getContext()).updateObservation(trait, value, null);
     }
 
-    public void removeTrait(String parent) {
-        ((CollectActivity) getContext()).removeTrait(parent);
+    public void removeTrait(TraitObject trait) {
+        ((CollectActivity) getContext()).removeTrait(trait);
     }
 
     public void triggerTts(String text) {
