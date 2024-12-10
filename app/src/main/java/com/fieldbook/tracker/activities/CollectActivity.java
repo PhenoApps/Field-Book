@@ -1811,8 +1811,14 @@ public class CollectActivity extends ThemedActivity
         goToId = builder.create();
 
         goToId.setOnShowListener(dialog -> {
-            barcodeId.requestFocus();
-            SoftKeyboardUtil.Companion.showKeyboard(getContext(), barcodeId, 500L);
+            barcodeId.post(() -> {
+                barcodeId.requestFocus();
+                SoftKeyboardUtil.Companion.showKeyboard(getContext(), barcodeId, 250L);
+            });
+        });
+
+        goToId.setOnDismissListener(dialog -> {
+            barcodeId.post(() -> SoftKeyboardUtil.Companion.closeKeyboard(getContext(), barcodeId, 250L));
         });
 
         goToId.show();
