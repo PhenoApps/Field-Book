@@ -23,6 +23,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.BluetoothChooseCallback;
 import com.fieldbook.tracker.utilities.BluetoothUtil;
@@ -156,7 +157,9 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
                 String message = intent.getExtras().getString("message");
                 int numLabels = intent.getExtras().getInt("numLabels", 0);
-
+                String plotId = intent.getExtras().getString("plotId");
+                String traitId = intent.getExtras().getString("traitId");
+                String traitFormat = intent.getExtras().getString("traitFormat");
 
                 if (message != null) {
 
@@ -164,13 +167,13 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
                 }
 
-                if (numLabels > 0) {
+                if (numLabels > 0 && plotId != null && traitId != null) {
                     String labelNumber = String.valueOf(numLabels);
-                    // Use the number of labels printed to record each print event
-                    ((CollectActivity) getContext()).insertPrintObservation(labelNumber);
-
-                    ((CollectActivity) getContext()).refreshRepeatedValuesToolbarIndicator();
+                    CollectActivity activity = (CollectActivity) getContext();
+                    activity.insertPrintObservation(plotId, traitId, traitFormat, labelNumber);
+                    activity.refreshRepeatedValuesToolbarIndicator();
                 }
+
             }
         }
     };
@@ -449,17 +452,23 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                          */
                         String printerName = getPrefs().getString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, null);
                         Log.d(TAG, "retrieved printerName is " + printerName);
+
+                        // Retrieve plotId and trait for use in the print command
+                        CollectActivity activity = (CollectActivity) getContext();
+                        String plotId = activity.getRangeBox().getPlotID();
+                        TraitObject trait = activity.getCurrentTrait();
+
                         if (printerName == null) {
                             mBluetoothUtil.choose(getContext(), new BluetoothChooseCallback() {
                                 @Override
                                 public void onDeviceChosen(String newDeviceName) {
                                     Log.d(TAG, "Chosen printerName is " + newDeviceName);
                                     saveDeviceNamePreference(newDeviceName);
-                                    mBluetoothUtil.print(getContext(), newDeviceName, size, labels);
+                                    mBluetoothUtil.print(getContext(), newDeviceName, labels, plotId, trait);
                                 }
                             });
                         } else {
-                            mBluetoothUtil.print(getContext(), printerName, size, labels);
+                            mBluetoothUtil.print(getContext(), printerName, labels, plotId, trait);
                         }
                     }
                 }

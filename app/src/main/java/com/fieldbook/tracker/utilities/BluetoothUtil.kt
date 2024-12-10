@@ -8,6 +8,7 @@ import android.util.Log
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.objects.TraitObject
 
 interface BluetoothChooseCallback {
     fun onDeviceChosen(deviceName: String)
@@ -73,11 +74,17 @@ class BluetoothUtil {
      * This function will send a list of label commands to the printer, and only updates the printer message when the
      * button is pressed.
      */
-    fun print(ctx: Context, printerName: String, size: String, labelCommand: List<String>) {
+    fun print(
+        ctx: Context,
+        printerName: String,
+        labelCommand: List<String>,
+        plotId: String,
+        trait: TraitObject
+    ) {
         Log.d(TAG, "Label zpl is: $labelCommand")
         if (labelCommand.isNotEmpty()) {
             Log.d(TAG, "Sending label zpl to $printerName")
-            PrintThread(ctx, printerName).print(size, labelCommand)
+            PrintThread(ctx, printerName).print(labelCommand, plotId, trait)
         }
     }
 }
