@@ -328,14 +328,19 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
                         ZipUtil.Companion.zip(context,
                                 new DocumentFile[]{DocumentFile.fromFile(new File(dbPath)), tempOutput},
                                 zipOutput);
-                        new FileUtil().shareFile(context, preferences, zipFile);
+                        FileUtil.shareFile(context, preferences, zipFile);
                         if (tempOutput != null && !tempOutput.delete()) {
                             throw new IOException();
                         }
                     } catch (IOException e) {
+                        fail = true;
                         e.printStackTrace();
                     }
+                } else {
+                    fail = true;
                 }
+            } else {
+                fail = true;
             }
             return 0;
         }
