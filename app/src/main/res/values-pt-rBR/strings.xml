@@ -18,6 +18,7 @@
     <string name="dialog_save_error_title">Erro ao Salvar</string>
     <string name="dialog_back">Voltar</string>
     <string name="dialog_scan">Escanear</string>
+    <string name="dialog_sort_by">Classificar por</string>
     <string name="dialog_enable">Habilitar</string>
     <string name="dialog_delete">Excluir</string>
     <string name="barcode_scanner_text">Escanear código de barras</string>
@@ -25,6 +26,12 @@
     <string name="startup_sample_data_title">Dados de amostra</string>
     <string name="startup_sample_data_message">Carregar dados de amostra?</string>
     <!-- App Intro -->
+    <string name="app_intro_intro_title_slide1">Bem-vindo ao Field Book!</string>
+    <string name="app_intro_intro_summary_slide1">A coleta de dados no campo exige, tradicionalmente, a escrita e a transcrição de notas em papel. O Livro de Campo foi criado como uma solução digital para captura de dados que permite aumentar a velocidade de coleta com maior integridade de dados.</string>
+    <string name="app_intro_intro_title_slide2">Funcionalidades e Personalização</string>
+    <string name="app_intro_permissions_title">Permissões</string>
+    <string name="app_intro_permissions_warning">Por favor, conceda as permissões necessárias</string>
+    <string name="app_intro_storage_title">Definir Armazenamento</string>
     <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">A importação de arquivos requer acesso aos arquivos do dispositivo.</string>
