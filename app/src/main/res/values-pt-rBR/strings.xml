@@ -29,10 +29,26 @@
     <string name="app_intro_intro_title_slide1">Bem-vindo ao Field Book!</string>
     <string name="app_intro_intro_summary_slide1">A coleta de dados no campo exige, tradicionalmente, a escrita e a transcrição de notas em papel. O Livro de Campo foi criado como uma solução digital para captura de dados que permite aumentar a velocidade de coleta com maior integridade de dados.</string>
     <string name="app_intro_intro_title_slide2">Funcionalidades e Personalização</string>
+    <string name="app_intro_intro_summary_slide2">Os dados são inseridos no Field Book com layouts de características personalizadas que são projetados para simplificar dados de entrada e minimizar erros.\n\n Por padrão, os dados coletados são armazenados localmente, mas o Field Book suporta a API que lhe permite enviar dados para sistemas compatíveis com BrAPI.</string>
+    <string name="app_intro_required_setup_title">Configuração Requerida</string>
+    <string name="app_intro_required_setup_summary">Para começar a usar o Field Book, conceda as permissões necessárias para o aplicativo e defina uma pasta onde seus dados serão armazenados.</string>
     <string name="app_intro_permissions_title">Permissões</string>
     <string name="app_intro_permissions_warning">Por favor, conceda as permissões necessárias</string>
     <string name="app_intro_storage_title">Definir Armazenamento</string>
+    <string name="app_intro_storage_summary">Defina uma pasta onde seus dados serão armazenados.</string>
+    <string name="app_intro_storage_warning">Por favor, defina o local de armazenamento</string>
+    <string name="app_intro_required_optional_title">Configuração Opcional</string>
+    <string name="app_intro_required_optional_summary">Estas configurações opcionais personalizam o Field Book e podem ser ajustadas nas Configurações de Field Book.</string>
+    <string name="app_intro_load_sample_data_title">Carregar Dados de Exemplo</string>
+    <string name="app_intro_load_sample_data_summary">Importar um banco de dados de amostra que inclui campos de exemplo e características.</string>
+    <string name="app_intro_tutorial_title">Tutorial</string>
+    <string name="app_intro_tutorial_summary">Adicione um ícone de ajuda ao topo da barra de ferramentas que descreve recursos em todo o aplicativo.</string>
+    <string name="app_intro_high_contrast_title">Tema de Alto Contraste</string>
+    <string name="app_intro_high_contrast_summary">Permitir um tema de alto contraste para melhor visibilidade em dispositivos.</string>
     <!-- Storage Definer -->
+    <string name="storage_definer_title">Local de Armazenamento</string>
+    <string name="storage_definer_summary">Por favor, selecione ou crie uma pasta que o Field Book pode usar para armazenar os dados do aplicativo.</string>
+    <string name="define_button_text">Escolher Pasta</string>
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">A importação de arquivos requer acesso aos arquivos do dispositivo.</string>
     <string name="permission_rationale_storage_export">A exportação de dados requer acesso aos arquivos do dispositivo.</string>
@@ -40,11 +56,12 @@
     <string name="permission_ask_bluetooth">Por favor, aceite permissões de Bluetooth.</string>
     <!-- Config Activity  -->
     <string name="settings_fields">Campos</string>
-    <string name="settings_traits">Caracteres</string>
+    <string name="settings_traits">Características</string>
     <string name="settings_collect">Coletar</string>
     <string name="settings_export">Exportar</string>
     <string name="settings_advanced">Configurações avançadas</string>
     <string name="settings_profile">Perfil</string>
+    <string name="settings_statistics">Estatísticas</string>
     <!-- Config Activity Fuzzy Search  -->
     <string name="act_config_fuzzy_search_failed">Base de Dados não pode recuperar um campo ou parcela com o código: %s</string>
     <string name="act_config_fuzzy_search_error">Algo deu errado ao pesquisar por %s</string>
@@ -54,13 +71,13 @@
     <string name="import_source_cloud">Armazenamento em nuvem</string>
     <string name="import_source_ask">Perguntar sempre</string>
     <string name="import_dialog_importing">Por favor aguarde...</string>
-    <string name="import_error_general">Erro na importação</string>
+    <string name="import_error_general">Erro ao importar</string>
     <string name="act_file_explorer_no_file_error">Não foram encontrados diretórios de Field Book.</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">Nenhum campo está atualmente carregado. Por favor, coloque um campo antes de coletar dados.</string>
     <string name="warning_traits_missing">Não existem caracteres. Por favor, crie caracteres antes de coletar dados.</string>
     <!-- Changelog -->
-    <string name="changelog_title">Alterar registro</string>
+    <string name="changelog_title">Registro de alterações</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Organizar Lista de Campos</string>
@@ -85,8 +102,8 @@
     <string name="list_item_field_sort_drag_content_description">Arraste para mover item.</string>
     <string name="dialog_field_sort_no_attributes_found">Não foram encontrados atributos.</string>
     <string name="dialog_field_sort_no_more_attributes_found">Todos os atributos têm sido usados.</string>
-    <string name="dialog_field_sort_delete_all_content_description">Exclui todas as entradas de classificação.</string>
-    <string name="dialog_field_sort_toggle_order_content_description">Inverte a ordem de classificação.</string>
+    <string name="dialog_field_sort_delete_all_content_description">Exclui todas as entradas de organização.</string>
+    <string name="dialog_field_sort_toggle_order_content_description">Inverte a ordem de organização.</string>
     <string name="dialog_field_sort_add_content_description">Abre uma caixa de diálogo para adicionar um novo atributo para ser organizado.</string>
     <!-- Modify -->
     <string name="fields_rename_study">Renomear</string>
@@ -101,9 +118,12 @@
         <item quantity="other">Tem certeza que deseja excluir estes campos: %s?</item>
     </plurals>
     <!-- Import -->
+    <string name="fields_new_button_content_description">Adicionar um novo campo.</string>
+    <string name="fields_new_dialog_title">Novo campo</string>
+    <string name="fields_new_create_field">Criar novo</string>
     <string name="import_dialog_unique">Identificador único</string>
-    <string name="import_dialog_primary">Ordem primária</string>
-    <string name="import_dialog_secondary">ordem secundária</string>
+    <string name="import_dialog_primary">Identificador primário</string>
+    <string name="import_dialog_secondary">Identificador secundário</string>
     <string name="import_dialog_sort">Ordem de Organização</string>
     <string name="import_error_unsupported">Este tipo de arquivo não é suportado atualmente</string>
     <string name="import_error_columns_replaced">Nomes de coluna contêm caracteres ilegais que serão substituídos durante a importação.</string>
@@ -161,6 +181,9 @@
     <string name="field_data_title">Dados</string>
     <string name="field_trait_observation_total">\"%d\"observações</string>
     <!-- Field Detail Charts -->
+    <string name="field_trait_chart_no_data">Sem dados para o gráfico</string>
+    <string name="field_trait_chart_incompatible_format">Este formato de característica não pode ser representado graficamente</string>
+    <string name="field_trait_chart_excess_data">Muitos valores distintos para representar graficamente</string>
     <!-- Semantic dates -->
     <string name="today">Hoje</string>
     <string name="yesterday">Ontem</string>
@@ -177,7 +200,7 @@
     <string name="traits_sort_import_order">Ordem de Importação</string>
     <string name="traits_sort_visibility">Visibilidade</string>
     <string name="traits_sort_format">Formato</string>
-    <string name="warning_traits_missing_modify">Crie caracteres antes de modificá-las.</string>
+    <string name="warning_traits_missing_modify">Crie características antes de modificá-las.</string>
     <!-- Trait import/export -->
     <string name="traits_toolbar_import_export">Importar/Exportar</string>
     <string name="traits_dialog_import">Importar</string>
@@ -241,7 +264,7 @@
     <string name="main_infobar_data_missing">Não há dados</string>
     <string name="main_toolbar_next_entry_no_data">Nova entrada de dados</string>
     <!-- InfoBars -->
-    <string name="dialog_att_chooser_traits">Caracteres</string>
+    <string name="dialog_att_chooser_traits">Características</string>
     <!-- ID/Barcode Search -->
     <string name="main_toolbar_moveto_no_match">Nenhum valor correspondente</string>
     <string name="main_toolbar_moveto">Ir para ID</string>
@@ -289,6 +312,7 @@
     <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
+    <string name="export_source_brapi">BrAPI</string>
     <string name="export_format_database">Base de dados</string>
     <string name="export_format_table">Tabela</string>
     <string name="export_file_name">Nome do arquivo</string>
@@ -360,15 +384,15 @@
     <string name="intro_tutorial_radio_item_no">Não</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_description">Você deseja habilitar o tutorial? Esta configuração pode ser alterada nas configurações avançadas.</string>
-    <string name="tutorial_main_traits_title">Caracteres</string>
-    <string name="tutorial_main_traitlist_title">Caracteres</string>
+    <string name="tutorial_main_traits_title">Características</string>
+    <string name="tutorial_main_traitlist_title">Características</string>
     <string name="tutorial_main_na_title">Datos faltantes</string>
     <string name="tutorial_main_delete_description">Los datos son eliminados usando este botón.</string>
     <string name="tutorial_main_search_title">Buscar</string>
     <string name="tutorial_main_resources_title">Recursos</string>
     <string name="tutorial_settings_fields_title">Campos</string>
     <string name="tutorial_settings_fields_import">Para comenzar a usar Fieldbook, primero importe un archivo de campo.</string>
-    <string name="tutorial_settings_traits_title">Caracteres</string>
+    <string name="tutorial_settings_traits_title">Características</string>
     <string name="tutorial_settings_settings_title">Configurações avançadas</string>
     <string name="tutorial_settings_export_title">Exportar</string>
     <string name="tutorial_traits_visibility_description">Las variables se pueden activar/desactivar usando casilla de verificación.</string>
@@ -381,5 +405,5 @@
     <!-- gopro -->
     <!-- canon camera strings -->
     <string name="sort">Organizar</string>
-    <string name="brapi_traits_filter_title">Caracteres</string>
+    <string name="brapi_traits_filter_title">Características</string>
 </resources>
