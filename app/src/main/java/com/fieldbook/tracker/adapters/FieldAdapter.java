@@ -117,14 +117,13 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
 
     class ViewHolder extends RecyclerView.ViewHolder {
         ImageView sourceIcon;
-        TextView name, count, brapiId;
+        TextView name, count;
 
         ViewHolder(View itemView) {
             super(itemView);
             sourceIcon = itemView.findViewById(R.id.fieldSourceIcon);
             name = itemView.findViewById(R.id.fieldName);
             count = itemView.findViewById(R.id.fieldCount);
-            brapiId = itemView.findViewById(R.id.brapiId);
 
             // Short click on source icon sets active field (unless in selectionMode)
             sourceIcon.setOnClickListener(v -> {
@@ -183,14 +182,6 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
 
         String formattedCount = String.format(context.getString(R.string.field_observation_count_format), count, level);
         holder.count.setText(formattedCount);
-
-        if (field.getStudy_db_id() != null && !Objects.equals(field.getStudy_db_id(), "null")) {
-            holder.brapiId.setText(field.getStudy_db_id());
-            holder.brapiId.setVisibility(View.VISIBLE);
-        } else {
-            holder.brapiId.setText("");
-            holder.brapiId.setVisibility(View.GONE);
-        }
 
         // Set source icon
         ImportFormat importFormat = field.getImport_format();
