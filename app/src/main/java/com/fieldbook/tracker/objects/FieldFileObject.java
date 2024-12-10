@@ -72,7 +72,7 @@ public class FieldFileObject {
     public abstract static class FieldFileBase {
         boolean openFail;
         boolean specialCharactersFail;
-        private String lastErrorMessage = "";
+        private CharSequence lastErrorMessage = "";
         private final Uri path_;
         private final Context ctx;
 
@@ -85,44 +85,42 @@ public class FieldFileObject {
             specialCharactersFail = false;
         }
 
-        protected void setLastError(String message) {
+        protected void setLastError(CharSequence message) {
             this.lastErrorMessage = message;
-            Log.e("FieldFileBase", message);
+            Log.e("FieldFileBase", message.toString());
         }
 
-        public String getLastError() {
+        public CharSequence getLastError() {
             return this.lastErrorMessage;
         }
 
         // Helper method to check unique values
         protected boolean checkUnique(HashMap<String, String> check, String value, String columnLabel, int rowIndex) {
-
-            if (value == null || value.isEmpty()) {
-                setLastError(ctx.getString(R.string.import_runnable_create_field_missing_unique, columnLabel, rowIndex + 1));
-                return false;
-            }
+            String fixFileMessage = ctx.getString(R.string.import_runnable_create_field_fix_file);
 
             if (check.containsKey(value)) {
-                setLastError(ctx.getString(R.string.import_runnable_create_field_duplicate_unique, value, rowIndex + 1));
+                String duplicateErrorMessage = ctx.getString(
+                        R.string.import_runnable_create_field_duplicate_unique_identifier, value, columnLabel, + 1
+                );
+                setLastError(StringUtil.INSTANCE.applyBoldStyleToString(
+                        String.format("%s\n\n%s", duplicateErrorMessage, fixFileMessage),
+                        value, columnLabel
+                ));
                 return false;
             }
 
-            if (value.contains("/") || value.contains("\\")) {
-                specialCharactersFail = true;
-                String rawMessage = ctx.getString(
-                        R.string.import_runnable_create_field_special_characters,
-                        value,
-                        rowIndex + 1
-                );
-                Spanned formattedMessage;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    formattedMessage = Html.fromHtml(rawMessage, Html.FROM_HTML_MODE_LEGACY);
-                } else {
-                    formattedMessage = Html.fromHtml(rawMessage);
+            for (char specialChar : new char[]{'/', '\\'}) {
+                if (value.contains(String.valueOf(specialChar))) {
+                    String specialCharErrorMessage = ctx.getString(
+                            R.string.import_runnable_create_field_special_character_error, value, columnLabel, rowIndex + 1, specialChar
+                    );
+                    setLastError(StringUtil.INSTANCE.applyBoldStyleToString(
+                            String.format("%s\n\n%s", specialCharErrorMessage, fixFileMessage),
+                            value, columnLabel
+                    ));
+                    specialCharactersFail = true;
+                    return false;
                 }
-
-                setLastError(formattedMessage.toString());
-                return false;
             }
 
             check.put(value, value);

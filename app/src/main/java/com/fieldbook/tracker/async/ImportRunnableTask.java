@@ -18,6 +18,7 @@ import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.StringUtil;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.lang.ref.WeakReference;
@@ -36,7 +37,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
     int lineFail = -1;
     boolean fail;
-    String failMessage;
+    private CharSequence failMessage;
     boolean uniqueFail;
     boolean containsDuplicates = false;
     private static final String TAG = "ImportRunnableTask";
@@ -171,12 +172,31 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                             } else {
                                 fail = true;
+
+                                String fixFileMessage = mContext.get().getString(R.string.import_runnable_create_field_fix_file);
+                                String missingIdMessageTemplate = mContext.get().getString(R.string.import_runnable_create_field_missing_identifier);
+
+                                String missingField = null;
+                                String fieldValue = null;
+
                                 if (data[uniqueIndex].isEmpty()) {
-                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_unique, unique, line+1);
+                                    missingField = mContext.get().getString(R.string.import_dialog_unique).toLowerCase();
+                                    fieldValue = unique;
                                 } else if (data[primaryIndex].isEmpty()) {
-                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_primary, primary, line+1);
+                                    missingField = mContext.get().getString(R.string.import_dialog_primary).toLowerCase();
+                                    fieldValue = primary;
                                 } else if (data[secondaryIndex].isEmpty()) {
-                                    failMessage = mContext.get().getString(R.string.import_runnable_create_field_missing_secondary, secondary, line+1);
+                                    missingField = mContext.get().getString(R.string.import_dialog_secondary).toLowerCase();
+                                    fieldValue = secondary;
+                                }
+
+                                if (missingField != null) {
+                                    String missingIdMessage = String.format(missingIdMessageTemplate, missingField, fieldValue, line + 1);
+                                    failMessage = StringUtil.INSTANCE.applyBoldStyleToString(
+                                            String.format("%s\n\n%s", missingIdMessage, fixFileMessage),
+                                            fieldValue,
+                                            String.valueOf(line + 1)
+                                    );
                                 }
                             }
                         }
@@ -235,7 +255,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
         // Display user feedback in an alert dialog
         if (context != null && (uniqueFail || mFieldFile.hasSpecialCharacters())) {
-            String errorMessage = mFieldFile.getLastError();
+            CharSequence errorMessage = mFieldFile.getLastError();
             showAlertDialog(context, "Unable to Import", errorMessage);
         } else if (context != null && fail ) {
             showAlertDialog(context, "Unable to Import", failMessage);
@@ -253,9 +273,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             Log.d(TAG, "onPostExecute: Import successful. Field setup for ID: " + result);
 
             SharedPreferences.Editor ed = preferences.edit();
-
             CollectActivity.reloadData = true;
-
             controller.queryAndLoadFields();
 
             try {
@@ -289,7 +307,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         }
     }
 
-    private void showAlertDialog(Context context, String title, String message) {
+    private void showAlertDialog(Context context, String title, CharSequence message) {
         new AlertDialog.Builder(context, R.style.AppAlertDialog)
                 .setTitle(title)
                 .setMessage(message)

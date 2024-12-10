@@ -160,11 +160,10 @@
     <string name="import_runnable_create_field_data_failed">Failed to create field data for line %d in file.</string>
     <string name="import_runnable_duplicates_skipped">Duplicate columns found, only first instance will be used.</string>
 
-    <string name="import_runnable_create_field_special_characters">Unique identifier value "<b>%s</b>" on row %d contains special characters that are not allowed.</string>
-    <string name="import_runnable_create_field_duplicate_unique">Unique identifier value "<b>%s</b>" is duplicated on row %d.</string>
-    <string name="import_runnable_create_field_missing_unique">Missing value found for unique identifier "<b>%s</b>" on row %d.</string>
-    <string name="import_runnable_create_field_missing_primary">Missing value found for primary identifier "<b>%s</b>" on row %d.</string>
-    <string name="import_runnable_create_field_missing_secondary">Missing value found for secondary identifier "<b>%s</b>" on row %d.</string>
+    <string name="import_runnable_create_field_duplicate_unique_identifier">Unique identifier value %s in column %s is duplicated on row %d.</string>
+    <string name="import_runnable_create_field_special_character_error">Unique identifier value %s in column %s on row %d contains special character "%s" which is not allowed.</string>
+    <string name="import_runnable_create_field_missing_identifier">Missing value for %s %s on row %d.</string>
+    <string name="import_runnable_create_field_fix_file">Please correct the file and try importing it again.</string>
 
     <string name="fields_study_exists_message">This field already exists.</string>
     <string name="fields_study_and_obs_exists_message">This field is already imported at this observation level.</string>
