@@ -130,7 +130,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             f.setPrimary_id(primary);
             f.setSecondary_id(secondary);
 
-            studyId = controller.getDatabase().createField(f, nonEmptyColumns);
+            studyId = controller.getDatabase().createField(f, nonEmptyColumns, false);
 
             controller.getDatabase().beginTransaction();
 

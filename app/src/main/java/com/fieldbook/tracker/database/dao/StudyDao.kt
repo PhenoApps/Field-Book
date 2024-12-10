@@ -329,9 +329,12 @@ class StudyDao {
          * This function uses a field object to create a exp/study row in the database.
          * Columns are new observation unit attribute names that are inserted as well.
          */
-        fun createField(e: FieldObject, timestamp: String, columns: List<String>): Int = withDatabase { db ->
+        fun createField(e: FieldObject, timestamp: String, columns: List<String>, fromBrapi: Boolean): Int = withDatabase { db ->
 
-            when (val sid = checkFieldNameAndObsLvl(e.exp_name, e.observation_level)) {
+            when (val sid = if (fromBrapi) checkBrapiStudyUnique(
+                e.observation_level,
+                e.study_db_id
+            ) else checkFieldNameAndObsLvl(e.exp_name, e.observation_level)) {
 
                 -1 -> {
 
@@ -560,6 +563,16 @@ class StudyDao {
                 arrayOf(Study.PK),
                 where = "study_name = ? AND observation_levels = ?",
                 whereArgs = arrayOf(name, observationLevel ?: "")
+            ).toFirst()[Study.PK] as? Int ?: -1
+
+        } ?: -1
+
+        fun checkBrapiStudyUnique(observationLevel: String?, brapiId: String?): Int = withDatabase { db ->
+            db.query(
+                Study.tableName,
+                arrayOf(Study.PK),
+                where = "observation_levels = ? AND study_db_id = ?",
+                whereArgs = arrayOf(observationLevel ?: "", brapiId ?: "")
             ).toFirst()[Study.PK] as? Int ?: -1
 
         } ?: -1
