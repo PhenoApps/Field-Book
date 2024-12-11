@@ -366,8 +366,14 @@
     <string name="trait_gnss_altitude_header">Alt.:</string>
     <string name="trait_gnss_time_header">UTC:</string>
     <!-- Trait Layout: Date -->
+    <string name="trait_date_calendar_picker_content_description">Botão que abre um selecionador de calendário.</string>
+    <string name="trait_date_save_button_content_description">Isto irá salvar a data atual selecionada.</string>
+    <string name="dialog_date_picker_neutral_button">Hoje</string>
     <!-- Trait Layout: Boolean -->
+    <string name="trait_boolean_on">Ativado</string>
+    <string name="trait_boolean_off">Desativado</string>
     <!-- Trait Layout: GoPro -->
+    <string name="trait_go_pro_capture_button_text">Capturar\n</string>
     <string name="trait_go_pro_camera_delete_photo_title">Excluir Foto</string>
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_delete_photo">Excluir Foto USB</string>
@@ -429,6 +435,8 @@
     <!-- Location -->
     <string name="preferences_location_title">Localização</string>
     <string name="preferences_location_defaults_title">GeoCoordinates</string>
+    <string name="location_level_off">Desativado</string>
+    <string name="pref_geonav_log_off">Desativado</string>
     <string name="choose_paired_bluetooth_devices_title">Escolha seu dispositivo bluetooth pareado</string>
     <!-- Sounds -->
     <string name="preferences_general_tts_language_title">Escolher Idioma</string>
