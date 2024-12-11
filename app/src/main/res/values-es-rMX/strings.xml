@@ -188,7 +188,7 @@
     <string name="today">Hoy</string>
     <string name="yesterday">Ayer</string>
     <plurals name="years_ago">
-        <item quantity="one">Hace %d años</item>
+        <item quantity="one">Hace %d año</item>
         <item quantity="other">Hace %d años</item>
     </plurals>
     <string name="no_activity">No hay actividad</string>
@@ -552,7 +552,7 @@
     <string name="pref_profile_crashlytics_user_id_enabled">ID Único</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Incluye un ID único y anónimo en los registros de fallos para ayudar al equipo de desarrollo a corregir errores</string>
     <string name="pref_profile_crashlytics_refresh_title">Refrescar ID</string>
-    <string name="pref_profile_crashlytics_refresh_summary">Esto asignará un nuevo ID único</string>
+    <string name="pref_profile_crashlytics_refresh_summary">Esto asignará nuevo ID único</string>
     <!-- Features -->
     <string name="preferences_features_title">Funcionalidades</string>
     <!-- Appearance -->
@@ -934,10 +934,10 @@
     <string name="brapi_export_observations">Observaciones</string>
     <string name="brapi_export_num_new_obs"> Nuevas Observaciones</string>
     <string name="brapi_export_num_synced_obs"> Observaciones Sincronizadas</string>
-    <string name="brapi_export_num_ed_obs">Observaciones editadas</string>
-    <string name="brapi_export_skipped_observations">Observaciones omitidas</string>
-    <string name="brapi_export_skipped_user_created">Variables de Observacion creadas por Usuario</string>
-    <string name="brapi_export_skipped_wrong_source">Origen de datos diferente</string>
+    <string name="brapi_export_num_ed_obs"> Observaciones Editadas</string>
+    <string name="brapi_export_skipped_observations"> Observaciones Omitidas</string>
+    <string name="brapi_export_skipped_user_created"> Variables de Observacion Creadas por Usuario</string>
+    <string name="brapi_export_skipped_wrong_source"> Origen de Datos Diferente</string>
     <string name="brapi_export_num_new_imgs">Fotos Nuevas</string>
     <string name="brapi_export_num_synced_imgs">Fotos Sincronizadas</string>
     <string name="brapi_export_num_ed_imgs">Fotos Editadas</string>
