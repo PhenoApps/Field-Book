@@ -374,6 +374,10 @@
     <string name="trait_boolean_off">Desativado</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Capturar\n</string>
+    <string name="trait_go_pro_await_device_title">Procurando um GoPros</string>
+    <string name="trait_go_pro_await_ble_title">Aguardando a conexão GoPro BLE</string>
+    <string name="trait_go_pro_await_ble_message">Comunicando com o GoPro BLE, isso pode demorar um minuto.</string>
+    <string name="trait_go_pro_await_ap_title">Aguardando o GoPro AP</string>
     <string name="trait_go_pro_camera_delete_photo_title">Excluir Foto</string>
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_delete_photo">Excluir Foto USB</string>
