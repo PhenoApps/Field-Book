@@ -88,6 +88,7 @@ import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.MediaKeyCodeActionHelper;
+import com.fieldbook.tracker.utilities.SensorHelper;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -143,7 +144,8 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.interfaces.CollectTraitController,
         InfoBarAdapter.InfoBarController,
         GPSTracker.GPSTrackerListener,
-        SearchDialog.onSearchResultsClickedListener {
+        SearchDialog.onSearchResultsClickedListener,
+        SensorHelper.RelativeRotationListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -152,6 +154,9 @@ public class CollectActivity extends ThemedActivity
     private final HandlerThread gnssRawLogHandlerThread = new HandlerThread("log");
 
     private GeoNavHelper geoNavHelper;
+
+    @Inject
+    SensorHelper sensorHelper;
 
     @Inject
     UsbCameraApi usbCameraApi;
@@ -204,6 +209,9 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     CameraXFacade cameraXFacade;
+
+    //used to track rotation relative to device
+    private SensorHelper.RotationModel rotationModel = null;
 
     private GPSTracker gps;
 
@@ -333,6 +341,8 @@ public class CollectActivity extends ThemedActivity
             }
             return null;
         });
+
+        sensorHelper.register();
 
         mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
 
@@ -1011,6 +1021,8 @@ public class CollectActivity extends ThemedActivity
         goProApi.onDestroy();
 
         bluetoothHelper.onDestroy();
+
+        sensorHelper.unregister();
 
         super.onDestroy();
     }
@@ -2724,5 +2736,16 @@ public class CollectActivity extends ThemedActivity
         searchRange = range;
         searchPlot = plot;
         searchReload = reload;
+    }
+
+    @Override
+    public void onRotationEvent(@NonNull SensorHelper.RotationModel rotation) {
+        this.rotationModel = rotation;
+    }
+
+    @Nullable
+    @Override
+    public SensorHelper.RotationModel getRotationRelativeToDevice() {
+        return rotationModel;
     }
 }
