@@ -2317,20 +2317,18 @@ public class CollectActivity extends ThemedActivity
 
     /**
      * Inserts a user observation whenever a label is printed.
-     * See ResultReceiver onReceiveResult in LabelPrintLayout
+     * @param plotID: The plot ID at the time of printing.
+     * @param traitID: The trait ID at the time of printing.
+     * @param traitFormat: The format of the trait.
      * @param labelNumber: The number of labels printed.
      */
-    public void insertPrintObservation(String labelNumber) {
-
-        TraitObject trait = getCurrentTrait();
-
+    public void insertPrintObservation(String plotID, String traitID, String traitFormat, String labelNumber) {
         String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertObservation(rangeBox.getPlotID(), trait.getId(), trait.getFormat(), labelNumber,
+        database.insertObservation(plotID, traitID, traitFormat, labelNumber,
                 getPerson(),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);
-
     }
 
     @Override
