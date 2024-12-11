@@ -427,26 +427,88 @@
     <string name="trait_gnss_external_device_tts">Dispositivo externo %s escolhido.</string>
     <string name="act_collect_na_btn_tts">Não aplicável</string>
     <string name="act_collect_barcode_btn_tts">Abrindo scanner de código de barras</string>
+    <string name="act_collect_delete_btn_tts">Valor foi excluído.</string>
+    <string name="trait_numeric_backspace_tts">Retrocesso</string>
+    <string name="trait_date_minus_day_tts">Voltar um dia</string>
+    <string name="trait_date_next_day_tts">Próximo dia</string>
+    <string name="trait_date_open_calendar_tts">Abrindo calendário.</string>
     <string name="trait_location_saved_tts">Localização salva.</string>
     <!--- Summary -->
+    <string name="fragment_summary_toolbar_title">Resumo</string>
+    <string name="menu_fragment_summary_filter_title">Filtrar</string>
+    <string name="fragment_summary_filter_title">Selecionar etiquetas de resumo</string>
+    <string name="dialog_fragment_summary_neutral_button">Alternar Todos</string>
+    <string name="fragment_summary_prev_button_text">Anterior</string>
+    <string name="fragment_summary_next_button_text">Seguinte</string>
+    <string name="fragment_summary_prev_button_content_description">Navega para a entrada anterior.</string>
+    <string name="fragment_summary_next_button_content_description">Navega para a próxima entrada.</string>
+    <string name="list_item_summary_nav_button_content_description">Navega para a entrada selecionada.</string>
     <!--- Repeated measures -->
+    <string name="view_repeated_values_add_button_content_description">Adiciona uma nova observação.</string>
+    <string name="view_repeated_values_add_button_fail">Você deve inserir um valor antes de criar uma nova observação.</string>
+    <string name="menu_collect_repeated_values_indicator">Exibe o número de valores repetidos.</string>
+    <string name="dialog_multi_measure_delete_no_observations">Não existem observações.</string>
+    <string name="dialog_multi_measure_delete_title">Observações</string>
+    <string name="dialog_multi_measure_confirm_delete_title">Todas as observações desta característica serão excluídas permanentemente.</string>
     <string name="dialog_multi_measure_delete">Excluir</string>
+    <string name="dialog_multi_measure_select_all">Selecionar tudo</string>
     <!--- GeoNav -->
+    <string name="menu_collect_start_geo_nav_title">Iniciar GeoNav</string>
+    <string name="activity_collect_found_plot">Navegou para parcela na proximidade</string>
     <string name="act_collect_geonav_first_location_found">Comunicações do Rover estabelecidas.</string>
+    <string name="act_collect_geonav_snack_nav_button_content_description">Isto irá navegar para a parcela mais próxima.</string>
+    <string name="activity_collect_sensor_manager_failed">Falha ao iniciar gestor de sensor</string>
+    <string name="activity_collect_geomagnetic_noise_detected">Interferência detectada, a bússola pode não ser precisa</string>
+    <string name="dialog_geonav_collect_neutral_reconnect">Reconectar</string>
+    <string name="dialog_geonav_collect_title">Configuração GeoNav</string>
+    <string name="dialog_geonav_collect_auto_navigate">Navegação automática</string>
+    <string name="dialog_geonav_collect_notify_on_precision_loss">Áudio em queda de precisão</string>
+    <string name="dialog_geonav_collect_precision_threshold_title">Grau de precisão</string>
+    <string name="dialog_geonav_collect_geonav_popup_type">Tipo de pop-up GeoNav</string>
+    <string name="dialog_geonav_collect_reconnect">Reconectar</string>
+    <string name="dialog_geonav_collect_reset_start_toast_message">Redefinindo conexão…</string>
+    <string name="dialog_geonav_collect_reset_end_toast_message">Redefinição de conexão</string>
     <string name="dialog_geonav_precision_loss_title">Perda de Precisão Localização</string>
+    <string name="dialog_geonav_precision_loss_msg">Sua precisão preferida foi perdida.</string>
     <!--- Content Descriptions -->
+    <string name="view_trait_box_right_content_description">Ir para a próxima característica.</string>
+    <string name="view_trait_box_left_content_description">Ir para característica anterior.</string>
+    <string name="view_range_box_left_button_content_description">Navega para a entrada anterior.</string>
+    <string name="view_range_box_right_button_content_description">Navega para a próxima entrada.</string>
+    <string name="act_collect_delete_value_button_content_description">Exclui o valor atual.</string>
+    <string name="act_collect_barcode_button_content_description">Inicie um scanner de código de barras.</string>
+    <string name="act_collect_na_value_button_content_description">Preencher o valor com não disponível.</string>
     <!-- Observation Info -->
+    <string name="observation_metadata_title">Metadados da Observação</string>
+    <string name="observation_info_study_name">Nome do Estudo</string>
+    <string name="observation_info_entry_id">Id da entrada</string>
     <string name="observation_info_trait_format">Formato de Característica</string>
+    <string name="observation_info_trait_name">Nome da Característica</string>
+    <string name="observation_info_value">Valor</string>
+    <string name="observation_info_timestamp">Timestamp da Observação</string>
+    <string name="observation_info_collector">Coletor</string>
+    <string name="observations_info_geo_coordinates">Coordenadas Geo</string>
+    <string name="observation_info_last_synced_time">Última Sincronização</string>
+    <string name="observation_info_additional_info">Informações Adicionais</string>
+    <string name="observation_info_rep">Rep</string>
     <string name="observation_info_other">Outros</string>
     <!-- Skip Entries -->
+    <string name="collect_sole_entry_without_data">Esta é a única entrada sem dados</string>
+    <string name="collect_all_entries_complete_for_current_trait">Todas as entradas têm dados para a característica atual</string>
+    <string name="collect_all_entries_complete_for_all_traits">Todas as entradas têm dados de todas as características</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
+    <string name="export_source_local">Local</string>
     <string name="export_source_brapi">BrAPI</string>
+    <string name="export_dialog_title">Exportar Dados</string>
     <string name="export_format_database">Base de dados</string>
     <string name="export_format_table">Tabela</string>
     <string name="export_file_name">Nome do arquivo</string>
+    <string name="export_content_columns_title">Colunas de campo</string>
     <string name="export_content_columns_all">Todas las columnas importadas</string>
+    <string name="export_content_columns_unique">Somente identificador único</string>
     <string name="export_content_traits_all">Todos os caracteres</string>
+    <string name="export_content_traits_active">Somente características ativas</string>
     <string name="export_error_general">Erro durante a exportação</string>
     <string name="export_error_data_missing">Não há dados para exportação</string>
     <string name="export_complete">Exportação completada</string>
@@ -461,21 +523,49 @@
     <string name="preferences_source_default_export">Origem da Exportação</string>
     <!-- Profile -->
     <string name="preferences_profile_title">Perfil</string>
+    <string name="preferences_profile_name_first">Primeiro Nome</string>
+    <string name="preferences_profile_name_error">Ambos os campos não podem estar em branco</string>
+    <string name="preferences_profile_require_interval_title">Intervalo de Verificação</string>
+    <string name="verification_interval_every_open">Toda vez que o aplicativo é aberto</string>
+    <string name="verification_interval_every_12">A cada 12 horas</string>
+    <string name="verification_interval_every_24">A cada 24 horas</string>
+    <string name="verification_interval_never">Nunca</string>
+    <string name="pref_profile_crashlytics_user_id_enabled">ID Único</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">Incluir uma ID anônima e única nos logs de erro para ajudar a equipe de desenvolvimento a corrigir bugs</string>
+    <string name="pref_profile_crashlytics_refresh_title">Atualizar ID</string>
+    <string name="pref_profile_crashlytics_refresh_summary">Isto atribuirá um novo ID único</string>
     <!-- Features -->
+    <string name="preferences_features_title">Funcionalidades</string>
     <!-- Appearance -->
+    <string name="preferences_appearance_title">Aparência</string>
+    <string name="preferences_appearance_application_title">Aplicativo</string>
+    <string name="preferences_theme_theme_title">Tema do Aplicativo</string>
     <string name="theme_default">Padrão</string>
+    <string name="theme_high_contrast">Alto Contraste</string>
+    <string name="theme_blue">Azul</string>
+    <string name="preferences_theme_text_size_title">Tamanho do Texto</string>
+    <string name="text_size_s">Pequeno</string>
     <string name="text_size_m">Médio (padrão)</string>
+    <string name="text_size_l">Grande</string>
+    <string name="text_size_xl">Extra Grande</string>
     <string name="preferences_theme_data_saved_title">Cor de dados salvos</string>
     <string name="preferences_theme_data_saved_description">Alterar como os dados salvos são exibidos</string>
     <string name="preferences_theme_reset_title">Restaurar tema padrão</string>
     <string name="preferences_theme_reset_description">Redefinir todas as configurações para os valores padrão do sistema</string>
     <string name="preferences_appearance_language">Idioma</string>
+    <string name="preferences_appearance_language_description">Idioma definido por sistema</string>
     <string name="preference_language_default">Idioma do Sistema</string>
     <string name="preferences_appearance_toolbar_customize_description">Alternar a visibilidade das funcionalidades padrão</string>
     <string name="preferences_appearance_toolbar_customize_search">Pesquisar</string>
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
+    <string name="preferences_appearance_toolbar_customize_summary">Resumo</string>
     <string name="preferences_general_feature_datagrid">Grilla de datos</string>
     <string name="preferences_general_feature_datagrid_description">Adicione um botão para exibir uma grade de dados coletados</string>
+    <string name="preferences_general_feature_next_missing">Próximo Entrada Sem Dados</string>
+    <string name="preferences_general_feature_barcode_text">Mover para ID único</string>
+    <string name="move_to_unique_id_disabled">Desativada</string>
+    <string name="move_to_unique_id_text_or_scan">O botão usa entrada de texto com escaneado de câmera opcional</string>
+    <string name="move_to_unique_id_direct_camera_scan">O botão usa a escaneado direto da câmera</string>
     <!-- Behavior -->
     <string name="preferences_behavior_data_title">Dados</string>
     <!-- Location -->
@@ -509,7 +599,10 @@
     <string name="database_reset_warning2">Essa ação não pode ser revertida. O aplicativo vai fechar depois de limpar o banco de dados. Você ainda deseja continuar?</string>
     <string name="database_reset_message">O banco de dados foi excluído</string>
     <!-- Experimental -->
+    <string name="pref_experimental_repeated_values_disabled_message">Todos os valores repetidos que foram coletados serão ocultados até que esta funcionalidade seja ativada novamente</string>
+    <string name="pref_experimental_enable_field_audio_summary">Ativa o recurso de gravação de áudio para todo o campo</string>
     <string name="field_audio_recording_stop">Um novo arquivo de áudio de nível de campo foi salvo</string>
+    <string name="pref_beta_mlkit_enabled_message">Habilitar essa funcionalidade irá mudar a biblioteca de leitura de código de barras do ZXing para MLKit</string>
     <!-- STATISTICS -->
     <string name="stat_title_fields">Campos</string>
     <string name="stat_title_data">Dados</string>
@@ -578,9 +671,11 @@
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Exportar</string>
     <string name="brapi_close_button">Fechar</string>
+    <string name="brapi_export_observations">Observações</string>
     <string name="brapi_export_skipped_user_created">Variables de Observacion creadas por Usuario</string>
     <string name="brapi_export_skipped_user_created_images">Variable de Imágenes creadas por el usuario</string>
     <!-- Pagination -->
+    <string name="next">Seguinte</string>
     <!-- General -->
     <!-- APP INTRO  -->
     <string name="intro_tutorial_radio_item_yes">Sim</string>
@@ -593,15 +688,19 @@
     <string name="tutorial_main_delete_description">Los datos son eliminados usando este botón.</string>
     <string name="tutorial_main_search_title">Pesquisar</string>
     <string name="tutorial_main_resources_title">Recursos</string>
+    <string name="tutorial_main_summary_title">Resumo</string>
     <string name="tutorial_settings_fields_title">Campos</string>
     <string name="tutorial_settings_fields_import">Para comenzar a usar Fieldbook, primero importe un archivo de campo.</string>
     <string name="tutorial_settings_traits_title">Características</string>
     <string name="tutorial_settings_settings_title">Configurações avançadas</string>
     <string name="tutorial_settings_export_title">Exportar</string>
+    <string name="tutorial_fields_file_description">Os arquivos devem conter três colunas: um identificador único, uma ordem primária e uma ordem secundária. A ordem primária/secundária é usada para navegação no campo.</string>
     <string name="tutorial_traits_visibility_description">Las variables se pueden activar/desactivar usando casilla de verificación.</string>
     <string name="tutorial_main_datagrid_title">Grilla de datos</string>
     <string name="tutorial_main_datagrid_description">Isto abre uma grade de fenotipagem 2D do campo atualmente selecionado.</string>
     <string name="brapi_programs_activity_title">Escolha seu Programa</string>
+    <string name="menu_action_brapi_filter">Filtrar</string>
+    <string name="act_brapi_filter_apply">Filtrar</string>
     <string name="act_brapi_filter_import">Importar</string>
     <string name="act_brapi_filter_clear">Limpar</string>
     <!-- base camera strings -->
@@ -625,6 +724,8 @@
     <string name="select">Selecionar</string>
     <string name="sort">Organizar</string>
     <string name="brapi_traits_filter_title">Características</string>
+    <string name="act_brapi_study_filter">Filtrar</string>
     <string name="act_brapi_trait_preprocess_title">Seletor de Formato de Field Book</string>
     <string name="act_brapi_trait_import_title">Escolher Formatos</string>
+    <string name="opening_brapi_no_network_error">Rede deve ser ativada para usar funcionalidade BrAPI.</string>
 </resources>
