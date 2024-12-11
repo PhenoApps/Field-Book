@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fields with different BrAPI study IDs can now have the same name (https://github.com/PhenoApps/Field-Book/pull/1095)
 
 ### Fixed
+- Label print observations are now assigned to the correct entry when navigating before the print is complete (https://github.com/PhenoApps/Field-Book/pull/1109)
 - Improved database export messaging (https://github.com/PhenoApps/Field-Book/pull/1112)
 - Go to ID dialog now has cursor focus when opened (https://github.com/PhenoApps/Field-Book/pull/1108)
 
