@@ -1380,4 +1380,7 @@
     <string name="pref_geonav_distance_threshold_summary">GeoNav automatically stops when distance from all plots exceeds this value in kilometers.</string>
     <string name="pref_geonav_distance_threshold_title">Proximity Check</string>
     <string name="activity_collect_proximity_warning">GeoNav Stopping, outside proximity of coordinates</string>
+    <string name="preferences_system_defaults_reset">Reset Settings</string>
+    <string name="reset_preferences_title">Reset Settings to Default</string>
+    <string name="reset_preferences_message">Warning: this will reset all of Field Book\'s preferences.</string>
 </resources>

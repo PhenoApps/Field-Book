@@ -275,6 +275,9 @@ public class GeneralKeys {
     @NotNull
     public static final String EXPERIMENTAL_NEW_BRAPI_UI = "com.tracker.fieldbook.preferences.keys.enable_enhanced_brapi_import";
 
+    @NotNull
+    public static final String RESET_PREFERENCES = "RESET_PREFERENCES";
+
     private GeneralKeys() {
 
     }
