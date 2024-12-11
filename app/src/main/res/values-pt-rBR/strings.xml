@@ -378,22 +378,62 @@
     <string name="trait_go_pro_await_ble_title">Aguardando a conexão GoPro BLE</string>
     <string name="trait_go_pro_await_ble_message">Comunicando com o GoPro BLE, isso pode demorar um minuto.</string>
     <string name="trait_go_pro_await_ap_title">Aguardando o GoPro AP</string>
+    <string name="trait_go_pro_await_ap_message">Conectando-se à rede, pode levar um minuto. \n SSID: %s \n Pass: %s</string>
+    <string name="trait_go_pro_await_ap_neutral">Conexão manual</string>
     <string name="trait_go_pro_camera_delete_photo_title">Excluir Foto</string>
+    <string name="go_pro_layout_black_11_not_detected">Esta característica foi feita para um GoPro Black 11, por favor, entre em contato com os desenvolvedores para implementar seu modelo GoPro.\n</string>
+    <string name="go_pro_frag_connect_btn_content_description">Conecte-se a uma câmera do GoPro.\n</string>
+    <string name="trait_go_pro_capture_content_description">Capture uma foto de um dispositivo GoPro conectado.\n</string>
     <!-- Trait Layout: USB Camera -->
+    <string name="trait_usb_camera_zoom_in_button_text">Mais Zoom</string>
+    <string name="trait_usb_camera_zoom_out_button_text">Menos Zoom</string>
+    <string name="trait_usb_camera_zoom_out_content_description">Menos Zoom</string>
+    <string name="trait_usb_camera_zoom_in_content_description">Mais Zoom</string>
     <string name="trait_usb_camera_delete_photo">Excluir Foto USB</string>
     <string name="trait_usb_camera_capture_content_description">Tire uma foto.</string>
+    <string name="trait_usb_camera_capture_button_text">Capturar</string>
     <!--- Trait Layout: Zebra label print -->
-    <string name="trait_layout_data_stored">Guardado</string>
+    <string name="trait_layout_data_stored">Salvar</string>
+    <string name="trait_layout_print_label_size_title">Tamanho:</string>
+    <string name="trait_layout_print_text_field_title">Texto:</string>
+    <string name="trait_layout_print_text_field_title_2">Texto2:</string>
+    <string name="trait_layout_print_text_field_title_3">Texto3:</string>
+    <string name="trait_layout_print_text_field_title_4">Texto4:</string>
+    <string name="trait_layout_print_barcode_field_title">Código de Barras:</string>
+    <string name="trait_layout_print_label_copies_title">Cópias:</string>
+    <string name="trait_layout_print_label_simple_text">simples</string>
+    <string name="trait_layout_print_label_detailed_text">detalhado</string>
+    <string name="trait_layout_print_label_date_option">data</string>
+    <string name="trait_layout_print_label_blank_option">em branco</string>
+    <string name="printer_open">A impressora está aberta</string>
+    <string name="printer_paused">A impressora está pausada</string>
+    <string name="printer_empty">A impressora está vazia</string>
+    <string name="printer_not_connected">Impressão não conectada</string>
+    <string name="no_device_paired">Nenhum dispositivo pareado</string>
+    <string name="trait_labelprint_connect_button_description">Botão que conecta uma impressora.</string>
+    <string name="trait_labelprint_preview_description">Pré-visualização da etiqueta.</string>
+    <string name="trait_labelprint_print_button_description">Botão que imprime os rótulos configurados nesta caixa de diálogo.</string>
+    <string name="printer_success">Impressão com sucesso</string>
     <string name="bluetooth_printer_choose_device_title">Escolha o dispositivo bluetooth para imprimir.</string>
     <!--- Trait Layout: Counter -->
+    <string name="trait_counter_layout_failed">Contador não conseguiu salvar, por favor recrie esta característica.</string>
     <!--- Trait Layout: Location -->
+    <string name="trait_location_save_content_description">Salvar a localização atual.</string>
     <!--- Text to Speech Strings -->
     <string name="trait_photo_tts_success">Foto tirada com sucesso.</string>
     <string name="trait_photo_tts_fail">A foto falhou.</string>
+    <string name="trait_print_label_success">Etiqueta de impressão.</string>
+    <string name="trait_gnss_internal_tts">GPS interno</string>
+    <string name="trait_gnss_external_device_tts">Dispositivo externo %s escolhido.</string>
+    <string name="act_collect_na_btn_tts">Não aplicável</string>
+    <string name="act_collect_barcode_btn_tts">Abrindo scanner de código de barras</string>
+    <string name="trait_location_saved_tts">Localização salva.</string>
     <!--- Summary -->
     <!--- Repeated measures -->
     <string name="dialog_multi_measure_delete">Excluir</string>
     <!--- GeoNav -->
+    <string name="act_collect_geonav_first_location_found">Comunicações do Rover estabelecidas.</string>
+    <string name="dialog_geonav_precision_loss_title">Perda de Precisão Localização</string>
     <!--- Content Descriptions -->
     <!-- Observation Info -->
     <string name="observation_info_trait_format">Formato de Característica</string>
@@ -425,6 +465,8 @@
     <!-- Appearance -->
     <string name="theme_default">Padrão</string>
     <string name="text_size_m">Médio (padrão)</string>
+    <string name="preferences_theme_data_saved_title">Cor de dados salvos</string>
+    <string name="preferences_theme_data_saved_description">Alterar como os dados salvos são exibidos</string>
     <string name="preferences_theme_reset_title">Restaurar tema padrão</string>
     <string name="preferences_theme_reset_description">Redefinir todas as configurações para os valores padrão do sistema</string>
     <string name="preferences_appearance_language">Idioma</string>
@@ -438,21 +480,36 @@
     <string name="preferences_behavior_data_title">Dados</string>
     <!-- Location -->
     <string name="preferences_location_title">Localização</string>
-    <string name="preferences_location_defaults_title">GeoCoordinates</string>
+    <string name="preferences_location_defaults_title">Geocoordenadas</string>
+    <string name="pref_general_location_collection_title">Nível da Coleção</string>
     <string name="location_level_off">Desativado</string>
+    <string name="location_level_study">Campo</string>
+    <string name="location_level_observation_unit">Entrada</string>
+    <string name="location_level_observation">Observação (maior uso da bateria)</string>
+    <string name="location_format_iso">ISO 6709</string>
+    <string name="location_format_geojson">GeoJSON</string>
+    <string name="pref_geonav_enable_summary">Navegar pelos campos usando localização do dispositivo</string>
     <string name="pref_geonav_log_off">Desativado</string>
+    <string name="pref_geonav_log_full_description">Completo: Registrando todas as atualizações de localização e etapas do algoritmo no armazenamento/geonav/log.txt</string>
+    <string name="pref_geonav_log_both_description">Ambos: Registrando todas as atualizações de localização e passos de algoritmo para armazenamento/geonav/log.txt, entrada mais próxima ao armazenamento/geonav/limited_log.txt</string>
+    <string name="pref_geonav_update_interval_summary">O tempo entre as atualizações de localização é %s</string>
+    <string name="pref_geonav_pair">Provedor de localização</string>
+    <string name="pref_behavior_geonav_internal_gps_choice">GPS interno</string>
     <string name="choose_paired_bluetooth_devices_title">Escolha seu dispositivo bluetooth pareado</string>
     <!-- Sounds -->
     <string name="preferences_general_tts_language_title">Escolher Idioma</string>
     <string name="preferences_general_tts_language_description">Escolha um idioma de TTS compatível</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
     <!-- Storage -->
+    <string name="preferences_storage_files_base_directory_title">Definir local de armazenamento</string>
+    <string name="preferences_storage_files_base_directory_description">Migre ou defina uma nova estrutura de diretório raiz. Os arquivos de exportação serão salvos aqui automaticamente.</string>
     <string name="preferences_storage_database_title">Base de dados</string>
     <string name="database_dialog_title">Base de dados</string>
     <string name="database_reset_warning1">Todos os dados serão excluídos em Redefinir. Você tem certeza disso?</string>
     <string name="database_reset_warning2">Essa ação não pode ser revertida. O aplicativo vai fechar depois de limpar o banco de dados. Você ainda deseja continuar?</string>
     <string name="database_reset_message">O banco de dados foi excluído</string>
     <!-- Experimental -->
+    <string name="field_audio_recording_stop">Um novo arquivo de áudio de nível de campo foi salvo</string>
     <!-- STATISTICS -->
     <string name="stat_title_fields">Campos</string>
     <string name="stat_title_data">Dados</string>
@@ -478,6 +535,7 @@
     <string name="brapi_choice_to_make_default_negative">Cancelar</string>
     <string name="brapi_choice_to_make_default_positive">Salvar</string>
     <string name="brapi_edit_display_name_default">Servidor de teste BrAPI</string>
+    <string name="brapi_oidc_url_desc">Localização do documento OIDC Discovery JSON</string>
     <!-- Community Servers -->
     <string-array name="community_servers_names">
         <item>CassavaBase</item>
@@ -501,11 +559,22 @@
         <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
     </string-array>
     <!-- Authorization -->
+    <string name="brapi_save_authorize">Autorizar</string>
     <!-- BrAPI Import -->
+    <string name="brapi_save_data_button">Pré-visualizar Campo</string>
     <string name="brapi_study_name">Nome</string>
     <string name="brapi_study_location">Localização</string>
+    <string name="brapi_study_detail_error">Erro ao carregar detalhes de estudo para o estudo. Estudo não salvo.</string>
+    <string name="brapi_plot_detail_error">Erro ao carregar parcelas para estudo. Estudo não salvo.</string>
+    <string name="brapi_study_traits_error">Erro ao carregar características para o estudo. Estudo não salvo.</string>
+    <string name="brapi_save_field_error">Erro ao Salvar Campo</string>
     <string name="brapi_fields_filter_by_trial">Filtrar por ensayo</string>
     <string name="brapi_trials_load">Cargar ensayos</string>
+    <string name="brapi_save_trait">Salvar Características</string>
+    <string name="brapi_error_saving_all_traits">Erro ao salvar características. Nenhuma característica foi salva.</string>
+    <string name="brapi_error_saving_some_traits">Erro ao salvar algumas características. Algumas características não foram salvas</string>
+    <string name="brapi_traits_saved_success">Características selecionadas salvas com sucesso.</string>
+    <string name="act_collect_no_plots">Este estudo não tem nenhuma parcela salva.</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Exportar</string>
     <string name="brapi_close_button">Fechar</string>
