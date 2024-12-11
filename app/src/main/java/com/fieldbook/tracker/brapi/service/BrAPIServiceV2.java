@@ -1355,15 +1355,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             if (var.getScale() != null) {
                 if (var.getScale().getValidValues() != null) {
 
-                    if (var.getScale().getValidValues().getMin() != null) {
-                        trait.setMinimum(var.getScale().getValidValues().getMin().toString());
+                    if (var.getScale().getValidValues().getMinimumValue() != null) {
+                        trait.setMinimum(var.getScale().getValidValues().getMinimumValue());
                     } else {
-                        // Fieldbook requires empty string for min and maxes.
                         trait.setMinimum("");
                     }
 
-                    if (var.getScale().getValidValues().getMax() != null) {
-                        trait.setMaximum(var.getScale().getValidValues().getMax().toString());
+                    if (var.getScale().getValidValues().getMaximumValue() != null) {
+                        trait.setMaximum(var.getScale().getValidValues().getMaximumValue());
                     } else {
                         trait.setMaximum("");
                     }
