@@ -2103,12 +2103,13 @@ public class DataHelper {
      * V2 - Edit existing trait
      */
     public long editTraits(String traitDbId, String trait, String format, String defaultValue,
-                           String minimum, String maximum, String details, String categories) {
+                           String minimum, String maximum, String details, String categories,
+                           Boolean closeKeyboardOnOpen) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
-                minimum, maximum, details, categories);
+                minimum, maximum, details, categories, closeKeyboardOnOpen);
 //        try {
 //            ContentValues c = new ContentValues();
 //            c.put("trait", trait);
@@ -2146,7 +2147,7 @@ public class DataHelper {
 
         return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
-                trait.getDetails(), trait.getCategories());
+                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
@@ -2310,19 +2311,19 @@ public class DataHelper {
 //        return -1;
     }
 
-    public int checkFieldNameAndObsLvl(String name, String observationLevel) {
+    public int checkBrapiStudyUnique(String observationLevel, String brapiId) {
 
         open();
 
-        return StudyDao.Companion.checkFieldNameAndObsLvl(name, observationLevel);
+        return StudyDao.Companion.checkBrapiStudyUnique(observationLevel, brapiId);
     }
 
-    public int createField(FieldObject e, List<String> columns) {
+    public int createField(FieldObject e, List<String> columns, Boolean fromBrapi) {
         // String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns){
 
         open();
 
-        return StudyDao.Companion.createField(e, timeStamp.format(Calendar.getInstance().getTime()), columns);
+        return StudyDao.Companion.createField(e, timeStamp.format(Calendar.getInstance().getTime()), columns, fromBrapi);
 
 //        long exp_id = checkFieldName(e.getExp_name());
 //        if (exp_id != -1) {

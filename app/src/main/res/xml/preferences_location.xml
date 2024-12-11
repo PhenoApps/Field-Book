@@ -77,6 +77,14 @@
             android:summary="@string/pref_geonav_search_angle_summary"
             android:title="@string/pref_geonav_search_angle_title" />
 
+        <EditTextPreference
+            android:defaultValue="10.0"
+            android:icon="@drawable/signal_distance_variant"
+            android:key="com.fieldbook.tracker.geonav.DISTANCE_THRESHOLD"
+            android:inputType="numberDecimal"
+            android:summary="@string/pref_geonav_distance_threshold_summary"
+            android:title="@string/pref_geonav_distance_threshold_title" />
+
         <ListPreference
             android:defaultValue="0"
             android:entries="@array/pref_geonav_logging_modes"

@@ -1189,7 +1189,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
 
             DataHelper.db.beginTransaction();
             // All checks finished, insert our data.
-            int expId = dataHelper.createField(field, studyDetails.getAttributes());
+            int expId = dataHelper.createField(field, studyDetails.getAttributes(), true);
             field.setExp_id(expId);
 
             boolean fail = false;

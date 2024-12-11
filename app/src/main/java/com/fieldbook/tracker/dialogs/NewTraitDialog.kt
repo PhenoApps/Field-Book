@@ -492,7 +492,8 @@ class NewTraitDialog(
             traitObject.minimum,
             traitObject.maximum,
             traitObject.details,
-            traitObject.categories
+            traitObject.categories,
+            traitObject.closeKeyboardOnOpen
         )
     }
 

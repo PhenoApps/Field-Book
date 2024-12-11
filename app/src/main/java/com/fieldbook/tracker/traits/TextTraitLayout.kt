@@ -12,6 +12,7 @@ import android.widget.EditText
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
+import org.phenoapps.utils.SoftKeyboardUtil.Companion.closeKeyboard
 import org.phenoapps.utils.SoftKeyboardUtil.Companion.showKeyboard
 
 class TextTraitLayout : BaseTraitLayout {
@@ -225,7 +226,11 @@ class TextTraitLayout : BaseTraitLayout {
 
     private fun selectEditText() {
         inputEditText?.let { input ->
-            showKeyboard(context, input, 300L)
+            if (currentTrait.closeKeyboardOnOpen) {
+                closeKeyboard(context, input, 300L)
+            } else {
+                showKeyboard(context, input, 300L)
+            }
             input.removeTextChangedListener(textWatcher)
             input.addTextChangedListener(textWatcher)
             input.requestFocus()

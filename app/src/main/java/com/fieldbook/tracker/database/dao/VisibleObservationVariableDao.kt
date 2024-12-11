@@ -71,6 +71,7 @@ class VisibleObservationVariableDao {
                         val attrName =
                             ObservationVariableAttributeDao.getAttributeNameById(it[ObservationVariableAttribute.FK] as Int)
 
+
                         when (attrName) {
                             "validValuesMin" -> minimum =
                                 it["observation_variable_attribute_value"] as? String ?: ""
@@ -80,6 +81,9 @@ class VisibleObservationVariableDao {
 
                             "category" -> categories =
                                 it["observation_variable_attribute_value"] as? String ?: ""
+
+                            "closeKeyboardOnOpen" -> closeKeyboardOnOpen =
+                                (it["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
                         }
 
                     }

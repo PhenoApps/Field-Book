@@ -108,6 +108,7 @@ import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.phenoapps.interfaces.security.SecureBluetooth;
 import org.phenoapps.security.SecureBluetoothActivityImpl;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
+import org.phenoapps.utils.SoftKeyboardUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
@@ -1820,6 +1821,18 @@ public class CollectActivity extends ThemedActivity
         });
 
         goToId = builder.create();
+
+        goToId.setOnShowListener(dialog -> {
+            barcodeId.post(() -> {
+                barcodeId.requestFocus();
+                SoftKeyboardUtil.Companion.showKeyboard(getContext(), barcodeId, 250L);
+            });
+        });
+
+        goToId.setOnDismissListener(dialog -> {
+            barcodeId.post(() -> SoftKeyboardUtil.Companion.closeKeyboard(getContext(), barcodeId, 250L));
+        });
+
         goToId.show();
 
         android.view.WindowManager.LayoutParams langParams = goToId.getWindow().getAttributes();
