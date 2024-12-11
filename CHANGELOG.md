@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fields with different BrAPI study IDs can now have the same name (https://github.com/PhenoApps/Field-Book/pull/1095)
 
 ### Fixed
+- Go to ID dialog now has cursor focus when opened (https://github.com/PhenoApps/Field-Book/pull/1108)
 
 ## [v6.0.1] - 2024-12-09
 
