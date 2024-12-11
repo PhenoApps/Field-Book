@@ -8,6 +8,7 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,6 +16,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.Utils;
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
@@ -316,5 +318,22 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 return scale.get(0).getValue();
             } else return scale.get(0).getLabel();
         } else return "";
+    }
+
+    @NonNull
+    @Override
+    public Boolean validate(String data) {
+
+        //check if the data is in the list of categories
+        ArrayList<BrAPIScaleValidValuesCategories> cats = getCategories();
+        if (CategoryJsonUtil.Companion.contains(cats, data)) {
+            return true;
+        } else {
+            getCollectActivity().runOnUiThread(() -> {
+                //Utils.makeToast(controller.getContext(),
+                //        controller.getContext().getString(R.string.trait_error_invalid_value));
+            });
+            return false;
+        }
     }
 }
