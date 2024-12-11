@@ -27,7 +27,7 @@
     <string name="startup_sample_data_message">Carregar dados de amostra?</string>
     <!-- App Intro -->
     <string name="app_intro_intro_title_slide1">Bem-vindo ao Field Book!</string>
-    <string name="app_intro_intro_summary_slide1">A coleta de dados no campo exige, tradicionalmente, a escrita e a transcrição de notas em papel. O Livro de Campo foi criado como uma solução digital para captura de dados que permite aumentar a velocidade de coleta com maior integridade de dados.</string>
+    <string name="app_intro_intro_summary_slide1">A coleta de dados no campo exige, tradicionalmente, a escrita e a transcrição de notas em papel. O Field Book foi criado como uma solução digital para captura de dados que permite aumentar a velocidade de coleta com maior integridade de dados.</string>
     <string name="app_intro_intro_title_slide2">Funcionalidades e Personalização</string>
     <string name="app_intro_intro_summary_slide2">Os dados são inseridos no Field Book com disposição de características personalizadas que são projetados para simplificar dados de entrada e minimizar erros.\n\n Por padrão, os dados coletados são armazenados localmente, mas o Field Book suporta a API que lhe permite enviar dados para sistemas compatíveis com BrAPI.</string>
     <string name="app_intro_required_setup_title">Configuração Requerida</string>
@@ -331,20 +331,55 @@
     <string name="activity_collect_dialog_verify_no_button">Não</string>
     <string name="activity_collect_dialog_verify_yes_button">Sim</string>
     <string name="activity_collect_dialog_neutral_button">Modificar configurações</string>
+    <string name="activity_collect_dialog_new_collector">Você deseja salvar o nome da pessoa coletando dados?</string>
     <!--- Datagrid -->
+    <string name="act_data_grid_cursor_failed">Falha ao carregar seus dados na grade de dados.</string>
+    <string name="dialog_data_grid_header_picker_title">Escolher Cabeçalhos da Linha</string>
+    <string name="dialog_data_grid_repeated_measures_title">Escolher Observação</string>
+    <string name="menu_action_header_view_data_grid_title">Escolher Cabeçalhos da Linha</string>
     <!--- Lock -->
+    <string name="activity_collect_locked_state">Bloqueado - a entrada de dados, a modificação e a exclusão estão desativadas</string>
+    <string name="activity_collect_frozen_state">Congelado - uma vez que os dados são salvos, eles não podem ser modificados ou excluídos</string>
+    <string name="activity_collect_unlocked_state">Desbloqueado - sem restrições na entrada de dados, modificação ou exclusão de dados</string>
     <!-- Trait Layout: Photo -->
-    <string name="trait_error_hardware_missing">El dispositivo no tiene una cámara que pueda utilizarse para tomar una imagen.</string>
+    <string name="trait_error_hardware_missing">Seu dispositivo não tem uma câmera que possa ser usada para tirar uma foto.</string>
+    <string name="trait_delete_warning_photo">Você tem certeza que deseja excluir esta foto?</string>
+    <string name="trait_photo_capture_button_content_description">Pressione para abrir a vista da câmera para capturar.</string>
+    <string name="photo_failed_to_delete">Falha ao excluir arquivo.</string>
     <!-- Trait Layout: GNSS -->
+    <string name="trait_gnss_geo_coord_update_dialog_title">Aviso de Atualização das Coordenadas</string>
+    <string name="trait_gnss_geo_coord_update_dialog_message">Você tem uma coordenada salva para esta unidade, tem certeza que deseja atualizá-la?</string>
+    <string name="trait_gnss_chip_manual_text">Manual</string>
+    <string name="trait_gnss_chip_10s_text">10s</string>
+    <string name="trait_gnss_chip_5s_text">5s de atraso</string>
+    <string name="gnss_trait_averaging_dialog_title">Coletando coordenadas</string>
+    <string name="gnss_trait_averaging_dialog_message">Por favor, aguarde enquanto as localizações de entrada estão sendo média…</string>
+    <string name="trait_gnss_collect_button_content_description">Coletar a localização atual.</string>
+    <string name="trait_gnss_disconnect_button_content_description">Desconecta do dispositivo GPS atual.</string>
+    <string name="trait_gnss_connect_button_content_description">Abre uma caixa de diálogo com possíveis dispositivos GPS para se conectar.</string>
+    <string name="gnss_trait_averaging_switch_text">Média</string>
+    <string name="trait_gnss_precision_header">Correção Requerida:</string>
+    <string name="trait_gnss_accuracy_header">Precisão:</string>
+    <string name="trait_gnss_hdop_header">HDOP:</string>
+    <string name="trait_gnss_latitude_header">Lat.:</string>
+    <string name="trait_gnss_longitude_header">Long.:</string>
+    <string name="trait_gnss_altitude_header">Alt.:</string>
+    <string name="trait_gnss_time_header">UTC:</string>
     <!-- Trait Layout: Date -->
     <!-- Trait Layout: Boolean -->
     <!-- Trait Layout: GoPro -->
+    <string name="trait_go_pro_camera_delete_photo_title">Excluir Foto</string>
     <!-- Trait Layout: USB Camera -->
+    <string name="trait_usb_camera_delete_photo">Excluir Foto USB</string>
+    <string name="trait_usb_camera_capture_content_description">Tire uma foto.</string>
     <!--- Trait Layout: Zebra label print -->
     <string name="trait_layout_data_stored">Guardado</string>
+    <string name="bluetooth_printer_choose_device_title">Escolha o dispositivo bluetooth para imprimir.</string>
     <!--- Trait Layout: Counter -->
     <!--- Trait Layout: Location -->
     <!--- Text to Speech Strings -->
+    <string name="trait_photo_tts_success">Foto tirada com sucesso.</string>
+    <string name="trait_photo_tts_fail">A foto falhou.</string>
     <!--- Summary -->
     <!--- Repeated measures -->
     <string name="dialog_multi_measure_delete">Excluir</string>
@@ -388,12 +423,16 @@
     <string name="preferences_appearance_toolbar_customize_search">Pesquisar</string>
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
     <string name="preferences_general_feature_datagrid">Grilla de datos</string>
+    <string name="preferences_general_feature_datagrid_description">Adicione um botão para exibir uma grade de dados coletados</string>
     <!-- Behavior -->
     <string name="preferences_behavior_data_title">Dados</string>
     <!-- Location -->
     <string name="preferences_location_title">Localização</string>
     <string name="preferences_location_defaults_title">GeoCoordinates</string>
+    <string name="choose_paired_bluetooth_devices_title">Escolha seu dispositivo bluetooth pareado</string>
     <!-- Sounds -->
+    <string name="preferences_general_tts_language_title">Escolher Idioma</string>
+    <string name="preferences_general_tts_language_description">Escolha um idioma de TTS compatível</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
     <!-- Storage -->
     <string name="preferences_storage_database_title">Base de dados</string>
@@ -405,10 +444,13 @@
     <!-- STATISTICS -->
     <string name="stat_title_fields">Campos</string>
     <string name="stat_title_data">Dados</string>
+    <string name="stat_title_photos">Fotos</string>
+    <string name="stat_photos_toast_message">fotos foram capturadas</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Sobre</string>
     <string name="about_version_title">Versão</string>
+    <string name="about_manual_title">Manual</string>
     <!-- Lead  -->
     <!-- Support  -->
     <!-- PhenoApps  -->
@@ -417,6 +459,7 @@
     <!-- Update -->
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="qr_code_share_choose_action_title">Escolher Ação</string>
     <string name="brapi_choice_to_make_default_dialog_title">Tornar este servidor BrAPI o padrão:</string>
     <string name="brapi_choice_to_make_default_import">Origem de Importação</string>
     <string name="brapi_choice_to_make_default_export">Origem de Exportação</string>
@@ -476,15 +519,31 @@
     <string name="tutorial_settings_export_title">Exportar</string>
     <string name="tutorial_traits_visibility_description">Las variables se pueden activar/desactivar usando casilla de verificación.</string>
     <string name="tutorial_main_datagrid_title">Grilla de datos</string>
+    <string name="tutorial_main_datagrid_description">Isto abre uma grade de fenotipagem 2D do campo atualmente selecionado.</string>
+    <string name="brapi_programs_activity_title">Escolha seu Programa</string>
     <string name="act_brapi_filter_import">Importar</string>
     <string name="act_brapi_filter_clear">Limpar</string>
     <!-- base camera strings -->
+    <string name="trait_camera_capture_content_description">Tire uma foto</string>
+    <string name="delete_local_photo">Excluir Foto</string>
+    <string name="trait_system_photo_settings_title">Configurações da Foto do Sistema</string>
+    <string name="trait_photos_no_settings">Esta característica não tem configurações.</string>
+    <string name="view_trait_photo_settings_preview_title">Pré-visualizar</string>
+    <string name="view_trait_photo_settings_resolution_title">Resolução de Alvo</string>
+    <string name="view_trait_photo_settings_system_title">Câmera do Sistema</string>
+    <string name="trait_name_alt_photo_system">Sistema</string>
     <string name="view_trait_photo_settings_camera_custom">Padrão</string>
+    <string name="view_trait_photo_settings_camera_system">Android</string>
     <string name="view_trait_photo_settings_camera_choice_description">Escolha entre a câmera padrão do Field Book e o app da câmera Android.</string>
     <!-- usb camera trait -->
+    <string name="view_trait_photo_settings_white_balance_title">Balanço de Branco Automático</string>
+    <string name="view_trait_photo_settings_auto_focus_title">Auto-Foco</string>
     <!-- gopro -->
     <!-- canon camera strings -->
+    <string name="trait_usb_photo_settings_title">Configurações de Fotos USB</string>
     <string name="select">Selecionar</string>
     <string name="sort">Organizar</string>
     <string name="brapi_traits_filter_title">Características</string>
+    <string name="act_brapi_trait_preprocess_title">Seletor de Formato de Field Book</string>
+    <string name="act_brapi_trait_import_title">Escolher Formatos</string>
 </resources>
