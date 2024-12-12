@@ -199,6 +199,7 @@
     <string name="database_reset_warning1">পুনস্থাপনের সময় সমস্ত উপাত্ত মুছে যাবে। আপনি কি ডাটাবেজ পুনস্থাপন করতে চান?</string>
     <string name="database_reset_warning2">কোন ডাটাবেজ পুনস্থাপন করলে তা পুনরায় ফিরে পাওয়া যায় না। ডাটাবেজ পরিষ্কারের পর অ্যাপ বন্ধ হবে। আপনি কি প্রকৃতপক্ষেই নিশ্চিত যে আপনি অগ্রসর হতে চান?</string>
     <string name="database_reset_message">ডাটাবেজ মুছে ফেলা হয়েছে</string>
+    <string name="preferences_storage_settings_title">অগ্রসরমান</string>
     <!-- Experimental -->
     <!-- STATISTICS -->
     <string name="stat_title_fields">ক্ষেত্রসমূহ</string>
