@@ -44,7 +44,7 @@
     <string name="app_intro_tutorial_title">Tutorial</string>
     <string name="app_intro_tutorial_summary">Adicione um ícone de ajuda ao topo da barra de ferramentas que descreve recursos em todo o aplicativo.</string>
     <string name="app_intro_high_contrast_title">Tema de Alto Contraste</string>
-    <string name="app_intro_high_contrast_summary">Permitir um tema de alto contraste para melhor visibilidade em dispositivos.</string>
+    <string name="app_intro_high_contrast_summary">Habilitar um tema de alto contraste para melhor visibilidade em dispositivos.</string>
     <!-- Storage Definer -->
     <string name="storage_definer_title">Local de Armazenamento</string>
     <string name="storage_definer_summary">Por favor, selecione ou crie uma pasta que o Field Book pode usar para armazenar os dados do aplicativo.</string>
@@ -514,13 +514,23 @@
     <string name="export_complete">Exportação completada</string>
     <string name="export_progress">Exportando...</string>
     <string name="export_error_missing_format">Tipo de exportação precisa ser selecionado</string>
+    <string name="export_error_missing_column">Tipo de coluna de campo deve ser selecionado</string>
+    <string name="export_error_missing_trait">Tipo de Característica deve ser selecionado</string>
+    <string name="export_overwrite">Sobrescrever exportação anterior</string>
+    <string name="dialog_export_bundle_data_cb_text">Dados de mídia agrupados com arquivo de exportação.</string>
+    <string name="export_multiple_fields_name">múltiplos_campos</string>
+    <string name="export_multiple_fields_message">Nota: Vários campos de exportação são agrupados em um arquivo ZIP</string>
     <!-- Citation -->
+    <string name="citation_card_title">Citar Field Book</string>
+    <string name="citation_title">Citação</string>
     <string name="citation_string">Se você utiliza o Field Book para pesquisa, por favor cite o seguinte artigo do diário:</string>
     <!-- SETTINGS -->
     <!-- General -->
+    <string name="preferences_system_title">Sistema</string>
     <string name="preferences_system_defaults_title">Padrões</string>
     <string name="preferences_source_default_import">Origem de Importação</string>
     <string name="preferences_source_default_export">Origem da Exportação</string>
+    <string name="brapi_disabled_alert_title">BrAPI Desabilitado</string>
     <!-- Profile -->
     <string name="preferences_profile_title">Perfil</string>
     <string name="preferences_profile_name_first">Primeiro Nome</string>
