@@ -35,11 +35,17 @@
             android:summary="@string/preferences_general_share_enable_description"
             android:title="@string/preferences_general_share_enable" />
 
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="settings_operations"
+        android:title="@string/preferences_storage_settings_title"
+        app:iconSpaceReserved="false">
+
         <Preference
             android:icon="@drawable/ic_refresh"
             android:key="RESET_PREFERENCES"
             android:title="@string/preferences_system_defaults_reset" />
-
     </PreferenceCategory>
 
     <PreferenceCategory
