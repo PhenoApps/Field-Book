@@ -75,6 +75,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var sortOrderChip: Chip
     private lateinit var traitCountChip: Chip
     private lateinit var observationCountChip: Chip
+    private lateinit var trialNameChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
 
@@ -99,6 +100,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         traitCountChip = rootView.findViewById(R.id.traitCountChip)
         observationCountChip = rootView.findViewById(R.id.observationCountChip)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
+        trialNameChip = rootView.findViewById(R.id.trialNameChip)
 
         fieldId = arguments?.getInt("fieldId")
         loadFieldDetails()
@@ -278,6 +280,12 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 }
             }
             entryCount = "${entryCount} ${field.observation_level}"
+
+            trialNameChip.visibility = View.GONE
+            trialNameChip.text = field.trial_name
+            if (trialNameChip.text.isNotBlank()) {
+                trialNameChip.visibility = View.VISIBLE
+            }
         }
 
 //        val sortOrder = field.exp_sort.takeIf { !it.isNullOrBlank() } ?: getString(R.string.field_default_sort_order)

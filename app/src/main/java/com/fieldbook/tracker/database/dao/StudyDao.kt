@@ -187,6 +187,7 @@ class StudyDao {
             it.attribute_count = this["attribute_count"]?.toString()
             it.trait_count = this["trait_count"]?.toString()
             it.observation_count = this["observation_count"]?.toString()
+            it.trial_name = this["trial_name"]?.toString()
         }
 
         fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
@@ -235,6 +236,7 @@ class StudyDao {
                     import_format,
                     study_source,
                     study_sort_name,
+                    trial_name,
                     count,
                     (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
@@ -359,6 +361,7 @@ class StudyDao {
                         put("study_source", e.exp_source)
                         put("count", e.count)
                         put("observation_levels", e.observation_level)
+                        put("trial_name", e.trial_name)
                     }).toInt()
 
                     try {
