@@ -28,6 +28,15 @@ public class FieldObject {
     private String attribute_count;
     private String trait_count;
     private String observation_count;
+    private String trial_name;
+
+    public String getTrial_name() {
+        return trial_name;
+    }
+
+    public void setTrial_name(String trial_name) {
+        this.trial_name = trial_name;
+    }
 
     public static class TraitDetail {
         private final String traitName;
