@@ -150,7 +150,7 @@
                             android:layout_height="wrap_content"
                             android:clickable="false"
                             android:focusable="false"
-                            app:chipIcon="@drawable/file"
+                            app:chipIcon="@drawable/ic_trial"
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"

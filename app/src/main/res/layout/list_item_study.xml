@@ -80,7 +80,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            app:chipIcon="@drawable/file"
+            app:chipIcon="@drawable/ic_trial"
             android:checkable="false"
             android:ellipsize="end"
             app:layout_constraintHorizontal_bias="0"
