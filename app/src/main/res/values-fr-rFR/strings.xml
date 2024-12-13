@@ -235,6 +235,7 @@
     <string name="database_reset_warning1">Toutes les données seront supprimées lors de la réinitialisation. Etes-vous sûr(e)?</string>
     <string name="database_reset_warning2">Cette action est irréversible. L\'application fermera après avoir effacé la base de données. Voulez-vous continuer?</string>
     <string name="database_reset_message">la base de données a été supprimée</string>
+    <string name="preferences_storage_settings_title">paramètres avancés</string>
     <!-- Experimental -->
     <!-- STATISTICS -->
     <string name="stat_title_fields">essais</string>

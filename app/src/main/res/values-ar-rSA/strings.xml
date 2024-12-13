@@ -242,6 +242,7 @@
     <string name="database_reset_warning1">سيتم حذف كل البيانات عند إعادة التعيين، هل أنت متأكد؟</string>
     <string name="database_reset_warning2">لا يمكن التراجع عن هذه العملية، سيتم الخروج من التطبيق بعد محي قاعدة البيانات. هل لازلت ترغب في المتابعة؟</string>
     <string name="database_reset_message">تم حذف قاعدة البيانات</string>
+    <string name="preferences_storage_settings_title">إعدادات متقدمة</string>
     <!-- Experimental -->
     <!-- STATISTICS -->
     <string name="stat_title_fields">حقول</string>

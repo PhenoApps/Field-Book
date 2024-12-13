@@ -243,6 +243,7 @@
     <string name="database_reset_warning1">リセットにより全てのデータが削除されます。よろしいですか？</string>
     <string name="database_reset_warning2">この作業は戻れません。データベースを消去した後、アプリを終了します。続けますか？</string>
     <string name="database_reset_message">データベースは削除されました。</string>
+    <string name="preferences_storage_settings_title">設定</string>
     <!-- Experimental -->
     <!-- STATISTICS -->
     <string name="stat_title_fields">圃場</string>

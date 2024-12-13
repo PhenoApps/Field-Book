@@ -246,6 +246,7 @@
     <string name="database_reset_warning1">重置数据库将删除所有数据。你确定吗？</string>
     <string name="database_reset_warning2">数据库重置无法逆转。该应用将在清除数据库后退出。你确定要继续吗?</string>
     <string name="database_reset_message">数据库已被删除</string>
+    <string name="preferences_storage_settings_title">设置</string>
     <!-- Experimental -->
     <!-- STATISTICS -->
     <string name="stat_title_fields">地块</string>
