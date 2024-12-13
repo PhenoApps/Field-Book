@@ -14,4 +14,4 @@ class GnssFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter()
-)
+), Scannable

@@ -380,7 +380,7 @@ class RangeBoxView : ConstraintLayout {
     // Simulate range right key press
     fun repeatKeyPress(directionStr: String) {
         val left = directionStr.equals("left", ignoreCase = true)
-        if (!controller.validateData()) {
+        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
             return
         }
         if (rangeID.isNotEmpty()) {
@@ -546,7 +546,7 @@ class RangeBoxView : ConstraintLayout {
 
     ///// paging /////
     fun moveEntryLeft() {
-        if (!controller.validateData()) {
+        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
             return
         }
         if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
@@ -570,7 +570,7 @@ class RangeBoxView : ConstraintLayout {
 
     fun moveEntryRight() {
         val traitBox = controller.getTraitBox()
-        if (!controller.validateData()) {
+        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
             return
         }
         if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)

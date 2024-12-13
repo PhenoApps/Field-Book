@@ -324,15 +324,15 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     @Override
     public Boolean validate(String data) {
 
-        //check if the data is in the list of categories
-        ArrayList<BrAPIScaleValidValuesCategories> cats = getCategories();
-        if (CategoryJsonUtil.Companion.contains(cats, data)) {
-            return true;
-        } else {
-            getCollectActivity().runOnUiThread(() -> {
-                //Utils.makeToast(controller.getContext(),
-                //        controller.getContext().getString(R.string.trait_error_invalid_value));
-            });
+        try {
+            ArrayList<BrAPIScaleValidValuesCategories> userChosenCats = CategoryJsonUtil.Companion.decode(data);
+            if (userChosenCats.isEmpty()) {
+                return true;
+            } else {
+                ArrayList<BrAPIScaleValidValuesCategories> cats = getCategories();
+                return CategoryJsonUtil.Companion.contains(cats, userChosenCats.get(0));
+            }
+        } catch (Exception e) {
             return false;
         }
     }

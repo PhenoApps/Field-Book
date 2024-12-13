@@ -15,5 +15,5 @@ class BooleanFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DefaultToggleValueParameter(),
-    DetailsParameter()
-)
+    DetailsParameter(),
+), Scannable

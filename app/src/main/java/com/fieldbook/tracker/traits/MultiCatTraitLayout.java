@@ -16,11 +16,13 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.gson.JsonParseException;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
@@ -363,19 +365,34 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     @Override
     public Boolean validate(String data) {
 
-        String[] classTokens = data.split(":");
-
-        boolean valid = false;
-
         ArrayList<BrAPIScaleValidValuesCategories> cats = new ArrayList<>(Arrays.asList(getCategories()));
 
-        for (String token : classTokens) {
+        ArrayList<BrAPIScaleValidValuesCategories> userChosenCats = new ArrayList<>();
 
-            BrAPIScaleValidValuesCategories validValue = new BrAPIScaleValidValuesCategories()
-                    .label(token)
-                    .value(token);
+        try {
 
-            valid = hasCategory(validValue);
+            if (JsonUtil.Companion.isJsonValid(data)) {
+
+                userChosenCats.addAll(CategoryJsonUtil.Companion.decode(data));
+
+            } else throw new RuntimeException();
+
+        } catch (Exception e) {
+
+            String[] classTokens = data.split(":");
+
+            for (String token : classTokens) {
+
+                userChosenCats.add(new BrAPIScaleValidValuesCategories()
+                        .label(token)
+                        .value(token));
+            }
+        }
+
+        boolean valid = true;
+        for (BrAPIScaleValidValuesCategories cat : userChosenCats) {
+            valid = CategoryJsonUtil.Companion.contains(cats, cat);
+            if (!valid) break;
         }
 
         //check if the data is in the list of categories

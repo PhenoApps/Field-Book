@@ -14,4 +14,4 @@ class DateFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter()
-)
+), Scannable

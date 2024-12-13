@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.LinkedHashMap;
@@ -104,15 +105,17 @@ public class NumericTraitLayout extends BaseTraitLayout {
     @Override
     public Boolean validate(String data) {
 
-        if (isUnder(data) || isOver(data)) {
+        TraitObject trait = getCurrentTrait();
+
+        if (isUnder(trait, data) || isOver(trait, data)) {
 
             getCollectActivity().runOnUiThread(() -> {
 
-                if (isOver(data)) {
+                if (isOver(trait, data)) {
                     Utils.makeToast(controller.getContext(),
                             controller.getContext().getString(R.string.trait_error_maximum_value)
                                     + ": " + getCurrentTrait().getMaximum());
-                } else if (isUnder(data)) {
+                } else if (isUnder(trait, data)) {
                     Utils.makeToast(controller.getContext(),
                             controller.getContext().getString(R.string.trait_error_minimum_value)
                                     + ": " + getCurrentTrait().getMinimum());
@@ -125,9 +128,9 @@ public class NumericTraitLayout extends BaseTraitLayout {
         return true;
     }
 
-    public boolean isUnder(final String s) {
+    public static boolean isUnder(TraitObject trait, final String s) {
 
-        String minimum = getCurrentTrait().getMinimum();
+        String minimum = trait.getMinimum();
 
         if (!minimum.isEmpty()) {
             try {
@@ -142,9 +145,9 @@ public class NumericTraitLayout extends BaseTraitLayout {
         }
     }
 
-    public boolean isOver(final String s) {
+    public static boolean isOver(TraitObject trait, final String s) {
 
-        String maximum = getCurrentTrait().getMaximum();
+        String maximum = trait.getMaximum();
 
         if (!maximum.isEmpty()) {
             try {

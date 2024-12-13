@@ -72,6 +72,7 @@ import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.traits.formats.TraitFormat;
 import com.fieldbook.tracker.traits.formats.coders.StringCoder;
+import com.fieldbook.tracker.traits.formats.Scannable;
 import com.fieldbook.tracker.traits.formats.presenters.ValuePresenter;
 import com.fieldbook.tracker.utilities.CameraXFacade;
 import com.fieldbook.tracker.utilities.BluetoothHelper;
@@ -622,18 +623,26 @@ public class CollectActivity extends ThemedActivity
      * @return boolean flag false when data is out of bounds, true otherwise
      */
     @Override
-    public boolean validateData() {
-        final String data = collectInputView.getText();
+    public boolean validateData(@Nullable String data) {
         final TraitObject currentTrait = traitBox.getCurrentTrait();
 
         if (currentTrait == null) return false;
+
+        if (data == null) return true;
 
         if (data.equals("NA")) return true;
 
         if (data.isEmpty()) return true;
 
         BaseTraitLayout layout = traitLayouts.getTraitLayout(currentTrait.getFormat());
-        if (!layout.validate(data)) {
+        TraitFormat format = Formats.Companion.findTrait(currentTrait.getFormat());
+
+        String value = data;
+        if (format instanceof Scannable) {
+            value = ((Scannable) format).preprocess(data);
+        }
+
+        if (!layout.validate(value)) {
 
             removeTrait(currentTrait);
 
@@ -2005,12 +2014,21 @@ public class CollectActivity extends ThemedActivity
 
                     TraitObject currentTrait = traitBox.getCurrentTrait();
                     BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
-                    currentTraitLayout.loadLayout();
+                    TraitFormat traitFormat = Formats.Companion.findTrait(currentTrait.getFormat());
 
+                    String oldValue = "";
+                    ObservationModel currentObs = getCurrentObservation();
+                    if (currentObs != null) {
+                        oldValue = currentObs.getValue();
+                    }
 
-                    updateObservation(currentTrait, scannedBarcode, null);
+                    if (scannedBarcode != null && traitFormat instanceof Scannable && validateData(scannedBarcode)) {
+                        updateObservation(currentTrait, ((Scannable) traitFormat).preprocess(scannedBarcode), null);
+                    } else {
+                        updateObservation(currentTrait, oldValue, null);
+                    }
+
                     currentTraitLayout.loadLayout();
-                    validateData();
                 }
                 break;
             case PhotoTraitLayout.PICTURE_REQUEST_CODE:
@@ -2580,7 +2598,7 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
-    private ObservationModel getCurrentObservation() {
+    public ObservationModel getCurrentObservation() {
         String rep = getCollectInputView().getRep();
         List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
             for (ObservationModel m : models) {

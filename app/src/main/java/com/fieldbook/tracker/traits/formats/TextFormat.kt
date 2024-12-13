@@ -18,4 +18,4 @@ class TextFormat : TraitFormat(
     DefaultValueParameter(),
     DetailsParameter(),
     CloseKeyboardParameter(false)
-)
+), Scannable

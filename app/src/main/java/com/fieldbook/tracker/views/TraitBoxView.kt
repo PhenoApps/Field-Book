@@ -431,7 +431,7 @@ class TraitBoxView : ConstraintLayout {
         if (visibleTraitsList == null) return
 
         var pos = 0
-        if (!controller.validateData()) {
+        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
             return
         }
 

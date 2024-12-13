@@ -28,4 +28,4 @@ class PercentFormat : NumericFormat(
         isRequired = true
     ),
     DetailsParameter()
-)
+), Scannable by PercentageScannable()
