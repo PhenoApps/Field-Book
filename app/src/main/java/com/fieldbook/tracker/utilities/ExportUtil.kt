@@ -524,7 +524,9 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                     } else {
                         if (preferences.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
 
-                            archivePreviousExport(filesToExport.first())
+                            if (filesToExport.isNotEmpty()) {
+                                archivePreviousExport(filesToExport.first())
+                            }
                         }
                         filesToExport.firstOrNull()
                     }
