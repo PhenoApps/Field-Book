@@ -87,59 +87,28 @@ class TraitBoxView : ConstraintLayout {
 
     fun connectRangeBox(rangeBoxView: RangeBoxView) {
 
-        //determine trait button function based on user-preferences
-        //issues217 introduces the ability to swap trait and plot arrows
-        val flipFlopArrows: Boolean =
-            controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
-        if (flipFlopArrows) {
-            traitLeft = rangeBoxView.getRangeLeft()
-            traitRight = rangeBoxView.getRangeRight()
-        } else {
-            traitLeft = findViewById(R.id.traitLeft)
-            traitRight = findViewById(R.id.traitRight)
-        }
+        traitLeft = findViewById(R.id.traitLeft)
+        traitRight = findViewById(R.id.traitRight)
         traitDetails = findViewById(R.id.traitDetails)
 
-        //change click-arrow based on preferences
-        if (flipFlopArrows) {
-            traitLeft.setImageResource(R.drawable.chevron_left)
-            traitLeft.setOnTouchListener(
-                createTraitOnTouchListener(
-                    traitLeft, R.drawable.chevron_left,
-                    R.drawable.chevron_left_pressed
-                )
+        traitLeft.setImageResource(R.drawable.trait_chevron_left)
+        traitLeft.setOnTouchListener(
+            createTraitOnTouchListener(
+                traitLeft, R.drawable.trait_chevron_left,
+                R.drawable.trait_chevron_left_pressed
             )
-        } else {
-            traitLeft.setImageResource(R.drawable.trait_chevron_left)
-            traitLeft.setOnTouchListener(
-                createTraitOnTouchListener(
-                    traitLeft, R.drawable.trait_chevron_left,
-                    R.drawable.trait_chevron_left_pressed
-                )
-            )
-        }
+        )
 
         // Go to previous trait
         traitLeft.setOnClickListener { moveTrait("left") }
 
-        //change click-arrow based on preferences
-        if (flipFlopArrows) {
-            traitRight.setImageResource(R.drawable.chevron_right)
-            traitRight.setOnTouchListener(
-                createTraitOnTouchListener(
-                    traitRight, R.drawable.chevron_right,
-                    R.drawable.chevron_right_pressed
-                )
+        traitRight.setImageResource(R.drawable.trait_chevron_right)
+        traitRight.setOnTouchListener(
+            createTraitOnTouchListener(
+                traitRight, R.drawable.trait_chevron_right,
+                R.drawable.trait_chevron_right_pressed
             )
-        } else {
-            traitRight.setImageResource(R.drawable.trait_chevron_right)
-            traitRight.setOnTouchListener(
-                createTraitOnTouchListener(
-                    traitRight, R.drawable.trait_chevron_right,
-                    R.drawable.trait_chevron_right_pressed
-                )
-            )
-        }
+        )
 
         // Go to next trait
         traitRight.setOnClickListener { moveTrait("right") }
@@ -147,11 +116,12 @@ class TraitBoxView : ConstraintLayout {
 
     fun initTraitDetails() {
         val traitDetails: TextView = findViewById(R.id.traitDetails)
-        traitDetails.setOnTouchListener { _, event ->
+        traitDetails.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> traitDetails.maxLines = 10
                 MotionEvent.ACTION_UP -> traitDetails.maxLines = 1
             }
+            view?.performClick()
             true
         }
     }
@@ -416,9 +386,11 @@ class TraitBoxView : ConstraintLayout {
         arrow: ImageView,
         imageIdUp: Int, imageIdDown: Int
     ): OnTouchListener {
-        return OnTouchListener { _, event ->
+        return OnTouchListener { v, event ->
             when (event.action) {
-                MotionEvent.ACTION_DOWN -> arrow.setImageResource(imageIdDown)
+                MotionEvent.ACTION_DOWN -> {
+                    arrow.setImageResource(imageIdDown)
+                }
                 MotionEvent.ACTION_MOVE -> {}
                 MotionEvent.ACTION_UP -> arrow.setImageResource(imageIdUp)
                 MotionEvent.ACTION_CANCEL -> {}

@@ -147,17 +147,8 @@ class RangeBoxView : ConstraintLayout {
 
     fun connectTraitBox(traitBoxView: TraitBoxView) {
 
-        //determine range button function based on user-preferences
-        //issues217 introduces the ability to swap trait and plot arrows
-        val flipFlopArrows =
-            controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
-        if (flipFlopArrows) {
-            rangeLeft = traitBoxView.getTraitLeft()
-            rangeRight = traitBoxView.getTraitRight()
-        } else {
-            rangeLeft = findViewById(R.id.rangeLeft)
-            rangeRight = findViewById(R.id.rangeRight)
-        }
+        rangeLeft = findViewById(R.id.rangeLeft)
+        rangeRight = findViewById(R.id.rangeRight)
 
         rangeLeft.setOnTouchListener(createOnLeftTouchListener())
         rangeRight.setOnTouchListener(createOnRightTouchListener())
@@ -298,43 +289,21 @@ class RangeBoxView : ConstraintLayout {
     private fun createOnLeftTouchListener(): OnTouchListener {
         val actionLeft = createRunnable("left")
 
-        //change click-arrow based on preferences
-        val flipFlopArrows =
-            controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
-        return if (flipFlopArrows) {
-            createOnTouchListener(
-                rangeLeft, actionLeft,
-                R.drawable.trait_chevron_left_pressed,
-                R.drawable.trait_chevron_left
-            )
-        } else {
-            createOnTouchListener(
-                rangeLeft, actionLeft,
-                R.drawable.chevron_left_pressed,
-                R.drawable.chevron_left
-            )
-        }
+        return createOnTouchListener(
+            rangeLeft, actionLeft,
+            R.drawable.chevron_left_pressed,
+            R.drawable.chevron_left
+        )
     }
 
     private fun createOnRightTouchListener(): OnTouchListener {
         val actionRight = createRunnable("right")
 
-        //change click-arrow based on preferences
-        val flipFlopArrows =
-            controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
-        return if (flipFlopArrows) {
-            createOnTouchListener(
-                rangeRight, actionRight,
-                R.drawable.trait_chevron_right_pressed,
-                R.drawable.trait_chevron_right
-            )
-        } else {
-            createOnTouchListener(
-                rangeRight, actionRight,
-                R.drawable.chevron_right_pressed,
-                R.drawable.chevron_right
-            )
-        }
+        return createOnTouchListener(
+            rangeRight, actionRight,
+            R.drawable.chevron_right_pressed,
+            R.drawable.chevron_right
+        )
     }
 
     private fun createOnTouchListener(
