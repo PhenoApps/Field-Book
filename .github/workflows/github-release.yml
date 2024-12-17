@@ -80,9 +80,40 @@ jobs:
           echo "patchVersion=$patchVersion" >> version.properties
 
           VERSION=$majorVersion.$minorVersion.$patchVersion
+          VERSION_CODE=$((majorVersion * 10000 + minorVersion * 100 + patchVersion))
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
 
-      - name: Process Changelog Changes
+      - name: Update changelog.xml
+        id: update-changelog-xml
+        run: |
+
+          # Read the Unreleased section and process notes based on type
+          RELEASE_CONTENT="" CURRENT_TYPE=""
+          while IFS= read -r note; do
+            if [[ "$note" == "### Added"* ]]; then
+              CURRENT_TYPE="new"
+            elif [[ "$note" == "### Changed"* ]]; then
+              CURRENT_TYPE="info"
+            elif [[ "$note" == "### Fixed"* ]]; then
+              CURRENT_TYPE="bugfix"
+            elif [[ "$note" =~ ^- ]]; then
+              clean_note=$(echo "$note" | sed -E 's/^- //; s/ *\(.*\)//')
+              pr_number=$(echo "$note" | grep -oP 'pull/\K[0-9]+' || echo "N/A")
+              RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note} (#${pr_number})</${CURRENT_TYPE}>\n"
+            fi
+          done < <(sed -n '/## \[Unreleased\]/,/^## /p' CHANGELOG.md | sed '1,2d' | sed '$d')
+
+          # Generate, insert, and log the new release block
+          today=$(date +'%Y-%m-%d')
+          RELEASE_BLOCK="    <release date=\"$today\" versionCode=\"$VERSION_CODE\" versionName=\"v$VERSION\">\n"
+          RELEASE_BLOCK+="$RELEASE_CONTENT"
+          RELEASE_BLOCK+="    </release>"
+          sed -i "/<changelog>/a \\\n$RELEASE_BLOCK" app/src/main/res/raw/changelog.xml
+          echo "Generated release block:"
+          echo -e "$RELEASE_BLOCK"
+
+      - name: Process CHANGELOG.md
         id: process-changelog
         run: |
           unreleased_section=$(sed -n '/## \[Unreleased\]/,/^## /p' CHANGELOG.md | sed '1,2d' | sed '$d')
