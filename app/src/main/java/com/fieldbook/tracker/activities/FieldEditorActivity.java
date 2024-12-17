@@ -70,6 +70,7 @@ import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.views.SearchBar;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -116,6 +117,7 @@ public class FieldEditorActivity extends ThemedActivity
     private ActionMode actionMode;
     private TextView customTitleView;
     public ExportUtil exportUtil;
+    private SearchBar searchBar;
 
     @Inject
     DataHelper database;
@@ -181,6 +183,9 @@ public class FieldEditorActivity extends ThemedActivity
 
         FloatingActionButton fab = findViewById(R.id.newField);
         fab.setOnClickListener(v -> handleImportAction());
+
+        searchBar = findViewById(R.id.act_fields_sb);
+        setupSearchBar();
 
         queryAndLoadFields();
 
@@ -1070,4 +1075,24 @@ public class FieldEditorActivity extends ThemedActivity
         return fieldSwitcher;
     }
 
+    private void setupSearchBar() {
+
+        searchBar.editText.addTextChangedListener(new android.text.TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mAdapter.setTextFilter(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                // Do nothing
+            }
+        });
+    }
 }
