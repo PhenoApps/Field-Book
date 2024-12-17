@@ -180,9 +180,7 @@ jobs:
         if: ${{ success() }}
         uses: EndBug/add-and-commit@v7
         with:
-          add: |
-            version.properties
-            CHANGELOG.md
+          add: "version.properties CHANGELOG.md app/src/main/res/raw/changelog.xml"
           message: "Bump ${{ env.BUMP_TYPE }} and update changelog for v${{ env.VERSION }}"
           token: ${{ secrets.ACTIONS_PAT }}
 
