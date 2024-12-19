@@ -99,8 +99,10 @@ jobs:
               CURRENT_TYPE="bugfix"
             elif [[ "$note" =~ ^- ]]; then
               clean_note=$(echo "$note" | sed -E 's/^- //; s/ *\(.*\)//')
-              pr_number=$(echo "$note" | grep -oP 'pull/\K[0-9]+' || echo "N/A")
-              RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note} (#${pr_number})</${CURRENT_TYPE}>\n"
+              RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note}</${CURRENT_TYPE}>\n"
+              #pr_number=$(echo "$note" | grep -oP 'pull/\K[0-9]+' || echo "N/A")
+              #RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note} (#${pr_number})</${CURRENT_TYPE}>\n"
+              
             fi
           done < <(sed -n '/## \[Unreleased\]/,/^## /p' CHANGELOG.md | sed '1,2d' | sed '$d')
 
