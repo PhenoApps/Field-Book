@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Percent traits imported via BrAPI without min and max values default to 0/100 (https://github.com/PhenoApps/Field-Book/pull/1127)
 
 ## [v6.0.2] - 2024-12-16
 
