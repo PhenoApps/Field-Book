@@ -34,6 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
@@ -553,6 +554,44 @@ public class CollectActivity extends ThemedActivity
         refreshInfoBarAdapter();
 
         uvcView = findViewById(R.id.collect_activity_uvc_tv);
+
+        handleFlipFlopPreferences();
+    }
+
+    /**
+     * Handles the flip flop preferences for the collect activity.
+     * Change from issue #934:
+     * Originally, the arrow functionalities were switched depending on this preference,
+     * now the whole UI is swapped.
+     */
+    private void handleFlipFlopPreferences() {
+
+        ConstraintLayout layout = findViewById(R.id.layout_main);
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(layout);
+
+        if (preferences.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)) {
+            constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.TOP,
+                    R.id.act_collect_infobar_rv, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.BOTTOM,
+                    R.id.act_collect_trait_box, ConstraintSet.TOP, 0);
+            constraintSet.connect(R.id.act_collect_trait_box, ConstraintSet.TOP,
+                    R.id.act_collect_range_box, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_input_view, ConstraintSet.TOP,
+                    R.id.act_collect_trait_box, ConstraintSet.BOTTOM, 0);
+        } else {
+            constraintSet.connect(R.id.act_collect_trait_box, ConstraintSet.TOP,
+                    R.id.act_collect_infobar_rv, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_trait_box, ConstraintSet.BOTTOM,
+                    R.id.act_collect_range_box, ConstraintSet.TOP, 0);
+            constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.TOP,
+                    R.id.act_collect_trait_box, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_input_view, ConstraintSet.TOP,
+                    R.id.act_collect_range_box, ConstraintSet.BOTTOM, 0);
+        }
+
+        constraintSet.applyTo(layout);
     }
 
     //when softkeyboard is displayed, reset the snackbar to redisplay with a calculated bottom margin
