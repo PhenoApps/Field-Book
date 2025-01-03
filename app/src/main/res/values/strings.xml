@@ -752,7 +752,7 @@
     <string name="preferences_behavior_skip_entries_across_all_traits">Arrows skip entries that already have values for all traits</string>
 
     <string name="preferences_general_swap_navigation">Swap Navigation</string>
-    <string name="preferences_general_swap_navigation_description">Swap the behavior of the entry and trait arrows</string>
+    <string name="preferences_general_swap_navigation_description">Swap the location of the entry and trait arrows</string>
 
     <string name="preferences_behavior_volume_buttons_navigate">Navigate With Volume Keys</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Disabled</string>
