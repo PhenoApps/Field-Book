@@ -34,6 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
@@ -89,6 +90,7 @@ import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.MediaKeyCodeActionHelper;
+import com.fieldbook.tracker.utilities.SensorHelper;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -109,6 +111,7 @@ import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.phenoapps.interfaces.security.SecureBluetooth;
 import org.phenoapps.security.SecureBluetoothActivityImpl;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
+import org.phenoapps.utils.SoftKeyboardUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
@@ -144,7 +147,8 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.interfaces.CollectTraitController,
         InfoBarAdapter.InfoBarController,
         GPSTracker.GPSTrackerListener,
-        SearchDialog.onSearchResultsClickedListener {
+        SearchDialog.onSearchResultsClickedListener,
+        SensorHelper.RelativeRotationListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -153,6 +157,9 @@ public class CollectActivity extends ThemedActivity
     private final HandlerThread gnssRawLogHandlerThread = new HandlerThread("log");
 
     private GeoNavHelper geoNavHelper;
+
+    @Inject
+    SensorHelper sensorHelper;
 
     @Inject
     UsbCameraApi usbCameraApi;
@@ -205,6 +212,9 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     CameraXFacade cameraXFacade;
+
+    //used to track rotation relative to device
+    private SensorHelper.RotationModel rotationModel = null;
 
     private GPSTracker gps;
 
@@ -334,6 +344,8 @@ public class CollectActivity extends ThemedActivity
             }
             return null;
         });
+
+        sensorHelper.register();
 
         mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
 
@@ -543,6 +555,44 @@ public class CollectActivity extends ThemedActivity
         refreshInfoBarAdapter();
 
         uvcView = findViewById(R.id.collect_activity_uvc_tv);
+
+        handleFlipFlopPreferences();
+    }
+
+    /**
+     * Handles the flip flop preferences for the collect activity.
+     * Change from issue #934:
+     * Originally, the arrow functionalities were switched depending on this preference,
+     * now the whole UI is swapped.
+     */
+    private void handleFlipFlopPreferences() {
+
+        ConstraintLayout layout = findViewById(R.id.layout_main);
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(layout);
+
+        if (preferences.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)) {
+            constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.TOP,
+                    R.id.act_collect_infobar_rv, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.BOTTOM,
+                    R.id.act_collect_trait_box, ConstraintSet.TOP, 0);
+            constraintSet.connect(R.id.act_collect_trait_box, ConstraintSet.TOP,
+                    R.id.act_collect_range_box, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_input_view, ConstraintSet.TOP,
+                    R.id.act_collect_trait_box, ConstraintSet.BOTTOM, 0);
+        } else {
+            constraintSet.connect(R.id.act_collect_trait_box, ConstraintSet.TOP,
+                    R.id.act_collect_infobar_rv, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_trait_box, ConstraintSet.BOTTOM,
+                    R.id.act_collect_range_box, ConstraintSet.TOP, 0);
+            constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.TOP,
+                    R.id.act_collect_trait_box, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_input_view, ConstraintSet.TOP,
+                    R.id.act_collect_range_box, ConstraintSet.BOTTOM, 0);
+        }
+
+        constraintSet.applyTo(layout);
     }
 
     //when softkeyboard is displayed, reset the snackbar to redisplay with a calculated bottom margin
@@ -1010,6 +1060,8 @@ public class CollectActivity extends ThemedActivity
         goProApi.onDestroy();
 
         bluetoothHelper.onDestroy();
+
+        sensorHelper.unregister();
 
         super.onDestroy();
     }
@@ -1819,6 +1871,18 @@ public class CollectActivity extends ThemedActivity
         });
 
         goToId = builder.create();
+
+        goToId.setOnShowListener(dialog -> {
+            barcodeId.post(() -> {
+                barcodeId.requestFocus();
+                SoftKeyboardUtil.Companion.showKeyboard(getContext(), barcodeId, 250L);
+            });
+        });
+
+        goToId.setOnDismissListener(dialog -> {
+            barcodeId.post(() -> SoftKeyboardUtil.Companion.closeKeyboard(getContext(), barcodeId, 250L));
+        });
+
         goToId.show();
 
         android.view.WindowManager.LayoutParams langParams = goToId.getWindow().getAttributes();
@@ -2312,20 +2376,18 @@ public class CollectActivity extends ThemedActivity
 
     /**
      * Inserts a user observation whenever a label is printed.
-     * See ResultReceiver onReceiveResult in LabelPrintLayout
+     * @param plotID: The plot ID at the time of printing.
+     * @param traitID: The trait ID at the time of printing.
+     * @param traitFormat: The format of the trait.
      * @param labelNumber: The number of labels printed.
      */
-    public void insertPrintObservation(String labelNumber) {
-
-        TraitObject trait = getCurrentTrait();
-
+    public void insertPrintObservation(String plotID, String traitID, String traitFormat, String labelNumber) {
         String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertObservation(rangeBox.getPlotID(), trait.getId(), trait.getFormat(), labelNumber,
+        database.insertObservation(plotID, traitID, traitFormat, labelNumber,
                 getPerson(),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);
-
     }
 
     @Override
@@ -2732,5 +2794,16 @@ public class CollectActivity extends ThemedActivity
         searchRange = range;
         searchPlot = plot;
         searchReload = reload;
+    }
+
+    @Override
+    public void onRotationEvent(@NonNull SensorHelper.RotationModel rotation) {
+        this.rotationModel = rotation;
+    }
+
+    @Nullable
+    @Override
+    public SensorHelper.RotationModel getRotationRelativeToDevice() {
+        return rotationModel;
     }
 }

@@ -41,6 +41,19 @@ class SystemPreferencesFragment : PreferenceFragmentCompat(),
             validateBrapiEnabledBeforeSetting(newValue.toString())
         }
 
+        val resetPref = findPreference<Preference>(GeneralKeys.RESET_PREFERENCES)
+        resetPref?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+            AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(R.string.reset_preferences_title)
+                .setMessage(R.string.reset_preferences_message)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    preferences.edit().clear().apply()
+                    activity?.finish()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+            true
+        }
     }
 
     override fun onPreferenceChange(preference: Preference, newValue: Any): Boolean {

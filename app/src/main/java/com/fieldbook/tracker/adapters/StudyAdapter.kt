@@ -27,6 +27,7 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
         fun getObservationUnits(id: String, position: Int): HashSet<BrAPIObservationUnit>?
         fun getGermplasm(id: String, position: Int): HashSet<BrAPIGermplasm>?
         fun getLocation(id: String): String
+        fun getTrialName(id: String): String
     }
 
     data class Model(
@@ -47,10 +48,16 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
             holder.traitCountChip.text = studyLoader.getObservationVariables(id, position)?.size?.toString() ?: "0"
             holder.unitCountChip.text = studyLoader.getObservationUnits(id, position)?.size?.toString() ?: ""
             holder.locationChip.text = studyLoader.getLocation(id)
-
+            holder.trialChip.text = studyLoader.getTrialName(id)
             if (holder.traitCountChip.text.isNotBlank()
                 && holder.unitCountChip.text.isNotBlank()) {
                 holder.progressBar.visibility = View.GONE
+            }
+
+            if (holder.trialChip.text.isNotBlank()) {
+                holder.trialChip.visibility = View.VISIBLE
+            } else {
+                holder.trialChip.visibility = View.GONE
             }
         }
     }
@@ -65,6 +72,7 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
         var traitCountChip: Chip = v.findViewById(R.id.list_item_study_traits_chip)
         var locationChip: Chip = v.findViewById(R.id.list_item_study_location_chip)
         var progressBar: ProgressBar = v.findViewById(R.id.list_item_study_pb)
+        var trialChip: Chip = v.findViewById(R.id.list_item_trial_chip)
     }
 
     class DiffCallback : DiffUtil.ItemCallback<Model>() {

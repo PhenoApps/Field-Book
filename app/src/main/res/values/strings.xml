@@ -752,7 +752,7 @@
     <string name="preferences_behavior_skip_entries_across_all_traits">Arrows skip entries that already have values for all traits</string>
 
     <string name="preferences_general_swap_navigation">Swap Navigation</string>
-    <string name="preferences_general_swap_navigation_description">Swap the behavior of the entry and trait arrows</string>
+    <string name="preferences_general_swap_navigation_description">Swap the location of the entry and trait arrows</string>
 
     <string name="preferences_behavior_volume_buttons_navigate">Navigate With Volume Keys</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Disabled</string>
@@ -853,6 +853,12 @@
     <string name="database_reset_warning2">A database reset cannot be reversed. The app will quit after clearing the database. Are you really sure you want to continue?</string>
     <string name="database_reset_message">Database has been deleted</string>
     <string name="share_file_title">Sending file…</string>
+
+
+    <string name="preferences_storage_settings_title">Settings</string>
+    <string name="preferences_system_defaults_reset">Reset Settings</string>
+    <string name="reset_preferences_title">Reset Settings to Default</string>
+    <string name="reset_preferences_message">Warning: this will reset all of Field Book\'s preferences.</string>
 
     <!-- Experimental -->
     <string name="preferences_experimental_title">Experimental</string>

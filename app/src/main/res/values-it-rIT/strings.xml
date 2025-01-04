@@ -238,6 +238,7 @@
     <string name="database_reset_warning1">Tutti i dati saranno cancellati. Sei sicuro di voler ripristinare il database?</string>
     <string name="database_reset_warning2">Un database cancellato non potrà essere ripristinato. L\'applicazione si chiuderà subito dopo. Sei sicuro di voler continuare?</string>
     <string name="database_reset_message">Il database è stato cancellato</string>
+    <string name="preferences_storage_settings_title">Impostazioni</string>
     <!-- Experimental -->
     <!-- STATISTICS -->
     <string name="stat_title_fields">Campi</string>

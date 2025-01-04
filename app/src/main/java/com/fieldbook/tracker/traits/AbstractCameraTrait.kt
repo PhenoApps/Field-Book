@@ -264,7 +264,8 @@ abstract class AbstractCameraTrait :
                 database.getStudyById(studyId),
                 database.getObservationUnitById(currentRange.plot_id),
                 database.getObservationVariableById(currentTrait.id),
-                file.uri
+                file.uri,
+                controller.getRotationRelativeToDevice()
             )
         }
     }

@@ -13,6 +13,7 @@ import com.fieldbook.tracker.utilities.BluetoothHelper
 import com.fieldbook.tracker.utilities.FfmpegHelper
 import com.fieldbook.tracker.utilities.GeoNavHelper
 import com.fieldbook.tracker.utilities.GnssThreadHelper
+import com.fieldbook.tracker.utilities.SensorHelper
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import com.fieldbook.tracker.utilities.WifiHelper
@@ -60,4 +61,5 @@ interface CollectController: FieldController {
     fun getCanonApi(): CanonApi
     fun takePicture()
     fun getCurrentObservation(): ObservationModel?
+    fun getRotationRelativeToDevice(): SensorHelper.RotationModel?
 }

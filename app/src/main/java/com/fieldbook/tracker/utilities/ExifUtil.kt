@@ -110,7 +110,8 @@ class ExifUtil {
             study: StudyModel?,
             unit: ObservationUnitModel?,
             variable: ObservationVariableModel?,
-            uri: Uri
+            uri: Uri,
+            rotationModel: SensorHelper.RotationModel?
         ) {
 
             val modelToSave = JsonObject()
@@ -154,6 +155,18 @@ class ExifUtil {
                 variableData.remove("internal_id_observation_variable")
 
                 modelToSave.add("observation_variable", variableData)
+            }
+
+            if (rotationModel != null) {
+
+                val rotationGson = Gson().toJsonTree(
+                    rotationModel,
+                    object : TypeToken<SensorHelper.RotationModel>() {}.type
+                )
+
+                val rotationData = rotationGson.asJsonObject
+
+                modelToSave.add("rotation", rotationData)
             }
 
             modelToSave.addProperty("collector", collector)

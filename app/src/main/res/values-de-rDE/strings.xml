@@ -160,6 +160,7 @@
     <string name="database_reset_warning1">Alle Daten werden gelöscht beim Zurücksetzen der Datenbank. Sind Sie sicher?</string>
     <string name="database_reset_warning2">Dieser Vorgang kann nicht rückgängig gemacht werden. Die Applikation wird gestoppt nach dem die Datenbank gelöscht wurde. Wollen Sie den Vorgang trotzdem fortsetzen?</string>
     <string name="database_reset_message">Datenbank wurde gelöscht</string>
+    <string name="preferences_storage_settings_title">Weitere Einstellungen</string>
     <!-- Experimental -->
     <!-- STATISTICS -->
     <string name="stat_title_fields">Felder</string>

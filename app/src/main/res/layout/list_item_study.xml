@@ -44,7 +44,6 @@
             android:layout_margin="16dp"
             app:chipIcon="@drawable/ic_dots_grid"
             android:checkable="false"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/list_item_study_title_tv"
@@ -58,7 +57,6 @@
             android:layout_margin="16dp"
             app:chipIcon="@drawable/ic_ruler"
             android:checkable="false"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toEndOf="@id/list_item_study_units_chip"
             app:layout_constraintTop_toBottomOf="@id/list_item_study_title_tv"
@@ -72,12 +70,25 @@
             android:layout_margin="16dp"
             app:chipIcon="@drawable/map_marker_outline"
             android:checkable="false"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toEndOf="@id/list_item_study_traits_chip"
             app:layout_constraintTop_toBottomOf="@id/list_item_study_title_tv"
-            app:layout_constraintEnd_toStartOf="@id/list_item_study_pb"
             tools:text="Manhattan, KS" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/list_item_trial_chip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            app:chipIcon="@drawable/ic_trial"
+            android:checkable="false"
+            android:ellipsize="end"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/list_item_study_units_chip"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="PeeDee Otter Trial"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

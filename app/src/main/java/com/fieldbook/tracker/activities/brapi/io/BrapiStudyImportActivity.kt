@@ -524,6 +524,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             override fun getLocation(id: String): String {
                return cacheModels.studies.firstOrNull { it.study.studyDbId == id }?.study?.locationName ?: ""
             }
+
+            override fun getTrialName(id: String): String {
+                return cacheModels.studies.firstOrNull { it.study.studyDbId == id }?.study?.trialName ?: ""
+            }
         })
 
         (studyList.adapter as StudyAdapter).submitList(studyModels)
@@ -647,6 +651,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.studyName = study.studyName
                     details.commonCropName = study.commonCropName
                     details.numberOfPlots = units.size
+                    details.trialName = study.trialName
 
                     details.traits = observationVariables[study.studyDbId]?.toList()
                         ?.map { it.toTraitObject(this@BrapiStudyImportActivity) } ?: listOf()
@@ -679,7 +684,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                         level,
                         primaryId,
                         secondaryId,
-                        sortOrder
+                        sortOrder,
                     )
                 }
         }

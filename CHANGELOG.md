@@ -10,8 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- Swap navigation now changes position of entry/trait navigation instead of only behavior (https://github.com/PhenoApps/Field-Book/pull/1123)
 
 ### Fixed
+- Percent traits imported via BrAPI without min and max values default to 0/100 (https://github.com/PhenoApps/Field-Book/pull/1127)
+
+## [v6.0.2] - 2024-12-16
+
+### Added
+- Trial name included in BrAPI import and field details page (https://github.com/PhenoApps/Field-Book/pull/1121)
+- Image EXIF tag metadata includes the device pitch, roll, and yaw at the time of capture (https://github.com/PhenoApps/Field-Book/pull/1115)
+- Setting added to reset preferences to default (https://github.com/PhenoApps/Field-Book/pull/1118)
+
+### Changed
+- Fields with different BrAPI study IDs can now have the same name (https://github.com/PhenoApps/Field-Book/pull/1095)
+
+### Fixed
+- Min and max values now correctly saved for BrAPI traits (https://github.com/PhenoApps/Field-Book/pull/1103)
+- Label print observations are now assigned to the correct entry when navigating before the print is complete (https://github.com/PhenoApps/Field-Book/pull/1109)
+- Improved database export messaging (https://github.com/PhenoApps/Field-Book/pull/1112)
+- Go to ID dialog now has cursor focus when opened (https://github.com/PhenoApps/Field-Book/pull/1108)
 
 ## [v6.0.1] - 2024-12-09
 
@@ -534,3 +552,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.0.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.0
 
 [v6.0.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.1
+[v6.0.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.2
+[v6.0.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.3
+[v6.0.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.4

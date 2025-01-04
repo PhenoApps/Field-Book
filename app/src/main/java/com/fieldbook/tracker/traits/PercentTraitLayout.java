@@ -152,7 +152,10 @@ public class PercentTraitLayout extends BaseTraitLayout {
 
         if (value != null && !value.equals("NA") && !value.isEmpty()) {
 
-            seekBar.setMax(Integer.parseInt(getCurrentTrait().getMaximum()));
+            // Default to max 100 if maximum is not set
+            String maxString = getCurrentTrait().getMaximum();
+            int max = (maxString != null && !maxString.isEmpty()) ? Integer.parseInt(maxString) : 100;
+            seekBar.setMax(max);
 
             int textColor = value.equals(getDefaultValue()) ? Color.BLACK : Color.parseColor(getDisplayColor());
             setCurrentValueText(value, textColor);

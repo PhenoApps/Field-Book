@@ -164,6 +164,7 @@
     <string name="database_reset_warning1">Ragaan hindinuu ni bada. Dhugaa keetii?</string>
     <string name="database_reset_warning2">Wanti dalagame duubatti hin deeb\'u. Meeshan erga kuusaa qul\'qullessen booda hojii ni dhaaba. Akkanumatti itti fufuu ni barbaaddaa?</string>
     <string name="database_reset_message">Kuusan badee jira</string>
+    <string name="preferences_storage_settings_title">Haala ittin jijiiramu ol\'aanaa</string>
     <!-- Experimental -->
     <!-- STATISTICS -->
     <string name="stat_title_fields">Dirree</string>

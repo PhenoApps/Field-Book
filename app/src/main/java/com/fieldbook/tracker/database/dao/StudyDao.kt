@@ -187,6 +187,7 @@ class StudyDao {
             it.attribute_count = this["attribute_count"]?.toString()
             it.trait_count = this["trait_count"]?.toString()
             it.observation_count = this["observation_count"]?.toString()
+            it.trial_name = this["trial_name"]?.toString()
         }
 
         fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
@@ -235,6 +236,7 @@ class StudyDao {
                     import_format,
                     study_source,
                     study_sort_name,
+                    trial_name,
                     count,
                     (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
@@ -329,9 +331,12 @@ class StudyDao {
          * This function uses a field object to create a exp/study row in the database.
          * Columns are new observation unit attribute names that are inserted as well.
          */
-        fun createField(e: FieldObject, timestamp: String, columns: List<String>): Int = withDatabase { db ->
+        fun createField(e: FieldObject, timestamp: String, columns: List<String>, fromBrapi: Boolean): Int = withDatabase { db ->
 
-            when (val sid = checkFieldNameAndObsLvl(e.exp_name, e.observation_level)) {
+            when (val sid = if (fromBrapi) checkBrapiStudyUnique(
+                e.observation_level,
+                e.study_db_id
+            ) else checkFieldNameAndObsLvl(e.exp_name, e.observation_level)) {
 
                 -1 -> {
 
@@ -356,6 +361,7 @@ class StudyDao {
                         put("study_source", e.exp_source)
                         put("count", e.count)
                         put("observation_levels", e.observation_level)
+                        put("trial_name", e.trial_name)
                     }).toInt()
 
                     try {
@@ -560,6 +566,16 @@ class StudyDao {
                 arrayOf(Study.PK),
                 where = "study_name = ? AND observation_levels = ?",
                 whereArgs = arrayOf(name, observationLevel ?: "")
+            ).toFirst()[Study.PK] as? Int ?: -1
+
+        } ?: -1
+
+        fun checkBrapiStudyUnique(observationLevel: String?, brapiId: String?): Int = withDatabase { db ->
+            db.query(
+                Study.tableName,
+                arrayOf(Study.PK),
+                where = "observation_levels = ? AND study_db_id = ?",
+                whereArgs = arrayOf(observationLevel ?: "", brapiId ?: "")
             ).toFirst()[Study.PK] as? Int ?: -1
 
         } ?: -1
