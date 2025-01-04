@@ -55,6 +55,7 @@ import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -318,7 +319,13 @@ public class ConfigActivity extends ThemedActivity {
                     break;
                 case 3:
                     if (checkTraitsExist() < 0) return;
-                    exportUtil.exportActiveField();
+                    if (BaseDocumentTreeUtil.Companion.getRoot(this) != null
+                            && BaseDocumentTreeUtil.Companion.isEnabled(this)
+                            && BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_field_export) != null) {
+                        exportUtil.exportActiveField();
+                    } else {
+                        Toast.makeText(this, R.string.error_storage_directory, Toast.LENGTH_LONG).show();
+                    }
                     break;
                 case 4:
                     intent.setClassName(ConfigActivity.this,
