@@ -73,6 +73,7 @@ import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.traits.formats.TraitFormat;
 import com.fieldbook.tracker.traits.formats.coders.StringCoder;
+import com.fieldbook.tracker.traits.formats.Scannable;
 import com.fieldbook.tracker.traits.formats.presenters.ValuePresenter;
 import com.fieldbook.tracker.utilities.CameraXFacade;
 import com.fieldbook.tracker.utilities.BluetoothHelper;
@@ -672,31 +673,29 @@ public class CollectActivity extends ThemedActivity
      * @return boolean flag false when data is out of bounds, true otherwise
      */
     @Override
-    public boolean validateData() {
-        final String strValue = collectInputView.getText();
+    public boolean validateData(@Nullable String data) {
         final TraitObject currentTrait = traitBox.getCurrentTrait();
 
         if (currentTrait == null) return false;
 
-        if (strValue.equals("NA")) return true;
+        if (data == null) return true;
 
-        final String trait = currentTrait.getName();
+        if (data.equals("NA")) return true;
 
-        if (traitBox.existsNewTraits()
-                && traitBox.getCurrentTrait() != null
-                && strValue.length() > 0
-                && !traitBox.getCurrentTrait().isValidValue(strValue)) {
+        if (data.isEmpty()) return true;
 
-            //checks if the trait is numerical and within the bounds (otherwise returns false)
-            if (currentTrait.isOver(strValue)) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_maximum_value)
-                        + ": " + currentTrait.getMaximum());
-            } else if (currentTrait.isUnder(strValue)) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_minimum_value)
-                        + ": " + currentTrait.getMinimum());
-            }
+        BaseTraitLayout layout = traitLayouts.getTraitLayout(currentTrait.getFormat());
+        TraitFormat format = Formats.Companion.findTrait(currentTrait.getFormat());
 
-            removeTrait(trait);
+        String value = data;
+        if (format instanceof Scannable) {
+            value = ((Scannable) format).preprocess(data);
+        }
+
+        if (!layout.validate(value)) {
+
+            removeTrait(currentTrait);
+
             collectInputView.clear();
 
             soundHelper.playError();
@@ -770,7 +769,7 @@ public class CollectActivity extends ThemedActivity
             // if a brapi observation that has been synced, don't allow deleting
             String format = getTraitFormat();
             if (status && !Formats.Companion.isCameraTrait(format)) {
-                brapiDelete(getTraitName(), false);
+                brapiDelete(getCurrentTrait(), false);
             } else {
                 traitLayouts.deleteTraitListener(getTraitFormat());
             }
@@ -1301,9 +1300,8 @@ public class CollectActivity extends ThemedActivity
                 .getLocationByCollectMode(this, preferences, expId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
     }
 
-    private void brapiDelete(String parent, Boolean hint) {
+    private void brapiDelete(TraitObject trait, Boolean hint) {
         Utils.makeToast(this, getString(R.string.brapi_delete_message));
-        TraitObject trait = traitBox.getCurrentTrait();
         updateObservation(trait, getString(R.string.brapi_na), null);
         if (hint) {
             setNaTextBrapiEmptyField();
@@ -1313,19 +1311,20 @@ public class CollectActivity extends ThemedActivity
     }
 
     // Delete trait, including from database
-    public void removeTrait(String parent) {
+    public void removeTrait(TraitObject trait) {
+
         if (rangeBox.isEmpty()) {
             return;
         }
 
-        String exp_id = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-        TraitObject trait = traitBox.getCurrentTrait();
-        if (database.isBrapiSynced(exp_id, getObservationUnit(), trait.getId(), getRep())) {
-            brapiDelete(parent, true);
+        String fieldId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+
+        if (database.isBrapiSynced(fieldId, getObservationUnit(), trait.getId(), getRep())) {
+            brapiDelete(trait, true);
         } else {
             // Always remove existing trait before inserting again
             // Based on plot_id, prevent duplicate
-            traitBox.remove(parent, getObservationUnit(), getRep());
+            traitBox.remove(trait, getObservationUnit(), getRep());
         }
     }
 
@@ -2079,12 +2078,21 @@ public class CollectActivity extends ThemedActivity
 
                     TraitObject currentTrait = traitBox.getCurrentTrait();
                     BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
-                    currentTraitLayout.loadLayout();
+                    TraitFormat traitFormat = Formats.Companion.findTrait(currentTrait.getFormat());
 
+                    String oldValue = "";
+                    ObservationModel currentObs = getCurrentObservation();
+                    if (currentObs != null) {
+                        oldValue = currentObs.getValue();
+                    }
 
-                    updateObservation(currentTrait, scannedBarcode, null);
+                    if (scannedBarcode != null && traitFormat instanceof Scannable && validateData(scannedBarcode)) {
+                        updateObservation(currentTrait, ((Scannable) traitFormat).preprocess(scannedBarcode), null);
+                    } else {
+                        updateObservation(currentTrait, oldValue, null);
+                    }
+
                     currentTraitLayout.loadLayout();
-                    validateData();
                 }
                 break;
             case PhotoTraitLayout.PICTURE_REQUEST_CODE:
@@ -2652,7 +2660,7 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
-    private ObservationModel getCurrentObservation() {
+    public ObservationModel getCurrentObservation() {
         String rep = getCollectInputView().getRep();
         List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
             for (ObservationModel m : models) {

@@ -7,10 +7,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+
+import java.util.Locale;
 
 public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSeekBarChangeListener {
 
@@ -91,6 +94,16 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
         super.deleteTraitListener();
 
         //resetToDefault();
+    }
+
+    @NonNull
+    @Override
+    public Boolean validate(String data) {
+        try {
+            return data.toLowerCase(Locale.ROOT).equals("true") || data.toLowerCase(Locale.ROOT).equals("false");
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void resetToDefault() {

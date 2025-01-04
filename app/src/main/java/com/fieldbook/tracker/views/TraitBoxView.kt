@@ -370,16 +370,11 @@ class TraitBoxView : ConstraintLayout {
      * @param traitName the observation variable name
      * @param plotID the unique plot identifier to remove the observations from
      */
-    fun remove(traitName: String, plotID: String, rep: String) {
-        if (newTraits.containsKey(traitName)) newTraits.remove(traitName)
+    fun remove(trait: TraitObject, plotID: String, rep: String) {
+        if (newTraits.containsKey(trait.name)) newTraits.remove(trait.name)
         val studyId =
             controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        val traitDbId = controller.getDatabase().getTraitByName(traitName).id
-        controller.getDatabase().deleteTrait(studyId, plotID, traitDbId, rep)
-    }
-
-    fun remove(trait: TraitObject, plotID: String, rep: String) {
-        remove(trait.name, plotID, rep)
+        controller.getDatabase().deleteTrait(studyId, plotID, trait.id, rep)
     }
 
     private fun createTraitOnTouchListener(
@@ -408,7 +403,7 @@ class TraitBoxView : ConstraintLayout {
         if (visibleTraitsList == null) return
 
         var pos = 0
-        if (!controller.validateData()) {
+        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
             return
         }
 

@@ -1025,4 +1025,26 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         update()
     }
+
+    override fun validate(data: String?): Boolean {
+
+        if (data == null) return true
+
+        try {
+            val gson = GeoJsonUtil.decode(data)
+            return true
+        } catch (e: Exception) {
+            if (";" in data) {
+                val parts = data.split(";")
+                if (parts.size >= 2) {
+                    val lat = parts[0].toDoubleOrNull()
+                    val lng = parts[1].toDoubleOrNull()
+                    if (lat != null && lng != null) {
+                        return true
+                    }
+                }
+            }
+            return false
+        }
+    }
 }
