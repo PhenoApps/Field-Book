@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Swap navigation now changes position of entry/trait navigation instead of only behavior (https://github.com/PhenoApps/Field-Book/pull/1123)
 
 ### Fixed
+- Barcodes scanned for data entry are now correctly checked for valid values (https://github.com/PhenoApps/Field-Book/pull/1110)
 - Percent traits imported via BrAPI without min and max values default to 0/100 (https://github.com/PhenoApps/Field-Book/pull/1127)
 
 ## [v6.0.2] - 2024-12-16
