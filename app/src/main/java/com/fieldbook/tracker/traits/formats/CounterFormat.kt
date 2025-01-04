@@ -14,4 +14,4 @@ class CounterFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter()
-)
+), Scannable

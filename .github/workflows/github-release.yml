@@ -14,9 +14,53 @@ on:
     types: [trigger-release]
 
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      release_required: ${{ steps.release-check.outputs.release_required }}
+      bump_type: ${{ steps.release-check.outputs.bump_type }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ACTIONS_PAT }}
+          fetch-depth: 0
+
+      - name: Determine Release Type and Necessity
+        id: release-check
+        run: |
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            LAST_RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+            echo "LAST_RELEASE_TAG: $LAST_RELEASE_TAG"
+
+            LAST_RELEASE_COMMIT=$(git rev-list -n 1 $LAST_RELEASE_TAG)
+            echo "LAST_RELEASE_COMMIT: $LAST_RELEASE_COMMIT"
+
+            changed_files=$(git diff-tree --no-commit-id --name-only $LAST_RELEASE_COMMIT HEAD | grep '^app' || echo "none")
+            echo "Changed files: $changed_files"
+
+            if [ "$changed_files" != "none" ]; then
+              echo "App directory has changed since the last release, proceeding with new release"
+              echo "release_required=true" >> $GITHUB_OUTPUT
+              echo "bump_type=patch" >> $GITHUB_OUTPUT
+            else
+              echo "No app directory changes since the last release. Skipping release."
+              echo "release_required=false" >> $GITHUB_OUTPUT
+            fi
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "release_required=true" >> $GITHUB_OUTPUT
+            echo "bump_type=${{ github.event.inputs.bump_type }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+            echo "release_required=true" >> $GITHUB_OUTPUT
+            echo "bump_type=${{ github.event.client_payload.bump_type }}" >> $GITHUB_OUTPUT
+          else
+            echo "Unknown trigger source."
+            exit 1
+          fi
   release:
     runs-on: ubuntu-latest
-
+    needs: check-changes
+    if: needs.check-changes.outputs.release_required == 'true'
     steps:
 
       - name: Checkout Repo
@@ -25,50 +69,19 @@ jobs:
           token: ${{ secrets.ACTIONS_PAT }}
           fetch-depth: 0
 
-      - name: Determine Bump Type Based on Trigger
-        id: determine-bump-type
-        run: |
-          if [ "${{ github.event_name }}" == "schedule" ]; then
-            LAST_RELEASE_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-            echo "LAST_RELEASE_TAG was $LAST_RELEASE_TAG"
-
-            LAST_RELEASE_COMMIT=$(git rev-list -n 1 $LAST_RELEASE_TAG)
-            echo "LAST_RELEASE_COMMIT was $LAST_RELEASE_COMMIT"
-            changed_files=$(git diff-tree --no-commit-id --name-only $LAST_RELEASE_COMMIT HEAD | grep '^app' || echo "none")
-            if [ "$changed_files" != "none" ]; then
-              echo "App directory has changed since the last release, proceeding with new release"
-            else
-              echo "No app directory changes since the last release. Skipping release."
-              exit 0
-            fi
-            BUMP_TYPE="patch"
-          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            BUMP_TYPE="${{ github.event.inputs.bump_type }}"
-          elif [ "${{ github.event_name }}" == "repository_dispatch" ]; then
-            BUMP_TYPE="${{ github.event.client_payload.bump_type }}"
-          else
-            echo "Unknown trigger source."
-            exit 1
-          fi
-
-          if [[ ! "$BUMP_TYPE" =~ ^(major|minor|patch)$ ]]; then
-            echo "Invalid bump type: $BUMP_TYPE"
-            exit 1
-          fi
-          echo "BUMP_TYPE=$BUMP_TYPE" >> $GITHUB_ENV
-
       - name: Bump Version in version.properties
         id: bump-version
         run: |
-          echo "Bumping version with BUMP_TYPE: $BUMP_TYPE"
+          bump_type="${{ needs.check-changes.outputs.bump_type }}"
+          echo "Bumping version with BUMP_TYPE: $bump_type"
 
           source version.properties
 
-          if [ "$BUMP_TYPE" == "major" ]; then
+          if [ "$bump_type" == "major" ]; then
               majorVersion=$((majorVersion + 1))
               minorVersion=0
               patchVersion=0
-          elif [ "$BUMP_TYPE" == "minor" ]; then
+          elif [ "$bump_type" == "minor" ]; then
               minorVersion=$((minorVersion + 1))
               patchVersion=0
           else
@@ -80,9 +93,42 @@ jobs:
           echo "patchVersion=$patchVersion" >> version.properties
 
           VERSION=$majorVersion.$minorVersion.$patchVersion
+          VERSION_CODE=$((majorVersion * 10000 + minorVersion * 100 + patchVersion))
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
 
-      - name: Process Changelog Changes
+      - name: Update changelog.xml
+        id: update-changelog-xml
+        run: |
+
+          # Read the Unreleased section and process notes based on type
+          RELEASE_CONTENT="" CURRENT_TYPE=""
+          while IFS= read -r note; do
+            if [[ "$note" == "### Added"* ]]; then
+              CURRENT_TYPE="new"
+            elif [[ "$note" == "### Changed"* ]]; then
+              CURRENT_TYPE="info"
+            elif [[ "$note" == "### Fixed"* ]]; then
+              CURRENT_TYPE="bugfix"
+            elif [[ "$note" =~ ^- ]]; then
+              clean_note=$(echo "$note" | sed -E 's/^- //; s/ *\(.*\)//')
+              RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note}</${CURRENT_TYPE}>\n"
+              #pr_number=$(echo "$note" | grep -oP 'pull/\K[0-9]+' || echo "N/A")
+              #RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note} (#${pr_number})</${CURRENT_TYPE}>\n"
+              
+            fi
+          done < <(sed -n '/## \[Unreleased\]/,/^## /p' CHANGELOG.md | sed '1,2d' | sed '$d')
+
+          # Generate, insert, and log the new release block
+          today=$(date +'%Y-%m-%d')
+          RELEASE_BLOCK="    <release date=\"$today\" versionCode=\"$VERSION_CODE\" versionName=\"v$VERSION\">\n"
+          RELEASE_BLOCK+="$RELEASE_CONTENT"
+          RELEASE_BLOCK+="    </release>"
+          sed -i "/<changelog>/a \\\n$RELEASE_BLOCK" app/src/main/res/raw/changelog.xml
+          echo "Generated release block:"
+          echo -e "$RELEASE_BLOCK"
+
+      - name: Process CHANGELOG.md
         id: process-changelog
         run: |
           unreleased_section=$(sed -n '/## \[Unreleased\]/,/^## /p' CHANGELOG.md | sed '1,2d' | sed '$d')
@@ -149,9 +195,7 @@ jobs:
         if: ${{ success() }}
         uses: EndBug/add-and-commit@v7
         with:
-          add: |
-            version.properties
-            CHANGELOG.md
+          add: "version.properties CHANGELOG.md app/src/main/res/raw/changelog.xml"
           message: "Bump ${{ env.BUMP_TYPE }} and update changelog for v${{ env.VERSION }}"
           token: ${{ secrets.ACTIONS_PAT }}
 

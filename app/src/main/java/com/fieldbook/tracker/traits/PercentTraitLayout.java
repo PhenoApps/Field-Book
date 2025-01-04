@@ -1,5 +1,8 @@
 package com.fieldbook.tracker.traits;
 
+import static com.fieldbook.tracker.traits.NumericTraitLayout.isOver;
+import static com.fieldbook.tracker.traits.NumericTraitLayout.isUnder;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -8,10 +11,15 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.traits.formats.Formats;
+import com.fieldbook.tracker.traits.formats.Scannable;
+import com.fieldbook.tracker.traits.formats.TraitFormat;
 
 public class PercentTraitLayout extends BaseTraitLayout {
     private SeekBar seekBar;
@@ -144,7 +152,10 @@ public class PercentTraitLayout extends BaseTraitLayout {
 
         if (value != null && !value.equals("NA") && !value.isEmpty()) {
 
-            seekBar.setMax(Integer.parseInt(getCurrentTrait().getMaximum()));
+            // Default to max 100 if maximum is not set
+            String maxString = getCurrentTrait().getMaximum();
+            int max = (maxString != null && !maxString.isEmpty()) ? Integer.parseInt(maxString) : 100;
+            seekBar.setMax(max);
 
             int textColor = value.equals(getDefaultValue()) ? Color.BLACK : Color.parseColor(getDisplayColor());
             setCurrentValueText(value, textColor);
@@ -181,6 +192,17 @@ public class PercentTraitLayout extends BaseTraitLayout {
             loadLayout();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @NonNull
+    @Override
+    public Boolean validate(String data) {
+        try {
+            TraitObject trait = getCurrentTrait();
+            return !(isUnder(trait, data) || isOver(trait, data));
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -222,7 +244,7 @@ public class PercentTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        removeTrait(getCurrentTrait().getName());
+        removeTrait(getCurrentTrait());
         super.deleteTraitListener();
         ObservationModel model = getCurrentObservation();
         seekBar.setOnSeekBarChangeListener(null);

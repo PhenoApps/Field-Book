@@ -622,7 +622,6 @@
     <string name="preferences_behavior_skip_entries_with_data">Las flechas omiten las entradas que ya tienen valores para la variable actual</string>
     <string name="preferences_behavior_skip_entries_across_all_traits">Las flechas omiten las entradas que ya tienen valores para todas las variables</string>
     <string name="preferences_general_swap_navigation">Cambiar Navegación</string>
-    <string name="preferences_general_swap_navigation_description">Cambiar el comportamiento de las flechas de entrada y variables</string>
     <string name="preferences_behavior_volume_buttons_navigate">Navegar con las Teclas de Volumen</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Desactivado</string>
     <string name="preferences_behavior_volume_buttons_navigate_traits">Teclas de volumen navegan variables</string>
@@ -702,6 +701,7 @@
     <string name="database_reset_warning2">Un restablecimiento de la base de datos no se puede revertir. La aplicación se cerrará después de borrar la base de datos. ¿Estás realmente seguro(a) de que quieres continuar?</string>
     <string name="database_reset_message">Base de datos ha sido eliminada</string>
     <string name="share_file_title">Enviando archivo…</string>
+    <string name="preferences_storage_settings_title">Ajustes</string>
     <!-- Experimental -->
     <string name="preferences_experimental_title">Experimental</string>
     <string name="preferences_experimental_stable_title">Estable</string>

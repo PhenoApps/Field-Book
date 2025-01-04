@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
@@ -369,7 +370,7 @@ public class DateTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        removeTrait(getCurrentTrait().getName());
+        removeTrait(getCurrentTrait());
 
         super.deleteTraitListener();
 
@@ -422,5 +423,16 @@ public class DateTraitLayout extends BaseTraitLayout {
             e.printStackTrace();
         }
         return getMonthForInt(c.get(Calendar.MONTH)) + " " + String.format(Locale.getDefault(), "%02d", c.get(Calendar.DAY_OF_MONTH));
+    }
+
+    @NonNull
+    @Override
+    public Boolean validate(String data) {
+        try {
+            Date d = dateFormat.parse(data);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

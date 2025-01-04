@@ -278,8 +278,8 @@
     <string name="dialog_new_trait_error_must_select_a_layout">Você deve selecionar uma disposição.</string>
     <string name="trait_creator_parameter_warning_integer_required">Inteiro obrigatório.</string>
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">As características não podem ser atualizados para características BrAPI.</string>
-    <string name="required">Obrigatório</string>
-    <string name="traits_create_warning_percent_value_required">O valor é obrigatório</string>
+    <string name="required">Requerido</string>
+    <string name="traits_create_warning_percent_value_required">Valor necessário</string>
     <string name="select_trait">Selecionar Característica</string>
     <string name="edit_traits">Editar</string>
     <!-- COLLECT -->
@@ -301,8 +301,8 @@
     <string name="dialog_infobar_att_chooser_title">Infobar %d</string>
     <string name="infobars_attribute_placeholder">Selecionar</string>
     <string name="field_name_attribute">nome_campo</string>
-    <string name="infobar_word_wrap_enabled">Quebra de linha ativada para Infobar %s</string>
-    <string name="infobar_word_wrap_disabled">Quebra de linha desativada para Infobar %s</string>
+    <string name="infobar_word_wrap_enabled">Quebra de linha habilitada para Infobar %s</string>
+    <string name="infobar_word_wrap_disabled">Quebra de linha desabilitada para Infobar %s</string>
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">Este ID está em %s</string>
     <string name="main_toolbar_moveto_no_match">Nenhum valor correspondente</string>
@@ -338,7 +338,7 @@
     <string name="dialog_data_grid_repeated_measures_title">Escolher Observação</string>
     <string name="menu_action_header_view_data_grid_title">Escolher Cabeçalhos da Linha</string>
     <!--- Lock -->
-    <string name="activity_collect_locked_state">Bloqueado - a entrada de dados, a modificação e a exclusão estão desativadas</string>
+    <string name="activity_collect_locked_state">Bloqueado - entrada de dados, modificação e exclusão estão desabilitados</string>
     <string name="activity_collect_frozen_state">Congelado - uma vez que os dados são salvos, eles não podem ser modificados ou excluídos</string>
     <string name="activity_collect_unlocked_state">Desbloqueado - sem restrições na entrada de dados, modificação ou exclusão de dados</string>
     <!-- Trait Layout: Photo -->
@@ -531,9 +531,18 @@
     <string name="preferences_source_default_import">Origem de Importação</string>
     <string name="preferences_source_default_export">Origem da Exportação</string>
     <string name="brapi_disabled_alert_title">BrAPI Desabilitado</string>
+    <string name="brapi_disabled_alert_message">BrAPI deve ser habilitada primeiro nas configurações do BrAPI.</string>
+    <string name="preferences_general_share_enable">Habilitar Compartilhamento de Arquivos</string>
+    <string name="preferences_general_share_enable_description">Quando os arquivos são exportados, uma caixa de diálogo de compartilhamento será exibida</string>
     <!-- Profile -->
     <string name="preferences_profile_title">Perfil</string>
-    <string name="preferences_profile_name_first">Primeiro Nome</string>
+    <string name="preferences_profile_person_title">Pessoa</string>
+    <string name="preferences_profile_require_person">Requer Pessoa</string>
+    <string name="preferences_profile_require_person_summary">Rastreie o nome da pessoa que está coletando os dados</string>
+    <string name="preferences_profile_set_person">Nome da Pessoa</string>
+    <string name="preferences_profile_person_dialog_title">Definir Pessoa</string>
+    <string name="preferences_profile_name_first">Nome</string>
+    <string name="preferences_profile_name_last">Sobrenome</string>
     <string name="preferences_profile_name_error">Ambos os campos não podem estar em branco</string>
     <string name="preferences_profile_require_interval_title">Intervalo de Verificação</string>
     <string name="verification_interval_every_open">Toda vez que o aplicativo é aberto</string>
@@ -549,6 +558,8 @@
     <!-- Appearance -->
     <string name="preferences_appearance_title">Aparência</string>
     <string name="preferences_appearance_application_title">Aplicativo</string>
+    <string name="preferences_appearance_theme_title">Tema</string>
+    <string name="preferences_appearance_theme_summary">Modificar cores específicas ou todo o tema do Field Book</string>
     <string name="preferences_theme_theme_title">Tema do Aplicativo</string>
     <string name="theme_default">Padrão</string>
     <string name="theme_high_contrast">Alto Contraste</string>
@@ -565,19 +576,39 @@
     <string name="preferences_appearance_language">Idioma</string>
     <string name="preferences_appearance_language_description">Idioma definido por sistema</string>
     <string name="preference_language_default">Idioma do Sistema</string>
+    <string name="preferences_appearance_collect_toolbar_title">Barra de Ferramentas de Coleta</string>
+    <string name="preferences_appearance_tutorial_description">Adicione um botão na barra de ferramentas através do aplicativo que abre o tutorial</string>
+    <string name="preferences_appearance_toolbar_customize">Barra de Ferramentas de Ações</string>
     <string name="preferences_appearance_toolbar_customize_description">Alternar a visibilidade das funcionalidades padrão</string>
     <string name="preferences_appearance_toolbar_customize_search">Pesquisar</string>
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
     <string name="preferences_appearance_toolbar_customize_summary">Resumo</string>
+    <string name="preferences_appearance_toolbar_customize_lock">Bloquear</string>
     <string name="preferences_general_feature_datagrid">Grilla de datos</string>
     <string name="preferences_general_feature_datagrid_description">Adicione um botão para exibir uma grade de dados coletados</string>
     <string name="preferences_general_feature_next_missing">Próximo Entrada Sem Dados</string>
+    <string name="preferences_general_skip_entries_disabled">Desabilitado</string>
+    <string name="preferences_general_skip_entries_with_data">Botão ignora entradas que já têm valores para a característica atual</string>
+    <string name="preferences_general_skip_entries_across_all_traits">Botão ignora entradas que já têm valores para todas as características</string>
     <string name="preferences_general_feature_barcode_text">Mover para ID único</string>
-    <string name="move_to_unique_id_disabled">Desativada</string>
+    <string name="move_to_unique_id_disabled">Desabilitado</string>
     <string name="move_to_unique_id_text_or_scan">O botão usa entrada de texto com escaneado de câmera opcional</string>
     <string name="move_to_unique_id_direct_camera_scan">O botão usa a escaneado direto da câmera</string>
+    <string name="preferences_appearance_collect_screen_title">Tela de Coleta</string>
+    <string name="preferences_appearance_infobar_number">Número de InfoBars</string>
+    <string name="preferences_appearance_infobar_number_description">Ajustar o número de Infobars exibidas na tela principal</string>
+    <string name="preferences_appearance_infobar_hide_prefix">Ocultar prefixo do Infobar</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">Prefixo do Infobar será substituído por um ícone genérico</string>
     <!-- Behavior -->
     <string name="preferences_behavior_data_title">Dados</string>
+    <string name="preferences_behavior_cycle_sound_title">Habilitar efeito de som?</string>
+    <string name="preferences_behavior_disable_entry_arrow">Exigir Dados para Mover Entrada</string>
+    <string name="preferences_behavior_disable_entry_arrow_neither">Desabilitado</string>
+    <string name="preferences_behavior_disable_entry_arrow_left">Exigir dados para mover para esquerda</string>
+    <string name="preferences_behavior_disable_entry_arrow_right">Exigir dados para mover para direita</string>
+    <string name="preferences_behavior_disable_entry_arrow_both">Exigir dados para mover para qualquer direção</string>
+    <string name="preferences_behavior_skip_entries_disabled">Desabilitado</string>
+    <string name="preferences_behavior_volume_buttons_navigate_disabled">Desabilitado</string>
     <!-- Location -->
     <string name="preferences_location_title">Localização</string>
     <string name="preferences_location_defaults_title">Geocoordenadas</string>
@@ -588,6 +619,7 @@
     <string name="location_level_observation">Observação (maior uso da bateria)</string>
     <string name="location_format_iso">ISO 6709</string>
     <string name="location_format_geojson">GeoJSON</string>
+    <string name="pref_geonav_enable_title">Habilitar GeoNav</string>
     <string name="pref_geonav_enable_summary">Navegar pelos campos usando localização do dispositivo</string>
     <string name="pref_geonav_log_off">Desativado</string>
     <string name="pref_geonav_log_full_description">Completo: Registrando todas as atualizações de localização e etapas do algoritmo no armazenamento/geonav/log.txt</string>
@@ -597,6 +629,7 @@
     <string name="pref_behavior_geonav_internal_gps_choice">GPS interno</string>
     <string name="choose_paired_bluetooth_devices_title">Escolha seu dispositivo bluetooth pareado</string>
     <!-- Sounds -->
+    <string name="preferences_general_tts_description">Habilitar a TTS quando os dados são inseridos na atividade de Coletar</string>
     <string name="preferences_general_tts_language_title">Escolher Idioma</string>
     <string name="preferences_general_tts_language_description">Escolha um idioma de TTS compatível</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
@@ -608,10 +641,17 @@
     <string name="database_reset_warning1">Todos os dados serão excluídos em Redefinir. Você tem certeza disso?</string>
     <string name="database_reset_warning2">Essa ação não pode ser revertida. O aplicativo vai fechar depois de limpar o banco de dados. Você ainda deseja continuar?</string>
     <string name="database_reset_message">O banco de dados foi excluído</string>
+    <string name="preferences_storage_settings_title">Configurações avançadas</string>
     <!-- Experimental -->
-    <string name="pref_experimental_repeated_values_disabled_message">Todos os valores repetidos que foram coletados serão ocultados até que esta funcionalidade seja ativada novamente</string>
+    <string name="pref_experimental_repeated_values_summary">Habilita que vários valores sejam coletados para cada entrada/característica</string>
+    <string name="pref_experimental_repeated_values_disabled_title">Medidas Repetidas Desabilitadas</string>
+    <string name="pref_experimental_repeated_values_disabled_message">Todos os valores repetidos que foram coletados serão ocultados até que esta funcionalidade seja habilitada novamente</string>
+    <string name="pref_experimental_enable_field_audio_title">Habilitar Áudio em Campo</string>
     <string name="pref_experimental_enable_field_audio_summary">Ativa o recurso de gravação de áudio para todo o campo</string>
     <string name="field_audio_recording_stop">Um novo arquivo de áudio de nível de campo foi salvo</string>
+    <string name="pref_beta_enable_individual_field_page_title">Habilitar Páginas de Campo Individuais</string>
+    <string name="pref_beta_enable_individual_field_page_summary">Selecionar um campo na lista de campos abre uma página de detalhes</string>
+    <string name="pref_beta_mlkit_enabled_title">Escanear código de barras usando MLKit habilitado</string>
     <string name="pref_beta_mlkit_enabled_message">Habilitar essa funcionalidade irá mudar a biblioteca de leitura de código de barras do ZXing para MLKit</string>
     <!-- STATISTICS -->
     <string name="stat_title_fields">Campos</string>
@@ -631,14 +671,22 @@
     <!-- Update -->
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="preferences_brapi_enable_title">Habilitar BrAPI</string>
+    <string name="preferences_brapi_enable_summary">A Breeding API permite a transferência de dados para bases de dados compatíveis.</string>
     <string name="qr_code_share_choose_action_title">Escolher Ação</string>
     <string name="brapi_choice_to_make_default_dialog_title">Tornar este servidor BrAPI o padrão:</string>
     <string name="brapi_choice_to_make_default_import">Origem de Importação</string>
     <string name="brapi_choice_to_make_default_export">Origem de Exportação</string>
     <string name="brapi_choice_to_make_default_negative">Cancelar</string>
     <string name="brapi_choice_to_make_default_positive">Salvar</string>
+    <string name="brapi_edit_display_name">Editar Nome de Exibição</string>
+    <string name="brapi_edit_display_name_server">Nome do Servidor</string>
     <string name="brapi_edit_display_name_default">Servidor de teste BrAPI</string>
     <string name="brapi_oidc_url_desc">Localização do documento OIDC Discovery JSON</string>
+    <string name="preferences_appearance_collect_labelval_customize">Valor vs Exibição de Rótulo</string>
+    <string name="preferences_appearance_collect_labelval_customize_description">Mostrar valores ou rótulos na tela de coleta</string>
+    <string name="preferences_appearance_collect_labelval_customize_value">Valor</string>
+    <string name="preferences_appearance_collect_labelval_customize_label">Rótulo</string>
     <!-- Community Servers -->
     <string-array name="community_servers_names">
         <item>CassavaBase</item>
@@ -663,6 +711,8 @@
     </string-array>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Autorizar</string>
+    <string name="brapi_display_name">Nome para Exibição</string>
+    <string name="brapi_auth_needed">Você precisa estar conectado ao sistema com o qual está tentando sincronizar dados para sincronizar seus dados.\n\nDeseja autenticar agora?</string>
     <!-- BrAPI Import -->
     <string name="brapi_save_data_button">Pré-visualizar Campo</string>
     <string name="brapi_study_name">Nome</string>
@@ -674,9 +724,12 @@
     <string name="brapi_fields_filter_by_trial">Filtrar por ensayo</string>
     <string name="brapi_trials_load">Cargar ensayos</string>
     <string name="brapi_save_trait">Salvar Características</string>
+    <string name="brapi_enable_before_sync">BRAPI está desabilitado. Por favor, habilite nas configurações antes de usar a sincronização.</string>
     <string name="brapi_error_saving_all_traits">Erro ao salvar características. Nenhuma característica foi salva.</string>
     <string name="brapi_error_saving_some_traits">Erro ao salvar algumas características. Algumas características não foram salvas</string>
     <string name="brapi_traits_saved_success">Características selecionadas salvas com sucesso.</string>
+    <string name="brapi_obs_sync_menu_name">Sincronizar</string>
+    <string name="brapi_obs_header_name">Baixando Observações para o Estudo:</string>
     <string name="act_collect_no_plots">Este estudo não tem nenhuma parcela salva.</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Exportar</string>
@@ -688,10 +741,11 @@
     <string name="next">Seguinte</string>
     <!-- General -->
     <!-- APP INTRO  -->
+    <string name="intro_tutorial_title">Gostaria de habilitar o tutorial?</string>
     <string name="intro_tutorial_radio_item_yes">Sim</string>
     <string name="intro_tutorial_radio_item_no">Não</string>
     <!-- TUTORIAL -->
-    <string name="tutorial_dialog_description">Você deseja habilitar o tutorial? Esta configuração pode ser alterada nas configurações avançadas.</string>
+    <string name="tutorial_dialog_description">Gostaria de habilitar o tutorial? Esta configuração pode ser alterada nas Configurações.</string>
     <string name="tutorial_main_traits_title">Características</string>
     <string name="tutorial_main_traitlist_title">Características</string>
     <string name="tutorial_main_na_title">Datos faltantes</string>
@@ -705,7 +759,11 @@
     <string name="tutorial_settings_settings_title">Configurações avançadas</string>
     <string name="tutorial_settings_export_title">Exportar</string>
     <string name="tutorial_fields_file_description">Os arquivos devem conter três colunas: um identificador único, uma ordem primária e uma ordem secundária. A ordem primária/secundária é usada para navegação no campo.</string>
-    <string name="tutorial_traits_visibility_description">Las variables se pueden activar/desactivar usando casilla de verificación.</string>
+    <string name="tutorial_fields_delete_description">Para excluir um campo, abra o menu no lado esquerdo de um campo e selecione Excluir.</string>
+    <string name="tutorial_traits_visibility_description">As características podem ser desabilitadas da coleção marcando a caixa de seleção.</string>
+    <string name="shutter_capture_content_description">Botão de disparo para tirar uma foto.</string>
+    <string name="dialog_geonav_prefs_sensor_missing_title">Falta o sensor necessário</string>
+    <string name="dialog_geonav_prefs_sensor_missing_message">O método trapezoidal requer um acelerômetro e giroscópio para usar entrada da bússola.</string>
     <string name="tutorial_main_datagrid_title">Grilla de datos</string>
     <string name="tutorial_main_datagrid_description">Isto abre uma grade de fenotipagem 2D do campo atualmente selecionado.</string>
     <string name="brapi_programs_activity_title">Escolha seu Programa</string>
@@ -713,6 +771,7 @@
     <string name="act_brapi_filter_apply">Filtrar</string>
     <string name="act_brapi_filter_import">Importar</string>
     <string name="act_brapi_filter_clear">Limpar</string>
+    <string name="activity_file_explorer_up_directory_name">Cima</string>
     <!-- base camera strings -->
     <string name="trait_camera_capture_content_description">Tire uma foto</string>
     <string name="delete_local_photo">Excluir Foto</string>
@@ -722,6 +781,7 @@
     <string name="view_trait_photo_settings_resolution_title">Resolução de Alvo</string>
     <string name="view_trait_photo_settings_system_title">Câmera do Sistema</string>
     <string name="trait_name_alt_photo_system">Sistema</string>
+    <string name="trait_name_alt_usb">USB</string>
     <string name="view_trait_photo_settings_camera_custom">Padrão</string>
     <string name="view_trait_photo_settings_camera_system">Android</string>
     <string name="view_trait_photo_settings_camera_choice_description">Escolha entre a câmera padrão do Field Book e o app da câmera Android.</string>
@@ -730,6 +790,8 @@
     <string name="view_trait_photo_settings_auto_focus_title">Auto-Foco</string>
     <!-- gopro -->
     <!-- canon camera strings -->
+    <string name="pref_canon_ssid_summary">Este nome é usado para encontrar a AP do seu dispositivo. Esse nome deve estar contido no SSID atual.</string>
+    <string name="pref_canon_title">Nome do SSID</string>
     <string name="trait_usb_photo_settings_title">Configurações de Fotos USB</string>
     <string name="select">Selecionar</string>
     <string name="sort">Organizar</string>
@@ -737,5 +799,8 @@
     <string name="act_brapi_study_filter">Filtrar</string>
     <string name="act_brapi_trait_preprocess_title">Seletor de Formato de Field Book</string>
     <string name="act_brapi_trait_import_title">Escolher Formatos</string>
-    <string name="opening_brapi_no_network_error">Rede deve ser ativada para usar funcionalidade BrAPI.</string>
+    <string name="pref_alpha_enhanced_brapi_import_summary">Quando habilitado, uma nova interface de importação de BrAPI será usada para estudos e características.</string>
+    <string name="opening_brapi_no_network_error">Rede deve ser habilitada para usar funcionalidade BrAPI.</string>
+    <string name="pref_alpha_media_keycode_events_summary">Habilitar para usar comandos de mídia para interações com o app</string>
+    <string name="pref_alpha_media_keycode_events_title">Habilitar Comandos de Mídia</string>
 </resources>

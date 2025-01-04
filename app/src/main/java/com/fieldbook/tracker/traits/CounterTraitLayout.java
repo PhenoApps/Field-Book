@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 
+import androidx.annotation.NonNull;
+
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
@@ -103,13 +105,24 @@ public class CounterTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        removeTrait(getCurrentTrait().getName());
+        removeTrait(getCurrentTrait());
         super.deleteTraitListener();
         ObservationModel model = getCurrentObservation();
         if (model != null) {
             getCollectInputView().setText(model.getValue());
         } else {
             getCollectInputView().setText("0");
+        }
+    }
+
+    @NonNull
+    @Override
+    public Boolean validate(String data) {
+        try {
+            Integer.parseInt(data);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 }
