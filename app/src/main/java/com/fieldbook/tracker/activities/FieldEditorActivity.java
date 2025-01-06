@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.OpenableColumns;
 import android.text.Html;
 import android.text.Spanned;
@@ -38,6 +39,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -103,6 +105,7 @@ public class FieldEditorActivity extends ThemedActivity
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
     private static final int REQUEST_CLOUD_FILE_CODE = 5;
     private static final int REQUEST_BRAPI_IMPORT_ACTIVITY = 10;
+
     private ArrayList<FieldObject> fieldList;
     public FieldAdapter mAdapter;
     public EditText trait;
@@ -185,7 +188,6 @@ public class FieldEditorActivity extends ThemedActivity
         fab.setOnClickListener(v -> handleImportAction());
 
         searchBar = findViewById(R.id.act_fields_sb);
-        setupSearchBar();
 
         queryAndLoadFields();
 
@@ -1052,6 +1054,9 @@ public class FieldEditorActivity extends ThemedActivity
             fieldList = database.getAllFieldObjects(); // Fetch data from the database
             mAdapter.submitList(new ArrayList<>(fieldList), () -> recyclerView.scrollToPosition(0));
             mAdapter.notifyDataSetChanged();
+
+            new Handler(Looper.getMainLooper()).postDelayed(this::setupSearchBar, 100);
+
         } catch (Exception e) {
             Log.e(TAG, "Error updating fields list", e);
         }
@@ -1077,22 +1082,32 @@ public class FieldEditorActivity extends ThemedActivity
 
     private void setupSearchBar() {
 
-        searchBar.editText.addTextChangedListener(new android.text.TextWatcher() {
+        if (recyclerView.canScrollVertically(1) || recyclerView.canScrollVertically(-1)) {
 
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Do nothing
-            }
+            searchBar.setVisibility(View.VISIBLE);
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mAdapter.setTextFilter(s.toString());
-            }
+            searchBar.editText.addTextChangedListener(new android.text.TextWatcher() {
 
-            @Override
-            public void afterTextChanged(android.text.Editable s) {
-                // Do nothing
-            }
-        });
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    // Do nothing
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    mAdapter.setTextFilter(s.toString());
+                }
+
+                @Override
+                public void afterTextChanged(android.text.Editable s) {
+                    // Do nothing
+                }
+            });
+
+        } else {
+
+            searchBar.setVisibility(View.GONE);
+
+        }
     }
 }
