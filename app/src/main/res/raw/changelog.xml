@@ -1,5 +1,12 @@
 <changelog>
 
+    <release date="2025-01-06" versionCode="60003" versionName="v6.0.3">
+        <info>Swap navigation now changes position of entry/trait navigation instead of only behavior</info>
+        <bugfix>Improved warnings for missing or corrupted storage directory</bugfix>
+        <bugfix>Barcodes scanned for data entry are now correctly checked for valid values</bugfix>
+        <bugfix>Percent traits imported via BrAPI without min and max values default to 0/100</bugfix>
+    </release>
+
     <release
         date="2024-12-16"
         versionCode="60020"

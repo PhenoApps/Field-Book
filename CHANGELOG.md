@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+
+### Fixed
+
+## [v6.0.3] - 2025-01-06
+
+### Added
+
+### Changed
 - Swap navigation now changes position of entry/trait navigation instead of only behavior (https://github.com/PhenoApps/Field-Book/pull/1123)
 
 ### Fixed
@@ -557,3 +565,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.0.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.2
 [v6.0.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.3
 [v6.0.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.4
+
+[v6.0.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.3
