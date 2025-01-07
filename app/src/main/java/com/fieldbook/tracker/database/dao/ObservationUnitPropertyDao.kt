@@ -59,7 +59,6 @@ class ObservationUnitPropertyDao {
             RangeObject().apply {
 
                 val model = db.query(sObservationUnitPropertyViewName,
-                    select = arrayOf(firstName, secondName, uniqueName, "id"),
                     where = "id = ?",
                     whereArgs = arrayOf(id.toString())).toFirst()
 

@@ -36,14 +36,25 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
 
             database.switchField(field.exp_id)
 
+            //get all entry props from field
+            val entryProps = database.getAllObservationUnitAttributeNames(field.exp_id)
+
+            //get current selected primary/secondary, if empty then choose first two from entry props.
+            val primary = if (field.primary_id == "null" || field.primary_id == null || field.primary_id.isEmpty()) {
+                if (entryProps.isNotEmpty()) entryProps[0] else ""
+            } else field.primary_id
+            val secondary = if (field.secondary_id == "null" || field.secondary_id == null || field.secondary_id.isEmpty()) {
+                if (entryProps.size > 1) entryProps[1] else ""
+            } else field.secondary_id
+
             //clear field selection after updates
             preferences.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, field.exp_id)
                 .putString(GeneralKeys.FIELD_FILE, field.exp_name)
                 .putString(GeneralKeys.FIELD_ALIAS, field.exp_alias)
                 .putString(GeneralKeys.FIELD_OBS_LEVEL, field.observation_level)
                 .putString(GeneralKeys.UNIQUE_NAME, field.unique_id)
-                .putString(GeneralKeys.PRIMARY_NAME, field.primary_id)
-                .putString(GeneralKeys.SECONDARY_NAME, field.secondary_id)
+                .putString(GeneralKeys.PRIMARY_NAME, primary)
+                .putString(GeneralKeys.SECONDARY_NAME, secondary)
                 .putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true)
                 .putString(GeneralKeys.LAST_PLOT, null).apply()
 

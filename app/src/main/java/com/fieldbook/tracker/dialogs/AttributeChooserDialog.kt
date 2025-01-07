@@ -20,7 +20,10 @@ import com.google.android.material.tabs.TabLayout
  * Each tab will load data into a recycler view that lets user choose infobar prefixes.
  */
 
-open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.AttributeAdapterController {
+open class AttributeChooserDialog(
+    private val showTraits: Boolean = true,
+    private val showOther: Boolean = true
+) : DialogFragment(), AttributeAdapter.AttributeAdapterController {
     companion object {
         const val TAG = "AttributeChooserDialog"
     }
@@ -44,6 +47,10 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
         recyclerView = view.findViewById(R.id.dialog_collect_att_chooser_lv)
         recyclerView.layoutManager = LinearLayoutManager(requireActivity())
         recyclerView.adapter = AttributeAdapter(this, null)
+
+        //toggle view of traits/other based on class param
+        tabLayout.getTabAt(1)?.view?.visibility = if (showTraits) TabLayout.VISIBLE else TabLayout.GONE
+        tabLayout.getTabAt(2)?.view?.visibility = if (showOther) TabLayout.VISIBLE else TabLayout.GONE
 
         val dialog = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
             .setView(view)

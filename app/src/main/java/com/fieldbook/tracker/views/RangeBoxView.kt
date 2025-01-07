@@ -21,6 +21,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.dialogs.AttributeChooserDialog
 import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
@@ -61,14 +63,6 @@ class RangeBoxView : ConstraintLayout {
     private var rangeEdited = false
     private var plotEdited = false
 
-    /**
-     * unique plot names used in range queries
-     * query and save them once during initialization
-     */
-    private var firstName: String
-    private var secondName: String
-    private var uniqueName: String
-
     private var delay = 100
     private var count = 1
 
@@ -80,8 +74,8 @@ class RangeBoxView : ConstraintLayout {
         this.rangeRight = v.findViewById(R.id.rangeRight)
         this.tvRange = v.findViewById(R.id.tvRange)
         this.tvPlot = v.findViewById(R.id.tvPlot)
-        this.plotEt = v.findViewById(R.id.plot)
-        this.rangeEt = v.findViewById(R.id.range)
+        this.plotEt = v.findViewById(R.id.plot) //secondary
+        this.rangeEt = v.findViewById(R.id.range) //primary
         this.rangeName = v.findViewById(R.id.rangeName)
         this.plotName = v.findViewById(R.id.plotName)
         this.plotsProgressBar = v.findViewById(R.id.plotsProgressBar)
@@ -94,9 +88,6 @@ class RangeBoxView : ConstraintLayout {
         cRange.plot_id = ""
         cRange.range = ""
         lastRange = ""
-        firstName = controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
-        secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
-        uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
     }
 
     constructor(ctx: Context) : super(ctx)
@@ -115,6 +106,18 @@ class RangeBoxView : ConstraintLayout {
         defStyle,
         defStyleRes
     )
+
+    private fun getPrimaryName(): String {
+        return controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
+    }
+
+    private fun getSecondaryName(): String {
+        return controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
+    }
+
+    private fun getUniqueName(): String {
+        return controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+    }
 
     fun toggleNavigation(toggle: Boolean) {
         rangeLeft.isEnabled = toggle
@@ -171,27 +174,39 @@ class RangeBoxView : ConstraintLayout {
             false
         }
         setName(10)
-        rangeName.setOnTouchListener { _, _ ->
-            Utils.makeToast(
-                context,
-                controller.getPreferences().getString(
-                    GeneralKeys.PRIMARY_NAME,
-                    context.getString(R.string.search_results_dialog_range)
-                )
+
+        val attributeChooserDialog = AttributeChooserDialog(showTraits = false, showOther = false)
+
+        rangeName.setOnClickListener {
+            attributeChooserDialog.setOnAttributeSelectedListener(object :
+                AttributeChooserDialog.OnAttributeSelectedListener {
+                override fun onAttributeSelected(label: String) {
+                    //update preference primary name
+                    controller.getPreferences().edit().putString(GeneralKeys.PRIMARY_NAME, label).apply()
+                    rangeName.setText(label)
+                    refresh()
+                }
+            })
+            attributeChooserDialog.show(
+                (controller.getContext() as CollectActivity).supportFragmentManager,
+                "attributeChooserDialog"
             )
-            false
         }
 
-        //TODO https://stackoverflow.com/questions/47107105/android-button-has-setontouchlistener-called-on-it-but-does-not-override-perform
-        plotName.setOnTouchListener { v: View, _: MotionEvent? ->
-            Utils.makeToast(
-                context,
-                controller.getPreferences().getString(
-                    GeneralKeys.SECONDARY_NAME,
-                    context.getString(R.string.search_results_dialog_range)
-                )
+        plotName.setOnClickListener {
+            attributeChooserDialog.setOnAttributeSelectedListener(object :
+                AttributeChooserDialog.OnAttributeSelectedListener {
+                override fun onAttributeSelected(label: String) {
+                    //update preference primary name
+                    controller.getPreferences().edit().putString(GeneralKeys.SECONDARY_NAME, label).apply()
+                    plotName.setText(label)
+                    refresh()
+                }
+            })
+            attributeChooserDialog.show(
+                (controller.getContext() as CollectActivity).supportFragmentManager,
+                "attributeChooserDialog"
             )
-            v.performClick()
         }
     }
 
@@ -380,8 +395,11 @@ class RangeBoxView : ConstraintLayout {
      * @param id the range position to update to
      */
     private fun updateCurrentRange(id: Int) {
-        if (firstName.isNotEmpty() && secondName.isNotEmpty() && uniqueName.isNotEmpty()) {
-            cRange = controller.getDatabase().getRange(firstName, secondName, uniqueName, id)
+        val primaryId = getPrimaryName()
+        val secondaryId = getSecondaryName()
+        val uniqueId = getUniqueName()
+        if (primaryId.isNotEmpty() && secondaryId.isNotEmpty() && uniqueId.isNotEmpty()) {
+            cRange = controller.getDatabase().getRange(primaryId, secondaryId, uniqueId, id)
 
             // RangeID is a sorted list of obs unit ids for the current field.
             // Set bar maximum to number of obs units in the field
@@ -400,11 +418,6 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun reload() {
-
-        firstName = controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
-        secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
-        uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-
         switchVisibility(controller.getPreferences().getBoolean(GeneralKeys.QUICK_GOTO, false))
         setName(8)
         paging = 1
