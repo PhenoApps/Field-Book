@@ -617,10 +617,14 @@
     <string name="location_level_study">Campo</string>
     <string name="location_level_observation_unit">Entrada</string>
     <string name="location_level_observation">Observação (maior uso da bateria)</string>
+    <string name="pref_coordinate_format_title">Formato de Coleção</string>
     <string name="location_format_iso">ISO 6709</string>
     <string name="location_format_geojson">GeoJSON</string>
+    <string name="pref_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_enable_title">Habilitar GeoNav</string>
     <string name="pref_geonav_enable_summary">Navegar pelos campos usando localização do dispositivo</string>
+    <string name="pref_geonav_search_method_summary">O método %s utilizado para pesquisar parcelas em GeoNav</string>
+    <string name="pref_geonav_method_distance">Distância</string>
     <string name="pref_geonav_log_off">Desativado</string>
     <string name="pref_geonav_log_full_description">Completo: Registrando todas as atualizações de localização e etapas do algoritmo no armazenamento/geonav/log.txt</string>
     <string name="pref_geonav_log_both_description">Ambos: Registrando todas as atualizações de localização e passos de algoritmo para armazenamento/geonav/log.txt, entrada mais próxima ao armazenamento/geonav/limited_log.txt</string>
@@ -641,6 +645,7 @@
     <string name="database_reset_warning1">Todos os dados serão excluídos em Redefinir. Você tem certeza disso?</string>
     <string name="database_reset_warning2">Essa ação não pode ser revertida. O aplicativo vai fechar depois de limpar o banco de dados. Você ainda deseja continuar?</string>
     <string name="database_reset_message">O banco de dados foi excluído</string>
+    <string name="share_file_title">Enviando arquivo…</string>
     <string name="preferences_storage_settings_title">Configurações avançadas</string>
     <!-- Experimental -->
     <string name="pref_experimental_repeated_values_summary">Habilita que vários valores sejam coletados para cada entrada/característica</string>
@@ -766,6 +771,7 @@
     <string name="dialog_geonav_prefs_sensor_missing_message">O método trapezoidal requer um acelerômetro e giroscópio para usar entrada da bússola.</string>
     <string name="tutorial_main_datagrid_title">Grilla de datos</string>
     <string name="tutorial_main_datagrid_description">Isto abre uma grade de fenotipagem 2D do campo atualmente selecionado.</string>
+    <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="brapi_programs_activity_title">Escolha seu Programa</string>
     <string name="menu_action_brapi_filter">Filtrar</string>
     <string name="act_brapi_filter_apply">Filtrar</string>
