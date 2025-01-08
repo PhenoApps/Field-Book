@@ -617,6 +617,7 @@
     <string name="preferences_behavior_disable_entry_arrow_left">Exigir dados para mover para esquerda</string>
     <string name="preferences_behavior_disable_entry_arrow_right">Exigir dados para mover para direita</string>
     <string name="preferences_behavior_disable_entry_arrow_both">Exigir dados para mover para qualquer direção</string>
+    <string name="preferences_behavior_skip_entries_title">Pular Entradas</string>
     <string name="preferences_behavior_skip_entries_disabled">Desabilitado</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Desabilitado</string>
     <!-- Location -->
@@ -817,6 +818,7 @@
     <string name="menu_filter_brapi_reset_cache_title">Restabelecer Cache</string>
     <string name="select">Selecionar</string>
     <string name="act_brapi_list_filter_reset_cache_title">Confirmar Restabelecer</string>
+    <string name="act_brapi_list_filter_reset_cache_message">Isto irá excluir os dados locais do BrAPI usados para pesquisa e importação.</string>
     <string name="sort">Organizar</string>
     <string name="brapi_traits_filter_title">Características</string>
     <string name="act_brapi_study_filter">Filtrar</string>
@@ -824,6 +826,7 @@
     <string name="act_brapi_trait_import_title">Escolher Formatos</string>
     <string name="pref_alpha_enhanced_brapi_import_summary">Quando habilitado, uma nova interface de importação de BrAPI será usada para estudos e características.</string>
     <string name="opening_brapi_no_network_error">Rede deve ser habilitada para usar funcionalidade BrAPI.</string>
+    <string name="act_brapi_list_filter_reset_selection_message">Isto irá limpar a lista de itens selecionados.</string>
     <string name="pref_alpha_media_keycode_events_summary">Habilitar para usar comandos de mídia para interações com o app</string>
     <string name="pref_alpha_media_keycode_events_title">Habilitar Comandos de Mídia</string>
 </resources>
