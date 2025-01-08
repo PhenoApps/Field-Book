@@ -619,7 +619,20 @@
     <string name="preferences_behavior_disable_entry_arrow_both">Exigir dados para mover para qualquer direção</string>
     <string name="preferences_behavior_skip_entries_title">Pular Entradas</string>
     <string name="preferences_behavior_skip_entries_disabled">Desabilitado</string>
+    <string name="preferences_behavior_skip_entries_with_data">As setas pulam entradas que já possuem valores para a característica atual</string>
+    <string name="preferences_behavior_skip_entries_across_all_traits">As setas pulam entradas que já possuem valores para todas as características</string>
+    <string name="preferences_general_swap_navigation">Trocar Navegação</string>
+    <string name="preferences_general_swap_navigation_description">Trocar a localização das setas entrada e característica</string>
+    <string name="preferences_behavior_volume_buttons_navigate">Navegar Com Teclas De Volume</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Desabilitado</string>
+    <string name="preferences_behavior_volume_buttons_navigate_traits">Teclas de volume navegam características</string>
+    <string name="preferences_behavior_volume_buttons_navigate_entries">Teclas de volume navegam entradas</string>
+    <string name="preferences_behavior_return_character">Ação da Tecla Retorno de Carro</string>
+    <string name="preferences_behavior_return_character_do_nothing">Fazer nada</string>
+    <string name="preferences_behavior_return_character_next_plot">A tecla de retorno de carro avança parcela</string>
+    <string name="preferences_behavior_return_character_next_trait">A tecla de retorno de carro avança característica</string>
+    <string name="preferences_general_use_day_number">Usar Dia do Ano</string>
+    <string name="preferences_general_use_day_number_description">Usar dia do ano na coleta de dados em vez da data</string>
     <!-- Location -->
     <string name="preferences_location_title">Localização</string>
     <string name="preferences_location_defaults_title">Geocoordenadas</string>
@@ -637,23 +650,50 @@
     <string name="pref_geonav_search_method_title">Método de Pesquisa</string>
     <string name="pref_geonav_search_method_summary">O método %s utilizado para pesquisar parcelas em GeoNav</string>
     <string name="pref_geonav_method_distance">Distância</string>
+    <string name="pref_geonav_method_trapezoid">Trapezoidal</string>
+    <string name="pref_behavior_geonav_parameters_category_title">Parâmetros</string>
+    <string name="pref_geonav_search_trapezoid_d1_title">Base Trapezoide (km)</string>
+    <string name="pref_geonav_search_trapezoid_d1_summary">A base mais curta do trapezoide é %s km</string>
+    <string name="pref_geonav_search_trapezoid_d2_title">Distância do Trapezoid (km)</string>
+    <string name="pref_geonav_search_trapezoid_d2_summary">A distância entre o usuário e o lado oposto do trapezoide é %s km</string>
+    <string name="pref_geonav_search_angle_summary">GeoNav cria um trapezoide na frente do usuário, o ângulo mais próximo do usuário é definido como %s°</string>
+    <string name="pref_geonav_search_angle_title">Ângulo de Pesquisa GeoNav (graus)</string>
+    <string name="pref_geonav_log">Registro GeoNav</string>
     <string name="pref_geonav_log_off">Desativado</string>
+    <string name="pref_geonav_log_off_description">Desativado: Não há registros registrados</string>
+    <string name="pref_geonav_log_limited">Limitado</string>
+    <string name="pref_geonav_log_limited_description">Limitado: Registro mais próximo do armazenamento/geonav/limited_log.txt</string>
+    <string name="pref_geonav_log_full">Completo</string>
     <string name="pref_geonav_log_full_description">Completo: Registrando todas as atualizações de localização e etapas do algoritmo no armazenamento/geonav/log.txt</string>
+    <string name="pref_geonav_log_both">Ambos</string>
     <string name="pref_geonav_log_both_description">Ambos: Registrando todas as atualizações de localização e passos de algoritmo para armazenamento/geonav/log.txt, entrada mais próxima ao armazenamento/geonav/limited_log.txt</string>
+    <string name="pref_geonav_update_interval_title">Intervalo de Atualização (s)</string>
     <string name="pref_geonav_update_interval_summary">O tempo entre as atualizações de localização é %s</string>
     <string name="pref_geonav_pair">Provedor de localização</string>
     <string name="pref_behavior_geonav_internal_gps_choice">GPS interno</string>
     <string name="choose_paired_bluetooth_devices_title">Escolha seu dispositivo bluetooth pareado</string>
     <!-- Sounds -->
+    <string name="preferences_sounds">Som</string>
+    <string name="preferences_sound_primary_order_title">Alterar Ordem Primária</string>
+    <string name="preferences_sound_primary_order_description">Reproduzir som de plonk quando o ordem principal for alterado</string>
+    <string name="preferences_sound_entry_title">Alterar Entrada</string>
+    <string name="preferences_sound_delete_obs_title">Excluir Observação</string>
+    <string name="preferences_sound_delete_obs_description">Reproduzir som excluir quando observação é excluída</string>
+    <string name="preferences_category_audio_tts_title">Texto para Fala</string>
+    <string name="preferences_general_tts_title">Texto para Fala</string>
     <string name="preferences_general_tts_description">Habilitar a TTS quando os dados são inseridos na atividade de Coletar</string>
     <string name="preferences_general_tts_language_title">Escolher Idioma</string>
     <string name="preferences_general_tts_language_description">Escolha um idioma de TTS compatível</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
     <!-- Storage -->
+    <string name="preferences_storage_title">Armazenamento</string>
+    <string name="preferences_storage_storage_title">Armazenamento</string>
     <string name="preferences_storage_files_base_directory_title">Definir local de armazenamento</string>
     <string name="preferences_storage_files_base_directory_description">Migre ou defina uma nova estrutura de diretório raiz. Os arquivos de exportação serão salvos aqui automaticamente.</string>
     <string name="preferences_storage_database_title">Base de dados</string>
     <string name="database_dialog_title">Base de dados</string>
+    <string name="database_import">Importar Base de Dados</string>
+    <string name="database_export">Exportar Banco de Dados</string>
     <string name="database_reset">Excluir Banco de Dados</string>
     <string name="database_reset_warning1">Todos os dados serão excluídos. Tem certeza de que deseja restabelecer a base de dados?</string>
     <string name="database_reset_warning2">Essa ação não pode ser revertida. O aplicativo vai fechar depois de limpar o banco de dados. Você ainda deseja continuar?</string>
@@ -685,7 +725,9 @@
     <string name="about_version_title">Versão</string>
     <string name="about_manual_title">Manual</string>
     <!-- Lead  -->
+    <string name="about_email_title">Email</string>
     <!-- Support  -->
+    <string name="about_support_title">Suporte</string>
     <!-- PhenoApps  -->
     <!-- Technical  -->
     <string name="about_technical_title">Detalles Técnicos</string>
