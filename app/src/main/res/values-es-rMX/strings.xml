@@ -467,7 +467,7 @@
     <string name="dialog_geonav_collect_geonav_popup_type">Tipo de GeoNav Popup</string>
     <string name="dialog_geonav_collect_reconnect">Reconectar</string>
     <string name="dialog_geonav_collect_reset_start_toast_message">Restableciendo conexión…</string>
-    <string name="dialog_geonav_collect_reset_end_toast_message">Reiniciar conexión</string>
+    <string name="dialog_geonav_collect_reset_end_toast_message">Restablecer conexión</string>
     <string name="dialog_geonav_precision_loss_title">Pérdida de Precisión de Ubicación</string>
     <string name="dialog_geonav_precision_loss_msg">Su precisión preferida se ha perdido.</string>
     <!--- Content Descriptions -->
@@ -510,6 +510,7 @@
     <string name="export_content_traits_all">Todas las variables</string>
     <string name="export_content_traits_active">Solo variables activas</string>
     <string name="export_error_general">Error en exportación</string>
+    <string name="error_storage_directory">Carpeta de almacenamiento faltante o dañada.</string>
     <string name="export_error_data_missing">No hay datos para exportar.</string>
     <string name="export_complete">Exportación ha sido completada</string>
     <string name="export_progress">Exportando...</string>
@@ -607,9 +608,9 @@
     <string name="preferences_behavior_hardware_title">Hardware</string>
     <string name="preferences_behavior_data_title">Datos</string>
     <string name="preferences_behavior_cycle_traits">Auto-Avance Entrada</string>
-    <string name="preferences_behavior_cycle_traits_description">Ciclando a través de la lista de variables automáticamente avanza la entrada</string>
+    <string name="preferences_behavior_cycle_traits_description">Rotando a través de la lista de variables automáticamente avanza la entrada</string>
     <string name="preferences_behavior_cycle_sound_title">¿Activar efecto de sonido?</string>
-    <string name="preferences_behavior_cycle_sound_description">Un efecto de sonido se reproducirá cuando se ciclen las variables (recomendado)</string>
+    <string name="preferences_behavior_cycle_sound_description">Un efecto de sonido se reproducirá cuando se roten los rasgos (recomendado)</string>
     <string name="preferences_behavior_return_to_first_trait">Auto-Restablecer Variables</string>
     <string name="preferences_behavior_return_to_first_trait_description">Avanzar la entrada se reinicia automáticamente en la primer variable</string>
     <string name="preferences_behavior_disable_entry_arrow">Requiere Dato para Moverse de Entrada</string>
@@ -622,6 +623,7 @@
     <string name="preferences_behavior_skip_entries_with_data">Las flechas omiten las entradas que ya tienen valores para la variable actual</string>
     <string name="preferences_behavior_skip_entries_across_all_traits">Las flechas omiten las entradas que ya tienen valores para todas las variables</string>
     <string name="preferences_general_swap_navigation">Cambiar Navegación</string>
+    <string name="preferences_general_swap_navigation_description">Cambiar el comportamiento de las flechas de entrada y variables</string>
     <string name="preferences_behavior_volume_buttons_navigate">Navegar con las Teclas de Volumen</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Desactivado</string>
     <string name="preferences_behavior_volume_buttons_navigate_traits">Teclas de volumen navegan variables</string>
@@ -677,8 +679,8 @@
     <string name="preferences_sound_primary_order_description">Sonido de \'plonk\' cuando cambia el orden primario</string>
     <string name="preferences_sound_entry_title">Cambiar Entrada</string>
     <string name="preferences_sound_entry_description">Reproducir sonido al moverse entre entradas</string>
-    <string name="preferences_sound_cycle_traits_title">Variables Cíclicas</string>
-    <string name="preferences_sound_cycle_traits_description">Reproducir un sonido cuando las variables son completamente cícladas</string>
+    <string name="preferences_sound_cycle_traits_title">Rotar Variables</string>
+    <string name="preferences_sound_cycle_traits_description">Reproducir un sonido cuando las variables son completamente rotadas</string>
     <string name="preferences_sound_delete_obs_title">Eliminar Observación</string>
     <string name="preferences_sound_delete_obs_description">Reproducir sonido al eliminar observación</string>
     <string name="preferences_category_audio_tts_title">Texto a Voz</string>
@@ -702,6 +704,9 @@
     <string name="database_reset_message">Base de datos ha sido eliminada</string>
     <string name="share_file_title">Enviando archivo…</string>
     <string name="preferences_storage_settings_title">Ajustes</string>
+    <string name="preferences_system_defaults_reset">Restablecer Ajustes</string>
+    <string name="reset_preferences_title">Restablecer Ajustes Predeterminados</string>
+    <string name="reset_preferences_message">Advertencia: Esto restablecerá todas las preferencias de Field Book.</string>
     <!-- Experimental -->
     <string name="preferences_experimental_title">Experimental</string>
     <string name="preferences_experimental_stable_title">Estable</string>
@@ -1155,4 +1160,6 @@ Las variables y los campos creados manualmente o importados a través de CSV deb
     <string name="pref_geonav_distance_threshold_summary">GeoNav se detiene automáticamente cuando la distancia de todas las parcelas excede este valor en kilómetros.</string>
     <string name="pref_geonav_distance_threshold_title">Verificación de Proximidad</string>
     <string name="activity_collect_proximity_warning">GeoNav detenido, fuera de coordenadas de proximidad</string>
+    <string name="no_suitable_file_manager_was_found">No se encontró un Administrador de Archivos adecuado.</string>
+    <string name="trait_error_invalid_multicat_value">Se introdujeron datos categóricos inválidos.</string>
 </resources>
