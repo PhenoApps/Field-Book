@@ -599,7 +599,12 @@
     <string name="preferences_appearance_infobar_number_description">Ajustar o número de Infobars exibidas na tela principal</string>
     <string name="preferences_appearance_infobar_hide_prefix">Ocultar prefixo do Infobar</string>
     <string name="preferences_appearance_infobar_hide_prefix_description">Prefixo do Infobar será substituído por um ícone genérico</string>
+    <string name="preferences_appearance_quickgoto">Ir Rápido Para</string>
+    <string name="preferences_appearance_quickgoto_description">Altere a seção do meio da tela principal para o legado \"Ir Rápido para\"</string>
     <!-- Behavior -->
+    <string name="preferences_behavior_title">Comportamento</string>
+    <string name="preferences_behavior_movement_title">Movimento</string>
+    <string name="preferences_behavior_hardware_title">Equipamento</string>
     <string name="preferences_behavior_data_title">Dados</string>
     <string name="preferences_behavior_cycle_sound_title">Habilitar efeito de som?</string>
     <string name="preferences_behavior_disable_entry_arrow">Exigir Dados para Mover Entrada</string>
@@ -623,6 +628,7 @@
     <string name="pref_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_enable_title">Habilitar GeoNav</string>
     <string name="pref_geonav_enable_summary">Navegar pelos campos usando localização do dispositivo</string>
+    <string name="pref_geonav_search_method_title">Método de Pesquisa</string>
     <string name="pref_geonav_search_method_summary">O método %s utilizado para pesquisar parcelas em GeoNav</string>
     <string name="pref_geonav_method_distance">Distância</string>
     <string name="pref_geonav_log_off">Desativado</string>
