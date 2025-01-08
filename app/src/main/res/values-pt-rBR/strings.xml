@@ -81,7 +81,7 @@
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Organizar Lista de Campos</string>
-    <string name="fields_sort_reset">Redefinir</string>
+    <string name="fields_sort_reset">Restabelecer</string>
     <string name="fields_sort_by_name">Nome</string>
     <string name="fields_sort_by_import_format">Formato de Importação</string>
     <string name="fields_sort_by_import_date">Data de Importação</string>
@@ -466,8 +466,8 @@
     <string name="dialog_geonav_collect_precision_threshold_title">Grau de precisão</string>
     <string name="dialog_geonav_collect_geonav_popup_type">Tipo de pop-up GeoNav</string>
     <string name="dialog_geonav_collect_reconnect">Reconectar</string>
-    <string name="dialog_geonav_collect_reset_start_toast_message">Redefinindo conexão…</string>
-    <string name="dialog_geonav_collect_reset_end_toast_message">Redefinição de conexão</string>
+    <string name="dialog_geonav_collect_reset_start_toast_message">Restabelecendo conexão…</string>
+    <string name="dialog_geonav_collect_reset_end_toast_message">Restabelecer de conexão</string>
     <string name="dialog_geonav_precision_loss_title">Perda de Precisão Localização</string>
     <string name="dialog_geonav_precision_loss_msg">Sua precisão preferida foi perdida.</string>
     <!--- Content Descriptions -->
@@ -572,7 +572,7 @@
     <string name="preferences_theme_data_saved_title">Cor de dados salvos</string>
     <string name="preferences_theme_data_saved_description">Alterar como os dados salvos são exibidos</string>
     <string name="preferences_theme_reset_title">Restaurar tema padrão</string>
-    <string name="preferences_theme_reset_description">Redefinir todas as configurações para os valores padrão do sistema</string>
+    <string name="preferences_theme_reset_description">Restabelecer todas as configurações para os valores padrão do sistema</string>
     <string name="preferences_appearance_language">Idioma</string>
     <string name="preferences_appearance_language_description">Idioma definido por sistema</string>
     <string name="preference_language_default">Idioma do Sistema</string>
@@ -606,7 +606,12 @@
     <string name="preferences_behavior_movement_title">Movimento</string>
     <string name="preferences_behavior_hardware_title">Equipamento</string>
     <string name="preferences_behavior_data_title">Dados</string>
+    <string name="preferences_behavior_cycle_traits">Auto-Avance de Entrada</string>
+    <string name="preferences_behavior_cycle_traits_description">Revezar através da lista de características automaticamente avança entrada</string>
     <string name="preferences_behavior_cycle_sound_title">Habilitar efeito de som?</string>
+    <string name="preferences_behavior_cycle_sound_description">Um efeito sonoro será reproduzido quando as características estiverem alteradas (recomendado)</string>
+    <string name="preferences_behavior_return_to_first_trait">Auto-Restabelecer Características</string>
+    <string name="preferences_behavior_return_to_first_trait_description">Avançando a entrada restabelece automaticamente para a primeira característica</string>
     <string name="preferences_behavior_disable_entry_arrow">Exigir Dados para Mover Entrada</string>
     <string name="preferences_behavior_disable_entry_arrow_neither">Desabilitado</string>
     <string name="preferences_behavior_disable_entry_arrow_left">Exigir dados para mover para esquerda</string>
@@ -648,11 +653,15 @@
     <string name="preferences_storage_files_base_directory_description">Migre ou defina uma nova estrutura de diretório raiz. Os arquivos de exportação serão salvos aqui automaticamente.</string>
     <string name="preferences_storage_database_title">Base de dados</string>
     <string name="database_dialog_title">Base de dados</string>
-    <string name="database_reset_warning1">Todos os dados serão excluídos em Redefinir. Você tem certeza disso?</string>
+    <string name="database_reset">Excluir Banco de Dados</string>
+    <string name="database_reset_warning1">Todos os dados serão excluídos. Tem certeza de que deseja restabelecer a base de dados?</string>
     <string name="database_reset_warning2">Essa ação não pode ser revertida. O aplicativo vai fechar depois de limpar o banco de dados. Você ainda deseja continuar?</string>
     <string name="database_reset_message">O banco de dados foi excluído</string>
     <string name="share_file_title">Enviando arquivo…</string>
     <string name="preferences_storage_settings_title">Configurações avançadas</string>
+    <string name="preferences_system_defaults_reset">Restabelecer Configurações</string>
+    <string name="reset_preferences_title">Restabelecer Configurações para o Padrão</string>
+    <string name="reset_preferences_message">Aviso: isto irá restabelecer todas as preferências do Field Book.</string>
     <!-- Experimental -->
     <string name="pref_experimental_repeated_values_summary">Habilita que vários valores sejam coletados para cada entrada/característica</string>
     <string name="pref_experimental_repeated_values_disabled_title">Medidas Repetidas Desabilitadas</string>
@@ -805,7 +814,9 @@
     <string name="pref_canon_ssid_summary">Este nome é usado para encontrar a AP do seu dispositivo. Esse nome deve estar contido no SSID atual.</string>
     <string name="pref_canon_title">Nome do SSID</string>
     <string name="trait_usb_photo_settings_title">Configurações de Fotos USB</string>
+    <string name="menu_filter_brapi_reset_cache_title">Restabelecer Cache</string>
     <string name="select">Selecionar</string>
+    <string name="act_brapi_list_filter_reset_cache_title">Confirmar Restabelecer</string>
     <string name="sort">Organizar</string>
     <string name="brapi_traits_filter_title">Características</string>
     <string name="act_brapi_study_filter">Filtrar</string>
