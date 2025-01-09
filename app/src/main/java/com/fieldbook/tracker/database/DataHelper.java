@@ -2362,11 +2362,11 @@ public class DataHelper {
 //        return (int) exp_id;
     }
 
-    public void createFieldData(int studyId, List<String> columns, List<String> data) {
+    public void createFieldData(int studyId, List<String> columns, List<String> data, Boolean isBrapi) {
 
         open();
 
-        StudyDao.Companion.createFieldData(studyId, columns, data);
+        StudyDao.Companion.createFieldData(studyId, columns, data, isBrapi);
 
 //        // get unique_id, primary_id, secondary_id names from exp_id
 //        Cursor cursor = db.rawQuery("SELECT exp_id.unique_id, exp_id.primary_id, exp_id.secondary_id from exp_id where exp_id.exp_id = " + exp_id, null);
