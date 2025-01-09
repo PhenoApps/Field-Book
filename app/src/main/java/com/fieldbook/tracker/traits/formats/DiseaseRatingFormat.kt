@@ -14,4 +14,4 @@ class DiseaseRatingFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter()
-)
+), Scannable

@@ -36,7 +36,7 @@ open class NumericFormat(
     iconDrawableResourceId = iconDrawableResourceId,
     stringNameAux = null,
     *parameters
-) {
+), Scannable {
 
     override fun validate(
         context: Context,

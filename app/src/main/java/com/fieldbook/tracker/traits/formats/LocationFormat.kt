@@ -14,4 +14,4 @@ class LocationFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter()
-)
+), Scannable

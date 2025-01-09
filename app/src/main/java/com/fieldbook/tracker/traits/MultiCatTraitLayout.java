@@ -8,6 +8,7 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,14 +16,18 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.JsonUtil;
+import com.fieldbook.tracker.utilities.Utils;
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.gson.JsonParseException;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.StringJoiner;
 
 public class MultiCatTraitLayout extends BaseTraitLayout {
@@ -354,5 +359,49 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
             } else joiner.add(s.getValue());
         }
         return joiner.toString();
+    }
+
+    @NonNull
+    @Override
+    public Boolean validate(String data) {
+
+        ArrayList<BrAPIScaleValidValuesCategories> cats = new ArrayList<>(Arrays.asList(getCategories()));
+
+        ArrayList<BrAPIScaleValidValuesCategories> userChosenCats = new ArrayList<>();
+
+        try {
+
+            if (JsonUtil.Companion.isJsonValid(data)) {
+
+                userChosenCats.addAll(CategoryJsonUtil.Companion.decode(data));
+
+            } else throw new RuntimeException();
+
+        } catch (Exception e) {
+
+            String[] classTokens = data.split(":");
+
+            for (String token : classTokens) {
+
+                userChosenCats.add(new BrAPIScaleValidValuesCategories()
+                        .label(token)
+                        .value(token));
+            }
+        }
+
+        boolean valid = true;
+        for (BrAPIScaleValidValuesCategories cat : userChosenCats) {
+            valid = CategoryJsonUtil.Companion.contains(cats, cat);
+            if (!valid) break;
+        }
+
+        //check if the data is in the list of categories
+        if (!valid) {
+            getCollectActivity().runOnUiThread(() ->
+                    Utils.makeToast(controller.getContext(),
+                            controller.getContext().getString(R.string.trait_error_invalid_multicat_value)));
+        }
+
+        return valid;
     }
 }

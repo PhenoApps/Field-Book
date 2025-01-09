@@ -402,10 +402,14 @@ public class FieldEditorActivity extends ThemedActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
-                        loadLocalPermission();
+                        if (checkDirectory()) {
+                            loadLocalPermission();
+                        }
                         break;
                     case 1:
-                        loadCloud();
+                        if (checkDirectory()) {
+                            loadCloud();
+                        }
                         break;
                     case 2:
                         FieldCreatorDialogFragment dialog = new FieldCreatorDialogFragment((ThemedActivity) FieldEditorActivity.this);
@@ -460,6 +464,17 @@ public class FieldEditorActivity extends ThemedActivity
             }
         } else {
             Toast.makeText(this, R.string.opening_brapi_no_network_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private Boolean checkDirectory() {
+        if (BaseDocumentTreeUtil.Companion.getRoot(this) != null
+                && BaseDocumentTreeUtil.Companion.isEnabled(this)
+                && BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_field_import) != null) {
+            return true;
+        } else {
+            Toast.makeText(this, R.string.error_storage_directory, Toast.LENGTH_LONG).show();
+            return false;
         }
     }
 
