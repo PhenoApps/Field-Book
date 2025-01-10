@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.utilities
 
 import android.content.Context
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.interfaces.FieldSwitcher
@@ -14,6 +15,12 @@ import javax.inject.Inject
  * This handles all necessary preferences and database updates.
  */
 class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: Context): FieldSwitcher {
+
+    companion object {
+        private const val TAG = "FieldSwitchImpl"
+        private val POSSIBLE_COLUMN_IDS = listOf("col", "column", "column_id", "range")
+        private val POSSIBLE_ROW_IDS = listOf("row", "row_id")
+    }
 
     @Inject
     lateinit var database: DataHelper
@@ -37,15 +44,36 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
             database.switchField(field.exp_id)
 
             //get all entry props from field
-            val entryProps = database.getAllObservationUnitAttributeNames(field.exp_id)
+            val entryProps = database.getAllObservationUnitAttributeNames(field.exp_id).toMutableList()
 
-            //get current selected primary/secondary, if empty then choose first two from entry props.
+            //remove unique id as a choice for the initial primary/secondary ids
+            val uniqueId = field.unique_id
+            entryProps.remove(uniqueId)
+
+            //add some basic logic to match row/col or block/rep if it exists, otherwise just use the first two
+            val hasRow = entryProps.indexOfFirst { it.lowercase() in POSSIBLE_ROW_IDS }
+            val hasBlock = entryProps.indexOfFirst { it.equals("block", true) }
+
             val primary = if (field.primary_id == "null" || field.primary_id == null || field.primary_id.isEmpty()) {
-                if (entryProps.isNotEmpty()) entryProps[0] else ""
+                if (hasRow != -1) {
+                    entryProps.removeAt(hasRow)
+                } else if (hasBlock != -1) {
+                    entryProps.removeAt(hasBlock)
+                } else if (entryProps.isNotEmpty()) entryProps.removeAt(0) else ""
             } else field.primary_id
+
+            val hasCol = entryProps.indexOfFirst { it.lowercase() in POSSIBLE_COLUMN_IDS }
+            val hasRep = entryProps.indexOfFirst { it.equals("rep", true) }
+
             val secondary = if (field.secondary_id == "null" || field.secondary_id == null || field.secondary_id.isEmpty()) {
-                if (entryProps.size > 1) entryProps[1] else ""
+                if (hasCol != -1) {
+                    entryProps.removeAt(hasCol)
+                } else if (hasRep != -1) {
+                    entryProps.removeAt(hasRep)
+                } else if (entryProps.isNotEmpty()) entryProps.removeAt(0) else ""
             } else field.secondary_id
+
+            Log.d(TAG, "Field Switched: ${field.exp_id}\tUnique: $uniqueId\tPrimary: $primary\tSecondary: $secondary")
 
             //clear field selection after updates
             preferences.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, field.exp_id)
