@@ -479,7 +479,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public String getObservationUnit() {
-        return getCRange().plot_id;
+        return getCRange().uniqueId;
     }
 
     public String getPerson() {
@@ -877,7 +877,7 @@ public class CollectActivity extends ThemedActivity
                 RangeObject ro = rangeBox.getCRange();
 
                 //issue #634 fix for now to check the search query by plot_id which should be the unique id
-                if (Objects.equals(ro.plot_id, searchUnique)) {
+                if (Objects.equals(ro.uniqueId, searchUnique)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -889,7 +889,7 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
+                if (rangeBox.getCRange().primaryId.equals(range) & rangeBox.getCRange().secondaryId.equals(plot)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -901,7 +901,7 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().plot.equals(data)) {
+                if (rangeBox.getCRange().secondaryId.equals(data)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -913,7 +913,7 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().range.equals(data)) {
+                if (rangeBox.getCRange().primaryId.equals(data)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -926,7 +926,7 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().plot_id.equals(data)) {
+                if (rangeBox.getCRange().uniqueId.equals(data)) {
 
                     if (trait == -1) {
                         moveToResultCore(j);

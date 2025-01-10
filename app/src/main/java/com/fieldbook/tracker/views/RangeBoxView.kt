@@ -10,7 +10,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
-import android.view.View
 import android.view.View.OnTouchListener
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -84,9 +83,9 @@ class RangeBoxView : ConstraintLayout {
 
         rangeID = this.controller.getDatabase().allRangeID
         cRange = RangeObject()
-        cRange.plot = ""
-        cRange.plot_id = ""
-        cRange.range = ""
+        cRange.secondaryId = ""
+        cRange.uniqueId = ""
+        cRange.primaryId = ""
         lastRange = ""
     }
 
@@ -141,11 +140,11 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun getPlotID(): String? {
-        return cRange.plot_id
+        return cRange.uniqueId
     }
 
     fun isEmpty(): Boolean {
-        return cRange.plot_id.isEmpty()
+        return cRange.uniqueId.isEmpty()
     }
 
     fun connectTraitBox(traitBoxView: TraitBoxView) {
@@ -374,10 +373,10 @@ class RangeBoxView : ConstraintLayout {
             // Refresh onscreen controls
             updateCurrentRange(rangeID[paging - 1])
             saveLastPlot()
-            if (cRange.plot_id.isEmpty()) return
+            if (cRange.uniqueId.isEmpty()) return
             if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
-                if (cRange.range != lastRange && lastRange != "") {
-                    lastRange = cRange.range
+                if (cRange.primaryId != lastRange && lastRange != "") {
+                    lastRange = cRange.primaryId
                     controller.getSoundHelper().playPlonk()
                 }
             }
@@ -424,9 +423,9 @@ class RangeBoxView : ConstraintLayout {
         setAllRangeID()
         if (rangeID.isNotEmpty()) {
             updateCurrentRange(rangeID[0])
-            lastRange = cRange.range
+            lastRange = cRange.primaryId
             display()
-            controller.getTraitBox().setNewTraits(cRange.plot_id)
+            controller.getTraitBox().setNewTraits(cRange.uniqueId)
         } else { //if no fields, print a message and finish with result canceled
             Utils.makeToast(context, context.getString(R.string.act_collect_no_plots))
             controller.cancelAndFinish()
@@ -438,8 +437,8 @@ class RangeBoxView : ConstraintLayout {
         updateCurrentRange(rangeID[paging - 1])
         display()
         if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
-            if (cRange.range != lastRange && lastRange != "") {
-                lastRange = cRange.range
+            if (cRange.primaryId != lastRange && lastRange != "") {
+                lastRange = cRange.primaryId
                 controller.getSoundHelper().playPlonk()
             }
         }
@@ -447,12 +446,12 @@ class RangeBoxView : ConstraintLayout {
 
     // Updates the data shown in the dropdown
     fun display() {
-        rangeEt.setText(cRange.range)
-        plotEt.setText(cRange.plot)
+        rangeEt.setText(cRange.primaryId)
+        plotEt.setText(cRange.secondaryId)
         rangeEt.isCursorVisible = false
         plotEt.isCursorVisible = false
-        tvRange.text = cRange.range
-        tvPlot.text = cRange.plot
+        tvRange.text = cRange.primaryId
+        tvPlot.text = cRange.secondaryId
     }
 
     fun rightClick() {
@@ -461,7 +460,7 @@ class RangeBoxView : ConstraintLayout {
 
     fun saveLastPlot() {
         val ed: SharedPreferences.Editor = controller.getPreferences().edit()
-        ed.putString(GeneralKeys.LAST_PLOT, cRange.plot_id)
+        ed.putString(GeneralKeys.LAST_PLOT, cRange.uniqueId)
         ed.apply()
     }
 
@@ -521,7 +520,7 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun setLastRange() {
-        lastRange = cRange.range
+        lastRange = cRange.primaryId
     }
 
     ///// paging /////

@@ -239,7 +239,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val studyDbId = (context as CollectActivity).studyId
 
             val units = database.getAllObservationUnits(studyDbId.toInt())
-                .filter { it.observation_unit_db_id == currentRange.plot_id }
+                .filter { it.observation_unit_db_id == currentRange.uniqueId }
 
             if (units.isNotEmpty()) {
 
@@ -374,7 +374,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val newLng = longitude.toDouble()
 
             val units = database.getAllObservationUnits(studyDbId.toInt())
-                .filter { it.observation_unit_db_id == currentRange.plot_id }
+                .filter { it.observation_unit_db_id == currentRange.uniqueId }
 
             if (units.isNotEmpty()) {
 
@@ -892,14 +892,14 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
         val observation =
-            database.getObservation(studyDbId, currentRange.plot_id, currentTrait.id, rep)
+            database.getObservation(studyDbId, currentRange.uniqueId, currentTrait.id, rep)
 
         if (observation != null) {
 
-            database.deleteTrait(studyDbId, currentRange.plot_id, currentTrait.id, rep)
+            database.deleteTrait(studyDbId, currentRange.uniqueId, currentTrait.id, rep)
 
             val units = controller.getDatabase().getAllObservationUnits(studyDbId.toInt())
-                .filter { it.observation_unit_db_id == currentRange.plot_id }
+                .filter { it.observation_unit_db_id == currentRange.uniqueId }
             if (units.isNotEmpty()) {
                 units.first().let { unit ->
                     controller.getDatabase().updateObservationUnit(unit, "")

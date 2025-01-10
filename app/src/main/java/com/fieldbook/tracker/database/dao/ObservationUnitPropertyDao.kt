@@ -62,17 +62,17 @@ class ObservationUnitPropertyDao {
                     where = "id = ?",
                     whereArgs = arrayOf(id.toString())).toFirst()
 
-                range = model[firstName].toString()
+                primaryId = model[firstName].toString()
 
-                plot = model[secondName].toString()
+                secondaryId = model[secondName].toString()
 
-                plot_id = model[uniqueName].toString()
+                uniqueId = model[uniqueName].toString()
             }
 
         } ?: RangeObject().apply {
-            range = ""
-            plot = ""
-            plot_id = ""
+            primaryId = ""
+            secondaryId = ""
+            uniqueId = ""
         }
 
         /**
