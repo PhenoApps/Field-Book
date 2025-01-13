@@ -3,6 +3,7 @@ package com.fieldbook.tracker.views
 import android.app.Service
 import android.content.Context
 import android.content.SharedPreferences
+import android.database.sqlite.SQLiteException
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
@@ -21,6 +22,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
@@ -29,6 +31,10 @@ import com.fieldbook.tracker.utilities.Utils
 import java.util.*
 
 class RangeBoxView : ConstraintLayout {
+
+    companion object {
+        const val TAG = "RangeBoxView"
+    }
 
     private var controller: CollectRangeController
 
@@ -381,21 +387,65 @@ class RangeBoxView : ConstraintLayout {
      */
     private fun updateCurrentRange(id: Int) {
         if (firstName.isNotEmpty() && secondName.isNotEmpty() && uniqueName.isNotEmpty()) {
-            cRange = controller.getDatabase().getRange(firstName, secondName, uniqueName, id)
 
-            // RangeID is a sorted list of obs unit ids for the current field.
-            // Set bar maximum to number of obs units in the field
-            // Set bar progress to position of current obs unit within the sorted list
-            plotsProgressBar.max = rangeID.size
-            plotsProgressBar.progress = rangeID.indexOf(id)
+            try {
+
+                cRange = controller.getDatabase().getRange(firstName, secondName, uniqueName, id)
+
+                // RangeID is a sorted list of obs unit ids for the current field.
+                // Set bar maximum to number of obs units in the field
+                // Set bar progress to position of current obs unit within the sorted list
+                plotsProgressBar.max = rangeID.size
+                plotsProgressBar.progress = rangeID.indexOf(id)
+
+            } catch (e: SQLiteException) {
+
+                logStudyEntryAttributes()
+
+                Log.e("Field Book", "Error getting range: $e")
+
+                Toast.makeText(
+                    context,
+                    R.string.act_collect_study_names_empty, Toast.LENGTH_SHORT
+                ).show()
+
+                controller.callFinish()
+            }
 
         } else {
-            //TODO switch to Utils
+
             Toast.makeText(
                 context,
                 R.string.act_collect_study_names_empty, Toast.LENGTH_SHORT
             ).show()
+
             controller.callFinish()
+        }
+    }
+
+    private fun logStudyEntryAttributes() {
+
+        try {
+
+            val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+            Log.e(TAG, "Current Study ID: $studyId")
+            Log.e(TAG, "Preference Primary Name: $firstName")
+            Log.e(TAG, "Preference Secondary Name: $secondName")
+            Log.e(TAG, "Preference Unique Name: $uniqueName")
+
+            controller.getDatabase().allFieldObjects.forEach {
+                Log.e(TAG, "Field ID: ${it.exp_id}")
+                Log.e(TAG, "Field Name: ${it.exp_name}")
+                Log.e(TAG, "Field Unique ID: ${it.unique_id}")
+                
+                val attributes = controller.getDatabase().getAllObservationUnitAttributeNames(it.exp_id).toList()
+                Log.e(TAG, "$attributes")
+            }
+
+        } catch (e: Exception) {
+
+            Log.e(TAG, "Error logging study entry attributes: $e")
+
         }
     }
 
