@@ -607,7 +607,7 @@
     <string name="preferences_behavior_hardware_title">Equipamento</string>
     <string name="preferences_behavior_data_title">Dados</string>
     <string name="preferences_behavior_cycle_traits">Auto-Avance de Entrada</string>
-    <string name="preferences_behavior_cycle_traits_description">Revezar através da lista de características automaticamente avança entrada</string>
+    <string name="preferences_behavior_cycle_traits_description">Percorrer da toda lista de características automaticamente avança entrada</string>
     <string name="preferences_behavior_cycle_sound_title">Habilitar efeito de som?</string>
     <string name="preferences_behavior_cycle_sound_description">Um efeito sonoro será reproduzido quando as características estiverem alteradas (recomendado)</string>
     <string name="preferences_behavior_return_to_first_trait">Auto-Restabelecer Características</string>
@@ -677,6 +677,9 @@
     <string name="preferences_sound_primary_order_title">Alterar Ordem Primária</string>
     <string name="preferences_sound_primary_order_description">Reproduzir som de plonk quando o ordem principal for alterado</string>
     <string name="preferences_sound_entry_title">Alterar Entrada</string>
+    <string name="preferences_sound_entry_description">Reproduzir som avançado ao mover entre entradas</string>
+    <string name="preferences_sound_cycle_traits_title">Percorrer Características</string>
+    <string name="preferences_sound_cycle_traits_description">Tocar som percorrer quando as características são completamente alteradas</string>
     <string name="preferences_sound_delete_obs_title">Excluir Observação</string>
     <string name="preferences_sound_delete_obs_description">Reproduzir som excluir quando observação é excluída</string>
     <string name="preferences_category_audio_tts_title">Texto para Fala</string>
@@ -704,6 +707,10 @@
     <string name="reset_preferences_title">Restabelecer Configurações para o Padrão</string>
     <string name="reset_preferences_message">Aviso: isto irá restabelecer todas as preferências do Field Book.</string>
     <!-- Experimental -->
+    <string name="preferences_experimental_title">Experimental</string>
+    <string name="preferences_experimental_stable_title">Estável</string>
+    <string name="preferences_experimental_beta_title">Beta</string>
+    <string name="preferences_experimental_alpha_title">Alfa</string>
     <string name="pref_experimental_repeated_values_summary">Habilita que vários valores sejam coletados para cada entrada/característica</string>
     <string name="pref_experimental_repeated_values_disabled_title">Medidas Repetidas Desabilitadas</string>
     <string name="pref_experimental_repeated_values_disabled_message">Todos os valores repetidos que foram coletados serão ocultados até que esta funcionalidade seja habilitada novamente</string>
