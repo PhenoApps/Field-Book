@@ -729,9 +729,13 @@
     <string name="stats_tab_layout_total">Total</string>
     <string name="stats_tab_layout_year">Ano</string>
     <string name="stats_tab_layout_month">Mês</string>
+    <string name="stat_card_export_title_total">Estatísticas Totais de Field Book</string>
+    <string name="stat_card_export_title">Estatísticas de Field Book para</string>
     <string name="stat_title_fields">Campos</string>
     <string name="stat_title_entries">Entradas</string>
     <string name="stat_title_data">Dados</string>
+    <string name="stat_title_hours">Horas</string>
+    <string name="stat_title_people">Pessoas</string>
     <string name="stat_title_photos">Fotos</string>
     <string name="stat_photos_toast_message">fotos foram capturadas</string>
     <!-- ABOUT -->
