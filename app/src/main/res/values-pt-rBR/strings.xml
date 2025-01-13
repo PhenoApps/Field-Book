@@ -711,18 +711,26 @@
     <string name="preferences_experimental_stable_title">Estável</string>
     <string name="preferences_experimental_beta_title">Beta</string>
     <string name="preferences_experimental_alpha_title">Alfa</string>
+    <string name="pref_experimental_repeated_values_title">Medidas Repetidas</string>
     <string name="pref_experimental_repeated_values_summary">Habilita que vários valores sejam coletados para cada entrada/característica</string>
     <string name="pref_experimental_repeated_values_disabled_title">Medidas Repetidas Desabilitadas</string>
     <string name="pref_experimental_repeated_values_disabled_message">Todos os valores repetidos que foram coletados serão ocultados até que esta funcionalidade seja habilitada novamente</string>
     <string name="pref_experimental_enable_field_audio_title">Habilitar Áudio em Campo</string>
     <string name="pref_experimental_enable_field_audio_summary">Ativa o recurso de gravação de áudio para todo o campo</string>
+    <string name="menu_collect_start_field_audio">Iniciar Gravação</string>
+    <string name="menu_collect_stop_field_audio">Parar Gravação</string>
+    <string name="field_audio_recording_start">Gravando áudio em nível de campo</string>
     <string name="field_audio_recording_stop">Um novo arquivo de áudio de nível de campo foi salvo</string>
     <string name="pref_beta_enable_individual_field_page_title">Habilitar Páginas de Campo Individuais</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selecionar um campo na lista de campos abre uma página de detalhes</string>
     <string name="pref_beta_mlkit_enabled_title">Escanear código de barras usando MLKit habilitado</string>
     <string name="pref_beta_mlkit_enabled_message">Habilitar essa funcionalidade irá mudar a biblioteca de leitura de código de barras do ZXing para MLKit</string>
     <!-- STATISTICS -->
+    <string name="stats_tab_layout_total">Total</string>
+    <string name="stats_tab_layout_year">Ano</string>
+    <string name="stats_tab_layout_month">Mês</string>
     <string name="stat_title_fields">Campos</string>
+    <string name="stat_title_entries">Entradas</string>
     <string name="stat_title_data">Dados</string>
     <string name="stat_title_photos">Fotos</string>
     <string name="stat_photos_toast_message">fotos foram capturadas</string>
