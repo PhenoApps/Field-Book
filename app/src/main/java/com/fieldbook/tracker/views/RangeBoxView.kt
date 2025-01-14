@@ -664,6 +664,8 @@ class RangeBoxView : ConstraintLayout {
         val study = controller.getDatabase().getFieldObject(studyId)
         val cursor = controller.getDatabase().getExportTableDataShort(studyId, study.unique_id, traits)
 
+        val traitNames = traits.map { it.name }
+
         cursor?.use {
             // Convert one-based range position to zero-based cursor position
             val zeroBasedPos = currentPos - 1
@@ -689,16 +691,20 @@ class RangeBoxView : ConstraintLayout {
                 rowsSeen++
 
                 // Check for uncollected trait observations
-                for (trait in traits) {
-                    val value = cursor.getString(cursor.getColumnIndexOrThrow(trait.name))
-                    if (value == null) {
-                        controller.getPreferences().edit().putString(GeneralKeys.LAST_USED_TRAIT, trait.name).apply()
-                        if (pos == currentPos) {
-                            // we are back where we started, notify that current entry is only one without data
-                            Utils.makeToast(context, context.getString(R.string.collect_sole_entry_without_data))
+                for (i in 0 until cursor.columnCount) {
+                    val traitName = cursor.getColumnName(i)
+                    if (traitName in traitNames) {
+                        val value = cursor.getString(i)
+                        if (value == null) {
+                            controller.getPreferences().edit().putString(GeneralKeys.LAST_USED_TRAIT, traitName).apply()
+                            if (pos == currentPos) {
+                                // We are back where we started, notify that current entry is only one without data
+                                Utils.makeToast(context, context.getString(R.string.collect_sole_entry_without_data))
+                            }
+                            return pos
                         }
-                        return pos
                     }
+
                 }
             }
         }
