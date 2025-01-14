@@ -23,6 +23,7 @@ import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.CitationDialog
+import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -113,7 +114,10 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val perms = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 
         if (EasyPermissions.hasPermissions(context, *perms) || Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-            exportLocal(fieldIds)
+            if (fieldIds.isNotEmpty()) {
+
+                exportLocal(fieldIds.mapNotNull { database.getFieldObject(it) })
+            }
         } else {
             EasyPermissions.requestPermissions(
                 context as Activity,
@@ -178,7 +182,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         }
     }
 
-    private fun exportLocal(fieldIds: List<Int>) {
+    private fun exportLocal(fields: List<FieldObject>) {
         val layout = LayoutInflater.from(context).inflate(R.layout.dialog_export, null)
 
         val bundleInfoMessage: TextView = layout.findViewById(R.id.bundleInfo)
@@ -212,7 +216,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             checkOverwrite.visibility = View.GONE
             bundleInfoMessage.visibility = View.VISIBLE
         } else {
-            var fo = database.getFieldObject(fieldIds[0])
+            val fo = fields.first()
             defaultFieldString = fo.exp_name
             if (defaultFieldString.length > 4 && defaultFieldString.lowercase().endsWith(".csv")) {
                 defaultFieldString = defaultFieldString.substring(0, defaultFieldString.length - 4)
