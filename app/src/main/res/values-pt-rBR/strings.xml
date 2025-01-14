@@ -901,7 +901,18 @@
     <string name="brapi_trials_select">Selecionar estudo</string>
     <string name="brapi_trials_error">Erro ao carregar estudos.</string>
     <string name="brapi_save_trait">Salvar Características</string>
+    <string name="brapi_must_configure_url">Deve configurar uma URL BrAPI válida nas configurações antes de prosseguir</string>
+    <string name="brapi_warning_select_program">Por favor, selecione um programa</string>
     <string name="brapi_warning_select_trial">Por favor, selecione um estudo</string>
+    <string name="brapi_warning_select_study">Por favor, selecione o campo</string>
+    <string name="brapi_export_failed">Exportação do BrAPI falhou</string>
+    <string name="brapi_export_permission_deny">ERRO: Você não tem permissões para enviar dados para o sistema especificado.</string>
+    <string name="brapi_export_not_supported">ERRO: Sistema de destino não suporta o envio de observações via BrAPI.</string>
+    <string name="brapi_export_wrong_num_obs">ERRO: Número de respostas de observações diferentes da solicitação</string>
+    <string name="brapi_export_missing_obs">ERRO: Faltando observação na resposta</string>
+    <string name="brapi_export_multiple_obs">ERRO: Múltiplas observações por variável</string>
+    <string name="brapi_export_unknown_error">ERRO: Erro Desconhecido</string>
+    <string name="brapi_export_successful">Exportação BrAPI Bem Sucedida</string>
     <string name="brapi_enable_before_sync">BRAPI está desabilitado. Por favor, habilite nas configurações antes de usar a sincronização.</string>
     <string name="brapi_error_saving_all_traits">Erro ao salvar características. Nenhuma característica foi salva.</string>
     <string name="brapi_error_saving_some_traits">Erro ao salvar algumas características. Algumas características não foram salvas</string>
@@ -993,9 +1004,16 @@
     <string name="act_brapi_trait_preprocess_title">Seletor de Formato de Field Book</string>
     <string name="act_brapi_trait_import_title">Escolher Formatos</string>
     <string name="brapi_filter_type_trial_count">Estudo (%s)</string>
+    <string name="brapi_filter_type_study_count">Estudo (%s)</string>
     <string name="pref_alpha_enhanced_brapi_import_summary">Quando habilitado, uma nova interface de importação de BrAPI será usada para estudos e características.</string>
+    <string name="pref_alpha_brapi_import_title">Nova interface do usuário de importação BrAPI</string>
     <string name="opening_brapi_no_network_error">Rede deve ser habilitada para usar funcionalidade BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Isto irá limpar a lista de itens selecionados.</string>
     <string name="pref_alpha_media_keycode_events_summary">Habilitar para usar comandos de mídia para interações com o app</string>
     <string name="pref_alpha_media_keycode_events_title">Habilitar Comandos de Mídia</string>
+    <string name="pref_geonav_distance_threshold_summary">GeoNav automaticamente para quando a distância de todos os lotes exceder esse valor em quilômetros.</string>
+    <string name="pref_geonav_distance_threshold_title">Verificação de Proximidade</string>
+    <string name="activity_collect_proximity_warning">GeoNav Parando, fora da proximidade das coordenadas</string>
+    <string name="no_suitable_file_manager_was_found">Nenhum Gerenciador de Arquivos adequado foi encontrado.</string>
+    <string name="trait_error_invalid_multicat_value">Dados categóricos inválidos.</string>
 </resources>
