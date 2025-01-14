@@ -1,9 +1,22 @@
 name: do-github-release
 
+# This workflow automates the app release process and supports multiple triggers:
+# - Manual dispatch: Releases unconditionally with a specified version bump.
+# - Dispatch from `process-pr-merge`: Releases unconditionally using the version bump from `process-pr-merge`.
+# - Weekly schedule: Runs every Monday at 3:00 PM EST and performs a patch release if the app directory has changed since the last release.
+
+# Key steps:
+# - Optionally checks for changes in `/app` and determines the release type (major, minor, or patch).
+# - Extracts unreleased notes from `CHANGELOG.md`, updates it, and syncs `changelog.xml`.
+# - Bumps the app version, builds, and signs the APK.
+# - Commits changes and creates a GitHub release with the APK and changelog details.
+
 on:
   schedule:
-    # Run every Monday at 20:00 (8:00 PM)
+    # Run every Monday at 3:00 PM EST
     - cron: "0 20 * * 1"
+    - cron: "45 19 * * 2"  # 2:45 PM Tues
+    - cron: "0 20 * * 2"  # 3:00 PM Tues
   workflow_dispatch:
     inputs:
       bump_type:
@@ -181,16 +194,6 @@ jobs:
           name: Signed APK
           path: app/build/outputs/
 
-      - name: Make GitHub Release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: "v${{ env.VERSION }}"
-          tag: "${{ env.VERSION }}"
-          file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-          asset_name: "Field-Book-v${{ env.VERSION }}.apk"
-          body: ${{ steps.process-changelog.outputs.changelog_additions }}
-
       - name: Commit Version and Changelog Changes
         if: ${{ success() }}
         uses: EndBug/add-and-commit@v7
@@ -204,6 +207,16 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
+
+      - name: Make GitHub Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          release_name: "v${{ env.VERSION }}"
+          tag: "${{ env.VERSION }}"
+          file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
+          asset_name: "Field-Book-v${{ env.VERSION }}.apk"
+          body: ${{ steps.process-changelog.outputs.changelog_additions }}
       
       #- name: Check date for Google Play upload
       #  id: date_check
