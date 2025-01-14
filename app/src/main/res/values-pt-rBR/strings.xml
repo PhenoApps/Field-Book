@@ -727,9 +727,22 @@
     <string name="field_audio_zip_error">Erro ao criar arquivo zip</string>
     <string name="pref_beta_enable_individual_field_page_title">Habilitar Páginas de Campo Individuais</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selecionar um campo na lista de campos abre uma página de detalhes</string>
+    <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
+    <string name="pref_beta_mlkit_summary">Esta opção usa a biblioteca MLKit em vez da biblioteca ZXing para escanear códigos de barras</string>
     <string name="pref_beta_mlkit_enabled_title">Escanear código de barras usando MLKit habilitado</string>
     <string name="pref_beta_mlkit_enabled_message">Habilitar essa funcionalidade irá mudar a biblioteca de leitura de código de barras do ZXing para MLKit</string>
     <!-- STATISTICS -->
+    <string name="warning_no_observations">Não foram coletadas observações</string>
+    <string name="warning_no_data">Sem dados para exibir</string>
+    <string name="warning_invalid_date_range">Selecione um intervalo de data válido</string>
+    <string name="stats_heatmap_title">Mapa de calor</string>
+    <string name="stats_heatmap">Ver um mapa de calor das observações coletadas</string>
+    <string name="stats_loading">Carregando…</string>
+    <string name="stats_first_day">Role até o primeiro dia com uma observação coletada</string>
+    <string name="stats_last_day">Role até o último dia com uma observação coletada</string>
+    <string name="stats_calendar_range">Selecione um intervalo de data para filtrar as datas exibidas</string>
+    <string name="stats_counter">Trocar a data com o número de observações coletadas nesse dia</string>
+    <string name="stats_date_range_picker_title">Selecione um intervalo de datas</string>
     <string name="stats_tab_layout_total">Total</string>
     <string name="stats_tab_layout_year">Ano</string>
     <string name="stats_tab_layout_month">Mês</string>
@@ -741,25 +754,54 @@
     <string name="stat_title_hours">Horas</string>
     <string name="stat_title_people">Pessoas</string>
     <string name="stat_title_photos">Fotos</string>
+    <string name="stat_title_busiest">Mais ocupado</string>
+    <string name="stat_title_most">Mais</string>
+    <string name="stat_fields_dialog_title">Campos importados em</string>
+    <string name="stat_people_dialog_title">Lista de Pessoas</string>
+    <string name="stat_most_dialog_title">Lista de Observações</string>
+    <string name="stat_entries_toast_message">entradas foram fenotipadas</string>
+    <string name="stat_data_toast_message">observações foram coletadas</string>
+    <string name="stat_hours_toast_message">horas gastas de fenotipagem</string>
     <string name="stat_photos_toast_message">fotos foram capturadas</string>
+    <string name="stat_busiest_toast_message">observações foram coletadas em </string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">Sobre</string>
     <string name="about_version_title">Versão</string>
     <string name="about_manual_title">Manual</string>
+    <string name="about_rate">Avaliar Field Book</string>
     <!-- Lead  -->
+    <string name="about_project_lead_title">Líder do Projeto</string>
     <string name="about_email_title">Email</string>
     <!-- Support  -->
     <string name="about_support_title">Suporte</string>
+    <string name="about_contributors_title">Colaboradores</string>
+    <string name="about_contributors_funding_title">Financiamento</string>
     <!-- PhenoApps  -->
     <!-- Technical  -->
-    <string name="about_technical_title">Detalles Técnicos</string>
+    <string name="about_technical_title">Detalhes Técnicos</string>
+    <string name="about_libraries_title">Bibliotecas</string>
     <!-- Update -->
+    <string name="check_updates_title">Buscando atualizações…</string>
+    <string name="found_updates_title">Baixar Última Versão</string>
+    <string name="no_updates_title">Executando a Última Versão</string>
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="brapi_info_title">Breeding API</string>
     <string name="preferences_brapi_enable_title">Habilitar BrAPI</string>
     <string name="preferences_brapi_enable_summary">A Breeding API permite a transferência de dados para bases de dados compatíveis.</string>
+    <string name="preferences_brapi_server_title">Servidor</string>
+    <string name="preferences_brapi_barcode_config_title">Auto-configurar</string>
+    <string name="preferences_brapi_barcode_config_summary">Gerenciar configurações com códigos QR</string>
+    <string name="preferences_brapi_barcode_config_scan">Importar novas configurações</string>
+    <string name="preferences_brapi_barcode_config_share">Compartilhar configurações atuais</string>
+    <string name="preferences_brapi_barcode_config_dialog_title">Configuração BrAPI Escaneável</string>
     <string name="qr_code_share_choose_action_title">Escolher Ação</string>
+    <string name="menu_action_brapi_pref_title">Autorizar BrAPI</string>
+    <string name="act_brapi_auth_http_warning_title">Alerta HTTP</string>
+    <string name="act_brapi_auth_http_warning_message">Você inseriu uma url http. Não há garantia de que esta conexão é segura.</string>
+    <string name="brapi_base_url">URL Base</string>
+    <string name="brapi_base_url_desc">A URL base para o servidor BrAPI conectado</string>
     <string name="brapi_choice_to_make_default_dialog_title">Tornar este servidor BrAPI o padrão:</string>
     <string name="brapi_choice_to_make_default_import">Origem de Importação</string>
     <string name="brapi_choice_to_make_default_export">Origem de Exportação</string>
@@ -768,11 +810,30 @@
     <string name="brapi_edit_display_name">Editar Nome de Exibição</string>
     <string name="brapi_edit_display_name_server">Nome do Servidor</string>
     <string name="brapi_edit_display_name_default">Servidor de teste BrAPI</string>
+    <string name="preferences_brapi_version">Versao BrAPI</string>
+    <string name="brapi_pagination">Tamanho da Página</string>
+    <string name="brapi_timeout">Tempo Limite do Servidor</string>
+    <string name="brapi_chunk_size">Tamanho do Chunk</string>
+    <string name="preferences_brapi_authorization_title">Autorização</string>
+    <string name="preferences_brapi_advanced_title">Avançado</string>
+    <string name="preferences_brapi_oidc_flow_oauth_code">Código de Autorização OAuth2</string>
+    <string name="preferences_brapi_oidc_flow_oauth_implicit">Concessão Implícita OAuth2</string>
+    <string name="preferences_brapi_oidc_flow_old_custom">Field Book Original Personalizado</string>
+    <string name="brapi_oidc_url">URL de Descobrimento OIDC</string>
     <string name="brapi_oidc_url_desc">Localização do documento OIDC Discovery JSON</string>
+    <string name="brapi_oidc_clientid">ID de Cliente OIDC</string>
+    <string name="brapi_oidc_clientid_desc">O ID do Cliente a ser usado no provedor de autenticação</string>
+    <string name="brapi_oidc_scope">Escopo OIDC</string>
+    <string name="brapi_oidc_scope_desc">O Escopo a ser usado no provedor de autenticação</string>
+    <string name="preferences_brapi_traits_title">Preferências</string>
     <string name="preferences_appearance_collect_labelval_customize">Valor vs Exibição de Rótulo</string>
     <string name="preferences_appearance_collect_labelval_customize_description">Mostrar valores ou rótulos na tela de coleta</string>
     <string name="preferences_appearance_collect_labelval_customize_value">Valor</string>
     <string name="preferences_appearance_collect_labelval_customize_label">Rótulo</string>
+    <string name="preferences_brapi_servers_title">Servidores Comunitários</string>
+    <string name="preferences_brapi_server_barcode">Ler código de barras do servidor</string>
+    <string name="preferences_brapi_server_scan_error">Erro de Escaneo</string>
+    <string name="preferences_brapi_server_add">Enviar um Servidor</string>
     <!-- Community Servers -->
     <string-array name="community_servers_names">
         <item>CassavaBase</item>
@@ -795,21 +856,52 @@
         <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
         <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
     </string-array>
+    <string-array name="community_servers_grant_types">
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+    </string-array>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Autorizar</string>
     <string name="brapi_display_name">Nome para Exibição</string>
+    <string name="brapi_revoke_auth">Finalizar Sessão</string>
+    <string name="brapi_auth_btn">Iniciar Sessão no Site</string>
+    <string name="brapi_auth_success">Autorização de BrAPI bem sucedida</string>
+    <string name="brapi_auth_deny">Autorização de BrAPI Negada</string>
+    <string name="brapi_auth_error_starting">Erro ao Iniciar a Autenticação BrAPI</string>
+    <string name="brapi_auth_permission_deny">ERRO: Você não tem as permissões necessárias para executar esta ação</string>
+    <string name="brapi_auth_needed_title">Login Necessário</string>
     <string name="brapi_auth_needed">Você precisa estar conectado ao sistema com o qual está tentando sincronizar dados para sincronizar seus dados.\n\nDeseja autenticar agora?</string>
     <!-- BrAPI Import -->
+    <string name="import_dialog_title_brapi_fields">Importar Campo BrAPI</string>
+    <string name="brapi_load_data_button">Carregar Campos</string>
+    <string name="brapi_load_traits_button">Carregar Características</string>
     <string name="brapi_save_data_button">Pré-visualizar Campo</string>
     <string name="brapi_study_name">Nome</string>
+    <string name="brapi_study_description">Descrição</string>
     <string name="brapi_study_location">Localização</string>
+    <string name="brapi_observation_level">Nível de Observação</string>
+    <string name="brapi_study_num_traits"> Características</string>
+    <string name="brapi_not_found">ERRO: O sistema de destino não suporta esta operação via BrAPI.</string>
+    <string name="brapi_studies_error">Erro ao carregar estudos.</string>
     <string name="brapi_study_detail_error">Erro ao carregar detalhes de estudo para o estudo. Estudo não salvo.</string>
     <string name="brapi_plot_detail_error">Erro ao carregar parcelas para estudo. Estudo não salvo.</string>
     <string name="brapi_study_traits_error">Erro ao carregar características para o estudo. Estudo não salvo.</string>
+    <string name="brapi_ontology_error">Erro ao carregar características da BrAPI.</string>
     <string name="brapi_save_field_error">Erro ao Salvar Campo</string>
-    <string name="brapi_fields_filter_by_trial">Filtrar por ensayo</string>
-    <string name="brapi_trials_load">Cargar ensayos</string>
+    <string name="brapi_field_not_selected">O Campo Selecionado Deve Ser Importado da BrAPI.</string>
+    <string name="brapi_fields_filter_by_program">Filtrar por programa</string>
+    <string name="brapi_fields_filter_by_trial">Filtrar por estudo</string>
+    <string name="brapi_programs_load">Carregar programas</string>
+    <string name="brapi_programs_select">Selecionar programa</string>
+    <string name="brapi_programs_error">Erro ao carregar programas.</string>
+    <string name="brapi_trials_load">Cargar estudos</string>
+    <string name="brapi_trials_select">Selecionar estudo</string>
+    <string name="brapi_trials_error">Erro ao carregar estudos.</string>
     <string name="brapi_save_trait">Salvar Características</string>
+    <string name="brapi_warning_select_trial">Por favor, selecione um estudo</string>
     <string name="brapi_enable_before_sync">BRAPI está desabilitado. Por favor, habilite nas configurações antes de usar a sincronização.</string>
     <string name="brapi_error_saving_all_traits">Erro ao salvar características. Nenhuma característica foi salva.</string>
     <string name="brapi_error_saving_some_traits">Erro ao salvar algumas características. Algumas características não foram salvas</string>
@@ -834,6 +926,7 @@
     <string name="tutorial_dialog_description">Gostaria de habilitar o tutorial? Esta configuração pode ser alterada nas Configurações.</string>
     <string name="tutorial_main_traits_title">Características</string>
     <string name="tutorial_main_traitlist_title">Características</string>
+    <string name="tutorial_main_datacollect_title">Entrada de dados</string>
     <string name="tutorial_main_na_title">Datos faltantes</string>
     <string name="tutorial_main_delete_description">Los datos son eliminados usando este botón.</string>
     <string name="tutorial_main_search_title">Pesquisar</string>
@@ -842,8 +935,12 @@
     <string name="tutorial_settings_fields_title">Campos</string>
     <string name="tutorial_settings_fields_import">Para comenzar a usar Fieldbook, primero importe un archivo de campo.</string>
     <string name="tutorial_settings_traits_title">Características</string>
+    <string name="tutorial_settings_collect_title">Coletar dados</string>
+    <string name="tutorial_settings_collect_description">permite coletar dados fenotiípicos.</string>
     <string name="tutorial_settings_settings_title">Configurações avançadas</string>
+    <string name="tutorial_settings_settings_description">permite configuração adicional para a coleta de dados.</string>
     <string name="tutorial_settings_export_title">Exportar</string>
+    <string name="tutorial_settings_export_description">Dados podem ser exportados em dois formatos: banco de dados ou tabela.</string>
     <string name="tutorial_fields_file_description">Os arquivos devem conter três colunas: um identificador único, uma ordem primária e uma ordem secundária. A ordem primária/secundária é usada para navegação no campo.</string>
     <string name="tutorial_fields_delete_description">Para excluir um campo, abra o menu no lado esquerdo de um campo e selecione Excluir.</string>
     <string name="tutorial_traits_visibility_description">As características podem ser desabilitadas da coleção marcando a caixa de seleção.</string>
@@ -853,7 +950,9 @@
     <string name="tutorial_main_datagrid_title">Grilla de datos</string>
     <string name="tutorial_main_datagrid_description">Isto abre uma grade de fenotipagem 2D do campo atualmente selecionado.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
+    <string name="oauth_configured_incorrectly">Falha na solicitação de autorização. Por favor, verifique configurações do BrAPI.</string>
     <string name="brapi_programs_activity_title">Escolha seu Programa</string>
+    <string name="import_brapi_field_title">Importar Campo BrAPI</string>
     <string name="menu_action_brapi_filter">Filtrar</string>
     <string name="act_brapi_filter_apply">Filtrar</string>
     <string name="act_brapi_filter_import">Importar</string>
@@ -880,7 +979,11 @@
     <string name="pref_canon_ssid_summary">Este nome é usado para encontrar a AP do seu dispositivo. Esse nome deve estar contido no SSID atual.</string>
     <string name="pref_canon_title">Nome do SSID</string>
     <string name="trait_usb_photo_settings_title">Configurações de Fotos USB</string>
+    <string name="canon_trait_settings_title">Configurações do Canon</string>
+    <string name="brapi_trials_filter_title">Estudos</string>
+    <string name="brapi_filter_type_trial">Estudo</string>
     <string name="menu_filter_brapi_reset_cache_title">Restabelecer Cache</string>
+    <string name="act_brapi_list_filter_loading_trials">Carregando estudos, aguarde.</string>
     <string name="select">Selecionar</string>
     <string name="act_brapi_list_filter_reset_cache_title">Confirmar Restabelecer</string>
     <string name="act_brapi_list_filter_reset_cache_message">Isto irá excluir os dados locais do BrAPI usados para pesquisa e importação.</string>
@@ -889,6 +992,7 @@
     <string name="act_brapi_study_filter">Filtrar</string>
     <string name="act_brapi_trait_preprocess_title">Seletor de Formato de Field Book</string>
     <string name="act_brapi_trait_import_title">Escolher Formatos</string>
+    <string name="brapi_filter_type_trial_count">Estudo (%s)</string>
     <string name="pref_alpha_enhanced_brapi_import_summary">Quando habilitado, uma nova interface de importação de BrAPI será usada para estudos e características.</string>
     <string name="opening_brapi_no_network_error">Rede deve ser habilitada para usar funcionalidade BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Isto irá limpar a lista de itens selecionados.</string>
