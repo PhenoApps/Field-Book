@@ -64,8 +64,8 @@
     <string name="settings_statistics">Estatísticas</string>
     <!-- Config Activity Fuzzy Search  -->
     <string name="act_config_fuzzy_search_failed">Base de Dados não pode recuperar um campo ou parcela com o código: %s</string>
-    <string name="act_config_fuzzy_search_error">Algo deu errado ao pesquisar por %s</string>
-    <string name="act_config_search_fab_content_description">Pesquisar em todas as parcelas e campos para carregar/navegar até o item codificado.</string>
+    <string name="act_config_fuzzy_search_error">Algo deu errado ao procurar por %s</string>
+    <string name="act_config_search_fab_content_description">Procurar em todas as parcelas e campos para carregar/navegar até o item codificado.</string>
     <!-- File manager  -->
     <string name="import_source_local">Armazenamento local</string>
     <string name="import_source_cloud">Armazenamento em nuvem</string>
@@ -311,10 +311,10 @@
     <string name="main_toolbar_moveto_scan">Escanear</string>
     <string name="act_collect_plot_with_code_not_found">Código de barras não encontrado. U\n</string>
     <!-- Search  -->
-    <string name="main_toolbar_search">Pesquisar</string>
+    <string name="main_toolbar_search">Procurar</string>
     <string name="search_dialog_add">Adicionar</string>
     <string name="search_dialog_clear">Limpar</string>
-    <string name="search_dialog_search">Pesquisar</string>
+    <string name="search_dialog_search">Procurar</string>
     <string name="search_dialog_operator_dialog_title">Selecionar um operador</string>
     <string name="search_dialog_query_is_equal_to">é igual a</string>
     <string name="search_dialog_query_is_not_equal_to">não é igual a</string>
@@ -322,7 +322,7 @@
     <string name="search_dialog_query_does_not_contain">não contém</string>
     <string name="search_dialog_query_is_more_than">é maior que</string>
     <string name="search_dialog_query_is_less_than">é menor que</string>
-    <string name="search_results_dialog_title">Resultados de pesquisa</string>
+    <string name="search_results_dialog_title">Resultados da procura</string>
     <string name="search_results_dialog_range">Fileira</string>
     <string name="search_results_dialog_plot">Parcela</string>
     <string name="search_results_missing">A busca não encontrou resultados</string>
@@ -580,7 +580,7 @@
     <string name="preferences_appearance_tutorial_description">Adicione um botão na barra de ferramentas através do aplicativo que abre o tutorial</string>
     <string name="preferences_appearance_toolbar_customize">Barra de Ferramentas de Ações</string>
     <string name="preferences_appearance_toolbar_customize_description">Alternar a visibilidade das funcionalidades padrão</string>
-    <string name="preferences_appearance_toolbar_customize_search">Pesquisar</string>
+    <string name="preferences_appearance_toolbar_customize_search">Procurar</string>
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
     <string name="preferences_appearance_toolbar_customize_summary">Resumo</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloquear</string>
@@ -647,8 +647,8 @@
     <string name="pref_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_enable_title">Habilitar GeoNav</string>
     <string name="pref_geonav_enable_summary">Navegar pelos campos usando localização do dispositivo</string>
-    <string name="pref_geonav_search_method_title">Método de Pesquisa</string>
-    <string name="pref_geonav_search_method_summary">O método %s utilizado para pesquisar parcelas em GeoNav</string>
+    <string name="pref_geonav_search_method_title">Método de Procura</string>
+    <string name="pref_geonav_search_method_summary">O método %s utilizado para procurar parcelas em GeoNav</string>
     <string name="pref_geonav_method_distance">Distância</string>
     <string name="pref_geonav_method_trapezoid">Trapezoidal</string>
     <string name="pref_behavior_geonav_parameters_category_title">Parâmetros</string>
@@ -657,7 +657,7 @@
     <string name="pref_geonav_search_trapezoid_d2_title">Distância do Trapezoid (km)</string>
     <string name="pref_geonav_search_trapezoid_d2_summary">A distância entre o usuário e o lado oposto do trapezoide é %s km</string>
     <string name="pref_geonav_search_angle_summary">GeoNav cria um trapezoide na frente do usuário, o ângulo mais próximo do usuário é definido como %s°</string>
-    <string name="pref_geonav_search_angle_title">Ângulo de Pesquisa GeoNav (graus)</string>
+    <string name="pref_geonav_search_angle_title">Ângulo de Procura (graus) GeoNav</string>
     <string name="pref_geonav_log">Registro GeoNav</string>
     <string name="pref_geonav_log_off">Desativado</string>
     <string name="pref_geonav_log_off_description">Desativado: Não há registros grabados</string>
@@ -940,7 +940,8 @@
     <string name="tutorial_main_datacollect_title">Entrada de dados</string>
     <string name="tutorial_main_na_title">Datos faltantes</string>
     <string name="tutorial_main_delete_description">Los datos son eliminados usando este botón.</string>
-    <string name="tutorial_main_search_title">Pesquisar</string>
+    <string name="tutorial_main_search_title">Procurar</string>
+    <string name="tutorial_main_search_description">O ícone de procura permite consultas ao banco de dados.</string>
     <string name="tutorial_main_resources_title">Recursos</string>
     <string name="tutorial_main_summary_title">Resumo</string>
     <string name="tutorial_settings_fields_title">Campos</string>
@@ -968,8 +969,15 @@
     <string name="act_brapi_filter_apply">Filtrar</string>
     <string name="act_brapi_filter_import">Importar</string>
     <string name="act_brapi_filter_clear">Limpar</string>
+    <string name="repeated_values_pager_content_description">valores repetidos</string>
+    <string name="repeated_values_right_button_content_description">direita</string>
+    <string name="repeated_values_left_button_content_description">esquerda</string>
+    <string name="export_util_repeated_measures_table_warning_title">Tabela de Medidas Repetidas</string>
+    <string name="export_util_repeated_measures_table_warning_message">Apenas os últimos valores de medidas repetidas serão exportados no formato de tabela.</string>
     <string name="activity_file_explorer_up_directory_name">Cima</string>
     <!-- base camera strings -->
+    <string name="trait_camera_connect_content_description">Inicia uma conexão do dispositivo.</string>
+    <string name="trait_camera_preview_content_description">Esta pré-visualiza a tela da câmera.</string>
     <string name="trait_camera_capture_content_description">Tire uma foto</string>
     <string name="delete_local_photo">Excluir Foto</string>
     <string name="trait_system_photo_settings_title">Configurações da Foto do Sistema</string>
@@ -983,9 +991,13 @@
     <string name="view_trait_photo_settings_camera_system">Android</string>
     <string name="view_trait_photo_settings_camera_choice_description">Escolha entre a câmera padrão do Field Book e o app da câmera Android.</string>
     <!-- usb camera trait -->
+    <string name="usb_camera_resolution_options_title">Resoluções Suportadas</string>
+    <string name="usb_camera_plug_in_camera">Por favor, conecte uma câmera compatível com UVC.</string>
     <string name="view_trait_photo_settings_white_balance_title">Balanço de Branco Automático</string>
     <string name="view_trait_photo_settings_auto_focus_title">Auto-Foco</string>
     <!-- gopro -->
+    <string name="dialog_go_pro_wait_stream_title">Aguardando pré-visualização ao vivo</string>
+    <string name="dialog_go_pro_wait_stream_message">Isso pode demorar um minuto.</string>
     <!-- canon camera strings -->
     <string name="pref_canon_ssid_summary">Este nome é usado para encontrar a AP do seu dispositivo. Esse nome deve estar contido no SSID atual.</string>
     <string name="pref_canon_title">Nome do SSID</string>
@@ -993,17 +1005,37 @@
     <string name="canon_trait_settings_title">Configurações do Canon</string>
     <string name="brapi_trials_filter_title">Estudos</string>
     <string name="brapi_filter_type_trial">Estudo</string>
+    <string name="brapi_filter_type_crop">Colheita</string>
+    <string name="brapi_importer_search_hint">Procurar Texto</string>
     <string name="menu_filter_brapi_reset_cache_title">Restabelecer Cache</string>
     <string name="act_brapi_list_filter_loading_trials">Carregando estudos, aguarde.</string>
     <string name="select">Selecionar</string>
+    <string name="brapi_v1_is_not_compatible">BrAPI V1 não é compatível.</string>
+    <string name="no_programdbid_provided">Nenhum programDbId fornecido</string>
+    <string name="no_studydbids_provided">Nenhum studyDbIds fornecido</string>
+    <string name="act_brapi_list_api_exception">Erro desconhecido. Por favor, verifique as preferências do BrAPI ou contate os desenvolvedores.</string>
     <string name="act_brapi_list_filter_reset_cache_title">Confirmar Restabelecer</string>
-    <string name="act_brapi_list_filter_reset_cache_message">Isto irá excluir os dados locais do BrAPI usados para pesquisa e importação.</string>
+    <string name="act_brapi_list_filter_reset_cache_message">Isto irá excluir os dados locais do BrAPI usados para procura e importação.</string>
+    <string name="search_bar_hint">Procurando… %s</string>
+    <string name="menu_filter_brapi_clear_filters">Limpar Filtros</string>
+    <string name="menu_filter_brapi_clear_selection">Limpar Seleção</string>
+    <string name="level">Nível</string>
+    <string name="primary">Primário</string>
+    <string name="secondary">Secundário</string>
     <string name="sort">Organizar</string>
     <string name="brapi_traits_filter_title">Características</string>
+    <string name="brapi_filter_type_study">Estudo</string>
     <string name="act_brapi_study_filter">Filtrar</string>
     <string name="act_brapi_trait_preprocess_title">Seletor de Formato de Field Book</string>
     <string name="act_brapi_trait_import_title">Escolher Formatos</string>
+    <plurals name="act_brapi_list_filter">
+        <item quantity="one">%s resultado</item>
+        <item quantity="other">%s resultados</item>
+    </plurals>
+    <string name="brapi_filter_type_program_count">Programa (%s)</string>
+    <string name="brapi_filter_type_season_count">Temporada (%s)</string>
     <string name="brapi_filter_type_trial_count">Estudo (%s)</string>
+    <string name="brapi_filter_type_crop_count">Colheita (%s)</string>
     <string name="brapi_filter_type_study_count">Estudo (%s)</string>
     <string name="pref_alpha_enhanced_brapi_import_summary">Quando habilitado, uma nova interface de importação de BrAPI será usada para estudos e características.</string>
     <string name="pref_alpha_brapi_import_title">Nova interface do usuário de importação BrAPI</string>
