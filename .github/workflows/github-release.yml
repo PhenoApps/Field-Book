@@ -15,8 +15,6 @@ on:
   schedule:
     # Run every Monday at 3:00 PM EST
     - cron: "0 20 * * 1"
-    - cron: "45 19 * * 2"  # 2:45 PM Tues
-    - cron: "0 20 * * 2"  # 3:00 PM Tues
   workflow_dispatch:
     inputs:
       bump_type:
