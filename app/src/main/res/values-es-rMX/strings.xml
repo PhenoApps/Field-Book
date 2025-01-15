@@ -83,7 +83,7 @@
     <string name="menu_fields_sort_list">Ordenar Lista de Campos</string>
     <string name="fields_sort_reset">Restablecer</string>
     <string name="fields_sort_by_name">Nombre</string>
-    <string name="fields_sort_by_import_format">Importar Formato</string>
+    <string name="fields_sort_by_import_format">Formato de Importación</string>
     <string name="fields_sort_by_import_date">Fecha de Importación</string>
     <string name="fields_sort_by_edit_date">Editar Fecha</string>
     <string name="fields_sort_by_sync_date">Fecha de Sincronización</string>
