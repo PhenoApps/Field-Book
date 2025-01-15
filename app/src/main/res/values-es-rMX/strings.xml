@@ -114,7 +114,7 @@
     <string name="fields_delete_study">Eliminar campo</string>
     <string name="fields_delete_study_confirmation">¿Estás seguro(a) de que quieres eliminar este campo? Esto eliminará todos los datos de este campo.</string>
     <plurals name="fields_delete_confirmation">
-        <item quantity="one">¿Estás seguro(a) de que quieres eliminar los campos: \"%s\"?</item>
+        <item quantity="one">¿Estás seguro(a) de que quieres eliminar el campo: \"%s\"?</item>
         <item quantity="other">¿Estás seguro de que deseas eliminar los campos: \"%s\"?</item>
     </plurals>
     <!-- Import -->
