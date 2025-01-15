@@ -913,7 +913,11 @@
     <string name="brapi_export_multiple_obs">ERRO: Múltiplas observações por variável</string>
     <string name="brapi_export_unknown_error">ERRO: Erro Desconhecido</string>
     <string name="brapi_export_successful">Exportação BrAPI Bem Sucedida</string>
+    <string name="brapi_saving_indicator">Salvando Observações…</string>
+    <string name="brapi_field_non_matching_sources_title">Origens Não Coincidem</string>
+    <string name="brapi_field_non_matching_sources">Não foi possível sincronizar dados. Os dados do campo são originários de %1$s, BrAPI url atualmente definida como %2$s. Origens devem corresponder.</string>
     <string name="brapi_enable_before_sync">BRAPI está desabilitado. Por favor, habilite nas configurações antes de usar a sincronização.</string>
+    <string name="brapi_trait_already_exists">Característica já existe: %1$s. Não salvando.</string>
     <string name="brapi_error_saving_all_traits">Erro ao salvar características. Nenhuma característica foi salva.</string>
     <string name="brapi_error_saving_some_traits">Erro ao salvar algumas características. Algumas características não foram salvas</string>
     <string name="brapi_traits_saved_success">Características selecionadas salvas com sucesso.</string>
@@ -925,6 +929,7 @@
     <string name="brapi_close_button">Fechar</string>
     <string name="brapi_export_observations">Observações</string>
     <string name="brapi_export_skipped_user_created">Variables de Observacion creadas por Usuario</string>
+    <string name="brapi_export_skipped_wrong_source"> Origem de Dados Diferente</string>
     <string name="brapi_export_skipped_user_created_images">Variable de Imágenes creadas por el usuario</string>
     <!-- Pagination -->
     <string name="next">Seguinte</string>
@@ -943,6 +948,7 @@
     <string name="tutorial_main_search_title">Procurar</string>
     <string name="tutorial_main_search_description">O ícone de procura permite consultas ao banco de dados.</string>
     <string name="tutorial_main_resources_title">Recursos</string>
+    <string name="tutorial_main_resources_description">Exibe uma lista de arquivos na pasta Repositório.</string>
     <string name="tutorial_main_summary_title">Resumo</string>
     <string name="tutorial_settings_fields_title">Campos</string>
     <string name="tutorial_settings_fields_import">Para comenzar a usar Fieldbook, primero importe un archivo de campo.</string>
