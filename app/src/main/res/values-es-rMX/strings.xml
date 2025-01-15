@@ -71,7 +71,7 @@
     <string name="import_source_cloud">Almacenamiento en la nube</string>
     <string name="import_source_ask">Preguntar siempre</string>
     <string name="import_dialog_importing">Espere...</string>
-    <string name="import_error_general">Error en importación</string>
+    <string name="import_error_general">Error importando</string>
     <string name="act_file_explorer_no_file_error">No se han encontrado directorios de Field Book.</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">El campo no ha sido cargado. Por favor cargue un campo antes de capturar datos.</string>
