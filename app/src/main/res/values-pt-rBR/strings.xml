@@ -923,31 +923,74 @@
     <string name="brapi_traits_saved_success">Características selecionadas salvas com sucesso.</string>
     <string name="brapi_obs_sync_menu_name">Sincronizar</string>
     <string name="brapi_obs_header_name">Baixando Observações para o Estudo:</string>
+    <string name="number_traits_label">Número de Características:</string>
+    <string name="number_observation_label">Número de Observações:</string>
+    <string name="no_observations_warning">Nenhuma observação encontrada para o estudo. Por favor, toque em Cancelar.</string>
+    <string name="brapi_skipped_traits">Características obtidas com sucesso. %1$d características ignoradas devido à ausência do campo brapi \'trait\'</string>
+    <string name="brapi_study_incompatible">Este estudo BrAPI atualmente é incompatível com Field Book. Estudos devem incluir linha e coluna no cabeçalho.</string>
     <string name="act_collect_no_plots">Este estudo não tem nenhuma parcela salva.</string>
     <!-- BrAPI Export -->
+    <string name="act_brapi_export_title">Exportação BrAPI</string>
     <string name="brapi_export_button">Exportar</string>
+    <string name="brapi_next_field_button">Campo Seguinte</string>
     <string name="brapi_close_button">Fechar</string>
+    <string name="brapi_export_title">Estatísticas de exportação do BrAPI</string>
     <string name="brapi_export_observations">Observações</string>
+    <string name="brapi_export_num_new_obs"> Novas Observações</string>
+    <string name="brapi_export_num_synced_obs"> Observações Sincronizadas</string>
+    <string name="brapi_export_num_ed_obs"> Observações Editadas</string>
+    <string name="brapi_export_skipped_observations"> Observações Ignoradas</string>
     <string name="brapi_export_skipped_user_created">Variables de Observacion creadas por Usuario</string>
     <string name="brapi_export_skipped_wrong_source"> Origem de Dados Diferente</string>
+    <string name="brapi_export_num_new_imgs">Novas Imagens</string>
+    <string name="brapi_export_num_synced_imgs">Imagens Sincronizadas</string>
+    <string name="brapi_export_num_ed_imgs">Imagens Editadas</string>
+    <string name="brapi_export_num_incomplete_imgs">Imagens Sincronizadas Incompletas</string>
+    <string name="brapi_export_skipped_images">Imagens Ignoradas</string>
     <string name="brapi_export_skipped_user_created_images">Variable de Imágenes creadas por el usuario</string>
+    <string name="brapi_export_images">Imagens</string>
+    <string name="brapi_delete_message">Não é possível excluir a observação BrAPI sincronizada, usando NA em vez disso</string>
+    <string name="act_brapi_export_image_load_failed">Carregamento de imagem falhou.</string>
     <!-- Pagination -->
     <string name="next">Seguinte</string>
+    <string name="prev">Anterior</string>
+    <string name="page_one_of_one">Página 1 de 1</string>
     <!-- General -->
+    <string name="device_offline_warning">Dispositivo Offline: Conecte-se a uma rede e tente novamente</string>
+    <string name="brapi_info_message">        Características e campos importados via BrAPI poderão exportar suas observações por meio da exportação BrAPI.
+        Características e campos criados manualmente ou importados via CSV precisarão ser exportados no formato CSV.
+    </string>
+    <string name="brapi_na">NA</string>
     <!-- APP INTRO  -->
     <string name="intro_tutorial_title">Gostaria de habilitar o tutorial?</string>
+    <string name="intro_tutorial_description">Esta configuração pode ser alterada nas Configurações</string>
     <string name="intro_tutorial_radio_item_yes">Sim</string>
     <string name="intro_tutorial_radio_item_no">Não</string>
+    <string name="intro_tutorial_warning">Por favor, faça uma opção</string>
     <!-- TUTORIAL -->
+    <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">Gostaria de habilitar o tutorial? Esta configuração pode ser alterada nas Configurações.</string>
+    <string name="tutorial_main_infobars_title">Infobars</string>
+    <string name="tutorial_main_infobars_description">InfoBars mostram dados extras para cada entrada e podem ser alterados usando os menus suspensos.</string>
     <string name="tutorial_main_traits_title">Características</string>
+    <string name="tutorial_main_traits_description">As pequenas flechas verdes se movem entre características.</string>
     <string name="tutorial_main_traitlist_title">Características</string>
+    <string name="tutorial_main_traitlist_description">A característica atual sendo coletada. Uma lista de características ativas é exibida quando a característica atual é pressionada.</string>
+    <string name="tutorial_main_entries_title">Entradas</string>
+    <string name="tutorial_main_entries_description">As flechas grandes e pretas se movem entre as entradas.</string>
+    <string name="tutorial_main_navinfo_title">Ordenar colunas</string>
+    <string name="tutorial_main_navinfo_description">Aqui é onde a ordem primária e secundária é exibida.</string>
     <string name="tutorial_main_datacollect_title">Entrada de dados</string>
+    <string name="tutorial_main_datacollect_description">Os dados são inseridos na área inferior da tela. Tipos de características diferentes têm layouts diferentes.</string>
     <string name="tutorial_main_na_title">Datos faltantes</string>
+    <string name="tutorial_main_na_description">O botão NA é usado para marcar valores como faltantes.</string>
+    <string name="tutorial_main_delete_title">Excluir dados</string>
     <string name="tutorial_main_delete_description">Los datos son eliminados usando este botón.</string>
     <string name="tutorial_main_search_title">Procurar</string>
     <string name="tutorial_main_search_description">O ícone de procura permite consultas ao banco de dados.</string>
     <string name="tutorial_main_resources_title">Recursos</string>
+    <string name="tutorial_fields_add_title">Adicionar Campo</string>
+    <string name="tutorial_fields_add_description">Importar um arquivo de campo.</string>
     <string name="tutorial_main_resources_description">Exibe uma lista de arquivos na pasta Repositório.</string>
     <string name="tutorial_main_summary_title">Resumo</string>
     <string name="tutorial_settings_fields_title">Campos</string>
