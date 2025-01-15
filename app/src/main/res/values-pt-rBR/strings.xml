@@ -59,7 +59,7 @@
     <string name="settings_traits">Características</string>
     <string name="settings_collect">Coletar</string>
     <string name="settings_export">Exportar</string>
-    <string name="settings_advanced">Configurações avançadas</string>
+    <string name="settings_advanced">Configurações</string>
     <string name="settings_profile">Perfil</string>
     <string name="settings_statistics">Estatísticas</string>
     <!-- Config Activity Fuzzy Search  -->
@@ -702,7 +702,7 @@
     <string name="database_reset_warning2">Essa ação não pode ser revertida. O aplicativo vai fechar depois de limpar o banco de dados. Você ainda deseja continuar?</string>
     <string name="database_reset_message">O banco de dados foi excluído</string>
     <string name="share_file_title">Enviando arquivo…</string>
-    <string name="preferences_storage_settings_title">Configurações avançadas</string>
+    <string name="preferences_storage_settings_title">Configurações</string>
     <string name="preferences_system_defaults_reset">Restabelecer Configurações</string>
     <string name="reset_preferences_title">Restabelecer Configurações para o Padrão</string>
     <string name="reset_preferences_message">Aviso: isto irá restabelecer todas as preferências do Field Book.</string>
@@ -993,16 +993,22 @@
     <string name="tutorial_fields_add_description">Importar um arquivo de campo.</string>
     <string name="tutorial_main_resources_description">Exibe uma lista de arquivos na pasta Repositório.</string>
     <string name="tutorial_main_summary_title">Resumo</string>
+    <string name="tutorial_main_summary_description">Exibe um resumo de todos os dados para a entrada atual.</string>
+    <string name="tutorial_main_lockdata_title">Bloquear dados</string>
+    <string name="tutorial_main_lockdata_description">Este bloqueia a entrada de dados atual</string>
     <string name="tutorial_settings_fields_title">Campos</string>
+    <string name="tutorial_settings_fields_description">permite importar e gerenciar campos.</string>
     <string name="tutorial_settings_fields_import">Para comenzar a usar Fieldbook, primero importe un archivo de campo.</string>
     <string name="tutorial_settings_traits_title">Características</string>
+    <string name="tutorial_settings_traits_description">permite que você adicione, importe e gerencie características</string>
     <string name="tutorial_settings_collect_title">Coletar dados</string>
-    <string name="tutorial_settings_collect_description">permite coletar dados fenotiípicos.</string>
-    <string name="tutorial_settings_settings_title">Configurações avançadas</string>
+    <string name="tutorial_settings_collect_description">permite coletar dados fenotípicos.</string>
+    <string name="tutorial_settings_settings_title">Configurações</string>
     <string name="tutorial_settings_settings_description">permite configuração adicional para a coleta de dados.</string>
     <string name="tutorial_settings_export_title">Exportar</string>
     <string name="tutorial_settings_export_description">Dados podem ser exportados em dois formatos: banco de dados ou tabela.</string>
     <string name="tutorial_fields_file_description">Os arquivos devem conter três colunas: um identificador único, uma ordem primária e uma ordem secundária. A ordem primária/secundária é usada para navegação no campo.</string>
+    <string name="tutorial_fields_select_title">Campo Ativo</string>
     <string name="tutorial_fields_delete_description">Para excluir um campo, abra o menu no lado esquerdo de um campo e selecione Excluir.</string>
     <string name="tutorial_traits_visibility_description">As características podem ser desabilitadas da coleção marcando a caixa de seleção.</string>
     <string name="shutter_capture_content_description">Botão de disparo para tirar uma foto.</string>
