@@ -958,8 +958,9 @@
     <string name="page_one_of_one">Página 1 de 1</string>
     <!-- General -->
     <string name="device_offline_warning">Dispositivo sin conexión: conéctese a una red e intente nuevamente</string>
-    <string name="brapi_info_message">Las variables y los campos importados vía BrAPI podrán exportar sus observaciones a través de la exportación BrAPI.
-Las variables y los campos creados manualmente o importados a través de CSV deberán exportarse a través de formato CSV.</string>
+    <string name="brapi_info_message">        Las variables y los campos importados vía BrAPI podrán exportar sus observaciones a través de la exportación BrAPI.
+       Las variables y los campos creados manualmente o importados a través de CSV deberán exportarse a través de formato CSV.
+    </string>
     <string name="brapi_na">NA</string>
     <!-- APP INTRO  -->
     <string name="intro_tutorial_title">¿Quieres activar el tutorial?</string>
