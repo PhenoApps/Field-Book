@@ -28,6 +28,8 @@ import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
+import com.google.firebase.crashlytics.CustomKeysAndValues
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import java.util.*
 
 class RangeBoxView : ConstraintLayout {
@@ -386,6 +388,7 @@ class RangeBoxView : ConstraintLayout {
      * @param id the range position to update to
      */
     private fun updateCurrentRange(id: Int) {
+
         if (firstName.isNotEmpty() && secondName.isNotEmpty() && uniqueName.isNotEmpty()) {
 
             try {
@@ -398,18 +401,12 @@ class RangeBoxView : ConstraintLayout {
                 plotsProgressBar.max = rangeID.size
                 plotsProgressBar.progress = rangeID.indexOf(id)
 
-            } catch (e: SQLiteException) {
-
-                logStudyEntryAttributes()
+            } catch (e: Exception) {
 
                 Log.e("Field Book", "Error getting range: $e")
 
-                Toast.makeText(
-                    context,
-                    R.string.act_collect_study_names_empty, Toast.LENGTH_SHORT
-                ).show()
+                controller.askUserSendCrashReport(e)
 
-                controller.callFinish()
             }
 
         } else {
@@ -420,32 +417,6 @@ class RangeBoxView : ConstraintLayout {
             ).show()
 
             controller.callFinish()
-        }
-    }
-
-    private fun logStudyEntryAttributes() {
-
-        try {
-
-            val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-            Log.e(TAG, "Current Study ID: $studyId")
-            Log.e(TAG, "Preference Primary Name: $firstName")
-            Log.e(TAG, "Preference Secondary Name: $secondName")
-            Log.e(TAG, "Preference Unique Name: $uniqueName")
-
-            controller.getDatabase().allFieldObjects.forEach {
-                Log.e(TAG, "Field ID: ${it.exp_id}")
-                Log.e(TAG, "Field Name: ${it.exp_name}")
-                Log.e(TAG, "Field Unique ID: ${it.unique_id}")
-                
-                val attributes = controller.getDatabase().getAllObservationUnitAttributeNames(it.exp_id).toList()
-                Log.e(TAG, "$attributes")
-            }
-
-        } catch (e: Exception) {
-
-            Log.e(TAG, "Error logging study entry attributes: $e")
-
         }
     }
 
