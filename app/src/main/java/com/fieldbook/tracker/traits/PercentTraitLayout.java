@@ -253,7 +253,8 @@ public class PercentTraitLayout extends BaseTraitLayout {
             seekBar.setProgress(Integer.parseInt(model.getValue()));
         } else {
             String defaultValue = getDefaultValue();
-            setCurrentValueText(defaultValue, Color.BLACK);
+            // clear the editText when deleted
+            setCurrentValueText("", Color.BLACK);
             seekBar.setProgress(Integer.parseInt(defaultValue));
         }
 

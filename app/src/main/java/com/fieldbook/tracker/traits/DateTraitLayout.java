@@ -53,8 +53,6 @@ public class DateTraitLayout extends BaseTraitLayout {
     @Override
     public void setNaTraitsText() {
         getCollectInputView().setText("NA");
-        //issue 413 apply the date saved preference color to NA values
-        forceDataSavedColor();
     }
 
     @Override
@@ -110,9 +108,6 @@ public class DateTraitLayout extends BaseTraitLayout {
                 updatePreviewDate(calendar);
 
                 updateViewDate(calendar);
-
-                //this saves the date, so update text to display color
-                forceDataSavedColor();
 
                 String rep = ((CollectActivity) getContext()).getRep();
 
@@ -197,9 +192,6 @@ public class DateTraitLayout extends BaseTraitLayout {
             String previewText = datePreviewText.getText().toString();
             getCollectInputView().setText(previewText);
 
-            // Change the text color accordingly
-            forceDataSavedColor();
-
             isBlocked = false;
         });
 
@@ -233,14 +225,8 @@ public class DateTraitLayout extends BaseTraitLayout {
                 .putString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, yearText + "-" + monthText + "-" + dayOfMonth)
                 .apply();
 
-        getCollectInputView().setText(getMonthForInt(calendar.get(Calendar.MONTH)) + " " + dayOfMonth);
-
-        // Change text color
-        if (getNewTraits().containsKey(getCurrentTrait().getName())) {
-            getCollectInputView().setTextColor(getValueAlteredColor());
-        } else {
-            getCollectInputView().setTextColor(getTextColor());
-        }
+        setDateText(getMonthForInt(calendar.get(Calendar.MONTH)),
+                String.format(Locale.getDefault(),"%02d", calendar.get(Calendar.DAY_OF_MONTH)));
     }
 
     private void log() {
