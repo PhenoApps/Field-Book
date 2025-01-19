@@ -1,9 +1,6 @@
 package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 
@@ -61,6 +58,7 @@ public class LayoutCollections {
 
     public void setNaTraitsText(String format) {
         getTraitLayout(format).setNaTraitsText();
+        getTraitLayout(format).setCurrentValueAsEdited();
     }
 
 //    Deprecated - simpler to disable/enable data collection using lockOverlay instead

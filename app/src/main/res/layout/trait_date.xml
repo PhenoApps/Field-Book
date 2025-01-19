@@ -16,6 +16,13 @@
         android:orientation="vertical"
         android:paddingTop="15dp">
 
+        <TextView
+            android:id="@+id/datePreviewText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textSize="@dimen/text_size_large" />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
