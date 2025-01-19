@@ -32,7 +32,7 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
 
     override fun switchField(field: FieldObject?) {
 
-        if (field != null && field.exp_id != -1) {
+        if (field != null && field.exp_id != -1 && field.date_import != null && field.date_import.isNotBlank()) {
 
             database.switchField(field.exp_id)
 

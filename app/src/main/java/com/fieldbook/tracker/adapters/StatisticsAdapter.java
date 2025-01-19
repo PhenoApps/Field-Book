@@ -22,6 +22,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.StatisticsActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
+import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.StatisticObject;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.traits.formats.TraitFormat;
@@ -199,7 +200,10 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
         List<String> fieldNames = new ArrayList<>();
         for (String field : fields) {
-            fieldNames.add(database.getFieldObject(Integer.valueOf(field)).getExp_name());
+            FieldObject f = database.getFieldObject(Integer.valueOf(field));
+            if (f != null && f.getExp_name() != null) {
+                fieldNames.add(f.getExp_name());
+            }
         }
 
         List<String> unitWithMostObservationsList = new ArrayList<>();

@@ -428,7 +428,6 @@ public class ConfigActivity extends ThemedActivity {
 
         }
 
-        Intent intent = new Intent(this, CollectActivity.class);
         CollectActivity.reloadData = true;
 
         if (plotId != null) {
@@ -437,8 +436,19 @@ public class ConfigActivity extends ThemedActivity {
 
         }
 
-        startActivity(intent);
+        startCollectActivity();
 
+    }
+
+    private void startCollectActivity() {
+
+        int selectedField = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+        FieldObject field = database.getFieldObject(selectedField);
+
+        if (field != null && field.getDate_import() != null && !field.getDate_import().isEmpty()) {
+            Intent intent = new Intent(this, CollectActivity.class);
+            startActivity(intent);
+        }
     }
 
     @Nullable
@@ -590,11 +600,7 @@ public class ConfigActivity extends ThemedActivity {
 
         if (EasyPermissions.hasPermissions(this, perms)
                 && (EasyPermissions.hasPermissions(this, finePerms) || EasyPermissions.hasPermissions(this, coarsePerms))) {
-            Intent intent = new Intent();
-
-            intent.setClassName(ConfigActivity.this,
-                    CollectActivity.class.getName());
-            startActivity(intent);
+            startCollectActivity();
         } else {
             // Do not have permissions, request them now
             EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_trait_features),

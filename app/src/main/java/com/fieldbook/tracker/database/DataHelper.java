@@ -2198,22 +2198,11 @@ public class DataHelper {
 
         open();
 
-        //TODO add optional cascade delete
-        StudyDao.Companion.deleteField(studyId);
-//        db.execSQL("DELETE FROM studies WHERE internal_id_study = " + exp_id);
-//        db.execSQL("DELETE FROM observation_units WHERE study_db_id = " + exp_id);
-//        db.execSQL("DELETE FROM observation_units_attributes WHERE study_db_id = " + exp_id);
-//        db.execSQL("DELETE FROM observation_units_values WHERE study_db_id = " + exp_id);
-//        db.execSQL("DELETE FROM observations WHERE study_db_id = " + exp_id);
-
-//        db.execSQL("DELETE FROM " + EXP_INDEX + " WHERE exp_id = " + exp_id);
-//        db.execSQL("DELETE FROM " + PLOTS + " WHERE exp_id = " + exp_id);
-//        db.execSQL("DELETE FROM " + PLOT_ATTRIBUTES + " WHERE exp_id = " + exp_id);
-//        db.execSQL("DELETE FROM " + PLOT_VALUES + " WHERE exp_id = " + exp_id);
-//        db.execSQL("DELETE FROM " + USER_TRAITS + " WHERE exp_id = " + exp_id);
-
-        resetSummaryLabels(studyId);
-        deleteFieldSortOrder(studyId);
+        if (studyId >= 0) {
+            StudyDao.Companion.deleteField(studyId);
+            resetSummaryLabels(studyId);
+            deleteFieldSortOrder(studyId);
+        }
     }
 
     private void resetSummaryLabels(int studyId) {

@@ -103,6 +103,8 @@ import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.firebase.crashlytics.CustomKeysAndValues;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.serenegiant.widget.UVCCameraTextureView;
@@ -295,6 +297,8 @@ public class CollectActivity extends ThemedActivity
     private AlertDialog dialogGeoNav;
     private AlertDialog dialogPrecisionLoss;
     private boolean mlkitEnabled;
+
+    private AlertDialog dialogCrashReport;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -2805,5 +2809,78 @@ public class CollectActivity extends ThemedActivity
     @Override
     public SensorHelper.RotationModel getRotationRelativeToDevice() {
         return rotationModel;
+    }
+
+    @Override
+    public void askUserSendCrashReport(@NonNull Exception e) {
+        if (getWindow().isActive()) {
+            try {
+                if (dialogCrashReport != null) {
+                    dialogCrashReport.dismiss();
+                }
+
+                dialogCrashReport = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                        .setTitle(getString(R.string.dialog_crash_report_title))
+                        .setMessage(getString(R.string.dialog_crash_report_message))
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            sendCrashReport(e);
+                            dialog.dismiss();
+                        })
+                        .setNegativeButton(android.R.string.no, (dialog, which) -> {
+                            FirebaseCrashlytics.getInstance().recordException(e);
+                            dialog.dismiss();
+                        })
+                        .create();
+
+                dialogCrashReport.show();
+
+            } catch (Exception ignore) {
+            }
+        }
+    }
+
+    private void sendCrashReport(Exception e) {
+
+        try {
+
+            FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
+
+            crashlytics.setCrashlyticsCollectionEnabled(true);
+
+            int studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+            Log.e(TAG, "Current Study ID: " + studyId);
+
+            CustomKeysAndValues.Builder builder = new CustomKeysAndValues.Builder()
+                    .putString("Current Study ID", Integer.toString(studyId));
+
+            int count = 0;
+            FieldObject[] fieldObjects = database.getAllFieldObjects().toArray(new FieldObject[0]);
+            for (FieldObject fo : fieldObjects) {
+                Log.e(TAG, "Field ID: " + count + " " + fo.getExp_id());
+                Log.e(TAG, "Field Name: " + count + " " + fo.getExp_name());
+                Log.e(TAG, "Field Unique ID: " + count + " " + fo.getUnique_id());
+
+                builder.putString("Field ID " + count, Integer.toString(fo.getExp_id()));
+                builder.putString("Field Name " + count, fo.getExp_name());
+                builder.putString("Field Unique ID " + count, fo.getUnique_id());
+
+                List<String> attributes = Arrays.asList(database.getAllObservationUnitAttributeNames(fo.getExp_id()));
+                Log.e(TAG, attributes.toString());
+                builder.putString("Observation Unit Attributes " + count, attributes.toString());
+
+                count = count + 1;
+            }
+
+            crashlytics.setCustomKeys(builder.build());
+
+            crashlytics.recordException(e);
+
+            crashlytics.sendUnsentReports();
+
+        } catch (Exception ex) {
+
+            Log.e(TAG, "Error logging study entry attributes: " + ex);
+
+        }
     }
 }

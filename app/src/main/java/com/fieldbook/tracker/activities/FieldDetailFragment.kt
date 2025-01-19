@@ -484,18 +484,23 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             )
         }
         if (EasyPermissions.hasPermissions(requireActivity(), *perms)) {
-            val intent = Intent()
-            intent.setClassName(
-                requireActivity(),
-                "com.fieldbook.tracker.activities.CollectActivity"
-            )
-            startActivity(intent)
+            startCollectActivity()
         } else {
             // Do not have permissions, request them now
             EasyPermissions.requestPermissions(
                 this, getString(R.string.permission_rationale_trait_features),
                 PERMISSIONS_REQUEST_TRAIT_DATA, *perms
             )
+        }
+    }
+
+    private fun startCollectActivity() {
+        val selectedField = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
+        val field = database.getFieldObject(selectedField)
+
+        if (field != null && field.date_import != null && field.date_import.isNotEmpty()) {
+            val intent = Intent(context, CollectActivity::class.java)
+            startActivity(intent)
         }
     }
 

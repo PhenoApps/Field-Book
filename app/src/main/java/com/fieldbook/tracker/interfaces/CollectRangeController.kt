@@ -13,4 +13,5 @@ interface CollectRangeController: CollectController {
     fun existsAllTraits(traitIndex: Int, plotIndex: Int): Int
     fun existsTrait(plotIndex: Int): Boolean
     fun getCollectInputView(): CollectInputView
+    fun askUserSendCrashReport(e: Exception)
 }

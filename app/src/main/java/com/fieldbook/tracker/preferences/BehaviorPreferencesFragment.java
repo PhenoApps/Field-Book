@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.preference.CheckBoxPreference;
@@ -29,6 +30,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
+    private static final String TAG = BehaviorPreferencesFragment.class.getSimpleName();
+
     @Inject
     SharedPreferences preferences;
 
@@ -38,6 +41,14 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+
+        //bugfix commit 60ab59c4a82db79b350d72f8dbf51d08548bd846 fixes deprecated preference data for volume nav
+        try {
+            preferences.getString(GeneralKeys.VOLUME_NAVIGATION, "");
+        } catch (ClassCastException e) {
+            preferences.edit().putString(GeneralKeys.VOLUME_NAVIGATION, "0").apply();
+            Log.d(TAG, "Stagnant Deprecated preference data found, fixing.");
+        }
 
         setPreferencesFromResource(R.xml.preferences_behavior, rootKey);
         CheckBoxPreference cycleTraitsPref = findPreference("CycleTraits");
