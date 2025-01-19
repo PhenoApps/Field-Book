@@ -18,7 +18,6 @@
             android:layout_height="wrap_content"
             style="@style/AppIntroDefaultHeading"
             android:textAlignment="textStart"
-            android:textColor="@color/main_color_text_dark"
             android:padding="0dp"/>
 
         <TextView
@@ -27,7 +26,6 @@
             android:layout_height="wrap_content"
             style="@style/AppIntroDefaultText"
             android:textAlignment="textStart"
-            android:textColor="@color/main_color_text_dark"
             android:padding="0dp"/>
 
     </LinearLayout>

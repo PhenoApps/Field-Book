@@ -67,11 +67,15 @@ class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
         get() = validateItems()
 
     override fun onUserIllegallyRequestedNextPage() {
-        Toast.makeText(
-            requireContext(),
-            setupItems?.get(getFirstInvalidItem())?.invalidateMessage,
-            Toast.LENGTH_SHORT
-        ).show()
+        try {
+            Toast.makeText(
+                requireContext().applicationContext,
+                setupItems?.get(getFirstInvalidItem())?.invalidateMessage,
+                Toast.LENGTH_SHORT
+            ).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     companion object {

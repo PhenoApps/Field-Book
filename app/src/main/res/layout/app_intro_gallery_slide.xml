@@ -20,8 +20,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="spread"
-        app:layout_constraintVertical_weight="2"
-        android:textColor="@color/main_color_text_dark"/>
+        app:layout_constraintVertical_weight="2"/>
 
     <GridLayout
         android:id="@+id/grid_layout"
@@ -48,7 +47,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/grid_layout"
-        app:layout_constraintVertical_weight="3"
-        android:textColor="@color/main_color_text_dark"/>
+        app:layout_constraintVertical_weight="3"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
