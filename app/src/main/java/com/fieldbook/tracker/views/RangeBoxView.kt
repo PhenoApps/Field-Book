@@ -10,7 +10,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
-import android.view.View
 import android.view.View.OnTouchListener
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -21,6 +20,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.dialogs.AttributeChooserDialog
 import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
@@ -61,14 +62,6 @@ class RangeBoxView : ConstraintLayout {
     private var rangeEdited = false
     private var plotEdited = false
 
-    /**
-     * unique plot names used in range queries
-     * query and save them once during initialization
-     */
-    private var firstName: String
-    private var secondName: String
-    private var uniqueName: String
-
     private var delay = 100
     private var count = 1
 
@@ -80,8 +73,8 @@ class RangeBoxView : ConstraintLayout {
         this.rangeRight = v.findViewById(R.id.rangeRight)
         this.tvRange = v.findViewById(R.id.tvRange)
         this.tvPlot = v.findViewById(R.id.tvPlot)
-        this.plotEt = v.findViewById(R.id.plot)
-        this.rangeEt = v.findViewById(R.id.range)
+        this.plotEt = v.findViewById(R.id.plot) //secondary
+        this.rangeEt = v.findViewById(R.id.range) //primary
         this.rangeName = v.findViewById(R.id.rangeName)
         this.plotName = v.findViewById(R.id.plotName)
         this.plotsProgressBar = v.findViewById(R.id.plotsProgressBar)
@@ -90,13 +83,10 @@ class RangeBoxView : ConstraintLayout {
 
         rangeID = this.controller.getDatabase().allRangeID
         cRange = RangeObject()
-        cRange.plot = ""
-        cRange.plot_id = ""
-        cRange.range = ""
+        cRange.secondaryId = ""
+        cRange.uniqueId = ""
+        cRange.primaryId = ""
         lastRange = ""
-        firstName = controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
-        secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
-        uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
     }
 
     constructor(ctx: Context) : super(ctx)
@@ -115,6 +105,18 @@ class RangeBoxView : ConstraintLayout {
         defStyle,
         defStyleRes
     )
+
+    private fun getPrimaryName(): String {
+        return controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
+    }
+
+    private fun getSecondaryName(): String {
+        return controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
+    }
+
+    private fun getUniqueName(): String {
+        return controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+    }
 
     fun toggleNavigation(toggle: Boolean) {
         rangeLeft.isEnabled = toggle
@@ -138,11 +140,11 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun getPlotID(): String? {
-        return cRange.plot_id
+        return cRange.uniqueId
     }
 
     fun isEmpty(): Boolean {
-        return cRange.plot_id.isEmpty()
+        return cRange.uniqueId.isEmpty()
     }
 
     fun connectTraitBox(traitBoxView: TraitBoxView) {
@@ -171,27 +173,39 @@ class RangeBoxView : ConstraintLayout {
             false
         }
         setName(10)
-        rangeName.setOnTouchListener { _, _ ->
-            Utils.makeToast(
-                context,
-                controller.getPreferences().getString(
-                    GeneralKeys.PRIMARY_NAME,
-                    context.getString(R.string.search_results_dialog_range)
-                )
+
+        val attributeChooserDialog = AttributeChooserDialog(showTraits = false, showOther = false)
+
+        rangeName.setOnClickListener {
+            attributeChooserDialog.setOnAttributeSelectedListener(object :
+                AttributeChooserDialog.OnAttributeSelectedListener {
+                override fun onAttributeSelected(label: String) {
+                    //update preference primary name
+                    controller.getPreferences().edit().putString(GeneralKeys.PRIMARY_NAME, label).apply()
+                    rangeName.setText(label)
+                    refresh()
+                }
+            })
+            attributeChooserDialog.show(
+                (controller.getContext() as CollectActivity).supportFragmentManager,
+                "attributeChooserDialog"
             )
-            false
         }
 
-        //TODO https://stackoverflow.com/questions/47107105/android-button-has-setontouchlistener-called-on-it-but-does-not-override-perform
-        plotName.setOnTouchListener { v: View, _: MotionEvent? ->
-            Utils.makeToast(
-                context,
-                controller.getPreferences().getString(
-                    GeneralKeys.SECONDARY_NAME,
-                    context.getString(R.string.search_results_dialog_range)
-                )
+        plotName.setOnClickListener {
+            attributeChooserDialog.setOnAttributeSelectedListener(object :
+                AttributeChooserDialog.OnAttributeSelectedListener {
+                override fun onAttributeSelected(label: String) {
+                    //update preference primary name
+                    controller.getPreferences().edit().putString(GeneralKeys.SECONDARY_NAME, label).apply()
+                    plotName.setText(label)
+                    refresh()
+                }
+            })
+            attributeChooserDialog.show(
+                (controller.getContext() as CollectActivity).supportFragmentManager,
+                "attributeChooserDialog"
             )
-            v.performClick()
         }
     }
 
@@ -359,10 +373,10 @@ class RangeBoxView : ConstraintLayout {
             // Refresh onscreen controls
             updateCurrentRange(rangeID[paging - 1])
             saveLastPlot()
-            if (cRange.plot_id.isEmpty()) return
+            if (cRange.uniqueId.isEmpty()) return
             if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
-                if (cRange.range != lastRange && lastRange != "") {
-                    lastRange = cRange.range
+                if (cRange.primaryId != lastRange && lastRange != "") {
+                    lastRange = cRange.primaryId
                     controller.getSoundHelper().playPlonk()
                 }
             }
@@ -380,8 +394,11 @@ class RangeBoxView : ConstraintLayout {
      * @param id the range position to update to
      */
     private fun updateCurrentRange(id: Int) {
-        if (firstName.isNotEmpty() && secondName.isNotEmpty() && uniqueName.isNotEmpty()) {
-            cRange = controller.getDatabase().getRange(firstName, secondName, uniqueName, id)
+        val primaryId = getPrimaryName()
+        val secondaryId = getSecondaryName()
+        val uniqueId = getUniqueName()
+        if (primaryId.isNotEmpty() && secondaryId.isNotEmpty() && uniqueId.isNotEmpty()) {
+            cRange = controller.getDatabase().getRange(primaryId, secondaryId, uniqueId, id)
 
             // RangeID is a sorted list of obs unit ids for the current field.
             // Set bar maximum to number of obs units in the field
@@ -400,20 +417,15 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun reload() {
-
-        firstName = controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
-        secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
-        uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-
         switchVisibility(controller.getPreferences().getBoolean(GeneralKeys.QUICK_GOTO, false))
         setName(8)
         paging = 1
         setAllRangeID()
         if (rangeID.isNotEmpty()) {
             updateCurrentRange(rangeID[0])
-            lastRange = cRange.range
+            lastRange = cRange.primaryId
             display()
-            controller.getTraitBox().setNewTraits(cRange.plot_id)
+            controller.getTraitBox().setNewTraits(cRange.uniqueId)
         } else { //if no fields, print a message and finish with result canceled
             Utils.makeToast(context, context.getString(R.string.act_collect_no_plots))
             controller.cancelAndFinish()
@@ -425,8 +437,8 @@ class RangeBoxView : ConstraintLayout {
         updateCurrentRange(rangeID[paging - 1])
         display()
         if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
-            if (cRange.range != lastRange && lastRange != "") {
-                lastRange = cRange.range
+            if (cRange.primaryId != lastRange && lastRange != "") {
+                lastRange = cRange.primaryId
                 controller.getSoundHelper().playPlonk()
             }
         }
@@ -434,12 +446,12 @@ class RangeBoxView : ConstraintLayout {
 
     // Updates the data shown in the dropdown
     fun display() {
-        rangeEt.setText(cRange.range)
-        plotEt.setText(cRange.plot)
+        rangeEt.setText(cRange.primaryId)
+        plotEt.setText(cRange.secondaryId)
         rangeEt.isCursorVisible = false
         plotEt.isCursorVisible = false
-        tvRange.text = cRange.range
-        tvPlot.text = cRange.plot
+        tvRange.text = cRange.primaryId
+        tvPlot.text = cRange.secondaryId
     }
 
     fun rightClick() {
@@ -448,7 +460,7 @@ class RangeBoxView : ConstraintLayout {
 
     fun saveLastPlot() {
         val ed: SharedPreferences.Editor = controller.getPreferences().edit()
-        ed.putString(GeneralKeys.LAST_PLOT, cRange.plot_id)
+        ed.putString(GeneralKeys.LAST_PLOT, cRange.uniqueId)
         ed.apply()
     }
 
@@ -508,7 +520,7 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun setLastRange() {
-        lastRange = cRange.range
+        lastRange = cRange.primaryId
     }
 
     ///// paging /////

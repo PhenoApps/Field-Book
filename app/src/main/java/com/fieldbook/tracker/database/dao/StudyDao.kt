@@ -400,18 +400,15 @@ class StudyDao {
         /**
          * This function should always be called within a transaction.
          */
-        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) =
-            withDatabase { db ->
+        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>, isBrapi: Boolean = false) = withDatabase { db ->
 
-                val names = getNames(studyId)!!
+            val names = getNames(studyId)!!
 
-                //TODO: indexOf can return -1 which leads to array out of bounds exception
-                //input data corresponds to original database column names
-                val uniqueIndex = columns.indexOf(names.unique)
-                val primaryIndex = columns.indexOf(names.primary)
-                val secondaryIndex = columns.indexOf(names.secondary)
+            //input data corresponds to original database column names
+            val uniqueIndex = columns.indexOf(names.unique)
+            val primaryIndex = columns.indexOf(names.primary)
+            val secondaryIndex = columns.indexOf(names.secondary)
 
-                //TODO remove when we handle primary/secondary ids better
             //check if data size matches the columns size, on mismatch fill with dummy data
             //mainly fixes issues with BrAPI when xtype/ytype and row/col values are not given
             val actualData = if (data.size != columns.size) {
@@ -430,12 +427,10 @@ class StudyDao {
                     geoCoordinates = data[geoCoordinatesIndex]
                 }
             }
-            
+
             val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
                 Study.FK to studyId,
                 "observation_unit_db_id" to actualData[uniqueIndex],
-                "primary_id" to if (primaryIndex < 0) "NA" else actualData[primaryIndex],
-                "secondary_id" to if (secondaryIndex < 0) "NA" else actualData[secondaryIndex],
                 "geo_coordinates" to geoCoordinates
             ))
 
@@ -451,28 +446,31 @@ class StudyDao {
                 ))
             }
 
-            if (primaryIndex < 0) {
+            if (isBrapi) {
 
-                val attrId = ObservationUnitAttributeDao.getIdByName("Row")
+                if (primaryIndex < 0) {
 
-                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                    Study.FK to studyId,
-                    ObservationUnit.FK to rowid,
-                    ObservationUnitAttribute.FK to attrId,
-                    "observation_unit_value_name" to "NA"
-                ))
-            }
+                    val attrId = ObservationUnitAttributeDao.getIdByName("Row")
 
-            if (secondaryIndex < 0) {
+                    db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                        Study.FK to studyId,
+                        ObservationUnit.FK to rowid,
+                        ObservationUnitAttribute.FK to attrId,
+                        "observation_unit_value_name" to "NA"
+                    ))
+                }
 
-                val attrId = ObservationUnitAttributeDao.getIdByName("Column")
+                if (secondaryIndex < 0) {
 
-                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                    Study.FK to studyId,
-                    ObservationUnit.FK to rowid,
-                    ObservationUnitAttribute.FK to attrId,
-                    "observation_unit_value_name" to "NA"
-                ))
+                    val attrId = ObservationUnitAttributeDao.getIdByName("Column")
+
+                    db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                        Study.FK to studyId,
+                        ObservationUnit.FK to rowid,
+                        ObservationUnitAttribute.FK to attrId,
+                        "observation_unit_value_name" to "NA"
+                    ))
+                }
             }
         }
 

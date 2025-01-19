@@ -262,7 +262,7 @@ abstract class AbstractCameraTrait :
                 (controller.getContext() as CollectActivity).person,
                 timestamp,
                 database.getStudyById(studyId),
-                database.getObservationUnitById(currentRange.plot_id),
+                database.getObservationUnitById(currentRange.uniqueId),
                 database.getObservationVariableById(currentTrait.id),
                 file.uri,
                 controller.getRotationRelativeToDevice()
@@ -278,7 +278,7 @@ abstract class AbstractCameraTrait :
         saver: (Uri) -> Unit
     ) {
 
-        val plot = obsUnit.plot_id
+        val plot = obsUnit.uniqueId
         val studyId = collectActivity.studyId
         val person = (activity as? CollectActivity)?.person
         val location = (activity as? CollectActivity)?.locationByPreferences
@@ -574,7 +574,7 @@ abstract class AbstractCameraTrait :
     private fun insertNa() {
 
         database.insertObservation(
-            currentRange.plot_id,
+            currentRange.uniqueId,
             currentTrait.id,
             currentTrait.format,
             "NA",
@@ -599,7 +599,7 @@ abstract class AbstractCameraTrait :
 
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-        val plot = currentRange.plot_id
+        val plot = currentRange.uniqueId
 
         val traitDbId = currentTrait.id
 

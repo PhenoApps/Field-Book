@@ -188,7 +188,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         @Override
         public void onClick(View view) {
-            ((CollectActivity) getContext()).setNewTraits(getDatabase().getUserDetail(getCurrentRange().plot_id));
+            ((CollectActivity) getContext()).setNewTraits(getDatabase().getUserDetail(getCurrentRange().uniqueId));
 
             boolean enableNavigation = true;
             switch (buttonState) {

@@ -100,7 +100,7 @@ class GoProTraitLayout :
     override fun loadLayout() {
         super.loadLayout()
         setup()
-        currentPlotId = currentRange.plot_id
+        currentPlotId = currentRange.uniqueId
     }
 
     private fun initializeConnectButton() {
