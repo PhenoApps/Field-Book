@@ -3,19 +3,15 @@ package com.fieldbook.tracker.views
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.AutoCompleteTextView
-import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.TextView
-import androidx.core.widget.addTextChangedListener
+import android.widget.ImageView
 import com.fieldbook.tracker.R
 
-class SearchBar: FrameLayout {
+class SearchBar : FrameLayout {
 
     lateinit var editText: AutoCompleteTextView
+    lateinit var clearButton: ImageView
 
     constructor(context: Context) : super(context) {
         init()
@@ -25,7 +21,11 @@ class SearchBar: FrameLayout {
         init()
     }
 
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
         init()
     }
 
@@ -35,6 +35,10 @@ class SearchBar: FrameLayout {
         val view = LayoutInflater.from(context).inflate(R.layout.view_search_bar, this, true)
 
         editText = view.findViewById(R.id.search)
+        clearButton = view.findViewById(R.id.clear)
 
+        clearButton.setOnClickListener {
+            editText.text.clear()
+        }
     }
 }

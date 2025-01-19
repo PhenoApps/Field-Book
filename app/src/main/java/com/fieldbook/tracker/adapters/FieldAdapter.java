@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,6 +40,8 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
     private final FieldSwitcher fieldSwitcher;
     private AdapterCallback callback;
     private OnFieldSelectedListener listener;
+    private String filterText = "";
+    private final List<FieldObject> fullFieldList = new ArrayList<>();
 
     public interface OnFieldSelectedListener {
         void onFieldSelected(int itemId);
@@ -218,5 +221,25 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
             // Clear any modifications for non-active fields
             holder.sourceIcon.setBackground(null);
         }
+    }
+
+    @Override
+    public void submitList(@Nullable List<FieldObject> list, @Nullable Runnable commitCallback) {
+        super.submitList(list, commitCallback);
+        fullFieldList.clear();
+        if (list != null) {
+            fullFieldList.addAll(list);
+        }
+    }
+
+    public void setTextFilter(String filter) {
+        this.filterText = filter;
+        List<FieldObject> filterFields = new ArrayList<>(fullFieldList);
+        for (FieldObject field : fullFieldList) {
+            if (!filter.isEmpty() && !field.getExp_name().toLowerCase().contains(filter.toLowerCase())) {
+                filterFields.remove(field);
+            }
+        }
+        submitList(filterFields);
     }
 }

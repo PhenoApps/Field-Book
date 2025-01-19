@@ -13,7 +13,8 @@
         android:layout_width="44dp"
         android:layout_height="44dp"
         android:gravity="center"
-        android:padding="8dp"/>
+        android:padding="8dp"
+        tools:src="@drawable/ic_file_csv"/>
 
     <LinearLayout xmlns:tools="http://schemas.android.com/tools"
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -43,7 +44,8 @@
             android:ellipsize="end"
             android:gravity="start"
             android:minWidth="40dp"
-            android:singleLine="true"/>
+            android:singleLine="true"
+            tools:text="200"/>
 
     </LinearLayout>
 
