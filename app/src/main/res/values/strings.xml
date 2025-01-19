@@ -273,6 +273,7 @@
     <string name="traits_format_labelprint">Zebra Label Print</string>
     <string name="traits_format_usb_camera">Usb Camera</string>
     <string name="traits_format_go_pro_camera">GoPro</string>
+    <string name="traits_format_angle">Angle</string>
 
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Trait Format</string>
