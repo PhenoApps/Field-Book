@@ -10,14 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
-
-### Fixed
-
-## [v6.0.4] - 2025-01-13
-
-### Added
-
-### Changed
+- BrAPI export no longer crashes when authentication token is expired (https://github.com/PhenoApps/Field-Book/pull/1134)
 
 ### Fixed
 
