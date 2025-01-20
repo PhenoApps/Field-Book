@@ -1389,4 +1389,6 @@
     <string name="activity_collect_proximity_warning">GeoNav Stopping, outside proximity of coordinates</string>
     <string name="no_suitable_file_manager_was_found">No suitable File Manager was found.</string>
     <string name="trait_error_invalid_multicat_value">Invalid categorical data was entered.</string>
+    <string name="dialog_crash_report_title">Failed to load data</string>
+    <string name="dialog_crash_report_message">Press OK to send an anonymous diagnostic report to help improve the app.</string>
 </resources>
