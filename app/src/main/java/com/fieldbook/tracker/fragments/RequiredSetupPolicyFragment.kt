@@ -12,6 +12,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.RequiredSetupAdapter
 import com.fieldbook.tracker.adapters.RequiredSetupAdapter.RequiredSetupModel
 import com.github.appintro.SlidePolicy
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 
 class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
@@ -75,6 +76,7 @@ class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
             ).show()
         } catch (e: Exception) {
             e.printStackTrace()
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
 
