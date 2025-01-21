@@ -128,33 +128,41 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
             // Short click on source icon sets active field (unless in selectionMode)
             sourceIcon.setOnClickListener(v -> {
                 int position = getBindingAdapterPosition();
-                FieldObject field = getItem(position);
-                if (field != null && isInSelectionMode) {
-                    toggleSelection(field.getExp_id());
-                } else if (field != null && context instanceof FieldEditorActivity) {
-                    ((FieldEditorActivity) context).setActiveField(field.getExp_id());
+                if (position != RecyclerView.NO_POSITION) {
+                    FieldObject field = getItem(position);
+                    if (field != null && isInSelectionMode) {
+                        toggleSelection(field.getExp_id());
+                    } else if (field != null && context instanceof FieldEditorActivity) {
+                        ((FieldEditorActivity) context).setActiveField(field.getExp_id());
+                    }
                 }
             });
 
             // Short click elsewhere opens detail fragment (unless in selectionMode)
             itemView.setOnClickListener(v -> {
                 if (v != sourceIcon) { // Check if the click is not on the icon
-                    FieldObject field = getItem(getBindingAdapterPosition());
-                    if (field != null && isInSelectionMode) {
-                        toggleSelection(field.getExp_id());
-                    } else if (field != null && listener != null) {
-                        listener.onFieldSelected(field.getExp_id());
+                    int position = getBindingAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        FieldObject field = getItem(position);
+                        if (field != null && isInSelectionMode) {
+                            toggleSelection(field.getExp_id());
+                        } else if (field != null && listener != null) {
+                            listener.onFieldSelected(field.getExp_id());
+                        }
                     }
                 }
             });
 
             // Long click enters and toggles selections in selection mode
             itemView.setOnLongClickListener(v -> {
-                FieldObject field = getItem(getBindingAdapterPosition());
-                if (field != null) {
-                    toggleSelection(field.getExp_id());
-                    isInSelectionMode = true;
-                    return true;
+                int position = getBindingAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    FieldObject field = getItem(position);
+                    if (field != null) {
+                        toggleSelection(field.getExp_id());
+                        isInSelectionMode = true;
+                        return true;
+                    }
                 }
                 return false;
             });

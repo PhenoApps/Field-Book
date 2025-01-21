@@ -9,7 +9,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -57,8 +56,6 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.traits.formats.Formats;
-import com.fieldbook.tracker.utilities.ArrayIndexComparator;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils;
@@ -78,7 +75,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -380,7 +376,13 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         } else if (itemId == R.id.sortTrait) {
             showTraitSortDialog();
         } else if (itemId == R.id.importexport) {
-            importExportDialog();
+            if (BaseDocumentTreeUtil.Companion.getRoot(this) != null
+                    && BaseDocumentTreeUtil.Companion.isEnabled(this)
+                    && BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait) != null) {
+                importExportDialog();
+            } else {
+                Toast.makeText(this, R.string.error_storage_directory, Toast.LENGTH_LONG).show();
+            }
         } else if (itemId == R.id.toggleTrait) {
             changeAllVisibility();
         } else if (itemId == android.R.id.home) {
@@ -606,7 +608,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         try {
             startActivityForResult(Intent.createChooser(intent, "cloudFile"), REQUEST_CLOUD_FILE_CODE);
         } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(getApplicationContext(), "No suitable File Manager was found.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), R.string.no_suitable_file_manager_was_found, Toast.LENGTH_SHORT).show();
         }
     }
 

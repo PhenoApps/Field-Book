@@ -23,4 +23,7 @@ class CategoricalFormat : TraitFormat(
     NameParameter(),
     DetailsParameter(),
     CategoriesParameter()
-), StringCoder by CategoricalJsonCoder(), ValuePresenter by CategoricalValuePresenter()
+),
+    StringCoder by CategoricalJsonCoder(),
+    ValuePresenter by CategoricalValuePresenter(),
+    Scannable
