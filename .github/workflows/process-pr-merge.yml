@@ -18,7 +18,6 @@ jobs:
       GH_TOKEN: ${{ secrets.ACTIONS_PAT }}
     outputs:
       pr_number: ${{ steps.check-pr.outputs.pr_number }}
-      pr_body: ${{ steps.check-pr.outputs.pr_body }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,11 +39,8 @@ jobs:
             exit 0
           fi
 
-          pr_body=$(gh api -X GET "repos/${{ github.repository }}/pulls/$pr_number" --jq '.body' | sed 's/\r//g')
           echo "PR Number: $pr_number"
-          echo "PR Body: $pr_body"
           echo "pr_number=${pr_number}" >> $GITHUB_OUTPUT
-          echo "pr_body=${pr_body}" >> $GITHUB_OUTPUT
 
   update-changelog:
     runs-on: ubuntu-latest
@@ -59,23 +55,28 @@ jobs:
           token: ${{ secrets.ACTIONS_PAT }}
           fetch-depth: 0
 
-      - name: Extract change type and release note
+      - name: Extract change type, bump type, and release note
         id: extract-details
         run: |
-          pr_body="${{ needs.determine-pr.outputs.pr_body }}"
-          echo "Extracting details from PR body..."
+          pr_number="${{ needs.determine-pr.outputs.pr_number }}"
+          echo "Fetching PR details for PR #$pr_number..."
 
-          release_note=$(echo "$pr_body" | awk 'BEGIN { found=0 } /```release-note/ { found=1; next } /```/ { found=0 } found { print }' | sed '/^$/d')
+          # Fetch PR body
+          pr_body=$(gh api -X GET "repos/${{ github.repository }}/pulls/$pr_number" --jq '.body' | sed 's/\r//g')
+          echo "Extracting details from PR Body: $pr_body"
+
+          # Extract release note
+          release_note=$(echo "$pr_body" | awk 'BEGIN { found=0 } /```release-note/ { found=1; next } /```/ { found=0 } found { print }' | sed '/^\s*$/d')
           echo "Release Note: $release_note"
-
-          change_type=$(echo "$pr_body" | grep -oP '(?<=- \[x\] `)[A-Z]+(?=`)' | head -n 1)
-          echo "Change Type: $change_type"
-
           if [ -z "$release_note" ]; then
             echo "No release note found."
             exit 1
           fi
+          echo "release_note=${release_note}" >> $GITHUB_OUTPUT
 
+          # Determine change type
+          change_type=$(echo "$pr_body" | grep -oP '(?<=- \[x\] `)[A-Z]+(?=`)' | head -n 1)
+          echo "Change Type: $change_type"
           case "$change_type" in
             "ADDITION")
               section="### Added"
@@ -95,9 +96,25 @@ jobs:
               exit 1
               ;;
           esac
-
-          echo "release_note=${release_note}" >> $GITHUB_OUTPUT
           echo "section=${section}" >> $GITHUB_OUTPUT
+
+          # Check for bump type
+          major_checked=$(echo "$pr_body" | grep -q '\[x\] \*\*`MAJOR`' && echo "true" || echo "false")
+          minor_checked=$(echo "$pr_body" | grep -q '\[x\] \*\*`MINOR`' && echo "true" || echo "false")
+          wait_checked=$(echo "$pr_body" | grep -q '\[x\] \*\*`WAIT`' && echo "true" || echo "false")
+          if [ "$major_checked" == "true" ]; then
+            echo "bump type: MAJOR"
+            echo "bump_type=major" >> $GITHUB_OUTPUT
+          elif [ "$minor_checked" == "true" ]; then
+            echo "bump type: MINOR"
+            echo "bump_type=minor" >> $GITHUB_OUTPUT
+          elif [ "$wait_checked" == "true" ]; then
+            echo "bump type WAIT was checked. No release required."
+            echo "bump_type=" >> $GITHUB_OUTPUT
+          else
+            echo "No valid bump type specified. Skipping release."
+            echo "bump_type=" >> $GITHUB_OUTPUT
+          fi
 
       - name: Update changelog
         run: |
@@ -114,30 +131,6 @@ jobs:
           author_name: Git Action Bot
           token: ${{ secrets.GITHUB_TOKEN }}
           push: true
-
-      - name: Extract bump type
-        id: extract-bump
-        run: |
-          pr_body="${{ needs.determine-pr.outputs.pr_body }}"
-          echo "Extracting bump type from PR body..."
-
-          major_checked=$(echo "$pr_body" | grep -q '\[x\] \*\*`MAJOR`' && echo "true" || echo "false")
-          minor_checked=$(echo "$pr_body" | grep -q '\[x\] \*\*`MINOR`' && echo "true" || echo "false")
-          wait_checked=$(echo "$pr_body" | grep -q '\[x\] \*\*`WAIT`' && echo "true" || echo "false")
-
-          if [ "$major_checked" == "true" ]; then
-            echo "Detected bump type: MAJOR"
-            echo "bump_type=major" >> $GITHUB_OUTPUT
-          elif [ "$minor_checked" == "true" ]; then
-            echo "Detected bump type: MINOR"
-            echo "bump_type=minor" >> $GITHUB_OUTPUT
-          elif [ "$wait_checked" == "true" ]; then
-            echo "WAIT was checked. No release required."
-            echo "bump_type=" >> $GITHUB_OUTPUT
-          else
-            echo "No valid bump type specified. Skipping release."
-            echo "bump_type=" >> $GITHUB_OUTPUT
-          fi
 
   dispatch-release:
     runs-on: ubuntu-latest
