@@ -83,7 +83,7 @@ class BrapiStudyFilterActivity(
     }
 
     override fun List<CheckboxListAdapter.Model>.filterExists(): List<CheckboxListAdapter.Model> {
-        val brapiIds = database.allFieldObjects.map { it.study_db_id }
+        val brapiIds = database.allFieldObjects.filter { it.exp_id >= 0 }.map { it.study_db_id }
         return filter { it.id !in brapiIds }
     }
 
@@ -186,7 +186,7 @@ class BrapiStudyFilterActivity(
             intentLauncher.launch(BrapiStudyImportActivity.getIntent(this).also { intent ->
                 intent.putExtra(
                     BrapiStudyImportActivity.EXTRA_STUDY_DB_IDS,
-                    associateProgramStudy().map { it.study.studyDbId }.toTypedArray()
+                    models.map { it.study.studyDbId }.toTypedArray()
                 )
                 intent.putExtra(
                     BrapiStudyImportActivity.EXTRA_PROGRAM_DB_ID,
