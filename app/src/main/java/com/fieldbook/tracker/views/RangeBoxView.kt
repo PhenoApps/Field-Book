@@ -3,6 +3,7 @@ package com.fieldbook.tracker.views
 import android.app.Service
 import android.content.Context
 import android.content.SharedPreferences
+import android.database.sqlite.SQLiteException
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
@@ -21,14 +22,21 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
+import com.google.firebase.crashlytics.CustomKeysAndValues
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import java.util.*
 
 class RangeBoxView : ConstraintLayout {
+
+    companion object {
+        const val TAG = "RangeBoxView"
+    }
 
     private var controller: CollectRangeController
 
@@ -380,21 +388,34 @@ class RangeBoxView : ConstraintLayout {
      * @param id the range position to update to
      */
     private fun updateCurrentRange(id: Int) {
-        if (firstName.isNotEmpty() && secondName.isNotEmpty() && uniqueName.isNotEmpty()) {
-            cRange = controller.getDatabase().getRange(firstName, secondName, uniqueName, id)
 
-            // RangeID is a sorted list of obs unit ids for the current field.
-            // Set bar maximum to number of obs units in the field
-            // Set bar progress to position of current obs unit within the sorted list
-            plotsProgressBar.max = rangeID.size
-            plotsProgressBar.progress = rangeID.indexOf(id)
+        if (firstName.isNotEmpty() && secondName.isNotEmpty() && uniqueName.isNotEmpty()) {
+
+            try {
+
+                cRange = controller.getDatabase().getRange(firstName, secondName, uniqueName, id)
+
+                // RangeID is a sorted list of obs unit ids for the current field.
+                // Set bar maximum to number of obs units in the field
+                // Set bar progress to position of current obs unit within the sorted list
+                plotsProgressBar.max = rangeID.size
+                plotsProgressBar.progress = rangeID.indexOf(id)
+
+            } catch (e: Exception) {
+
+                Log.e("Field Book", "Error getting range: $e")
+
+                controller.askUserSendCrashReport(e)
+
+            }
 
         } else {
-            //TODO switch to Utils
+
             Toast.makeText(
                 context,
                 R.string.act_collect_study_names_empty, Toast.LENGTH_SHORT
             ).show()
+
             controller.callFinish()
         }
     }
@@ -614,6 +635,8 @@ class RangeBoxView : ConstraintLayout {
         val study = controller.getDatabase().getFieldObject(studyId)
         val cursor = controller.getDatabase().getExportTableDataShort(studyId, study.unique_id, traits)
 
+        val traitNames = traits.map { it.name }
+
         cursor?.use {
             // Convert one-based range position to zero-based cursor position
             val zeroBasedPos = currentPos - 1
@@ -639,16 +662,20 @@ class RangeBoxView : ConstraintLayout {
                 rowsSeen++
 
                 // Check for uncollected trait observations
-                for (trait in traits) {
-                    val value = cursor.getString(cursor.getColumnIndexOrThrow(trait.name))
-                    if (value == null) {
-                        controller.getPreferences().edit().putString(GeneralKeys.LAST_USED_TRAIT, trait.name).apply()
-                        if (pos == currentPos) {
-                            // we are back where we started, notify that current entry is only one without data
-                            Utils.makeToast(context, context.getString(R.string.collect_sole_entry_without_data))
+                for (i in 0 until cursor.columnCount) {
+                    val traitName = cursor.getColumnName(i)
+                    if (traitName in traitNames) {
+                        val value = cursor.getString(i)
+                        if (value == null) {
+                            controller.getPreferences().edit().putString(GeneralKeys.LAST_USED_TRAIT, traitName).apply()
+                            if (pos == currentPos) {
+                                // We are back where we started, notify that current entry is only one without data
+                                Utils.makeToast(context, context.getString(R.string.collect_sole_entry_without_data))
+                            }
+                            return pos
                         }
-                        return pos
                     }
+
                 }
             }
         }

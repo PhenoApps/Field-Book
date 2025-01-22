@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="70dp"
-        android:textColor="@color/main_color_text_dark"
         android:text="" />
 
     <TextView
@@ -23,7 +22,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="@color/main_color_text_dark"
         android:text="" />
 
     <androidx.recyclerview.widget.RecyclerView

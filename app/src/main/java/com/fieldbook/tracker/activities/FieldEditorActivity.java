@@ -453,7 +453,7 @@ public class FieldEditorActivity extends ThemedActivity
     public void loadBrAPI() {
 
         if (Utils.isConnected(this)) {
-            if (prefs.getBoolean(GeneralKeys.EXPERIMENTAL_NEW_BRAPI_UI, false)) {
+            if (prefs.getBoolean(GeneralKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)) {
                 Intent intent = new Intent(this, BrapiStudyFilterActivity.class);
                 BrapiFilterCache.Companion.checkClearCache(this);
                 startActivityForResult(intent, REQUEST_BRAPI_IMPORT_ACTIVITY);

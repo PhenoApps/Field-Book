@@ -11,6 +11,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
 import androidx.constraintlayout.widget.Group
+import androidx.core.database.getStringOrNull
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.evrencoskun.tableview.TableView
@@ -249,16 +250,29 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                         do { //iterate over cursor results and populate lists of plot ids and related trait values
 
-                            val rowHeaderIndex = cursor.getColumnIndex(rowHeader)
+                            val rowData = arrayListOf<String?>()
+                            val columns = arrayListOf<String>()
+                            val columnCount = cursor.columnCount
+
+                            for (i in 0 until columnCount) {
+                                try {
+                                    columns.add(cursor.getColumnName(i))
+                                    rowData.add(cursor.getStringOrNull(i))
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+
+                            val rowHeaderIndex = columns.indexOf(rowHeader)
 
                             //unique name column is always the first column
-                            val uniqueIndex = cursor.getColumnIndex(study.unique_id)
+                            val uniqueIndex = columns.indexOf(uniqueHeader)
 
                             if (uniqueIndex > -1) { //if it doesn't exist skip this row
 
-                                val id = cursor.getString(uniqueIndex)
+                                val id = rowData[uniqueIndex] ?: ""
 
-                                val header = cursor.getString(rowHeaderIndex)
+                                val header = if (rowHeaderIndex > -1) columns[rowHeaderIndex] else ""
 
                                 val dataList = arrayListOf<CellData>()
 
@@ -268,19 +282,16 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                                 mTraits.forEachIndexed { _, variable ->
 
-                                    val index = cursor.getColumnIndex(variable.name)
+                                    val index = columns.indexOf(DataHelper.replaceIdentifiers(variable.name))
 
                                     if (index > -1) {
 
-                                        val value = cursor.getString(index) ?: ""
+                                        val value = rowData[index] ?: ""
 
                                         val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
 
                                         val repeatedValues =
                                             database.getRepeatedValues(studyId.toString(), id, variable.id)
-                                        if (repeatedValues.size > 1) {
-                                            println("$studyId $id $variable has repeated values...!")
-                                        }
 
                                         var cellValue = value
 
