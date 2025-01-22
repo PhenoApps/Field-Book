@@ -295,7 +295,11 @@ public class FieldEditorActivity extends ThemedActivity
     };
 
     public void setActiveField(int studyId) {
-        FieldObject field = database.getFieldObject(studyId);
+
+        //get current field id and compare the input, only switch if they are different
+        int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+        if (currentFieldId == studyId) return;
+
         fieldSwitcher.switchField(studyId);
         CollectActivity.reloadData = true;
         if (mAdapter != null) {
