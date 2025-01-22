@@ -1161,6 +1161,9 @@
     <string name="pref_geonav_distance_threshold_summary">GeoNav se detiene automáticamente cuando la distancia de todas las parcelas excede este valor en kilómetros.</string>
     <string name="pref_geonav_distance_threshold_title">Verificación de Proximidad</string>
     <string name="activity_collect_proximity_warning">GeoNav detenido, fuera de coordenadas de proximidad</string>
+    <string name="failed_to_save_study">Error al guardar el estudio</string>
     <string name="no_suitable_file_manager_was_found">No se encontró un Administrador de Archivos adecuado.</string>
     <string name="trait_error_invalid_multicat_value">Se introdujeron datos categóricos inválidos.</string>
+    <string name="dialog_crash_report_title">Error al cargar los datos</string>
+    <string name="dialog_crash_report_message">Presione OK para enviar un informe de diagnóstico anónimo para ayudar a mejorar la app.</string>
 </resources>
