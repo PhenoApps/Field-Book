@@ -14,6 +14,8 @@
     <string name="dialog_import">Importa</string>
     <string name="dialog_warning">Attenzione</string>
     <string name="dialog_save">Salva</string>
+    <string name="dialog_go">Vai</string>
+    <string name="dialog_sort_by">Ordina Per</string>
     <string name="dialog_delete">Cancella</string>
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
     <!-- Startup  -->
@@ -25,6 +27,7 @@
     <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_storage_export">L\'esportazione dei dati richiede l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_trait_features">La raccolta dei dati richiede l\'accesso ai file, al microfono e alla camera del dispositivo.</string>
+    <string name="permission_ask_bluetooth">Accetta i permessi bluetooth.</string>
     <!-- Config Activity  -->
     <string name="settings_fields">Campi</string>
     <string name="settings_traits">Caratteri</string>
