@@ -831,33 +831,42 @@ public class BrapiExportActivity extends ThemedActivity {
     }
 
     private void showExportButton() {
-        Button exportButton = findViewById(R.id.brapi_export_btn);
-        Button nextFieldButton = findViewById(R.id.next_field_btn);
-        Button closeButton = findViewById(R.id.close_btn);
 
-        exportButton.setVisibility(View.VISIBLE);
-        nextFieldButton.setVisibility(View.GONE);
-        closeButton.setVisibility(View.GONE);
+        runOnUiThread(() -> {
+            Button exportButton = findViewById(R.id.brapi_export_btn);
+            Button nextFieldButton = findViewById(R.id.next_field_btn);
+            Button closeButton = findViewById(R.id.close_btn);
+
+            exportButton.setVisibility(View.VISIBLE);
+            nextFieldButton.setVisibility(View.GONE);
+            closeButton.setVisibility(View.GONE);
+        });
     }
 
     private void showNextFieldButton() {
-        Button exportButton = findViewById(R.id.brapi_export_btn);
-        Button nextFieldButton = findViewById(R.id.next_field_btn);
-        Button closeButton = findViewById(R.id.close_btn);
 
-        exportButton.setVisibility(View.GONE);
-        nextFieldButton.setVisibility(View.VISIBLE);
-        closeButton.setVisibility(View.GONE);
+        runOnUiThread(() -> {
+            Button exportButton = findViewById(R.id.brapi_export_btn);
+            Button nextFieldButton = findViewById(R.id.next_field_btn);
+            Button closeButton = findViewById(R.id.close_btn);
+
+            exportButton.setVisibility(View.GONE);
+            nextFieldButton.setVisibility(View.VISIBLE);
+            closeButton.setVisibility(View.GONE);
+        });
     }
 
     private void showCloseButton() {
-        Button exportButton = findViewById(R.id.brapi_export_btn);
-        Button nextFieldButton = findViewById(R.id.next_field_btn);
-        Button closeButton = findViewById(R.id.close_btn);
 
-        exportButton.setVisibility(View.GONE);
-        nextFieldButton.setVisibility(View.GONE);
-        closeButton.setVisibility(View.VISIBLE);
+        runOnUiThread(() -> {
+            Button exportButton = findViewById(R.id.brapi_export_btn);
+            Button nextFieldButton = findViewById(R.id.next_field_btn);
+            Button closeButton = findViewById(R.id.close_btn);
+
+            exportButton.setVisibility(View.GONE);
+            nextFieldButton.setVisibility(View.GONE);
+            closeButton.setVisibility(View.VISIBLE);
+        });
     }
 
     public enum UploadError {
