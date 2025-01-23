@@ -321,6 +321,12 @@ class ObservationUnitPropertyDao {
                 val requiredColumns = arrayOf(uniqueName) + traits.map { it.name }.toTypedArray()
                 val matrixCursor = MatrixCursor(requiredColumns)
 
+                val traitStartIndex = cursor.columnCount - traits.size
+
+                if (traitStartIndex < 0) {
+                    return null
+                }
+
                 while (cursor.moveToNext()) {
 
                     val rowData = mutableListOf<String?>()
@@ -330,7 +336,7 @@ class ObservationUnitPropertyDao {
                         try {
 
                             rowData.add(
-                                cursor.getStringOrNull(index)
+                                cursor.getStringOrNull(traitStartIndex + index)
                             )
 
                         } catch (e: Exception) {
