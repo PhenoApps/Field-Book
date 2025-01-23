@@ -114,10 +114,14 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val perms = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 
         if (EasyPermissions.hasPermissions(context, *perms) || Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-            if (fieldIds.isNotEmpty()) {
 
-                exportLocal(fieldIds.mapNotNull { database.getFieldObject(it) })
+            val fieldsToExport = fieldIds.mapNotNull { database.getFieldObject(it) }
+
+            if (fieldsToExport.isNotEmpty()) {
+
+                exportLocal(fieldsToExport)
             }
+
         } else {
             EasyPermissions.requestPermissions(
                 context as Activity,
