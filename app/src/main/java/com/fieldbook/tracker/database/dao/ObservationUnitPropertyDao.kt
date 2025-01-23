@@ -318,25 +318,25 @@ class ObservationUnitPropertyDao {
 
             getExportTableData(context, expId, traits)?.use { cursor ->
 
-                val requiredColumns = arrayOf(uniqueName) + traits.map { it.name }.toTypedArray()
+                val requiredTraits = traits.map { it.name }.toTypedArray()
+                val requiredColumns = arrayOf(uniqueName) + requiredTraits
                 val matrixCursor = MatrixCursor(requiredColumns)
-
-                val traitStartIndex = cursor.columnCount - traits.size
-
-                if (traitStartIndex < 0) {
-                    return null
-                }
+                val traitStartIndex = cursor.columnCount - requiredTraits.size
 
                 while (cursor.moveToNext()) {
 
                     val rowData = mutableListOf<String?>()
 
-                    requiredColumns.forEachIndexed { index, s ->
+                    //add the unique id
+                    rowData.add(cursor.getStringOrNull(0))
+
+                    //skip ahead to the traits and add all trait values
+                    requiredTraits.forEachIndexed { index, s ->
 
                         try {
 
                             rowData.add(
-                                cursor.getStringOrNull(traitStartIndex + index)
+                                cursor.getStringOrNull(index + traitStartIndex)
                             )
 
                         } catch (e: Exception) {
