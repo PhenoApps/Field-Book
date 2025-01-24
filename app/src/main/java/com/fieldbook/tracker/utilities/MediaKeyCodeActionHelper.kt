@@ -21,6 +21,13 @@ class MediaKeyCodeActionHelper {
 
             val prefs = collector.getPreferences()
 
+            //bugfix for compatibility with old preference
+            try {
+                prefs.getString(GeneralKeys.VOLUME_NAVIGATION, VolumeNavigation.DISABLED.ordinal.toString())
+            } catch (e: ClassCastException) {
+                prefs.edit().remove(GeneralKeys.VOLUME_NAVIGATION).apply()
+            }
+
             val volumeNavEnabled = when(prefs.getString(GeneralKeys.VOLUME_NAVIGATION, VolumeNavigation.DISABLED.ordinal.toString())) {
                 VolumeNavigation.DISABLED.ordinal.toString() -> VolumeNavigation.DISABLED
                 VolumeNavigation.TRAIT_NAVIGATION.ordinal.toString() -> VolumeNavigation.TRAIT_NAVIGATION

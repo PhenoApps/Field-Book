@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.util.Log
+import androidx.core.database.getStringOrNull
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
@@ -229,24 +230,28 @@ class ObservationUnitPropertyDao {
                 val matrixCursor = MatrixCursor(requiredColumns)
 
                 while (fullCursor.moveToNext()) {
-                    val rowData = requiredColumns.map { columnName ->
-                        val columnIndex = fullCursor.getColumnIndex(columnName)
-                        if (columnIndex != -1) fullCursor.getString(columnIndex) else null
-                    }.toTypedArray()
-                    matrixCursor.addRow(rowData)
+
+                    val row = arrayListOf<String?>()
+
+                    requiredColumns.forEachIndexed { index, s ->
+
+                        try {
+
+                            row.add(fullCursor.getStringOrNull(index))
+
+                        } catch (e: Exception) {
+
+                            e.printStackTrace()
+
+                        }
+                    }
+
+                    matrixCursor.addRow(row)
+
                 }
 
                 // Return a cursor that only includes the required columns
-                return MatrixCursor(requiredColumns).also { filteredCursor ->
-                    matrixCursor.moveToFirst()
-                    while (!matrixCursor.isAfterLast) {
-                        val rowValues = requiredColumns.map { columnName ->
-                            matrixCursor.getString(matrixCursor.getColumnIndex(columnName))
-                        }.toTypedArray()
-                        filteredCursor.addRow(rowValues)
-                        matrixCursor.moveToNext()
-                    }
-                }
+                return matrixCursor
             }
             // Return null if the original data retrieval fails
             return null
@@ -309,32 +314,45 @@ class ObservationUnitPropertyDao {
             uniqueName: String,
             traits: ArrayList<TraitObject>
         ): Cursor? {
+
             getExportTableData(context, expId, traits)?.use { cursor ->
-                val requiredColumns = arrayOf(uniqueName) + traits.map { it.name }.toTypedArray()
+
+                val requiredTraits = traits.map { it.name }.toTypedArray()
+                val requiredColumns = arrayOf(uniqueName) + requiredTraits
                 val matrixCursor = MatrixCursor(requiredColumns)
+                val traitStartIndex = cursor.columnCount - requiredTraits.size
 
                 while (cursor.moveToNext()) {
+
                     val rowData = mutableListOf<String?>()
 
-                    val uniqueNameIndex = cursor.getColumnIndex(uniqueName)
-                    if (uniqueNameIndex != -1) {
-                        rowData.add(cursor.getString(uniqueNameIndex))
-                    } else {
-                        rowData.add(null) // or handle appropriately
+                    //add the unique id
+                    rowData.add(cursor.getStringOrNull(0))
+
+                    //skip ahead to the traits and add all trait values
+                    requiredTraits.forEachIndexed { index, s ->
+
+                        try {
+
+                            rowData.add(
+                                cursor.getStringOrNull(index + traitStartIndex)
+                            )
+
+                        } catch (e: Exception) {
+
+                            e.printStackTrace()
+
+                        }
+
                     }
 
-                    traits.forEach { trait ->
-                        val traitIndex = cursor.getColumnIndex(trait.name)
-                        if (traitIndex != -1) {
-                            rowData.add(cursor.getString(traitIndex))
-                        } else {
-                            rowData.add(null) // or handle appropriately
-                        }
-                    }
                     matrixCursor.addRow(rowData.toTypedArray())
                 }
+
                 return matrixCursor
+
             }
+
             return null
         }
 

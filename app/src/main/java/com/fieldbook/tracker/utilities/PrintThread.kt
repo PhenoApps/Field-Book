@@ -46,7 +46,9 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
      */
     override fun run() {
 
-        Looper.prepare()
+        if (Looper.myLooper() == null) {
+            Looper.prepare()
+        }
 
         mLocalBroadcast = LocalBroadcastManager.getInstance(ctx)
 

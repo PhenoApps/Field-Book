@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
+import android.widget.ProgressBar
 import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,6 +14,7 @@ import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.AttributeAdapter
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.BackgroundUiTask
 import com.google.android.material.tabs.TabLayout
 
 /**
@@ -33,6 +35,8 @@ open class AttributeChooserDialog(
 
     private lateinit var tabLayout: TabLayout
     private lateinit var recyclerView: RecyclerView
+    private lateinit var progressBar: ProgressBar
+
     private var attributes = arrayOf<String>()
     private var traits = arrayOf<TraitObject>()
     private var other = arrayOf<TraitObject>()
@@ -45,6 +49,8 @@ open class AttributeChooserDialog(
         // Initialize UI elements
         tabLayout = view.findViewById(R.id.dialog_collect_att_chooser_tl)
         recyclerView = view.findViewById(R.id.dialog_collect_att_chooser_lv)
+        progressBar = view.findViewById(R.id.dialog_collect_att_chooser_pb)
+
         recyclerView.layoutManager = LinearLayoutManager(requireActivity())
         recyclerView.adapter = AttributeAdapter(this, null)
 
@@ -60,7 +66,11 @@ open class AttributeChooserDialog(
 
         // Call loadData after dialog is shown
         dialog.setOnShowListener {
-            loadData()
+            toggleProgressVisibility(true)
+            BackgroundUiTask.execute(
+                backgroundBlock = ::loadData,
+                uiBlock = ::setupTabLayout,
+                onCanceled = ::setupTabLayout)
         }
 
         return dialog
@@ -87,14 +97,12 @@ open class AttributeChooserDialog(
             Log.d(TAG, "Error occurred when querying for attributes in Collect Activity.")
             e.printStackTrace()
         }
+    }
 
-        //setup ui
-        try {
-            setupTabLayout()
-        } catch (e: Exception) {
-            Log.d(TAG, "Error occurred when setting up attribute tab layout.")
-            e.printStackTrace()
-        }
+    private fun toggleProgressVisibility(show: Boolean) {
+        progressBar.visibility = if (show) ProgressBar.VISIBLE else ProgressBar.GONE
+        tabLayout.visibility = if (show) TabLayout.GONE else TabLayout.VISIBLE
+        recyclerView.visibility = if (show) RecyclerView.GONE else RecyclerView.VISIBLE
     }
 
     /**
@@ -103,28 +111,40 @@ open class AttributeChooserDialog(
      * save the selected tab as preference
      */
     private fun setupTabLayout() {
-        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
 
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                tab?.let { t ->
-                    loadTab(t.text.toString())
-                    PreferenceManager.getDefaultSharedPreferences(requireActivity())
-                        .edit().putInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, t.position).apply()
+        try {
+
+            toggleProgressVisibility(false)
+
+            tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    tab?.let { t ->
+                        loadTab(t.text.toString())
+                        PreferenceManager.getDefaultSharedPreferences(requireActivity())
+                            .edit().putInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, t.position).apply()
+                    }
                 }
-            }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+                override fun onTabUnselected(tab: TabLayout.Tab?) {}
 
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-                tab?.let { t -> loadTab(t.text.toString()) }
-            }
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+                    tab?.let { t -> loadTab(t.text.toString()) }
+                }
 
-        })
+            })
 
-        //manually select the first tab based on preferences
-        val tabIndex = PreferenceManager.getDefaultSharedPreferences(requireActivity()).getInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, 0)
+            //manually select the first tab based on preferences
+            val tabIndex = PreferenceManager.getDefaultSharedPreferences(requireActivity()).getInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, 0)
 
-        tabLayout.selectTab(tabLayout.getTabAt(tabIndex))
+            tabLayout.selectTab(tabLayout.getTabAt(tabIndex))
+
+        } catch (e: Exception) {
+
+            Log.d(TAG, "Error occurred when querying for attributes in Collect Activity.")
+
+            e.printStackTrace()
+        }
     }
 
     /** Placeholder method; overridden in infoBar class where selection is needed. */

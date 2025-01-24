@@ -12,6 +12,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.RequiredSetupAdapter
 import com.fieldbook.tracker.adapters.RequiredSetupAdapter.RequiredSetupModel
 import com.github.appintro.SlidePolicy
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 
 class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
@@ -67,11 +68,16 @@ class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
         get() = validateItems()
 
     override fun onUserIllegallyRequestedNextPage() {
-        Toast.makeText(
-            requireContext(),
-            setupItems?.get(getFirstInvalidItem())?.invalidateMessage,
-            Toast.LENGTH_SHORT
-        ).show()
+        try {
+            Toast.makeText(
+                requireContext().applicationContext,
+                setupItems?.get(getFirstInvalidItem())?.invalidateMessage,
+                Toast.LENGTH_SHORT
+            ).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            FirebaseCrashlytics.getInstance().recordException(e)
+        }
     }
 
     companion object {

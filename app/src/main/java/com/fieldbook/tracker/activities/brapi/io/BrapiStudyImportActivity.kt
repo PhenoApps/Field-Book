@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
-import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.mapper.toTraitObject
 import com.fieldbook.tracker.adapters.StudyAdapter
 import com.fieldbook.tracker.adapters.StudyAdapter.Model
@@ -608,42 +607,55 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             launch(Dispatchers.IO) {
 
+                val level = BrapiObservationLevel().also {
+                    it.observationLevelName = try {
+                        if (selectedLevel in existingLevels().indices) {
+                            existingLevels().elementAt(selectedLevel)
+                        } else {
+                            "plot"
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to get observation level", e)
+                        finish()
+                        ""
+                    }
+                }
+
+                val allAttributes = getAttributeKeys()
+                val primaryId = allAttributes[selectedPrimary]
+                val secondaryId = allAttributes[selectedSecondary]
+                val sortOrder = if (selectedSort == -1) "" else allAttributes[selectedSort]
+
                 studyDbIds.forEach { id ->
 
                     studies.firstOrNull { it.studyDbId == id }?.let {
 
-                        saveStudy(it)
+                        saveStudy(it, level, primaryId, secondaryId, sortOrder)
 
                     }
                 }
 
                 setResult(Activity.RESULT_OK)
                 finish()
+
             }
         }
     }
 
-    private fun saveStudy(study: BrAPIStudy) {
-
-        val level = BrapiObservationLevel().also {
-            it.observationLevelName = try {
-                if (selectedLevel in existingLevels().indices) {
-                    existingLevels().elementAt(selectedLevel)
-                } else {
-                    "plot"
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to get observation level", e)
-                finish()
-                ""
-            }
-        }
+    private fun saveStudy(
+        study: BrAPIStudy,
+        level: BrapiObservationLevel,
+        primaryId: String,
+        secondaryId: String,
+        sortId: String
+    ) {
 
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
             observationUnits[study.studyDbId]?.filter {
-                    if (it.observationUnitPosition.entryType.name == "TEST") true
-                    else it.observationUnitPosition.observationLevel.levelName == level.observationLevelName }
+                if (it.observationUnitPosition?.entryType?.name == "TEST") true
+                else it.observationUnitPosition.observationLevel.levelName == level.observationLevelName
+            }
                 ?.let { units ->
 
                     val details = BrapiStudyDetails()
@@ -657,35 +669,43 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                         ?.map { it.toTraitObject(this@BrapiStudyImportActivity) } ?: listOf()
 
                     val attributes = studyAttributes.values.flatMap { it.keys }.distinct()
-                    val primaryId = attributes[selectedPrimary]
-                    val secondaryId = attributes[selectedSecondary]
-                    val sortOrder = if (selectedSort == -1) "" else attributes[selectedSort]
 
-                    details.attributes = attributes
+                    if (listOf(primaryId, secondaryId, sortId).filter { it.isNotEmpty() }.all { it in attributes }) {
 
-                    val unitAttributes = ArrayList<List<String>>()
-                    units.forEach { unit ->
+                        details.attributes = attributes
 
-                        val row = ArrayList<String>()
+                        val unitAttributes = ArrayList<List<String>>()
+                        units.forEach { unit ->
 
-                        attributes.forEach { attr ->
-                            row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
+                            val row = ArrayList<String>()
+
+                            attributes.forEach { attr ->
+                                row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
+                            }
+
+                            unitAttributes.add(row)
+
                         }
 
-                        unitAttributes.add(row)
+                        details.values = mutableListOf()
+                        details.values.addAll(unitAttributes)
 
+                        brapiService.saveStudyDetails(
+                            details,
+                            level,
+                            primaryId,
+                            secondaryId,
+                            sortId,
+                        )
+                    } else {
+
+                        runOnUiThread {
+
+                            Toast.makeText(this, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
+                            setResult(Activity.RESULT_CANCELED)
+                            finish()
+                        }
                     }
-
-                    details.values = mutableListOf()
-                    details.values.addAll(unitAttributes)
-
-                    brapiService.saveStudyDetails(
-                        details,
-                        level,
-                        primaryId,
-                        secondaryId,
-                        sortOrder,
-                    )
                 }
         }
 
@@ -865,5 +885,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     }
                 }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancel()
     }
 }

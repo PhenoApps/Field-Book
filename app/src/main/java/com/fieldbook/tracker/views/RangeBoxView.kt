@@ -3,6 +3,7 @@ package com.fieldbook.tracker.views
 import android.app.Service
 import android.content.Context
 import android.content.SharedPreferences
+import android.database.Cursor
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
@@ -30,6 +31,10 @@ import com.fieldbook.tracker.utilities.Utils
 import java.util.*
 
 class RangeBoxView : ConstraintLayout {
+
+    companion object {
+        const val TAG = "RangeBoxView"
+    }
 
     private var controller: CollectRangeController
 
@@ -65,6 +70,8 @@ class RangeBoxView : ConstraintLayout {
     private var delay = 100
     private var count = 1
 
+    private var exportDataCursor: Cursor? = null
+
     init {
 
         val v = inflate(context, R.layout.view_range_box, this)
@@ -87,6 +94,9 @@ class RangeBoxView : ConstraintLayout {
         cRange.uniqueId = ""
         cRange.primaryId = ""
         lastRange = ""
+
+        refreshCursor()
+
     }
 
     constructor(ctx: Context) : super(ctx)
@@ -394,24 +404,38 @@ class RangeBoxView : ConstraintLayout {
      * @param id the range position to update to
      */
     private fun updateCurrentRange(id: Int) {
+
         val primaryId = getPrimaryName()
         val secondaryId = getSecondaryName()
         val uniqueId = getUniqueName()
-        if (primaryId.isNotEmpty() && secondaryId.isNotEmpty() && uniqueId.isNotEmpty()) {
-            cRange = controller.getDatabase().getRange(primaryId, secondaryId, uniqueId, id)
 
-            // RangeID is a sorted list of obs unit ids for the current field.
-            // Set bar maximum to number of obs units in the field
-            // Set bar progress to position of current obs unit within the sorted list
-            plotsProgressBar.max = rangeID.size
-            plotsProgressBar.progress = rangeID.indexOf(id)
+        if (primaryId.isNotEmpty() && secondaryId.isNotEmpty() && uniqueId.isNotEmpty()) {
+
+            try {
+
+                cRange = controller.getDatabase().getRange(primaryId, secondaryId, uniqueId, id)
+
+                // RangeID is a sorted list of obs unit ids for the current field.
+                // Set bar maximum to number of obs units in the field
+                // Set bar progress to position of current obs unit within the sorted list
+                plotsProgressBar.max = rangeID.size
+                plotsProgressBar.progress = rangeID.indexOf(id)
+
+            } catch (e: Exception) {
+
+                Log.e("Field Book", "Error getting range: $e")
+
+                controller.askUserSendCrashReport(e)
+
+            }
 
         } else {
-            //TODO switch to Utils
+
             Toast.makeText(
                 context,
                 R.string.act_collect_study_names_empty, Toast.LENGTH_SHORT
             ).show()
+
             controller.callFinish()
         }
     }
@@ -622,11 +646,10 @@ class RangeBoxView : ConstraintLayout {
     }
 
     private fun moveToNextUncollectedObs(currentPos: Int, direction: Int, traits: ArrayList<TraitObject>): Int {
-        val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val study = controller.getDatabase().getFieldObject(studyId)
-        val cursor = controller.getDatabase().getExportTableDataShort(studyId, study.unique_id, traits)
 
-        cursor?.use {
+        val traitNames = traits.map { it.name }
+
+        exportDataCursor?.use { cursor ->
             // Convert one-based range position to zero-based cursor position
             val zeroBasedPos = currentPos - 1
             cursor.moveToPosition(zeroBasedPos)
@@ -651,15 +674,18 @@ class RangeBoxView : ConstraintLayout {
                 rowsSeen++
 
                 // Check for uncollected trait observations
-                for (trait in traits) {
-                    val value = cursor.getString(cursor.getColumnIndexOrThrow(trait.name))
-                    if (value == null) {
-                        controller.getPreferences().edit().putString(GeneralKeys.LAST_USED_TRAIT, trait.name).apply()
-                        if (pos == currentPos) {
-                            // we are back where we started, notify that current entry is only one without data
-                            Utils.makeToast(context, context.getString(R.string.collect_sole_entry_without_data))
+                for (i in 0 until cursor.columnCount) {
+                    val traitName = cursor.getColumnName(i)
+                    if (traitName in traitNames) {
+                        val value = cursor.getString(i)
+                        if (value == null) {
+                            controller.getPreferences().edit().putString(GeneralKeys.LAST_USED_TRAIT, traitName).apply()
+                            if (pos == currentPos) {
+                                // We are back where we started, notify that current entry is only one without data
+                                Utils.makeToast(context, context.getString(R.string.collect_sole_entry_without_data))
+                            }
+                            return pos
                         }
-                        return pos
                     }
                 }
             }
@@ -700,5 +726,13 @@ class RangeBoxView : ConstraintLayout {
 
     fun clickRight() {
         rangeRight.performClick()
+    }
+
+    fun refreshCursor() {
+        exportDataCursor?.close()
+        val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+        val traits = controller.getDatabase().visibleTraitObjects
+        exportDataCursor = controller.getDatabase().getExportTableDataShort(studyId, uniqueName, traits)
     }
 }
