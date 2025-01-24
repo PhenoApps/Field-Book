@@ -1273,6 +1273,11 @@ public class CollectActivity extends ThemedActivity
         //update the info bar in case a variable is used
         refreshInfoBarAdapter();
         refreshRepeatedValuesToolbarIndicator();
+        refreshRangeBoxCursor();
+    }
+
+    public void refreshRangeBoxCursor() {
+        rangeBox.refreshCursor();
     }
 
     public void insertRep(String value, String rep) {
