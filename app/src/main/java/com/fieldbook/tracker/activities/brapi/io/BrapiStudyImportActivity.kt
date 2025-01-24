@@ -103,8 +103,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private var selectedLevel: Int = -1
     private var selectedSort: Int = -1
-    private var selectedPrimary: Int = -1
-    private var selectedSecondary: Int = -1
 
     private var attributesTable: HashMap<String, Map<String, Map<String, String>>>? = null
 
@@ -293,8 +291,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private fun setDefaultAttributeIdentifiers() {
 
-        val attributes = getAttributeKeys()
-
         val levels = existingLevels()
 
         if (selectedLevel == -1) {
@@ -303,22 +299,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             } else {
                 0
             }
-        }
-
-        selectedPrimary = if (attributes.contains("Row")) {
-            attributes.indexOf("Row")
-        } else if (attributes.contains("Block")) {
-            attributes.indexOf("Block")
-        } else {
-            0
-        }
-
-        selectedSecondary = if (attributes.contains("Column")) {
-            attributes.indexOf("Column")
-        } else if (attributes.contains("Rep")) {
-            attributes.indexOf("Rep")
-        } else {
-            0
         }
     }
 
@@ -560,16 +540,27 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 }
 
                 val allAttributes = getAttributeKeys()
-                val primaryId = allAttributes[selectedPrimary]
-                val secondaryId = allAttributes[selectedSecondary]
                 val sortOrder = if (selectedSort == -1) "" else allAttributes[selectedSort]
 
                 studyDbIds.forEach { id ->
 
-                    studies.firstOrNull { it.studyDbId == id }?.let {
+                    try {
 
-                        saveStudy(it, level, primaryId, secondaryId, sortOrder)
+                        studies.firstOrNull { it.studyDbId == id }?.let {
 
+                            saveStudy(it, level, sortOrder)
+
+                        }
+
+                    } catch (e: Exception) {
+
+                        Log.e(TAG, "Failed to save study", e)
+
+                        runOnUiThread {
+
+                            Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
+
+                        }
                     }
                 }
 
@@ -583,8 +574,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private fun saveStudy(
         study: BrAPIStudy,
         level: BrapiObservationLevel,
-        primaryId: String,
-        secondaryId: String,
         sortId: String
     ) {
 
@@ -608,45 +597,34 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                     val attributes = studyAttributes.values.flatMap { it.keys }.distinct()
 
-                    if (listOf(primaryId, secondaryId, sortId).filter { it.isNotEmpty() }.all { it in attributes }) {
+                    details.attributes = attributes
 
-                        details.attributes = attributes
+                    val unitAttributes = ArrayList<List<String>>()
+                    units.forEach { unit ->
 
-                        val unitAttributes = ArrayList<List<String>>()
-                        units.forEach { unit ->
+                        val row = ArrayList<String>()
 
-                            val row = ArrayList<String>()
-
-                            attributes.forEach { attr ->
-                                row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
-                            }
-
-                            unitAttributes.add(row)
-
+                        attributes.forEach { attr ->
+                            row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
                         }
 
-                        details.values = mutableListOf()
-                        details.values.addAll(unitAttributes)
+                        unitAttributes.add(row)
 
-                        brapiService.saveStudyDetails(
-                            details,
-                            level,
-                            primaryId,
-                            secondaryId,
-                            sortId,
-                        )
-                    } else {
-
-                        runOnUiThread {
-
-                            Toast.makeText(this, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
-                            setResult(Activity.RESULT_CANCELED)
-                            finish()
-                        }
                     }
+
+                    details.values = mutableListOf()
+                    details.values.addAll(unitAttributes)
+
+                    //primary/secondary no longer required
+                    brapiService.saveStudyDetails(
+                        details,
+                        level,
+                        "",
+                        "",
+                        sortId,
+                    )
                 }
         }
-
     }
 
     private suspend fun fetchObservationLevels(programDbId: String) = coroutineScope {
