@@ -3,7 +3,7 @@ package com.fieldbook.tracker.views
 import android.app.Service
 import android.content.Context
 import android.content.SharedPreferences
-import android.database.sqlite.SQLiteException
+import android.database.Cursor
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
@@ -22,14 +22,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
-import com.google.firebase.crashlytics.CustomKeysAndValues
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import java.util.*
 
 class RangeBoxView : ConstraintLayout {
@@ -80,6 +77,8 @@ class RangeBoxView : ConstraintLayout {
     private var delay = 100
     private var count = 1
 
+    private var exportDataCursor: Cursor? = null
+
     init {
 
         val v = inflate(context, R.layout.view_range_box, this)
@@ -105,6 +104,9 @@ class RangeBoxView : ConstraintLayout {
         firstName = controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
         secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
         uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+
+        refreshCursor()
+
     }
 
     constructor(ctx: Context) : super(ctx)
@@ -631,13 +633,10 @@ class RangeBoxView : ConstraintLayout {
     }
 
     private fun moveToNextUncollectedObs(currentPos: Int, direction: Int, traits: ArrayList<TraitObject>): Int {
-        val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val study = controller.getDatabase().getFieldObject(studyId)
-        val cursor = controller.getDatabase().getExportTableDataShort(studyId, study.unique_id, traits)
 
         val traitNames = traits.map { it.name }
 
-        cursor?.use {
+        exportDataCursor?.use { cursor ->
             // Convert one-based range position to zero-based cursor position
             val zeroBasedPos = currentPos - 1
             cursor.moveToPosition(zeroBasedPos)
@@ -675,7 +674,6 @@ class RangeBoxView : ConstraintLayout {
                             return pos
                         }
                     }
-
                 }
             }
         }
@@ -715,5 +713,13 @@ class RangeBoxView : ConstraintLayout {
 
     fun clickRight() {
         rangeRight.performClick()
+    }
+
+    fun refreshCursor() {
+        exportDataCursor?.close()
+        val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+        val traits = controller.getDatabase().visibleTraitObjects
+        exportDataCursor = controller.getDatabase().getExportTableDataShort(studyId, uniqueName, traits)
     }
 }
