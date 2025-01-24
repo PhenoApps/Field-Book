@@ -14,6 +14,8 @@
     <string name="dialog_import">Importa</string>
     <string name="dialog_warning">Attenzione</string>
     <string name="dialog_save">Salva</string>
+    <string name="dialog_go">Vai</string>
+    <string name="dialog_sort_by">Ordina Per</string>
     <string name="dialog_delete">Cancella</string>
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
     <!-- Startup  -->
@@ -25,6 +27,7 @@
     <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_storage_export">L\'esportazione dei dati richiede l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_trait_features">La raccolta dei dati richiede l\'accesso ai file, al microfono e alla camera del dispositivo.</string>
+    <string name="permission_ask_bluetooth">Accetta i permessi bluetooth.</string>
     <!-- Config Activity  -->
     <string name="settings_fields">Campi</string>
     <string name="settings_traits">Caratteri</string>
@@ -230,6 +233,9 @@
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
     <!-- Location -->
     <string name="preferences_location_title">Posizione</string>
+    <string name="location_format_iso">ISO 6709</string>
+    <string name="location_format_geojson">GeoJSON</string>
+    <string name="pref_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_log_both">Ambo</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Suoni</string>
@@ -265,6 +271,34 @@
     <string name="brapi_choice_to_make_default_negative">Cancella</string>
     <string name="brapi_choice_to_make_default_positive">Salva</string>
     <!-- Community Servers -->
+    <string-array name="community_servers_names">
+        <item>CassavaBase</item>
+        <item>T3/Wheat</item>
+        <item>T3/Oat</item>
+        <item>T3/Barley</item>
+        <item>Server Di Test Predefinito</item>
+    </string-array>
+    <string-array name="community_servers_urls">
+        <item>https://www.cassavabase.org</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org</item>
+        <item>https://test-server.brapi.org</item>
+    </string-array>
+    <string-array name="community_servers_oidc_urls">
+        <item>https://www.cassavabase.org/.well-known/openid-configuration</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
+    </string-array>
+    <string-array name="community_servers_grant_types">
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+    </string-array>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Salva e autorizza</string>
     <string name="brapi_revoke_auth">Disconnettersi</string>
@@ -383,6 +417,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_traits_visibility_title">Visibilità del carettere</string>
     <string name="tutorial_traits_visibility_description">I caretteri possono essere disabilitati dalla raccolta selezionando la casella di controllo.</string>
     <string name="tutorial_main_datagrid_title">Griglia di dati</string>
+    <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="act_brapi_filter_import">Importa</string>
     <string name="act_brapi_filter_clear">Cancellare</string>
     <!-- base camera strings -->
