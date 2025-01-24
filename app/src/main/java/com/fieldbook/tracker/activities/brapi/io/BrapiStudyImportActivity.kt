@@ -187,7 +187,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     }
 
     enum class Tab {
-        LEVELS, PRIMARY_ORDER, SECONDARY_ORDER, SORT
+        LEVELS, SORT
     }
 
     private fun loadTabLayout(studyDbIds: List<String>) {
@@ -199,8 +199,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 when (tab?.position) {
                     Tab.LEVELS.ordinal -> setLevelListOptions()
                     Tab.SORT.ordinal -> setSortListOptions()
-                    Tab.PRIMARY_ORDER.ordinal -> setPrimaryOrderListOptions()
-                    Tab.SECONDARY_ORDER.ordinal -> setSecondaryOrderListOptions()
                 }
 
                 listView.visibility = View.VISIBLE
@@ -293,62 +291,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }
     }
 
-    private fun setPrimaryOrderListOptions() {
-
-        listView.visibility = View.VISIBLE
-
-        val attributes = getAttributeKeys()
-
-        listView.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_single_choice,
-            attributes
-        )
-
-        listView.setItemChecked(selectedPrimary, true)
-
-        listView.smoothScrollToPosition(selectedPrimary)
-
-        listView.setOnItemClickListener { _, _, position, _ ->
-
-            selectedPrimary = if (selectedPrimary == position) {
-
-                listView.setItemChecked(selectedPrimary, false)
-
-                -1
-
-            } else position
-        }
-    }
-
-    private fun setSecondaryOrderListOptions() {
-
-        listView.visibility = View.VISIBLE
-
-        val attributes = getAttributeKeys()
-
-        listView.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_single_choice,
-            attributes
-        )
-
-        listView.setItemChecked(selectedSecondary, true)
-
-        listView.smoothScrollToPosition(selectedSecondary)
-
-        listView.setOnItemClickListener { _, _, position, _ ->
-
-            selectedSecondary = if (selectedSecondary == position) {
-
-                listView.setItemChecked(selectedSecondary, false)
-
-                -1
-
-            } else position
-        }
-    }
-
     private fun setDefaultAttributeIdentifiers() {
 
         val attributes = getAttributeKeys()
@@ -363,24 +305,20 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             }
         }
 
-        if (selectedPrimary == -1) {
-            selectedPrimary = if (attributes.contains("Row")) {
-                attributes.indexOf("Row")
-            } else if (attributes.contains("Block")) {
-                attributes.indexOf("Block")
-            } else {
-                0
-            }
+        selectedPrimary = if (attributes.contains("Row")) {
+            attributes.indexOf("Row")
+        } else if (attributes.contains("Block")) {
+            attributes.indexOf("Block")
+        } else {
+            0
         }
 
-        if (selectedSecondary == -1) {
-            selectedSecondary = if (attributes.contains("Column")) {
-                attributes.indexOf("Column")
-            } else if (attributes.contains("Rep")) {
-                attributes.indexOf("Rep")
-            } else {
-                0
-            }
+        selectedSecondary = if (attributes.contains("Column")) {
+            attributes.indexOf("Column")
+        } else if (attributes.contains("Rep")) {
+            attributes.indexOf("Rep")
+        } else {
+            0
         }
     }
 
