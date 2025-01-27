@@ -132,14 +132,13 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
     /**
      * Runs the data grid loading.
      */
-    private fun initialize(prefixTrait: String? = null,
-                           plotId: Int? = null,
+    private fun initialize(plotId: Int? = null,
                            trait: Int? = null) {
 
         //if something goes wrong finish the activity
         try {
 
-            loadGridData(prefixTrait, plotId, trait)
+            loadGridData(plotId, trait)
 
         } catch (e: Exception) {
 
@@ -167,16 +166,21 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
             R.id.menu_data_grid_action_header_view -> {
 
                 //get all available obs. property columns
-                val prefixTraits = database.rangeColumns
+                val columns = database.rangeColumns
 
-                if (prefixTraits.isNotEmpty()) {
+                if (columns.isNotEmpty()) {
+                    val rowHeader = getCurrentRowHeader()
+                    val rowHeaderIndex = columns.indexOf(rowHeader).takeIf { it >= 0 } ?: 0
 
                     //show a dialog to choose a prefix trait to be displayed
                     AlertDialog.Builder(this, R.style.AppAlertDialog)
                         .setTitle(R.string.dialog_data_grid_header_picker_title)
-                        .setSingleChoiceItems(prefixTraits, 0) { dialog, which ->
+                        .setSingleChoiceItems(columns, rowHeaderIndex) { dialog, which ->
 
-                            initialize(prefixTraits[which])
+                            // Update the preference to the determined row header
+                            preferences.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, columns[which]).apply()
+
+                            initialize()
 
                             dialog.dismiss()
 
@@ -192,29 +196,17 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
      * Uses the getExportTableData query to create a spreadsheet of values.
      * Columns returned are plot_id followed by all traits.
      */
-    private fun loadGridData(prefixTrait: String? = null,
-                             plotId: Int? = null,
+    private fun loadGridData(plotId: Int? = null,
                              trait: Int? = null) {
 
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-
-        val study = database.getFieldObject(studyId)
 
         val showLabel = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") == "value"
 
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
-        //if row header was not chosen, then use the preference unique name
-        var rowHeader =
-            prefixTrait ?: preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader)
-            ?: ""
-
-        if (rowHeader !in database.rangeColumnNames) {
-            rowHeader = uniqueHeader
-        }
-
-        //if rowHeader was updated, update the preference
-        preferences.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, rowHeader).apply()
+        val rowHeader = getCurrentRowHeader()
+        val rowHeaderIndex = database.rangeColumns.indexOf(rowHeader).takeIf { it >= 0 } ?: 0
 
         if (rowHeader.isNotBlank()) {
 
@@ -262,8 +254,6 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                                     e.printStackTrace()
                                 }
                             }
-
-                            val rowHeaderIndex = columns.indexOf(rowHeader)
 
                             //unique name column is always the first column
                             val uniqueIndex = columns.indexOf(uniqueHeader)
@@ -383,6 +373,23 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Determines the current row header.
+     * @return The row header as a string.
+     */
+    private fun getCurrentRowHeader(): String {
+        val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+        val rowHeader = preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
+
+        return if (rowHeader in database.rangeColumnNames) {
+            Log.d("DataGridActivity", "Using saved row header from preferences: $rowHeader")
+            rowHeader
+        } else {
+            Log.d("DataGridActivity", "Saved row header invalid. Falling back to unique header: $uniqueHeader")
+            uniqueHeader
         }
     }
 
