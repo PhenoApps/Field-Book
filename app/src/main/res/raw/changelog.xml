@@ -1,5 +1,9 @@
 <changelog>
 
+    <release date="2025-01-24" versionCode="60006" versionName="v6.0.6">
+        <bugfix>Numerous bug fixes and enhancements </bugfix>
+    </release>
+
     <release date="2025-01-22" versionCode="60005" versionName="v6.0.5">
         <new>Search box added to field list</new>
         <info>BrAPI export no longer crashes when authentication token is expired</info>

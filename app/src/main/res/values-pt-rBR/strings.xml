@@ -1161,6 +1161,9 @@
     <string name="pref_geonav_distance_threshold_summary">GeoNav automaticamente para quando a distância de todos os lotes exceder esse valor em quilômetros.</string>
     <string name="pref_geonav_distance_threshold_title">Verificação de Proximidade</string>
     <string name="activity_collect_proximity_warning">GeoNav Parando, fora da proximidade das coordenadas</string>
+    <string name="failed_to_save_study">Falha ao salvar estudo</string>
     <string name="no_suitable_file_manager_was_found">Nenhum Gerenciador de Arquivos adequado foi encontrado.</string>
     <string name="trait_error_invalid_multicat_value">Dados categóricos inválidos.</string>
+    <string name="dialog_crash_report_title">Falha ao carregar dados</string>
+    <string name="dialog_crash_report_message">Pressione OK para enviar um relatório de diagnóstico anônimo para ajudar a melhorar o aplicativo.</string>
 </resources>
