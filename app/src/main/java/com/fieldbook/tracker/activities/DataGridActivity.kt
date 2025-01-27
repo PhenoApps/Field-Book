@@ -272,7 +272,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                                 val id = rowData[uniqueIndex] ?: ""
 
-                                val header = if (rowHeaderIndex > -1) columns[rowHeaderIndex] else ""
+                                val header = if (rowHeaderIndex > -1) rowData[rowHeaderIndex] ?: "" else ""
 
                                 val dataList = arrayListOf<CellData>()
 
