@@ -79,6 +79,11 @@ button. Traits can be imported individually or in groups.
 Field Book will report **Selected traits saved successfully**, and return
 to the traits screen with the imported traits selected.
 
+Sync
+----
+
+**Sync** connects to the server specified in <a href="settings-brapi.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/server-network.png" width="20px"></a> [Brapi settings](settings-brapi.md), updating the trial with new data that has been added from other sources since the last sync or import. This option will not work for trials imported from a file.
+
 Export data
 -----------
 

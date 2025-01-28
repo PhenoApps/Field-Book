@@ -21,9 +21,9 @@ trait-gopro
  : 
 
  : {.toctree maxdepth="2" caption="Settings"}
-settings settings-general settings-profile settings-appearance
-settings-behavior settings-geonav settings-sounds settings-brapi
-settings-database settings-beta
+settings settings-profile settings-features settings-appearance settings-behavior
+settings-location settings-sounds settings-brapi
+settings-system settings-storage settings-experimental
  : 
 
  : {.toctree maxdepth="2" caption="Extra"}

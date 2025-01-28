@@ -10,7 +10,7 @@ requires field entries to have high-precision location data collected
 via the <a href="trait-gnss.md"><img style="vertical-align: middle;" src="_static/icons/formats/satellite-variant.png" width="20px"></a> [GNSS Trait](trait-gnss.md) or included in the field
 import file. Imported coordinates must be in `Lat;Long` format in a
 single `geo_coordinates` column. Refer to the
-`rtk_sample.csv` file in the `field_import` directory as an example.
+`rtk_sample.csv` file in the `field_import` folder as an example.
 
 To use GeoNav, navigate to the
 <a href="settings-geonav.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/map-search.png" width="20px"></a> [Geonav Settings](settings-geonav.md) and enable GeoNav. Turn

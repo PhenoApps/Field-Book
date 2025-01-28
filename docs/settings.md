@@ -18,7 +18,7 @@ Field Book settings are grouped into eight subcategories:
 -  <a href="settings-sounds.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/volume-high.png" width="20px"></a> [Sound Settings](settings-sound.md) toggle sound
     notifications for collection activities.
 -   <a href="settings-brapi.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/server-network.png" width="20px"></a> [Brapi settings](settings-brapi.md) connect to an external data source using the Breeding API (BrAPI).
--   <a href="settings-database.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/database.png" width="20px"></a> [Database settings](settings-database.md) allow the database to be imported, exported, or reset.
+-   <a href="settings-storage.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/database.png" width="20px"></a> [Storage settings](settings-storage.md) allow the database to be imported, exported, or reset.
 
 The <img ref="search" style="vertical-align: middle;" src="_static/icons/collect/magnify.png" width="20px"> **Search Bar** at the top of the screen can be used to quickly find and navigate to a specific setting.
 

@@ -51,14 +51,14 @@ date and the name of the field.
 
 After clicking save, you will see Field Book app citation information
 and an option to share the exported file with other apps or email. The
-exported file is stored in the `field_export` directory.
+exported file is stored in the `field_export` folder.
 
 #### Other Customizations
 
 **Bundle media data** produces a zipped file that contains the exported
 data along with images and audio files that have also been collected.
 
-**Overwrite previous export** moves old files to `archive` directory.
+**Overwrite previous export** moves old files to `archive` folder.
 
 The default export location can be modified in
-<a href="settings-general.md"><img style="vertical-align: middle;" src="_static/icons/home/cog.png" width="20px"></a> [General Settings](settings-general.md).
+<a href="settings-system.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/cog-outline.png" width="20px"></a> [System Settings](settings-system.md).
