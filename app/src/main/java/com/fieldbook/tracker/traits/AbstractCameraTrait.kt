@@ -39,6 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import org.threeten.bp.OffsetDateTime
 import java.io.File
@@ -162,6 +163,16 @@ abstract class AbstractCameraTrait :
                 shutterButton?.performClick()
             }
         }
+    }
+
+    protected fun isCropRequired() = (currentTrait?.cropImage ?: false)
+
+    protected fun isCropExist() = (preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait?.id?.toInt() ?: -1), "") ?: "").isNotEmpty()
+
+    protected fun requestCropDefinition(traitId: String, imageUri: Uri) {
+
+        (context as CollectActivity).showCropDialog(traitId, imageUri)
+
     }
 
     protected fun saveJpegToStorage(
@@ -318,7 +329,7 @@ abstract class AbstractCameraTrait :
 
                                 writeExif(file, studyId, saveTime)
 
-                                notifyItemInserted()
+                                notifyItemInserted(file.uri)
                             }
                         }
 
@@ -338,7 +349,7 @@ abstract class AbstractCameraTrait :
 
                                 writeExif(file, studyId, saveTime)
 
-                                notifyItemInserted()
+                                notifyItemInserted(file.uri)
 
                             } else {
 
@@ -352,15 +363,50 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    private fun notifyItemInserted() {
+    private fun notifyItemInserted(uri: Uri) {
 
         ui.launch {
 
-            loadAdapterItems()
+            if (isCropRequired()) {
 
-            // update trait status as observation was saved
-            (context as CollectActivity).updateCurrentTraitStatus(true)
+                if (isCropExist()) {
+
+                    //get bitmap from uri, create new bitmap from preference roi and update uri to database
+                    val cropRect = preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait.id.toInt()), "") ?: ""
+
+                    withContext(Dispatchers.IO) {
+
+                        //crop bmp
+                        val croppedBmp = BitmapLoader.cropBitmap(context, uri, cropRect)
+
+                        //save cropped bmp to uri
+                        context.contentResolver.openOutputStream(uri)?.use { output ->
+                            croppedBmp.compress(Bitmap.CompressFormat.JPEG, 80, output)
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            loadItems()
+                        }
+                    }
+
+                } else {
+
+                    requestCropDefinition(currentTrait.id, uri)
+                }
+
+            } else {
+
+                loadItems()
+            }
         }
+    }
+
+    private fun loadItems() {
+
+        loadAdapterItems()
+
+        // update trait status as observation was saved
+        (context as CollectActivity).updateCurrentTraitStatus(true)
     }
 
     private fun getSelectedImage(): ImageAdapter.Model? {

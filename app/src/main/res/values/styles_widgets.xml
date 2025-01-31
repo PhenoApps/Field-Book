@@ -48,6 +48,12 @@
         <item name="android:textSize">?attr/fb_body_text_size</item>
     </style>
 
+    <style name="CropEditTextStyle" parent="EditTextStyle">
+        <item name="editTextColor">?attr/fb_color_text_dark</item>
+        <item name="backgroundTint">?attr/fb_color_primary_dark</item>
+        <item name="android:textSize">?attr/fb_body_text_size</item>
+    </style>
+
     <!-- generic text view styling -->
     <style name="TextViewStyle" parent="Widget.AppCompat.TextView">
         <item name="android:textSize">?attr/fb_body_text_size</item>
