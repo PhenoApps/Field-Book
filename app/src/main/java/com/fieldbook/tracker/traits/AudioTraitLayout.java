@@ -3,7 +3,6 @@ package com.fieldbook.tracker.traits;
 import android.app.Activity;
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.View;
@@ -23,8 +22,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 public class AudioTraitLayout extends BaseTraitLayout {
 
     static public String type = "audio";
-
-    private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
     private Uri recordingLocation;
     private FloatingActionButton controlButton;
@@ -45,6 +42,12 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     @Override
     public void setNaTraitsText() {
+        // delete previously saved audio if it exists
+        deleteRecording();
+        recordingLocation = null;
+        mediaPlayer = null;
+        refreshButtonState();
+
         audioRecordingText.setText("NA");
     }
 
@@ -122,10 +125,10 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     private void refreshButtonState() {
         ObservationModel model = getCurrentObservation();
-        if (model != null && !model.getValue().isEmpty()) {
+        if (model != null && !model.getValue().isEmpty() && !model.getValue().equals("NA")) {
             buttonState = ButtonState.WAITING_FOR_PLAYBACK;
             controlButton.setImageResource(buttonState.getImageId());
-        } else {
+        } else { // for NA, change the button state to WAITING_FOR_RECORDING
             buttonState = ButtonState.WAITING_FOR_RECORDING;
             controlButton.setImageResource(buttonState.getImageId());
             audioRecordingText.setText("");
@@ -140,7 +143,6 @@ public class AudioTraitLayout extends BaseTraitLayout {
         super.deleteTraitListener();
         recordingLocation = null;
         mediaPlayer = null;
-        mediaRecorder = null;
         refreshButtonState();
     }
 
@@ -274,9 +276,18 @@ public class AudioTraitLayout extends BaseTraitLayout {
         private void stopRecording() {
             try {
                 fieldAudioHelper.stopRecording();
-                updateObservation(getCurrentTrait(), fieldAudioHelper.getRecordingLocation().toString());
-                audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
-                getCollectInputView().setText(fieldAudioHelper.getRecordingLocation().toString());
+                Uri audioUri = fieldAudioHelper.getRecordingLocation();
+                if (audioUri != null) {
+                    updateObservation(getCurrentTrait(), audioUri.toString());
+                    audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
+                    getCollectInputView().setText(audioUri.toString());
+
+                    // update recordingLocation
+                    DocumentFile file = DocumentFile.fromSingleUri(getContext(), audioUri);
+                    if (file != null && file.exists()) {
+                        AudioTraitLayout.this.recordingLocation = file.getUri();
+                    }
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
