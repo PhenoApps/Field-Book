@@ -20,7 +20,7 @@
 
         <ImageView
             android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
+            android:scaleType="fitCenter"
             tools:src="@raw/chip"
             android:id="@+id/list_item_image_iv"
             android:layout_width="match_parent"

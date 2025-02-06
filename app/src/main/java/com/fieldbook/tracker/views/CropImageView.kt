@@ -6,6 +6,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.RectF
 import android.net.Uri
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -45,6 +46,31 @@ class CropImageView : ConstraintLayout {
     companion object {
         const val TAG = "CropImageView"
         const val MIN_DISTANCE_BETWEEN_HANDLES = 32
+
+        fun parseRectCoordinates(rectCoordinates: String): RectF? {
+
+            if (rectCoordinates.isNotBlank()) {
+                val rect = RectF()
+                val values = rectCoordinates.split(",")
+                if (values.size == 4) {
+                    try {
+                        rect.left = values[0].toFloat()
+                        rect.top = values[1].toFloat()
+                        rect.right = values[2].toFloat()
+                        rect.bottom = values[3].toFloat()
+
+                        return rect
+
+                    } catch (e: Exception) {
+
+                        e.printStackTrace()
+
+                    }
+                }
+            }
+
+            return null
+        }
     }
 
     interface CropImageHandler {

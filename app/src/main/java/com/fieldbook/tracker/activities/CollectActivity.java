@@ -2902,6 +2902,7 @@ public class CollectActivity extends ThemedActivity
             Intent intent = new Intent(this, CropImageActivity.class);
             intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(traitId));
             intent.putExtra(CropImageFragment.EXTRA_IMAGE_URI, uri.toString());
+            cameraXFacade.unbind();
             startActivity(intent);
         } catch (Exception e) {
             e.printStackTrace();
@@ -2912,6 +2913,7 @@ public class CollectActivity extends ThemedActivity
         try {
             Intent intent = new Intent(this, CameraActivity.class);
             intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
+            cameraXFacade.unbind();
             startActivityForResult(intent, REQUEST_CROP_IMAGE_CODE);
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.activities
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Size
 import android.widget.ImageButton
 import android.widget.TextView
@@ -31,15 +33,20 @@ class CameraActivity : ThemedActivity() {
 
     private var supportedResolutions: List<Size> = listOf()
 
+    private var traitId: String? = null
+
     companion object {
 
         val TAG = CameraActivity::class.simpleName
         const val EXTRA_TITLE = "title"
-
+        const val EXTRA_TRAIT_ID = "trait_id"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //get trait id from extras
+        traitId = intent.getStringExtra(EXTRA_TRAIT_ID)
 
         setContentView(R.layout.activity_camera)
 
@@ -115,7 +122,9 @@ class CameraActivity : ThemedActivity() {
             val resolution = getSupportedResolutionByPreferences()
 
             cameraXFacade.bindPreview(
-                previewView, resolution
+                previewView, resolution,
+                traitId,
+                Handler(Looper.getMainLooper())
             ) { camera, executor, capture ->
 
                 setupCaptureUi(camera, executor, capture)
@@ -139,8 +148,10 @@ class CameraActivity : ThemedActivity() {
                     object : ImageCapture.OnImageSavedCallback {
                         override fun onError(error: ImageCaptureException) {}
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                            setResult(RESULT_OK)
-                            finish()
+                            runOnUiThread {
+                                setResult(RESULT_OK)
+                                finish()
+                            }
                         }
                     })
             }
