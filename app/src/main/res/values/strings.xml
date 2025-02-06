@@ -881,6 +881,10 @@
     <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
     <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
     <string name="field_audio_zip_error">Error creating zip file</string>
+    <string name="trait_audio_placeholder_filename">Recorded Audio File</string>
+    <string name="trait_audio_timestamp">Timestamp: </string>
+    <string name="trait_audio_duration">Duration: </string>
+    <string name="trait_audio_file_size">File Size: </string>
 
     <string name="pref_beta_enable_individual_field_page_title">Enable Individual Field Pages</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selecting a field in the fields list opens a detail page</string>

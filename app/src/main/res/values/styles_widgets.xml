@@ -125,6 +125,15 @@
         <item name="android:backgroundTint">?fb_trait_button_background_tint</item>
     </style>
 
+    <style name="MaterialCardViewStyle" parent="Widget.MaterialComponents.CardView">
+        <item name="cardElevation">2dp</item>
+        <item name="cardCornerRadius">8dp</item>
+    </style>
+
+    <style name="MaterialCardViewStyle.TraitInfo">
+        <item name="android:backgroundTint">?fb_trait_button_background_tint</item>
+    </style>
+
     <!-- Preference Search bar card style, inherits android:widget style -->
     <style name="CardViewStyle" parent="Base.CardView" />
 
