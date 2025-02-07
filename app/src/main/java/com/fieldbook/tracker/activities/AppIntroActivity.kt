@@ -199,8 +199,12 @@ class AppIntroActivity : AppIntro() {
                 },
 
                 {
-                    val root = getRoot(applicationContext)
-                    return@RequiredSetupModel (root != null && root.exists())
+                    try {
+                        val root = getRoot(applicationContext)
+                        return@RequiredSetupModel (root != null && root.exists())
+                    } catch (e: NullPointerException) {
+                        return@RequiredSetupModel false
+                    }
                 },
 
                 applicationContext.getString(R.string.app_intro_storage_warning)
