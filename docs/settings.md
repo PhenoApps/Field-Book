@@ -2,7 +2,7 @@ Settings
 ========
 
 <figure align="center" class="image">
-  <img src="_static/images/settings/settings_framed.png" width="400px"> 
+  <img src="_static/images/settings/settings_framed.png" width="350px"> 
   <figcaption><i>Settings screen layout</i></figcaption> 
 </figure>
 

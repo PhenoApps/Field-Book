@@ -7,71 +7,26 @@
   <meta name="description" content="Field Book Documentation">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css">
-  <link rel="stylesheet" href="/_static/styles.css">
-  
 </head>
 <body>
   <div id="app"></div>
   <script>
     window.$docsify = {
-      alias: {
-        '/v6/.*_sidebar.md': 'https://raw.githubusercontent.com/RifeLab/Field-Book-Sandbox/refs/heads/main/docs/_sidebar.md',
-        '/v6/': 'https://raw.githubusercontent.com/RifeLab/Field-Book-Sandbox/refs/heads/main/docs/README.md',
-        '/v6/(.*)': 'https://raw.githubusercontent.com/RifeLab/Field-Book-Sandbox/refs/heads/main/docs/$1',
-
-        '/v5/.*_sidebar.md': 'https://raw.githubusercontent.com/RifeLab/Field-Book-Sandbox/refs/tags/6.0.0/docs/_sidebar.md',
-        '/v5/': 'https://raw.githubusercontent.com/RifeLab/Field-Book-Sandbox/refs/tags/6.0.0/docs/README.md',
-        '/v5/(.*)': 'https://raw.githubusercontent.com/RifeLab/Field-Book-Sandbox/refs/tags/6.0.0/docs/$1',
-
-        '/.*/_sidebar.md': 'https://raw.githubusercontent.com/RifeLab/Field-Book-Sandbox/refs/heads/main/docs/_sidebar.md',
-        '/': 'https://raw.githubusercontent.com/RifeLab/Field-Book-Sandbox/refs/heads/main/docs/README.md',
-        '/(.*)': 'https://raw.githubusercontent.com/RifeLab/Field-Book-Sandbox/refs/heads/main/docs/$1'
-      },
-      name:
-        '<div class="sidebar-logo">' +
-          '<img src="_static/icons/icon.png" height="32px" alt="Field Book logo">' +
-          '<span class="sidebar-logo-title">Field Book</span>' +
-        "</div>" +
-        '<select id="version-selector" name="version" class="sidebar-version-select">' +
-          '<option value="v6">v6</option>' +
-          '<option value="v5">v5</option>' +
-        "</select>",
-      plugins: [
-        function (hook, vm) {
-          hook.mounted(function () {
-            Docsify.dom.find("#version-selector", function (e) {
-              // I'm using the "hash" router mode
-              window.location.hash = e.target.value;
-            });
-          });
-        },
-      ],
-      repo: 'https://github.com/RifeLab/Field-Book-Sandbox',
+      name: 'Field Book Documentation',
+      repo: 'https://github.com/PhenoApps/Field-Book',
       loadSidebar: true,
       subMaxLevel: 2,
+      sidebarDisplayLevel: 1,
       homepage: 'README.md',
       search: {
-        hideOtherSidebarContent: true,
-        namespaceTags: {
-          "v6": ["v6"],
-          "v5": ["v5"]
-        }
-      },
-      namespaces: [
-        {
-          id: "version",
-          values: ["v6", "v5"],
-          default: "v6",
-          optional: true,
-          selector: "#version-selector"
-        }
-      ],
+        namespace: 'default',
+      }
     }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
-  <script src="//unpkg.com/docsify-namespaced@0.1.1/dist/docsify-namespaced.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
   <script src="https://unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
 </body>
 </html>

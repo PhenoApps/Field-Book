@@ -8,7 +8,7 @@ Collected data is exported to `.csv` files. The Export dialog allows the
 user to customize how collected data is exported.
 
 <figure align="center" class="image">
-  <img src="_static/images/export/export_framed.png" width="400px"> 
+  <img src="_static/images/export/export_framed.png" width="350px"> 
   <figcaption><i>Export dialog details</i></figcaption> 
 </figure>
 

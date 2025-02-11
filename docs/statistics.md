@@ -14,10 +14,10 @@ The Statistics screen provides helpful information about Field Book usage.
 Statistics Cards
 ----------------
 
-The default statistics cards shows total counts across all data in the app. The counts include number of fields with data collectes, number of entries with data collected, number of observations, hours spent collecting data, number of people who collected data, number of photos taken, as well as the date with the largest number of observations (busiest day) and the entry with the most observations (most observed).
+The default statistics cards shows total counts across all data in the app. The counts include number of fields with data collected, number of entries with data collected, number of observations, hours spent collecting data, number of people who collected data, number of photos taken, as well as the date with the largest number of observations (busiest day) and the entry with the most observations (most observed).
 
 <figure align="center" class="image">
-  <img src="_static/images/statistics/statistics_joined.png" width="700px"> 
+  <img src="_static/images/statistics/statistics_joined.png" width="1100px"> 
   <figcaption><i>The total, year, and month tabs</i></figcaption> 
 </figure>
 
@@ -31,6 +31,6 @@ The heatmap view shows your collection activy overlayed on a calendar. Each circ
 Use the up and down arrows in the toolbar to scroll through the calendar. Use the calendar icon to set a custom range of dates. Or use the number icon to switch the calendar from showing dates to showing numbers of observations.
 
 <figure align="center" class="image">
-  <img src="_static/images/statistics/statistics_heatmap_joined.png" width="1100px"> 
+  <img src="_static/images/statistics/statistics_heatmap_joined.png" width="700px"> 
   <figcaption><i>The heatmap view, left with dates, right with obs numbers</i></figcaption> 
 </figure>

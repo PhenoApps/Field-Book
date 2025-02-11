@@ -15,7 +15,7 @@ The large black arrows are used to navigate between entries. The progress bar ab
 Data is entered in the bottom area of the screen using a layout determined by the current trait. Entered values turn from black to red once they have been saved to Field Book's internal database.
 
 <figure align="center" class="image">
-  <img src="_static/images/collect/collect_framed.png" width="400px"> 
+  <img src="_static/images/collect/collect_framed.png" width="350px"> 
   <figcaption><i>Data collection screen</i></figcaption> 
 </figure>
 
@@ -90,7 +90,7 @@ that are currently active. Pressing the current trait will show a
 dialog of all currently active traits, select a different trait to jump to it.
 
 <figure align="center" class="image">
-  <img src="_static/images/collect/collect_trait_menu_framed.png" width="400px"> 
+  <img src="_static/images/collect/collect_trait_menu_framed.png" width="350px"> 
   <figcaption><i>Pressing the active trait to see the trait
 dialog</i></figcaption> 
 </figure>

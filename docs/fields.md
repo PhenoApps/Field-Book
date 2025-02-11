@@ -32,7 +32,7 @@ optional, but can be included and viewed in the InfoBars or in the
 summary dialog on the collect screen.
 
 <figure align="center" class="image">
-  <img src="_static/images/fields/fields_framed.png" width="400px"> 
+  <img src="_static/images/fields/fields_framed.png" width="350px"> 
   <figcaption><i>The Fields screen layout with sample fields loaded</i></figcaption> 
 </figure>
 
@@ -120,14 +120,14 @@ To use your location to set the active field, press the <img ref="add" style="ve
 To reorder or sort the fields, press the <img ref="add" style="vertical-align: middle;" src="_static/icons/fields/sort.png" width="20px"> icon in the toolbar. Then choose which field attribute should be used to sort the list.
 
 <figure align="center" class="image">
-  <img src="_static/images/fields/fields_sort_framed.png" width="400px"> 
+  <img src="_static/images/fields/fields_sort_framed.png" width="350px"> 
   <figcaption><i>Field list sort options</i></figcaption> 
 </figure>
 
 For batch operations, long press one or more field items. This opens the action menu. Use the action menu icons to select all, export selected fields, or delete selected fields.
 
 <figure align="center" class="image">
-  <img src="_static/images/fields/fields_delete_framed.png" width="400px"> 
+  <img src="_static/images/fields/fields_delete_framed.png" width="350px"> 
   <figcaption><i>Delete fields confirmation</i></figcaption> 
 </figure>
 
@@ -143,7 +143,7 @@ Field details
 Pressing a field item in the fields list opens a detail view for the field.
 
 <figure align="center" class="image">
-  <img src="_static/images/fields/field_detail_framed.png" width="400px"> 
+  <img src="_static/images/fields/field_detail_framed.png" width="350px"> 
   <figcaption><i>Field detail view</i></figcaption> 
 </figure>
 

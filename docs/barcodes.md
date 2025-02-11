@@ -21,7 +21,7 @@ accurately capture height without having to hold both the height stick
 and the device.
 
 <figure align="center" class="image">
-  <img src="_static/images/barcodes/barcodes_plant_height.png" width="400px"> 
+  <img src="_static/images/barcodes/barcodes_plant_height.png" width="350px"> 
   <figcaption><i>Plant height measurement via barcoded height
 stick</i></figcaption> 
 </figure>
