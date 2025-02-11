@@ -166,6 +166,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
         recordingLocation = null;
         mediaPlayer = null;
         refreshButtonState();
+        hideAudioInfoCard();
     }
 
     // Delete recording
@@ -175,7 +176,6 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
             if (file != null && file.exists()) {
                 file.delete();
-                hideAudioInfoCard();
             }
         }
     }
