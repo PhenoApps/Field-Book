@@ -38,6 +38,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.brapi.client.v2.JSON
 import org.brapi.client.v2.model.queryParams.germplasm.GermplasmQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
@@ -688,7 +689,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.traits = observationVariables[study.studyDbId]?.toList()
                         ?.map { it.toTraitObject(this@BrapiStudyImportActivity) } ?: listOf()
 
-                    val attributes = studyAttributes.values.flatMap { it.keys }.distinct()
+                    val geoCoordinateColumnName = "geo_coordinates"
+
+                    val attributes = (studyAttributes.values.flatMap { it.keys } + geoCoordinateColumnName).distinct()
 
                     if (listOf(primaryId, secondaryId, sortId).filter { it.isNotEmpty() }.all { it in attributes }) {
 
@@ -700,7 +703,20 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                             val row = ArrayList<String>()
 
                             attributes.forEach { attr ->
-                                row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
+                                if (attr != geoCoordinateColumnName) {
+                                    row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
+                                }
+                            }
+
+                            //add geo json as json string
+                            if (geoCoordinateColumnName in attributes) {
+                                unit.observationUnitPosition?.geoCoordinates?.let { coordString ->
+                                    try {
+                                        row.add(JSON().serialize(coordString))
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "Failed to serialize geo coordinates", e)
+                                    }
+                                }
                             }
 
                             unitAttributes.add(row)
