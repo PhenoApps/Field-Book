@@ -184,13 +184,14 @@ public class DateTraitLayout extends BaseTraitLayout {
                 e.printStackTrace();
             }
 
+            String previewText = datePreviewText.getText().toString();
+            getCollectInputView().setText(previewText);
+
             if (getPrefs().getBoolean(GeneralKeys.USE_DAY_OF_YEAR, false)) {
                 updateObservation(getCurrentTrait(), String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
             } else {
                 updateObservation(getCurrentTrait(), dateFormat.format(calendar.getTime()));
             }
-            String previewText = datePreviewText.getText().toString();
-            getCollectInputView().setText(previewText);
 
             isBlocked = false;
         });
