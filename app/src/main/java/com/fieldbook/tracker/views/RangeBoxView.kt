@@ -34,6 +34,8 @@ class RangeBoxView : ConstraintLayout {
 
     companion object {
         const val TAG = "RangeBoxView"
+        //truncate to three characters plus the colon
+        const val TRUNCATE_LENGTH = 3 + 1
     }
 
     private var controller: CollectRangeController
@@ -179,7 +181,8 @@ class RangeBoxView : ConstraintLayout {
             plotEt.isCursorVisible = true
             false
         }
-        setName(10)
+
+        setName()
 
         val attributeChooserDialog = AttributeChooserDialog(showTraits = false, showOther = false)
 
@@ -189,7 +192,7 @@ class RangeBoxView : ConstraintLayout {
                 override fun onAttributeSelected(label: String) {
                     //update preference primary name
                     controller.getPreferences().edit().putString(GeneralKeys.PRIMARY_NAME, label).apply()
-                    rangeName.setText(label)
+                    setName()
                     refresh()
                 }
             })
@@ -205,7 +208,7 @@ class RangeBoxView : ConstraintLayout {
                 override fun onAttributeSelected(label: String) {
                     //update preference primary name
                     controller.getPreferences().edit().putString(GeneralKeys.SECONDARY_NAME, label).apply()
-                    plotName.setText(label)
+                    setName()
                     refresh()
                 }
             })
@@ -439,7 +442,7 @@ class RangeBoxView : ConstraintLayout {
 
     fun reload() {
         switchVisibility(controller.getPreferences().getBoolean(GeneralKeys.QUICK_GOTO, false))
-        setName(8)
+        setName()
         paging = 1
         setAllRangeID()
         if (rangeID.isNotEmpty()) {
@@ -513,7 +516,7 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
-    fun setName(maxLen: Int) {
+    fun setName() {
         val primaryName = controller.getPreferences().getString(
             GeneralKeys.PRIMARY_NAME,
             context.getString(R.string.search_results_dialog_range)
@@ -522,8 +525,8 @@ class RangeBoxView : ConstraintLayout {
             GeneralKeys.SECONDARY_NAME,
             context.getString(R.string.search_results_dialog_plot)
         ) + ":"
-        rangeName.text = truncate(primaryName, maxLen)
-        plotName.text = truncate(secondaryName, maxLen)
+        rangeName.text = truncate(primaryName, TRUNCATE_LENGTH)
+        plotName.text = truncate(secondaryName, TRUNCATE_LENGTH)
     }
 
     fun setAllRangeID() {

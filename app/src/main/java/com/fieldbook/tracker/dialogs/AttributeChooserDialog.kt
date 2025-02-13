@@ -26,9 +26,23 @@ open class AttributeChooserDialog(
     private val showTraits: Boolean = true,
     private val showOther: Boolean = true
 ) : DialogFragment(), AttributeAdapter.AttributeAdapterController {
+
     companion object {
         const val TAG = "AttributeChooserDialog"
+
+        private const val ARG_TITLE = "title"
+
+        /** Factory method to create a new dialog with an infoBarPosition argument. */
+        fun newInstance(titleResId: Int): AttributeChooserDialog {
+            val args = Bundle().apply {
+                putInt(ARG_TITLE, titleResId)
+            }
+            return AttributeChooserDialog().apply {
+                arguments = args
+            }
+        }
     }
+
     interface OnAttributeSelectedListener {
         fun onAttributeSelected(label: String)
     }
@@ -46,6 +60,11 @@ open class AttributeChooserDialog(
         val inflater = requireActivity().layoutInflater
         val view = inflater.inflate(R.layout.dialog_collect_att_chooser, null)
 
+        var titleResId = arguments?.getInt(ARG_TITLE) ?: R.string.dialog_att_chooser_title_default
+        if (titleResId == 0) titleResId = R.string.dialog_att_chooser_title_default
+
+        val dialogTitle = context?.getString(titleResId)
+
         // Initialize UI elements
         tabLayout = view.findViewById(R.id.dialog_collect_att_chooser_tl)
         recyclerView = view.findViewById(R.id.dialog_collect_att_chooser_lv)
@@ -58,11 +77,14 @@ open class AttributeChooserDialog(
         tabLayout.getTabAt(1)?.view?.visibility = if (showTraits) TabLayout.VISIBLE else TabLayout.GONE
         tabLayout.getTabAt(2)?.view?.visibility = if (showOther) TabLayout.VISIBLE else TabLayout.GONE
 
-        val dialog = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
+        val builder = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
             .setView(view)
             .setNegativeButton(android.R.string.cancel, null)
             .setCancelable(true)
-            .create()
+
+        dialogTitle?.let { builder.setTitle(it) }
+
+        val dialog = builder.create()
 
         // Call loadData after dialog is shown
         dialog.setOnShowListener {

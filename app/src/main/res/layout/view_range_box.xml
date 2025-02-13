@@ -42,7 +42,7 @@
 
     <LinearLayout
         android:id="@+id/namesPlotRangeHolder"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
@@ -57,7 +57,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="right"
-            android:paddingRight="10dp"
+            android:paddingRight="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="@string/search_results_dialog_range"
             android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
@@ -67,7 +69,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="right"
-            android:paddingRight="10dp"
+            android:paddingRight="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="@string/search_results_dialog_plot"
             android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
@@ -102,7 +106,6 @@
             android:id="@+id/tvRange"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:padding="0dp"
             android:singleLine="true"
             android:text=""
@@ -126,7 +129,6 @@
             android:id="@+id/tvPlot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:singleLine="true"
             android:text=""
             android:textSize="?attr/fb_title_text_size"
