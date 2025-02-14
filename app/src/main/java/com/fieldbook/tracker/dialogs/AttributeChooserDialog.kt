@@ -20,11 +20,14 @@ import com.google.android.material.tabs.TabLayout
 /**
  * A tab layout with tabs: attributes, traits, and other.
  * Each tab will load data into a recycler view that lets user choose infobar prefixes.
+ *
+ * Added 'showSystemAttributes' that will toggle the adding of the field name attribute to the list of attributes (and any future system attributes).
  */
 
 open class AttributeChooserDialog(
     private val showTraits: Boolean = true,
-    private val showOther: Boolean = true
+    private val showOther: Boolean = true,
+    private val showSystemAttributes: Boolean = true
 ) : DialogFragment(), AttributeAdapter.AttributeAdapterController {
 
     companion object {
@@ -110,7 +113,9 @@ open class AttributeChooserDialog(
             val activity = requireActivity() as CollectActivity
             attributes = activity.getDatabase().getAllObservationUnitAttributeNames(activity.studyId.toInt())
             val attributesList = attributes.toMutableList()
-            attributesList.add(0, getString(R.string.field_name_attribute))
+            if (showSystemAttributes) {
+                attributesList.add(0, getString(R.string.field_name_attribute))
+            }
             attributes = attributesList.toTypedArray()
             traits = activity.getDatabase().allTraitObjects.toTypedArray()
             other = traits.filter { !it.visible }.toTypedArray()

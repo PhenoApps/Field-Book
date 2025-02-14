@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.views
 
-import android.app.Service
 import android.content.Context
 import android.content.SharedPreferences
 import android.database.Cursor
@@ -9,12 +8,8 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.util.Log
-import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View.OnTouchListener
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -23,6 +18,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.dialogs.AttributeChooserDialog
+import com.fieldbook.tracker.dialogs.QuickGotoDialog
 import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
@@ -46,16 +42,12 @@ class RangeBoxView : ConstraintLayout {
     var cRange: RangeObject
     private var lastRange: String
 
-    private var rangeName: TextView
-    private var plotName: TextView
+    private var primaryNameTv: TextView
+    private var secondaryNameTv: TextView
 
-    //edit text used for quick goto feature range = primary id
-    private var rangeEt: EditText
+    var primaryIdTv: TextView
+    var secondaryIdTv: TextView
 
-    //edit text used for quick goto feature plot = secondary id
-    private var plotEt: EditText
-    private var tvRange: TextView
-    private var tvPlot: TextView
     private var rangeLeft: ImageView
     private var rangeRight: ImageView
 
@@ -80,12 +72,10 @@ class RangeBoxView : ConstraintLayout {
 
         this.rangeLeft = v.findViewById(R.id.rangeLeft)
         this.rangeRight = v.findViewById(R.id.rangeRight)
-        this.tvRange = v.findViewById(R.id.tvRange)
-        this.tvPlot = v.findViewById(R.id.tvPlot)
-        this.plotEt = v.findViewById(R.id.plot) //secondary
-        this.rangeEt = v.findViewById(R.id.range) //primary
-        this.rangeName = v.findViewById(R.id.rangeName)
-        this.plotName = v.findViewById(R.id.plotName)
+        this.primaryIdTv = v.findViewById(R.id.tvRange)
+        this.secondaryIdTv = v.findViewById(R.id.tvPlot)
+        this.primaryNameTv = v.findViewById(R.id.rangeName)
+        this.secondaryNameTv = v.findViewById(R.id.plotName)
         this.plotsProgressBar = v.findViewById(R.id.plotsProgressBar)
 
         this.controller = context as CollectRangeController
@@ -170,23 +160,15 @@ class RangeBoxView : ConstraintLayout {
         // Go to next range
         rangeRight.setOnClickListener { moveEntryRight() }
 
-        rangeEt.setOnEditorActionListener(createOnEditorListener(rangeEt, "range"))
-        plotEt.setOnEditorActionListener(createOnEditorListener(plotEt, "plot"))
-        rangeEt.setOnTouchListener { _, _ ->
-            rangeEt.isCursorVisible = true
-            false
-        }
-
-        plotEt.setOnTouchListener { _, _ ->
-            plotEt.isCursorVisible = true
-            false
-        }
-
         setName()
 
-        val attributeChooserDialog = AttributeChooserDialog(showTraits = false, showOther = false)
+        val attributeChooserDialog = AttributeChooserDialog(
+            showTraits = false,
+            showOther = false,
+            showSystemAttributes = false
+        )
 
-        rangeName.setOnClickListener {
+        primaryNameTv.setOnClickListener {
             attributeChooserDialog.setOnAttributeSelectedListener(object :
                 AttributeChooserDialog.OnAttributeSelectedListener {
                 override fun onAttributeSelected(label: String) {
@@ -202,7 +184,7 @@ class RangeBoxView : ConstraintLayout {
             )
         }
 
-        plotName.setOnClickListener {
+        secondaryNameTv.setOnClickListener {
             attributeChooserDialog.setOnAttributeSelectedListener(object :
                 AttributeChooserDialog.OnAttributeSelectedListener {
                 override fun onAttributeSelected(label: String) {
@@ -217,6 +199,41 @@ class RangeBoxView : ConstraintLayout {
                 "attributeChooserDialog"
             )
         }
+
+        primaryIdTv.setOnClickListener {
+            showQuickGoToDialog()
+        }
+
+        secondaryIdTv.setOnClickListener {
+            showQuickGoToDialog()
+        }
+    }
+
+    /**
+     * Builds and shows an alert dialog with two edit text fields for the primary/secondary ids
+     */
+    private fun showQuickGoToDialog() {
+
+        val dialog = QuickGotoDialog(controller) { primaryId, secondaryId ->
+
+            quickGoToNavigateFromDialog(primaryId, secondaryId)
+        }
+
+        dialog.show((context as CollectActivity).supportFragmentManager, "quickGotoDialog")
+
+    }
+
+    private fun quickGoToNavigateFromDialog(primaryId: String, secondaryId: String) {
+        try {
+
+             controller.moveToSearch(
+                    "quickgoto", rangeID,
+                    primaryId,
+                    secondaryId, null, -1)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in quickGoToNavigateFromDialog: $e")
+        }
     }
 
     private fun repeatUpdate() {
@@ -227,72 +244,6 @@ class RangeBoxView : ConstraintLayout {
 
     private fun truncate(s: String, maxLen: Int): String {
         return if (s.length > maxLen) s.substring(0, maxLen - 1) + ":" else s
-    }
-
-    /**
-     * This listener is used in the QuickGoto feature.
-     * This listens to the primary/secondary edit text's in the rangebox.
-     * When the soft keyboard enter key action is pressed (IME_ACTION_DONE)
-     * this will use the moveToSearch function.
-     * First it will search for both primary/secondary ids if they have both been changed.
-     * If one has not been changed or a plot is not found for both terms then it defaults to
-     * a search with whatever was changed last.
-     * @param edit the edit text to assign this listener to
-     * @param searchType the type used in moveToSearch, either plot or range
-     */
-    private fun createOnEditorListener(
-        edit: EditText,
-        searchType: String
-    ): TextView.OnEditorActionListener {
-        return object : TextView.OnEditorActionListener {
-            override fun onEditorAction(view: TextView, actionId: Int, event: KeyEvent?): Boolean {
-                // do not do bit check on event, crashes keyboard
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    try {
-
-                        //if both quick goto et's have been changed, attempt a search with them
-                        if (rangeEdited && plotEdited) {
-
-                            //if the search fails back-down to the original search
-                            if (!controller.moveToSearch(
-                                    "quickgoto", rangeID,
-                                    rangeEt.text.toString(),
-                                    plotEt.text.toString(), null, -1
-                                )
-                            ) {
-                                controller.moveToSearch(
-                                    searchType,
-                                    rangeID,
-                                    null,
-                                    null,
-                                    view.text.toString(),
-                                    -1
-                                )
-                            }
-                        } else { //original search if only one has changed
-                            controller.moveToSearch(
-                                searchType,
-                                rangeID,
-                                null,
-                                null,
-                                view.text.toString(),
-                                -1
-                            )
-                        }
-
-                        //reset the changed flags
-                        rangeEdited = false
-                        plotEdited = false
-                        val imm: InputMethodManager =
-                            context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
-                        imm.hideSoftInputFromWindow(edit.windowToken, 0)
-                    } catch (ignore: Exception) {
-                    }
-                    return true
-                }
-                return false
-            }
-        }
     }
 
     private fun createRunnable(directionStr: String): Runnable {
@@ -441,7 +392,6 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun reload() {
-        switchVisibility(controller.getPreferences().getBoolean(GeneralKeys.QUICK_GOTO, false))
         setName()
         paging = 1
         setAllRangeID()
@@ -470,12 +420,8 @@ class RangeBoxView : ConstraintLayout {
 
     // Updates the data shown in the dropdown
     fun display() {
-        rangeEt.setText(cRange.primaryId)
-        plotEt.setText(cRange.secondaryId)
-        rangeEt.isCursorVisible = false
-        plotEt.isCursorVisible = false
-        tvRange.text = cRange.primaryId
-        tvPlot.text = cRange.secondaryId
+        primaryIdTv.text = cRange.primaryId
+        secondaryIdTv.text = cRange.secondaryId
     }
 
     fun rightClick() {
@@ -498,24 +444,6 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
-    private fun switchVisibility(textview: Boolean) {
-        if (textview) {
-            tvRange.visibility = GONE
-            tvPlot.visibility = GONE
-            rangeEt.visibility = VISIBLE
-            plotEt.visibility = VISIBLE
-
-            //when the et's are visible create text watchers to listen for changes
-            rangeEt.addTextChangedListener(createTextWatcher("range"))
-            plotEt.addTextChangedListener(createTextWatcher("plot"))
-        } else {
-            tvRange.visibility = VISIBLE
-            tvPlot.visibility = VISIBLE
-            rangeEt.visibility = GONE
-            plotEt.visibility = GONE
-        }
-    }
-
     fun setName() {
         val primaryName = controller.getPreferences().getString(
             GeneralKeys.PRIMARY_NAME,
@@ -525,8 +453,8 @@ class RangeBoxView : ConstraintLayout {
             GeneralKeys.SECONDARY_NAME,
             context.getString(R.string.search_results_dialog_plot)
         ) + ":"
-        rangeName.text = truncate(primaryName, TRUNCATE_LENGTH)
-        plotName.text = truncate(secondaryName, TRUNCATE_LENGTH)
+        this.primaryNameTv.text = truncate(primaryName, TRUNCATE_LENGTH)
+        this.secondaryNameTv.text = truncate(secondaryName, TRUNCATE_LENGTH)
     }
 
     fun setAllRangeID() {
@@ -546,8 +474,6 @@ class RangeBoxView : ConstraintLayout {
     fun setLastRange() {
         lastRange = cRange.primaryId
     }
-
-    ///// paging /////
 
     ///// paging /////
     fun moveEntryLeft() {

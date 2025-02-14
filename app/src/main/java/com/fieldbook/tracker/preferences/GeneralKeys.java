@@ -41,7 +41,6 @@ public class GeneralKeys {
     // General
     public static final String TUTORIAL_MODE                        = "Tips";
     public static final String NEXT_ENTRY_NO_DATA                   = "NextEmptyPlot";
-    public static final String QUICK_GOTO                           = "QuickGoTo";
     public static final String MOVE_TO_UNIQUE_ID                    = "com.fieldbook.tracker.MOVE_TO_UNIQUE_ID";
     public static final String DATAGRID_SETTING                     = "DataGrid";
     public static final String HIDE_ENTRIES_WITH_DATA               = "com.fieldbook.tracker.HIDE_ENTRIES";

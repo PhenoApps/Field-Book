@@ -90,36 +90,11 @@
         app:layout_constraintStart_toEndOf="@id/namesPlotRangeHolder"
         app:layout_constraintTop_toBottomOf="@+id/plotsProgressBar">
 
-        <EditText
-            android:id="@+id/range"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:imeOptions="actionDone"
-            android:inputType="textVisiblePassword"
-            android:singleLine="true"
-            android:text=""
-            android:textSize="?attr/fb_title_text_size"
-            android:textStyle="bold" />
-
         <TextView
             android:id="@+id/tvRange"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="0dp"
-            android:singleLine="true"
-            android:text=""
-            android:textSize="?attr/fb_title_text_size"
-            android:textStyle="bold"
-            android:visibility="gone" />
-
-        <EditText
-            android:id="@+id/plot"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:imeOptions="actionDone"
-            android:inputType="textVisiblePassword"
             android:singleLine="true"
             android:text=""
             android:textSize="?attr/fb_title_text_size"
@@ -127,13 +102,12 @@
 
         <TextView
             android:id="@+id/tvPlot"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:text=""
             android:textSize="?attr/fb_title_text_size"
-            android:textStyle="bold"
-            android:visibility="gone" />
+            android:textStyle="bold" />
     </LinearLayout>
 
 
