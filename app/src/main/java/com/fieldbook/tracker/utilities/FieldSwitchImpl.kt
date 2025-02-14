@@ -75,7 +75,6 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
             val hasSecondary = entryProps.indexOfFirst { it.equals(secondaryName, true) }
             val hasCol = entryProps.indexOfFirst { it.lowercase() in POSSIBLE_COLUMN_IDS }
             val hasPlot = entryProps.indexOfFirst { it.equals("plot", true) }
-            val hasRep = entryProps.indexOfFirst { it.equals("rep", true) }
 
             val secondary = if (field.secondary_id == "null" || field.secondary_id == null || field.secondary_id.isEmpty()) {
                 if (hasSecondary != -1) {
@@ -84,8 +83,6 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
                     entryProps.removeAt(hasCol)
                 } else if (hasPlot != -1) {
                     entryProps.removeAt(hasPlot)
-                } else if (hasRep != -1) {
-                    entryProps.removeAt(hasRep)
                 } else if (entryProps.isNotEmpty()) entryProps.removeAt(0) else ""
             } else field.secondary_id
 
