@@ -50,24 +50,40 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
             val uniqueId = field.unique_id
             entryProps.remove(uniqueId)
 
+            //attempt to automatically select based on previous selections
+            val primaryName = preferences.getString(GeneralKeys.PRIMARY_NAME, "")
+            val secondaryName = preferences.getString(GeneralKeys.SECONDARY_NAME, "")
+
             //add some basic logic to match row/col or block/rep if it exists, otherwise just use the first two
+            val hasPrimary = entryProps.indexOfFirst { it.equals(primaryName, true) }
             val hasRow = entryProps.indexOfFirst { it.lowercase() in POSSIBLE_ROW_IDS }
+            val hasRange = entryProps.indexOfFirst { it.equals("range", true) }
             val hasBlock = entryProps.indexOfFirst { it.equals("block", true) }
 
             val primary = if (field.primary_id == "null" || field.primary_id == null || field.primary_id.isEmpty()) {
-                if (hasRow != -1) {
+                if (hasPrimary != -1) {
+                    entryProps.removeAt(hasPrimary)
+                } else if (hasRow != -1) {
                     entryProps.removeAt(hasRow)
+                } else if (hasRange != -1) {
+                    entryProps.removeAt(hasRange)
                 } else if (hasBlock != -1) {
                     entryProps.removeAt(hasBlock)
                 } else if (entryProps.isNotEmpty()) entryProps.removeAt(0) else ""
             } else field.primary_id
 
+            val hasSecondary = entryProps.indexOfFirst { it.equals(secondaryName, true) }
             val hasCol = entryProps.indexOfFirst { it.lowercase() in POSSIBLE_COLUMN_IDS }
+            val hasPlot = entryProps.indexOfFirst { it.equals("plot", true) }
             val hasRep = entryProps.indexOfFirst { it.equals("rep", true) }
 
             val secondary = if (field.secondary_id == "null" || field.secondary_id == null || field.secondary_id.isEmpty()) {
-                if (hasCol != -1) {
+                if (hasSecondary != -1) {
+                    entryProps.removeAt(hasSecondary)
+                } else if (hasCol != -1) {
                     entryProps.removeAt(hasCol)
+                } else if (hasPlot != -1) {
+                    entryProps.removeAt(hasPlot)
                 } else if (hasRep != -1) {
                     entryProps.removeAt(hasRep)
                 } else if (entryProps.isNotEmpty()) entryProps.removeAt(0) else ""
