@@ -78,10 +78,12 @@ class CameraActivity : ThemedActivity() {
     @OptIn(ExperimentalCamera2Interop::class)
     private fun bindCameraForInformation() {
 
-        cameraXFacade.bindIdentity { _, sizes ->
+        cameraXFacade.bindIdentity({ _, sizes ->
 
             supportedResolutions = sizes
 
+        }) {
+            finishActivity(RESULT_CANCELED)
         }
 
         //trigger ui update based on preferences

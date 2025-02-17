@@ -7,7 +7,16 @@
     android:orientation="vertical"
     android:weightSum="1">
 
+    <ProgressBar
+        android:id="@+id/dialog_collect_att_chooser_pb"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
     <com.google.android.material.tabs.TabLayout
+        tools:visibility="visible"
+        android:visibility="gone"
         android:id="@+id/dialog_collect_att_chooser_tl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -25,7 +34,10 @@
             android:text="@string/dialog_att_chooser_other"/>
     </com.google.android.material.tabs.TabLayout>
 
-    <androidx.recyclerview.widget.RecyclerView android:id="@+id/dialog_collect_att_chooser_lv"
+    <androidx.recyclerview.widget.RecyclerView
+        tools:visibility="visible"
+        android:visibility="gone"
+        android:id="@+id/dialog_collect_att_chooser_lv"
         android:layout_margin="4dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"

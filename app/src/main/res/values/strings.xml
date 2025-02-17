@@ -1392,5 +1392,6 @@
     <string name="trait_error_invalid_multicat_value">Invalid categorical data was entered.</string>
     <string name="dialog_crash_report_title">Failed to load data</string>
     <string name="dialog_crash_report_message">Press OK to send an anonymous diagnostic report to help improve the app.</string>
+    <string name="failed_to_fetch_observation_levels">Failed fetching observation levels</string>
 
 </resources>
