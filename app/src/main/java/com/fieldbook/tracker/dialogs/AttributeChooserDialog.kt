@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.activities.FieldEditorActivity
 import com.fieldbook.tracker.adapters.AttributeAdapter
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -21,11 +22,19 @@ import com.google.android.material.tabs.TabLayout
  */
 
 open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.AttributeAdapterController {
+
     companion object {
         const val TAG = "AttributeChooserDialog"
     }
+
     interface OnAttributeSelectedListener {
         fun onAttributeSelected(label: String)
+    }
+
+    private var loadUniqueAttributesOnly = false
+
+    fun loadUniqueAttributes() {
+        loadUniqueAttributesOnly = true
     }
 
     private lateinit var tabLayout: TabLayout
@@ -53,7 +62,17 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
 
         // Call loadData after dialog is shown
         dialog.setOnShowListener {
-            loadData()
+            if (loadUniqueAttributesOnly) {
+                val prefs = PreferenceManager.getDefaultSharedPreferences(requireActivity())
+                val activeFieldId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
+                Log.d(TAG, "Loading unique attributes for field ID: $activeFieldId")
+                val activity = requireActivity() as FieldEditorActivity
+                attributes = activity.getDatabase().getPossibleUniqueAttributes(activeFieldId)?.toTypedArray() ?: emptyArray()
+                Log.d(TAG, "Final attributes array size: ${attributes.size}")
+                loadTab(getString(R.string.dialog_att_chooser_attributes))
+            } else {
+                loadData()
+            }
         }
 
         return dialog

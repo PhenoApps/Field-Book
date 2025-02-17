@@ -35,24 +35,26 @@ class StudyDao {
 
         fun getPossibleUniqueAttributes(studyId: Int): List<String> = withDatabase { db ->
             val query = """
-                SELECT oua.observation_unit_attribute_name 
-                FROM observation_units_attributes oua
-                WHERE oua.study_id = ? 
-                AND (
-                    SELECT COUNT(DISTINCT ouv.observation_unit_value_name) 
-                    FROM observation_units_values ouv 
-                    WHERE ouv.observation_unit_attribute_db_id = oua.internal_id_observation_unit_attribute
-                ) = (
-                    SELECT COUNT(*) 
-                    FROM observation_units_values ouv 
-                    WHERE ouv.observation_unit_attribute_db_id = oua.internal_id_observation_unit_attribute
+                SELECT observation_unit_attribute_name 
+                FROM observation_units_attributes 
+                WHERE internal_id_observation_unit_attribute IN (
+                    SELECT distinct(observation_unit_attribute_db_id)
+                    FROM observation_units_values
+                    WHERE study_id = ?
+                    GROUP BY observation_unit_attribute_db_id, observation_unit_value_name
+                    HAVING COUNT(*) = 1
                 )
             """
+
+            Log.d("StudyDao", "Running query: $query")
             
             db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
                 val attributes = mutableListOf<String>()
                 while (cursor.moveToNext()) {
-                    cursor.getString(0)?.let { attributes.add(it) }
+                    cursor.getString(0)?.let {
+                         attributes.add(it)
+                         Log.d("StudyDao", "Found unique attribute: $it")
+                    }
                 }
                 attributes
             }
@@ -265,6 +267,7 @@ class StudyDao {
             it.trait_count = this["trait_count"]?.toString()
             it.observation_count = this["observation_count"]?.toString()
             it.trial_name = this["trial_name"]?.toString()
+            it.search_attribute = this["observation_unit_search_attribute"]?.toString()
         }
 
         fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
@@ -315,6 +318,7 @@ class StudyDao {
                     study_sort_name,
                     trial_name,
                     count,
+                    observation_unit_search_attribute,
                     (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count

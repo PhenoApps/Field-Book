@@ -29,6 +29,7 @@ import com.fieldbook.tracker.adapters.FieldDetailAdapter
 import com.fieldbook.tracker.adapters.FieldDetailItem
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.dialogs.AttributeChooserDialog
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
 import com.fieldbook.tracker.interfaces.FieldAdapterController
 import com.fieldbook.tracker.interfaces.FieldSortController
@@ -278,6 +279,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         var importFormat: ImportFormat? = field.import_format
         var entryCount = field.count.toString()
         val attributeCount = field.attribute_count.toString()
+        val searchAttribute = (field.search_attribute ?: field.unique_id).toString()
 
         if (importFormat == ImportFormat.BRAPI) {
             cardViewSync.visibility = View.VISIBLE
@@ -308,7 +310,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         entryCountChip.text = entryCount
         attributeCountChip.text = attributeCount
         sortOrderChip.text = getString(R.string.field_sort_entries)
-        editUniqueChip.text = getString(R.string.field_edit_unique_id)
+//        editUniqueChip.text = getString(R.string.field_edit_unique_id)
+        editUniqueChip.text = searchAttribute
 
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {
@@ -448,45 +451,58 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         dialog.show()
     }
 
+//    private fun showEditUniqueIdDialog(field: FieldObject) {
+//        val inflater = requireActivity().layoutInflater
+//        val dialogView = inflater.inflate(R.layout.dialog_field_edit_unique, null)
+//
+//        val uniqueDropdown = dialogView.findViewById<AutoCompleteTextView>(R.id.unique_dropdown)
+//        val errorMessageView = dialogView.findViewById<TextView>(R.id.error_message)
+//
+//        // Get list of possible unique attributes
+//        val uniqueOptions = database.getPossibleUniqueAttributes(field.exp_id)
+//        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, uniqueOptions)
+//        uniqueDropdown.setAdapter(adapter)
+//
+//        // Set current value if exists
+//        field.unique_id?.let { uniqueDropdown.setText(it) }
+//
+//        val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+//            .setTitle(getString(R.string.field_edit_unique_id))
+//            .setView(dialogView)
+//            .setPositiveButton(getString(R.string.dialog_save), null)
+//            .setNegativeButton(getString(R.string.dialog_cancel), null)
+//
+//        val dialog = builder.create()
+//
+//        dialog.setOnShowListener {
+//            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+//            positiveButton.setOnClickListener {
+//                val selectedAttribute = uniqueDropdown.text.toString()
+//
+//                if (selectedAttribute.isNotBlank() && uniqueOptions.contains(selectedAttribute)) {
+//                    database.updateFieldUniqueId(field.exp_id, selectedAttribute)
+//                    loadFieldDetails()
+//                    dialog.dismiss()
+//                } else {
+//                    showErrorMessage(errorMessageView, getString(R.string.invalid_unique_id_selection))
+//                }
+//            }
+//        }
+//
+//        dialog.show()
+//    }
+
     private fun showEditUniqueIdDialog(field: FieldObject) {
-        val inflater = requireActivity().layoutInflater
-        val dialogView = inflater.inflate(R.layout.dialog_field_edit_unique, null)
-
-        val uniqueDropdown = dialogView.findViewById<AutoCompleteTextView>(R.id.unique_dropdown)
-        val errorMessageView = dialogView.findViewById<TextView>(R.id.error_message)
-        
-        // Get list of possible unique attributes
-        val uniqueOptions = database.getPossibleUniqueAttributes(field.exp_id)
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, uniqueOptions)
-        uniqueDropdown.setAdapter(adapter)
-        
-        // Set current value if exists
-        field.unique_id?.let { uniqueDropdown.setText(it) }
-
-        val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-            .setTitle(getString(R.string.field_edit_unique_id))
-            .setView(dialogView)
-            .setPositiveButton(getString(R.string.dialog_save), null)
-            .setNegativeButton(getString(R.string.dialog_cancel), null)
-
-        val dialog = builder.create()
-
-        dialog.setOnShowListener {
-            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            positiveButton.setOnClickListener {
-                val selectedAttribute = uniqueDropdown.text.toString()
-                
-                if (selectedAttribute.isNotBlank() && uniqueOptions.contains(selectedAttribute)) {
-                    database.updateFieldUniqueId(field.exp_id, selectedAttribute)
+        val dialog = AttributeChooserDialog().apply {
+            loadUniqueAttributes()
+            setOnAttributeSelectedListener(object : AttributeChooserDialog.OnAttributeSelectedListener {
+                override fun onAttributeSelected(label: String) {
+                    database.updateFieldUniqueId(field.exp_id, label)
                     loadFieldDetails()
-                    dialog.dismiss()
-                } else {
-                    showErrorMessage(errorMessageView, getString(R.string.invalid_unique_id_selection))
                 }
-            }
+            })
         }
-
-        dialog.show()
+        dialog.show(parentFragmentManager, AttributeChooserDialog.TAG)
     }
 
     /**

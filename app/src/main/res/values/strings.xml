@@ -204,7 +204,7 @@
     <string name="name_conflict_import_name">import name</string>
     <string name="name_conflict_display_name">display name</string>
 
-    <string name="field_edit_unique_id">Change Unique ID</string>
+    <string name="field_edit_unique_id">Change Search Attribute</string>
     <string name="invalid_unique_id_selection">Invalid Selection</string>
 
 <!--    <string name="field_default_sort_order">import order</string>-->

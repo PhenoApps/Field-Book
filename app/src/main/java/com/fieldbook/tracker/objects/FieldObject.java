@@ -29,6 +29,7 @@ public class FieldObject {
     private String trait_count;
     private String observation_count;
     private String trial_name;
+    private String search_attribute;
 
     public String getTrial_name() {
         return trial_name;
@@ -241,5 +242,12 @@ public class FieldObject {
 
     public void setObservation_count(String observation_count) {
         this.observation_count = observation_count;
+    }
+    public String getSearch_attribute() {
+        return search_attribute;
+    }
+
+    public void setSearch_attribute(String search_attribute) {
+        this.search_attribute = search_attribute;
     }
 }

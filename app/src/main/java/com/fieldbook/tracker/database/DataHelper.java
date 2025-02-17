@@ -74,7 +74,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
 public class DataHelper {
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 11;
+    public static final int DATABASE_VERSION = 12;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -3061,6 +3061,25 @@ public class DataHelper {
                 helper.populateImportFormat(db);
                 helper.fixStudyAliases(db);
 
+            }
+
+            if (oldVersion <= 10 && newVersion >= 11) {
+
+                // modify studies table for better handling of brapi study attributes
+                db.execSQL("ALTER TABLE studies ADD COLUMN import_format TEXT");
+                db.execSQL("ALTER TABLE studies ADD COLUMN date_sync TEXT");
+                helper.populateImportFormat(db);
+                helper.fixStudyAliases(db);
+
+            }
+
+            if (oldVersion <= 11 && newVersion >= 12) {
+
+                // Add observation_unit_search_attribute column to studies table
+                db.execSQL("ALTER TABLE studies ADD COLUMN observation_unit_search_attribute TEXT");
+
+                // Populate the new column with the default value from study_unique_id_name
+                db.execSQL("UPDATE studies SET observation_unit_search_attribute = study_unique_id_name");
             }
         }
     }

@@ -186,7 +186,7 @@
                             android:id="@+id/editUniqueChip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:chipIcon="@drawable/ic_tag_text"
+                            app:chipIcon="@drawable/ic_tb_barcode_scan"
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
