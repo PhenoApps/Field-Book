@@ -8,6 +8,7 @@ import androidx.fragment.app.DialogFragment
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.preferences.GeneralKeys
+import org.phenoapps.utils.SoftKeyboardUtil
 
 /**
  * Dialog to quickly jump to a specific range of data in the CollectActivity.
@@ -36,12 +37,6 @@ class QuickGotoDialog(
         primaryEt.hint = primary
         secondaryEt.hint = secondary
 
-        //get current primary/secondary and set the edit texts
-        controller.getRangeBox().let {
-            primaryEt.setText(it.primaryIdTv.text.toString())
-            secondaryEt.setText(it.secondaryIdTv.text.toString())
-        }
-
         val dialog = AlertDialog.Builder(requireContext())
             .setTitle(R.string.dialog_quick_goto_title)
             .setView(view)
@@ -52,6 +47,13 @@ class QuickGotoDialog(
             }
             .setNegativeButton(android.R.string.cancel) { _, _ -> }
             .create()
+
+        dialog.setOnShowListener {
+
+            primaryEt.requestFocus()
+            SoftKeyboardUtil.Companion.showKeyboard(context, primaryEt)
+
+        }
 
         return dialog
     }

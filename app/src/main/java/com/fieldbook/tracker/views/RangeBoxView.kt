@@ -72,10 +72,10 @@ class RangeBoxView : ConstraintLayout {
 
         this.rangeLeft = v.findViewById(R.id.rangeLeft)
         this.rangeRight = v.findViewById(R.id.rangeRight)
-        this.primaryIdTv = v.findViewById(R.id.tvRange)
-        this.secondaryIdTv = v.findViewById(R.id.tvPlot)
-        this.primaryNameTv = v.findViewById(R.id.rangeName)
-        this.secondaryNameTv = v.findViewById(R.id.plotName)
+        this.primaryIdTv = v.findViewById(R.id.primaryIdTv)
+        this.secondaryIdTv = v.findViewById(R.id.secondaryIdTv)
+        this.primaryNameTv = v.findViewById(R.id.primaryNameTv)
+        this.secondaryNameTv = v.findViewById(R.id.secondaryNameTv)
         this.plotsProgressBar = v.findViewById(R.id.plotsProgressBar)
 
         this.controller = context as CollectRangeController
@@ -224,15 +224,43 @@ class RangeBoxView : ConstraintLayout {
     }
 
     private fun quickGoToNavigateFromDialog(primaryId: String, secondaryId: String) {
+
         try {
 
-             controller.moveToSearch(
-                    "quickgoto", rangeID,
-                    primaryId,
-                    secondaryId, null, -1)
+            when {
+
+                primaryId.isNotBlank() && secondaryId.isNotBlank() -> {
+                    controller.moveToSearch(
+                        "quickgoto", rangeID,
+                        primaryId,
+                        secondaryId, null, -1
+                    )
+                }
+
+                primaryId.isNotBlank() && secondaryId.isBlank() -> {
+                    controller.moveToSearch(
+                        "range", rangeID,
+                        primaryId,
+                        null, primaryId, -1
+                    )
+                }
+
+                primaryId.isBlank() && secondaryId.isNotBlank() -> {
+                    controller.moveToSearch(
+                        "plot", rangeID,
+                        null,
+                        secondaryId, secondaryId, -1
+                    )
+                }
+
+                else -> return
+
+            }
 
         } catch (e: Exception) {
+
             Log.e(TAG, "Error in quickGoToNavigateFromDialog: $e")
+
         }
     }
 
