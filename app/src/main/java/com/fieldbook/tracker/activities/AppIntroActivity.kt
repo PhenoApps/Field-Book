@@ -93,8 +93,9 @@ class AppIntroActivity : AppIntro() {
             val resources = ctx.getString(R.string.dir_resources)
             val trait = ctx.getString(R.string.dir_trait)
             val updates = ctx.getString(R.string.dir_updates)
+            val preferences = ctx.getString(R.string.dir_preferences)
             directories = arrayOf(archive, db, fieldExport, fieldImport,
-                geonav, plotData, resources, trait, updates
+                geonav, plotData, resources, trait, updates, preferences
             )
         }
 

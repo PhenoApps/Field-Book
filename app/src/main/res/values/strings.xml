@@ -23,6 +23,7 @@
     <string name="dialog_sort_by">Sort By</string>
     <string name="dialog_enable">Enable</string>
     <string name="dialog_delete">Delete</string>
+    <string name="dialog_accept">Accept</string>
 
     <string name="barcode_scanner_text">Scan a barcode</string>
 
@@ -861,6 +862,11 @@
     <string name="reset_preferences_title">Reset Settings to Default</string>
     <string name="reset_preferences_message">Warning: this will reset all of Field Book\'s preferences.</string>
 
+    <!-- Preferences -->
+    <string name="preferences_preferences_title">Preferences</string>
+    <string name="preferences_export_preferences">Export Preferences</string>
+    <string name="preferences_import_preferences">Import Preferences</string>
+
     <!-- Experimental -->
     <string name="preferences_experimental_title">Experimental</string>
     <string name="preferences_experimental_stable_title">Stable</string>
@@ -1393,4 +1399,36 @@
     <string name="dialog_crash_report_title">Failed to load data</string>
     <string name="dialog_crash_report_message">Press OK to send an anonymous diagnostic report to help improve the app.</string>
 
+    <!--  NearbyShare  -->
+    <string name="nearby_share_connection_established">Connection Established</string>
+    <string name="nearby_share_connection_rejected">Connection Rejected</string>
+    <string name="nearby_share_connection_error">Connection Error</string>
+    <string name="nearby_share_connection_cancelled">Connection cancelled</string>
+    <string name="nearby_share_transfer_complete">Transfer completed</string>
+    <string name="nearby_share_transfer_in_progress">Transfer in progress</string>
+    <string name="nearby_share_transfer_failed">Transfer failed</string>
+    <string name="nearby_share_transfer_cancelled">Transfer cancelled</string>
+    <string name="nearby_share_devices_disconnected">Devices Disconnected</string>
+    <string name="nearby_share_receiving_file">Receiving file…</string>
+    <string name="nearby_share_starting_transfer">Transferring File %s…</string>
+    <string name="nearby_share_waiting_for_receivers">Waiting for receivers to connect…</string>
+    <string name="nearby_share_searching_for_senders">Searching for nearby devices…</string>
+    <string name="nearby_share_already_waiting_for_receivers">Already waiting for receivers to connect…</string>
+    <string name="nearby_share_already_searching_for_sender">Already searching for sender…</string>
+    <string name="nearby_share_no_devices_found">No devices found yet</string>
+    <string name="nearby_share_permissions_required">Permissions Required</string>
+    <string name="nearby_share_failed_discovery">Failed to start discovery: %s</string>
+    <string name="nearby_share_failed_advertising">Error while waiting for devices: %s</string>
+    <string name="nearby_share_failed_transfer">Failed to start transfer: %s</string>
+    <string name="nearby_share_failed_payload">Failed to create file payload</string>
+    <string name="nearby_share_failed_request">Failed to request connection: %s</string>
+    <string name="nearby_share_failed_handle_file">Failed to handle file: %s</string>
+    <string name="nearby_share_generating_file">Getting the file ready for transfer</string>
+    <string name="nearby_share_failed_preferences_import">Failed to import preferences</string>
+
+    <string name="nearby_share_authenticating_connection">Authenticating connection with %s…</string>
+
+    <string name="dialog_device_selection_title">Select a device</string>
+    <string name="dialog_nearby_authentication_title">Accept Connection to %s</string>
+    <string name="dialog_nearby_authentication_summary">Confirm the code matches on both devices: %s</string>
 </resources>

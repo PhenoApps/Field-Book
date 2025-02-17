@@ -240,6 +240,8 @@ dependencies {
     // Calendar date range picker library
     implementation 'io.github.architshah248.calendar:awesome-calendar:2.0.0'
 
+    implementation 'com.google.android.gms:play-services-nearby:19.3.0'
+
     //AppIntro
     implementation 'com.github.AppIntro:AppIntro:6.3.1'
 

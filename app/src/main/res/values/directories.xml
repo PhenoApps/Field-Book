@@ -11,6 +11,8 @@
     <string name="dir_database" translatable="false">database</string>
     <string name="dir_updates" translatable="false">updates</string>
     <string name="dir_archive" translatable="false">archive</string>
+    <string name="dir_preferences" translatable="false">preferences</string>
+    <string name="dir_shared" translatable="false">shared</string>
 
     <!-- plot data field dir specific media directory names -->
     <string name="dir_media_photos" translatable="false">photos</string>
