@@ -11,6 +11,8 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -73,6 +75,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var entryCountChip: Chip
     private lateinit var attributeCountChip: Chip
     private lateinit var sortOrderChip: Chip
+    private lateinit var editUniqueChip: Chip
     private lateinit var traitCountChip: Chip
     private lateinit var observationCountChip: Chip
     private lateinit var trialNameChip: Chip
@@ -97,6 +100,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         entryCountChip = rootView.findViewById(R.id.entryCountChip)
         attributeCountChip = rootView.findViewById(R.id.attributeCountChip)
         sortOrderChip = rootView.findViewById(R.id.sortOrderChip)
+        editUniqueChip = rootView.findViewById(R.id.editUniqueChip)
         traitCountChip = rootView.findViewById(R.id.traitCountChip)
         observationCountChip = rootView.findViewById(R.id.observationCountChip)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
@@ -182,6 +186,15 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 val field = database.getFieldObject(id)
                 field?.let {
                     (activity as? FieldSortController)?.showSortDialog(it)
+                }
+            }
+        }
+
+        editUniqueChip.setOnClickListener {
+            fieldId?.let { id ->
+                val field = database.getFieldObject(id)
+                field?.let {
+                    showEditUniqueIdDialog(it)
                 }
             }
         }
@@ -295,6 +308,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         entryCountChip.text = entryCount
         attributeCountChip.text = attributeCount
         sortOrderChip.text = getString(R.string.field_sort_entries)
+        editUniqueChip.text = getString(R.string.field_edit_unique_id)
 
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {
@@ -427,6 +441,47 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     }
                 } else {
                     showErrorMessage(errorMessageView, getString(R.string.name_cannot_be_empty))
+                }
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun showEditUniqueIdDialog(field: FieldObject) {
+        val inflater = requireActivity().layoutInflater
+        val dialogView = inflater.inflate(R.layout.dialog_field_edit_unique, null)
+
+        val uniqueDropdown = dialogView.findViewById<AutoCompleteTextView>(R.id.unique_dropdown)
+        val errorMessageView = dialogView.findViewById<TextView>(R.id.error_message)
+        
+        // Get list of possible unique attributes
+        val uniqueOptions = database.getPossibleUniqueAttributes(field.exp_id)
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, uniqueOptions)
+        uniqueDropdown.setAdapter(adapter)
+        
+        // Set current value if exists
+        field.unique_id?.let { uniqueDropdown.setText(it) }
+
+        val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+            .setTitle(getString(R.string.field_edit_unique_id))
+            .setView(dialogView)
+            .setPositiveButton(getString(R.string.dialog_save), null)
+            .setNegativeButton(getString(R.string.dialog_cancel), null)
+
+        val dialog = builder.create()
+
+        dialog.setOnShowListener {
+            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            positiveButton.setOnClickListener {
+                val selectedAttribute = uniqueDropdown.text.toString()
+                
+                if (selectedAttribute.isNotBlank() && uniqueOptions.contains(selectedAttribute)) {
+                    database.updateFieldUniqueId(field.exp_id, selectedAttribute)
+                    loadFieldDetails()
+                    dialog.dismiss()
+                } else {
+                    showErrorMessage(errorMessageView, getString(R.string.invalid_unique_id_selection))
                 }
             }
         }

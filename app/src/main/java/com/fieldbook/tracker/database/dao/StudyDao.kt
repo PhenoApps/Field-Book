@@ -33,6 +33,83 @@ class StudyDao {
 
     companion object {
 
+        fun getPossibleUniqueAttributes(studyId: Int): List<String> = withDatabase { db ->
+            val query = """
+                SELECT oua.observation_unit_attribute_name 
+                FROM observation_units_attributes oua
+                WHERE oua.study_id = ? 
+                AND (
+                    SELECT COUNT(DISTINCT ouv.observation_unit_value_name) 
+                    FROM observation_units_values ouv 
+                    WHERE ouv.observation_unit_attribute_db_id = oua.internal_id_observation_unit_attribute
+                ) = (
+                    SELECT COUNT(*) 
+                    FROM observation_units_values ouv 
+                    WHERE ouv.observation_unit_attribute_db_id = oua.internal_id_observation_unit_attribute
+                )
+            """
+            
+            db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
+                val attributes = mutableListOf<String>()
+                while (cursor.moveToNext()) {
+                    cursor.getString(0)?.let { attributes.add(it) }
+                }
+                attributes
+            }
+        } ?: emptyList()
+
+        fun updateFieldUniqueId(studyId: Int, newUniqueAttribute: String) = withDatabase { db ->
+            db.beginTransaction()
+            try {
+                // Get the attribute ID for the new unique identifier
+                val attrIdQuery = """
+                    SELECT internal_id_observation_unit_attribute 
+                    FROM observation_units_attributes 
+                    WHERE study_id = ? AND observation_unit_attribute_name = ?
+                """
+                
+                val attrId = db.rawQuery(attrIdQuery, arrayOf(studyId.toString(), newUniqueAttribute))
+                    .use { cursor -> 
+                        if (cursor.moveToFirst()) cursor.getInt(0) else null 
+                    } ?: return@withDatabase
+
+                // Update studies table
+                db.execSQL(
+                    "UPDATE studies SET study_unique_id_name = ? WHERE internal_id_study = ?",
+                    arrayOf(newUniqueAttribute, studyId.toString())
+                )
+
+                // Update observation_units table using values from observation_units_values
+                val updateUnitsQuery = """
+                    UPDATE observation_units 
+                    SET observation_unit_db_id = (
+                        SELECT ouv.observation_unit_value_name 
+                        FROM observation_units_values ouv 
+                        WHERE ouv.observation_unit_id = observation_units.internal_id_observation_unit 
+                        AND ouv.observation_unit_attribute_db_id = ?
+                    )
+                    WHERE study_id = ?
+                """
+                db.execSQL(updateUnitsQuery, arrayOf(attrId.toString(), studyId.toString()))
+
+                // Update observations table using the new observation_unit_db_id values
+                val updateObsQuery = """
+                    UPDATE observations 
+                    SET observation_unit_id = (
+                        SELECT ou.observation_unit_db_id 
+                        FROM observation_units ou 
+                        WHERE ou.internal_id_observation_unit = observations.observation_unit_id
+                    )
+                    WHERE study_id = ?
+                """
+                db.execSQL(updateObsQuery, arrayOf(studyId.toString()))
+
+                db.setTransactionSuccessful()
+            } finally {
+                db.endTransaction()
+            }
+        }
+
         private fun fixPlotAttributes(db: SQLiteDatabase) {
 
             db.rawQuery("PRAGMA foreign_keys=OFF;", null).close()

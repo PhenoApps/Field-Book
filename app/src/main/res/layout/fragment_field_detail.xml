@@ -182,6 +182,19 @@
                             app:chipStrokeColor="?attr/selectableChipStroke"
                             app:chipStrokeWidth="2dp" />
 
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/editUniqueChip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:chipIcon="@drawable/ic_tag_text"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/selectableChipBackground"
+                            app:chipStartPadding="6dp"
+                            app:chipStrokeColor="?attr/selectableChipStroke"
+                            app:chipStrokeWidth="2dp" />
+
                     </com.google.android.material.chip.ChipGroup>
 
                 </LinearLayout>

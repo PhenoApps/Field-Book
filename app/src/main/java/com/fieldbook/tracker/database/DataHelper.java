@@ -888,6 +888,16 @@ public class DataHelper {
 //        db.endTransaction();
     }
 
+    public List<String> getPossibleUniqueAttributes(int studyId) {
+        open();
+        return StudyDao.Companion.getPossibleUniqueAttributes(studyId);
+    }
+
+    public void updateFieldUniqueId(int studyId, String newUniqueAttribute) {
+        open();
+        StudyDao.Companion.updateFieldUniqueId(studyId, newUniqueAttribute);
+    }
+
     public void updateImages(List<FieldBookImage> images) {
         ArrayList<String> ids = new ArrayList<>();
 
