@@ -436,14 +436,16 @@ class StudyDao {
 
             columns.forEachIndexed { index, it ->
 
-                val attrId = ObservationUnitAttributeDao.getIdByName(it)
+                if (it != "geo_coordinates") {
+                    val attrId = ObservationUnitAttributeDao.getIdByName(it)
 
-                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                    Study.FK to studyId,
-                    ObservationUnit.FK to rowid,
-                    ObservationUnitAttribute.FK to attrId,
-                    "observation_unit_value_name" to actualData[index]
-                ))
+                    db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                        Study.FK to studyId,
+                        ObservationUnit.FK to rowid,
+                        ObservationUnitAttribute.FK to attrId,
+                        "observation_unit_value_name" to actualData[index]
+                    ))
+                }
             }
 
             if (isBrapi) {

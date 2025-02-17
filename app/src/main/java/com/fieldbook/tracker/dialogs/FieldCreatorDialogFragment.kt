@@ -375,8 +375,8 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
         scope.launch {
             // Database operation might be time-consuming, so we run it on the IO dispatcher
             val createdFieldId = withContext(Dispatchers.IO) {
+                DataHelper.db.beginTransaction()
                 try {
-                    DataHelper.db.beginTransaction()
                     Log.d("FieldCreatorDialog", "Inserting new field in the database.")
 
                     val field = FieldObject().apply {

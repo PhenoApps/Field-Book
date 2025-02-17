@@ -27,6 +27,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -37,6 +38,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.brapi.client.v2.JSON
 import org.brapi.client.v2.model.queryParams.germplasm.GermplasmQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
@@ -171,7 +173,26 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             setLoadingText(getString(R.string.act_brapi_study_import_fetch_levels))
 
-            fetchObservationLevels(programDbId).join()
+            try {
+
+                fetchObservationLevels(programDbId).join()
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+                FirebaseCrashlytics.getInstance().recordException(e)
+
+                withContext(Dispatchers.Main) {
+
+                    Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_fetch_observation_levels), Toast.LENGTH_SHORT).show()
+
+                    setResult(Activity.RESULT_CANCELED)
+
+                    finish()
+                }
+            }
+
             withContext(Dispatchers.Main) {
                 importButton.isEnabled = false
                 loadingTextView.visibility = View.GONE
@@ -595,7 +616,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.traits = observationVariables[study.studyDbId]?.toList()
                         ?.map { it.toTraitObject(this@BrapiStudyImportActivity) } ?: listOf()
 
-                    val attributes = studyAttributes.values.flatMap { it.keys }.distinct()
+                    val geoCoordinateColumnName = "geo_coordinates"
+
+                    val attributes = (studyAttributes.values.flatMap { it.keys } + geoCoordinateColumnName).distinct()
 
                     details.attributes = attributes
 
@@ -605,7 +628,20 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                         val row = ArrayList<String>()
 
                         attributes.forEach { attr ->
-                            row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
+                            if (attr != geoCoordinateColumnName) {
+                                row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
+                            }
+                        }
+
+                        //add geo json as json string
+                        if (geoCoordinateColumnName in attributes) {
+                            unit.observationUnitPosition?.geoCoordinates?.let { coordString ->
+                                try {
+                                    row.add(JSON().serialize(coordString))
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Failed to serialize geo coordinates", e)
+                                }
+                            }
                         }
 
                         unitAttributes.add(row)

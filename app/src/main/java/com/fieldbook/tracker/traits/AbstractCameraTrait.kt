@@ -295,7 +295,7 @@ abstract class AbstractCameraTrait :
 
                 //get the bitmap from the texture view, only use it if its not null
 
-                val name = "${sanitizedTraitName}_${plot}_$saveTime.jpg"
+                val name = "${plot}_${sanitizedTraitName}_$saveTime.jpg"
 
                 DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { dir ->
 

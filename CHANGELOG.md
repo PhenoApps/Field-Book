@@ -8,16 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Access full add field menu via long-press (https://github.com/PhenoApps/Field-Book/pull/1149)
+- geo_coordinates are now pulled in via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1149)
 
 ### Changed
 
 ### Fixed
+- Numerous bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1149)
 
 ## [v6.0.6] - 2025-01-24
-
-### Added
-
-### Changed
 
 ### Fixed
 - Numerous bug fixes and enhancements 

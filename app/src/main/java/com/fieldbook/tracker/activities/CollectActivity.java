@@ -1492,7 +1492,6 @@ public class CollectActivity extends ThemedActivity
             if (dir != null && dir.exists()) {
                 intent.setClassName(CollectActivity.this, FileExploreActivity.class.getName());
                 intent.putExtra("path", dir.getUri().toString());
-                intent.putExtra("exclude", new String[]{"fieldbook"});
                 intent.putExtra("title", getString(R.string.main_toolbar_resources));
                 startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
             }

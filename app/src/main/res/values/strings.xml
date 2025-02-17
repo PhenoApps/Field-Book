@@ -1398,5 +1398,6 @@
     <string name="quick_goto_primary_hint">Primary ID</string>
     <string name="quick_goto_secondary_hint">Secondary ID</string>
     <string name="quick_goto_dialog_icon_description">running person</string>
+    <string name="failed_to_fetch_observation_levels">Failed fetching observation levels</string>
 
 </resources>
