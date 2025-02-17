@@ -3,28 +3,32 @@ package com.fieldbook.tracker.activities
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
-import androidx.constraintlayout.widget.Group
+import androidx.appcompat.widget.Toolbar
 import androidx.core.database.getStringOrNull
-import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.RecyclerView
-import com.evrencoskun.tableview.TableView
-import com.evrencoskun.tableview.listener.ITableViewListener
+import com.bin.david.form.core.SmartTable
+import com.bin.david.form.core.TableConfig
+import com.bin.david.form.data.CellInfo
+import com.bin.david.form.data.column.Column
+import com.bin.david.form.data.format.draw.IDrawFormat
+import com.bin.david.form.data.table.ArrayTableData
+import com.bin.david.form.data.table.TableData
+import com.bin.david.form.utils.DensityUtils
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.adapters.DataGridAdapter
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationModel
-import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
-import com.fieldbook.tracker.utilities.CategoryJsonUtil.Companion.decode
 import com.fieldbook.tracker.utilities.Utils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -35,8 +39,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * @author Chaney
- *
  * This activity is available as an optional toolbar action.
  * Toolbar can be activated by selecting Preferences/General/Datagrid
  *
@@ -50,51 +52,14 @@ import javax.inject.Inject
  * i.putExtra("trait", 1) <- actually a trait index s.a 0 -> "height", 1 -> "lodging"
  **/
 @AndroidEntryPoint
-class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITableViewListener {
+class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
-    /***
-     * Polymorphism class structure to serve different cell types to the grid.
-     */
-    open class BlockData(open val code: String) {
-        override fun hashCode(): Int {
-            return code.hashCode()
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as BlockData
-
-            if (code != other.code) return false
-
-            return true
-        }
-    }
-
-    data class HeaderData(val name: String, override val code: String) : BlockData(code)
-    data class CellData(val value: String?, override val code: String, val color: Int = Color.GREEN, val onClick: View.OnClickListener? = null): BlockData(code)
-    class EmptyCell(override val code: String): BlockData(code)
-
-    //coroutine scope for launching background processes
-    private val scope by lazy {
-        CoroutineScope(Dispatchers.IO)
-    }
-
-    /**
-     * views that are initialized in oncreate
-     */
-    private lateinit var mTableView: TableView
+    private lateinit var table: SmartTable<String>
     private lateinit var progressBar: ProgressBar
-    private lateinit var dataGridGroup: Group
 
-    /**
-     * Adapters/lists used to store grid information, also used for click events
-     */
-    private lateinit var mAdapter: DataGridAdapter
+    private var mTraits: ArrayList<TraitObject> = ArrayList()
     private lateinit var mRowHeaders: ArrayList<String>
     private lateinit var mPlotIds: ArrayList<String>
-    private var mTraits: ArrayList<TraitObject> = ArrayList()
 
     @Inject
     lateinit var database: DataHelper
@@ -102,347 +67,375 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
     @Inject
     lateinit var preferences: SharedPreferences
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private val scope by lazy {
+        CoroutineScope(Dispatchers.IO)
+    }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //this activity uses databinding to inflate the content layout
-        //this creates a 'binding' variable that has all the views as fields, an alternative to findViewById
-        val binding = DataBindingUtil.setContentView<ActivityDataGridBinding>(
-            this,
-            R.layout.activity_data_grid
+        setContentView(R.layout.activity_data_grid)
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        supportActionBar?.apply {
+            title = null
+            setDisplayHomeAsUpEnabled(true)
+            setHomeButtonEnabled(true)
+        }
+
+        table = findViewById(R.id.table)
+        progressBar = findViewById(R.id.data_grid_progress_bar)
+
+        setupTableStyle()
+
+        initialize(
+            plotId = intent.extras?.getInt("plot_id"),
+            trait = intent.extras?.getInt("trait")
         )
-
-        setSupportActionBar(binding.toolbar)
-
-        if (supportActionBar != null) {
-            supportActionBar?.title = null
-            supportActionBar?.setDisplayHomeAsUpEnabled(true)
-            supportActionBar?.setHomeButtonEnabled(true)
-        }
-
-        progressBar = binding.dataGridProgressBar
-        dataGridGroup = binding.dataGridGroup
-        mTableView = binding.tableView
-
-        initialize(plotId = intent.extras?.getInt("plot_id"),
-            trait = intent.extras?.getInt("trait"))
     }
 
-    /**
-     * Runs the data grid loading.
-     */
-    private fun initialize(prefixTrait: String? = null,
-                           plotId: Int? = null,
-                           trait: Int? = null) {
 
-        //if something goes wrong finish the activity
-        try {
-
-            loadGridData(prefixTrait, plotId, trait)
-
-        } catch (e: Exception) {
-
-            e.printStackTrace()
-
-            setResult(RESULT_CANCELED)
-
-            finish()
-        }
-    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-
         menuInflater.inflate(R.menu.menu_data_grid, menu)
-
         return super.onCreateOptionsMenu(menu)
     }
 
-    //finish activity when back button is pressed
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-            }
+            android.R.id.home -> finish()
             R.id.menu_data_grid_action_header_view -> {
-
-                //get all available obs. property columns
                 val prefixTraits = database.rangeColumns
-
                 if (prefixTraits.isNotEmpty()) {
+                    val currentRowHeader = preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, "")
+                    val selectedIndex = prefixTraits.indexOf(currentRowHeader).takeIf { it >= 0 } ?: 0
 
-                    //show a dialog to choose a prefix trait to be displayed
                     AlertDialog.Builder(this, R.style.AppAlertDialog)
                         .setTitle(R.string.dialog_data_grid_header_picker_title)
-                        .setSingleChoiceItems(prefixTraits, 0) { dialog, which ->
-
+                        .setSingleChoiceItems(prefixTraits, selectedIndex) { dialog, which ->
                             initialize(prefixTraits[which])
-
                             dialog.dismiss()
-
                         }.create().show()
                 }
             }
         }
-
         return super.onOptionsItemSelected(item)
     }
 
-    /**
-     * Uses the getExportTableData query to create a spreadsheet of values.
-     * Columns returned are plot_id followed by all traits.
-     */
-    private fun loadGridData(prefixTrait: String? = null,
-                             plotId: Int? = null,
-                             trait: Int? = null) {
+    private fun setupTableStyle() {
 
+        table.config.apply {
+            setHorizontalPadding(0)
+            setVerticalPadding(0)
+
+            isShowXSequence = false
+            isShowYSequence = false
+            isShowTableTitle = false
+
+            isFixedTitle = true
+
+            minTableWidth = resources.displayMetrics.widthPixels
+        }
+
+        table.setZoom(true, 2f, 0.5f)
+    }
+
+    private fun initialize(prefixTrait: String? = null, plotId: Int? = null, trait: Int? = null) {
+        try {
+            loadGridData(prefixTrait, plotId, trait)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            setResult(RESULT_CANCELED)
+            finish()
+        }
+    }
+
+    private fun loadGridData(prefixTrait: String?, plotId: Int?, trait: Int?) {
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-
-        val study = database.getFieldObject(studyId)
-
         val showLabel = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") == "value"
-
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
         //if row header was not chosen, then use the preference unique name
-        var rowHeader =
-            prefixTrait ?: preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader)
-            ?: ""
+        var rowHeader = prefixTrait ?: preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
 
-        if (rowHeader !in database.rangeColumnNames) {
-            rowHeader = uniqueHeader
-        }
+        if (rowHeader !in database.rangeColumnNames) rowHeader = uniqueHeader
 
         //if rowHeader was updated, update the preference
         preferences.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, rowHeader).apply()
 
-        if (rowHeader.isNotBlank()) {
+        if (rowHeader.isBlank()) return
 
-            //background processing
-            scope.launch {
+        //background processing
+        scope.launch {
+            //query database for visible traits
+            mTraits.clear()
 
-                //query database for visible traits
-                mTraits.clear()
-
-                val traitObjects = database.allTraitObjects
-                traitObjects.forEach {
-                    if (it.visible) {
-                        mTraits.add(it)
-                    }
+            database.allTraitObjects.forEach {
+                if (it.visible) {
+                    mTraits.add(it)
                 }
+            }
 
-                val traits = database.allTraitObjects
+            //expensive database call, only asks for the unique name plot attr and all visible traits
+            val cursor = database.getExportTableData(studyId, mTraits)
 
-                //expensive database call, only asks for the unique name plot attr and all visible traits
-                val cursor = database.getExportTableData(studyId, mTraits)
+            if (cursor.moveToFirst()) {
+                Log.d("DataGridActivity", "Query executed. Row count: ${cursor.count}")
 
-                if (cursor.moveToFirst()) {
+                mRowHeaders = arrayListOf()
+                mPlotIds = arrayListOf()
+                val dataArray = arrayListOf<Array<String>>()
 
-                    Log.d("DataGridActivity", "Query executed. Row count: ${cursor.count}")
+                try {
+                    do { //iterate over cursor results and populate lists of plot ids and related trait values
+                        val rowData = arrayListOf<String?>()
+                        val columns = arrayListOf<String>()
 
-                    mRowHeaders = arrayListOf()
+                        for (i in 0 until cursor.columnCount) {
+                            columns.add(cursor.getColumnName(i))
+                            rowData.add(cursor.getStringOrNull(i))
+                        }
 
-                    mPlotIds = arrayListOf()
+                        val rowHeaderIndex = columns.indexOf(rowHeader)
+                        //unique name column is always the first column
+                        val uniqueIndex = columns.indexOf(uniqueHeader)
 
-                    val dataMap = arrayListOf<List<CellData>>()
+                        if (uniqueIndex > -1) { //if it doesn't exist skip this row
+                            val id = rowData[uniqueIndex] ?: ""
+                            val header = if (rowHeaderIndex > -1) rowData[rowHeaderIndex] ?: "" else ""
 
-                    try {
+                            mRowHeaders.add(header) //add unique name row header
+                            mPlotIds.add(id)
 
-                        do { //iterate over cursor results and populate lists of plot ids and related trait values
+                            val rowValues = arrayListOf<String>()
 
-                            val rowData = arrayListOf<String?>()
-                            val columns = arrayListOf<String>()
-                            val columnCount = cursor.columnCount
+                            // ensure we create a value for each trait
+                            mTraits.forEach { trait ->
+                                val index = columns.indexOf(DataHelper.replaceIdentifiers(trait.name))
+                                var cellValue = ""
 
-                            for (i in 0 until columnCount) {
-                                try {
-                                    columns.add(cursor.getColumnName(i))
-                                    rowData.add(cursor.getStringOrNull(i))
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-                            }
+                                if (index > -1) {
+                                    val value = rowData[index] ?: ""
+                                    val repeatedValues = database.getRepeatedValues(studyId.toString(), id, trait.id)
 
-                            val rowHeaderIndex = columns.indexOf(rowHeader)
-
-                            //unique name column is always the first column
-                            val uniqueIndex = columns.indexOf(uniqueHeader)
-
-                            if (uniqueIndex > -1) { //if it doesn't exist skip this row
-
-                                val id = rowData[uniqueIndex] ?: ""
-
-                                val header = if (rowHeaderIndex > -1) columns[rowHeaderIndex] else ""
-
-                                val dataList = arrayListOf<CellData>()
-
-                                mRowHeaders.add(header) //add unique name row header
-
-                                mPlotIds.add(id)
-
-                                mTraits.forEachIndexed { _, variable ->
-
-                                    val index = columns.indexOf(DataHelper.replaceIdentifiers(variable.name))
-
-                                    if (index > -1) {
-
-                                        val value = rowData[index] ?: ""
-
-                                        val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
-
-                                        val repeatedValues =
-                                            database.getRepeatedValues(studyId.toString(), id, variable.id)
-
-                                        var cellValue = value
-
-                                        if (t != null) {
-
-                                            try {
-
-                                                cellValue = CategoryJsonUtil
-                                                    .flattenMultiCategoryValue(
-                                                        decode(value),
-                                                        showLabel
-                                                    )
-
-                                            } catch (e: Exception) {
-
-                                                e.printStackTrace()
-
-                                            }
+                                    if (trait.format in setOf("categorical", "multicat", "qualitative")) {
+                                        try {
+                                            cellValue = CategoryJsonUtil.flattenMultiCategoryValue(
+                                                CategoryJsonUtil.decode(value),
+                                                showLabel
+                                            )
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
                                         }
+                                    } else {
+                                        cellValue = value
+                                    }
 
-                                        //check repeated values and replace cellvalue with an ellipses
-
-                                        if (repeatedValues.size > 1) {
-
-                                            //data list is a trait row in the data grid
-                                            dataList.add(CellData("...", id))
-
-                                        } else {
-
-                                            dataList.add(CellData(cellValue, id))
-
-                                        }
+                                    //check repeated values and replace cellValue with an ellipses
+                                    if (repeatedValues.size > 1) {
+                                        cellValue = "..."
                                     }
                                 }
 
-                                dataMap.add(dataList)
+                                rowValues.add(cellValue)
                             }
 
-                        } while (cursor.moveToNext())
-
-                    } catch (e: java.lang.IllegalStateException) {
-
-                        withContext(Dispatchers.Main) {
-                            Utils.makeToast(this@DataGridActivity, getString(R.string.act_data_grid_cursor_failed))
+                            dataArray.add(rowValues.toTypedArray())
                         }
 
-                        e.printStackTrace()
+                    } while (cursor.moveToNext())
 
-                    }
 
-                    //send trait/plot indices to highlight the cell
-                    mAdapter = DataGridAdapter((trait ?: 1) - 1, (plotId ?: 1) - 1)
+                    withContext(Dispatchers.Main) {
+                        val columnTitles = mTraits.map { it.name }.toTypedArray()
 
-                    runOnUiThread {
-
-                        mTableView.setHasFixedWidth(true)
-
-                        mTableView.tableViewListener = this@DataGridActivity
-
-                        mTableView.isShowHorizontalSeparators = false
-
-                        mTableView.isShowVerticalSeparators = false
-
-                        mTableView.setAdapter(mAdapter)
-
-                        mAdapter.setAllItems(mTraits.map { HeaderData(it.name, it.name) },
-                            mRowHeaders.map { HeaderData(it, it) },
-                            dataMap.toList()
-                        )
-
-                        //scroll to the position of the current trait/plot id
-                        if (plotId != null && trait != null) {
-
-                            mTableView.scrollToColumnPosition(trait - 1)
-
-                            mTableView.scrollToRowPosition(plotId - 1)
-
-                        }
-                    }
-
-                    cursor.close() //always remember to close your cursor! :)
-
-                    //update the ui after background processing ends
-                    runOnUiThread {
-
-                        dataGridGroup.visibility = View.VISIBLE
+                        setupTableData(columnTitles, dataArray, plotId, trait)
 
                         progressBar.visibility = View.GONE
                     }
+
+                } catch (e: IllegalStateException) {
+                    withContext(Dispatchers.Main) {
+                        Utils.makeToast(
+                            this@DataGridActivity,
+                            getString(R.string.act_data_grid_cursor_failed)
+                        )
+                    }
+                    e.printStackTrace()
                 }
+
+                cursor.close()
             }
         }
     }
 
-    override fun onCellClicked(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {
+    private fun setupTableData(columnTitles: Array<String>, data: ArrayList<Array<String>>, plotId: Int?, trait: Int?) {
+        val headerColumnTitle = preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, "") ?: ""
+        val allColumnTitles = arrayOf(headerColumnTitle) + columnTitles
 
+        // add row headers to the data
+        val dataWithHeaders = data.mapIndexed { index, row ->
+            arrayOf(mRowHeaders[index]) + row
+        }.toTypedArray()
+
+        val tableData = ArrayTableData.create(
+            "DataGrid",
+            allColumnTitles,
+            ArrayTableData.transformColumnArray(dataWithHeaders),
+            object : IDrawFormat<String> {
+                val context = this@DataGridActivity
+
+                override fun measureWidth(column: Column<String>, position: Int, config: TableConfig): Int {
+                    return DensityUtils.dp2px(context, 120f)
+                }
+
+                override fun measureHeight(column: Column<String>, position: Int, config: TableConfig): Int {
+                    return DensityUtils.dp2px(context, 50f)
+                }
+
+                override fun draw(canvas: Canvas, rect: Rect, cellInfo: CellInfo<String>, config: TableConfig) {
+                    val paint = config.paint
+                    paint.style = Paint.Style.FILL
+
+                    val rowHeaderBgColor = TypedValue()
+                    val filledCellBgColor = TypedValue()
+                    val emptyCellBgColor = TypedValue()
+
+                    val rowHeaderTextColor = TypedValue()
+                    val cellTextColor = TypedValue()
+
+                    context.theme.resolveAttribute(R.attr.fb_color_primary_dark, rowHeaderBgColor, true)
+                    context.theme.resolveAttribute(R.attr.selectedItemBackground, filledCellBgColor, true)
+                    context.theme.resolveAttribute(R.attr.fb_color_background, emptyCellBgColor, true)
+                    context.theme.resolveAttribute(R.attr.fb_color_text_light, rowHeaderTextColor, true)
+                    context.theme.resolveAttribute(R.attr.fb_color_text_dark, cellTextColor, true)
+
+                    val text = cellInfo.value ?: cellInfo.data ?: ""
+
+                    // set background colors for cells
+                    paint.color = when {
+                        cellInfo.col == 0 -> rowHeaderBgColor.data
+                        text.isNotBlank() -> filledCellBgColor.data
+                        else -> emptyCellBgColor.data
+                    }
+
+                    // draw cell and fill color
+                    canvas.drawRect(
+                        (rect.left + 5).toFloat(),
+                        (rect.top + 5).toFloat(),
+                        (rect.right - 5).toFloat(),
+                        (rect.bottom - 5).toFloat(),
+                        paint
+                    )
+
+                    // set text colors
+                    paint.color = if (cellInfo.col == 0) {
+                        rowHeaderTextColor.data
+                    } else {
+                        cellTextColor.data
+                    }
+
+                    paint.textSize = DensityUtils.sp2px(
+                        context,
+                        14f
+                    ).toFloat()
+                    paint.textAlign = Paint.Align.CENTER
+
+                    val xPos = (rect.centerX()).toFloat()
+                    val yPos = rect.exactCenterY() - ((paint.descent() + paint.ascent()) / 2)
+
+                    // draw the text
+                    canvas.drawText(
+                        getCellTextDisplay(text, rect, paint),
+                        xPos,
+                        yPos,
+                        paint
+                    )
+                }
+            }
+        )
+
+        tableData.onItemClickListener =
+            TableData.OnItemClickListener<String> { _, _, _, col, row ->
+                if (col > 0) {
+                    onCellClicked(col - 1, row) // col - 1 as we have added rowHeaders
+                }
+            }
+
+        tableData.columns[0].isFixed = true
+        table.tableData = tableData
+    }
+
+    /**
+     * Get the text to be displayed in the table cell
+     * Use ellipsis if the string is too long to fit in the available width
+     * We can use binary search to efficiently find the max characters that can fit
+     */
+    private fun getCellTextDisplay(text: String, rect: Rect, paint: Paint): String {
+        val padding = DensityUtils.dp2px(this@DataGridActivity, 4f)
+        val availableWidth = rect.width() - (padding * 2)
+
+        val ellipsis = "..."
+        var displayText = text
+        val textWidth = paint.measureText(displayText)
+
+        if (textWidth > availableWidth) {
+            // binary search to find max chars
+            var left = 0
+            var right = text.length
+            while (left < right) {
+                val mid = (left + right + 1) / 2
+                val s = text.substring(0, mid) + ellipsis
+                if (paint.measureText(s) <= availableWidth) {
+                    left = mid
+                } else {
+                    right = mid - 1
+                }
+            }
+            displayText = text.substring(0, left) + ellipsis
+        }
+
+        return displayText
+    }
+
+    private fun onCellClicked(column: Int, row: Int) {
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-
-        //populate plotId clicked from parameters and global store
         val plotId = mPlotIds[row]
-
         val trait = mTraits[column]
 
         val repeatedValues = database.getRepeatedValues(studyId, plotId, trait.id)
 
         if (repeatedValues.size <= 1) {
-
             navigateFromValueClicked(plotId, column)
-
         } else {
-
-            //show alert dialog with repeated values
             showRepeatedValuesNavigatorDialog(repeatedValues)
         }
     }
 
     private fun navigateFromValueClicked(plotId: String, traitIndex: Int, rep: Int? = 1) {
-
-        //this is the onlick handler which displays a quick message and sets the intent result / finishes
         Utils.makeToast(applicationContext, plotId)
 
-        val returnIntent = Intent()
-
-        returnIntent.putExtra("result", plotId)
-
-        //the trait index is used to move collect activity to the clicked trait
-        returnIntent.putExtra("trait", traitIndex)
-
-        returnIntent.putExtra("rep", rep)
+        val returnIntent = Intent().apply {
+            putExtra("result", plotId)
+            putExtra("trait", traitIndex)
+            putExtra("rep", rep)
+        }
 
         setResult(RESULT_OK, returnIntent)
-
         finish()
     }
 
     private fun decodeValue(value: String): String {
-
-        val labelValPref: String =
-            preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") ?: "value"
-        val scale = decode(
-            value
-        )
+        val labelValPref = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") ?: "value"
+        val scale = CategoryJsonUtil.decode(value)
         return if (scale.isNotEmpty()) {
-            if (labelValPref == "value") {
-                scale[0].value
-            } else scale[0].label
+            if (labelValPref == "value") scale[0].value else scale[0].label
         } else ""
     }
 
     private fun showRepeatedValuesNavigatorDialog(repeatedValues: Array<ObservationModel>) {
-
         for (m in repeatedValues) {
             if (m.observation_variable_field_book_format in setOf("categorical", "multicat", "qualitative")) {
                 if (m.value.isNotEmpty()) {
@@ -453,36 +446,17 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
         val choices = repeatedValues.map { it.value }.filter { it.isNotBlank() }.toTypedArray()
 
-        //show a dialog to choose which value to navigate to
         AlertDialog.Builder(this, R.style.AppAlertDialog)
             .setTitle(R.string.dialog_data_grid_repeated_measures_title)
             .setSingleChoiceItems(choices, 0) { dialog, which ->
-
                 val value = repeatedValues[which]
-
                 val plotId = value.observation_unit_id
-
-                val traitIndex =
-                    mTraits.indexOfFirst { it.id == value.observation_variable_db_id.toString() }
+                val traitIndex = mTraits.indexOfFirst {
+                    it.id == value.observation_variable_db_id.toString()
+                }
 
                 navigateFromValueClicked(plotId, traitIndex, which + 1)
-
                 dialog.dismiss()
-
             }.create().show()
     }
-
-    //region unimplemented click events
-    override fun onCellDoubleClicked(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {}
-    override fun onCellLongPressed(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {}
-    override fun onColumnHeaderClicked(columnHeaderView: RecyclerView.ViewHolder, column: Int) {}
-    override fun onColumnHeaderDoubleClicked(
-        columnHeaderView: RecyclerView.ViewHolder,
-        column: Int
-    ) {}
-    override fun onColumnHeaderLongPressed(columnHeaderView: RecyclerView.ViewHolder, column: Int) {}
-    override fun onRowHeaderClicked(rowHeaderView: RecyclerView.ViewHolder, row: Int) {}
-    override fun onRowHeaderDoubleClicked(rowHeaderView: RecyclerView.ViewHolder, row: Int) {}
-    override fun onRowHeaderLongPressed(rowHeaderView: RecyclerView.ViewHolder, row: Int) {}
-    //endregion
 }

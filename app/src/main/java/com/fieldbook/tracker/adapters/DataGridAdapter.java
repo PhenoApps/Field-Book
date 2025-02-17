@@ -9,14 +9,14 @@ import android.widget.TextView;
 import com.evrencoskun.tableview.adapter.AbstractTableAdapter;
 import com.evrencoskun.tableview.adapter.recyclerview.holder.AbstractViewHolder;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.DataGridActivity;
+import com.fieldbook.tracker.activities.OldDataGridActivity;
 
 import org.jetbrains.annotations.NotNull;
 
 /**
  * https://github.com/evrencoskun/TableView/wiki
  */
-public class DataGridAdapter extends AbstractTableAdapter<DataGridActivity.HeaderData, DataGridActivity.HeaderData, DataGridActivity.CellData> {
+public class DataGridAdapter extends AbstractTableAdapter<OldDataGridActivity.HeaderData, OldDataGridActivity.HeaderData, OldDataGridActivity.CellData> {
 
     private final int mSelectedCol;
     private final int mSelectedRow;
@@ -81,7 +81,7 @@ public class DataGridAdapter extends AbstractTableAdapter<DataGridActivity.Heade
       * @see #onCreateCellViewHolder(ViewGroup, int);
       */
      @Override
-     public void onBindCellViewHolder(@NotNull AbstractViewHolder holder, DataGridActivity.CellData cellItemModel, int
+     public void onBindCellViewHolder(@NotNull AbstractViewHolder holder, OldDataGridActivity.CellData cellItemModel, int
              columnPosition, int rowPosition) {
 
          // Get the holder to update cell item text
@@ -148,7 +148,7 @@ public class DataGridAdapter extends AbstractTableAdapter<DataGridActivity.Heade
       */
      @Override
      public void onBindColumnHeaderViewHolder(@NotNull AbstractViewHolder holder,
-                                              DataGridActivity.HeaderData columnHeaderItemModel,
+                                              OldDataGridActivity.HeaderData columnHeaderItemModel,
                                               int position) {
 
          // Get the holder to update cell item text
@@ -204,7 +204,7 @@ public class DataGridAdapter extends AbstractTableAdapter<DataGridActivity.Heade
       * @see #onCreateRowHeaderViewHolder(ViewGroup, int) ;
       */
      @Override
-     public void onBindRowHeaderViewHolder(@NotNull AbstractViewHolder holder, DataGridActivity.HeaderData rowHeaderItemModel, int
+     public void onBindRowHeaderViewHolder(@NotNull AbstractViewHolder holder, OldDataGridActivity.HeaderData rowHeaderItemModel, int
              position) {
 
          // Get the holder to update row header item text
