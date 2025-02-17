@@ -265,7 +265,8 @@ class FileExploreActivity : ActivityDialog(), CoroutineScope by MainScope() {
 
                     if (excludedExtensions.contains(checkExtension(name))) continue
 
-                    if (includedExtensions.contains(checkExtension(name)) || file.isDirectory) {
+                    // Include files only if the extension is in the `include` list or no `include` list is provided
+                    if (includedExtensions.isEmpty() || includedExtensions.contains(checkExtension(name)) || file.isDirectory) {
                         val nextIndex = fileList.map { it.file }.binarySearch(name)
                         val index = if (nextIndex >= 0) nextIndex else -(nextIndex + 1)
 
