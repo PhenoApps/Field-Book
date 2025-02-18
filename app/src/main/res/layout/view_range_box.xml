@@ -2,17 +2,19 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <ProgressBar
+    <ProgressBar style="?android:attr/progressBarStyleHorizontal"
         android:id="@+id/plotsProgressBar"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:layout_width="match_parent"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:progressTint="?attr/colorAccent"
-        style="?android:attr/progressBarStyleHorizontal"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <ImageView
         android:id="@+id/rangeLeft"
@@ -41,26 +43,26 @@
         app:layout_constraintTop_toBottomOf="@+id/plotsProgressBar" />
 
     <LinearLayout
-        android:id="@+id/namesPlotRangeHolder"
-        android:layout_width="wrap_content"
+        android:id="@+id/namesHolderLayout"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/valuesPlotRangeHolder"
+        app:layout_constraintEnd_toStartOf="@id/valuesHolderLayout"
         app:layout_constraintStart_toEndOf="@+id/rangeLeft"
-        app:layout_constraintTop_toBottomOf="@+id/plotsProgressBar">
+        app:layout_constraintTop_toBottomOf="@+id/plotsProgressBar"
+        app:layout_constraintHorizontal_weight="1">
 
         <TextView
             android:id="@+id/primaryNameTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="right"
-            android:paddingRight="8dp"
             android:ellipsize="end"
+            android:layout_gravity="center"
             android:maxLines="1"
-            android:text="@string/search_results_dialog_range"
+            tools:text="row:"
             android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
 
@@ -68,18 +70,17 @@
             android:id="@+id/secondaryNameTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="right"
-            android:paddingRight="8dp"
             android:ellipsize="end"
+            android:layout_gravity="center"
             android:maxLines="1"
-            android:text="@string/search_results_dialog_plot"
+            tools:text="col:"
             android:textSize="?attr/fb_title_text_size"
             android:textStyle="bold" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/valuesPlotRangeHolder"
+        android:id="@+id/valuesHolderLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
@@ -87,8 +88,9 @@
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/rangeRight"
-        app:layout_constraintStart_toEndOf="@id/namesPlotRangeHolder"
-        app:layout_constraintTop_toBottomOf="@+id/plotsProgressBar">
+        app:layout_constraintStart_toEndOf="@id/namesHolderLayout"
+        app:layout_constraintTop_toBottomOf="@+id/plotsProgressBar"
+        app:layout_constraintHorizontal_weight="1">
 
         <TextView
             android:id="@+id/primaryIdTv"
@@ -99,7 +101,8 @@
             android:gravity="center"
             android:text=""
             android:textSize="?attr/fb_title_text_size"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="1"/>
 
         <TextView
             android:id="@+id/secondaryIdTv"
@@ -109,8 +112,8 @@
             android:gravity="center"
             android:text=""
             android:textSize="?attr/fb_title_text_size"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="13RPN00005" />
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
