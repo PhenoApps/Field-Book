@@ -44,6 +44,7 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
                 .putString(GeneralKeys.UNIQUE_NAME, field.unique_id)
                 .putString(GeneralKeys.PRIMARY_NAME, field.primary_id)
                 .putString(GeneralKeys.SECONDARY_NAME, field.secondary_id)
+                .putString(GeneralKeys.SEARCH_ATTRIBUTE, field.search_attribute)
                 .putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true)
                 .putString(GeneralKeys.LAST_PLOT, null).apply()
 

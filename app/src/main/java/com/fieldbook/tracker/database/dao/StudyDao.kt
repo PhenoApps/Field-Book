@@ -38,11 +38,11 @@ class StudyDao {
                 SELECT observation_unit_attribute_name 
                 FROM observation_units_attributes 
                 WHERE internal_id_observation_unit_attribute IN (
-                    SELECT distinct(observation_unit_attribute_db_id)
+                    SELECT observation_unit_attribute_db_id
                     FROM observation_units_values
                     WHERE study_id = ?
-                    GROUP BY observation_unit_attribute_db_id, observation_unit_value_name
-                    HAVING COUNT(*) = 1
+                    GROUP BY observation_unit_attribute_db_id
+                    HAVING COUNT(DISTINCT observation_unit_value_name) = COUNT(observation_unit_value_name)
                 )
             """
 
@@ -60,56 +60,17 @@ class StudyDao {
             }
         } ?: emptyList()
 
-        fun updateFieldUniqueId(studyId: Int, newUniqueAttribute: String) = withDatabase { db ->
-            db.beginTransaction()
-            try {
-                // Get the attribute ID for the new unique identifier
-                val attrIdQuery = """
-                    SELECT internal_id_observation_unit_attribute 
-                    FROM observation_units_attributes 
-                    WHERE study_id = ? AND observation_unit_attribute_name = ?
-                """
-                
-                val attrId = db.rawQuery(attrIdQuery, arrayOf(studyId.toString(), newUniqueAttribute))
-                    .use { cursor -> 
-                        if (cursor.moveToFirst()) cursor.getInt(0) else null 
-                    } ?: return@withDatabase
+        /**
+        * Updates the observation unit search attribute for a study record.
+        * This attribute is used to identify entries in the barcode search, by default it's the same as the unique_id
+        */
 
-                // Update studies table
-                db.execSQL(
-                    "UPDATE studies SET study_unique_id_name = ? WHERE internal_id_study = ?",
-                    arrayOf(newUniqueAttribute, studyId.toString())
-                )
-
-                // Update observation_units table using values from observation_units_values
-                val updateUnitsQuery = """
-                    UPDATE observation_units 
-                    SET observation_unit_db_id = (
-                        SELECT ouv.observation_unit_value_name 
-                        FROM observation_units_values ouv 
-                        WHERE ouv.observation_unit_id = observation_units.internal_id_observation_unit 
-                        AND ouv.observation_unit_attribute_db_id = ?
-                    )
-                    WHERE study_id = ?
-                """
-                db.execSQL(updateUnitsQuery, arrayOf(attrId.toString(), studyId.toString()))
-
-                // Update observations table using the new observation_unit_db_id values
-                val updateObsQuery = """
-                    UPDATE observations 
-                    SET observation_unit_id = (
-                        SELECT ou.observation_unit_db_id 
-                        FROM observation_units ou 
-                        WHERE ou.internal_id_observation_unit = observations.observation_unit_id
-                    )
-                    WHERE study_id = ?
-                """
-                db.execSQL(updateObsQuery, arrayOf(studyId.toString()))
-
-                db.setTransactionSuccessful()
-            } finally {
-                db.endTransaction()
-            }
+        fun updateSearchAttribute(studyId: Int, newSearchAttribute: String) = withDatabase { db ->
+            db.update(Study.tableName,
+                contentValuesOf("observation_unit_search_attribute" to newSearchAttribute),
+                "${Study.PK} = $studyId",
+                null
+            )
         }
 
         private fun fixPlotAttributes(db: SQLiteDatabase) {

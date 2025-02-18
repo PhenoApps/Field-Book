@@ -497,7 +497,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             loadUniqueAttributes()
             setOnAttributeSelectedListener(object : AttributeChooserDialog.OnAttributeSelectedListener {
                 override fun onAttributeSelected(label: String) {
-                    database.updateFieldUniqueId(field.exp_id, label)
+                    database.updateSearchAttribute(field.exp_id, label)
                     loadFieldDetails()
                 }
             })

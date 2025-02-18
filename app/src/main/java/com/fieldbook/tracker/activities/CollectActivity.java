@@ -925,7 +925,7 @@ public class CollectActivity extends ThemedActivity
         }
 
         //move to plot id
-        if (command.equals("id") || command.equals("barcode")) {
+        if (command.equals("id")) {
             int rangeSize = plotIndices.length;
             for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);
@@ -936,6 +936,26 @@ public class CollectActivity extends ThemedActivity
                         moveToResultCore(j);
                     } else moveToResultCore(j, trait);
 
+                    return true;
+                }
+            }
+        }
+
+        if (command.equals("barcode")) {
+            int rangeSize = plotIndices.length;
+            String searchAttribute = preferences.getString(GeneralKeys.SEARCH_ATTRIBUTE, "");
+            
+            for (int j = 1; j <= rangeSize; j++) {
+                rangeBox.setRangeByIndex(j - 1);
+                RangeObject ro = rangeBox.getCRange();
+                
+                // Get the search attribute value for this plot
+                String[] attributeValue = database.getDropDownRange(searchAttribute, ro.plot_id);
+                String searchValue = attributeValue != null && attributeValue.length > 0 ? attributeValue[0] : "";
+
+                // Match against search attribute first, fallback to plot_id
+                if (searchValue.equals(data) || ro.plot_id.equals(data)) {
+                    moveToResultCore(j);
                     return true;
                 }
             }
@@ -1847,7 +1867,7 @@ public class CollectActivity extends ThemedActivity
                 inputPlotId = barcodeId.getText().toString();
                 rangeBox.setAllRangeID();
                 int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id", rangeID, null, null, inputPlotId, -1);
+                moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
                 goToId.dismiss();
             }
         });

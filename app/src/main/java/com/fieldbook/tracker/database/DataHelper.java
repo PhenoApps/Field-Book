@@ -893,9 +893,9 @@ public class DataHelper {
         return StudyDao.Companion.getPossibleUniqueAttributes(studyId);
     }
 
-    public void updateFieldUniqueId(int studyId, String newUniqueAttribute) {
+    public void updateSearchAttribute(int studyId, String newSearchAttribute) {
         open();
-        StudyDao.Companion.updateFieldUniqueId(studyId, newUniqueAttribute);
+        StudyDao.Companion.updateSearchAttribute(studyId, newSearchAttribute);
     }
 
     public void updateImages(List<FieldBookImage> images) {
@@ -3063,24 +3063,12 @@ public class DataHelper {
 
             }
 
-            if (oldVersion <= 10 && newVersion >= 11) {
-
-                // modify studies table for better handling of brapi study attributes
-                db.execSQL("ALTER TABLE studies ADD COLUMN import_format TEXT");
-                db.execSQL("ALTER TABLE studies ADD COLUMN date_sync TEXT");
-                helper.populateImportFormat(db);
-                helper.fixStudyAliases(db);
-
-            }
-
             if (oldVersion <= 11 && newVersion >= 12) {
-
-                // Add observation_unit_search_attribute column to studies table
+                // Add observation_unit_search_attribute column to studies table, use study_unique_id_name as default value
                 db.execSQL("ALTER TABLE studies ADD COLUMN observation_unit_search_attribute TEXT");
-
-                // Populate the new column with the default value from study_unique_id_name
                 db.execSQL("UPDATE studies SET observation_unit_search_attribute = study_unique_id_name");
             }
+
         }
     }
 }
