@@ -442,18 +442,17 @@ class StudyDao {
         /**
          * This function should always be called within a transaction.
          */
-        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) =
-            withDatabase { db ->
+        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) = withDatabase { db ->
 
-                val names = getNames(studyId)!!
+            val names = getNames(studyId)!!
 
-                //TODO: indexOf can return -1 which leads to array out of bounds exception
-                //input data corresponds to original database column names
-                val uniqueIndex = columns.indexOf(names.unique)
-                val primaryIndex = columns.indexOf(names.primary)
-                val secondaryIndex = columns.indexOf(names.secondary)
+            //TODO: indexOf can return -1 which leads to array out of bounds exception
+            //input data corresponds to original database column names
+            val uniqueIndex = columns.indexOf(names.unique)
+            val primaryIndex = columns.indexOf(names.primary)
+            val secondaryIndex = columns.indexOf(names.secondary)
 
-                //TODO remove when we handle primary/secondary ids better
+            //TODO remove when we handle primary/secondary ids better
             //check if data size matches the columns size, on mismatch fill with dummy data
             //mainly fixes issues with BrAPI when xtype/ytype and row/col values are not given
             val actualData = if (data.size != columns.size) {
@@ -483,14 +482,16 @@ class StudyDao {
 
             columns.forEachIndexed { index, it ->
 
-                val attrId = ObservationUnitAttributeDao.getIdByName(it)
+                if (it != "geo_coordinates") {
+                    val attrId = ObservationUnitAttributeDao.getIdByName(it)
 
-                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                    Study.FK to studyId,
-                    ObservationUnit.FK to rowid,
-                    ObservationUnitAttribute.FK to attrId,
-                    "observation_unit_value_name" to actualData[index]
-                ))
+                    db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                        Study.FK to studyId,
+                        ObservationUnit.FK to rowid,
+                        ObservationUnitAttribute.FK to attrId,
+                        "observation_unit_value_name" to actualData[index]
+                    ))
+                }
             }
 
             if (primaryIndex < 0) {

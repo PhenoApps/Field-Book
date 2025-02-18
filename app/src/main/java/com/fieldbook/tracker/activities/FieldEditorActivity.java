@@ -39,7 +39,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -47,10 +46,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiActivity;
-import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity;
-import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity;
 import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
@@ -186,6 +183,10 @@ public class FieldEditorActivity extends ThemedActivity
 
         FloatingActionButton fab = findViewById(R.id.newField);
         fab.setOnClickListener(v -> handleImportAction());
+        fab.setOnLongClickListener(v -> {
+            showFileDialog();
+            return true;
+        });
 
         searchBar = findViewById(R.id.act_fields_sb);
 
@@ -1057,7 +1058,7 @@ public class FieldEditorActivity extends ThemedActivity
 
             new AlertDialog.Builder(this, R.style.AppAlertDialog)
                     .setTitle(R.string.dialog_save_error_title)
-                    .setPositiveButton(org.phenoapps.androidlibrary.R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
+                    .setPositiveButton(R.string.dialog_ok, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
                     .setMessage(R.string.sort_dialog_error_saving)
                     .create()
                     .show();

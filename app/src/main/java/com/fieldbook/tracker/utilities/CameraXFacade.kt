@@ -60,29 +60,40 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
     }
 
     fun bindIdentity(
-        onBind: (Camera, List<Size>) -> Unit
+        onBind: (Camera, List<Size>) -> Unit,
+        onFail: () -> Unit
     ) {
 
         unbind()
 
-        val camera = cameraXInstance.get().bindToLifecycle(
-            context as LifecycleOwner,
-            frontSelector,
-        )
+        try {
 
-        val info = Camera2CameraInfo.from(camera.cameraInfo)
+            val camera = cameraXInstance.get().bindToLifecycle(
+                context as LifecycleOwner,
+                frontSelector,
+            )
 
-        val configs =
-            info.getCameraCharacteristic(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+            val info = Camera2CameraInfo.from(camera.cameraInfo)
 
-        val allSizes = (configs?.getOutputSizes(ImageFormat.JPEG) ?: arrayOf()).toList()
+            val configs =
+                info.getCameraCharacteristic(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
 
-        //get all sizes that are 4:3 aspect ratio
-        val aspectRatioSizes = allSizes.filter {
-            it.width.toFloat() / it.height.toFloat() == 4f / 3f
+            val allSizes = (configs?.getOutputSizes(ImageFormat.JPEG) ?: arrayOf()).toList()
+
+            //get all sizes that are 4:3 aspect ratio
+            val aspectRatioSizes = allSizes.filter {
+                it.width.toFloat() / it.height.toFloat() == 4f / 3f
+            }
+
+            onBind(camera, aspectRatioSizes)
+
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+
+            onFail()
+
         }
-
-        onBind(camera, aspectRatioSizes)
     }
 
     fun bindFrontCapture(

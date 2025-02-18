@@ -104,9 +104,6 @@ class RangeBoxView : ConstraintLayout {
         firstName = controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
         secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
         uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-
-        refreshCursor()
-
     }
 
     constructor(ctx: Context) : super(ctx)
@@ -634,6 +631,9 @@ class RangeBoxView : ConstraintLayout {
 
     private fun moveToNextUncollectedObs(currentPos: Int, direction: Int, traits: ArrayList<TraitObject>): Int {
 
+        val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+        val exportDataCursor = controller.getDatabase().getExportTableDataShort(studyId, uniqueName, traits)
         val traitNames = traits.map { it.name }
 
         exportDataCursor?.use { cursor ->
@@ -713,13 +713,5 @@ class RangeBoxView : ConstraintLayout {
 
     fun clickRight() {
         rangeRight.performClick()
-    }
-
-    fun refreshCursor() {
-        exportDataCursor?.close()
-        val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-        val traits = controller.getDatabase().visibleTraitObjects
-        exportDataCursor = controller.getDatabase().getExportTableDataShort(studyId, uniqueName, traits)
     }
 }

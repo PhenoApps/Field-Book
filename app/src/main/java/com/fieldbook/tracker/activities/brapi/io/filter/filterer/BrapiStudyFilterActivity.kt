@@ -119,7 +119,7 @@ class BrapiStudyFilterActivity(
             checked = false,
             id = model.study.studyDbId,
             label = model.study.studyName,
-            subLabel = model.trialName ?: model.study.locationName
+            subLabel = model.trialName ?: model.study.locationName ?: ""
         )
     }
 
