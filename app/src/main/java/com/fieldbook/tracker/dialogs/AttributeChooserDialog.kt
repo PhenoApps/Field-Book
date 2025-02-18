@@ -23,7 +23,11 @@ import com.google.android.material.tabs.TabLayout
  * Each tab will load data into a recycler view that lets user choose infobar prefixes.
  */
 
-open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.AttributeAdapterController {
+open class AttributeChooserDialog(
+    private val showTraits: Boolean = true,
+    private val showOther: Boolean = true,
+    private val uniqueOnly: Boolean = false
+) : DialogFragment(), AttributeAdapter.AttributeAdapterController {
 
     companion object {
         const val TAG = "AttributeChooserDialog"
@@ -31,12 +35,6 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
 
     interface OnAttributeSelectedListener {
         fun onAttributeSelected(label: String)
-    }
-
-    private var loadUniqueAttributesOnly = false
-
-    fun loadUniqueAttributes() {
-        loadUniqueAttributesOnly = true
     }
 
     private lateinit var tabLayout: TabLayout
@@ -60,6 +58,10 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
         recyclerView.layoutManager = LinearLayoutManager(requireActivity())
         recyclerView.adapter = AttributeAdapter(this, null)
 
+        //toggle view of traits/other based on class param
+        tabLayout.getTabAt(1)?.view?.visibility = if (showTraits) TabLayout.VISIBLE else TabLayout.GONE
+        tabLayout.getTabAt(2)?.view?.visibility = if (showOther) TabLayout.VISIBLE else TabLayout.GONE
+
         val dialog = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
             .setView(view)
             .setNegativeButton(android.R.string.cancel, null)
@@ -71,19 +73,18 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
             toggleProgressVisibility(true)
             BackgroundUiTask.execute(
                 backgroundBlock = {
-                    if (loadUniqueAttributesOnly) {
+                    if (uniqueOnly) {
                         val prefs = PreferenceManager.getDefaultSharedPreferences(requireActivity())
                         val activeFieldId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
-                        Log.d(TAG, "Loading unique attributes for field ID: $activeFieldId")
                         val activity = requireActivity() as FieldEditorActivity
                         attributes = activity.getDatabase().getPossibleUniqueAttributes(activeFieldId)?.toTypedArray() ?: emptyArray()
-                        Log.d(TAG, "Final attributes array size: ${attributes.size}")
                     } else {
                         loadData()
                     }
                 },
                 uiBlock = {
-                    if (loadUniqueAttributesOnly) {
+                    toggleProgressVisibility(false)
+                    if (uniqueOnly) {
                         loadTab(getString(R.string.dialog_att_chooser_attributes))
                     } else {
                         setupTabLayout()

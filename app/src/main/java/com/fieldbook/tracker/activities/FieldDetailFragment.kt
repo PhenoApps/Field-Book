@@ -195,7 +195,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             fieldId?.let { id ->
                 val field = database.getFieldObject(id)
                 field?.let {
-                    showEditUniqueIdDialog(it)
+                    showChangeSearchAttributeDialog(it)
                 }
             }
         }
@@ -451,50 +451,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         dialog.show()
     }
 
-//    private fun showEditUniqueIdDialog(field: FieldObject) {
-//        val inflater = requireActivity().layoutInflater
-//        val dialogView = inflater.inflate(R.layout.dialog_field_edit_unique, null)
-//
-//        val uniqueDropdown = dialogView.findViewById<AutoCompleteTextView>(R.id.unique_dropdown)
-//        val errorMessageView = dialogView.findViewById<TextView>(R.id.error_message)
-//
-//        // Get list of possible unique attributes
-//        val uniqueOptions = database.getPossibleUniqueAttributes(field.exp_id)
-//        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, uniqueOptions)
-//        uniqueDropdown.setAdapter(adapter)
-//
-//        // Set current value if exists
-//        field.unique_id?.let { uniqueDropdown.setText(it) }
-//
-//        val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-//            .setTitle(getString(R.string.field_edit_unique_id))
-//            .setView(dialogView)
-//            .setPositiveButton(getString(R.string.dialog_save), null)
-//            .setNegativeButton(getString(R.string.dialog_cancel), null)
-//
-//        val dialog = builder.create()
-//
-//        dialog.setOnShowListener {
-//            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-//            positiveButton.setOnClickListener {
-//                val selectedAttribute = uniqueDropdown.text.toString()
-//
-//                if (selectedAttribute.isNotBlank() && uniqueOptions.contains(selectedAttribute)) {
-//                    database.updateFieldUniqueId(field.exp_id, selectedAttribute)
-//                    loadFieldDetails()
-//                    dialog.dismiss()
-//                } else {
-//                    showErrorMessage(errorMessageView, getString(R.string.invalid_unique_id_selection))
-//                }
-//            }
-//        }
-//
-//        dialog.show()
-//    }
-
-    private fun showEditUniqueIdDialog(field: FieldObject) {
-        val dialog = AttributeChooserDialog().apply {
-            loadUniqueAttributes()
+    private fun showChangeSearchAttributeDialog(field: FieldObject) {
+        val dialog = AttributeChooserDialog(showTraits = false, showOther = false, uniqueOnly = true).apply {
             setOnAttributeSelectedListener(object : AttributeChooserDialog.OnAttributeSelectedListener {
                 override fun onAttributeSelected(label: String) {
                     database.updateSearchAttribute(field.exp_id, label)

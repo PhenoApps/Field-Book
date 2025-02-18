@@ -346,6 +346,7 @@
     <string name="main_toolbar_next_entry_no_data">Next entry with no data</string>
 
     <!-- InfoBars -->
+    <string name="dialog_att_chooser_unique_attributes">Unique Attributes</string>
     <string name="dialog_att_chooser_attributes">Attributes</string>
     <string name="dialog_att_chooser_traits">Traits</string>
     <string name="dialog_att_chooser_other">Other</string>
