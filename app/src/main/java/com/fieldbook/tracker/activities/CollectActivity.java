@@ -846,7 +846,6 @@ public class CollectActivity extends ThemedActivity
         String[] traits = database.getVisibleTrait();
         if (traits != null) {
             traitBox.initTraitType(traits, rangeSuppress);
-
         }
     }
 
