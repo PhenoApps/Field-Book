@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.OpenableColumns;
 import android.text.Html;
 import android.text.Spanned;
@@ -45,10 +46,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiActivity;
-import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity;
-import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity;
 import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
@@ -70,6 +69,7 @@ import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.views.SearchBar;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -102,6 +102,7 @@ public class FieldEditorActivity extends ThemedActivity
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
     private static final int REQUEST_CLOUD_FILE_CODE = 5;
     private static final int REQUEST_BRAPI_IMPORT_ACTIVITY = 10;
+
     private ArrayList<FieldObject> fieldList;
     public FieldAdapter mAdapter;
     public EditText trait;
@@ -116,6 +117,7 @@ public class FieldEditorActivity extends ThemedActivity
     private ActionMode actionMode;
     private TextView customTitleView;
     public ExportUtil exportUtil;
+    private SearchBar searchBar;
 
     @Inject
     DataHelper database;
@@ -181,6 +183,12 @@ public class FieldEditorActivity extends ThemedActivity
 
         FloatingActionButton fab = findViewById(R.id.newField);
         fab.setOnClickListener(v -> handleImportAction());
+        fab.setOnLongClickListener(v -> {
+            showFileDialog();
+            return true;
+        });
+
+        searchBar = findViewById(R.id.act_fields_sb);
 
         queryAndLoadFields();
 
@@ -288,7 +296,11 @@ public class FieldEditorActivity extends ThemedActivity
     };
 
     public void setActiveField(int studyId) {
-        FieldObject field = database.getFieldObject(studyId);
+
+        //get current field id and compare the input, only switch if they are different
+        int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+        if (currentFieldId == studyId) return;
+
         fieldSwitcher.switchField(studyId);
         CollectActivity.reloadData = true;
         if (mAdapter != null) {
@@ -446,7 +458,7 @@ public class FieldEditorActivity extends ThemedActivity
     public void loadBrAPI() {
 
         if (Utils.isConnected(this)) {
-            if (prefs.getBoolean(GeneralKeys.EXPERIMENTAL_NEW_BRAPI_UI, false)) {
+            if (prefs.getBoolean(GeneralKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)) {
                 Intent intent = new Intent(this, BrapiStudyFilterActivity.class);
                 BrapiFilterCache.Companion.checkClearCache(this);
                 startActivityForResult(intent, REQUEST_BRAPI_IMPORT_ACTIVITY);
@@ -1046,7 +1058,7 @@ public class FieldEditorActivity extends ThemedActivity
 
             new AlertDialog.Builder(this, R.style.AppAlertDialog)
                     .setTitle(R.string.dialog_save_error_title)
-                    .setPositiveButton(org.phenoapps.androidlibrary.R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
+                    .setPositiveButton(R.string.dialog_ok, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
                     .setMessage(R.string.sort_dialog_error_saving)
                     .create()
                     .show();
@@ -1062,6 +1074,9 @@ public class FieldEditorActivity extends ThemedActivity
             fieldList = database.getAllFieldObjects(); // Fetch data from the database
             mAdapter.submitList(new ArrayList<>(fieldList), () -> recyclerView.scrollToPosition(0));
             mAdapter.notifyDataSetChanged();
+
+            new Handler(Looper.getMainLooper()).postDelayed(this::setupSearchBar, 100);
+
         } catch (Exception e) {
             Log.e(TAG, "Error updating fields list", e);
         }
@@ -1085,4 +1100,34 @@ public class FieldEditorActivity extends ThemedActivity
         return fieldSwitcher;
     }
 
+    private void setupSearchBar() {
+
+        if (recyclerView.canScrollVertically(1) || recyclerView.canScrollVertically(-1)) {
+
+            searchBar.setVisibility(View.VISIBLE);
+
+            searchBar.editText.addTextChangedListener(new android.text.TextWatcher() {
+
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    // Do nothing
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    mAdapter.setTextFilter(s.toString());
+                }
+
+                @Override
+                public void afterTextChanged(android.text.Editable s) {
+                    // Do nothing
+                }
+            });
+
+        } else {
+
+            searchBar.setVisibility(View.GONE);
+
+        }
+    }
 }

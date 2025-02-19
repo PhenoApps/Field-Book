@@ -20,6 +20,7 @@ import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.ThemedActivity;
+import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment;
 import com.fieldbook.tracker.brapi.model.BrapiProgram;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
@@ -36,6 +37,8 @@ public class BrapiProgramActivity extends ThemedActivity {
     private BrapiPaginationManager paginationManager;
     private ListView programsView;
     private final ArrayList<BrapiProgram> programsList = new ArrayList<>();
+
+    private BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -141,7 +144,9 @@ public class BrapiProgramActivity extends ThemedActivity {
             (BrapiProgramActivity.this).runOnUiThread(() -> {
                 // Show error message. We don't finish the activity intentionally.
                 if(BrAPIService.isConnectionError(code)){
-                    BrAPIService.handleConnectionError(BrapiProgramActivity.this, code);
+                    if (BrAPIService.handleConnectionError(BrapiProgramActivity.this, code)) {
+                        showBrapiAuthDialog();
+                    }
                 }else {
                     Toast.makeText(getApplicationContext(), getString(R.string.brapi_programs_error), Toast.LENGTH_LONG).show();
                 }
@@ -149,6 +154,18 @@ public class BrapiProgramActivity extends ThemedActivity {
             });
             return null;
         });
+    }
+
+    private void showBrapiAuthDialog() {
+        try {
+            runOnUiThread(() -> {
+                if (!brapiAuth.isVisible()) {
+                    brapiAuth.show(getSupportFragmentManager(), "BrapiAuthDialogFragment");
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private ListAdapter buildProgramsArrayAdapter(List<BrapiProgram> programs) {

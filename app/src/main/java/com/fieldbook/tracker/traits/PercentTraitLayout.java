@@ -145,7 +145,7 @@ public class PercentTraitLayout extends BaseTraitLayout {
                 getCollectInputView().setText("NA");
                 getSeekBar().setProgress(0);
             } else if (!model.getValue().isEmpty()) {
-                getSeekBar().setProgress(Integer.parseInt(model.getValue()));
+                setSeekBarProgress(model.getValue());
             } else {
                 super.refreshLayout(onNew);
             }
@@ -160,11 +160,10 @@ public class PercentTraitLayout extends BaseTraitLayout {
 
             // Default to max 100 if maximum is not set
             String maxString = getCurrentTrait().getMaximum();
-            int max = (maxString != null && !maxString.isEmpty()) ? Integer.parseInt(maxString) : 100;
-            seekBar.setMax(max);
+            setSeekBarMax(maxString);
 
             seekBar.setOnSeekBarChangeListener(null);
-            seekBar.setProgress(Integer.parseInt(value));
+            setSeekBarProgress(value);
             seekBar.setOnSeekBarChangeListener(seekListener);
 
         } else if (value != null && value.equals("NA")) {
@@ -215,7 +214,7 @@ public class PercentTraitLayout extends BaseTraitLayout {
             seekBar.setMax(Integer.parseInt(max));
         }
         seekBar.setOnSeekBarChangeListener(null);
-        seekBar.setProgress(Integer.parseInt(getDefaultValue()));
+        setSeekBarProgress(getDefaultValue());
         seekBar.setOnSeekBarChangeListener(seekListener);
     }
 
@@ -239,15 +238,41 @@ public class PercentTraitLayout extends BaseTraitLayout {
             if (model.getValue().equals("NA")) {
                 seekBar.setProgress(0);
             } else {
-                seekBar.setProgress(Integer.parseInt(model.getValue()));
+                setSeekBarProgress(model.getValue());
             }
         } else {
             String defaultValue = getDefaultValue();
-            // clear the editText when deleted
             getCollectInputView().setText("");
-            seekBar.setProgress(Integer.parseInt(defaultValue));
+            setSeekBarProgress(defaultValue);
         }
 
         seekBar.setOnSeekBarChangeListener(seekListener);
+    }
+
+    private void setSeekBarProgress(String value) {
+
+        ((CollectActivity) controller.getContext()).runOnUiThread(() -> {
+            try {
+                seekBar.setProgress(Integer.parseInt(value));
+                return;
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            seekBar.setProgress(0);
+        });
+    }
+
+    private void setSeekBarMax(String max) {
+        ((CollectActivity) controller.getContext()).runOnUiThread(() -> {
+            try {
+                if (max != null && !max.isEmpty()) {
+                    seekBar.setMax(Integer.parseInt(max));
+                }
+                return;
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            seekBar.setMax(100);
+        });
     }
 }

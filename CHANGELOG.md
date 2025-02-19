@@ -8,10 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Access full add field menu via long-press (https://github.com/PhenoApps/Field-Book/pull/1149)
+- geo_coordinates are now pulled in via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1149)
 
 ### Changed
 
 ### Fixed
+- Numerous bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1149)
+
+## [v6.0.6] - 2025-01-24
+
+### Fixed
+- Numerous bug fixes and enhancements 
+
+## [v6.0.5] - 2025-01-22
+
+### Added
+- Search box added to field list (https://github.com/PhenoApps/Field-Book/pull/1125)
+
+### Changed
+- BrAPI export no longer crashes when authentication token is expired (https://github.com/PhenoApps/Field-Book/pull/1134)
+
+### Fixed
+- Numerous bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1135)
 
 ## [v6.0.3] - 2025-01-06
 
@@ -567,3 +586,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.0.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.4
 
 [v6.0.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.3
+[v6.0.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.4
+
+[v6.0.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.5
+[v6.0.6]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.6

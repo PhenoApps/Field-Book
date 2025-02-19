@@ -117,48 +117,56 @@ class FileExploreActivity : ActivityDialog(), CoroutineScope by MainScope() {
 
                 mainListView?.onItemClickListener =
                     AdapterView.OnItemClickListener { _: AdapterView<*>?, _: View?, which: Int, _: Long ->
-                        chosenFile = fileList[which].file
-                        //File sel = new File(path + "/" + chosenFile);
-                        val file = path?.findFile(chosenFile!!)
-                        if (file != null && file.exists() && file.isDirectory) {
-                            firstLvl = false
 
-                            // Adds chosen directory to list
-                            str.add(chosenFile)
-                            fileList.clear()
-                            path = file
+                        launch(Dispatchers.IO) {
 
-                            loadFilesProgress(file, exclude, include)
+                            chosenFile = fileList[which].file
+                            //File sel = new File(path + "/" + chosenFile);
+                            val file = path?.findFile(chosenFile!!)
+                            if (file != null && file.exists() && file.isDirectory) {
+                                firstLvl = false
 
-                        } else if (chosenFile.equals(getString(R.string.activity_file_explorer_up_directory_name))
-                            && (file == null || !file.exists())
-                        ) {
-                            // present directory removed from list
-                            str.removeAt(str.size - 1)
+                                // Adds chosen directory to list
+                                str.add(chosenFile)
+                                fileList.clear()
+                                path = file
 
-                            // path modified to exclude present directory
-                            path = path?.parentFile
-
-                            fileList.clear()
-
-                            // if there are no more directories in the list, then
-                            // its the first level
-                            if (str.isEmpty()) {
-                                firstLvl = true
-                            }
-
-                            loadFilesProgress(path, exclude, include)
-
-                        } else {
-                            try {
-                                if (file != null && file.exists()) {
-                                    val returnIntent = Intent()
-                                    returnIntent.putExtra(EXTRA_RESULT_KEY, file.uri.toString())
-                                    setResult(RESULT_OK, returnIntent)
-                                    finish()
+                                withContext(Dispatchers.Main) {
+                                    loadFilesProgress(file, exclude, include)
                                 }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
+
+                            } else if (chosenFile.equals(getString(R.string.activity_file_explorer_up_directory_name))
+                                && (file == null || !file.exists())
+                            ) {
+                                // present directory removed from list
+                                str.removeAt(str.size - 1)
+
+                                // path modified to exclude present directory
+                                path = path?.parentFile
+
+                                fileList.clear()
+
+                                // if there are no more directories in the list, then
+                                // its the first level
+                                if (str.isEmpty()) {
+                                    firstLvl = true
+                                }
+
+                                withContext(Dispatchers.Main) {
+                                    loadFilesProgress(path, exclude, include)
+                                }
+
+                            } else {
+                                try {
+                                    if (file != null && file.exists()) {
+                                        val returnIntent = Intent()
+                                        returnIntent.putExtra(EXTRA_RESULT_KEY, file.uri.toString())
+                                        setResult(RESULT_OK, returnIntent)
+                                        finish()
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
                             }
                         }
                     }
@@ -257,7 +265,8 @@ class FileExploreActivity : ActivityDialog(), CoroutineScope by MainScope() {
 
                     if (excludedExtensions.contains(checkExtension(name))) continue
 
-                    if (includedExtensions.contains(checkExtension(name)) || file.isDirectory) {
+                    // Include files only if the extension is in the `include` list or no `include` list is provided
+                    if (includedExtensions.isEmpty() || includedExtensions.contains(checkExtension(name)) || file.isDirectory) {
                         val nextIndex = fileList.map { it.file }.binarySearch(name)
                         val index = if (nextIndex >= 0) nextIndex else -(nextIndex + 1)
 

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/main_primary_transparent"
     android:orientation="vertical">
 
     <TextView
@@ -13,7 +11,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="70dp"
-        android:textColor="@color/main_color_text_dark"
         android:text="" />
 
     <TextView
@@ -23,14 +20,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="@color/main_color_text_dark"
         android:text="" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/setup_rv"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        android:orientation="vertical">
 
+        <com.fieldbook.tracker.views.OptionalSetupItem
+            android:id="@+id/load_sample_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.fieldbook.tracker.views.OptionalSetupItem
+            android:id="@+id/enable_tutorial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.fieldbook.tracker.views.OptionalSetupItem
+            android:id="@+id/high_contrast_theme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 </LinearLayout>
