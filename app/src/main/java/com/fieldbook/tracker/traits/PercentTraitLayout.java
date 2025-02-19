@@ -68,7 +68,7 @@ public class PercentTraitLayout extends BaseTraitLayout {
 
         seekListener = new SeekBar.OnSeekBarChangeListener() {
 
-            public void onProgressChanged(SeekBar sb, int progress, boolean arg2) {
+            public void onProgressChanged(SeekBar sb, int progress, boolean fromUser) {
                 int minimum = 0;
                 if (getCurrentTrait() != null) {
                     try {
@@ -80,7 +80,13 @@ public class PercentTraitLayout extends BaseTraitLayout {
                 if (sb.getProgress() < minimum)
                     sb.setProgress(minimum);
 
-                setCurrentValueText(sb.getProgress(), Color.parseColor(getDisplayColor()));
+                getCollectInputView().setText(sb.getProgress() + "%");
+
+                // check if the change was from user interaction.
+                // useful when navigating across repeated values
+                if (fromUser) {
+                    setCurrentValueAsEdited();
+                }
             }
 
             public void onStartTrackingTouch(SeekBar sb) {
@@ -157,16 +163,12 @@ public class PercentTraitLayout extends BaseTraitLayout {
             int max = (maxString != null && !maxString.isEmpty()) ? Integer.parseInt(maxString) : 100;
             seekBar.setMax(max);
 
-            int textColor = value.equals(getDefaultValue()) ? Color.BLACK : Color.parseColor(getDisplayColor());
-            setCurrentValueText(value, textColor);
-
             seekBar.setOnSeekBarChangeListener(null);
             seekBar.setProgress(Integer.parseInt(value));
             seekBar.setOnSeekBarChangeListener(seekListener);
 
         } else if (value != null && value.equals("NA")) {
             getCollectInputView().setText("NA");
-            getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
             seekBar.setProgress(0);
         }
     }
@@ -181,7 +183,8 @@ public class PercentTraitLayout extends BaseTraitLayout {
     @Override
     public void afterLoadDefault(CollectActivity act) {
         super.afterLoadDefault(act);
-        updateLoadBarValue(getDefaultValue());
+        getCollectInputView().setText(getDefaultValue() + "%");
+        updateLoadBar();
     }
 
     @Override
@@ -216,11 +219,6 @@ public class PercentTraitLayout extends BaseTraitLayout {
         seekBar.setOnSeekBarChangeListener(seekListener);
     }
 
-    private void updateLoadBarValue(String value) {
-        setCurrentValueText(value, Color.BLACK);
-        updateLoadBar();
-    }
-
     private String getDefaultValue() {
         String defaultValue = "0";
         if (getCurrentTrait().getDefaultValue() != null
@@ -230,18 +228,6 @@ public class PercentTraitLayout extends BaseTraitLayout {
         return defaultValue;
     }
 
-    private void setCurrentValueText(int value, int color) {
-        setCurrentValueText(String.valueOf(value), color);
-    }
-
-    private void setCurrentValueText(String value, int color) {
-        getCollectInputView().setTextColor(color);
-        if (value.isEmpty())
-            getCollectInputView().setText(value);
-        else
-            getCollectInputView().setText(value + "%");
-    }
-
     @Override
     public void deleteTraitListener() {
         removeTrait(getCurrentTrait());
@@ -249,12 +235,16 @@ public class PercentTraitLayout extends BaseTraitLayout {
         ObservationModel model = getCurrentObservation();
         seekBar.setOnSeekBarChangeListener(null);
         if (model != null) {
-            setCurrentValueText(model.getValue(), Color.BLACK);
-            seekBar.setProgress(Integer.parseInt(model.getValue()));
+            getCollectInputView().setText(model.getValue() + "%");
+            if (model.getValue().equals("NA")) {
+                seekBar.setProgress(0);
+            } else {
+                seekBar.setProgress(Integer.parseInt(model.getValue()));
+            }
         } else {
             String defaultValue = getDefaultValue();
             // clear the editText when deleted
-            setCurrentValueText("", Color.BLACK);
+            getCollectInputView().setText("");
             seekBar.setProgress(Integer.parseInt(defaultValue));
         }
 
