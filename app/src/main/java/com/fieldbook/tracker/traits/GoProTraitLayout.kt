@@ -17,7 +17,6 @@ import com.fieldbook.tracker.utilities.FileUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.phenoapps.fragments.gopro.GoProFragment
 import org.threeten.bp.OffsetDateTime
 
 @AndroidEntryPoint
@@ -219,7 +218,7 @@ class GoProTraitLayout :
 
         styledPlayerView?.player = controller.getGoProApi().createPlayer()
 
-        Log.i(GoProFragment.TAG, "Player created")
+        Log.i(TAG, "Player created")
     }
 
     private fun connect() {
