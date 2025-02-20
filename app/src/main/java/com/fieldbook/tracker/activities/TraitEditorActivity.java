@@ -120,6 +120,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 int to = target.getBindingAdapterPosition();
 
                 try {
+                    preferences.edit().putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position").apply();
+                    queryAndLoadTraits();
                     adapter.moveItem(from, to);
                 } catch (IndexOutOfBoundsException iobe) {
                     iobe.printStackTrace();
@@ -643,9 +645,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     private void showTraitSortDialog() {
         Map<String, String> sortOptions = new LinkedHashMap<>();
-        final String defaultSortOrder = "internal_id_observation_variable";
+        final String defaultSortOrder = "position";
         String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, defaultSortOrder);
 
+        sortOptions.put(getString(R.string.traits_sort_default), "position");
         sortOptions.put(getString(R.string.traits_sort_name), "observation_variable_name");
         sortOptions.put(getString(R.string.traits_sort_format), "observation_variable_field_book_format");
         sortOptions.put(getString(R.string.traits_sort_import_order), "internal_id_observation_variable");

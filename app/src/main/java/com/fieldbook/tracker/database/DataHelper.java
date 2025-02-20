@@ -1052,11 +1052,11 @@ public class DataHelper {
     /**
      * Used by the application to return all traits which are visible
      */
-    public String[] getVisibleTrait() {
+    public String[] getVisibleTrait(String sortOrder) {
 
         open();
 
-        return VisibleObservationVariableDao.Companion.getVisibleTrait();
+        return VisibleObservationVariableDao.Companion.getVisibleTrait(sortOrder);
 
 //        String[] data = null;
 //
@@ -1083,11 +1083,11 @@ public class DataHelper {
 //        return data;
     }
 
-    public ArrayList<TraitObject> getVisibleTraitObjects() {
+    public ArrayList<TraitObject> getVisibleTraitObjects(String sortOrder) {
 
         open();
 
-        return VisibleObservationVariableDao.Companion.getVisibleTraitObjects();
+        return VisibleObservationVariableDao.Companion.getVisibleTraitObjects(sortOrder);
     }
 
     /**
@@ -1314,7 +1314,7 @@ public class DataHelper {
 
         return StudyDao.Companion.getFieldObject(
                 studyId,
-                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
+                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
         );
 
 //        Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
@@ -1352,7 +1352,7 @@ public class DataHelper {
         open();
 
         return ObservationVariableDao.Companion.getAllTraitObjects(
-                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
+                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
         );
 
 //        ArrayList<TraitObject> list = new ArrayList<>();

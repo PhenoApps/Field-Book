@@ -842,8 +842,9 @@ public class CollectActivity extends ThemedActivity
 
         traitBox.initTraitDetails();
 
+        String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
         // trait is unique, format is not
-        String[] traits = database.getVisibleTrait();
+        String[] traits = database.getVisibleTrait(currentSortOrder);
         if (traits != null) {
             traitBox.initTraitType(traits, rangeSuppress);
         }
@@ -1185,8 +1186,9 @@ public class CollectActivity extends ThemedActivity
 
         if (trait != null) {
 
+            String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
             //get all traits, filter the preference trait and check it's visibility
-            String[] traits = database.getVisibleTrait();
+            String[] traits = database.getVisibleTrait(currentSortOrder);
 
             try {
 
@@ -2280,7 +2282,8 @@ public class CollectActivity extends ThemedActivity
      */
     @Override
     public int existsAllTraits(final int traitIndex, final int plotId) {
-        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
+        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects(sortOrder);
         for (int i = 0; i < traits.size(); i++) {
             if (i != traitIndex
                     && !database.getTraitExists(plotId, traits.get(i).getId())) return i;
@@ -2291,7 +2294,8 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public List<Integer> getNonExistingTraits(final int plotId) {
-        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
+        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects(sortOrder);
         final ArrayList<Integer> indices = new ArrayList<>();
         for (int i = 0; i < traits.size(); i++) {
             if (!database.getTraitExists(plotId, traits.get(i).getId()))

@@ -223,7 +223,7 @@ class GoProTraitLayout :
 
     private fun connect() {
 
-        controller.advisor().withNearby { adapter ->
+        controller.advisor().withNearby { adapter: BluetoothAdapter ->
 
             if (!adapter.isEnabled) {
 

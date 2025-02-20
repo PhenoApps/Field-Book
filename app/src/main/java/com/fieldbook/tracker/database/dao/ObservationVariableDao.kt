@@ -214,15 +214,12 @@ class ObservationVariableDao {
             )
         }
 
-        fun getAllTraitObjects(sortOrder: String = "internal_id_observation_variable"): ArrayList<TraitObject> = withDatabase { db ->
+        fun getAllTraitObjects(sortOrder: String = "position"): ArrayList<TraitObject> = withDatabase { db ->
             val traits = ArrayList<TraitObject>()
-
-            // Sort ascending except for visibility, for visibility sort desc to have visible traits first
-            val orderDirection = if (sortOrder == "visible") "DESC" else "ASC"
 
             val query = """
                 SELECT * FROM ${ObservationVariable.tableName}
-                ORDER BY $sortOrder COLLATE NOCASE $orderDirection
+                ORDER BY ${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ASC
             """
 
             db.rawQuery(query, null).use { cursor ->
@@ -258,11 +255,20 @@ class ObservationVariableDao {
                     traits.add(trait)
                 }
             }
-            ArrayList(traits)
+
+            if (sortOrder == "visible") {
+                val visibleTraits = traits.filter { it.visible }
+                val invisibleTraits = traits.filter { !it.visible }
+
+                ArrayList(visibleTraits.sortedBy { it.realPosition } + ArrayList(invisibleTraits.sortedBy { it.realPosition }))
+
+            } else {
+                ArrayList(traits)
+            }
         } ?: ArrayList()
 
         // Overload for Java compatibility
-        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("internal_id_observation_variable")
+        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("position")
 
 
 //        fun getAllTraitObjects(sortOrder: String): ArrayList<TraitObject> = withDatabase { db ->

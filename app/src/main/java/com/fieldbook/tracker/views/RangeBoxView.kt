@@ -579,7 +579,8 @@ class RangeBoxView : ConstraintLayout {
                 moveToNextUncollectedObs(pos, step, arrayListOf(currentTraitObj))
             }
             2 -> {
-                val visibleTraits = ArrayList(controller.getDatabase().visibleTraitObjects.filterNotNull())
+                val sortOrder = controller.getPreferences().getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
+                val visibleTraits = ArrayList(controller.getDatabase().getVisibleTraitObjects(sortOrder).filterNotNull())
                 moveToNextUncollectedObs(pos, step, visibleTraits)
             }
             else -> moveSimply(pos, step)

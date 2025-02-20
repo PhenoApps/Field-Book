@@ -262,7 +262,9 @@ class TraitBoxView : ConstraintLayout {
     }
 
     private fun updateTraitsStatusBar() {
-        val visibleTraits: Array<String> = controller.getDatabase().getVisibleTrait()
+
+        val currentSortOrder = controller.getPreferences().getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
+        val visibleTraits: Array<String> = controller.getDatabase().getVisibleTrait(currentSortOrder)
 
         // images saved are not stored in newTraits hashMap
         // get the data for current plot_id again
