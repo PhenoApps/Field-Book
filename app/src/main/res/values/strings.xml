@@ -1400,5 +1400,10 @@
     <string name="quick_goto_dialog_icon_description">running person</string>
     <string name="failed_to_fetch_observation_levels">Failed fetching observation levels</string>
     <string name="traits_sort_default">Default</string>
+    <string name="traits_crop_image_parameter">Crop</string>
+    <string name="dialog_crop_title">Setup Crop Region</string>
+    <string name="dialog_crop_message">Define a crop region that will be applied to all future pictures for this trait.</string>
+    <string name="view_trait_photo_settings_crop">Set Crop Region</string>
+    <string name="crop_image_clip_data_label">Field Book crop region data</string>
 
 </resources>

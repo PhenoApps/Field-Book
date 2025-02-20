@@ -240,6 +240,7 @@ class ObservationVariableDao {
                         minimum = ""
                         categories = ""
                         closeKeyboardOnOpen = false
+                        cropImage = false
 
                         val values = ObservationVariableValueDao.getVariableValues(id.toInt())
                         values?.forEach { value ->
@@ -249,6 +250,7 @@ class ObservationVariableDao {
                                 "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String ?: ""
                                 "category" -> categories = value["observation_variable_attribute_value"] as? String ?: ""
                                 "closeKeyboardOnOpen" -> closeKeyboardOnOpen = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
+                                "cropImage" -> cropImage = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
                             }
                         }
                     }
@@ -356,6 +358,7 @@ class ObservationVariableDao {
                 Log.d("ObservationVariableDao", "maximum: ${t.maximum.orEmpty()}")
                 Log.d("ObservationVariableDao", "categories: ${t.categories.orEmpty()}")
                 Log.d("ObservationVariableDao", "closeKeyboardOnOpen: ${t.closeKeyboardOnOpen ?: "false"}")
+                Log.d("ObservationVariableDao", "cropImage: ${t.cropImage ?: "false"}")
 
                 val varRowId = db.insert(ObservationVariable.tableName, null, contentValues)
 
@@ -365,6 +368,7 @@ class ObservationVariableDao {
                         t.maximum.orEmpty(),
                         t.categories.orEmpty(),
                         (t.closeKeyboardOnOpen ?: "false").toString(),
+                        (t.cropImage ?: "false").toString(),
                         varRowId.toString()
                     )
                     Log.d("ObservationVariableDao", "Trait ${t.name} inserted successfully with row ID: $varRowId")
@@ -396,7 +400,8 @@ class ObservationVariableDao {
         //TODO need to edit min/max/category obs. var. val/attrs
         fun editTraits(id: String, trait: String, format: String, defaultValue: String,
                        minimum: String, maximum: String, details: String, categories: String,
-                       closeKeyboardOnOpen: Boolean): Long = withDatabase { db ->
+                       closeKeyboardOnOpen: Boolean,
+                       cropImage: Boolean): Long = withDatabase { db ->
 
             val rowid = db.update(ObservationVariable.tableName, ContentValues().apply {
                 put("observation_variable_name", trait)
@@ -421,7 +426,10 @@ class ObservationVariableDao {
                         ObservationVariableValueDao.update(id, attrId.toString(), categories)
                     }
                     "closeKeyboardOnOpen" -> {
-                        ObservationVariableValueDao.insertCloseKeyboard(closeKeyboardOnOpen.toString(), id)
+                        ObservationVariableValueDao.insertAttributeValue(it, closeKeyboardOnOpen.toString(), id)
+                    }
+                    "cropImage" -> {
+                        ObservationVariableValueDao.insertAttributeValue(it, cropImage.toString(), id)
                     }
                 }
             }

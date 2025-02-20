@@ -87,8 +87,10 @@ class VisibleObservationVariableDao {
 
                             "closeKeyboardOnOpen" -> closeKeyboardOnOpen =
                                 (it["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
-                        }
 
+                            "cropImage" -> cropImage =
+                                (it["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
+                        }
                     }
                 }
             }

@@ -55,6 +55,7 @@ import com.fieldbook.tracker.devices.camera.CanonApi;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
 import com.fieldbook.tracker.dialogs.SearchDialog;
+import com.fieldbook.tracker.fragments.CropImageFragment;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -117,6 +118,7 @@ import org.phenoapps.utils.SoftKeyboardUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -153,6 +155,7 @@ public class CollectActivity extends ThemedActivity
         SensorHelper.RelativeRotationListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
+    public static final int REQUEST_CROP_IMAGE_CODE = 101;
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
 
@@ -2116,6 +2119,13 @@ public class CollectActivity extends ThemedActivity
 
                 } else triggerTts(fail);
                 break;
+            case REQUEST_CROP_IMAGE_CODE:
+                if (resultCode == RESULT_OK) {
+                    File f = new File(getContext().getCacheDir(), AbstractCameraTrait.TEMPORARY_IMAGE_NAME);
+                    Uri uri = Uri.fromFile(f);
+                    startCropActivity(getCurrentTrait().getId(), uri);
+                }
+                break;
         }
     }
 
@@ -2883,6 +2893,52 @@ public class CollectActivity extends ThemedActivity
 
             Log.e(TAG, "Error logging study entry attributes: " + ex);
 
+        }
+    }
+
+    /**
+     * a function that starts the crop activity and sends it required intent data
+     */
+    public void startCropActivity(String traitId, Uri uri) {
+        try {
+            Intent intent = new Intent(this, CropImageActivity.class);
+            intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(traitId));
+            intent.putExtra(CropImageFragment.EXTRA_IMAGE_URI, uri.toString());
+            cameraXFacade.unbind();
+            startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void requestAndCropImage() {
+        try {
+            Intent intent = new Intent(this, CameraActivity.class);
+            intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
+            cameraXFacade.unbind();
+            startActivityForResult(intent, REQUEST_CROP_IMAGE_CODE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * shows an alert dialog that asks user to define a crop region
+     */
+    public void showCropDialog(String traitId, Uri uri) {
+        try {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+            builder.setTitle(R.string.dialog_crop_title);
+            builder.setMessage(R.string.dialog_crop_message);
+            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                startCropActivity(traitId, uri);
+            });
+            builder.setNegativeButton(android.R.string.no, (dialog, which) -> {
+                dialog.dismiss();
+            });
+            builder.create().show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
