@@ -399,6 +399,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             Toast.makeText(this, R.string.act_trait_editor_no_traits_exist, Toast.LENGTH_SHORT).show();
         } else {
             showDeleteTraitDialog((dialog, which) -> {
+                for (TraitObject t : traits) {
+                    preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(t.getId()))).apply();
+                }
                 database.deleteTraitsTable();
                 queryAndLoadTraits();
                 dialog.dismiss();
@@ -585,6 +588,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         ArrayList<TraitObject> traits = database.getAllTraitObjects();
 
         if (!traits.isEmpty()) {
+
+            for (TraitObject t : traits) {
+                preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(t.getId()))).apply();
+            }
 
             showDeleteTraitDialog((dialog, which) -> {
 
@@ -923,6 +930,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
+
+                preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(trait.getId()))).apply();
 
                 getDatabase().deleteTrait(trait.getId());
 

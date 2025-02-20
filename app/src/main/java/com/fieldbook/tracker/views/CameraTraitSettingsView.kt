@@ -45,7 +45,12 @@ open class CameraTraitSettingsView: ConstraintLayout {
         resolutionGroup = view.findViewById(R.id.view_trait_photo_settings_resolution_rg)
         resolutionTitle = view.findViewById(R.id.view_trait_photo_settings_resolution_tv)
         resolutionFrameLayout = view.findViewById(R.id.view_trait_photo_settings_resolution_fl)
+
         cropButton = view.findViewById(R.id.view_trait_photo_settings_crop_btn)
+        // Set the visibility of the crop button to GONE if the trait does not support cropping
+        (context as CollectActivity).currentTrait.cropImage?.let {
+            cropButton.visibility = if (it) View.VISIBLE else View.GONE
+        }
     }
 
     constructor(ctx: Context, supportedResolutions: List<Size>) : super(ctx) {

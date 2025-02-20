@@ -202,30 +202,30 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
         //overlay effect gives a frame that has an 'overlayCanvas'
         cropEffect?.setOnDrawListener { frame ->
             try {
+                //check that coordinates are correct, parse and draw the rect
+                if (!cropCoordinates.isNullOrEmpty() && cropCoordinates != CropImageView.DEFAULT_CROP_COORDINATES) {
+                    //convert the camera sensor coordinates to local preview view coordinates
+                    val sensorToUi = previewView!!.sensorToViewTransform
+                    if (sensorToUi != null) {
+                        val sensorToEffect = frame.sensorToBufferTransform
+                        val uiToSensor = Matrix()
+                        sensorToUi.invert(uiToSensor)
+                        uiToSensor.postConcat(sensorToEffect)
 
-                //convert the camera sensor coordinates to local preview view coordinates
-                val sensorToUi = previewView!!.sensorToViewTransform
-                if (sensorToUi != null) {
-                    val sensorToEffect = frame.sensorToBufferTransform
-                    val uiToSensor = Matrix()
-                    sensorToUi.invert(uiToSensor)
-                    uiToSensor.postConcat(sensorToEffect)
+                        //get canvas and clear color, apply affine transformation
+                        val canvas = frame.overlayCanvas
+                        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+                        canvas.setMatrix(uiToSensor)
 
-                    //get canvas and clear color, apply affine transformation
-                    val canvas = frame.overlayCanvas
-                    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-                    canvas.setMatrix(uiToSensor)
-
-                    //check that coordinates are correct, parse and draw the rect
-                    if (!cropCoordinates.isNullOrEmpty()) {
                         val rect = CropImageView.parseRectCoordinates(cropCoordinates)
+                        //check if rect is null or matches the default
                         if (rect != null) {
                             //draw a rectangle on the left of the canvas
                             //converts normalized coordinates to previewView-relative
-                            val left = rect.left*previewView.width
-                            val top = rect.top*previewView.height
-                            val right = rect.right*previewView.width
-                            val bottom = rect.bottom*previewView.height
+                            val left = rect.left * previewView.width
+                            val top = (rect.top * previewView.height) - 8f
+                            val right = rect.right * previewView.width
+                            val bottom = (rect.bottom * previewView.height) + 8f
 
                             //newer APIs allow clipping a rect in two commands, earlier is a little more complex
                             val clipRect = RectF(left, top, right, bottom)
@@ -236,7 +236,11 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
                             }
 
                             val typedValue = TypedValue()
-                            context.theme?.resolveAttribute(R.attr.fb_inverse_crop_region_color, typedValue, true)
+                            context.theme?.resolveAttribute(
+                                R.attr.fb_inverse_crop_region_color,
+                                typedValue,
+                                true
+                            )
 
                             canvas.drawARGB(
                                 Color.alpha(typedValue.data),
@@ -246,7 +250,10 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
                             )
 
                             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                                canvas.clipRect(Rect(0, 0, previewView.width, previewView.height), Region.Op.REPLACE)
+                                canvas.clipRect(
+                                    Rect(0, 0, previewView.width, previewView.height),
+                                    Region.Op.REPLACE
+                                )
                             }
                         }
                     }

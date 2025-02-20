@@ -46,7 +46,7 @@ class CropImageView : ConstraintLayout {
     companion object {
         const val TAG = "CropImageView"
         const val MIN_DISTANCE_BETWEEN_HANDLES = 32
-
+        const val DEFAULT_CROP_COORDINATES = "0.00, 0.00, 1.00, 1.00"
         fun parseRectCoordinates(rectCoordinates: String): RectF? {
 
             if (rectCoordinates.isNotBlank()) {
