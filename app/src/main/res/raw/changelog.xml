@@ -1,5 +1,12 @@
 <changelog>
 
+    <release date="2025-02-20" versionCode="60007" versionName="v6.0.7">
+        <new>Access full add field menu via long-press</new>
+        <new>geo_coordinates are now pulled in via BrAPI</new>
+        <bugfix>Replaced ffmpeg library with local version</bugfix>
+        <bugfix>Numerous bug fixes and enhancements</bugfix>
+    </release>
+
     <release date="2025-01-24" versionCode="60006" versionName="v6.0.6">
         <bugfix>Numerous bug fixes and enhancements </bugfix>
     </release>
