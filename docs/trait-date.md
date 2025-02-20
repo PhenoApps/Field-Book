@@ -26,3 +26,10 @@ Collect layout
   <img src="_static/images/traits/formats/collect_date_framed.png" width="400px"> 
   <figcaption><i>Date trait collection interface</i></figcaption> 
 </figure>
+
+Press the bottom calendar icon to open the date picker
+
+<figure align="center" class="image">
+  <img src="_static/images/traits/formats/collect_date_picker_framed.png" width="400px"> 
+  <figcaption><i>The calendar date picker</i></figcaption> 
+</figure>

@@ -10,7 +10,7 @@ trait name and optional details.
 On the collect page, the camera icon opens the device camera to capture
 images. Multiple photos can be captured for each entry. 
 
-Captured photos are stored in `.jpg` format, and named by using underscores to join the entry's unique_id, the trait name, the photo number, and a timestamp. The resulting files are stored in a picture directory within a field-specific subdirectory of `plot_data`. An example photo filepath would be `plot_data/FIELD_NAME/picture/PHOTO_FILE_NAME.jpg`.
+Captured photos are stored in `.jpg` format, and named by using underscores to join the entry's unique_id, the trait name, the photo number, and a timestamp. The resulting files are stored in a picture folder within a field-specific subfolder of `plot_data`. An example photo filepath would be `plot_data/FIELD_NAME/picture/PHOTO_FILE_NAME.jpg`.
 
 Creation
 --------

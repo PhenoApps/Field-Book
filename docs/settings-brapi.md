@@ -5,7 +5,7 @@ Configuration
 -------------
 
 <figure align="center" class="image">
-  <img src="_static/images/settings/brapi/settings_brapi_1_framed.png" width="400px"> 
+  <img src="_static/images/settings/brapi/settings_brapi_framed.png" width="400px"> 
   <figcaption><i>BrAPI Configuration
 Settings</i></figcaption> 
 </figure>

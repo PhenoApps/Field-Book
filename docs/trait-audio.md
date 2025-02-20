@@ -16,7 +16,7 @@ recording. Press the
 back the audio that has been recorded.
 
 Recorded audio files are stored in `.mp3` format, and named with the entry's unique_id and a
-timestamp. The resulting files are stored in an audio directory within a field-specific subdirectory of `plot_data`. An example audio filepath would be `plot_data/FIELD_NAME/audio/AUDIO_FILE_NAME.mp3`.
+timestamp. The resulting files are stored in an audio folder within a field-specific subfolder of `plot_data`. An example audio filepath would be `plot_data/FIELD_NAME/audio/AUDIO_FILE_NAME.mp3`.
 
 Creation
 --------

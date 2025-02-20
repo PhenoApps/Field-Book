@@ -15,7 +15,7 @@ connected, press the
 access it and capture images. Multiple photos can be captured for each
 entry.
 
-Captured photos are stored in `.jpg` format, and named by using underscores to join the entry's unique_id, the trait name, the photo number, and a timestamp. The resulting files are stored in a usb-camera directory within a field-specific subdirectory of `plot_data`. An example photo filepath would be `plot_data/FIELD_NAME/usb-camera/PHOTO_FILE_NAME.jpg`.
+Captured photos are stored in `.jpg` format, and named by using underscores to join the entry's unique_id, the trait name, the photo number, and a timestamp. The resulting files are stored in a usb-camera folder within a field-specific subfolder of `plot_data`. An example photo filepath would be `plot_data/FIELD_NAME/usb-camera/PHOTO_FILE_NAME.jpg`.
 
 Creation
 --------

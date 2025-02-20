@@ -19,10 +19,7 @@ Creating a Trait
 ----------------
 
 Traits can be created by pressing the large <img ref="add" style="vertical-align: middle;" src="_static/icons/traits/plus-circle.png" width="20px"> icon at the
-bottom right of the screen, or the same icon in the toolbar. For each
-format, the creation screen adjusts to indicate which fields are
-required. Trait names must be unique. Each trait is created by
-specifying a trait `format`, a trait `name`, optional `details`, and
+bottom right of the screen. Select a format, then fill in the required fields in the format-specific dialog. Trait names must be unique. Each trait has a `format`, a trait `name`, optional `details`, and
 format-dependent fields such as `min`, `max`, and `default`.
 
 <figure align="center" class="image">
@@ -52,9 +49,9 @@ Once created, traits can be manipulated using the following features:
 
 - Make all traits **Visible** or **Invisible** by pressing the <img ref="check-all" style="vertical-align: middle;" src="_static/icons/traits/check-all.png" width="20px"> icon in the toolbar.
 
-- Open the trait **Menu** using the <img ref="menu" style="vertical-align: middle;" src="_static/icons/traits/dots-vertical.png" width="20px"> icon on right side of the toolbar to access additional operations affecting all traits.
+- Reorder all traits by pressing the <img ref="check-all" style="vertical-align: middle;" src="_static/icons/traits/sort.png" width="20px"> icon in the toolbar, and then selecting one of the sort criterion (options include trait `Name`, `Format`, `Import Order`, and `Visibility`)
 
-- Within the menu, select **Sort** to reorder all traits according to one of the sort criterion (options include trait `Name`, `Format`, or `Visibility`)
+- Open the trait **Menu** using the <img ref="menu" style="vertical-align: middle;" src="_static/icons/traits/dots-vertical.png" width="20px"> icon on right side of the toolbar to access additional operations affecting all traits.
   
 - Select **Delete all traits**, then confirm, to remove every trait in the list.
   
@@ -66,8 +63,11 @@ Once created, traits can be manipulated using the following features:
 </figure>
 
 Trait imports and exports are similar to field imports/exports in that
-they rely on files stored in a dedicated folder, or on communication
-with a designated server using a <a href="brapi.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/server-network.png" width="20px"></a> [Brapi](brapi.md) connection.
+they rely on files stored in a dedicated folder (Local Storage), or on using the device file manager to select a trait file anywhere on the device, including from cloud utilities like Google Drive (Cloud Storage).
+
+BrAPI imports are accessed separately, in the create trait workflow. First make sure BrAPI is enabled and configured in the <a href="settings-brapi.md"><img style="vertical-align: middle;" src="_static/icons/settings/main/server-network.png" width="20px"></a> [Brapi settings](settings-brapi.md)
+
+Then the BrAPI Display Name of the server you connected to will show up as the last format choice in the list when you press the create trait icon in the bottom right of the screen. Check out the <a href="brapi.md"></a> [BrAPI](brapi.md) section of the documentation for details of the trait import process, as well as field import, sync, and data export.
 
 ?> When using local storage, trait lists are stored as `.trt` files in the
 `trait` folder. Technically `.trt` files are just `.csv` files with the extension renamed; exported `.trt` files can be opened as `.csv` if desired. However it is not recommended to manually edit and reimport these files, trait edits are best done within the application.
