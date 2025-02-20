@@ -7,24 +7,27 @@ import com.fieldbook.tracker.database.query
 import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.preferences.GeneralKeys
 
 
 class VisibleObservationVariableDao {
 
     companion object {
 
-        fun getVisibleTrait(): Array<String> = withDatabase { db ->
+        fun getVisibleTrait(sortOrder: String = "position"): Array<String> = withDatabase { db ->
 
-            db.query(sVisibleObservationVariableViewName,
-                    select = arrayOf("observation_variable_name"),
-                    orderBy = "position").toTable().map { it ->
-                it["observation_variable_name"].toString()
-            }.toTypedArray()
+            db.query(sVisibleObservationVariableViewName)
+                .toTable()
+                .sortedBy { (it[if (sortOrder == "visible") "position" else sortOrder] as? String ?: "position").lowercase() }
+                .map { it["observation_variable_name"] as? String ?: ""}
+                .toTypedArray()
 
         } ?: emptyArray<String>()
 
-        fun getVisibleTraitObjects(): ArrayList<TraitObject> = withDatabase { db ->
-            val rows = db.query(sVisibleObservationVariableViewName, orderBy = "position").toTable()
+        fun getVisibleTraitObjects(sortOrder: String = "position"): ArrayList<TraitObject> = withDatabase { db ->
+            val rows = db.query(sVisibleObservationVariableViewName)
+                .toTable()
+                .sortedBy { (it[if (sortOrder == "visible") "position" else sortOrder] as? String ?: "position").lowercase() }
 
             val variables: ArrayList<TraitObject> = ArrayList()
 
@@ -84,8 +87,10 @@ class VisibleObservationVariableDao {
 
                             "closeKeyboardOnOpen" -> closeKeyboardOnOpen =
                                 (it["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
-                        }
 
+                            "cropImage" -> cropImage =
+                                (it["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
+                        }
                     }
                 }
             }

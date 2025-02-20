@@ -206,6 +206,10 @@
                     android:scheme="fieldbook" />
             </intent-filter>
         </activity>
+        <activity android:name=".activities.CropImageActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.brapi.BrapiExportActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"

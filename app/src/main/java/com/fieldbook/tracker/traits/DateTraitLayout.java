@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +33,7 @@ public class DateTraitLayout extends BaseTraitLayout {
     FloatingActionButton addDayBtn;
     FloatingActionButton minusDayBtn;
     FloatingActionButton saveDayBtn;
+    private TextView datePreviewText;
     private String date;
     private boolean isBlocked = true; //tracks when multi measures can be navigated
     private boolean isFirstLoad = true;
@@ -51,8 +53,6 @@ public class DateTraitLayout extends BaseTraitLayout {
     @Override
     public void setNaTraitsText() {
         getCollectInputView().setText("NA");
-        //issue 413 apply the date saved preference color to NA values
-        forceDataSavedColor();
     }
 
     @Override
@@ -86,6 +86,9 @@ public class DateTraitLayout extends BaseTraitLayout {
         addDayBtn = act.findViewById(R.id.addDateBtn);
         minusDayBtn = act.findViewById(R.id.minusDateBtn);
         saveDayBtn = act.findViewById(R.id.enterBtn);
+        datePreviewText = act.findViewById(R.id.datePreviewText);
+
+        updatePreviewDate(calendar);
 
         ImageButton calendarVisibilityBtn = act.findViewById(R.id.trait_date_calendar_visibility_btn);
 
@@ -102,10 +105,9 @@ public class DateTraitLayout extends BaseTraitLayout {
 
                 calendar.set(y, m, d);
 
-                updateViewDate(calendar);
+                updatePreviewDate(calendar);
 
-                //this saves the date, so update text to display color
-                forceDataSavedColor();
+                updateViewDate(calendar);
 
                 String rep = ((CollectActivity) getContext()).getRep();
 
@@ -141,9 +143,9 @@ public class DateTraitLayout extends BaseTraitLayout {
             // Add day
             calendar.add(Calendar.DATE, 1);
 
-            updateViewDate(calendar);
+            updatePreviewDate(calendar);
 
-            isBlocked = true;
+            isBlocked = false;
         });
 
         // Minus day
@@ -163,9 +165,9 @@ public class DateTraitLayout extends BaseTraitLayout {
             //Subtract day, rewrite date
             calendar.add(Calendar.DATE, -1);
 
-            updateViewDate(calendar);
+            updatePreviewDate(calendar);
 
-            isBlocked = true;
+            isBlocked = false;
         });
 
         // Saving date data
@@ -182,18 +184,14 @@ public class DateTraitLayout extends BaseTraitLayout {
                 e.printStackTrace();
             }
 
-            if (!getCollectInputView().getText().equals("NA")) { //issue 413, don't update NA when save button is pressed
-                if (getPrefs().getBoolean(GeneralKeys.USE_DAY_OF_YEAR, false)) {
-                    updateObservation(getCurrentTrait(), String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
-                } else {
-                    updateObservation(getCurrentTrait(), dateFormat.format(calendar.getTime()));
-                }
+            String previewText = datePreviewText.getText().toString();
+            getCollectInputView().setText(previewText);
+
+            if (getPrefs().getBoolean(GeneralKeys.USE_DAY_OF_YEAR, false)) {
+                updateObservation(getCurrentTrait(), String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
+            } else {
+                updateObservation(getCurrentTrait(), dateFormat.format(calendar.getTime()));
             }
-
-            parseDateAndView();
-
-            // Change the text color accordingly
-            forceDataSavedColor();
 
             isBlocked = false;
         });
@@ -206,6 +204,13 @@ public class DateTraitLayout extends BaseTraitLayout {
         String month = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
         String day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
         return month + " " + day;
+    }
+
+    private void updatePreviewDate(Calendar calendar) {
+        date = dateFormat.format(calendar.getTime());
+        log();
+        setDatePreviewText(getMonthForInt(calendar.get(Calendar.MONTH)),
+                String.format(Locale.getDefault(),"%02d", calendar.get(Calendar.DAY_OF_MONTH)));
     }
 
     private void updateViewDate(Calendar calendar) {
@@ -221,14 +226,8 @@ public class DateTraitLayout extends BaseTraitLayout {
                 .putString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, yearText + "-" + monthText + "-" + dayOfMonth)
                 .apply();
 
-        getCollectInputView().setText(getMonthForInt(calendar.get(Calendar.MONTH)) + " " + dayOfMonth);
-
-        // Change text color
-        if (getNewTraits().containsKey(getCurrentTrait().getName())) {
-            getCollectInputView().setTextColor(getValueAlteredColor());
-        } else {
-            getCollectInputView().setTextColor(getTextColor());
-        }
+        setDateText(getMonthForInt(calendar.get(Calendar.MONTH)),
+                String.format(Locale.getDefault(),"%02d", calendar.get(Calendar.DAY_OF_MONTH)));
     }
 
     private void log() {
@@ -353,19 +352,12 @@ public class DateTraitLayout extends BaseTraitLayout {
     public void afterLoadNotExists(CollectActivity act) {
         super.afterLoadNotExists(act);
 
-        getCollectInputView().setTextColor(Color.BLACK);
-
         //if data does not exist, use the current date as a default value
         final Calendar c = Calendar.getInstance();
 
-        date = dateFormat.format(c.getTime());
-        log();
-
-        parseDateAndView();
+        updatePreviewDate(c);
 
         isBlocked = true;
-
-        setDateText(getMonthForInt(c.get(Calendar.MONTH)), String.format(Locale.getDefault(), "%02d", c.get(Calendar.DAY_OF_MONTH)) );
     }
 
     @Override
@@ -380,15 +372,8 @@ public class DateTraitLayout extends BaseTraitLayout {
 
             parseDateAndView();
 
-        } else {
-
-            final Calendar c = Calendar.getInstance();
-            date = dateFormat.format(c.getTime());
-
-            getCollectInputView().setTextColor(getTextColor());
-
-            //This is used to persist moving between months
-            setDateText(getMonthForInt(c.get(Calendar.MONTH)), String.format(Locale.getDefault(), "%02d", c.get(Calendar.DAY_OF_MONTH)) );
+        } else { // clear the editText
+            getCollectInputView().setText("");
         }
     }
 
@@ -405,6 +390,10 @@ public class DateTraitLayout extends BaseTraitLayout {
         }
 
         return month;
+    }
+
+    private void setDatePreviewText(String month, String day) {
+        datePreviewText.setText(month + " " + day);
     }
 
     private void setDateText(String month, String day) {

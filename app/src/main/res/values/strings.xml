@@ -881,6 +881,10 @@
     <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
     <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
     <string name="field_audio_zip_error">Error creating zip file</string>
+    <string name="trait_audio_placeholder_filename">Recorded Audio File</string>
+    <string name="trait_audio_timestamp">Timestamp: </string>
+    <string name="trait_audio_duration">Duration: </string>
+    <string name="trait_audio_file_size">File Size: </string>
 
     <string name="pref_beta_enable_individual_field_page_title">Enable Individual Field Pages</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selecting a field in the fields list opens a detail page</string>
@@ -1392,6 +1396,19 @@
     <string name="trait_error_invalid_multicat_value">Invalid categorical data was entered.</string>
     <string name="dialog_crash_report_title">Failed to load data</string>
     <string name="dialog_crash_report_message">Press OK to send an anonymous diagnostic report to help improve the app.</string>
+    <string name="dialog_att_chooser_title_default">Choose an attribute</string>
+    <string name="dialog_quick_goto_title">Quick GoTo</string>
+    <string name="dialog_quick_goto_go">Go</string>
+    <string name="quick_goto_primary_hint">Primary ID</string>
+    <string name="quick_goto_secondary_hint">Secondary ID</string>
+    <string name="quick_goto_dialog_icon_description">running person</string>
     <string name="failed_to_fetch_observation_levels">Failed fetching observation levels</string>
+    <string name="traits_sort_default">Default</string>
+    <string name="traits_crop_image_parameter">Crop</string>
+    <string name="dialog_crop_title">Setup Crop Region</string>
+    <string name="dialog_crop_message">Define a crop region that will be applied to all future pictures for this trait.</string>
+    <string name="view_trait_photo_settings_crop">Set Crop Region</string>
+    <string name="crop_image_clip_data_label">Field Book crop region data</string>
+    <string name="quick_goto_swap_content_description">toggle input type</string>
 
 </resources>
