@@ -3,7 +3,9 @@ package com.fieldbook.tracker.dialogs
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
+import android.text.InputType
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.fragment.app.DialogFragment
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.interfaces.CollectRangeController
@@ -35,6 +37,8 @@ class QuickGotoDialog(
         val primaryEt = view.findViewById<EditText>(R.id.quick_goto_primary_et)
         val secondaryEt = view.findViewById<EditText>(R.id.quick_goto_secondary_et)
 
+        val swapButton = view.findViewById<ImageButton>(R.id.quick_goto_swap_btn)
+
         primaryEt.hint = primary
         secondaryEt.hint = secondary
 
@@ -57,6 +61,28 @@ class QuickGotoDialog(
             }
         }
 
+        swapButton.setOnClickListener {
+
+            toggleInputType(primaryEt)
+            toggleInputType(secondaryEt)
+
+
+            swapButton.setImageResource(if (secondaryEt.inputType == InputType.TYPE_CLASS_NUMBER) {
+                R.drawable.ic_trait_text
+            } else {
+                R.drawable.ic_trait_numeric
+            })
+        }
+
         return dialog
+    }
+
+    private fun toggleInputType(editText: EditText) {
+
+        editText.inputType = if (editText.inputType == InputType.TYPE_CLASS_NUMBER) {
+            InputType.TYPE_CLASS_TEXT
+        } else {
+            InputType.TYPE_CLASS_NUMBER
+        }
     }
 }
