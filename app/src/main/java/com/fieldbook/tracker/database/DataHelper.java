@@ -2551,6 +2551,46 @@ public class DataHelper {
     }
 
     /**
+     * Export preferences by encoding in a file in the preferences directory
+     *
+     * @param ctx      Context
+     * @param filename Name of the preferences file to create
+     * @return DocumentFile
+     * @throws IOException If file operations fail
+     */
+    public DocumentFile exportPreferences(Context ctx, String filename) throws IOException {
+        try {
+            DocumentFile preferencesDir = BaseDocumentTreeUtil.Companion.getDirectory(ctx, R.string.dir_preferences);
+
+            if (preferencesDir != null) {
+
+                DocumentFile prefDoc = preferencesDir.findFile(filename);
+                if (prefDoc != null && prefDoc.exists()) {
+                    prefDoc.delete();
+                }
+
+                DocumentFile preferenceFile = preferencesDir.createFile("*/*", filename);
+
+                if (preferenceFile != null) {
+                    OutputStream tempStream = BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_preferences, filename);
+                    ObjectOutputStream objectStream = new ObjectOutputStream(tempStream);
+                    objectStream.writeObject(preferences.getAll());
+
+                    objectStream.close();
+                    if (tempStream != null) {
+                        tempStream.close();
+                    }
+                    return preferenceFile;
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+            throw new IOException("Failed to export preferences", e);
+        }
+    }
+
+    /**
      * Copy old file to new file
      */
     private void copyFile(File oldFile, File newFile) throws IOException {
