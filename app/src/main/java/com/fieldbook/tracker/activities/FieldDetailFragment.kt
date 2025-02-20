@@ -11,6 +11,8 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -27,6 +29,7 @@ import com.fieldbook.tracker.adapters.FieldDetailAdapter
 import com.fieldbook.tracker.adapters.FieldDetailItem
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.dialogs.AttributeChooserDialog
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
 import com.fieldbook.tracker.interfaces.FieldAdapterController
 import com.fieldbook.tracker.interfaces.FieldSortController
@@ -73,6 +76,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var entryCountChip: Chip
     private lateinit var attributeCountChip: Chip
     private lateinit var sortOrderChip: Chip
+    private lateinit var editUniqueChip: Chip
     private lateinit var traitCountChip: Chip
     private lateinit var observationCountChip: Chip
     private lateinit var trialNameChip: Chip
@@ -97,6 +101,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         entryCountChip = rootView.findViewById(R.id.entryCountChip)
         attributeCountChip = rootView.findViewById(R.id.attributeCountChip)
         sortOrderChip = rootView.findViewById(R.id.sortOrderChip)
+        editUniqueChip = rootView.findViewById(R.id.editUniqueChip)
         traitCountChip = rootView.findViewById(R.id.traitCountChip)
         observationCountChip = rootView.findViewById(R.id.observationCountChip)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
@@ -186,6 +191,15 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             }
         }
 
+        editUniqueChip.setOnClickListener {
+            fieldId?.let { id ->
+                val field = database.getFieldObject(id)
+                field?.let {
+                    showChangeSearchAttributeDialog(it)
+                }
+            }
+        }
+
         disableDataChipRipples()
 
         Log.d("FieldDetailFragment", "onCreateView End")
@@ -265,6 +279,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         var importFormat: ImportFormat? = field.import_format
         var entryCount = field.count.toString()
         val attributeCount = field.attribute_count.toString()
+        val searchAttribute = (field.search_attribute ?: field.unique_id).toString()
 
         if (importFormat == ImportFormat.BRAPI) {
             cardViewSync.visibility = View.VISIBLE
@@ -295,6 +310,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         entryCountChip.text = entryCount
         attributeCountChip.text = attributeCount
         sortOrderChip.text = getString(R.string.field_sort_entries)
+//        editUniqueChip.text = getString(R.string.field_edit_unique_id)
+        editUniqueChip.text = searchAttribute
 
         val lastEdit = field.date_edit
         if (!lastEdit.isNullOrEmpty()) {
@@ -432,6 +449,18 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         }
 
         dialog.show()
+    }
+
+    private fun showChangeSearchAttributeDialog(field: FieldObject) {
+        val dialog = AttributeChooserDialog(showTraits = false, showOther = false, uniqueOnly = true).apply {
+            setOnAttributeSelectedListener(object : AttributeChooserDialog.OnAttributeSelectedListener {
+                override fun onAttributeSelected(label: String) {
+                    database.updateSearchAttribute(field.exp_id, label)
+                    loadFieldDetails()
+                }
+            })
+        }
+        dialog.show(parentFragmentManager, AttributeChooserDialog.TAG)
     }
 
     /**

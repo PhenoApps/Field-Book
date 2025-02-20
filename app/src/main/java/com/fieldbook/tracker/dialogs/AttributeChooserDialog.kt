@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.activities.FieldEditorActivity
 import com.fieldbook.tracker.adapters.AttributeAdapter
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -22,10 +23,16 @@ import com.google.android.material.tabs.TabLayout
  * Each tab will load data into a recycler view that lets user choose infobar prefixes.
  */
 
-open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.AttributeAdapterController {
+open class AttributeChooserDialog(
+    private val showTraits: Boolean = true,
+    private val showOther: Boolean = true,
+    private val uniqueOnly: Boolean = false
+) : DialogFragment(), AttributeAdapter.AttributeAdapterController {
+
     companion object {
         const val TAG = "AttributeChooserDialog"
     }
+
     interface OnAttributeSelectedListener {
         fun onAttributeSelected(label: String)
     }
@@ -51,6 +58,10 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
         recyclerView.layoutManager = LinearLayoutManager(requireActivity())
         recyclerView.adapter = AttributeAdapter(this, null)
 
+        //toggle view of traits/other based on class param
+        tabLayout.getTabAt(1)?.view?.visibility = if (showTraits) TabLayout.VISIBLE else TabLayout.GONE
+        tabLayout.getTabAt(2)?.view?.visibility = if (showOther) TabLayout.VISIBLE else TabLayout.GONE
+
         val dialog = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
             .setView(view)
             .setNegativeButton(android.R.string.cancel, null)
@@ -61,9 +72,26 @@ open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.Attribute
         dialog.setOnShowListener {
             toggleProgressVisibility(true)
             BackgroundUiTask.execute(
-                backgroundBlock = ::loadData,
-                uiBlock = ::setupTabLayout,
-                onCanceled = ::setupTabLayout)
+                backgroundBlock = {
+                    if (uniqueOnly) {
+                        val prefs = PreferenceManager.getDefaultSharedPreferences(requireActivity())
+                        val activeFieldId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
+                        val activity = requireActivity() as FieldEditorActivity
+                        attributes = activity.getDatabase().getPossibleUniqueAttributes(activeFieldId)?.toTypedArray() ?: emptyArray()
+                    } else {
+                        loadData()
+                    }
+                },
+                uiBlock = {
+                    toggleProgressVisibility(false)
+                    if (uniqueOnly) {
+                        loadTab(getString(R.string.dialog_att_chooser_attributes))
+                    } else {
+                        setupTabLayout()
+                    }
+                },
+                onCanceled = ::setupTabLayout
+            )
         }
 
         return dialog
