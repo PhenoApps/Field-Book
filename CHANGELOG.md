@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- BrAPI authorization fix for specific devices (https://github.com/PhenoApps/Field-Book/pull/1163)
 
 ## [v6.0.7] - 2025-02-20
 
@@ -22,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
-- Replaced ffmpeg library with local version
+- Replaced ffmpeg library with local version (https://github.com/PhenoApps/Field-Book/pull/1166)
 - Numerous bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1149)
 
 ## [v6.0.6] - 2025-01-24
