@@ -205,16 +205,16 @@ class RangeBoxView : ConstraintLayout {
         }
 
         secondaryIdTv.setOnClickListener {
-            showQuickGoToDialog()
+            showQuickGoToDialog(primaryClicked = false)
         }
     }
 
     /**
      * Builds and shows an alert dialog with two edit text fields for the primary/secondary ids
      */
-    private fun showQuickGoToDialog() {
+    private fun showQuickGoToDialog(primaryClicked: Boolean = true) {
 
-        val dialog = QuickGotoDialog(controller) { primaryId, secondaryId ->
+        val dialog = QuickGotoDialog(controller, primaryClicked) { primaryId, secondaryId ->
 
             quickGoToNavigateFromDialog(primaryId, secondaryId)
         }

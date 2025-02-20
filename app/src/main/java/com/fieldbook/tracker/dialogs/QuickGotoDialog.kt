@@ -15,6 +15,7 @@ import org.phenoapps.utils.SoftKeyboardUtil
  */
 class QuickGotoDialog(
     private val controller: CollectRangeController,
+    private val primaryClicked: Boolean = true,
     private val callback: (String, String) -> Unit): DialogFragment() {
 
     companion object {
@@ -50,9 +51,10 @@ class QuickGotoDialog(
 
         dialog.setOnShowListener {
 
-            primaryEt.requestFocus()
-            SoftKeyboardUtil.Companion.showKeyboard(context, primaryEt)
-
+            with(if (primaryClicked) primaryEt else secondaryEt) {
+                this.requestFocus()
+                SoftKeyboardUtil.Companion.showKeyboard(context, this)
+            }
         }
 
         return dialog
