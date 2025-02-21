@@ -222,7 +222,9 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
 
                 try {
                     database.importDatabase(file); // (handles both .db and .zip)
-                    clearPreferences();
+                    if (file.getName().endsWith(".db")){
+                        clearPreferences();
+                    }
 
                     if (file.getName().equals("sample_db.zip") || file.getName().equals("sample.db")) {
                         selectFirstField();
