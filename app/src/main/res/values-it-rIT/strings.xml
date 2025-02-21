@@ -27,6 +27,7 @@
     <string name="startup_sample_data_message">Vuoi caricare i dati di prova forniti?</string>
     <!-- App Intro -->
     <string name="app_intro_intro_title_slide1">Benvenuto su Field Book!</string>
+    <string name="app_intro_intro_summary_slide1">Tradizionalmente la raccolta dei dati in campo si basa sull\'utilizzo e sulla trascrizione da carta e matita. Field Book è stato creato come soluzione digitale per la raccolta dei dati, permettendo una maggiore velocità e una migliore integrità dei dati.</string>
     <string name="app_intro_intro_title_slide2">Funzionalità e Personalizzazione</string>
     <string name="app_intro_intro_summary_slide2">I dati vengono inseriti su Field Book con impaginazioni dei tratti che sono progettate per semplificare l\'inserimento dei dati e minimizzare gli errori. \n\n Per impostazione predefinita, i dati raccolti vengono archiviati localmente, ma Field Book supporta la Breeding-API che permette l\'invio di dati a sistemi compatibili con BrAPI.</string>
     <string name="app_intro_required_setup_title">Impostazione Richiesta</string>
@@ -36,6 +37,9 @@
     <string name="app_intro_storage_title">Scegli lo spazio di archiviazione</string>
     <string name="app_intro_storage_summary">Scegli una cartella dove memorizzare i tuoi dati.</string>
     <string name="app_intro_storage_warning">Imposta la posizione di archiviazione</string>
+    <string name="app_intro_required_optional_title">Configurazione Facoltativa</string>
+    <string name="app_intro_required_optional_summary">Queste configurazioni facoltative personalizzano Field Book e possono essere regolate nelle impostazioni.</string>
+    <string name="app_intro_tutorial_title">Guida</string>
     <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
