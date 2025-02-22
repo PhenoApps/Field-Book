@@ -20,6 +20,7 @@ import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -184,7 +185,7 @@ class BrapiTraitFilterActivity(
 
     private suspend fun queryVariables() = launch(Dispatchers.IO) {
 
-        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
         val variables = arrayListOf<BrAPIObservationVariable>()
 

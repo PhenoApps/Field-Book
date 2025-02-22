@@ -142,9 +142,9 @@ public class ConfigActivity extends ThemedActivity {
      *
      */
     private void checkBrapiToken() {
-        String token = preferences.getString(GeneralKeys.BRAPI_TOKEN, "");
+        String token = preferences.getString(PreferenceKeys.BRAPI_TOKEN, "");
         if (!token.isEmpty()) {
-            preferences.edit().putBoolean(GeneralKeys.BRAPI_ENABLED, true).apply();
+            preferences.edit().putBoolean(PreferenceKeys.BRAPI_ENABLED, true).apply();
         }
     }
 
@@ -351,7 +351,7 @@ public class ConfigActivity extends ThemedActivity {
         ImageListAdapter adapterImg = new ImageListAdapter(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
 
-        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
+        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
 
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {

@@ -36,7 +36,7 @@ class MediaKeyCodeActionHelper {
                 else -> VolumeNavigation.DISABLED
             }
 
-            val mediaControlEnabled = prefs.getBoolean(GeneralKeys.MEDIA_KEYCODE_NAVIGATION, false)
+            val mediaControlEnabled = prefs.getBoolean(PreferenceKeys.MEDIA_KEYCODE_NAVIGATION, false)
 
             //return early if settings are disabled
             if (volumeNavEnabled == VolumeNavigation.DISABLED && !mediaControlEnabled) {

@@ -567,7 +567,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     public void startBrapiTraitActivity(boolean fromTraitCreator) {
 
         if (Utils.isConnected(this)) {
-            if (prefs.getBoolean(GeneralKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)) {
+            if (prefs.getBoolean(PreferenceKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)) {
                 Intent intent = new Intent(this, BrapiTraitFilterActivity.class);
                 BrapiFilterCache.Companion.checkClearCache(this);
                 startActivity(intent);

@@ -337,7 +337,7 @@ public class CollectActivity extends ThemedActivity
         geoNavHelper = new GeoNavHelper(this);
 
         ttsHelper = new TextToSpeechHelper(this, () -> {
-            String lang = mPrefs.getString(GeneralKeys.TTS_LANGUAGE, "-1");
+            String lang = mPrefs.getString(PreferenceKeys.TTS_LANGUAGE, "-1");
             if (!lang.equals("-1")) {
                 Set<Locale> locales = TextToSpeechHelper.Companion.getAvailableLocales();
                 for (Locale l : locales) {
@@ -352,7 +352,7 @@ public class CollectActivity extends ThemedActivity
 
         sensorHelper.register();
 
-        mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
+        mlkitEnabled = mPrefs.getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
 
         loadScreen();
 
@@ -375,7 +375,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public void triggerTts(String text) {
-        if (preferences.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
+        if (preferences.getBoolean(PreferenceKeys.TTS_LANGUAGE_ENABLED, false)) {
             ttsHelper.speak(text);
         }
     }
@@ -1371,7 +1371,7 @@ public class CollectActivity extends ThemedActivity
 //        actionView.setOnClickListener((View) -> onOptionsItemSelected(geoNavEnable));
 
         MenuItem fieldAudioMic = systemMenu.findItem(R.id.field_audio_mic);
-        fieldAudioMic.setVisible(mPrefs.getBoolean(GeneralKeys.ENABLE_FIELD_AUDIO, false));
+        fieldAudioMic.setVisible(mPrefs.getBoolean(PreferenceKeys.ENABLE_FIELD_AUDIO, false));
 
         customizeToolbarIcons();
 
@@ -2533,7 +2533,7 @@ public class CollectActivity extends ThemedActivity
             try {
 
                 String labelValPref = ((CollectActivity) context).getPreferences()
-                        .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value");
+                        .getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value");
                 if (labelValPref == null) {
                     labelValPref = "value";
                 }

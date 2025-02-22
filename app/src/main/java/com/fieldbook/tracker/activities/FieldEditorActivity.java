@@ -389,8 +389,8 @@ public class FieldEditorActivity extends ThemedActivity
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_cloud);
         importArray[2] = getString(R.string.fields_new_create_field);
-        if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
-            String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
+        if (preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
+            String displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
             importArray = Arrays.copyOf(importArray, importArray.length + 1);
             importArray[3] = displayName;
         }
@@ -459,7 +459,7 @@ public class FieldEditorActivity extends ThemedActivity
     public void loadBrAPI() {
 
         if (Utils.isConnected(this)) {
-            if (prefs.getBoolean(GeneralKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)) {
+            if (prefs.getBoolean(PreferenceKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)) {
                 Intent intent = new Intent(this, BrapiStudyFilterActivity.class);
                 BrapiFilterCache.Companion.checkClearCache(this);
                 startActivityForResult(intent, REQUEST_BRAPI_IMPORT_ACTIVITY);

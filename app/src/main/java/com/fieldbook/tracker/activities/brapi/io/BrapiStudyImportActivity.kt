@@ -24,7 +24,7 @@ import com.fieldbook.tracker.brapi.model.BrapiStudyDetails
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
-import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -789,7 +789,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         val germs = arrayListOf<BrAPIGermplasm>()
 
-        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
         Log.d(TAG, "Fetching germplasm for $studyDbId")
 
@@ -835,7 +835,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             val models = arrayListOf<BrAPIObservationVariable>()
 
-            val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+            val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
             launch(Dispatchers.IO) {
                 (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
@@ -881,7 +881,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         val units = arrayListOf<BrAPIObservationUnit>()
 
-        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
         launch(Dispatchers.IO) {
 
