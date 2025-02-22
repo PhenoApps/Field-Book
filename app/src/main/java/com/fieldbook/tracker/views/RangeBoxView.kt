@@ -26,6 +26,7 @@ import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.Utils
 import java.util.*
 
@@ -425,7 +426,7 @@ class RangeBoxView : ConstraintLayout {
         secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
         uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
-        switchVisibility(controller.getPreferences().getBoolean(GeneralKeys.QUICK_GOTO, false))
+        switchVisibility(controller.getPreferences().getBoolean(PreferenceKeys.QUICK_GOTO, false))
         setName(8)
         paging = 1
         setAllRangeID()
@@ -597,7 +598,7 @@ class RangeBoxView : ConstraintLayout {
         //three skipMode options: 0. disabled 1. skip active trait 2. skip but check all traits
 
         val skipMode = if (fromToolbar) {
-            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0")?.toIntOrNull() ?: 0
+            controller.getPreferences().getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0")?.toIntOrNull() ?: 0
         } else {
             controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "0")?.toIntOrNull() ?: 0
         }

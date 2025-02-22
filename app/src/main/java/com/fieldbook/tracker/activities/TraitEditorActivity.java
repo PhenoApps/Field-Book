@@ -56,6 +56,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils;
@@ -287,7 +288,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
         }
 
         queryAndLoadTraits();
@@ -335,7 +336,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         new MenuInflater(TraitEditorActivity.this).inflate(R.menu.menu_traits, menu);
 
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
 
         return true;
     }

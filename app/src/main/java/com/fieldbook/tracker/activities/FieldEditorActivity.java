@@ -64,6 +64,7 @@ import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
@@ -199,7 +200,7 @@ public class FieldEditorActivity extends ThemedActivity
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
         }
 
         queryAndLoadFields();
@@ -514,7 +515,7 @@ public class FieldEditorActivity extends ThemedActivity
         new MenuInflater(FieldEditorActivity.this).inflate(R.menu.menu_fields, menu);
 
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
 
         return true;
     }

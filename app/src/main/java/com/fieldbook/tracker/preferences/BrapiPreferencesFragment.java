@@ -135,11 +135,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     boolean isChecked = (Boolean) newValue;
                     if (!isChecked) { // on disable, reset default sources if they were set to brapi
-                        if (preferences.getString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "").equals("brapi")) {
-                            preferences.edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "ask").apply();
+                        if (preferences.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, "").equals("brapi")) {
+                            preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, "ask").apply();
                         }
-                        if (preferences.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "").equals("brapi")) {
-                            preferences.edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
+                        if (preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "").equals("brapi")) {
+                            preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
                         }
                         // remove brapi auth token when brapi is disabled
                         preferences.edit().remove(GeneralKeys.BRAPI_TOKEN).apply();
@@ -601,9 +601,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             for (int i = 0; i < checkedOptions.length; i++) {
                 if (checkedOptions[i]) {
                     if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_import))) {
-                        preferences.edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "brapi").apply();
+                        preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, "brapi").apply();
                     } else if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_export))) {
-                        preferences.edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "brapi").apply();
+                        preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "brapi").apply();
                     }
                 }
             }

@@ -17,18 +17,11 @@ public class GeneralKeys {
     public static final String LAST_NAME = "LastName";
     public static final String PERSON_UPDATE = "PersonUpdate";
     public static final String MODIFY_PROFILE_SETTINGS = "ModifyProfileSettings";
-    public static final String VERIFICATION_INTERVAL              = "com.tracker.fieldbook.preference.profile_verification_interval";
 
     // Appearance
     public static final String INFOBAR_UPDATE = "INFOBAR_UPDATE";
-    public static final String TOOLBAR_CUSTOMIZE                    = "TOOLBAR_CUSTOMIZE";
-    public static final String INFOBAR_NUMBER                       = "INFOBAR_NUMBER";
-    public static final String HIDE_INFOBAR_PREFIX                  = "HIDE_INFOBAR_PREFIX";
     public static final String APPLICATION_THEME                    = "APPLICATION_THEME";
     public static final String RESTORE_DEFAULT_THEME                = "RESTORE_DEFAULT_THEME";
-    public static final String LANGUAGE_LOCALE_ID                   = "com.tracker.fieldbook.preference.language.id";
-    public static final String LANGUAGE_LOCALE_SUMMARY              = "com.tracker.fieldbook.preference.language.summary";
-    public static final String LANGUAGE_LOCALE_DEFAULT_ID                   = "com.tracker.fieldbook.preference.language.default_id";
 
     // Behavior
     public static final String RETURN_CHARACTER                     = "RETURN_CHARACTER";
@@ -41,13 +34,8 @@ public class GeneralKeys {
     // General
     public static final String TUTORIAL_MODE                        = "Tips";
     public static final String NEXT_ENTRY_NO_DATA                   = "NextEmptyPlot";
-    public static final String QUICK_GOTO                           = "QuickGoTo";
-    public static final String MOVE_TO_UNIQUE_ID                    = "com.fieldbook.tracker.MOVE_TO_UNIQUE_ID";
-    public static final String DATAGRID_SETTING                     = "DataGrid";
     public static final String HIDE_ENTRIES_WITH_DATA               = "com.fieldbook.tracker.HIDE_ENTRIES";
-    public static final String HIDE_ENTRIES_WITH_DATA_TOOLBAR       = "com.fieldbook.tracker.HIDE_ENTRIES_WITH_DATA_TOOLBAR";
     public static final String USE_DAY_OF_YEAR                      = "UseDay";
-    public static final String ENABLE_SHARE                        = "EnableShare";
     public static final String GENERAL_LOCATION_COLLECTION          = "com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION";
     public static final String ATTR_CHOOSER_DIALOG_TAB              = "ATTR_CHOOSER_DIALOG_TAB";
 
@@ -151,20 +139,15 @@ public class GeneralKeys {
 
     //themes
     public static final String SAVED_DATA_COLOR = "SAVED_DATA_COLOR";
-    public static final String THEME = "key_preferences_theme_theme";
-    public static final String TEXT_THEME = "key_preferences_theme_text";
     public static final String THEME_FLAG = "key_preferences_theme_theme_flag";
-    public static final String IMPORT_SOURCE_DEFAULT = "IMPORT_SOURCE_DEFAULT";
-    public static final String EXPORT_SOURCE_DEFAULT = "EXPORT_SOURCE_DEFAULT";
+
     public static final String FIRST_RUN = "FirstRun";
     public static final String UPDATE_VERSION = "UpdateVersion";
     public static final String REGION = "region";
-    public static final String TIPS = "Tips";
     public static final String TIPS_CONFIGURED = "TipsConfigured";
 
     //shared preferences file name
     public static final String SHARED_PREF_FILE_NAME = "Settings";
-    public static final String LANGUAGE_PREF = "language";
 
     //used to get the name of the currently selected field that is saved in preferences
     //example: field_sample how to get: sharedPreferences.getString(Constants.FIELD_FILE, "")

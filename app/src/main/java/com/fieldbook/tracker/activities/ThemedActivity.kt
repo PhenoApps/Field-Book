@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -42,8 +43,8 @@ open class ThemedActivity: AppCompatActivity() {
             //set the theme
             val (themeIndex, textIndex) = with(prefs) {
 
-                (getString(GeneralKeys.THEME, "0")?.toInt()
-                    ?: 0) to (getString(GeneralKeys.TEXT_THEME, "1")?.toInt() ?: 1)
+                (getString(PreferenceKeys.THEME, "0")?.toInt()
+                    ?: 0) to (getString(PreferenceKeys.TEXT_THEME, "1")?.toInt() ?: 1)
 
             }
 

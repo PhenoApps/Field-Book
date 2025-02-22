@@ -35,6 +35,7 @@ import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.fragments.ImportDBFragment;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
@@ -122,7 +123,7 @@ public class ConfigActivity extends ThemedActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
         }
 
         invalidateOptionsMenu();
@@ -201,13 +202,13 @@ public class ConfigActivity extends ThemedActivity {
 
             SharedPreferences.Editor ed = preferences.edit();
 
-            Set<String> entries = preferences.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
+            Set<String> entries = preferences.getStringSet(PreferenceKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
             entries.add("search");
             entries.add("resources");
             entries.add("summary");
             entries.add("lockData");
 
-            ed.putStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, entries);
+            ed.putStringSet(PreferenceKeys.TOOLBAR_CUSTOMIZE, entries);
             ed.apply();
 
             // to disable App Intro for debug mode
@@ -546,13 +547,13 @@ public class ConfigActivity extends ThemedActivity {
 
                 if (highContrastThemeEnabled) {
                     preferences.edit()
-                            .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.HIGH_CONTRAST))
-                            .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
+                            .putString(PreferenceKeys.THEME, String.valueOf(ThemedActivity.HIGH_CONTRAST))
+                            .putString(PreferenceKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
                             .apply();
                 } else {
                     preferences.edit()
-                            .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
-                            .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
+                            .putString(PreferenceKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
+                            .putString(PreferenceKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
                             .apply();
                 }
 
@@ -612,7 +613,7 @@ public class ConfigActivity extends ThemedActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
         return true;
     }
 

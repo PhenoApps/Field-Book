@@ -61,6 +61,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -1085,10 +1086,10 @@ public class CollectActivity extends ThemedActivity
 
         // Update menu item visibility
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
-            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
-            systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
-            systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
+            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
+            systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
+            systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(PreferenceKeys.DATAGRID_SETTING, false));
         }
 
         refreshInfoBarAdapter();
@@ -1339,7 +1340,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     private void customizeToolbarIcons() {
-        Set<String> entries = preferences.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
+        Set<String> entries = preferences.getStringSet(PreferenceKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
 
         if (systemMenu != null) {
             systemMenu.findItem(R.id.search).setVisible(entries.contains("search"));
@@ -1355,10 +1356,10 @@ public class CollectActivity extends ThemedActivity
 
         systemMenu = menu;
 
-        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
-        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
-        systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
-        systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
+        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
+        systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
+        systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(PreferenceKeys.DATAGRID_SETTING, false));
 
         //toggle repeated values indicator
         systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator).setVisible(collectInputView.isRepeatEnabled());
@@ -1499,7 +1500,7 @@ public class CollectActivity extends ThemedActivity
             rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, true));
             refreshMain();
         } else if (itemId == jumpToPlotId) {
-            String moveToUniqueIdValue = preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "");
+            String moveToUniqueIdValue = preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "");
             if (moveToUniqueIdValue.equals("1")) {
                 moveToPlotID();
             } else if (moveToUniqueIdValue.equals("2")) {
