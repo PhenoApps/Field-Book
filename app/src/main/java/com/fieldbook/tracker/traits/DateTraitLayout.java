@@ -16,6 +16,7 @@ import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.dialogs.DatePickerFragment;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -183,7 +184,7 @@ public class DateTraitLayout extends BaseTraitLayout {
             }
 
             if (!getCollectInputView().getText().equals("NA")) { //issue 413, don't update NA when save button is pressed
-                if (getPrefs().getBoolean(GeneralKeys.USE_DAY_OF_YEAR, false)) {
+                if (getPrefs().getBoolean(PreferenceKeys.USE_DAY_OF_YEAR, false)) {
                     updateObservation(getCurrentTrait(), String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
                 } else {
                     updateObservation(getCurrentTrait(), dateFormat.format(calendar.getTime()));

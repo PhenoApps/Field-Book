@@ -40,6 +40,7 @@ import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.NmeaParser
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.impactZoneSearch
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.lowPassFilter
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
@@ -326,7 +327,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     }
 
     private fun currentLoggingMode() : String {
-        return preferences.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0") ?: "0"
+        return preferences.getString(PreferenceKeys.GEONAV_LOGGING_MODE, "0") ?: "0"
     }
 
     /**
@@ -354,7 +355,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             )
 
             //set update interval from the preferences can be 1s, 5s or 10s
-            val interval = preferences.getString(GeneralKeys.UPDATE_INTERVAL, "1") ?: "1"
+            val interval = preferences.getString(PreferenceKeys.UPDATE_INTERVAL, "1") ?: "1"
             var period = 1000L
             when (interval) {
                 "1" -> {}
@@ -484,7 +485,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private fun runImpactZoneAlgorithm(internal: Boolean) {
 
         //the angle of the IZ algorithm to use, see Geodetic util class for more details
-        val thetaPref: String = preferences.getString(GeneralKeys.SEARCH_ANGLE, "0") ?: "0"
+        val thetaPref: String = preferences.getString(PreferenceKeys.SEARCH_ANGLE, "0") ?: "0"
         var theta = 22.5
         when (thetaPref) {
             "22.5" -> {
@@ -501,11 +502,11 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             }
         }
         val geoNavMethod: String =
-            preferences.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
+            preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
         val d1: Double =
-            preferences.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble() ?: 0.001
+            preferences.getString(PreferenceKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble() ?: 0.001
         val d2: Double =
-            preferences.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble() ?: 0.01
+            preferences.getString(PreferenceKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble() ?: 0.01
         //user must have a valid pointing direction before attempting the IZ
         //initialize the start position and fill with external or internal GPS coordinates
         val start: Location? = if (internal) {
@@ -534,7 +535,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         if (start != null && currentFixQuality) {
 
             val distanceThreshKm = try {
-                (preferences.getString(GeneralKeys.GEONAV_DISTANCE_THRESHOLD, "10.0") ?: "10.0").toDouble()
+                (preferences.getString(PreferenceKeys.GEONAV_DISTANCE_THRESHOLD, "10.0") ?: "10.0").toDouble()
             } catch (e: NumberFormatException) {
                 10.0
             }
@@ -736,12 +737,12 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                 val resolver: ContentResolver = controller.getContext().contentResolver
                 val geoNavFolder = getDirectory(controller.getContext(), R.string.dir_geonav)
                 if (geoNavFolder != null && geoNavFolder.exists()) {
-                    val interval = preferences.getString(GeneralKeys.UPDATE_INTERVAL, "1")
+                    val interval = preferences.getString(PreferenceKeys.UPDATE_INTERVAL, "1")
                     val address =
                         (preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "") ?: "")
                             .replace(":".toRegex(), "-")
                             .replace("\\s".toRegex(), "_")
-                    val thetaPref = preferences.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
+                    val thetaPref = preferences.getString(PreferenceKeys.SEARCH_ANGLE, "22.5")
                     // if the currentLoggingMode is for limited logging, use "limited_" as the prefix for filename
 //                    val prefixOfFile = if (currentLoggingMode() == "1") {
 //                        "limited_"
@@ -849,7 +850,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             if ((mTeslas < 25 || mTeslas > 65) && mNotWarnedInterference) {
                 mNotWarnedInterference = false
                 val geoNavMethod: String =
-                    preferences.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
+                    preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
                 if (geoNavMethod != "0") {
                     Toast.makeText(
                         controller.getContext(), R.string.activity_collect_geomagnetic_noise_detected,

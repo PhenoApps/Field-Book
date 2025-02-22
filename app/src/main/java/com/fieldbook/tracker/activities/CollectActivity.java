@@ -577,7 +577,7 @@ public class CollectActivity extends ThemedActivity
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layout);
 
-        if (preferences.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)) {
+        if (preferences.getBoolean(PreferenceKeys.FLIP_FLOP_ARROWS, false)) {
             constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.TOP,
                     R.id.act_collect_infobar_rv, ConstraintSet.BOTTOM, 0);
             constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.BOTTOM,
@@ -1136,7 +1136,7 @@ public class CollectActivity extends ThemedActivity
 
         mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
 
-        if (mPrefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
+        if (mPrefs.getBoolean(PreferenceKeys.ENABLE_GEONAV, false)) {
 
             //setup logger whenever activity resumes
             geoNavHelper.setupGeoNavLogger();
@@ -1366,7 +1366,7 @@ public class CollectActivity extends ThemedActivity
 
         //added in geonav 310 only make goenav switch visible if preference is set
         MenuItem geoNavEnable = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
-        geoNavEnable.setVisible(mPrefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false));
+        geoNavEnable.setVisible(mPrefs.getBoolean(PreferenceKeys.ENABLE_GEONAV, false));
 //        View actionView = MenuItemCompat.getActionView(geoNavEnable);
 //        actionView.setOnClickListener((View) -> onOptionsItemSelected(geoNavEnable));
 
@@ -2371,11 +2371,11 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public boolean isCyclingTraitsAdvances() {
-        return preferences.getBoolean(GeneralKeys.CYCLING_TRAITS_ADVANCES, false);
+        return preferences.getBoolean(PreferenceKeys.CYCLING_TRAITS_ADVANCES, false);
     }
 
     public boolean isReturnFirstTrait() {
-        return preferences.getBoolean(GeneralKeys.RETURN_FIRST_TRAIT, false);
+        return preferences.getBoolean(PreferenceKeys.RETURN_FIRST_TRAIT, false);
     }
 
     /**

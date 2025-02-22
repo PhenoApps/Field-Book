@@ -44,9 +44,9 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
         //bugfix commit 60ab59c4a82db79b350d72f8dbf51d08548bd846 fixes deprecated preference data for volume nav
         try {
-            preferences.getString(GeneralKeys.VOLUME_NAVIGATION, "");
+            preferences.getString(PreferenceKeys.VOLUME_NAVIGATION, "");
         } catch (ClassCastException e) {
-            preferences.edit().putString(GeneralKeys.VOLUME_NAVIGATION, "0").apply();
+            preferences.edit().putString(PreferenceKeys.VOLUME_NAVIGATION, "0").apply();
             Log.d(TAG, "Stagnant Deprecated preference data found, fixing.");
         }
 

@@ -33,6 +33,7 @@ import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.Companion.ACTION_BROADCAST_GNSS_TRAIT
 import com.fieldbook.tracker.location.gnss.NmeaParser
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.GeoJsonUtil
 import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
@@ -267,11 +268,11 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
      */
     private fun setupAveragingUi() {
 
-        val checked = prefs.getBoolean(GeneralKeys.GEONAV_AVERAGING, false)
+        val checked = prefs.getBoolean(PreferenceKeys.GEONAV_AVERAGING, false)
 
         averageSwitch.setOnCheckedChangeListener { _, isChecked ->
 
-            prefs.edit().putBoolean(GeneralKeys.GEONAV_AVERAGING, isChecked).apply()
+            prefs.edit().putBoolean(PreferenceKeys.GEONAV_AVERAGING, isChecked).apply()
 
             chipGroup.visibility = if (isChecked) View.VISIBLE else View.INVISIBLE
         }
@@ -280,11 +281,11 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         chipGroup.visibility = if (checked) View.VISIBLE else View.INVISIBLE
 
-        val chipId = prefs.getInt(GeneralKeys.GEONAV_AVERAGING_INTERVAL, R.id.gnss_trait_5s_chip)
+        val chipId = prefs.getInt(PreferenceKeys.GEONAV_AVERAGING_INTERVAL, R.id.gnss_trait_5s_chip)
         chipGroup.check(chipId)
 
         chipGroup.setOnCheckedChangeListener { _, checkedId ->
-            prefs.edit().putInt(GeneralKeys.GEONAV_AVERAGING_INTERVAL, checkedId).apply()
+            prefs.edit().putInt(PreferenceKeys.GEONAV_AVERAGING_INTERVAL, checkedId).apply()
         }
     }
 
@@ -650,7 +651,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
             var startNewCommThread = true
 
-            if (prefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
+            if (prefs.getBoolean(PreferenceKeys.ENABLE_GEONAV, false)) {
 
                 val geoNavAddress = prefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, null)
 

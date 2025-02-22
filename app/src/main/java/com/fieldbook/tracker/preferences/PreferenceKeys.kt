@@ -35,10 +35,45 @@ class PreferenceKeys {
         const val LANGUAGE_LOCALE_SUMMARY = "com.tracker.fieldbook.preference.language.summary"
         const val LANGUAGE_LOCALE_DEFAULT_ID = "com.tracker.fieldbook.preference.language.default_id"
 
+        // BEHAVIOR
+        const val CYCLING_TRAITS_ADVANCES = "CycleTraits"
+        const val RETURN_FIRST_TRAIT = "ReturnFirst"
+        const val DISABLE_ENTRY_ARROW_NO_DATA = "DISABLE_ENTRY_ARROW_NO_DATA"
+        const val FLIP_FLOP_ARROWS = "FLIP_FLOP_ARROWS"
+        const val VOLUME_NAVIGATION = "VOLUME_NAVIGATION"
+        const val RETURN_CHARACTER = "RETURN_CHARACTER"
+        const val USE_DAY_OF_YEAR = "UseDay"
+
+        // LOCATION
+        // TODO: check if PAIR_BLUETOOTH and PAIRED_DEVICE_ADDRESS needs to go here
+        const val GENERAL_LOCATION_COLLECTION = "com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION"
+        const val COORDINATE_FORMAT = "com.fieldbook.tracker.COORDINATE_FORMAT"
+        // GeoNav
+        private const val GEONAV_PREFIX = "com.fieldbook.tracker.geonav."
+        const val ENABLE_GEONAV = GEONAV_PREFIX + "ENABLE_GEONAV"
+        const val SEARCH_ANGLE = GEONAV_PREFIX + "parameters.SEARCH_ANGLE"
+        const val UPDATE_INTERVAL = GEONAV_PREFIX + "UPDATE_INTERVAL"
+        const val GEONAV_AVERAGING = GEONAV_PREFIX + "GEONAV_AVERAGING"
+        const val GEONAV_AVERAGING_INTERVAL = GEONAV_PREFIX + "GEONAV_AVERAGIN_INTERVAL"
+        const val GEONAV_PARAMETER_D1 = GEONAV_PREFIX + "parameters.trapezoid.D1"
+        const val GEONAV_PARAMETER_D2 = GEONAV_PREFIX + "parameters.trapezoid.D2"
+        const val GEONAV_SEARCH_METHOD = GEONAV_PREFIX + "SEARCH_METHOD"
+        const val GEONAV_DISTANCE_THRESHOLD = GEONAV_PREFIX + "DISTANCE_THRESHOLD"
+        const val GEONAV_LOGGING_MODE = GEONAV_PREFIX + "GEONAV_LOGGING_MODE"
+
+        // Sounds
+        const val PRIMARY_SOUND = "RangeSound"
+        const val ENTRY_NAVIGATION_SOUND = "ENTRY_NAVIGATION_SOUND"
+        const val CYCLE_TRAITS_SOUND = "CYCLE_TRAITS_SOUND"
+        const val DELETE_OBSERVATION_SOUND = "DELETE_OBSERVATION_SOUND"
+
         // SYSTEM
         const val IMPORT_SOURCE_DEFAULT = "IMPORT_SOURCE_DEFAULT"
         const val EXPORT_SOURCE_DEFAULT = "EXPORT_SOURCE_DEFAULT"
         const val ENABLE_SHARE = "EnableShare"
         // TODO: check if crashlytics related preferences need to go here
+
+        // EXPERIMENTAL
+        const val MEDIA_KEYCODE_NAVIGATION = "com.tracker.fieldbook.preferences.keys.enable_media_keycode_events"
     }
 }

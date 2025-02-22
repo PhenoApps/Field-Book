@@ -62,9 +62,9 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
                 if (newValue as? Boolean == true) {
                     val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
                     prefs.edit()
-                        .putBoolean(GeneralKeys.ENABLE_GEONAV, true)
+                        .putBoolean(PreferenceKeys.ENABLE_GEONAV, true)
                         .putString(
-                            GeneralKeys.GEONAV_LOGGING_MODE,
+                            PreferenceKeys.GEONAV_LOGGING_MODE,
                             GeoNavHelper.GeoNavLoggingMode.LIMITED.value
                         ).apply()
                 }

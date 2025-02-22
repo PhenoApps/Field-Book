@@ -368,7 +368,7 @@ class RangeBoxView : ConstraintLayout {
             updateCurrentRange(rangeID[paging - 1])
             saveLastPlot()
             if (cRange.plot_id.isEmpty()) return
-            if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
+            if (controller.getPreferences().getBoolean(PreferenceKeys.PRIMARY_SOUND, false)) {
                 if (cRange.range != lastRange && lastRange != "") {
                     lastRange = cRange.range
                     controller.getSoundHelper().playPlonk()
@@ -445,7 +445,7 @@ class RangeBoxView : ConstraintLayout {
     fun refresh() {
         updateCurrentRange(rangeID[paging - 1])
         display()
-        if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
+        if (controller.getPreferences().getBoolean(PreferenceKeys.PRIMARY_SOUND, false)) {
             if (cRange.range != lastRange && lastRange != "") {
                 lastRange = cRange.range
                 controller.getSoundHelper().playPlonk()
@@ -539,12 +539,12 @@ class RangeBoxView : ConstraintLayout {
         if (!controller.validateData(controller.getCurrentObservation()?.value)) {
             return
         }
-        if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
+        if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
         ) {
             controller.getSoundHelper().playAdvance()
         }
         val entryArrow =
-            controller.getPreferences().getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
+            controller.getPreferences().getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
         if ((entryArrow == "1" || entryArrow == "3") && !controller.getTraitBox().existsTrait()) {
             controller.getSoundHelper().playError()
         } else {
@@ -563,12 +563,12 @@ class RangeBoxView : ConstraintLayout {
         if (!controller.validateData(controller.getCurrentObservation()?.value)) {
             return
         }
-        if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
+        if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
         ) {
             controller.getSoundHelper().playAdvance()
         }
         val entryArrow =
-            controller.getPreferences().getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
+            controller.getPreferences().getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
         if ((entryArrow == "2" || entryArrow == "3") && !traitBox.existsTrait()) {
             controller.getSoundHelper().playError()
         } else {
