@@ -50,6 +50,8 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
         registerPreferenceListeners()
 
         (activity as PreferencesActivity).supportActionBar?.title = getString(R.string.preferences_location_title)
+
+        mPairDevicePref = findPreference(PreferenceKeys.PAIR_BLUETOOTH)
     }
 
     private fun setupUi() {
@@ -84,7 +86,7 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
                 true
             }
 
-        findPreference<Preference>(GeneralKeys.PAIR_BLUETOOTH)?.let { pairDevicePref ->
+        findPreference<Preference>(PreferenceKeys.PAIR_BLUETOOTH)?.let { pairDevicePref ->
             pairDevicePref.onPreferenceClickListener = Preference.OnPreferenceClickListener {
                 advisor.connectWith {
                     startDeviceChoiceDialog()
@@ -232,8 +234,8 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
      */
     private fun updateDeviceAddressSummary() {
         if (mPairDevicePref != null) {
-            val address = preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
-            mPairDevicePref!!.summary = address
+            val address = preferences.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, "")
+            mPairDevicePref?.summary = address
         }
     }
 
@@ -279,7 +281,7 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
                     if (device != null) {
                         address = device.address
                     }
-                    preferences.edit().putString(GeneralKeys.PAIRED_DEVICE_ADDRESS, address)
+                    preferences.edit().putString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, address)
                         .apply()
                     updateDeviceAddressSummary()
                     dialog.dismiss()

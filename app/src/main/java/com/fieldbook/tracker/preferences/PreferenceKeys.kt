@@ -45,11 +45,12 @@ class PreferenceKeys {
         const val USE_DAY_OF_YEAR = "UseDay"
 
         // LOCATION
-        // TODO: check if PAIR_BLUETOOTH and PAIRED_DEVICE_ADDRESS needs to go here
+        private const val GEONAV_PREFIX = "com.fieldbook.tracker.geonav."
+        const val PAIR_BLUETOOTH: String = GEONAV_PREFIX + "PAIR_BLUETOOTH"
+        const val PAIRED_DEVICE_ADDRESS: String = GEONAV_PREFIX + "PAIRED_DEVICE_ADDRESS"
         const val GENERAL_LOCATION_COLLECTION = "com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION"
         const val COORDINATE_FORMAT = "com.fieldbook.tracker.COORDINATE_FORMAT"
         // GeoNav
-        private const val GEONAV_PREFIX = "com.fieldbook.tracker.geonav."
         const val ENABLE_GEONAV = GEONAV_PREFIX + "ENABLE_GEONAV"
         const val SEARCH_ANGLE = GEONAV_PREFIX + "parameters.SEARCH_ANGLE"
         const val UPDATE_INTERVAL = GEONAV_PREFIX + "UPDATE_INTERVAL"

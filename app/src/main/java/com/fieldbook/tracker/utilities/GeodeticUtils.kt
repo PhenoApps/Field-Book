@@ -81,7 +81,7 @@ class GeodeticUtils {
                     val interval = preferences.getString(PreferenceKeys.UPDATE_INTERVAL, "1") ?: "1"
                     //find the mac address of the device, if not found then start the internal GPS
                     val address: String =
-                        (preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "internal") ?: "")
+                        (preferences.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, "internal") ?: "")
                             .replace(":".toRegex(), "-")
                             .replace("\\s".toRegex(), "_")
                     //the angle of the IZ algorithm to use, see Geodetic util class for more details

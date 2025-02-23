@@ -368,7 +368,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             }
 
             //find the mac address of the device, if not found then start the internal GPS
-            val address: String = preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "") ?: ""
+            val address: String = preferences.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, "") ?: ""
             val internalGps: String =
                 controller.getContext().getString(R.string.pref_behavior_geonav_internal_gps_choice)
             var internal = true
@@ -739,7 +739,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                 if (geoNavFolder != null && geoNavFolder.exists()) {
                     val interval = preferences.getString(PreferenceKeys.UPDATE_INTERVAL, "1")
                     val address =
-                        (preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "") ?: "")
+                        (preferences.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, "") ?: "")
                             .replace(":".toRegex(), "-")
                             .replace("\\s".toRegex(), "_")
                     val thetaPref = preferences.getString(PreferenceKeys.SEARCH_ANGLE, "22.5")

@@ -653,7 +653,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
             if (prefs.getBoolean(PreferenceKeys.ENABLE_GEONAV, false)) {
 
-                val geoNavAddress = prefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, null)
+                val geoNavAddress = prefs.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, null)
 
                 if (geoNavAddress == value.address) {
 
