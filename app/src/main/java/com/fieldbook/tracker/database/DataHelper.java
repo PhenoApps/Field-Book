@@ -52,15 +52,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -2558,7 +2562,7 @@ public class DataHelper {
      * @return DocumentFile
      * @throws IOException If file operations fail
      */
-    public DocumentFile exportPreferences(Context ctx, String filename) throws IOException {
+    public DocumentFile exportPreferences(Context ctx, String filename, boolean exportOnlySettingsKeys) throws IOException {
         try {
             DocumentFile preferencesDir = BaseDocumentTreeUtil.Companion.getDirectory(ctx, R.string.dir_preferences);
 
@@ -2574,7 +2578,7 @@ public class DataHelper {
                 if (preferenceFile != null) {
                     OutputStream tempStream = BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_preferences, filename);
                     ObjectOutputStream objectStream = new ObjectOutputStream(tempStream);
-                    objectStream.writeObject(preferences.getAll());
+                    objectStream.writeObject(exportOnlySettingsKeys ? getSettingsPreferencesOnly() : preferences.getAll());
 
                     objectStream.close();
                     if (tempStream != null) {
@@ -2588,6 +2592,47 @@ public class DataHelper {
             Log.e(TAG, e.getMessage());
             throw new IOException("Failed to export preferences", e);
         }
+    }
+
+    /**
+     * Helper method to extract only the preferences defined in PreferenceKeys class
+     * @return Map containing only preferences that belong to settings
+     */
+    private Map<String, Object> getSettingsPreferencesOnly() {
+        Map<String, ?> allPrefs = preferences.getAll();
+        Map<String, Object> settingsPrefs = new HashMap<>();
+        Set<String> preferenceKeys = new HashSet<>();
+
+        try {
+            Class<?> preferenceKeysClass = Class.forName("com.fieldbook.tracker.preferences.PreferenceKeys");
+
+            Field[] fields = preferenceKeysClass.getDeclaredFields();
+            for (Field field : fields) {
+                // check for public static final and string type fields
+                if (
+                    !Modifier.isPrivate(field.getModifiers()) &&
+                    Modifier.isStatic(field.getModifiers()) &&
+                    Modifier.isFinal(field.getModifiers()) &&
+                    field.getType() == String.class) {
+
+                    // get the string value of the constant
+                    String key = (String) field.get(null);
+                    preferenceKeys.add(key);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error accessing PreferenceKeys: " + e.getMessage());
+        }
+
+        Log.d(TAG, "Found " + preferenceKeys.size() + " keys from PreferenceKeys");
+
+        for (String key : preferenceKeys) {
+            if (allPrefs.containsKey(key)) {
+                settingsPrefs.put(key, allPrefs.get(key));
+            }
+        }
+
+        return settingsPrefs;
     }
 
     /**

@@ -95,7 +95,6 @@ class PreferenceKeys {
         const val IMPORT_SOURCE_DEFAULT = "IMPORT_SOURCE_DEFAULT"
         const val EXPORT_SOURCE_DEFAULT = "EXPORT_SOURCE_DEFAULT"
         const val ENABLE_SHARE = "EnableShare"
-        // TODO: check if crashlytics related preferences need to go here
 
         // EXPERIMENTAL
         const val REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values"

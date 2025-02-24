@@ -195,7 +195,7 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
         try {
             SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
             String filename = "preferences_" + timeStamp.format(Calendar.getInstance().getTime());
-            return database.exportPreferences(context, filename);
+            return database.exportPreferences(context, filename, true);
         } catch (IOException e) {
             Log.e("PreferencesFragment", "Failed to export preferences", e);
             return null;
