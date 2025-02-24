@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+
+## [v6.0.8] - 2025-02-24
+
+### Added
+
+### Changed
+
+### Fixed
 - Preferences are now correctly imported from database zip files
 - BrAPI authorization fix for specific devices (https://github.com/PhenoApps/Field-Book/pull/1163)
 
@@ -603,3 +611,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.0.6]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.6
 
 [v6.0.7]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.7
+
+[v6.0.8]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.8
