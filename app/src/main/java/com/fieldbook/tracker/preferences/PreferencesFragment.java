@@ -119,7 +119,7 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_menu_quickshare) {
+        if (item.getItemId() == R.id.action_menu_nearby_share) {
             showPreferenceShareDialog();
             return true;
         }
