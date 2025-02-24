@@ -435,7 +435,7 @@ public class FieldEditorActivity extends ThemedActivity
             }
         };
 
-        ListAddDialog dialog = new ListAddDialog(this, importArray, icons, onItemClickListener);
+        ListAddDialog dialog = new ListAddDialog(this, R.string.fields_new_dialog_title, importArray, icons, onItemClickListener);
         dialog.show(getSupportFragmentManager(), "ListAddDialog");
     }
 

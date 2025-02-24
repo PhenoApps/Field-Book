@@ -32,7 +32,9 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.FileInputStream
 import javax.inject.Inject
@@ -102,29 +104,49 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
      * Manually save one copy in specified directory's "shared" folder
      */
     private fun handleReceivedFile(payloadFile: Payload.File?) {
-        payloadFile?.asParcelFileDescriptor()?.let { pfd ->
-            try {
-                val fileName = payloadFile.asUri()?.lastPathSegment ?: "unknown"
-                val sharedDir = fileCallback?.getSaveFileDirectory()?.let { dirId ->
-                    BaseDocumentTreeUtil.createDir(context, getString(dirId), getString(R.string.dir_shared))
-                }
-                val docFile = sharedDir?.createFile("*/*", fileName)
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                payloadFile?.asParcelFileDescriptor()?.let { pfd ->
+                    try {
+                        val fileName = payloadFile.asUri()?.lastPathSegment ?: "unknown"
+                        val sharedDir = fileCallback?.getSaveFileDirectory()?.let { dirId ->
+                            BaseDocumentTreeUtil.createDir(
+                                context,
+                                getString(dirId),
+                                getString(R.string.dir_shared)
+                            )
+                        }
+                        val docFile = sharedDir?.createFile("*/*", fileName)
 
-                docFile?.let { file ->
-                    context.contentResolver?.openOutputStream(file.uri)?.use { outputStream ->
-                        FileInputStream(pfd.fileDescriptor).use { inputStream->
-                            inputStream.copyTo(outputStream)
+                        docFile?.let { file ->
+                            context.contentResolver?.openOutputStream(file.uri)
+                                ?.use { outputStream ->
+                                    FileInputStream(pfd.fileDescriptor).use { inputStream ->
+                                        inputStream.copyTo(outputStream)
+                                    }
+                                }
+                        }
+
+                        try {
+                            if (docFile != null) {
+                                fileCallback?.onFileReceived(docFile)
+                            }
+                            withContext(Dispatchers.Main) {
+                                Utils.makeToast(context, String.format(getString(R.string.nearby_share_file_imported_successfully), fileName))
+                            }
+                        } catch (e: Exception) {
+                            withContext(Dispatchers.Main) {
+                                Log.e("PreferencesFragment", "Failed to import file", e);
+                                setProgressStatus(String.format(getString(R.string.nearby_share_failed_import), e.message), R.drawable.ic_transfer_error)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            setProgressStatus(String.format(getString(R.string.nearby_share_failed_handle_file), e.message), R.drawable.ic_transfer_error)
+                            FirebaseCrashlytics.getInstance().recordException(e)
                         }
                     }
-                    Utils.makeToast(context, "$fileName imported successfully")
                 }
-
-                if (docFile != null) {
-                    fileCallback?.onFileReceived(docFile)
-                }
-            } catch (e: Exception) {
-                Utils.makeToast(context, String.format(getString(R.string.nearby_share_failed_handle_file), e.message))
-                FirebaseCrashlytics.getInstance().recordException(e)
             }
         }
     }
@@ -134,41 +156,45 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
      * Create and send the payload for the file to be transferred
      */
     private fun sendFile(endpointId: String, fileUri: Uri) {
-        val payload = docFile?.let { documentFile ->
-            try {
-                context.contentResolver?.openFileDescriptor(documentFile.uri, "r")?.let { pfd ->
-                    Payload.fromFile(pfd).apply {
-                        documentFile.name?.let { name ->
-                            try {
-                                setFileName(name)
-                                setProgressMessage(String.format(getString(R.string.nearby_share_starting_transfer), name))
-                            } catch (e: Exception) {
-                                Log.e("NearbyShareUtil", "Failed to set filename", e)
+        scope.launch {
+            val payload = docFile?.let { documentFile ->
+                try {
+                    context.contentResolver?.openFileDescriptor(documentFile.uri, "r")?.let { pfd ->
+                        Payload.fromFile(pfd).apply {
+                            documentFile.name?.let { name ->
+                                try {
+                                    setFileName(name)
+                                    setProgressMessage(String.format(getString(R.string.nearby_share_starting_transfer), name))
+                                } catch (e: Exception) {
+                                    Log.e("NearbyShareUtil", "Failed to set filename", e)
+                                    setProgressStatus(getString(R.string.nearby_share_failed_payload), R.drawable.ic_transfer_error)
+                                }
                             }
                         }
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    setProgressStatus(getString(R.string.nearby_share_failed_payload), R.drawable.ic_transfer_error)
+                    null
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
             }
-        }
 
-        payload?.let {
-            connectionsClient.sendPayload(endpointId, it)
-                .addOnSuccessListener {
-                    setProgressMessage(getString(R.string.nearby_share_transfer_in_progress))
-                }
-                .addOnCompleteListener {
-                    setProgressMessage(getString(R.string.nearby_share_transfer_complete))
-                }
-                .addOnFailureListener { e ->
-                    setProgressStatus(String.format(getString(R.string.nearby_share_failed_transfer), e.message), R.drawable.ic_transfer_error)
-                    stopAdvertising()
-                }
-        } ?: run {
-            setProgressStatus(getString(R.string.nearby_share_failed_payload), R.drawable.ic_transfer_error)
-            stopAdvertising()
+            payload?.let {
+                connectionsClient.sendPayload(endpointId, it)
+                    .addOnSuccessListener {
+                        setProgressMessage(getString(R.string.nearby_share_transfer_in_progress))
+                    }
+                    .addOnCompleteListener {
+                        setProgressMessage(getString(R.string.nearby_share_transfer_complete))
+                    }
+                    .addOnFailureListener { e ->
+                        setProgressStatus(String.format(getString(R.string.nearby_share_failed_transfer), e.message), R.drawable.ic_transfer_error)
+                        stopAdvertising()
+                    }
+            } ?: run {
+                setProgressStatus(getString(R.string.nearby_share_failed_payload), R.drawable.ic_transfer_error)
+                stopAdvertising()
+            }
         }
     }
 
@@ -188,8 +214,10 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
             when (payload.type) {
                 Payload.Type.FILE -> {
-                    setProgressMessage(getString(R.string.nearby_share_receiving_file))
-                    handleReceivedFile(payload.asFile())
+                    if (isDiscovering) {
+                        setProgressMessage(getString(R.string.nearby_share_receiving_file))
+                        handleReceivedFile(payload.asFile())
+                    }
                 }
             }
         }
@@ -255,7 +283,6 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                     docFile?.let { file ->
                         val fileUri = file.uri
                         sendFile(endpointId, fileUri)
-                        stopNearbyShare()
                     }
                 }
                 ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED -> {
@@ -303,10 +330,14 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
 
         scope.launch {
             try {
-                docFile = fileCallback?.prepareFileForTransfer()
+                withContext(Dispatchers.IO) {
+                    docFile = fileCallback?.prepareFileForTransfer()
+                }
             } catch (e: Exception) {
+                setProgressStatus(String.format(getString(R.string.nearby_share_failed_export_generation), e), R.drawable.ic_transfer_error)
                 stopNearbyShare()
                 FirebaseCrashlytics.getInstance().recordException(e)
+                return@launch
             }
 
             val advertisingOptions = AdvertisingOptions.Builder().setStrategy(STRATEGY).build()
@@ -375,10 +406,15 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         }
     }
 
+    fun cleanup() {
+        stopNearbyShare()
+        scope.cancel()
+    }
+
     /**
      * Function to stop advertising/discovering
      */
-    fun stopNearbyShare() {
+    private fun stopNearbyShare() {
         disconnectEstablishedConnections()
 
         if (isAdvertising) stopAdvertising()
@@ -505,6 +541,9 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         progressDialog?.show()
     }
 
+    /**
+     * Changes the dialog message, retains the progressBar
+     */
     private fun setProgressMessage(message: String) {
         if (progressDialog == null) showProgressDialog()
         progressBar?.visibility = View.VISIBLE
@@ -512,8 +551,14 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         progressMessage?.text = message
     }
 
+    /**
+     * Changes the dialog message, and shows icon instead of progressBar
+     */
     private fun setProgressStatus(message: String, icon: Int) {
         if (progressDialog == null) showProgressDialog()
+
+        progressDialog?.getButton(AlertDialog.BUTTON_NEGATIVE)?.text = context.getString(R.string.dialog_close)
+
         progressBar?.visibility = View.GONE
         progressStatusIcon?.apply {
             visibility = View.VISIBLE

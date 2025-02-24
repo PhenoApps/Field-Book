@@ -862,11 +862,6 @@
     <string name="reset_preferences_title">Reset Settings to Default</string>
     <string name="reset_preferences_message">Warning: this will reset all of Field Book\'s preferences.</string>
 
-    <!-- Preferences -->
-    <string name="preferences_preferences_title">Preferences</string>
-    <string name="preferences_export_preferences">Export Preferences</string>
-    <string name="preferences_import_preferences">Import Preferences</string>
-
     <!-- Experimental -->
     <string name="preferences_experimental_title">Experimental</string>
     <string name="preferences_experimental_stable_title">Stable</string>
@@ -1401,6 +1396,8 @@
     <string name="failed_to_fetch_observation_levels">Failed fetching observation levels</string>
 
     <!--  NearbyShare  -->
+    <string name="nearby_share_title">Nearby Share</string>
+    <string name="nearby_share_preferences_title">Share Preferences</string>
     <string name="nearby_share_connection_established">Connection Established</string>
     <string name="nearby_share_connection_rejected">Connection Rejected</string>
     <string name="nearby_share_connection_error">Connection Error</string>
@@ -1417,7 +1414,7 @@
     <string name="nearby_share_already_waiting_for_receivers">Already waiting for receivers to connect…</string>
     <string name="nearby_share_already_searching_for_sender">Already searching for sender…</string>
     <string name="nearby_share_no_devices_found">No devices found yet</string>
-    <string name="nearby_share_permissions_required">Permissions Required</string>
+    <string name="nearby_share_permissions_required">Nearby Devices Permissions Required</string>
     <string name="nearby_share_failed_discovery">Failed to start discovery: %s</string>
     <string name="nearby_share_failed_advertising">Error while waiting for devices: %s</string>
     <string name="nearby_share_failed_transfer">Failed to start transfer: %s</string>
@@ -1425,11 +1422,17 @@
     <string name="nearby_share_failed_request">Failed to request connection: %s</string>
     <string name="nearby_share_failed_handle_file">Failed to handle file: %s</string>
     <string name="nearby_share_generating_file">Getting the file ready for transfer</string>
-    <string name="nearby_share_failed_preferences_import">Failed to import preferences</string>
+    <string name="nearby_share_failed_import">Failed to import file: %s</string>
+    <string name="nearby_share_failed_export_generation">Error generating file for sharing: %s</string>
+    <string name="nearby_share_file_imported_successfully">%s imported successfully</string>
 
     <string name="nearby_share_authenticating_connection">Authenticating connection with %s…</string>
 
     <string name="dialog_device_selection_title">Select a device</string>
     <string name="dialog_nearby_authentication_title">Accept Connection to %s</string>
     <string name="dialog_nearby_authentication_summary">Confirm the code matches on both devices: %s</string>
+
+    <string name="preferences_preferences_title">Preferences</string>
+    <string name="nearby_share_export_preferences">Export Preferences</string>
+    <string name="nearby_share_import_preferences">Import Preferences</string>
 </resources>

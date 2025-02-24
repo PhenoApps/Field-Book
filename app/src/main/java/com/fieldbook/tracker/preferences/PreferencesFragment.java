@@ -2,8 +2,17 @@ package com.fieldbook.tracker.preferences;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.AdapterView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import com.bytehamster.lib.preferencesearch.SearchConfiguration;
@@ -11,12 +20,50 @@ import com.bytehamster.lib.preferencesearch.SearchPreference;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
+import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.dialogs.ListAddDialog;
+import com.fieldbook.tracker.utilities.NearbyShareUtil;
+import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.utilities.ZipUtil;
 
-public class PreferencesFragment extends BasePreferenceFragment {
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
+public class PreferencesFragment extends BasePreferenceFragment implements NearbyShareUtil.FileCallback, NearbyShareUtil.PermissionCallback {
 
     private PreferenceManager prefMgr;
     private Context context;
     private SearchPreference searchPreference;
+
+    private  Menu systemMenu;
+    @Inject
+    DataHelper database;
+    @Inject
+    NearbyShareUtil nearbyShareUtil;
+    private final ActivityResultLauncher<String[]> permissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(),
+                    permissions -> {
+                        boolean allGranted = permissions.values()
+                                .stream()
+                                .allMatch(granted -> granted);
+
+                        if (allGranted) {
+                            nearbyShareUtil.handlePermissionResult(
+                                    NearbyShareUtil.REQUEST_PERMISSIONS_CODE,
+                                    new int[permissions.size()]);
+                        } else {
+                            Utils.makeToast(getContext(), getString(R.string.nearby_share_permissions_required));
+                        }
+                    });
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -41,6 +88,7 @@ public class PreferencesFragment extends BasePreferenceFragment {
         config.index(R.xml.preferences_location);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
+        setHasOptionsMenu(true);
     }
 
     public void onSearchResultClicked(SearchPreferenceResult result) {
@@ -63,8 +111,99 @@ public class PreferencesFragment extends BasePreferenceFragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.menu_pref, menu);
+        systemMenu = menu;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_menu_quickshare) {
+            showPreferenceShareDialog();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        nearbyShareUtil.cleanup();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
+
+        if (systemMenu != null) {
+            systemMenu.clear();
+            MenuInflater inflater = getActivity().getMenuInflater();
+            inflater.inflate(R.menu.menu_pref, systemMenu);
+        }
+    }
+
+    private void showPreferenceShareDialog() {
+        String[] options = {
+                getString(R.string.nearby_share_import_preferences),
+                getString(R.string.nearby_share_export_preferences)
+        };
+
+        int[] icons = {
+                R.drawable.ic_prefs_import,
+                R.drawable.ic_prefs_export
+        };
+
+
+        if (getActivity() != null) {
+            AdapterView.OnItemClickListener onItemClickListener = (parent, view, position, id) -> {
+                switch (position) {
+                    case 0:
+                        nearbyShareUtil.startReceiving(PreferencesFragment.this, PreferencesFragment.this);
+                        break;
+                    case 1:
+                        nearbyShareUtil.startSharing(PreferencesFragment.this, PreferencesFragment.this);
+                        break;
+                }
+            };
+            ListAddDialog dialog = new ListAddDialog(getActivity(), R.string.nearby_share_preferences_title, options, icons, onItemClickListener);
+            dialog.show(getActivity().getSupportFragmentManager(), "ListAddDialog");
+        }
+    }
+    @Override
+    public int getSaveFileDirectory() {
+        return R.string.dir_preferences;
+    }
+
+    @Override
+    public void onFileReceived(@NonNull DocumentFile receivedFile) {
+        try {
+            if (context != null) {
+                ObjectInputStream objectStream = new ObjectInputStream(context.getContentResolver().openInputStream(receivedFile.getUri()));
+                Map<String, ?> prefMap = (Map<String, ?>) objectStream.readObject();
+                objectStream.close();
+                ZipUtil.Companion.updatePreferences(context, prefMap);
+            }
+        } catch (Exception e) {
+            Log.e("PreferencesFragment", "Failed to import preferences", e);
+        }
+    }
+
+    @Override
+    public DocumentFile prepareFileForTransfer() {
+        try {
+            SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
+            String filename = "preferences_" + timeStamp.format(Calendar.getInstance().getTime());
+            return database.exportPreferences(context, filename);
+        } catch (IOException e) {
+            Log.e("PreferencesFragment", "Failed to export preferences", e);
+            return null;
+        }
+    }
+
+    @Override
+    public void onPermissionRequest(@NonNull String[] permissions, int requestCode) {
+        permissionLauncher.launch(permissions);
     }
 }
