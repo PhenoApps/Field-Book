@@ -14,19 +14,132 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/audioRecordingText"
-            android:layout_width="wrap_content"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/audio_info_card"
+            style="@style/MaterialCardViewStyle.TraitInfo"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:textSize="@dimen/text_size_xlarge"
-            android:textStyle="bold"
-            android:inputType="textNoSuggestions"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:hint=""
-            android:text="Tap To Start" />
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/file_name_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:textSize="@dimen/text_size_large"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="@string/trait_audio_placeholder_filename" />
+
+                <LinearLayout
+                    android:id="@+id/file_metadata_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/trait_audio_timestamp"
+                            android:textStyle="bold"
+                            android:textSize="@dimen/text_size_medium"/>
+
+                        <TextView
+                            android:id="@+id/file_timestamp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:textSize="@dimen/text_size_medium"
+                            android:textStyle="bold"
+                            android:ellipsize="end"
+                            android:singleLine="true"
+                            tools:text="Feb 3, 2:45 PM" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
+
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/text_size_medium"
+                                android:textStyle="bold"
+                                android:ellipsize="end"
+                                android:singleLine="true"
+                                android:text="@string/trait_audio_duration" />
+
+                            <TextView
+                                android:id="@+id/file_duration"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:textSize="@dimen/text_size_medium"
+                                android:textStyle="bold"
+                                android:ellipsize="end"
+                                android:singleLine="true"
+                                tools:text="02:45" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/text_size_medium"
+                                android:textStyle="bold"
+                                android:ellipsize="end"
+                                android:singleLine="true"
+                                android:text="@string/trait_audio_file_size" />
+
+                            <TextView
+                                android:id="@+id/file_size"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:textSize="@dimen/text_size_medium"
+                                android:textStyle="bold"
+                                android:ellipsize="end"
+                                android:singleLine="true"
+                                tools:text="1.2 MB" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             style="@style/FloatingActionButtonStyle.TraitButtons"

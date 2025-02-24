@@ -493,7 +493,8 @@ class NewTraitDialog(
             traitObject.maximum,
             traitObject.details,
             traitObject.categories,
-            traitObject.closeKeyboardOnOpen
+            traitObject.closeKeyboardOnOpen,
+            traitObject.cropImage
         )
     }
 

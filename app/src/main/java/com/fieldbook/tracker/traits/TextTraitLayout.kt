@@ -3,6 +3,7 @@ package com.fieldbook.tracker.traits
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Typeface
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -53,6 +54,8 @@ class TextTraitLayout : BaseTraitLayout {
                 collectInputView.text = value
 
                 updateObservation(currentTrait, value)
+
+                observationEditedStyle()
             }
         }
 
@@ -69,6 +72,7 @@ class TextTraitLayout : BaseTraitLayout {
 
     override fun setNaTraitsText() {
         inputEditText?.setText("NA")
+        observationEditedStyle()
     }
 
     override fun type(): String {
@@ -240,5 +244,11 @@ class TextTraitLayout : BaseTraitLayout {
     override fun refreshLock() {
         super.refreshLock()
         loadLayout()
+    }
+
+    private fun observationEditedStyle() {
+        inputEditText?.setTypeface(null, Typeface.ITALIC)
+
+        inputEditText?.setTextColor(textColor)
     }
 }

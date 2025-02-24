@@ -433,7 +433,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
                     saveState = if (offset == 0) AbstractCameraTrait.SaveState.NEW else AbstractCameraTrait.SaveState.SAVING,
                     offset = offset ?: 0)
 
-                Log.d(TAG, "Getting offset: ${offset ?: 0} for ${unit.plot_id}")
+                Log.d(TAG, "Getting offset: ${offset ?: 0} for ${unit.uniqueId}")
                 requestGetImage(session, handle, unit, (offset ?: 0) + length, saveTime)
 
             }
@@ -517,7 +517,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
                         lastSavedTime?.let { time ->
 
-                            log("Found new image $handleInteger for ${unit.plot_id}")
+                            log("Found new image $handleInteger for ${unit.uniqueId}")
 
                             //requestUiLock(true, session, storageId, unit)
 

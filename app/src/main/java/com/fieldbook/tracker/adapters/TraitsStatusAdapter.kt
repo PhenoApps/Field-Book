@@ -106,7 +106,8 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
         // Only update if the new selection is different
         if (currentSelection != newSelection) {
             currentSelection = newSelection
-            notifyDataSetChanged() // Notify adapter to refresh all items
+            notifyItemChanged(currentSelection)
+            notifyItemChanged(newSelection)
         }
     }
 
@@ -118,7 +119,7 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
                 this[currentSelection].hasObservation = value
             }
             submitList(updatedList)
-            notifyDataSetChanged()
+            notifyItemChanged(currentSelection)
         }
     }
 
@@ -128,11 +129,11 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
     class DiffCallback : DiffUtil.ItemCallback<TraitBoxItemModel>() {
 
         override fun areItemsTheSame(oldItem: TraitBoxItemModel, newItem: TraitBoxItemModel): Boolean {
-            return oldItem == newItem
+            return oldItem.trait == newItem.trait
         }
 
         override fun areContentsTheSame(oldItem: TraitBoxItemModel, newItem: TraitBoxItemModel): Boolean {
-            return oldItem == newItem
+            return oldItem.hasObservation == newItem.hasObservation
         }
     }
 }
