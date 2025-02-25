@@ -11,7 +11,7 @@ accompanying excercises.
 
 The exercises in the the training slides are based on the
 `training_sample.csv` field file which is copied into the
-`field_import` directory on install and is imported as part training.
+`field_import` folder on install and is imported as part training.
 
 <figure align="center" class="image">
   <img src="_static/images/training_field.png" width="1100px"> 
