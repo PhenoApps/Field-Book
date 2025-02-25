@@ -898,6 +898,11 @@ public class DataHelper {
         StudyDao.Companion.updateSearchAttribute(studyId, newSearchAttribute);
     }
 
+    public String getSearchAttribute(int studyId) {
+        open();
+        return StudyDao.Companion.getSearchAttribute(studyId);
+    }
+
     public void updateImages(List<FieldBookImage> images) {
         ArrayList<String> ids = new ArrayList<>();
 

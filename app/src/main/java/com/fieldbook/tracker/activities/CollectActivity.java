@@ -943,7 +943,8 @@ public class CollectActivity extends ThemedActivity
 
         if (command.equals("barcode")) {
             int rangeSize = plotIndices.length;
-            String searchAttribute = preferences.getString(GeneralKeys.SEARCH_ATTRIBUTE, "");
+            int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+            String searchAttribute = database.getSearchAttribute(currentFieldId);
             
             for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);

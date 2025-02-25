@@ -183,7 +183,6 @@ public class GeneralKeys {
     public static final String UNIQUE_NAME = "ImportUniqueName";
     public static final String PRIMARY_NAME = "ImportFirstName";
     public static final String SECONDARY_NAME = "ImportSecondName";
-    public static final String SEARCH_ATTRIBUTE = "SearchAttribute";
 
     //Used to get name of observation level of currently selected field
     public static final String FIELD_OBS_LEVEL = "FieldObsLevel";
