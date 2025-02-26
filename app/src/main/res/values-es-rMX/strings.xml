@@ -1166,4 +1166,5 @@
     <string name="trait_error_invalid_multicat_value">Se introdujeron datos categóricos inválidos.</string>
     <string name="dialog_crash_report_title">Error al cargar los datos</string>
     <string name="dialog_crash_report_message">Presione OK para enviar un informe de diagnóstico anónimo para ayudar a mejorar la app.</string>
+    <string name="failed_to_fetch_observation_levels">Fallo obteniendo el nivel de las observaciónes</string>
 </resources>
