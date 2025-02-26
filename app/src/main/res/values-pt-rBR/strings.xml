@@ -927,7 +927,7 @@
     <string name="number_traits_label">Número de Características:</string>
     <string name="number_observation_label">Número de Observações:</string>
     <string name="no_observations_warning">Nenhuma observação encontrada para o estudo. Por favor, toque em Cancelar.</string>
-    <string name="brapi_skipped_traits">Características obtidas com sucesso. %1$d características ignoradas devido à ausência do campo brapi \'trait\'</string>
+    <string name="brapi_skipped_traits">Características obtidas com sucesso. %1$d características ignoradas devido à ausência do \'característica\' brapi</string>
     <string name="brapi_study_incompatible">Este estudo BrAPI atualmente é incompatível com Field Book. Estudos devem incluir linha e coluna no cabeçalho.</string>
     <string name="act_collect_no_plots">Este estudo não tem nenhuma parcela salva.</string>
     <!-- BrAPI Export -->
