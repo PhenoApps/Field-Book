@@ -10,6 +10,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 
 /**
  * View that contains the default fb edit text and the repeated values view feature.
@@ -28,7 +29,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
 
     //get the current mode from settings
     private val repeatModeFlag = PreferenceManager.getDefaultSharedPreferences(context)
-        .getBoolean(GeneralKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
+        .getBoolean(PreferenceKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
 
     init {
 

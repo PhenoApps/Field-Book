@@ -12,6 +12,7 @@ import android.widget.EditText
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import org.phenoapps.utils.SoftKeyboardUtil.Companion.closeKeyboard
 import org.phenoapps.utils.SoftKeyboardUtil.Companion.showKeyboard
 
@@ -131,7 +132,7 @@ class TextTraitLayout : BaseTraitLayout {
 
                     //check system setting to navigate to next plot/trait
                     val actionOnScanLineFeed =
-                        prefs.getString(GeneralKeys.RETURN_CHARACTER, "0") ?: "0"
+                        prefs.getString(PreferenceKeys.RETURN_CHARACTER, "0") ?: "0"
 
                     if (actionOnScanLineFeed == "0") {
                         controller.getRangeBox().moveEntryRight()

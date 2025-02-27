@@ -12,6 +12,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.interfaces.TraitCsvWriter
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldDataDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.ZipUtil.Companion.zip
@@ -152,7 +153,7 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
             buttonState = ButtonState.WAITING_FOR_RECORDING
             releaseRecorder()
             // zip the field audio and log file only if logging is enabled
-            val isLoggingEnabled = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0")
+            val isLoggingEnabled = mPrefs.getString(PreferenceKeys.GEONAV_LOGGING_MODE, "0")
             if(isLoggingEnabled != "0"){
                 zipAudioLogAndTraits()
             }

@@ -164,7 +164,7 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
     }
 
     private boolean validateBrapiEnabledBeforeSetting(String newValue) {
-        if ("brapi".equals(newValue) && !preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+        if ("brapi".equals(newValue) && !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
             showBrapiDisabledAlertDialog();
             return false;
         }

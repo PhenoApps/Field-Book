@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.ManufacturerUtil
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import com.fieldbook.tracker.views.OptionalSetupItem
@@ -67,7 +68,7 @@ class OptionalSetupFragment : Fragment(){
             setTitle(getString(R.string.app_intro_tutorial_title))
             setSummary(getString(R.string.app_intro_tutorial_summary))
             setOnClickListener {
-                toggleOptionalSetting(this, GeneralKeys.TIPS)
+                toggleOptionalSetting(this, PreferenceKeys.TIPS)
             }
             setTitleTextSize(24f)
         }

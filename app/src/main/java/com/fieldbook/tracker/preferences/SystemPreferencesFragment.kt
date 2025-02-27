@@ -66,7 +66,7 @@ class SystemPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     private fun validateBrapiEnabledBeforeSetting(newValue: String): Boolean {
-        if ("brapi" == newValue && !preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+        if ("brapi" == newValue && !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
             showBrapiDisabledAlertDialog()
             return false
         }
