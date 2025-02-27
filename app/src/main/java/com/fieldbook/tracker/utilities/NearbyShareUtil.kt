@@ -12,7 +12,9 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
 import androidx.documentfile.provider.DocumentFile
+import androidx.fragment.app.FragmentActivity
 import com.fieldbook.tracker.R
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.AdvertisingOptions
@@ -35,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.phenoapps.security.SecureBluetoothActivityImpl
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.FileInputStream
 import javax.inject.Inject
@@ -47,29 +50,21 @@ import javax.inject.Inject
  */
 class NearbyShareUtil @Inject constructor(@ActivityContext private val context: Context) {
 
-    interface FileCallback {
+    interface FileHandler {
         fun getSaveFileDirectory(): Int // specifies parent directory for file to be stored in
         fun onFileReceived(receivedFile: DocumentFile)
         fun prepareFileForTransfer(): DocumentFile
     }
 
-    interface PermissionCallback {
-        fun onPermissionRequest(permissions: Array<String>, requestCode: Int)
-    }
-
     private data class Endpoint(val id: String, val name: String)
 
-    private var fileCallback: FileCallback? = null
-    private var permissionCallback: PermissionCallback? = null
+    private var fileHandler: FileHandler? = null
 
     private var connectionsClient: ConnectionsClient = Nearby.getConnectionsClient(context)
     private var docFile: DocumentFile? = null
 
     private var isDiscovering = false
     private var isAdvertising = false
-
-    // used while handling permission request
-    private var currentState: ShareState? = null
 
     private val mEstablishedConnections = mutableSetOf<String>()
     private val mPendingConnections = mutableMapOf<String, Endpoint>()
@@ -88,14 +83,16 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
     private val scope = CoroutineScope(Dispatchers.Main)
 
     companion object {
-        const val REQUEST_PERMISSIONS_CODE = 112
         private val STRATEGY = Strategy.P2P_STAR
         private const val SERVICE_ID = "com.fieldbook.tracker.SERVICE_ID"
     }
 
-    private enum class ShareState {
-        ADVERTISING,
-        DISCOVERING
+    private val secureBluetooth by lazy {
+        SecureBluetoothActivityImpl(context as FragmentActivity)
+    }
+
+    init {
+        secureBluetooth.initialize()
     }
 
     /**
@@ -109,7 +106,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                 payloadFile?.asParcelFileDescriptor()?.let { pfd ->
                     try {
                         val fileName = payloadFile.asUri()?.lastPathSegment ?: "unknown"
-                        val sharedDir = fileCallback?.getSaveFileDirectory()?.let { dirId ->
+                        val sharedDir = fileHandler?.getSaveFileDirectory()?.let { dirId ->
                             BaseDocumentTreeUtil.createDir(
                                 context,
                                 getString(dirId),
@@ -129,7 +126,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
 
                         try {
                             if (docFile != null) {
-                                fileCallback?.onFileReceived(docFile)
+                                fileHandler?.onFileReceived(docFile)
                             }
                             withContext(Dispatchers.Main) {
                                 Utils.makeToast(context, String.format(getString(R.string.nearby_share_file_imported_successfully), fileName))
@@ -198,15 +195,13 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         }
     }
 
-    fun startSharing(fileCallback: FileCallback, permissionCallback: PermissionCallback) {
-        this.fileCallback = fileCallback
-        this.permissionCallback = permissionCallback
+    fun startSharing(fileHandler: FileHandler) {
+        this.fileHandler = fileHandler
         startAdvertising()
     }
 
-    fun startReceiving(fileCallback: FileCallback, permissionCallback: PermissionCallback) {
-        this.fileCallback = fileCallback
-        this.permissionCallback = permissionCallback
+    fun startReceiving(fileHandler: FileHandler) {
+        this.fileHandler = fileHandler
         startDiscovering()
     }
 
@@ -319,46 +314,41 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
             return
         }
 
-        if (!hasRequiredPermissions()) {
-            currentState = ShareState.ADVERTISING
-            requestPermissions()
-            Utils.makeToast(context, getString(R.string.nearby_share_permissions_required))
-            return
-        }
+        secureBluetooth.withNearby { _ ->
+            setProgressMessage(getString(R.string.nearby_share_generating_file))
 
-        setProgressMessage(getString(R.string.nearby_share_generating_file))
-
-        scope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    docFile = fileCallback?.prepareFileForTransfer()
+            scope.launch {
+                try {
+                    withContext(Dispatchers.IO) {
+                        docFile = fileHandler?.prepareFileForTransfer()
+                    }
+                } catch (e: Exception) {
+                    setProgressStatus(String.format(getString(R.string.nearby_share_failed_export_generation), e), R.drawable.ic_transfer_error)
+                    stopNearbyShare()
+                    FirebaseCrashlytics.getInstance().recordException(e)
+                    return@launch
                 }
-            } catch (e: Exception) {
-                setProgressStatus(String.format(getString(R.string.nearby_share_failed_export_generation), e), R.drawable.ic_transfer_error)
-                stopNearbyShare()
-                FirebaseCrashlytics.getInstance().recordException(e)
-                return@launch
-            }
 
-            val advertisingOptions = AdvertisingOptions.Builder().setStrategy(STRATEGY).build()
+                val advertisingOptions = AdvertisingOptions.Builder().setStrategy(STRATEGY).build()
 
-            try {
-                connectionsClient.startAdvertising(Build.MODEL, SERVICE_ID, connectionLifecycleCallback, advertisingOptions)
-                    .addOnSuccessListener {
-                        isAdvertising = true
-                        setProgressMessage(getString(R.string.nearby_share_waiting_for_receivers))
-                    }.addOnFailureListener { e ->
-                        stopNearbyShare()
-                        setProgressStatus(String.format(getString(R.string.nearby_share_failed_advertising), e.message), R.drawable.ic_transfer_error)
-                    }
-                    .addOnCanceledListener {
-                        stopNearbyShare()
-                        setProgressStatus(getString(R.string.nearby_share_connection_cancelled), R.drawable.ic_transfer_cancelled)
-                    }
-            } catch (e: Exception) {
-                stopNearbyShare()
-                setProgressStatus(String.format(getString(R.string.nearby_share_failed_advertising), e.message), R.drawable.ic_transfer_error)
-                FirebaseCrashlytics.getInstance().recordException(e)
+                try {
+                    connectionsClient.startAdvertising(Build.MODEL, SERVICE_ID, connectionLifecycleCallback, advertisingOptions)
+                        .addOnSuccessListener {
+                            isAdvertising = true
+                            setProgressMessage(getString(R.string.nearby_share_waiting_for_receivers))
+                        }.addOnFailureListener { e ->
+                            stopNearbyShare()
+                            setProgressStatus(String.format(getString(R.string.nearby_share_failed_advertising), e.message), R.drawable.ic_transfer_error)
+                        }
+                        .addOnCanceledListener {
+                            stopNearbyShare()
+                            setProgressStatus(getString(R.string.nearby_share_connection_cancelled), R.drawable.ic_transfer_cancelled)
+                        }
+                } catch (e: Exception) {
+                    stopNearbyShare()
+                    setProgressStatus(String.format(getString(R.string.nearby_share_failed_advertising), e.message), R.drawable.ic_transfer_error)
+                    FirebaseCrashlytics.getInstance().recordException(e)
+                }
             }
         }
     }
@@ -371,32 +361,40 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
             return
         }
 
-        if (!hasRequiredPermissions()) {
-            currentState = ShareState.DISCOVERING
-            requestPermissions()
-            Utils.makeToast(context, getString(R.string.nearby_share_permissions_required))
-            return
-        }
-
-        val discoveryOptions = DiscoveryOptions.Builder().setStrategy(STRATEGY).build()
-
-        try {
-            connectionsClient.startDiscovery(SERVICE_ID, endpointDiscoveryCallback, discoveryOptions)
-                .addOnSuccessListener {
-                    isDiscovering = true
-                    setProgressMessage(getString(R.string.nearby_share_searching_for_senders))
-                }.addOnFailureListener { e ->
-                    stopNearbyShare()
-                    setProgressStatus(String.format(getString(R.string.nearby_share_failed_discovery), e.message), R.drawable.ic_transfer_error)
+        secureBluetooth.withNearby { _ ->
+            // for certain android versions (observed for android 16)
+            // even though BLUETOOTH_SCAN is requested in discoverWith
+            // the request result isn't registered immediately
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                    // if permission is missing, request it again
+                    secureBluetooth.withPermission(arrayOf(Manifest.permission.BLUETOOTH_SCAN)) {
+                        startDiscovering()  // retry after permission is granted
+                    }
+                    return@withNearby
                 }
-                .addOnCanceledListener {
-                    stopNearbyShare()
-                    setProgressStatus(getString(R.string.nearby_share_connection_cancelled), R.drawable.ic_transfer_cancelled)
-                }
-        } catch (e: Exception) {
-            stopNearbyShare()
-            setProgressStatus(String.format(getString(R.string.nearby_share_failed_discovery), e.message), R.drawable.ic_transfer_error)
-            FirebaseCrashlytics.getInstance().recordException(e)
+            }
+
+            val discoveryOptions = DiscoveryOptions.Builder().setStrategy(STRATEGY).build()
+
+            try {
+                connectionsClient.startDiscovery(SERVICE_ID, endpointDiscoveryCallback, discoveryOptions)
+                    .addOnSuccessListener {
+                        isDiscovering = true
+                        setProgressMessage(getString(R.string.nearby_share_searching_for_senders))
+                    }.addOnFailureListener { e ->
+                        stopNearbyShare()
+                        setProgressStatus(String.format(getString(R.string.nearby_share_failed_discovery), e.message), R.drawable.ic_transfer_error)
+                    }
+                    .addOnCanceledListener {
+                        stopNearbyShare()
+                        setProgressStatus(getString(R.string.nearby_share_connection_cancelled), R.drawable.ic_transfer_cancelled)
+                    }
+            } catch (e: Exception) {
+                stopNearbyShare()
+                setProgressStatus(String.format(getString(R.string.nearby_share_failed_discovery), e.message), R.drawable.ic_transfer_error)
+                FirebaseCrashlytics.getInstance().recordException(e)
+            }
         }
     }
 
@@ -447,74 +445,6 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         authenticationDialog?.dismiss()
     }
 
-    fun handlePermissionResult(requestCode: Int, perms: IntArray) {
-        if (requestCode == REQUEST_PERMISSIONS_CODE) {
-            if (perms.all { it == PackageManager.PERMISSION_GRANTED }) {
-                when (currentState) {
-                    ShareState.ADVERTISING -> startAdvertising()
-                    ShareState.DISCOVERING -> startDiscovering()
-                    null -> Log.d("NearbyShareUtil", "No pending operation")
-                }
-            } else {
-                setProgressStatus(getString(R.string.nearby_share_permissions_required), R.drawable.ic_transfer_error)
-                Utils.makeToast(context, getString(R.string.nearby_share_permissions_required))
-                requestPermissions()
-            }
-            currentState = null
-        }
-    }
-
-    private fun hasRequiredPermissions(): Boolean {
-        return when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                context.checkSelfPermission(Manifest.permission.BLUETOOTH_ADVERTISE) == PackageManager.PERMISSION_GRANTED &&
-                        context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
-                        context.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED &&
-                        context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                        context.checkSelfPermission(Manifest.permission.NEARBY_WIFI_DEVICES) == PackageManager.PERMISSION_GRANTED
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                context.checkSelfPermission(Manifest.permission.BLUETOOTH_ADVERTISE) == PackageManager.PERMISSION_GRANTED &&
-                        context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
-                        context.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED &&
-                        context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
-                context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-            }
-            else -> true
-        }
-    }
-
-    private fun requestPermissions() {
-        val permissions = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                arrayOf(
-                    Manifest.permission.BLUETOOTH_ADVERTISE,
-                    Manifest.permission.BLUETOOTH_CONNECT,
-                    Manifest.permission.BLUETOOTH_SCAN,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.NEARBY_WIFI_DEVICES
-                )
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                arrayOf(
-                    Manifest.permission.BLUETOOTH_ADVERTISE,
-                    Manifest.permission.BLUETOOTH_CONNECT,
-                    Manifest.permission.BLUETOOTH_SCAN,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-            }
-            else -> {
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-            }
-        }
-
-        permissionCallback?.onPermissionRequest(permissions, REQUEST_PERMISSIONS_CODE)
-    }
-
     private fun showProgressDialog() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_nearby_share, null)
 
@@ -533,8 +463,9 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
             .setCancelable(true)
             .setOnCancelListener {
                 // stop sharing when tapped outside the dialog window
-                progressDialog = null
                 stopNearbyShare()
+                progressDialog?.dismiss()
+                progressDialog = null
             }
             .create()
 

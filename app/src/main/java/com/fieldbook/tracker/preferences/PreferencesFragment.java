@@ -8,8 +8,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
@@ -23,7 +21,6 @@ import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.dialogs.ListAddDialog;
 import com.fieldbook.tracker.utilities.NearbyShareUtil;
-import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 
 import java.io.IOException;
@@ -38,7 +35,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class PreferencesFragment extends BasePreferenceFragment implements NearbyShareUtil.FileCallback, NearbyShareUtil.PermissionCallback {
+public class PreferencesFragment extends BasePreferenceFragment implements NearbyShareUtil.FileHandler {
 
     private PreferenceManager prefMgr;
     private Context context;
@@ -49,21 +46,6 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
     DataHelper database;
     @Inject
     NearbyShareUtil nearbyShareUtil;
-    private final ActivityResultLauncher<String[]> permissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(),
-                    permissions -> {
-                        boolean allGranted = permissions.values()
-                                .stream()
-                                .allMatch(granted -> granted);
-
-                        if (allGranted) {
-                            nearbyShareUtil.handlePermissionResult(
-                                    NearbyShareUtil.REQUEST_PERMISSIONS_CODE,
-                                    new int[permissions.size()]);
-                        } else {
-                            Utils.makeToast(getContext(), getString(R.string.nearby_share_permissions_required));
-                        }
-                    });
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -160,10 +142,10 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
             AdapterView.OnItemClickListener onItemClickListener = (parent, view, position, id) -> {
                 switch (position) {
                     case 0:
-                        nearbyShareUtil.startReceiving(PreferencesFragment.this, PreferencesFragment.this);
+                        nearbyShareUtil.startReceiving(PreferencesFragment.this);
                         break;
                     case 1:
-                        nearbyShareUtil.startSharing(PreferencesFragment.this, PreferencesFragment.this);
+                        nearbyShareUtil.startSharing(PreferencesFragment.this);
                         break;
                 }
             };
@@ -200,10 +182,5 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
             Log.e("PreferencesFragment", "Failed to export preferences", e);
             return null;
         }
-    }
-
-    @Override
-    public void onPermissionRequest(@NonNull String[] permissions, int requestCode) {
-        permissionLauncher.launch(permissions);
     }
 }
