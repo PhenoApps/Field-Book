@@ -73,16 +73,6 @@ class StudyDao {
             )
         }
 
-        fun getSearchAttribute(studyId: Int): String? = withDatabase { db ->
-            val query = "SELECT observation_unit_search_attribute FROM ${Study.tableName} WHERE ${Study.PK} = $studyId"
-            db.rawQuery(query, null).use { cursor ->
-                if (cursor.moveToFirst()) {
-                    return@withDatabase cursor.getString(0)
-                }
-                null
-            }
-        }
-
         private fun fixPlotAttributes(db: SQLiteDatabase) {
 
             db.rawQuery("PRAGMA foreign_keys=OFF;", null).close()

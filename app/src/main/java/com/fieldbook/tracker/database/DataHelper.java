@@ -898,9 +898,9 @@ public class DataHelper {
         StudyDao.Companion.updateSearchAttribute(studyId, newSearchAttribute);
     }
 
-    public String getSearchAttribute(int studyId) {
+    public ObservationUnitModel[] getObservationUnitsBySearchAttribute(int studyId, String searchValue) {
         open();
-        return StudyDao.Companion.getSearchAttribute(studyId);
+        return ObservationUnitDao.Companion.getBySearchAttribute(studyId, searchValue);
     }
 
     public void updateImages(List<FieldBookImage> images) {

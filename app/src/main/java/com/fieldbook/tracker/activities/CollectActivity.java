@@ -941,25 +941,90 @@ public class CollectActivity extends ThemedActivity
             }
         }
 
-        if (command.equals("barcode")) {
-            int rangeSize = plotIndices.length;
-            int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
-            String searchAttribute = database.getSearchAttribute(currentFieldId);
+        // if (command.equals("barcode")) {
+        //     int rangeSize = plotIndices.length;
+        //     int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+        //     String searchAttribute = database.getSearchAttribute(currentFieldId);
+        //     boolean isSearchAttrEmpty = searchAttribute == null || searchAttribute.isEmpty();
             
-            for (int j = 1; j <= rangeSize; j++) {
+        //     for (int j = 1; j <= rangeSize; j++) {
+        //         rangeBox.setRangeByIndex(j - 1);
+        //         RangeObject ro = rangeBox.getCRange();
+                
+        //         // Match against search attribute first (if available)
+        //         if (!isSearchAttrEmpty) {
+        //             String[] attributeValue = database.getDropDownRange(searchAttribute, ro.plot_id);
+        //             String searchValue = attributeValue != null && attributeValue.length > 0 ? attributeValue[0] : "";
+                    
+        //             if (searchValue.equals(data)) {
+        //                 moveToResultCore(j);
+        //                 return true;
+        //             }
+        //         }
+                
+        //         // Fall back to plot_id check
+        //         if (ro.plot_id.equals(data)) {
+        //             moveToResultCore(j);
+        //             return true;
+        //         }
+        //     }
+        // }
+
+        if (command.equals("barcode")) {
+            int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+            Log.d(TAG, "Barcode search in current field: " + currentFieldId + ", searching for: " + data);
+            
+            ObservationUnitModel[] matchingUnits = database.getObservationUnitsBySearchAttribute(
+                currentFieldId, data);
+            Log.d(TAG, "Search attribute results: " + matchingUnits.length + " units found");
+            
+            // if (matchingUnits.length > 0) {
+            //     // If found by search attribute, move to that observation unit
+            //     String matchingObsUnitId = matchingUnits[0].getObservation_unit_db_id();
+            //     rangeBox.setAllRangeID();
+            //     int[] rangeID = rangeBox.getRangeID();
+            //     if (moveToSearch("id", rangeID, null, null, matchingObsUnitId, -1)) {
+            //         return true;
+            //     }
+            // }
+            if (matchingUnits.length > 0) {
+                // If found by search attribute, move to that observation unit
+                String matchingObsUnitId = matchingUnits[0].getObservation_unit_db_id();
+                Log.d(TAG, "Found match by search attribute. Unit ID: " + matchingObsUnitId);
+                
+                // If multiple matches were found, show a toast notification
+                if (matchingUnits.length > 1) {
+                    Utils.makeToast(this, getString(R.string.search_multiple_matches_found, matchingUnits.length));
+                }
+                
+                for (int j = 1; j <= plotIndices.length; j++) {
+                    rangeBox.setRangeByIndex(j - 1);
+                    RangeObject ro = rangeBox.getCRange();
+                    Log.d(TAG, "Checking against plot_id: " + ro.plot_id);
+                    
+                    if (ro.plot_id.equals(matchingObsUnitId)) {
+                        moveToResultCore(j);
+                        return true;
+                    }
+                }
+                Log.d(TAG, "Couldn't find matching plot in range box despite database match");
+            }
+            
+            // Fallback: check if the barcode directly matches a plot_id
+            Log.d(TAG, "Falling back to direct plot_id matching");
+            for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
                 RangeObject ro = rangeBox.getCRange();
                 
-                // Get the search attribute value for this plot
-                String[] attributeValue = database.getDropDownRange(searchAttribute, ro.plot_id);
-                String searchValue = attributeValue != null && attributeValue.length > 0 ? attributeValue[0] : "";
-
-                // Match against search attribute first, fallback to plot_id
-                if (searchValue.equals(data) || ro.plot_id.equals(data)) {
+                if (ro.plot_id.equals(data)) {
+                    Log.d(TAG, "Direct match found at index: " + j);
                     moveToResultCore(j);
                     return true;
                 }
             }
+            
+            return false;
         }
 
         if (!command.equals("quickgoto") && !command.equals("barcode"))
@@ -2016,16 +2081,19 @@ public class CollectActivity extends ThemedActivity
                 if(resultCode == RESULT_OK) {
 
                     if (geoNavHelper.getSnackbar() != null) geoNavHelper.getSnackbar().dismiss();
+                    String barcodeValue;
+
                     if(mlkitEnabled) {
-                        inputPlotId = data.getStringExtra("barcode");
+                        barcodeValue = data.getStringExtra("barcode");
                     }
                     else {
                         IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                        inputPlotId = plotSearchResult.getContents();
+                        barcodeValue = plotSearchResult.getContents();
                     }
+
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
-                    boolean success = moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
+                    boolean success = moveToSearch("barcode", rangeID, null, null, barcodeValue, -1);
 
                     //play success or error sound if the plotId was not found
                     if (success) {
@@ -2033,35 +2101,53 @@ public class CollectActivity extends ThemedActivity
                     } else {
                         boolean found = false;
                         FieldObject studyObj = null;
-                        ObservationUnitModel[] models = database.getAllObservationUnits();
-                        for (ObservationUnitModel m : models) {
-                            if (m.getObservation_unit_db_id().equals(inputPlotId)) {
 
-                                FieldObject study = database.getFieldObject(m.getStudy_id());
-                                if (study != null && study.getExp_name() != null) {
-                                    studyObj = study;
-                                    found = true;
-                                    break;
+                        // Check all other fields by search attribute
+                        ArrayList<FieldObject> allFields = database.getAllFieldObjects();
+                        for (FieldObject field : allFields) {
+
+                            // Skip the current field
+                            if (field.getExp_id() == preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)) {
+                                continue;
+                            }
+
+                            ObservationUnitModel[] matchingUnits = database.getObservationUnitsBySearchAttribute(
+                                field.getExp_id(), inputPlotId);
+
+                            if (matchingUnits.length > 0) {
+                                studyObj = field;
+                                inputPlotId = matchingUnits[0].getObservation_unit_db_id(); // Update inputPlotId to the matched observation unit
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        // If not found by search attribute in any field, try direct plot_id matching
+                        if (!found) {
+                            ObservationUnitModel[] models = database.getAllObservationUnits();
+                            for (ObservationUnitModel m : models) {
+                                if (m.getObservation_unit_db_id().equals(inputPlotId)) {
+                                    FieldObject study = database.getFieldObject(m.getStudy_id());
+                                    if (study != null && study.getExp_name() != null) {
+                                        studyObj = study;
+                                        found = true;
+                                        break;
+                                    }
                                 }
                             }
                         }
 
-                        if (found && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
-
+                        if (found && studyObj != null && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
                             int studyId = studyObj.getExp_id();
                             String fieldName = studyObj.getExp_alias();
 
                             String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
 
-                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, R.id.toolbarBottom,8000, null,
+                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, R.id.toolbarBottom, 8000, null,
                                 (v) -> switchField(studyId, null));
-
                         } else {
-
                             soundHelper.playError();
-
                             Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
-
                         }
                     }
                 }

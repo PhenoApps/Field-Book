@@ -206,6 +206,8 @@
 
     <string name="field_edit_unique_id">Change Search Attribute</string>
     <string name="invalid_unique_id_selection">Invalid Selection</string>
+    <string name="search_multiple_matches_found">Found %1$d matching plots. Showing the first one.</string>
+    <string name="barcode_scan_failed">Barcode scan failed or was cancelled</string>
 
 <!--    <string name="field_default_sort_order">import order</string>-->
 
