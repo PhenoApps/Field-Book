@@ -15,6 +15,7 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.widget.Toolbar
 import androidx.core.database.getStringOrNull
+import androidx.lifecycle.lifecycleScope
 import com.bin.david.form.core.SmartTable
 import com.bin.david.form.core.TableConfig
 import com.bin.david.form.data.CellInfo
@@ -71,6 +72,13 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         CoroutineScope(Dispatchers.IO)
     }
 
+    val activeCellBgColor = TypedValue()
+    val filledCellBgColor = TypedValue()
+    val emptyCellBgColor = TypedValue()
+
+    val activeCellTextColor = TypedValue()
+    val cellTextColor = TypedValue()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -94,6 +102,14 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
             plotId = intent.extras?.getInt("plot_id"),
             trait = intent.extras?.getInt("trait")
         )
+
+        theme.apply {
+            resolveAttribute(R.attr.activeCellColor, activeCellBgColor, true)
+            resolveAttribute(R.attr.dataFilledColor, filledCellBgColor, true)
+            resolveAttribute(R.attr.emptyCellColor, emptyCellBgColor, true)
+            resolveAttribute(R.attr.activeCellTextColor, activeCellTextColor, true)
+            resolveAttribute(R.attr.cellTextColor, cellTextColor, true)
+        }
     }
 
 
@@ -157,19 +173,19 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         val showLabel = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") == "value"
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
-        //if row header was not chosen, then use the preference unique name
+        // if row header was not chosen, then use the preference unique name
         var rowHeader = prefixTrait ?: preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
 
         if (rowHeader !in database.rangeColumnNames) rowHeader = uniqueHeader
 
-        //if rowHeader was updated, update the preference
+        // if rowHeader was updated, update the preference
         preferences.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, rowHeader).apply()
 
         if (rowHeader.isBlank()) return
 
-        //background processing
+        // background processing
         scope.launch {
-            //query database for visible traits
+            // query database for visible traits
             mTraits.clear()
 
             database.allTraitObjects.forEach {
@@ -178,7 +194,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                 }
             }
 
-            //expensive database call, only asks for the unique name plot attr and all visible traits
+            // expensive database call, only asks for the unique name plot attr and all visible traits
             val cursor = database.getExportTableData(studyId, mTraits)
 
             if (cursor.moveToFirst()) {
@@ -189,7 +205,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                 val dataArray = arrayListOf<Array<String>>()
 
                 try {
-                    do { //iterate over cursor results and populate lists of plot ids and related trait values
+                    do { // iterate over cursor results and populate lists of plot ids and related trait values
                         val rowData = arrayListOf<String?>()
                         val columns = arrayListOf<String>()
 
@@ -199,14 +215,14 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                         }
 
                         val rowHeaderIndex = columns.indexOf(rowHeader)
-                        //unique name column is always the first column
+                        // unique name column is always the first column
                         val uniqueIndex = columns.indexOf(uniqueHeader)
 
-                        if (uniqueIndex > -1) { //if it doesn't exist skip this row
+                        if (uniqueIndex > -1) { // if it doesn't exist skip this row
                             val id = rowData[uniqueIndex] ?: ""
                             val header = if (rowHeaderIndex > -1) rowData[rowHeaderIndex] ?: "" else ""
 
-                            mRowHeaders.add(header) //add unique name row header
+                            mRowHeaders.add(header) // add unique name row header
                             mPlotIds.add(id)
 
                             val rowValues = arrayListOf<String>()
@@ -233,7 +249,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                                         cellValue = value
                                     }
 
-                                    //check repeated values and replace cellValue with an ellipses
+                                    // check repeated values and replace cellValue with an ellipses
                                     if (repeatedValues.size > 1) {
                                         cellValue = "..."
                                     }
@@ -299,25 +315,17 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                     val paint = config.paint
                     paint.style = Paint.Style.FILL
 
-                    val rowHeaderBgColor = TypedValue()
-                    val filledCellBgColor = TypedValue()
-                    val emptyCellBgColor = TypedValue()
-
-                    val rowHeaderTextColor = TypedValue()
-                    val cellTextColor = TypedValue()
-
-                    context.theme.resolveAttribute(R.attr.fb_color_primary_dark, rowHeaderBgColor, true)
-                    context.theme.resolveAttribute(R.attr.selectedItemBackground, filledCellBgColor, true)
-                    context.theme.resolveAttribute(R.attr.fb_color_background, emptyCellBgColor, true)
-                    context.theme.resolveAttribute(R.attr.fb_color_text_light, rowHeaderTextColor, true)
-                    context.theme.resolveAttribute(R.attr.fb_color_text_dark, cellTextColor, true)
-
                     val text = cellInfo.value ?: cellInfo.data ?: ""
+
+                    // determine if this is the active cell
+                    // row is col both use 0-based indexing
+                    // col effectively can be considered to use 1-based due to the added first column for row headers
+                    val isActiveCell = (plotId != null && trait != null && cellInfo.row + 1 == plotId && (cellInfo.col == trait))
 
                     // set background colors for cells
                     paint.color = when {
-                        cellInfo.col == 0 -> rowHeaderBgColor.data
-                        text.isNotBlank() -> filledCellBgColor.data
+                        isActiveCell -> activeCellBgColor.data
+                        cellInfo.col != 0 && text.isNotBlank() -> filledCellBgColor.data
                         else -> emptyCellBgColor.data
                     }
 
@@ -331,8 +339,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                     )
 
                     // set text colors
-                    paint.color = if (cellInfo.col == 0) {
-                        rowHeaderTextColor.data
+                    paint.color = if (isActiveCell) {
+                        activeCellTextColor.data
                     } else {
                         cellTextColor.data
                     }

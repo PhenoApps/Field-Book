@@ -314,4 +314,10 @@
     <attr name="fb_third_chip_color" format="color" />
     <attr name="fb_fourth_chip_color" format="color" />
 
+    <!-- data grid colors -->
+    <attr name="dataFilledColor" format="color"/>
+    <attr name="emptyCellColor" format="color"/>
+    <attr name="activeCellColor" format="color"/>
+    <attr name="activeCellTextColor" format="color"/>
+    <attr name="cellTextColor" format="color"/>
 </resources>
