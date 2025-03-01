@@ -372,7 +372,9 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                 }
             }
 
-        tableData.columns[0].isFixed = true
+        // keeping a column fixed is leading to random clicks on cells
+        // tableData.columns[0].isFixed = true
+
         table.tableData = tableData
     }
 
