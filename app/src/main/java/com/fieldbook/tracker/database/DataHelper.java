@@ -897,6 +897,11 @@ public class DataHelper {
         open();
         StudyDao.Companion.updateSearchAttribute(studyId, newSearchAttribute);
     }
+    
+    public int updateSearchAttributeForAllFields(String newSearchAttribute) {
+        open();
+        return StudyDao.Companion.updateSearchAttributeForAllFields(newSearchAttribute);
+    }
 
     public ObservationUnitModel[] getObservationUnitsBySearchAttribute(int studyId, String searchValue) {
         open();

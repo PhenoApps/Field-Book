@@ -208,6 +208,10 @@
     <string name="invalid_unique_id_selection">Invalid Selection</string>
     <string name="search_multiple_matches_found">Found %1$d matching plots. Showing the first one.</string>
     <string name="barcode_scan_failed">Barcode scan failed or was cancelled</string>
+    <string name="apply_to_all_fields">Apply choice to all eligible fields</string>
+    <string name="dialog_search_attribute_title">Choose search attribute</string>
+    <string name="search_attribute_updated">Search attribute updated</string>
+    <string name="search_attribute_updated_all">Search attribute updated for %1$d field(s)</string>
 
 <!--    <string name="field_default_sort_order">import order</string>-->
 

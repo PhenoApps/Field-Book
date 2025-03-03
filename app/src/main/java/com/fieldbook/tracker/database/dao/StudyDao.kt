@@ -73,6 +73,45 @@ class StudyDao {
             )
         }
 
+        /**
+        * Updates the observation unit search attribute for all studies that have this attribute
+        * @return The number of studies that were updated
+        */
+        fun updateSearchAttributeForAllFields(newSearchAttribute: String): Int = withDatabase { db ->
+            // First check which studies have this attribute
+            val studiesWithAttribute = mutableListOf<Int>()
+            
+            val query = """
+                SELECT DISTINCT study_id 
+                FROM observation_units_attributes 
+                WHERE observation_unit_attribute_name = ?
+            """
+            
+            Log.d("StudyDao", "Finding studies with attribute: $newSearchAttribute")
+            
+            db.rawQuery(query, arrayOf(newSearchAttribute)).use { cursor ->
+                while (cursor.moveToNext()) {
+                    cursor.getInt(0).let { studyId ->
+                        studiesWithAttribute.add(studyId)
+                        Log.d("StudyDao", "Found study with matching attribute: $studyId")
+                    }
+                }
+            }
+            
+            // Now update each study that has this attribute
+            var updatedCount = 0
+            if (studiesWithAttribute.isNotEmpty()) {
+                for (studyId in studiesWithAttribute) {
+                    // Fix: Add null safety with the Elvis operator (?:)
+                    val result = updateSearchAttribute(studyId, newSearchAttribute)
+                    if ((result ?: 0) > 0) updatedCount++
+                }
+            }
+            
+            Log.d("StudyDao", "Updated search attribute for $updatedCount studies")
+            updatedCount
+        } ?: 0
+
         private fun fixPlotAttributes(db: SQLiteDatabase) {
 
             db.rawQuery("PRAGMA foreign_keys=OFF;", null).close()

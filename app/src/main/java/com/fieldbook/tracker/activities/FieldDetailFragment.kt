@@ -452,14 +452,45 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     private fun showChangeSearchAttributeDialog(field: FieldObject) {
-        val dialog = AttributeChooserDialog(showTraits = false, showOther = false, uniqueOnly = true).apply {
-            setOnAttributeSelectedListener(object : AttributeChooserDialog.OnAttributeSelectedListener {
-                override fun onAttributeSelected(label: String) {
+        val dialog = AttributeChooserDialog(
+            showTraits = false,
+            showOther = false,
+            uniqueOnly = true,
+            showApplyAllCheckbox = true
+        )
+
+        dialog.setOnAttributeSelectedListener(object : AttributeChooserDialog.OnAttributeSelectedListener {
+            override fun onAttributeSelected(label: String) {
+                // Get the apply to all state
+                val applyToAll = dialog.getApplyToAllState()
+
+                if (applyToAll) {
+                    // Update search attribute for all fields with this attribute
+                    val count = database.updateSearchAttributeForAllFields(label)
+                    Toast.makeText(
+                        context,
+                        getString(R.string.search_attribute_updated_all, count),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    // Update only the current field
                     database.updateSearchAttribute(field.exp_id, label)
-                    loadFieldDetails()
+                    Toast.makeText(
+                        context,
+                        getString(R.string.search_attribute_updated),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            })
-        }
+
+                loadFieldDetails()
+
+                // If apply to all was selected, refresh the parent activity's field list
+                if (applyToAll) {
+                    (activity as? FieldAdapterController)?.queryAndLoadFields()
+                }
+            }
+        })
+
         dialog.show(parentFragmentManager, AttributeChooserDialog.TAG)
     }
 
