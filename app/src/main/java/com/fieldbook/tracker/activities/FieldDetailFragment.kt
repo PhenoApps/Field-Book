@@ -452,6 +452,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     private fun showChangeSearchAttributeDialog(field: FieldObject) {
+        (activity as? FieldEditorActivity)?.setActiveField(field.exp_id)
+        
         val dialog = AttributeChooserDialog(
             showTraits = false,
             showOther = false,

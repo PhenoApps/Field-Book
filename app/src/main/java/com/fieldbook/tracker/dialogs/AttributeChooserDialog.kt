@@ -4,8 +4,8 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.CheckBox
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
@@ -62,6 +62,12 @@ open class AttributeChooserDialog(
         recyclerView = view.findViewById(R.id.dialog_collect_att_chooser_lv)
         progressBar = view.findViewById(R.id.dialog_collect_att_chooser_pb)
 
+         // Initialize checkbox if needed
+        if (showApplyAllCheckbox) {
+            applyAllCheckbox = view.findViewById(R.id.dialog_collect_att_chooser_checkbox)
+            applyAllCheckbox?.visibility = View.VISIBLE
+        }
+
         recyclerView.layoutManager = LinearLayoutManager(requireActivity())
         recyclerView.adapter = AttributeAdapter(this, null)
 
@@ -69,21 +75,19 @@ open class AttributeChooserDialog(
         tabLayout.getTabAt(1)?.view?.visibility = if (showTraits) TabLayout.VISIBLE else TabLayout.GONE
         tabLayout.getTabAt(2)?.view?.visibility = if (showOther) TabLayout.VISIBLE else TabLayout.GONE
 
-        // Add checkbox if requested - add it directly to the root LinearLayout
-        if (showApplyAllCheckbox) {
-            val checkBox = CheckBox(requireContext()).apply {
-                text = getString(R.string.apply_to_all_fields)
-                setPadding(50, 20, 50, 20)
-            }
-            
-            // The view is already a LinearLayout, so we can just add the checkbox to it
-            (view as? LinearLayout)?.addView(checkBox)
-            
-            applyAllCheckbox = checkBox
-        }
+        // val dialog = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
+        //     .setView(view)
+        //     .setNegativeButton(android.R.string.cancel, null)
+        //     .setCancelable(true)
+        //     .create()
+
+        // if (uniqueOnly) {
+        //     createdDialog.setTitle(getString(R.string.search_attribute_dialog_title))
+        // }
 
         val dialog = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
             .setView(view)
+            .apply { if (uniqueOnly) setTitle(R.string.search_attribute_dialog_title) }
             .setNegativeButton(android.R.string.cancel, null)
             .setCancelable(true)
             .create()
@@ -94,6 +98,7 @@ open class AttributeChooserDialog(
             BackgroundUiTask.execute(
                 backgroundBlock = {
                     if (uniqueOnly) {
+                        tabLayout.getTabAt(0)?.text = getString(R.string.dialog_att_chooser_unique_attributes)
                         val prefs = PreferenceManager.getDefaultSharedPreferences(requireActivity())
                         val activeFieldId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
                         val activity = requireActivity() as FieldEditorActivity
