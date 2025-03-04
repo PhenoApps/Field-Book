@@ -29,7 +29,7 @@ import com.fieldbook.tracker.adapters.FieldDetailAdapter
 import com.fieldbook.tracker.adapters.FieldDetailItem
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.dialogs.AttributeChooserDialog
+import com.fieldbook.tracker.dialogs.SearchAttributeChooserDialog
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
 import com.fieldbook.tracker.interfaces.FieldAdapterController
 import com.fieldbook.tracker.interfaces.FieldSortController
@@ -451,26 +451,62 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         dialog.show()
     }
 
+    // private fun showChangeSearchAttributeDialog(field: FieldObject) {
+    //     (activity as? FieldEditorActivity)?.setActiveField(field.exp_id)
+
+    //     val dialog = AttributeChooserDialog(
+    //         showTraits = false,
+    //         showOther = false,
+    //         uniqueOnly = true,
+    //         showApplyAllCheckbox = true
+    //     )
+
+    //     dialog.setOnAttributeSelectedListener(object : AttributeChooserDialog.OnAttributeSelectedListener {
+    //         override fun onAttributeSelected(label: String) {
+    //             // Get the apply to all state
+    //             val applyToAll = dialog.getApplyToAllState()
+
+    //             if (applyToAll) {
+    //                 // Update search attribute for all fields with this attribute
+    //                 val count = database.updateSearchAttributeForAllFields(label)
+    //                 Toast.makeText(
+    //                     context,
+    //                     getString(R.string.search_attribute_updated_all, count),
+    //                     Toast.LENGTH_SHORT
+    //                 ).show()
+    //             } else {
+    //                 // Update only the current field
+    //                 database.updateSearchAttribute(field.exp_id, label)
+    //                 Toast.makeText(
+    //                     context,
+    //                     getString(R.string.search_attribute_updated),
+    //                     Toast.LENGTH_SHORT
+    //                 ).show()
+    //             }
+
+    //             loadFieldDetails()
+
+    //             // If apply to all was selected, refresh the parent activity's field list
+    //             if (applyToAll) {
+    //                 (activity as? FieldAdapterController)?.queryAndLoadFields()
+    //             }
+    //         }
+    //     })
+
+    //     dialog.show(parentFragmentManager, AttributeChooserDialog.TAG)
+    // }
+
     private fun showChangeSearchAttributeDialog(field: FieldObject) {
         (activity as? FieldEditorActivity)?.setActiveField(field.exp_id)
         
-        val dialog = AttributeChooserDialog(
-            showTraits = false,
-            showOther = false,
-            uniqueOnly = true,
-            showApplyAllCheckbox = true
-        )
-
-        dialog.setOnAttributeSelectedListener(object : AttributeChooserDialog.OnAttributeSelectedListener {
-            override fun onAttributeSelected(label: String) {
-                // Get the apply to all state
-                val applyToAll = dialog.getApplyToAllState()
-
+        val dialog = SearchAttributeChooserDialog()
+        dialog.setOnSearchAttributeSelectedListener(object : SearchAttributeChooserDialog.OnSearchAttributeSelectedListener {
+            override fun onSearchAttributeSelected(label: String, applyToAll: Boolean) {
                 if (applyToAll) {
                     // Update search attribute for all fields with this attribute
                     val count = database.updateSearchAttributeForAllFields(label)
                     Toast.makeText(
-                        context,
+                        context, 
                         getString(R.string.search_attribute_updated_all, count),
                         Toast.LENGTH_SHORT
                     ).show()
@@ -478,22 +514,21 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     // Update only the current field
                     database.updateSearchAttribute(field.exp_id, label)
                     Toast.makeText(
-                        context,
+                        context, 
                         getString(R.string.search_attribute_updated),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-
+                
                 loadFieldDetails()
-
+                
                 // If apply to all was selected, refresh the parent activity's field list
                 if (applyToAll) {
                     (activity as? FieldAdapterController)?.queryAndLoadFields()
                 }
             }
         })
-
-        dialog.show(parentFragmentManager, AttributeChooserDialog.TAG)
+        dialog.show(parentFragmentManager, SearchAttributeChooserDialog.TAG)
     }
 
     /**
