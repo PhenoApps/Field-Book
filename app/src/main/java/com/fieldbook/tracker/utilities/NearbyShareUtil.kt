@@ -3,7 +3,6 @@ package com.fieldbook.tracker.utilities
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
@@ -53,7 +52,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
     interface FileHandler {
         fun getSaveFileDirectory(): Int // specifies parent directory for file to be stored in
         fun onFileReceived(receivedFile: DocumentFile)
-        fun prepareFileForTransfer(): DocumentFile
+        fun prepareFileForTransfer(): DocumentFile?
     }
 
     private data class Endpoint(val id: String, val name: String)
@@ -133,7 +132,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                             }
                         } catch (e: Exception) {
                             withContext(Dispatchers.Main) {
-                                Log.e("PreferencesFragment", "Failed to import file", e);
+                                Log.e("PreferencesFragment", "Failed to import file", e)
                                 setProgressStatus(String.format(getString(R.string.nearby_share_failed_import), e.message), R.drawable.ic_transfer_error)
                             }
                         }
@@ -152,7 +151,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
      * Executed by the sender device
      * Create and send the payload for the file to be transferred
      */
-    private fun sendFile(endpointId: String, fileUri: Uri) {
+    private fun sendFile(endpointId: String) {
         scope.launch {
             val payload = docFile?.let { documentFile ->
                 try {
@@ -275,9 +274,8 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                 ConnectionsStatusCodes.STATUS_OK -> {
                     setProgressMessage(getString(R.string.nearby_share_connection_established))
                     mEstablishedConnections.add(endpointId)
-                    docFile?.let { file ->
-                        val fileUri = file.uri
-                        sendFile(endpointId, fileUri)
+                    docFile?.let { _ ->
+                        sendFile(endpointId)
                     }
                 }
                 ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED -> {
@@ -323,9 +321,15 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                         docFile = fileHandler?.prepareFileForTransfer()
                     }
                 } catch (e: Exception) {
-                    setProgressStatus(String.format(getString(R.string.nearby_share_failed_export_generation), e), R.drawable.ic_transfer_error)
+                    setProgressStatus(String.format(getString(R.string.nearby_share_failed_export_generation_message), e), R.drawable.ic_transfer_error)
                     stopNearbyShare()
                     FirebaseCrashlytics.getInstance().recordException(e)
+                    return@launch
+                }
+
+                if (docFile == null) {
+                    setProgressStatus(getString(R.string.nearby_share_failed_export_generation), R.drawable.ic_transfer_error)
+                    stopNearbyShare()
                     return@launch
                 }
 

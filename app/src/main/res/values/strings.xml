@@ -1423,7 +1423,8 @@
     <string name="nearby_share_failed_handle_file">Failed to handle file: %s</string>
     <string name="nearby_share_generating_file">Getting the file ready for transfer</string>
     <string name="nearby_share_failed_import">Failed to import file: %s</string>
-    <string name="nearby_share_failed_export_generation">Error generating file for sharing: %s</string>
+    <string name="nearby_share_failed_export_generation_message">Error generating file for sharing: %s</string>
+    <string name="nearby_share_failed_export_generation">Error generating file for sharing</string>
     <string name="nearby_share_file_imported_successfully">%s imported successfully</string>
 
     <string name="nearby_share_authenticating_connection">Authenticating connection with %s…</string>
