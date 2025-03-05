@@ -20,10 +20,10 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.dialogs.ListAddDialog;
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.NearbyShareUtil;
 import com.fieldbook.tracker.utilities.ZipUtil;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -177,8 +177,8 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
         try {
             SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
             String filename = "preferences_" + timeStamp.format(Calendar.getInstance().getTime());
-            return database.exportPreferences(context, filename, true);
-        } catch (IOException e) {
+            return DocumentTreeUtil.Companion.exportPreferences(context, filename, true);
+        } catch (Exception e) {
             Log.e("PreferencesFragment", "Failed to export preferences", e);
             return null;
         }
