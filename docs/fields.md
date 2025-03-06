@@ -89,11 +89,17 @@ The <img class="icon" src="_static/icons/fields/menu.png"> menu icon in the uppe
 
 Creating a new field directly in Field Book requires a field name, dimensions, starting corner for entry ordering, and whether entries should progress in a zigzag or serpentine order.
 Universal unique IDs will be generated for all entries.
-Confirm the planned settings are as expected, then press OK.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/fields_create_joined.png" width="1100px"> 
-  <figcaption class="screenshot-caption"><i>The field creation process</i></figcaption> 
+  <figcaption class="screenshot-caption"><i>Required input during field creation</i></figcaption> 
+</figure>
+
+Confirm the planned settings are as expected, then press OK.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/fields_create_2_joined.png" width="700px"> 
+  <figcaption class="screenshot-caption"><i>Confirmation and a newly created field</i></figcaption> 
 </figure>
 
 #### Breeding API (BrAPI)
@@ -145,6 +151,11 @@ The sort dialog is populated by pressing the <img class="icon" src="_static/icon
 Column priority for sorting can be modified by using using the <img class="icon" src="_static/icons/traits/reorder-horizontal.png"> icon to drag and reorder them.
 The <img class="icon" src="_static/icons/fields/sort.png"> icon will toggle the sort between ascending and descending.
 The <img class="icon" src="_static/icons/settings/sounds/delete.png"> icon will remove columns that have been added.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/field_detail_sort_joined.png" width="1100px"> 
+  <figcaption class="screenshot-caption"><i>Sorting entries by ascending row, then column</i></figcaption> 
+</figure>
 
 The <img class="icon" src="_static/icons/home/barley.png"> [Collect](collect.md) card will navigate to the Collect screen where data can be collected.
 
