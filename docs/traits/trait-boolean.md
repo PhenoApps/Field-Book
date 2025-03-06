@@ -1,12 +1,13 @@
-<img ref="boolean" style="vertical-align: middle;" src="_static/icons/formats/close-circle.png" width="40px"> Boolean Trait
-===============================================================================
+<link rel="stylesheet" type="text/css" href="_styles/styles.css">
 
-The Boolean trait format is used to record TRUE/FALSE values. It is
-created with a trait name, default value, and optional details. On the
-collect page you can toggle between TRUE and FALSE as needed. Details
-text is displayed under the trait name on the collect page.
+# <img class="icon-title" src="_static/icons/formats/close-circle.png"> Boolean Trait
 
-<figure align="center" class="image">
-  <img src="_static/images/traits/formats/boolean_format_joined.png" width="700px"> 
-  <figcaption><i>Boolean trait creation dialog and collect format</i></figcaption> 
+The Boolean trait format is used to record `TRUE`/`FALSE` values.
+It is created with a `name`, `default` value, and optional `details`.
+On the Collect screen you can toggle between `TRUE` and `FALSE`.
+Details text is displayed under the trait name on the Collect screen.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/traits/formats/boolean_format_joined.png" width="700px"> 
+  <figcaption class="screenshot-caption"><i>Boolean trait creation dialog and collect format</i></figcaption> 
 </figure>

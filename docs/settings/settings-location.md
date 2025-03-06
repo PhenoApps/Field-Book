@@ -1,50 +1,60 @@
-Location Settings
-=================
+<link rel="stylesheet" type="text/css" href="_styles/styles.css">
 
-<figure align="center" class="image">
-  <img src="_static/images/settings/location/settings_location_framed.png" width="350px"> 
-  <figcaption><i>Location settings screen layout</i></figcaption> 
+# Location Settings
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/settings/location/settings_location_framed.png" width="350px"> 
+  <figcaption class="screenshot-caption"><i>Location settings screen</i></figcaption> 
 </figure>
 
-#### <img ref="gps" style="vertical-align: middle;" src="_static/icons/formats/crosshairs-gps.png" width="20px"> Location collected
+## GeoCoordinates
 
-Set the method for collecting location while using Field Book. Can be at
-the level of the field, the plot, or the individual observation.
+#### <img class="icon" src="_static/icons/formats/crosshairs-gps.png"> Location Provider
 
-<figure align="center" class="image">
-  <img src="_static/images/settings/location/settings_location_collected.png" width="325px"> 
-  <figcaption><i>Location collect options</i></figcaption> 
+Set the source of location data.
+The device GPS or connect an external device with Bluetooth.
+
+#### <img class="icon" src="_static/icons/settings/location/select-marker.png"> Collection Level
+
+Location can optionally be captured during data collection at the field level, plot level, or the individual observation level.
+Location data is included in the metadata fields of database format export files.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/settings/location/settings_location_collection_level.png" width="325px"> 
+  <figcaption class="screenshot-caption"><i>Location collect options</i></figcaption> 
 </figure>
 
-#### <img ref="geonav" style="vertical-align: middle;" src="_static/icons/settings/location/map-search.png" width="20px"> Enable Geonav
+## Geonav
 
-Enables the device to move between entires based on GPS data. Requires
-entries to have GNSS data.
+#### <img class="icon" src="_static/icons/settings/location/map-search.png"> Enable Geonav
 
-#### <img ref="method" style="vertical-align: middle;" src="_static/icons/settings/location/function-variant.png" width="20px"> Search Method
+Enables the device to move between entires based on geocoordinate data.
+Requires entries to have GNSS data.
 
-The method used to match GPS location to entry. Defaults to the distance
-method.
+#### <img class="icon" src="_static/icons/settings/location/function-variant.png"> Search Method
 
-<figure align="center" class="image">
-  <img src="_static/images/settings/location/settings_geonav_search_method.png" width="325px"> 
-  <figcaption><i>GeoNav search method options</i></figcaption> 
+The method used to match geocoordinate location to entry.
+Defaults to the distance method.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/settings/location/settings_location_search_method.png" width="325px"> 
+  <figcaption class="screenshot-caption"><i>GeoNav search method options</i></figcaption> 
 </figure>
 
-#### <img ref="log" style="vertical-align: middle;" src="_static/icons/settings/location/script-text-outline.png" width="20px"> GeoNav Log
+#### <img class="icon" src="_static/icons/settings/location/signal-distance-variant.png"> Proximity Check
 
-Turns on GeoNav logging to a logfile stored in `/storage/geonav/log.txt`
+Set the distance in km from known plots at which GeoNav should turn off.
 
-#### <img ref="interval" style="vertical-align: middle;" src="_static/icons/settings/location/timer-sand-empty.png" width="20px"> Update Interval
+#### <img class="icon" src="_static/icons/settings/location/note-off-outline.png"> GeoNav Log
 
-Changes the time between GeoNav location updates. Can be set to 1s
-(default), 5s, or 10s
+Turns on GeoNav logging and saves logs to `/storage/geonav/log.txt`
 
-<figure align="center" class="image">
-  <img src="_static/images/settings/location/settings_geonav_update_intervals.png" width="325px"> 
-  <figcaption><i>GeoNav interval options</i></figcaption> 
+#### <img class="icon" src="_static/icons/settings/location/timer-sand-empty.png"> Update Interval(s)
+
+Changes the time between GeoNav location updates.
+Can be set to 1s (default), 5s, or 10s.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/settings/location/settings_location_update_interval.png" width="325px"> 
+  <figcaption class="screenshot-caption"><i>GeoNav interval options</i></figcaption> 
 </figure>
-
-#### <img ref="bluetooth" style="vertical-align: middle;" src="_static/icons/settings/location/bluetooth.png" width="20px"> Pair Device
-
-Opens Bluetooth interface to pair to an external GPS device

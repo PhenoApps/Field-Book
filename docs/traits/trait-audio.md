@@ -1,22 +1,21 @@
-<img ref="audio" style="vertical-align: middle;" src="_static/icons/formats/microphone.png" width="40px"> Audio Trait
-=========================================================================
+<link rel="stylesheet" type="text/css" href="_styles/styles.css">
 
-The audio trait format is used to record audio. It is created with a
-trait name and optional details.
+# <img class="icon-title" src="_static/icons/formats/microphone.png"> Audio Trait
 
-On the collect page, press the
-<img ref="audio" style="vertical-align: middle;" src="_static/icons/formats/microphone.png" width="20px"> button to
-begin recording audio. Press the
-<img ref="stop" style="vertical-align: middle;" src="_static/icons/formats/stop.png" width="20px"> button to stop
-recording. Press the
-<img ref="play" style="vertical-align: middle;" src="_static/icons/formats/play.png" width="20px"> button to play
-back the audio that has been recorded.
+The audio trait format is used to record audio.
+It is created with a `name` and optional `details`.
+Details text is displayed under the trait name on the Collect screen.
 
-Recorded audio files are stored in `.mp3` format, and named with the entry's unique_id and a
-timestamp. The resulting files are stored in an audio folder within a field-specific subfolder of `plot_data`. An example audio filepath would be `plot_data/FIELD_NAME/audio/AUDIO_FILE_NAME.mp3`.
+On the Collect screen, press the <img class="icon" src="_static/icons/formats/microphone.png"> button to begin recording audio.
+Press the <img class="icon" src="_static/icons/formats/stop.png"> button to stop recording.
+Press the <img class="icon" src="_static/icons/formats/play.png"> button to play back the audio that has been recorded.
 
-<figure align="center" class="image">
-  <img src="_static/images/traits/formats/audio_format_joined.png" width="700px"> 
-  <figcaption><i>Audio trait creation dialog and collect format</i></figcaption> 
+Recorded audio files are stored in `.mp3` format, and named with the entry's `unique id` and a
+timestamp.
+The resulting files are stored in an audio folder within a field-specific subfolder of `plot_data`.
+An example audio filepath would be `plot_data/FIELD_NAME/audio/AUDIO_FILE_NAME.mp3`.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/traits/formats/audio_format_joined.png" width="700px"> 
+  <figcaption class="screenshot-caption"><i>Audio trait creation dialog and collect format</i></figcaption> 
 </figure>
-
