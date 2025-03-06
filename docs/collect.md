@@ -29,8 +29,8 @@ Values turn from black to red once they have been saved to the internal database
 By default there are four icons in the top toolbar that provide additional functionality during data collection.
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/collect/collect_toolbar_highlight_framed.png" width="350px"> 
-  <figcaption class="screenshot-caption"><i>Collect screen with the top toolbar highlighted</i></figcaption> 
+  <img class="screenshot" src="_static/images/collect/collect_top_toolbar_section.png" width="325px"> 
+  <figcaption class="screenshot-caption"><i>The Collect screen top toolbar</i></figcaption> 
 </figure>
 
 - <img class="icon" src="_static/icons/collect/magnify.png"> **Search** opens a dialog to search for a specific entry.
@@ -104,7 +104,8 @@ InfoBar prefixes can be replaced with symbols by toggling the "Hide InfoBar Pref
 </figure>
 
 The small, green arrows are used to move between the visible traits.
-Pressing the current trait will display a dialog of all visible traits.
+Dots at the bottom of the section show progress through the traits for the current entry.
+Pressing the current trait name will display a dialog of all visible traits.
 Selecting a different trait will navigate the app to that trait.
 Pressing "Edit" will navigate to the [Traits](traits.md) screen where you can modify which traits are currently active or create new traits.
 
@@ -121,7 +122,8 @@ Pressing "Edit" will navigate to the [Traits](traits.md) screen where you can mo
 </figure>
 
 The large, black arrows navigate between different entries.
-Pressing and holding these arrows will continuously scroll.
+The bar at the top of the section shows progress through all entries in the field.
+Pressing and holding the an arrow will continuously scroll through the entries.
 The longer the arrows are pressed, the faster the scrolling becomes.
 
 #### Data input
