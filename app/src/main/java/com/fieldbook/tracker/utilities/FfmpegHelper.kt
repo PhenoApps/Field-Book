@@ -6,10 +6,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.phenoapps.fragments.gopro.GoProHelper
+import com.fieldbook.tracker.devices.camera.gopro.GoProHelper
 import java.lang.Exception
 import java.net.DatagramPacket
 import java.net.DatagramSocket
