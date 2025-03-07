@@ -1,6 +1,7 @@
 name: update-docs
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
