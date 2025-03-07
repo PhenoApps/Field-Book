@@ -8,8 +8,9 @@
 
     <com.fieldbook.tracker.views.CompassView
         android:id="@+id/compassView"
-        android:layout_width="200dp"
-        android:layout_height="200dp"/>
+        android:layout_marginVertical="10dp"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         style="@style/FloatingActionButtonStyle.TraitButtons"
