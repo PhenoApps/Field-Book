@@ -46,5 +46,15 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/list_item_infobar" />
 
+    <CheckBox
+        android:id="@+id/dialog_collect_att_chooser_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/search_attribute_apply_to_all"
+        android:layout_gravity="center_horizontal"
+        android:padding="12dp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
 </LinearLayout>
 

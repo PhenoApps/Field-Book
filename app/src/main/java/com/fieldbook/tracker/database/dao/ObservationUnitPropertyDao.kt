@@ -412,7 +412,7 @@ class ObservationUnitPropertyDao {
                 $orderByClause
             """.trimIndent()
 
-            Log.d("getSortedObsUnitData", "Executing dynamic query: $query")
+//            Log.d("getSortedObsUnitData", "Executing dynamic query: $query")
             db.rawQuery(query, null)
         }
 
