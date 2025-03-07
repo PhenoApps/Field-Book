@@ -21,6 +21,7 @@ import com.fieldbook.tracker.adapters.TraitsStatusAdapter
 import com.fieldbook.tracker.interfaces.CollectTraitController
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.BaseTraitLayout
 import com.fieldbook.tracker.traits.LayoutCollections
 
@@ -415,7 +416,7 @@ class TraitBoxView : ConstraintLayout {
                 if (controller.isCyclingTraitsAdvances()) {
                     rangeBox.clickLeft()
                 }
-                if (controller.getPreferences().getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND, false)) {
+                if (controller.getPreferences().getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)) {
                     controller.getSoundHelper().playCycle()
                 }
             }
@@ -426,7 +427,7 @@ class TraitBoxView : ConstraintLayout {
                 if (controller.isCyclingTraitsAdvances()) {
                     rangeBox.clickRight()
                 }
-                if (controller.getPreferences().getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND, false)) {
+                if (controller.getPreferences().getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)) {
                     controller.getSoundHelper().playCycle()
                 }
             }
@@ -439,7 +440,7 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun returnFirst() {
-        if (controller.getPreferences().getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND, false)) {
+        if (controller.getPreferences().getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)) {
             controller.getSoundHelper().playCycle()
         }
         setSelection(0)

@@ -11,6 +11,7 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.InfobarAttributeChooserDialog
 import com.fieldbook.tracker.objects.InfoBarModel
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
 
@@ -36,7 +37,7 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
         val database: DataHelper = (context as CollectActivity).getDatabase()
 
         //get the preference number of infobars to load, default to 3 if pref isn't set
-        val numInfoBars: Int = preferences.getInt(GeneralKeys.INFOBAR_NUMBER, 3)
+        val numInfoBars: Int = preferences.getInt(PreferenceKeys.INFOBAR_NUMBER, 3)
 
         //get all plot attribute names for the study
         val attributes: MutableList<String> = ArrayList(database.rangeColumnNames.toList())

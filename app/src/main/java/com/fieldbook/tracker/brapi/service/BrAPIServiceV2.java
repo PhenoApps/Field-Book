@@ -35,6 +35,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
@@ -178,7 +179,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public void authorizeClient() {
         try {
             apiClient.authenticate(t -> PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(GeneralKeys.BRAPI_TOKEN, null));
+                    .getString(PreferenceKeys.BRAPI_TOKEN, null));
         } catch (ApiException error) {
             Log.e("BrAPIServiceV2", "API Exception", error);
         }
@@ -518,7 +519,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                final Function<Integer, Void> failFunction) {
         try {
             final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
+                    .getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
@@ -708,7 +709,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
     public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
         final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
+                .getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
         BrAPIGermplasmSearchRequest germplasmBody = new BrAPIGermplasmSearchRequest();
         List<String> doubledGermplasmDbIds = new ArrayList<>(allGermplasmDbIds);
         doubledGermplasmDbIds.addAll(allGermplasmDbIds);
