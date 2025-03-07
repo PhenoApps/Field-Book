@@ -7,11 +7,13 @@ import android.os.Looper
 import android.util.AttributeSet
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.lowPassFilter
 import com.fieldbook.tracker.views.CompassView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 /**
- * A trait for measuring Yaw angle using device orientation.
+ * A trait for measuring the tilt angle using device orientation.
+ * Uses the device tilt from gravity sensor (or accelerometer) for angle measurement.
  */
 class AngleTraitLayout : BaseTraitLayout {
 
@@ -21,16 +23,14 @@ class AngleTraitLayout : BaseTraitLayout {
 
     private lateinit var compassView: CompassView
     private lateinit var captureButton: FloatingActionButton
-    private var currentYaw: Float? = null
+
+    private var currentAngle: Float = 0f
 
     private val updateHandler: Handler = Handler(Looper.getMainLooper())
-    private var isUpdating: Boolean = false
     private val updateRunnable = object : Runnable {
         override fun run() {
             updateFromSensor()
-            if (isUpdating) {
-                updateHandler.postDelayed(this, UPDATE_INTERVAL)
-            }
+            updateHandler.postDelayed(this, UPDATE_INTERVAL)
         }
     }
 
@@ -54,32 +54,21 @@ class AngleTraitLayout : BaseTraitLayout {
         captureButton = act.findViewById(R.id.captureButton)
 
         captureButton.setOnClickListener {
-            controller.getRotationRelativeToDevice()?.let { rotation ->
-                val angleValue = "%.2f".format(rotation.yaw)
-                updateObservation(currentTrait, angleValue)
-                collectInputView.text = angleValue
-            }
+            val angleValue = "%.1f".format(currentAngle)
+            updateObservation(currentTrait, angleValue)
+            collectInputView.text = angleValue
         }
 
-        startUpdates()
-    }
-
-    private fun startUpdates() {
-        if (!isUpdating) {
-            isUpdating = true
-            updateHandler.post(updateRunnable)
-        }
+        updateHandler.post(updateRunnable)
     }
 
     private fun updateCompass() {
-        currentYaw?.apply {
-            compassView.setYawAngle(this)
-        }
+        compassView.setYawAngle(currentAngle)
     }
 
     private fun updateFromSensor() {
-        controller.getRotationRelativeToDevice()?.let { rotation ->
-            currentYaw = rotation.yaw
+        controller.getDeviceTilt()?.let { deviceTilt ->
+            currentAngle = lowPassFilter(floatArrayOf(deviceTilt.roll), floatArrayOf(currentAngle))[0]
             updateCompass()
         }
     }

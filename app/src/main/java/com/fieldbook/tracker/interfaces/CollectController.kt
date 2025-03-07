@@ -60,4 +60,5 @@ interface CollectController: FieldController {
     fun getCanonApi(): CanonApi
     fun takePicture()
     fun getRotationRelativeToDevice(): SensorHelper.RotationModel?
+    fun getDeviceTilt(): SensorHelper.RotationModel?
 }
