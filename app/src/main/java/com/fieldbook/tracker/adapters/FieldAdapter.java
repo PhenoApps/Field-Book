@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,6 +40,8 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
     private final FieldSwitcher fieldSwitcher;
     private AdapterCallback callback;
     private OnFieldSelectedListener listener;
+    private String filterText = "";
+    private final List<FieldObject> fullFieldList = new ArrayList<>();
 
     public interface OnFieldSelectedListener {
         void onFieldSelected(int itemId);
@@ -128,33 +131,41 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
             // Short click on source icon sets active field (unless in selectionMode)
             sourceIcon.setOnClickListener(v -> {
                 int position = getBindingAdapterPosition();
-                FieldObject field = getItem(position);
-                if (field != null && isInSelectionMode) {
-                    toggleSelection(field.getExp_id());
-                } else if (field != null && context instanceof FieldEditorActivity) {
-                    ((FieldEditorActivity) context).setActiveField(field.getExp_id());
+                if (position != RecyclerView.NO_POSITION) {
+                    FieldObject field = getItem(position);
+                    if (field != null && isInSelectionMode) {
+                        toggleSelection(field.getExp_id());
+                    } else if (field != null && context instanceof FieldEditorActivity) {
+                        ((FieldEditorActivity) context).setActiveField(field.getExp_id());
+                    }
                 }
             });
 
             // Short click elsewhere opens detail fragment (unless in selectionMode)
             itemView.setOnClickListener(v -> {
                 if (v != sourceIcon) { // Check if the click is not on the icon
-                    FieldObject field = getItem(getBindingAdapterPosition());
-                    if (field != null && isInSelectionMode) {
-                        toggleSelection(field.getExp_id());
-                    } else if (field != null && listener != null) {
-                        listener.onFieldSelected(field.getExp_id());
+                    int position = getBindingAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        FieldObject field = getItem(position);
+                        if (field != null && isInSelectionMode) {
+                            toggleSelection(field.getExp_id());
+                        } else if (field != null && listener != null) {
+                            listener.onFieldSelected(field.getExp_id());
+                        }
                     }
                 }
             });
 
             // Long click enters and toggles selections in selection mode
             itemView.setOnLongClickListener(v -> {
-                FieldObject field = getItem(getBindingAdapterPosition());
-                if (field != null) {
-                    toggleSelection(field.getExp_id());
-                    isInSelectionMode = true;
-                    return true;
+                int position = getBindingAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    FieldObject field = getItem(position);
+                    if (field != null) {
+                        toggleSelection(field.getExp_id());
+                        isInSelectionMode = true;
+                        return true;
+                    }
                 }
                 return false;
             });
@@ -218,5 +229,25 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
             // Clear any modifications for non-active fields
             holder.sourceIcon.setBackground(null);
         }
+    }
+
+    @Override
+    public void submitList(@Nullable List<FieldObject> list, @Nullable Runnable commitCallback) {
+        super.submitList(list, commitCallback);
+        fullFieldList.clear();
+        if (list != null) {
+            fullFieldList.addAll(list);
+        }
+    }
+
+    public void setTextFilter(String filter) {
+        this.filterText = filter;
+        List<FieldObject> filterFields = new ArrayList<>(fullFieldList);
+        for (FieldObject field : fullFieldList) {
+            if (!filter.isEmpty() && !field.getExp_name().toLowerCase().contains(filter.toLowerCase())) {
+                filterFields.remove(field);
+            }
+        }
+        submitList(filterFields);
     }
 }

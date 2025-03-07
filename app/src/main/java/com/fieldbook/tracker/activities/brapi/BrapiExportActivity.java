@@ -14,10 +14,12 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
+import androidx.fragment.app.FragmentActivity;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.ThemedActivity;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
+import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
@@ -76,6 +78,8 @@ public class BrapiExportActivity extends ThemedActivity {
     private UploadError postImageMetaDataError;
     private UploadError putImageContentError;
     private UploadError putImageMetaDataError;
+
+    private final BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
 
     public BrapiExportActivity() {
 
@@ -547,7 +551,18 @@ public class BrapiExportActivity extends ThemedActivity {
                     putImageContentError == UploadError.API_UNAUTHORIZED_ERROR ||
                     putImageMetaDataError == UploadError.API_UNAUTHORIZED_ERROR) {
                 reset();
-                BrAPIService.handleConnectionError(this, 401);
+                boolean showDialog = BrAPIService.handleConnectionError(this, 401);
+                if (showDialog) {
+                    try {
+                        runOnUiThread(() -> {
+                            if (!brapiAuth.isVisible()) {
+                                brapiAuth.show(getSupportFragmentManager(), "BrapiAuthDialogFragment");
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
                 return;
             } else {
                 String message;
@@ -606,6 +621,14 @@ public class BrapiExportActivity extends ThemedActivity {
         editedObservations.clear();
         imagesNew.clear();
         imagesEditedIncomplete.clear();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (brapiAuth != null && brapiAuth.isAdded() && brapiAuth.isVisible()) {
+            brapiAuth.dismiss();
+        }
     }
 
     private UploadError processResponse(List<Observation> observationDbIds, List<Observation> observationsNeedingSync) {
@@ -808,33 +831,42 @@ public class BrapiExportActivity extends ThemedActivity {
     }
 
     private void showExportButton() {
-        Button exportButton = findViewById(R.id.brapi_export_btn);
-        Button nextFieldButton = findViewById(R.id.next_field_btn);
-        Button closeButton = findViewById(R.id.close_btn);
 
-        exportButton.setVisibility(View.VISIBLE);
-        nextFieldButton.setVisibility(View.GONE);
-        closeButton.setVisibility(View.GONE);
+        runOnUiThread(() -> {
+            Button exportButton = findViewById(R.id.brapi_export_btn);
+            Button nextFieldButton = findViewById(R.id.next_field_btn);
+            Button closeButton = findViewById(R.id.close_btn);
+
+            exportButton.setVisibility(View.VISIBLE);
+            nextFieldButton.setVisibility(View.GONE);
+            closeButton.setVisibility(View.GONE);
+        });
     }
 
     private void showNextFieldButton() {
-        Button exportButton = findViewById(R.id.brapi_export_btn);
-        Button nextFieldButton = findViewById(R.id.next_field_btn);
-        Button closeButton = findViewById(R.id.close_btn);
 
-        exportButton.setVisibility(View.GONE);
-        nextFieldButton.setVisibility(View.VISIBLE);
-        closeButton.setVisibility(View.GONE);
+        runOnUiThread(() -> {
+            Button exportButton = findViewById(R.id.brapi_export_btn);
+            Button nextFieldButton = findViewById(R.id.next_field_btn);
+            Button closeButton = findViewById(R.id.close_btn);
+
+            exportButton.setVisibility(View.GONE);
+            nextFieldButton.setVisibility(View.VISIBLE);
+            closeButton.setVisibility(View.GONE);
+        });
     }
 
     private void showCloseButton() {
-        Button exportButton = findViewById(R.id.brapi_export_btn);
-        Button nextFieldButton = findViewById(R.id.next_field_btn);
-        Button closeButton = findViewById(R.id.close_btn);
 
-        exportButton.setVisibility(View.GONE);
-        nextFieldButton.setVisibility(View.GONE);
-        closeButton.setVisibility(View.VISIBLE);
+        runOnUiThread(() -> {
+            Button exportButton = findViewById(R.id.brapi_export_btn);
+            Button nextFieldButton = findViewById(R.id.next_field_btn);
+            Button closeButton = findViewById(R.id.close_btn);
+
+            exportButton.setVisibility(View.GONE);
+            nextFieldButton.setVisibility(View.GONE);
+            closeButton.setVisibility(View.VISIBLE);
+        });
     }
 
     public enum UploadError {

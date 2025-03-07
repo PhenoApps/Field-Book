@@ -55,6 +55,7 @@ import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -318,7 +319,13 @@ public class ConfigActivity extends ThemedActivity {
                     break;
                 case 3:
                     if (checkTraitsExist() < 0) return;
-                    exportUtil.exportActiveField();
+                    if (BaseDocumentTreeUtil.Companion.getRoot(this) != null
+                            && BaseDocumentTreeUtil.Companion.isEnabled(this)
+                            && BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_field_export) != null) {
+                        exportUtil.exportActiveField();
+                    } else {
+                        Toast.makeText(this, R.string.error_storage_directory, Toast.LENGTH_LONG).show();
+                    }
                     break;
                 case 4:
                     intent.setClassName(ConfigActivity.this,
@@ -421,7 +428,6 @@ public class ConfigActivity extends ThemedActivity {
 
         }
 
-        Intent intent = new Intent(this, CollectActivity.class);
         CollectActivity.reloadData = true;
 
         if (plotId != null) {
@@ -430,8 +436,19 @@ public class ConfigActivity extends ThemedActivity {
 
         }
 
-        startActivity(intent);
+        startCollectActivity();
 
+    }
+
+    private void startCollectActivity() {
+
+        int selectedField = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+        FieldObject field = database.getFieldObject(selectedField);
+
+        if (field != null && field.getDate_import() != null && !field.getDate_import().isEmpty()) {
+            Intent intent = new Intent(this, CollectActivity.class);
+            startActivity(intent);
+        }
     }
 
     @Nullable
@@ -583,11 +600,7 @@ public class ConfigActivity extends ThemedActivity {
 
         if (EasyPermissions.hasPermissions(this, perms)
                 && (EasyPermissions.hasPermissions(this, finePerms) || EasyPermissions.hasPermissions(this, coarsePerms))) {
-            Intent intent = new Intent();
-
-            intent.setClassName(ConfigActivity.this,
-                    CollectActivity.class.getName());
-            startActivity(intent);
+            startCollectActivity();
         } else {
             // Do not have permissions, request them now
             EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_trait_features),

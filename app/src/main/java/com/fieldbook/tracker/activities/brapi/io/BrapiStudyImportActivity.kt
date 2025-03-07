@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
-import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.mapper.toTraitObject
 import com.fieldbook.tracker.adapters.StudyAdapter
 import com.fieldbook.tracker.adapters.StudyAdapter.Model
@@ -28,6 +27,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -38,6 +38,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.brapi.client.v2.JSON
 import org.brapi.client.v2.model.queryParams.germplasm.GermplasmQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
@@ -174,7 +175,26 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             setLoadingText(getString(R.string.act_brapi_study_import_fetch_levels))
 
-            fetchObservationLevels(programDbId).join()
+            try {
+
+                fetchObservationLevels(programDbId).join()
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+                FirebaseCrashlytics.getInstance().recordException(e)
+
+                withContext(Dispatchers.Main) {
+
+                    Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_fetch_observation_levels), Toast.LENGTH_SHORT).show()
+
+                    setResult(Activity.RESULT_CANCELED)
+
+                    finish()
+                }
+            }
+
             withContext(Dispatchers.Main) {
                 importButton.isEnabled = false
                 loadingTextView.visibility = View.GONE
@@ -608,42 +628,55 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             launch(Dispatchers.IO) {
 
+                val level = BrapiObservationLevel().also {
+                    it.observationLevelName = try {
+                        if (selectedLevel in existingLevels().indices) {
+                            existingLevels().elementAt(selectedLevel)
+                        } else {
+                            "plot"
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to get observation level", e)
+                        finish()
+                        ""
+                    }
+                }
+
+                val allAttributes = getAttributeKeys()
+                val primaryId = allAttributes[selectedPrimary]
+                val secondaryId = allAttributes[selectedSecondary]
+                val sortOrder = if (selectedSort == -1) "" else allAttributes[selectedSort]
+
                 studyDbIds.forEach { id ->
 
                     studies.firstOrNull { it.studyDbId == id }?.let {
 
-                        saveStudy(it)
+                        saveStudy(it, level, primaryId, secondaryId, sortOrder)
 
                     }
                 }
 
                 setResult(Activity.RESULT_OK)
                 finish()
+
             }
         }
     }
 
-    private fun saveStudy(study: BrAPIStudy) {
-
-        val level = BrapiObservationLevel().also {
-            it.observationLevelName = try {
-                if (selectedLevel in existingLevels().indices) {
-                    existingLevels().elementAt(selectedLevel)
-                } else {
-                    "plot"
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to get observation level", e)
-                finish()
-                ""
-            }
-        }
+    private fun saveStudy(
+        study: BrAPIStudy,
+        level: BrapiObservationLevel,
+        primaryId: String,
+        secondaryId: String,
+        sortId: String
+    ) {
 
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
             observationUnits[study.studyDbId]?.filter {
-                    if (it.observationUnitPosition.entryType.name == "TEST") true
-                    else it.observationUnitPosition.observationLevel.levelName == level.observationLevelName }
+                if (it.observationUnitPosition?.entryType?.name == "TEST") true
+                else it.observationUnitPosition.observationLevel.levelName == level.observationLevelName
+            }
                 ?.let { units ->
 
                     val details = BrapiStudyDetails()
@@ -656,36 +689,59 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.traits = observationVariables[study.studyDbId]?.toList()
                         ?.map { it.toTraitObject(this@BrapiStudyImportActivity) } ?: listOf()
 
-                    val attributes = studyAttributes.values.flatMap { it.keys }.distinct()
-                    val primaryId = attributes[selectedPrimary]
-                    val secondaryId = attributes[selectedSecondary]
-                    val sortOrder = if (selectedSort == -1) "" else attributes[selectedSort]
+                    val geoCoordinateColumnName = "geo_coordinates"
 
-                    details.attributes = attributes
+                    val attributes = (studyAttributes.values.flatMap { it.keys } + geoCoordinateColumnName).distinct()
 
-                    val unitAttributes = ArrayList<List<String>>()
-                    units.forEach { unit ->
+                    if (listOf(primaryId, secondaryId, sortId).filter { it.isNotEmpty() }.all { it in attributes }) {
 
-                        val row = ArrayList<String>()
+                        details.attributes = attributes
 
-                        attributes.forEach { attr ->
-                            row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
+                        val unitAttributes = ArrayList<List<String>>()
+                        units.forEach { unit ->
+
+                            val row = ArrayList<String>()
+
+                            attributes.forEach { attr ->
+                                if (attr != geoCoordinateColumnName) {
+                                    row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
+                                }
+                            }
+
+                            //add geo json as json string
+                            if (geoCoordinateColumnName in attributes) {
+                                unit.observationUnitPosition?.geoCoordinates?.let { coordString ->
+                                    try {
+                                        row.add(JSON().serialize(coordString))
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "Failed to serialize geo coordinates", e)
+                                    }
+                                }
+                            }
+
+                            unitAttributes.add(row)
+
                         }
 
-                        unitAttributes.add(row)
+                        details.values = mutableListOf()
+                        details.values.addAll(unitAttributes)
 
+                        brapiService.saveStudyDetails(
+                            details,
+                            level,
+                            primaryId,
+                            secondaryId,
+                            sortId,
+                        )
+                    } else {
+
+                        runOnUiThread {
+
+                            Toast.makeText(this, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
+                            setResult(Activity.RESULT_CANCELED)
+                            finish()
+                        }
                     }
-
-                    details.values = mutableListOf()
-                    details.values.addAll(unitAttributes)
-
-                    brapiService.saveStudyDetails(
-                        details,
-                        level,
-                        primaryId,
-                        secondaryId,
-                        sortOrder,
-                    )
                 }
         }
 
@@ -865,5 +921,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     }
                 }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancel()
     }
 }

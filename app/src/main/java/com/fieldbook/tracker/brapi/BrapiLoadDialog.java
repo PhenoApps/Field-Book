@@ -327,7 +327,10 @@ public class BrapiLoadDialog extends DialogFragment {
             primary.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
-                    selectedPrimary = studyDetails.getAttributes().get(index);
+                    List<String> attrs = studyDetails.getAttributes();
+                    if (attrs != null && !attrs.isEmpty() && index < attrs.size()) {
+                        selectedPrimary = attrs.get(index);
+                    }
                 }
 
                 @Override
@@ -341,7 +344,10 @@ public class BrapiLoadDialog extends DialogFragment {
             secondary.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
-                    selectedSecondary = studyDetails.getAttributes().get(index);
+                    List<String> attrs = studyDetails.getAttributes();
+                    if (attrs != null && !attrs.isEmpty() && index < attrs.size()) {
+                        selectedSecondary = attrs.get(index);
+                    }
                 }
 
                 @Override
@@ -355,7 +361,10 @@ public class BrapiLoadDialog extends DialogFragment {
             sort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
-                    selectedSort = studyDetails.getAttributes().get(index);
+                    List<String> attrs = studyDetails.getAttributes();
+                    if (attrs != null && !attrs.isEmpty() && index < attrs.size()) {
+                        selectedSort = attrs.get(index);
+                    }
                 }
 
                 @Override

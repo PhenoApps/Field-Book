@@ -44,7 +44,7 @@
         app:iconSpaceReserved="false">
 
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:icon="@drawable/ic_pref_brapi_server"
             android:key="com.tracker.fieldbook.preferences.keys.enable_enhanced_brapi_import"
             android:summary="@string/pref_alpha_enhanced_brapi_import_summary"

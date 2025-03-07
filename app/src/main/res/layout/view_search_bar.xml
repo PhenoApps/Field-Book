@@ -47,7 +47,6 @@
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/searchpreference_clear"
             android:padding="4dp"
-            android:visibility="gone"
             app:srcCompat="@drawable/searchpreference_ic_clear"
             app:tint="?android:attr/textColorPrimary" />
 
