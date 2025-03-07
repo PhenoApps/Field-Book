@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/crop_top_handle"
+        android:layout_width="@dimen/crop_handle_size"
+        android:layout_height="@dimen/crop_handle_size"
+        android:contentDescription="TODO"
+        android:src="@drawable/crop_handle"
+        app:layout_constraintStart_toStartOf="@id/crop_image_iv"
+        app:layout_constraintEnd_toEndOf="@id/crop_image_iv"
+        app:layout_constraintTop_toTopOf="@id/crop_image_iv"
+        app:layout_constraintBottom_toTopOf="@id/crop_image_iv"
+        android:elevation="2dp"/>
+
+    <ImageView
+        android:id="@+id/crop_bottom_handle"
+        android:layout_width="@dimen/crop_handle_size"
+        android:layout_height="@dimen/crop_handle_size"
+        android:contentDescription="TODO"
+        android:src="@drawable/crop_handle"
+        app:layout_constraintTop_toBottomOf="@id/crop_image_iv"
+        app:layout_constraintStart_toStartOf="@id/crop_image_iv"
+        app:layout_constraintEnd_toEndOf="@id/crop_image_iv"
+        app:layout_constraintBottom_toBottomOf="@id/crop_image_iv"
+        android:elevation="2dp"/>
+
+    <ImageView
+        android:id="@+id/crop_start_handle"
+        android:layout_width="@dimen/crop_handle_size"
+        android:layout_height="@dimen/crop_handle_size"
+        android:contentDescription="TODO"
+        android:src="@drawable/crop_handle"
+        app:layout_constraintEnd_toStartOf="@id/crop_image_iv"
+        app:layout_constraintStart_toStartOf="@id/crop_image_iv"
+        app:layout_constraintTop_toTopOf="@id/crop_image_iv"
+        app:layout_constraintBottom_toBottomOf="@id/crop_image_iv"
+        android:elevation="2dp"/>
+
+    <ImageView
+        android:id="@+id/crop_end_handle"
+        android:layout_width="@dimen/crop_handle_size"
+        android:layout_height="@dimen/crop_handle_size"
+        android:contentDescription="TODO"
+        android:src="@drawable/crop_handle"
+        app:layout_constraintStart_toEndOf="@id/crop_image_iv"
+        app:layout_constraintEnd_toEndOf="@id/crop_image_iv"
+        app:layout_constraintBottom_toBottomOf="@id/crop_image_iv"
+        app:layout_constraintTop_toTopOf="@id/crop_image_iv"
+        android:elevation="2dp"/>
+
+    <ImageView
+        android:id="@+id/crop_mid_handle"
+        android:layout_width="@dimen/crop_handle_size"
+        android:layout_height="@dimen/crop_handle_size"
+        android:contentDescription="TODO"
+        android:src="@drawable/crop_handle"
+        app:layout_constraintStart_toStartOf="@id/crop_image_iv"
+        app:layout_constraintEnd_toEndOf="@id/crop_image_iv"
+        app:layout_constraintBottom_toBottomOf="@id/crop_image_iv"
+        app:layout_constraintTop_toTopOf="@id/crop_image_iv"
+        android:elevation="1dp"/>
+
+    <com.fieldbook.tracker.views.OverlayImageView
+        android:layout_width="@dimen/crop_image_portrait_width"
+        android:layout_height="@dimen/crop_image_portrait_height"
+        android:adjustViewBounds="true"
+        android:cropToPadding="true"
+        android:scaleType="centerCrop"
+        android:id="@+id/crop_image_iv"
+        tools:src="@raw/chip"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.33"
+        app:layout_constraintDimensionRatio="4:3"/>
+
+    <RelativeLayout
+        android:id="@+id/crop_image_rl"
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/cell"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline"
+        app:layout_constraintTop_toBottomOf="@id/crop_image_iv">
+
+        <EditText
+            style="@style/CropEditTextStyle"
+            android:layout_margin="16dp"
+            android:id="@+id/crop_image_tv"
+            android:inputType="text"
+            android:text=""
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:imeOptions="actionDone"
+            android:maxLines="1"
+            android:hint="(tl_x, tl_y, br_x, br_y)"/>
+
+    </RelativeLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.75"/>
+
+    <ImageButton
+        android:id="@+id/crop_copy_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="TODO"
+        android:scaleType="fitXY"
+        android:background="@drawable/cell"
+        android:src="@drawable/content_copy"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/crop_image_rl"/>
+
+    <ImageButton
+        android:layout_marginStart="8dp"
+        android:id="@+id/crop_expand_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="TODO"
+        android:scaleType="fitXY"
+        android:background="@drawable/cell"
+        android:src="@drawable/arrow_expand"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/crop_copy_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/crop_image_rl"/>
+
+    <ImageButton
+        android:id="@+id/crop_reset_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="TODO"
+        android:background="@drawable/cell"
+        android:scaleType="fitXY"
+        android:src="@drawable/undo_variant"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/crop_copy_btn"
+        app:layout_constraintBottom_toBottomOf="@id/crop_image_rl"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_margin="16dp"
+        android:id="@+id/crop_save_btn"
+        android:layout_width="0dp"
+        android:layout_height="?actionBarSize"
+        android:contentDescription="TODO"
+        android:text="Save"
+        android:textColor="@color/BLACK"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="1"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

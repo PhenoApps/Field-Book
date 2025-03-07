@@ -70,34 +70,40 @@ public class GPSTracker extends Service implements LocationListener {
 
                 // First get location from Network Provider
                 if (isNetworkEnabled) {
-                    locationManager.requestLocationUpdates(
-                            LocationManager.NETWORK_PROVIDER,
-                            minTime,
-                            minDistance, this);
-                    Log.d("Network", "Network");
+
                     if (locationManager != null) {
+
+                        locationManager.requestLocationUpdates(
+                                LocationManager.NETWORK_PROVIDER,
+                                minTime,
+                                minDistance, this);
+
                         location = locationManager
                                 .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                         if (location != null) {
                             latitude = location.getLatitude();
                             longitude = location.getLongitude();
+                            onLocationChanged(location);
                         }
                     }
 
                     // if GPS Enabled get lat/long using GPS Services
                     if (isGPSEnabled) {
                         if (location == null) {
-                            locationManager.requestLocationUpdates(
-                                    LocationManager.GPS_PROVIDER,
-                                    minTime,
-                                    minDistance, this);
-                            Log.d("GPS Enabled", "GPS Enabled");
                             if (locationManager != null) {
+
+                                locationManager.requestLocationUpdates(
+                                        LocationManager.GPS_PROVIDER,
+                                        minTime,
+                                        minDistance, this);
+
                                 location = locationManager
                                         .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
                                 if (location != null) {
                                     latitude = location.getLatitude();
                                     longitude = location.getLongitude();
+                                    onLocationChanged(location);
                                 }
                             }
                         }
@@ -106,7 +112,9 @@ public class GPSTracker extends Service implements LocationListener {
             }
 
         } catch (Exception e) {
+
             e.printStackTrace();
+
         }
 
         return location;
