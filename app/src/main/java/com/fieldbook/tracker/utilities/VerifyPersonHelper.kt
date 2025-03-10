@@ -8,6 +8,7 @@ import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
 
@@ -28,7 +29,7 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
         val systemTime = System.nanoTime()
 
         //number of hours to wait before asking for user, pref found in profile
-        val interval = when (preferences.getString(GeneralKeys.VERIFICATION_INTERVAL, "2")) {
+        val interval = when (preferences.getString(PreferenceKeys.VERIFICATION_INTERVAL, "2")) {
             "0" -> 0
             "1" -> 12
             "2" -> 24

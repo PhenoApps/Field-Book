@@ -27,6 +27,7 @@ import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -85,9 +86,9 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     }
 
     fun export() {
-        val exporter = preferences.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "")
+        val exporter = preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "")
 
-        if (!allFieldsBrAPI() || exporter == "local" || !preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+        if (!allFieldsBrAPI() || exporter == "local" || !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
             // use local export if any fields aren't all brapi, if brapi is disabled, or if local pref is set
             exportPermission()
         } else if (exporter == "brapi") {
@@ -139,7 +140,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
         val exportArray = arrayOf(
             context.getString(R.string.export_source_local),
-            preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.brapi_edit_display_name_default))
+            preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.brapi_edit_display_name_default))
         )
 
         val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
@@ -309,7 +310,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val positiveButton: Button = saveDialog.getButton(AlertDialog.BUTTON_POSITIVE)
         positiveButton.setOnClickListener {
 
-            val repeatedMeasuresEnabled = preferences.getBoolean(GeneralKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
+            val repeatedMeasuresEnabled = preferences.getBoolean(PreferenceKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
 
             //show a warning if table is selected and repeated measures is enabled
             if (checkTable.isChecked && repeatedMeasuresEnabled) {
@@ -628,7 +629,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
      * Scan file to update file list and share exported file
      */
     private fun shareFile(docFile: DocumentFile) {
-        if (preferences.getBoolean(GeneralKeys.ENABLE_SHARE, true)) {
+        if (preferences.getBoolean(PreferenceKeys.ENABLE_SHARE, true)) {
             val intent = Intent()
             intent.action = Intent.ACTION_SEND
             intent.type = "text/plain"

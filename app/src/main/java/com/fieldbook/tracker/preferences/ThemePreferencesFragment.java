@@ -41,9 +41,9 @@ public class ThemePreferencesFragment extends PreferenceFragmentCompat implement
                     getContext().getTheme().resolveAttribute(R.attr.fb_value_saved_color, value, true);
 
                     preferences.edit()
-                            .putInt(GeneralKeys.SAVED_DATA_COLOR, value.data)
-                            .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
-                            .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
+                            .putInt(PreferenceKeys.SAVED_DATA_COLOR, value.data)
+                            .putString(PreferenceKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
+                            .putString(PreferenceKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
                             .apply();
 
                     refreshTheme();
@@ -57,7 +57,7 @@ public class ThemePreferencesFragment extends PreferenceFragmentCompat implement
         /*
          * When theme is updated, save it to preferences.
          */
-        Preference textPref = findPreference(GeneralKeys.TEXT_THEME);
+        Preference textPref = findPreference(PreferenceKeys.TEXT_THEME);
         if (textPref != null) {
             textPref.setOnPreferenceChangeListener((pref, value) -> {
 
@@ -68,7 +68,7 @@ public class ThemePreferencesFragment extends PreferenceFragmentCompat implement
             });
         }
 
-        Preference themePref = findPreference(GeneralKeys.THEME);
+        Preference themePref = findPreference(PreferenceKeys.THEME);
         if (themePref != null) {
             themePref.setOnPreferenceChangeListener((pref, value) -> {
 

@@ -23,6 +23,7 @@ import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.CategoryJsonUtil.Companion.decode
 import com.fieldbook.tracker.utilities.Utils
@@ -201,7 +202,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
 
-        val showLabel = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") == "value"
+        val showLabel = preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value") == "value"
 
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
@@ -437,7 +438,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
     private fun decodeValue(value: String): String {
 
         val labelValPref: String =
-            preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") ?: "value"
+            preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value") ?: "value"
         val scale = decode(
             value
         )

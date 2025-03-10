@@ -17,6 +17,7 @@ import com.fieldbook.tracker.adapters.SummaryAdapter
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.google.gson.JsonParseException
 import dagger.hilt.android.AndroidEntryPoint
@@ -181,7 +182,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
                                         //read the preferences, default to displaying values instead of labels
                                         val labelValPref: String =
                                             PreferenceManager.getDefaultSharedPreferences(act)
-                                                .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value")
+                                                .getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value")
                                                 ?: "value"
 
                                         value = CategoryJsonUtil.flattenMultiCategoryValue(

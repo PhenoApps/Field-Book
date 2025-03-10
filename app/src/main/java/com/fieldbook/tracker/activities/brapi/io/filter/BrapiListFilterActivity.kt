@@ -26,6 +26,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.android.material.chip.Chip
@@ -263,7 +264,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         val modelCache = arrayListOf<BrAPIStudy>()
 
-        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
         (brapiService as BrAPIServiceV2).studyService.fetchAll(
             StudyQueryParams().also {
@@ -307,7 +308,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     private suspend fun queryTrials() = async(Dispatchers.IO) {
 
-        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
         (brapiService as BrAPIServiceV2).trialService.fetchAll(
             TrialQueryParams().also {
