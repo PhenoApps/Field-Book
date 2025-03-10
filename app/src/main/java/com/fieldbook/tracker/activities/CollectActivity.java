@@ -983,9 +983,9 @@ public class CollectActivity extends ThemedActivity
                 }
             }
 
-            // If we didn't find it in the current field, try the cross-field search
+            // Check other fields if we didn't find it in the current field
             Log.d("Field Book", "Not found in current field, trying other fields");
-            return performCrossFallbackSearch(data);
+            return searchAcrossAllFields(data);
         }
 
         if (!command.equals("quickgoto") && !command.equals("barcode"))
@@ -999,8 +999,8 @@ public class CollectActivity extends ThemedActivity
      * @param searchValue The barcode or search value to find
      * @return true if found in another field, false otherwise
      */
-    private boolean performCrossFallbackSearch(String searchValue) {
-        Log.d("Field Book", "Starting cross-field fallback search for: " + searchValue);
+    private boolean searchAcrossAllFields(String searchValue) {
+        Log.d("Field Book", "Searching across all fields for: " + searchValue);
 
         boolean found = false;
         FieldObject studyObj = null;
