@@ -168,6 +168,7 @@
     <string name="database_reset_warning1">በመለሶ ማስተካከል ጊዜ መረጃ ልጠፋ ይችላል፤ ይሁን?</string>
     <string name="database_reset_warning2">ይህ ዉሳኔ አይቀየርም፤ መሳሪያው የመራጃ ማህደሩን ካጸዳ ብሃላ መስራት ይትዋል፤ ቢሆንም ለመቀጠል ትፈልጋለህ?</string>
     <string name="database_reset_message">የመረጃ ማህደሩ ጠፍትዋል</string>
+    <string name="preferences_storage_settings_title">የረቀቃ አዘጋጃጀት</string>
     <!-- Experimental -->
     <!-- STATISTICS -->
     <string name="stat_title_fields">ቦታዎች</string>

@@ -8,6 +8,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v6.0.8] - 2025-02-24
+
+### Added
+
+### Changed
+
+### Fixed
+- Preferences are now correctly imported from database zip files
+- BrAPI authorization fix for specific devices (https://github.com/PhenoApps/Field-Book/pull/1163)
+
+## [v6.0.7] - 2025-02-20
+
+### Added
+- Access full add field menu via long-press (https://github.com/PhenoApps/Field-Book/pull/1149)
+- geo_coordinates are now pulled in via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1149)
+
+### Changed
+
+### Fixed
+- Replaced ffmpeg library with local version (https://github.com/PhenoApps/Field-Book/pull/1166)
+- Numerous bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1149)
+
+## [v6.0.6] - 2025-01-24
+
+### Fixed
+- Numerous bug fixes and enhancements 
+
+## [v6.0.5] - 2025-01-22
+
+### Added
+- Search box added to field list (https://github.com/PhenoApps/Field-Book/pull/1125)
+
+### Changed
+- BrAPI export no longer crashes when authentication token is expired (https://github.com/PhenoApps/Field-Book/pull/1134)
+
+### Fixed
+- Numerous bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1135)
+
+## [v6.0.3] - 2025-01-06
+
+### Added
+
+### Changed
+- Swap navigation now changes position of entry/trait navigation instead of only behavior (https://github.com/PhenoApps/Field-Book/pull/1123)
+
+### Fixed
+- Improved warnings for missing or corrupted storage directory (https://github.com/PhenoApps/Field-Book/pull/1122)
+- Barcodes scanned for data entry are now correctly checked for valid values (https://github.com/PhenoApps/Field-Book/pull/1110)
+- Percent traits imported via BrAPI without min and max values default to 0/100 (https://github.com/PhenoApps/Field-Book/pull/1127)
+
+## [v6.0.2] - 2024-12-16
+
+### Added
+- Trial name included in BrAPI import and field details page (https://github.com/PhenoApps/Field-Book/pull/1121)
+- Image EXIF tag metadata includes the device pitch, roll, and yaw at the time of capture (https://github.com/PhenoApps/Field-Book/pull/1115)
+- Setting added to reset preferences to default (https://github.com/PhenoApps/Field-Book/pull/1118)
+
+### Changed
+- Fields with different BrAPI study IDs can now have the same name (https://github.com/PhenoApps/Field-Book/pull/1095)
+
+### Fixed
+- Min and max values now correctly saved for BrAPI traits (https://github.com/PhenoApps/Field-Book/pull/1103)
+- Label print observations are now assigned to the correct entry when navigating before the print is complete (https://github.com/PhenoApps/Field-Book/pull/1109)
+- Improved database export messaging (https://github.com/PhenoApps/Field-Book/pull/1112)
+- Go to ID dialog now has cursor focus when opened (https://github.com/PhenoApps/Field-Book/pull/1108)
+
+## [v6.0.1] - 2024-12-09
+
+### Added
 - Accession number now included for germplasm imported via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1093)
 - Option added at trait creation to keep keyboard closed when navigating to text traits (https://github.com/PhenoApps/Field-Book/pull/1102)
 - Proximity check added to disable GeoNav when away from field (https://github.com/PhenoApps/Field-Book/pull/1098)
@@ -524,3 +598,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v5.6.26]: https://github.com/PhenoApps/Field-Book/releases/tag/5.6.26
 
 [v6.0.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.0
+
+[v6.0.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.1
+[v6.0.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.2
+[v6.0.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.3
+[v6.0.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.4
+
+[v6.0.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.3
+[v6.0.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.4
+
+[v6.0.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.5
+[v6.0.6]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.6
+
+[v6.0.7]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.7
+
+[v6.0.8]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.8

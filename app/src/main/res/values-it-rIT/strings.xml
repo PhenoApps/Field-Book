@@ -14,17 +14,38 @@
     <string name="dialog_import">Importa</string>
     <string name="dialog_warning">Attenzione</string>
     <string name="dialog_save">Salva</string>
+    <string name="dialog_go">Vai</string>
+    <string name="dialog_save_error_title">Errore durante il salvataggio</string>
+    <string name="dialog_back">Indietro</string>
+    <string name="dialog_scan">Scansiona</string>
+    <string name="dialog_sort_by">Ordina Per</string>
+    <string name="dialog_enable">Abilita</string>
     <string name="dialog_delete">Cancella</string>
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dati di prova</string>
     <string name="startup_sample_data_message">Vuoi caricare i dati di prova forniti?</string>
     <!-- App Intro -->
+    <string name="app_intro_intro_title_slide1">Benvenuto su Field Book!</string>
+    <string name="app_intro_intro_summary_slide1">Tradizionalmente la raccolta dei dati in campo si basa sull\'utilizzo e sulla trascrizione da carta e matita. Field Book è stato creato come soluzione digitale per la raccolta dei dati, permettendo una maggiore velocità e una migliore integrità dei dati.</string>
+    <string name="app_intro_intro_title_slide2">Funzionalità e Personalizzazione</string>
+    <string name="app_intro_intro_summary_slide2">I dati vengono inseriti su Field Book con impaginazioni dei tratti che sono progettate per semplificare l\'inserimento dei dati e minimizzare gli errori. \n\n Per impostazione predefinita, i dati raccolti vengono archiviati localmente, ma Field Book supporta la Breeding-API che permette l\'invio di dati a sistemi compatibili con BrAPI.</string>
+    <string name="app_intro_required_setup_title">Impostazione Richiesta</string>
+    <string name="app_intro_required_setup_summary">Per iniziare a usare Field Book, concedi i permessi necessari all\'applicazione e scegli una cartella in cui salvare i tuoi dati.</string>
+    <string name="app_intro_permissions_title">Permessi</string>
+    <string name="app_intro_permissions_warning">Si prega di concedere le autorizzazioni necessarie</string>
+    <string name="app_intro_storage_title">Scegli lo spazio di archiviazione</string>
+    <string name="app_intro_storage_summary">Scegli una cartella dove memorizzare i tuoi dati.</string>
+    <string name="app_intro_storage_warning">Imposta la posizione di archiviazione</string>
+    <string name="app_intro_required_optional_title">Configurazione Facoltativa</string>
+    <string name="app_intro_required_optional_summary">Queste configurazioni facoltative personalizzano Field Book e possono essere regolate nelle impostazioni.</string>
+    <string name="app_intro_tutorial_title">Guida</string>
     <!-- Storage Definer -->
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_storage_export">L\'esportazione dei dati richiede l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_trait_features">La raccolta dei dati richiede l\'accesso ai file, al microfono e alla camera del dispositivo.</string>
+    <string name="permission_ask_bluetooth">Accetta i permessi bluetooth.</string>
     <!-- Config Activity  -->
     <string name="settings_fields">Campi</string>
     <string name="settings_traits">Caratteri</string>
@@ -32,6 +53,7 @@
     <string name="settings_export">Esporta</string>
     <string name="settings_advanced">Impostazioni</string>
     <string name="settings_profile">Profilo</string>
+    <string name="settings_statistics">Statistiche</string>
     <!-- Config Activity Fuzzy Search  -->
     <!-- File manager  -->
     <string name="import_source_local">Memoria locale</string>
@@ -46,14 +68,18 @@
     <string name="changelog_title">Diario di modifiche</string>
     <!-- FIELDS -->
     <!-- General -->
+    <string name="fields_select_all">Seleziona Tutto</string>
     <!-- Sort -->
     <!-- Modify -->
+    <string name="fields_rename_study">Rinomina</string>
     <string name="fields_export">Esporta</string>
+    <string name="fields_archive">Archivio</string>
     <!-- Delete -->
     <string name="fields_delete">Cancella</string>
     <string name="fields_delete_study">Cancella campo</string>
     <string name="fields_delete_study_confirmation">Sei sicuro di voler cancellare questo campo? Verranno cancellati anche tutti i dati associati a questo campo.</string>
     <!-- Import -->
+    <string name="fields_new_create_field">Crea nuovo</string>
     <string name="import_dialog_unique">Identificatore unico</string>
     <string name="import_dialog_primary">Ordine primario</string>
     <string name="import_dialog_secondary">Ordine secondario</string>
@@ -230,6 +256,9 @@
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
     <!-- Location -->
     <string name="preferences_location_title">Posizione</string>
+    <string name="location_format_iso">ISO 6709</string>
+    <string name="location_format_geojson">GeoJSON</string>
+    <string name="pref_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_log_both">Ambo</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Suoni</string>
@@ -238,6 +267,7 @@
     <string name="database_reset_warning1">Tutti i dati saranno cancellati. Sei sicuro di voler ripristinare il database?</string>
     <string name="database_reset_warning2">Un database cancellato non potrà essere ripristinato. L\'applicazione si chiuderà subito dopo. Sei sicuro di voler continuare?</string>
     <string name="database_reset_message">Il database è stato cancellato</string>
+    <string name="preferences_storage_settings_title">Impostazioni</string>
     <!-- Experimental -->
     <!-- STATISTICS -->
     <string name="stat_title_fields">Campi</string>
@@ -264,6 +294,34 @@
     <string name="brapi_choice_to_make_default_negative">Cancella</string>
     <string name="brapi_choice_to_make_default_positive">Salva</string>
     <!-- Community Servers -->
+    <string-array name="community_servers_names">
+        <item>CassavaBase</item>
+        <item>T3/Wheat</item>
+        <item>T3/Oat</item>
+        <item>T3/Barley</item>
+        <item>Server Di Test Predefinito</item>
+    </string-array>
+    <string-array name="community_servers_urls">
+        <item>https://www.cassavabase.org</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org</item>
+        <item>https://test-server.brapi.org</item>
+    </string-array>
+    <string-array name="community_servers_oidc_urls">
+        <item>https://www.cassavabase.org/.well-known/openid-configuration</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
+    </string-array>
+    <string-array name="community_servers_grant_types">
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+    </string-array>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Salva e autorizza</string>
     <string name="brapi_revoke_auth">Disconnettersi</string>
@@ -382,6 +440,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_traits_visibility_title">Visibilità del carettere</string>
     <string name="tutorial_traits_visibility_description">I caretteri possono essere disabilitati dalla raccolta selezionando la casella di controllo.</string>
     <string name="tutorial_main_datagrid_title">Griglia di dati</string>
+    <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="act_brapi_filter_import">Importa</string>
     <string name="act_brapi_filter_clear">Cancellare</string>
     <!-- base camera strings -->

@@ -2198,22 +2198,11 @@ public class DataHelper {
 
         open();
 
-        //TODO add optional cascade delete
-        StudyDao.Companion.deleteField(studyId);
-//        db.execSQL("DELETE FROM studies WHERE internal_id_study = " + exp_id);
-//        db.execSQL("DELETE FROM observation_units WHERE study_db_id = " + exp_id);
-//        db.execSQL("DELETE FROM observation_units_attributes WHERE study_db_id = " + exp_id);
-//        db.execSQL("DELETE FROM observation_units_values WHERE study_db_id = " + exp_id);
-//        db.execSQL("DELETE FROM observations WHERE study_db_id = " + exp_id);
-
-//        db.execSQL("DELETE FROM " + EXP_INDEX + " WHERE exp_id = " + exp_id);
-//        db.execSQL("DELETE FROM " + PLOTS + " WHERE exp_id = " + exp_id);
-//        db.execSQL("DELETE FROM " + PLOT_ATTRIBUTES + " WHERE exp_id = " + exp_id);
-//        db.execSQL("DELETE FROM " + PLOT_VALUES + " WHERE exp_id = " + exp_id);
-//        db.execSQL("DELETE FROM " + USER_TRAITS + " WHERE exp_id = " + exp_id);
-
-        resetSummaryLabels(studyId);
-        deleteFieldSortOrder(studyId);
+        if (studyId >= 0) {
+            StudyDao.Companion.deleteField(studyId);
+            resetSummaryLabels(studyId);
+            deleteFieldSortOrder(studyId);
+        }
     }
 
     private void resetSummaryLabels(int studyId) {
@@ -2311,19 +2300,19 @@ public class DataHelper {
 //        return -1;
     }
 
-    public int checkFieldNameAndObsLvl(String name, String observationLevel) {
+    public int checkBrapiStudyUnique(String observationLevel, String brapiId) {
 
         open();
 
-        return StudyDao.Companion.checkFieldNameAndObsLvl(name, observationLevel);
+        return StudyDao.Companion.checkBrapiStudyUnique(observationLevel, brapiId);
     }
 
-    public int createField(FieldObject e, List<String> columns) {
+    public int createField(FieldObject e, List<String> columns, Boolean fromBrapi) {
         // String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns){
 
         open();
 
-        return StudyDao.Companion.createField(e, timeStamp.format(Calendar.getInstance().getTime()), columns);
+        return StudyDao.Companion.createField(e, timeStamp.format(Calendar.getInstance().getTime()), columns, fromBrapi);
 
 //        long exp_id = checkFieldName(e.getExp_name());
 //        if (exp_id != -1) {

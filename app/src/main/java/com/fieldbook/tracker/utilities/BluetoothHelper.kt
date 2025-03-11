@@ -1,23 +1,13 @@
 package com.fieldbook.tracker.utilities
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
-import android.net.wifi.WifiManager
-import android.net.wifi.WifiNetworkSpecifier
-import android.os.Build
-import android.os.PatternMatcher
 import android.util.Log
-import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.phenoapps.fragments.gopro.GoProHelper
+import com.fieldbook.tracker.devices.camera.gopro.GoProHelper
 import javax.inject.Inject
 
 class BluetoothHelper @Inject constructor(@ApplicationContext private val context: Context) {

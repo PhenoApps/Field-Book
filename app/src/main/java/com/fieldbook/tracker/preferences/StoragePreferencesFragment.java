@@ -19,7 +19,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.ListPreference;
@@ -104,12 +106,16 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
         Preference databaseDelete = findPreference("pref_database_delete");
 
         databaseImport.setOnPreferenceClickListener(preference -> {
-            importDatabaseFilePermission();
+            if (checkDirectory()) {
+                importDatabaseFilePermission();
+            }
             return true;
         });
 
         databaseExport.setOnPreferenceClickListener(preference -> {
-            exportDatabaseFilePermission();
+            if (checkDirectory()) {
+                exportDatabaseFilePermission();
+            }
             return true;
         });
 
@@ -117,6 +123,18 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
             showDatabaseResetDialog1();
             return true;
         });
+    }
+
+    @NonNull
+    private Boolean checkDirectory() {
+        if (BaseDocumentTreeUtil.Companion.getRoot(context) != null
+                && BaseDocumentTreeUtil.Companion.isEnabled(context)
+                && BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_database) != null) {
+            return true;
+        } else {
+            Toast.makeText(context, R.string.error_storage_directory, Toast.LENGTH_LONG).show();
+            return false;
+        }
     }
 
     @Override
@@ -204,7 +222,9 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
 
                 try {
                     database.importDatabase(file); // (handles both .db and .zip)
-                    clearPreferences();
+                    if (file.getName().endsWith(".db")){
+                        clearPreferences();
+                    }
 
                     if (file.getName().equals("sample_db.zip") || file.getName().equals("sample.db")) {
                         selectFirstField();
@@ -328,14 +348,19 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
                         ZipUtil.Companion.zip(context,
                                 new DocumentFile[]{DocumentFile.fromFile(new File(dbPath)), tempOutput},
                                 zipOutput);
-                        new FileUtil().shareFile(context, preferences, zipFile);
+                        FileUtil.shareFile(context, preferences, zipFile);
                         if (tempOutput != null && !tempOutput.delete()) {
                             throw new IOException();
                         }
                     } catch (IOException e) {
+                        fail = true;
                         e.printStackTrace();
                     }
+                } else {
+                    fail = true;
                 }
+            } else {
+                fail = true;
             }
             return 0;
         }

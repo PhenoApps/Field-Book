@@ -1,5 +1,8 @@
 package com.fieldbook.tracker.traits;
 
+import static com.fieldbook.tracker.traits.NumericTraitLayout.isOver;
+import static com.fieldbook.tracker.traits.NumericTraitLayout.isUnder;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -8,10 +11,15 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.traits.formats.Formats;
+import com.fieldbook.tracker.traits.formats.Scannable;
+import com.fieldbook.tracker.traits.formats.TraitFormat;
 
 public class PercentTraitLayout extends BaseTraitLayout {
     private SeekBar seekBar;
@@ -131,7 +139,7 @@ public class PercentTraitLayout extends BaseTraitLayout {
                 getCollectInputView().setText("NA");
                 getSeekBar().setProgress(0);
             } else if (!model.getValue().isEmpty()) {
-                getSeekBar().setProgress(Integer.parseInt(model.getValue()));
+                setSeekBarProgress(model.getValue());
             } else {
                 super.refreshLayout(onNew);
             }
@@ -144,13 +152,15 @@ public class PercentTraitLayout extends BaseTraitLayout {
 
         if (value != null && !value.equals("NA") && !value.isEmpty()) {
 
-            seekBar.setMax(Integer.parseInt(getCurrentTrait().getMaximum()));
+            // Default to max 100 if maximum is not set
+            String maxString = getCurrentTrait().getMaximum();
+            setSeekBarMax(maxString);
 
             int textColor = value.equals(getDefaultValue()) ? Color.BLACK : Color.parseColor(getDisplayColor());
             setCurrentValueText(value, textColor);
 
             seekBar.setOnSeekBarChangeListener(null);
-            seekBar.setProgress(Integer.parseInt(value));
+            setSeekBarProgress(value);
             seekBar.setOnSeekBarChangeListener(seekListener);
 
         } else if (value != null && value.equals("NA")) {
@@ -184,13 +194,24 @@ public class PercentTraitLayout extends BaseTraitLayout {
         }
     }
 
+    @NonNull
+    @Override
+    public Boolean validate(String data) {
+        try {
+            TraitObject trait = getCurrentTrait();
+            return !(isUnder(trait, data) || isOver(trait, data));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private void updateLoadBar() {
         String max = getCurrentTrait().getMaximum();
         if (!max.isEmpty()) {
             seekBar.setMax(Integer.parseInt(max));
         }
         seekBar.setOnSeekBarChangeListener(null);
-        seekBar.setProgress(Integer.parseInt(getDefaultValue()));
+        setSeekBarProgress(getDefaultValue());
         seekBar.setOnSeekBarChangeListener(seekListener);
     }
 
@@ -222,19 +243,46 @@ public class PercentTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        removeTrait(getCurrentTrait().getName());
+        removeTrait(getCurrentTrait());
         super.deleteTraitListener();
         ObservationModel model = getCurrentObservation();
         seekBar.setOnSeekBarChangeListener(null);
         if (model != null) {
             setCurrentValueText(model.getValue(), Color.BLACK);
-            seekBar.setProgress(Integer.parseInt(model.getValue()));
+            setSeekBarProgress(model.getValue());
         } else {
             String defaultValue = getDefaultValue();
             setCurrentValueText(defaultValue, Color.BLACK);
-            seekBar.setProgress(Integer.parseInt(defaultValue));
+            setSeekBarProgress(defaultValue);
         }
 
         seekBar.setOnSeekBarChangeListener(seekListener);
+    }
+
+    private void setSeekBarProgress(String value) {
+
+        ((CollectActivity) controller.getContext()).runOnUiThread(() -> {
+            try {
+                seekBar.setProgress(Integer.parseInt(value));
+                return;
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            seekBar.setProgress(0);
+        });
+    }
+
+    private void setSeekBarMax(String max) {
+        ((CollectActivity) controller.getContext()).runOnUiThread(() -> {
+            try {
+                if (max != null && !max.isEmpty()) {
+                    seekBar.setMax(Integer.parseInt(max));
+                }
+                return;
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            seekBar.setMax(100);
+        });
     }
 }

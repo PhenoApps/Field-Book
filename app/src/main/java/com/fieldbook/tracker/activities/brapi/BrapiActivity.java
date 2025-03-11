@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities.brapi;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -15,9 +16,11 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
+import androidx.fragment.app.FragmentActivity;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.ThemedActivity;
+import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment;
 import com.fieldbook.tracker.brapi.BrapiLoadDialog;
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
@@ -48,6 +51,8 @@ public class BrapiActivity extends ThemedActivity {
     public static final String PROGRAM_DB_ID_INTENT_PARAM = "programDbId";
     private List<BrapiObservationLevel> observationLevels;
     private BrapiObservationLevel selectedObservationLevel;
+
+    private BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
 
     @Override
     public void onDestroy() {
@@ -177,7 +182,9 @@ public class BrapiActivity extends ThemedActivity {
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
                         if(BrAPIService.isConnectionError(code)){
-                            BrAPIService.handleConnectionError(BrapiActivity.this, code);
+                            if (BrAPIService.handleConnectionError(BrapiActivity.this, code)) {
+                                showBrapiAuthDialog();
+                            }
                         }else {
                             Toast.makeText(getApplicationContext(), getString(R.string.brapi_studies_error), Toast.LENGTH_LONG).show();
                         }
@@ -189,6 +196,18 @@ public class BrapiActivity extends ThemedActivity {
 
             }
         });
+    }
+
+    private void showBrapiAuthDialog() {
+        try {
+            runOnUiThread(() -> {
+                if (!brapiAuth.isVisible()) {
+                    brapiAuth.show(getSupportFragmentManager(), "BrapiAuthDialogFragment");
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadObservationLevels() {

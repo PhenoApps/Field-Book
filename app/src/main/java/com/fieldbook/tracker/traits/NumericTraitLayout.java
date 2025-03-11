@@ -3,11 +3,16 @@ package com.fieldbook.tracker.traits;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
+
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -71,7 +76,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
             @Override
             public boolean onLongClick(View v) {
                 getCollectInputView().setText("");
-                removeTrait(getCurrentTrait().getName());
+                removeTrait(getCurrentTrait());
                 return false;
             }
         });
@@ -94,6 +99,67 @@ public class NumericTraitLayout extends BaseTraitLayout {
     public void deleteTraitListener() {
         ((CollectActivity) getContext()).removeTrait();
         super.deleteTraitListener();
+    }
+
+    @NonNull
+    @Override
+    public Boolean validate(String data) {
+
+        TraitObject trait = getCurrentTrait();
+
+        if (isUnder(trait, data) || isOver(trait, data)) {
+
+            getCollectActivity().runOnUiThread(() -> {
+
+                if (isOver(trait, data)) {
+                    Utils.makeToast(controller.getContext(),
+                            controller.getContext().getString(R.string.trait_error_maximum_value)
+                                    + ": " + getCurrentTrait().getMaximum());
+                } else if (isUnder(trait, data)) {
+                    Utils.makeToast(controller.getContext(),
+                            controller.getContext().getString(R.string.trait_error_minimum_value)
+                                    + ": " + getCurrentTrait().getMinimum());
+                }
+            });
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean isUnder(TraitObject trait, final String s) {
+
+        String minimum = trait.getMinimum();
+
+        if (!minimum.isEmpty()) {
+            try {
+                final double v = Double.parseDouble(s);
+                final double lowerValue = Double.parseDouble(minimum);
+                return v < lowerValue;
+            } catch (NumberFormatException e) {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean isOver(TraitObject trait, final String s) {
+
+        String maximum = trait.getMaximum();
+
+        if (!maximum.isEmpty()) {
+            try {
+                final double v = Double.parseDouble(s);
+                final double upperValue = Double.parseDouble(maximum);
+                return v > upperValue;
+            } catch (NumberFormatException e) {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
     private class NumberButtonOnClickListener implements OnClickListener {

@@ -11,6 +11,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
 import androidx.constraintlayout.widget.Group
+import androidx.core.database.getStringOrNull
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.evrencoskun.tableview.TableView
@@ -131,14 +132,13 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
     /**
      * Runs the data grid loading.
      */
-    private fun initialize(prefixTrait: String? = null,
-                           plotId: Int? = null,
+    private fun initialize(plotId: Int? = null,
                            trait: Int? = null) {
 
         //if something goes wrong finish the activity
         try {
 
-            loadGridData(prefixTrait, plotId, trait)
+            loadGridData(plotId, trait)
 
         } catch (e: Exception) {
 
@@ -166,16 +166,21 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
             R.id.menu_data_grid_action_header_view -> {
 
                 //get all available obs. property columns
-                val prefixTraits = database.rangeColumns
+                val columns = database.rangeColumns
 
-                if (prefixTraits.isNotEmpty()) {
+                if (columns.isNotEmpty()) {
+                    val rowHeader = getCurrentRowHeader()
+                    val rowHeaderIndex = columns.indexOf(rowHeader).takeIf { it >= 0 } ?: 0
 
                     //show a dialog to choose a prefix trait to be displayed
                     AlertDialog.Builder(this, R.style.AppAlertDialog)
                         .setTitle(R.string.dialog_data_grid_header_picker_title)
-                        .setSingleChoiceItems(prefixTraits, 0) { dialog, which ->
+                        .setSingleChoiceItems(columns, rowHeaderIndex) { dialog, which ->
 
-                            initialize(prefixTraits[which])
+                            // Update the preference to the determined row header
+                            preferences.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, columns[which]).apply()
+
+                            initialize()
 
                             dialog.dismiss()
 
@@ -191,29 +196,17 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
      * Uses the getExportTableData query to create a spreadsheet of values.
      * Columns returned are plot_id followed by all traits.
      */
-    private fun loadGridData(prefixTrait: String? = null,
-                             plotId: Int? = null,
+    private fun loadGridData(plotId: Int? = null,
                              trait: Int? = null) {
 
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-
-        val study = database.getFieldObject(studyId)
 
         val showLabel = preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") == "value"
 
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
-        //if row header was not chosen, then use the preference unique name
-        var rowHeader =
-            prefixTrait ?: preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader)
-            ?: ""
-
-        if (rowHeader !in database.rangeColumnNames) {
-            rowHeader = uniqueHeader
-        }
-
-        //if rowHeader was updated, update the preference
-        preferences.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, rowHeader).apply()
+        val rowHeader = getCurrentRowHeader()
+        val rowHeaderIndex = database.rangeColumns.indexOf(rowHeader).takeIf { it >= 0 } ?: 0
 
         if (rowHeader.isNotBlank()) {
 
@@ -249,16 +242,27 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                         do { //iterate over cursor results and populate lists of plot ids and related trait values
 
-                            val rowHeaderIndex = cursor.getColumnIndex(rowHeader)
+                            val rowData = arrayListOf<String?>()
+                            val columns = arrayListOf<String>()
+                            val columnCount = cursor.columnCount
+
+                            for (i in 0 until columnCount) {
+                                try {
+                                    columns.add(cursor.getColumnName(i))
+                                    rowData.add(cursor.getStringOrNull(i))
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
 
                             //unique name column is always the first column
-                            val uniqueIndex = cursor.getColumnIndex(study.unique_id)
+                            val uniqueIndex = columns.indexOf(uniqueHeader)
 
                             if (uniqueIndex > -1) { //if it doesn't exist skip this row
 
-                                val id = cursor.getString(uniqueIndex)
+                                val id = rowData[uniqueIndex] ?: ""
 
-                                val header = cursor.getString(rowHeaderIndex)
+                                val header = if (rowHeaderIndex > -1) rowData[rowHeaderIndex] ?: "" else ""
 
                                 val dataList = arrayListOf<CellData>()
 
@@ -268,19 +272,16 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
 
                                 mTraits.forEachIndexed { _, variable ->
 
-                                    val index = cursor.getColumnIndex(variable.name)
+                                    val index = columns.indexOf(DataHelper.replaceIdentifiers(variable.name))
 
                                     if (index > -1) {
 
-                                        val value = cursor.getString(index) ?: ""
+                                        val value = rowData[index] ?: ""
 
                                         val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
 
                                         val repeatedValues =
                                             database.getRepeatedValues(studyId.toString(), id, variable.id)
-                                        if (repeatedValues.size > 1) {
-                                            println("$studyId $id $variable has repeated values...!")
-                                        }
 
                                         var cellValue = value
 
@@ -372,6 +373,23 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITable
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Determines the current row header.
+     * @return The row header as a string.
+     */
+    private fun getCurrentRowHeader(): String {
+        val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+        val rowHeader = preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
+
+        return if (rowHeader in database.rangeColumnNames) {
+            Log.d("DataGridActivity", "Using saved row header from preferences: $rowHeader")
+            rowHeader
+        } else {
+            Log.d("DataGridActivity", "Saved row header invalid. Falling back to unique header: $uniqueHeader")
+            uniqueHeader
         }
     }
 

@@ -129,18 +129,15 @@ public interface BrAPIService {
         return code == 401 || code == 403 || code == 404;
     }
 
-    static void handleConnectionError(Context context, int code) {
+    static boolean handleConnectionError(Context context, int code) {
         ApiErrorCode apiErrorCode = ApiErrorCode.processErrorCode(code);
         String toastMsg;
 
+        boolean returnVal = false;
         switch (apiErrorCode) {
             case UNAUTHORIZED:
-                // Start the login process
-                ((Activity) context).runOnUiThread(() -> {
-                    BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
-                    brapiAuth.show(((FragmentActivity) context).getSupportFragmentManager(), "BrapiAuthDialogFragment");
-                });
                 toastMsg = context.getString(R.string.brapi_auth_deny);
+                returnVal = true;
                 break;
             case FORBIDDEN:
                 toastMsg = context.getString(R.string.brapi_auth_permission_deny);
@@ -155,6 +152,8 @@ public interface BrAPIService {
         ((Activity)context).runOnUiThread(() -> {
             Toast.makeText(context.getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
         });
+
+        return returnVal;
     }
 
     void postImageMetaData(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);

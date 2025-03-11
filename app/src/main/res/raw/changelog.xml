@@ -1,7 +1,69 @@
 <changelog>
 
+    <release date="2025-02-24" versionCode="60008" versionName="v6.0.8">
+        <bugfix>Preferences are now correctly imported from database zip files</bugfix>
+        <bugfix>BrAPI authorization fix for specific devices</bugfix>
+    </release>
+
+    <release date="2025-02-20" versionCode="60007" versionName="v6.0.7">
+        <new>Access full add field menu via long-press</new>
+        <new>geo_coordinates are now pulled in via BrAPI</new>
+        <bugfix>Replaced ffmpeg library with local version</bugfix>
+        <bugfix>Numerous bug fixes and enhancements</bugfix>
+    </release>
+
+    <release date="2025-01-24" versionCode="60006" versionName="v6.0.6">
+        <bugfix>Numerous bug fixes and enhancements </bugfix>
+    </release>
+
+    <release date="2025-01-22" versionCode="60005" versionName="v6.0.5">
+        <new>Search box added to field list</new>
+        <info>BrAPI export no longer crashes when authentication token is expired</info>
+        <bugfix>Numerous bug fixes and enhancements</bugfix>
+    </release>
+
+    <release date="2025-01-06" versionCode="60003" versionName="v6.0.3">
+        <info>Swap navigation now changes position of entry/trait navigation instead of only behavior
+</info>
+        <bugfix>Improved warnings for missing or corrupted storage directory</bugfix>
+        <bugfix>Barcodes scanned for data entry are now correctly checked for valid values</bugfix>
+        <bugfix>Percent traits imported via BrAPI without min and max values default to 0/100
+</bugfix>
+    </release>
+
     <release
-        date="2024-12-01"
+        date="2024-12-16"
+        versionCode="60020"
+        versionName="v6.0.2">
+        <new>Trial name included in BrAPI import and field details page</new>
+        <new>Image EXIF tag metadata includes the device pitch, roll, and yaw at the time of capture</new>
+        <new>Setting added to reset preferences to default</new>
+        <info>Fields with different BrAPI study IDs can now have the same name</info>
+        <bugfix>Min and max values now correctly saved for BrAPI traits</bugfix>
+        <bugfix>Label print observations are now assigned to the correct entry when navigating before the print is complete</bugfix>
+        <bugfix>Improved database export messaging</bugfix>
+        <bugfix>Go to ID dialog now has cursor focus when opened</bugfix>
+    </release>
+
+    <release
+        date="2024-12-09"
+        versionCode="60010"
+        versionName="v6.0.1">
+        <new>Accession number now included for germplasm imported via BrAPI</new>
+        <new>Option added at trait creation to keep keyboard closed when navigating to text traits</new>
+        <new>Proximity check added to disable GeoNav when away from field</new>
+        <new>Experimental setting to use media keys for entry/trait navigation and picture capture</new>
+        <info>Fields and traits that have already been imported are now hidden on the BrAPI import screen</info>
+        <info>Long-pressing delete button on bottom toolbar will remove all observations for that trait</info>
+        <info>Current time now used as lastSyncedTime when downloading Observations via BrAPI</info>
+        <info>lastSyncedTime updated after creating/updating Observations</info>
+        <info>Improved support for BrAPI servers not using https</info>
+        <bugfix>"observation_time_stamp" and "last_synced_time" now correctly saved in DAO</bugfix>
+        <bugfix>Synced and updated records now correctly identified</bugfix>
+    </release>
+
+    <release
+        date="2024-12-02"
         versionCode="60000"
         versionName="v6.0">
         <new>Fields list updated to include bulk actions and individual field pages</new>

@@ -3,6 +3,7 @@ package com.fieldbook.tracker.interfaces
 import android.content.Context
 import android.location.Location
 import android.os.Handler
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.devices.camera.UsbCameraApi
 import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.devices.camera.CanonApi
@@ -12,6 +13,7 @@ import com.fieldbook.tracker.utilities.BluetoothHelper
 import com.fieldbook.tracker.utilities.FfmpegHelper
 import com.fieldbook.tracker.utilities.GeoNavHelper
 import com.fieldbook.tracker.utilities.GnssThreadHelper
+import com.fieldbook.tracker.utilities.SensorHelper
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import com.fieldbook.tracker.utilities.WifiHelper
@@ -58,4 +60,6 @@ interface CollectController: FieldController {
     fun getFfmpegHelper(): FfmpegHelper
     fun getCanonApi(): CanonApi
     fun takePicture()
+    fun getCurrentObservation(): ObservationModel?
+    fun getRotationRelativeToDevice(): SensorHelper.RotationModel?
 }

@@ -138,9 +138,9 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             f.setPrimary_id(primary);
             f.setSecondary_id(secondary);
 
-            studyId = controller.getDatabase().createField(f, nonEmptyColumns);
-
             controller.getDatabase().beginTransaction();
+
+            studyId = controller.getDatabase().createField(f, nonEmptyColumns, false);
 
             //start iterating over all the rows of the csv file only if we found the u/p/s indices
             if (uniqueIndex > -1 && primaryIndex > -1 && secondaryIndex > -1) {

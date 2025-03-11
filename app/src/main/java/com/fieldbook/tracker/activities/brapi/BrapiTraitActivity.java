@@ -16,6 +16,7 @@ import androidx.arch.core.util.Function;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ThemedActivity;
+import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
@@ -38,6 +39,8 @@ public class BrapiTraitActivity extends ThemedActivity {
     private BrAPIService brAPIService;
     private List<TraitObject> selectedTraits;
     private BrapiPaginationManager paginationManager;
+
+    private final BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
 
     @Inject
     DataHelper database;
@@ -188,7 +191,9 @@ public class BrapiTraitActivity extends ThemedActivity {
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
                         if(BrAPIService.isConnectionError(code)){
-                            BrAPIService.handleConnectionError(BrapiTraitActivity.this, code);
+                            if (BrAPIService.handleConnectionError(BrapiTraitActivity.this, code)) {
+                                showBrapiAuthDialog();
+                            }
                         }else {
                             Toast.makeText(getApplicationContext(), getString(R.string.brapi_ontology_error), Toast.LENGTH_LONG).show();
                         }
@@ -199,6 +204,18 @@ public class BrapiTraitActivity extends ThemedActivity {
                 return null;
             }
         });
+    }
+
+    private void showBrapiAuthDialog() {
+        try {
+            runOnUiThread(() -> {
+                if (!brapiAuth.isVisible()) {
+                    brapiAuth.show(getSupportFragmentManager(), "BrapiAuthDialogFragment");
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // Transforms the trait data to display it on the screen.

@@ -34,6 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
@@ -72,6 +73,7 @@ import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.traits.formats.TraitFormat;
 import com.fieldbook.tracker.traits.formats.coders.StringCoder;
+import com.fieldbook.tracker.traits.formats.Scannable;
 import com.fieldbook.tracker.traits.formats.presenters.ValuePresenter;
 import com.fieldbook.tracker.utilities.CameraXFacade;
 import com.fieldbook.tracker.utilities.BluetoothHelper;
@@ -88,6 +90,7 @@ import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.MediaKeyCodeActionHelper;
+import com.fieldbook.tracker.utilities.SensorHelper;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -100,6 +103,8 @@ import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.firebase.crashlytics.CustomKeysAndValues;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.serenegiant.widget.UVCCameraTextureView;
@@ -108,6 +113,7 @@ import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.phenoapps.interfaces.security.SecureBluetooth;
 import org.phenoapps.security.SecureBluetoothActivityImpl;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
+import org.phenoapps.utils.SoftKeyboardUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
@@ -143,7 +149,8 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.interfaces.CollectTraitController,
         InfoBarAdapter.InfoBarController,
         GPSTracker.GPSTrackerListener,
-        SearchDialog.onSearchResultsClickedListener {
+        SearchDialog.onSearchResultsClickedListener,
+        SensorHelper.RelativeRotationListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -152,6 +159,9 @@ public class CollectActivity extends ThemedActivity
     private final HandlerThread gnssRawLogHandlerThread = new HandlerThread("log");
 
     private GeoNavHelper geoNavHelper;
+
+    @Inject
+    SensorHelper sensorHelper;
 
     @Inject
     UsbCameraApi usbCameraApi;
@@ -204,6 +214,9 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     CameraXFacade cameraXFacade;
+
+    //used to track rotation relative to device
+    private SensorHelper.RotationModel rotationModel = null;
 
     private GPSTracker gps;
 
@@ -285,6 +298,8 @@ public class CollectActivity extends ThemedActivity
     private AlertDialog dialogPrecisionLoss;
     private boolean mlkitEnabled;
 
+    private AlertDialog dialogCrashReport;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -333,6 +348,8 @@ public class CollectActivity extends ThemedActivity
             }
             return null;
         });
+
+        sensorHelper.register();
 
         mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
 
@@ -542,6 +559,44 @@ public class CollectActivity extends ThemedActivity
         refreshInfoBarAdapter();
 
         uvcView = findViewById(R.id.collect_activity_uvc_tv);
+
+        handleFlipFlopPreferences();
+    }
+
+    /**
+     * Handles the flip flop preferences for the collect activity.
+     * Change from issue #934:
+     * Originally, the arrow functionalities were switched depending on this preference,
+     * now the whole UI is swapped.
+     */
+    private void handleFlipFlopPreferences() {
+
+        ConstraintLayout layout = findViewById(R.id.layout_main);
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(layout);
+
+        if (preferences.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)) {
+            constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.TOP,
+                    R.id.act_collect_infobar_rv, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.BOTTOM,
+                    R.id.act_collect_trait_box, ConstraintSet.TOP, 0);
+            constraintSet.connect(R.id.act_collect_trait_box, ConstraintSet.TOP,
+                    R.id.act_collect_range_box, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_input_view, ConstraintSet.TOP,
+                    R.id.act_collect_trait_box, ConstraintSet.BOTTOM, 0);
+        } else {
+            constraintSet.connect(R.id.act_collect_trait_box, ConstraintSet.TOP,
+                    R.id.act_collect_infobar_rv, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_trait_box, ConstraintSet.BOTTOM,
+                    R.id.act_collect_range_box, ConstraintSet.TOP, 0);
+            constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.TOP,
+                    R.id.act_collect_trait_box, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.act_collect_input_view, ConstraintSet.TOP,
+                    R.id.act_collect_range_box, ConstraintSet.BOTTOM, 0);
+        }
+
+        constraintSet.applyTo(layout);
     }
 
     //when softkeyboard is displayed, reset the snackbar to redisplay with a calculated bottom margin
@@ -622,31 +677,29 @@ public class CollectActivity extends ThemedActivity
      * @return boolean flag false when data is out of bounds, true otherwise
      */
     @Override
-    public boolean validateData() {
-        final String strValue = collectInputView.getText();
+    public boolean validateData(@Nullable String data) {
         final TraitObject currentTrait = traitBox.getCurrentTrait();
 
         if (currentTrait == null) return false;
 
-        if (strValue.equals("NA")) return true;
+        if (data == null) return true;
 
-        final String trait = currentTrait.getName();
+        if (data.equals("NA")) return true;
 
-        if (traitBox.existsNewTraits()
-                && traitBox.getCurrentTrait() != null
-                && strValue.length() > 0
-                && !traitBox.getCurrentTrait().isValidValue(strValue)) {
+        if (data.isEmpty()) return true;
 
-            //checks if the trait is numerical and within the bounds (otherwise returns false)
-            if (currentTrait.isOver(strValue)) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_maximum_value)
-                        + ": " + currentTrait.getMaximum());
-            } else if (currentTrait.isUnder(strValue)) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_minimum_value)
-                        + ": " + currentTrait.getMinimum());
-            }
+        BaseTraitLayout layout = traitLayouts.getTraitLayout(currentTrait.getFormat());
+        TraitFormat format = Formats.Companion.findTrait(currentTrait.getFormat());
 
-            removeTrait(trait);
+        String value = data;
+        if (format instanceof Scannable) {
+            value = ((Scannable) format).preprocess(data);
+        }
+
+        if (!layout.validate(value)) {
+
+            removeTrait(currentTrait);
+
             collectInputView.clear();
 
             soundHelper.playError();
@@ -720,7 +773,7 @@ public class CollectActivity extends ThemedActivity
             // if a brapi observation that has been synced, don't allow deleting
             String format = getTraitFormat();
             if (status && !Formats.Companion.isCameraTrait(format)) {
-                brapiDelete(getTraitName(), false);
+                brapiDelete(getCurrentTrait(), false);
             } else {
                 traitLayouts.deleteTraitListener(getTraitFormat());
             }
@@ -1012,6 +1065,8 @@ public class CollectActivity extends ThemedActivity
 
         bluetoothHelper.onDestroy();
 
+        sensorHelper.unregister();
+
         super.onDestroy();
     }
 
@@ -1249,9 +1304,8 @@ public class CollectActivity extends ThemedActivity
                 .getLocationByCollectMode(this, preferences, expId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
     }
 
-    private void brapiDelete(String parent, Boolean hint) {
+    private void brapiDelete(TraitObject trait, Boolean hint) {
         Utils.makeToast(this, getString(R.string.brapi_delete_message));
-        TraitObject trait = traitBox.getCurrentTrait();
         updateObservation(trait, getString(R.string.brapi_na), null);
         if (hint) {
             setNaTextBrapiEmptyField();
@@ -1261,19 +1315,20 @@ public class CollectActivity extends ThemedActivity
     }
 
     // Delete trait, including from database
-    public void removeTrait(String parent) {
+    public void removeTrait(TraitObject trait) {
+
         if (rangeBox.isEmpty()) {
             return;
         }
 
-        String exp_id = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-        TraitObject trait = traitBox.getCurrentTrait();
-        if (database.isBrapiSynced(exp_id, getObservationUnit(), trait.getId(), getRep())) {
-            brapiDelete(parent, true);
+        String fieldId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+
+        if (database.isBrapiSynced(fieldId, getObservationUnit(), trait.getId(), getRep())) {
+            brapiDelete(trait, true);
         } else {
             // Always remove existing trait before inserting again
             // Based on plot_id, prevent duplicate
-            traitBox.remove(parent, getObservationUnit(), getRep());
+            traitBox.remove(trait, getObservationUnit(), getRep());
         }
     }
 
@@ -1437,7 +1492,6 @@ public class CollectActivity extends ThemedActivity
             if (dir != null && dir.exists()) {
                 intent.setClassName(CollectActivity.this, FileExploreActivity.class.getName());
                 intent.putExtra("path", dir.getUri().toString());
-                intent.putExtra("exclude", new String[]{"fieldbook"});
                 intent.putExtra("title", getString(R.string.main_toolbar_resources));
                 startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
             }
@@ -1820,6 +1874,18 @@ public class CollectActivity extends ThemedActivity
         });
 
         goToId = builder.create();
+
+        goToId.setOnShowListener(dialog -> {
+            barcodeId.post(() -> {
+                barcodeId.requestFocus();
+                SoftKeyboardUtil.Companion.showKeyboard(getContext(), barcodeId, 250L);
+            });
+        });
+
+        goToId.setOnDismissListener(dialog -> {
+            barcodeId.post(() -> SoftKeyboardUtil.Companion.closeKeyboard(getContext(), barcodeId, 250L));
+        });
+
         goToId.show();
 
         android.view.WindowManager.LayoutParams langParams = goToId.getWindow().getAttributes();
@@ -2015,12 +2081,21 @@ public class CollectActivity extends ThemedActivity
 
                     TraitObject currentTrait = traitBox.getCurrentTrait();
                     BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
-                    currentTraitLayout.loadLayout();
+                    TraitFormat traitFormat = Formats.Companion.findTrait(currentTrait.getFormat());
 
+                    String oldValue = "";
+                    ObservationModel currentObs = getCurrentObservation();
+                    if (currentObs != null) {
+                        oldValue = currentObs.getValue();
+                    }
 
-                    updateObservation(currentTrait, scannedBarcode, null);
+                    if (scannedBarcode != null && traitFormat instanceof Scannable && validateData(scannedBarcode)) {
+                        updateObservation(currentTrait, ((Scannable) traitFormat).preprocess(scannedBarcode), null);
+                    } else {
+                        updateObservation(currentTrait, oldValue, null);
+                    }
+
                     currentTraitLayout.loadLayout();
-                    validateData();
                 }
                 break;
             case PhotoTraitLayout.PICTURE_REQUEST_CODE:
@@ -2304,20 +2379,18 @@ public class CollectActivity extends ThemedActivity
 
     /**
      * Inserts a user observation whenever a label is printed.
-     * See ResultReceiver onReceiveResult in LabelPrintLayout
+     * @param plotID: The plot ID at the time of printing.
+     * @param traitID: The trait ID at the time of printing.
+     * @param traitFormat: The format of the trait.
      * @param labelNumber: The number of labels printed.
      */
-    public void insertPrintObservation(String labelNumber) {
-
-        TraitObject trait = getCurrentTrait();
-
+    public void insertPrintObservation(String plotID, String traitID, String traitFormat, String labelNumber) {
         String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertObservation(rangeBox.getPlotID(), trait.getId(), trait.getFormat(), labelNumber,
+        database.insertObservation(plotID, traitID, traitFormat, labelNumber,
                 getPerson(),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);
-
     }
 
     @Override
@@ -2590,7 +2663,7 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
-    private ObservationModel getCurrentObservation() {
+    public ObservationModel getCurrentObservation() {
         String rep = getCollectInputView().getRep();
         List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
             for (ObservationModel m : models) {
@@ -2724,5 +2797,89 @@ public class CollectActivity extends ThemedActivity
         searchRange = range;
         searchPlot = plot;
         searchReload = reload;
+    }
+
+    @Override
+    public void onRotationEvent(@NonNull SensorHelper.RotationModel rotation) {
+        this.rotationModel = rotation;
+    }
+
+    @Nullable
+    @Override
+    public SensorHelper.RotationModel getRotationRelativeToDevice() {
+        return rotationModel;
+    }
+
+    @Override
+    public void askUserSendCrashReport(@NonNull Exception e) {
+        if (getWindow().isActive()) {
+            try {
+                if (dialogCrashReport != null) {
+                    dialogCrashReport.dismiss();
+                }
+
+                dialogCrashReport = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                        .setTitle(getString(R.string.dialog_crash_report_title))
+                        .setMessage(getString(R.string.dialog_crash_report_message))
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            sendCrashReport(e);
+                            dialog.dismiss();
+                        })
+                        .setNegativeButton(android.R.string.no, (dialog, which) -> {
+                            FirebaseCrashlytics.getInstance().recordException(e);
+                            dialog.dismiss();
+                        })
+                        .create();
+
+                dialogCrashReport.show();
+
+            } catch (Exception ignore) {
+            }
+        }
+    }
+
+    private void sendCrashReport(Exception e) {
+
+        try {
+
+            FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
+
+            crashlytics.setCrashlyticsCollectionEnabled(true);
+
+            int studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+            Log.e(TAG, "Current Study ID: " + studyId);
+
+            CustomKeysAndValues.Builder builder = new CustomKeysAndValues.Builder()
+                    .putString("Current Study ID", Integer.toString(studyId));
+
+            int count = 0;
+            FieldObject[] fieldObjects = database.getAllFieldObjects().toArray(new FieldObject[0]);
+            for (FieldObject fo : fieldObjects) {
+                Log.e(TAG, "Field ID: " + count + " " + fo.getExp_id());
+                Log.e(TAG, "Field Name: " + count + " " + fo.getExp_name());
+                Log.e(TAG, "Field Unique ID: " + count + " " + fo.getUnique_id());
+
+                builder.putString("Field ID " + count, Integer.toString(fo.getExp_id()));
+                builder.putString("Field Name " + count, fo.getExp_name());
+                builder.putString("Field Unique ID " + count, fo.getUnique_id());
+
+                List<String> attributes = Arrays.asList(database.getAllObservationUnitAttributeNames(fo.getExp_id()));
+                Log.e(TAG, attributes.toString());
+                builder.putString("Observation Unit Attributes " + count, attributes.toString());
+
+                count = count + 1;
+            }
+
+            crashlytics.setCustomKeys(builder.build());
+
+            crashlytics.recordException(e);
+
+            crashlytics.sendUnsentReports();
+
+        } catch (Exception ex) {
+
+            Log.e(TAG, "Error logging study entry attributes: " + ex);
+
+        }
     }
 }

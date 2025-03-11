@@ -121,12 +121,14 @@ class PhotoTraitLayout : CameraTrait {
     @OptIn(ExperimentalCamera2Interop::class)
     private fun bindCameraForInformation() {
 
-        controller.getCameraXFacade().bindIdentity { _, sizes ->
+        controller.getCameraXFacade().bindIdentity({ _, sizes ->
 
             supportedResolutions = sizes
 
             settingsButton?.isEnabled = true
 
+        }) {
+            (context as CollectActivity).finishActivity(Activity.RESULT_CANCELED)
         }
     }
 

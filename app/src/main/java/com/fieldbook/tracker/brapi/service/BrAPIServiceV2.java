@@ -1355,15 +1355,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             if (var.getScale() != null) {
                 if (var.getScale().getValidValues() != null) {
 
-                    if (var.getScale().getValidValues().getMin() != null) {
-                        trait.setMinimum(var.getScale().getValidValues().getMin().toString());
+                    if (var.getScale().getValidValues().getMinimumValue() != null) {
+                        trait.setMinimum(var.getScale().getValidValues().getMinimumValue());
                     } else {
-                        // Fieldbook requires empty string for min and maxes.
                         trait.setMinimum("");
                     }
 
-                    if (var.getScale().getValidValues().getMax() != null) {
-                        trait.setMaximum(var.getScale().getValidValues().getMax().toString());
+                    if (var.getScale().getValidValues().getMaximumValue() != null) {
+                        trait.setMaximum(var.getScale().getValidValues().getMaximumValue());
                     } else {
                         trait.setMaximum("");
                     }
@@ -1546,7 +1545,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setCount(studyDetails.getNumberOfPlots().toString());
             field.setObservation_level(observationLevel);
             field.setImport_format(ImportFormat.BRAPI);
-
+            field.setTrial_name(studyDetails.getTrialName());
             // Get our host url
             if (BrAPIService.getHostUrl(context) != null) {
                 field.setExp_source(BrAPIService.getHostUrl(context));
@@ -1561,7 +1560,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setExp_sort(sortOrder);
 
             // Do a pre-check to see if the field exists so we can show an error
-            int FieldUniqueStatus = dataHelper.checkFieldNameAndObsLvl(field.getExp_name(), field.getObservation_level());
+            int FieldUniqueStatus = dataHelper.checkBrapiStudyUnique(field.getObservation_level(), field.getStudy_db_id());
             if (FieldUniqueStatus != -1) {
                 return new BrapiControllerResponse(false, this.notUniqueFieldMessage);
             }
@@ -1586,7 +1585,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             DataHelper.db.beginTransaction();
             // All checks finished, insert our data.
-            int expId = dataHelper.createField(field, studyDetails.getAttributes());
+            int expId = dataHelper.createField(field, studyDetails.getAttributes(), true);
             field.setExp_id(expId);
 
             boolean fail = false;
