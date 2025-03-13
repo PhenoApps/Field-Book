@@ -2445,7 +2445,8 @@ public class DataHelper {
                 try (InputStream input = context.getContentResolver().openInputStream(file.getUri())) {
 
                     try (OutputStream output = new FileOutputStream(internalDbPath)) {
-                        ZipUtil.Companion.unzip(context, input, output);
+                        boolean isSampleDb = fileName.equals("sample_db.zip");
+                        ZipUtil.Companion.unzip(context, input, output, isSampleDb);
 
                         open();
                     } catch (Exception e) {
