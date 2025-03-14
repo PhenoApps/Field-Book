@@ -682,16 +682,18 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
                     getThreadHelper().start(value, mHandler)
 
-                    val filter = IntentFilter()
-                    filter.addAction(ACTION_BROADCAST_GNSS_TRAIT)
 
-                    /**
-                     * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
-                     * The parser parameter is a model for the parsed message, and is used to populate the
-                     * trait layout UI.
-                     */
-                    mLocalBroadcastManager.registerReceiver(receiver, filter)
                 }
+
+                val filter = IntentFilter()
+                filter.addAction(ACTION_BROADCAST_GNSS_TRAIT)
+
+                /**
+                 * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
+                 * The parser parameter is a model for the parsed message, and is used to populate the
+                 * trait layout UI.
+                 */
+                mLocalBroadcastManager.registerReceiver(receiver, filter)
             }
         }
 
