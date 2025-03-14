@@ -1072,11 +1072,11 @@ public class DataHelper {
     /**
      * Used by the application to return all traits which are visible
      */
-    public String[] getVisibleTrait() {
+    public String[] getVisibleTrait(String sortOrder) {
 
         open();
 
-        return VisibleObservationVariableDao.Companion.getVisibleTrait();
+        return VisibleObservationVariableDao.Companion.getVisibleTrait(sortOrder);
 
 //        String[] data = null;
 //
@@ -1103,11 +1103,11 @@ public class DataHelper {
 //        return data;
     }
 
-    public ArrayList<TraitObject> getVisibleTraitObjects() {
+    public ArrayList<TraitObject> getVisibleTraitObjects(String sortOrder) {
 
         open();
 
-        return VisibleObservationVariableDao.Companion.getVisibleTraitObjects();
+        return VisibleObservationVariableDao.Companion.getVisibleTraitObjects(sortOrder);
     }
 
     /**
@@ -1334,7 +1334,7 @@ public class DataHelper {
 
         return StudyDao.Companion.getFieldObject(
                 studyId,
-                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
+                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
         );
 
 //        Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
@@ -1372,7 +1372,7 @@ public class DataHelper {
         open();
 
         return ObservationVariableDao.Companion.getAllTraitObjects(
-                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "internal_id_observation_variable")
+                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
         );
 
 //        ArrayList<TraitObject> list = new ArrayList<>();
@@ -2124,12 +2124,13 @@ public class DataHelper {
      */
     public long editTraits(String traitDbId, String trait, String format, String defaultValue,
                            String minimum, String maximum, String details, String categories,
-                           Boolean closeKeyboardOnOpen) {
+                           Boolean closeKeyboardOnOpen,
+                           Boolean cropImage) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
-                minimum, maximum, details, categories, closeKeyboardOnOpen);
+                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage);
 //        try {
 //            ContentValues c = new ContentValues();
 //            c.put("trait", trait);
@@ -2167,7 +2168,7 @@ public class DataHelper {
 
         return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
-                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen());
+                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
@@ -2371,11 +2372,11 @@ public class DataHelper {
 //        return (int) exp_id;
     }
 
-    public void createFieldData(int studyId, List<String> columns, List<String> data) {
+    public void createFieldData(int studyId, List<String> columns, List<String> data, Boolean isBrapi) {
 
         open();
 
-        StudyDao.Companion.createFieldData(studyId, columns, data);
+        StudyDao.Companion.createFieldData(studyId, columns, data, isBrapi);
 
 //        // get unique_id, primary_id, secondary_id names from exp_id
 //        Cursor cursor = db.rawQuery("SELECT exp_id.unique_id, exp_id.primary_id, exp_id.secondary_id from exp_id where exp_id.exp_id = " + exp_id, null);
@@ -2464,7 +2465,8 @@ public class DataHelper {
                 try (InputStream input = context.getContentResolver().openInputStream(file.getUri())) {
 
                     try (OutputStream output = new FileOutputStream(internalDbPath)) {
-                        ZipUtil.Companion.unzip(context, input, output);
+                        boolean isSampleDb = fileName.equals("sample_db.zip");
+                        ZipUtil.Companion.unzip(context, input, output, isSampleDb);
 
                         open();
                     } catch (Exception e) {

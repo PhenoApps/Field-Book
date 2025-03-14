@@ -37,6 +37,7 @@
     <color name="main_chip_first_color">#47b65d</color>
     <color name="main_chip_second_color">#00a771</color>
     <color name="main_chip_third_color">#009683</color>
+    <color name="main_inverse_crop_region_color">#80101010</color>
 
     <!-- blue theme colors -->
     <color name="blue_border">@color/BLACK</color>

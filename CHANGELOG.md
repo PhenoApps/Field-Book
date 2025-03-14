@@ -8,16 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Primary/Secondar Order are no longer required when importing files (https://github.com/PhenoApps/Field-Book/pull/1169)
+- Labels between entry arrows can be swapped in Collect via new dialog (https://github.com/PhenoApps/Field-Book/pull/1169)
+- New or edited data values are now italicized (https://github.com/PhenoApps/Field-Book/pull/1169)
+- Incoming photos can now be cropped (enable when creating new photo traits) (https://github.com/PhenoApps/Field-Book/pull/1169)
 
 ### Changed
+- Date trait layout modified to match other formats (https://github.com/PhenoApps/Field-Book/pull/1169)
+- Audio trait layout modified to display more information (https://github.com/PhenoApps/Field-Book/pull/1169)
+- Quick GoTo setting removed and functionality moved to separate dialog that's enabled by default (https://github.com/PhenoApps/Field-Book/pull/1169)
 
 ### Fixed
+- Manual trait order no longer reset when leaving screen (https://github.com/PhenoApps/Field-Book/pull/1169)
 
 ## [v6.0.8] - 2025-02-24
-
-### Added
-
-### Changed
 
 ### Fixed
 - Preferences are now correctly imported from database zip files
@@ -52,8 +56,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Numerous bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1135)
 
 ## [v6.0.3] - 2025-01-06
-
-### Added
 
 ### Changed
 - Swap navigation now changes position of entry/trait navigation instead of only behavior (https://github.com/PhenoApps/Field-Book/pull/1123)

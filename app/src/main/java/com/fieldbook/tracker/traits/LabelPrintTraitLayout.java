@@ -515,7 +515,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
             } else {
                 int pos = spinner.getSelectedItemPosition();
                 if (pos < options.length) {
-                    String[] v = getDatabase().getDropDownRange(options[pos], getCurrentRange().plot_id);
+                    String[] v = getDatabase().getDropDownRange(options[pos], getCurrentRange().uniqueId);
                     if (v.length != 0) {
                         value = v[0];
                     }

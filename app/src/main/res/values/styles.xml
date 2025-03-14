@@ -129,6 +129,8 @@
         <item name="fb_heatmap_color_max">@color/main_heatmap_color_max</item>
 
         <item name="selected_date_circle_color">?fb_heatmap_color_medium</item>
+
+        <item name="fb_inverse_crop_region_color">@color/main_inverse_crop_region_color</item>
     </style>
 
     <!-- Blue Theme -->

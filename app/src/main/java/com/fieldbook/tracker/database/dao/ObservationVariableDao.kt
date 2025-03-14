@@ -214,15 +214,12 @@ class ObservationVariableDao {
             )
         }
 
-        fun getAllTraitObjects(sortOrder: String = "internal_id_observation_variable"): ArrayList<TraitObject> = withDatabase { db ->
+        fun getAllTraitObjects(sortOrder: String = "position"): ArrayList<TraitObject> = withDatabase { db ->
             val traits = ArrayList<TraitObject>()
-
-            // Sort ascending except for visibility, for visibility sort desc to have visible traits first
-            val orderDirection = if (sortOrder == "visible") "DESC" else "ASC"
 
             val query = """
                 SELECT * FROM ${ObservationVariable.tableName}
-                ORDER BY $sortOrder COLLATE NOCASE $orderDirection
+                ORDER BY ${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ASC
             """
 
             db.rawQuery(query, null).use { cursor ->
@@ -243,6 +240,7 @@ class ObservationVariableDao {
                         minimum = ""
                         categories = ""
                         closeKeyboardOnOpen = false
+                        cropImage = false
 
                         val values = ObservationVariableValueDao.getVariableValues(id.toInt())
                         values?.forEach { value ->
@@ -252,17 +250,27 @@ class ObservationVariableDao {
                                 "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String ?: ""
                                 "category" -> categories = value["observation_variable_attribute_value"] as? String ?: ""
                                 "closeKeyboardOnOpen" -> closeKeyboardOnOpen = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
+                                "cropImage" -> cropImage = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
                             }
                         }
                     }
                     traits.add(trait)
                 }
             }
-            ArrayList(traits)
+
+            if (sortOrder == "visible") {
+                val visibleTraits = traits.filter { it.visible }
+                val invisibleTraits = traits.filter { !it.visible }
+
+                ArrayList(visibleTraits.sortedBy { it.realPosition } + ArrayList(invisibleTraits.sortedBy { it.realPosition }))
+
+            } else {
+                ArrayList(traits)
+            }
         } ?: ArrayList()
 
         // Overload for Java compatibility
-        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("internal_id_observation_variable")
+        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("position")
 
 
 //        fun getAllTraitObjects(sortOrder: String): ArrayList<TraitObject> = withDatabase { db ->
@@ -350,6 +358,7 @@ class ObservationVariableDao {
                 Log.d("ObservationVariableDao", "maximum: ${t.maximum.orEmpty()}")
                 Log.d("ObservationVariableDao", "categories: ${t.categories.orEmpty()}")
                 Log.d("ObservationVariableDao", "closeKeyboardOnOpen: ${t.closeKeyboardOnOpen ?: "false"}")
+                Log.d("ObservationVariableDao", "cropImage: ${t.cropImage ?: "false"}")
 
                 val varRowId = db.insert(ObservationVariable.tableName, null, contentValues)
 
@@ -359,6 +368,7 @@ class ObservationVariableDao {
                         t.maximum.orEmpty(),
                         t.categories.orEmpty(),
                         (t.closeKeyboardOnOpen ?: "false").toString(),
+                        (t.cropImage ?: "false").toString(),
                         varRowId.toString()
                     )
                     Log.d("ObservationVariableDao", "Trait ${t.name} inserted successfully with row ID: $varRowId")
@@ -390,7 +400,8 @@ class ObservationVariableDao {
         //TODO need to edit min/max/category obs. var. val/attrs
         fun editTraits(id: String, trait: String, format: String, defaultValue: String,
                        minimum: String, maximum: String, details: String, categories: String,
-                       closeKeyboardOnOpen: Boolean): Long = withDatabase { db ->
+                       closeKeyboardOnOpen: Boolean,
+                       cropImage: Boolean): Long = withDatabase { db ->
 
             val rowid = db.update(ObservationVariable.tableName, ContentValues().apply {
                 put("observation_variable_name", trait)
@@ -415,7 +426,10 @@ class ObservationVariableDao {
                         ObservationVariableValueDao.update(id, attrId.toString(), categories)
                     }
                     "closeKeyboardOnOpen" -> {
-                        ObservationVariableValueDao.insertCloseKeyboard(closeKeyboardOnOpen.toString(), id)
+                        ObservationVariableValueDao.insertAttributeValue(it, closeKeyboardOnOpen.toString(), id)
+                    }
+                    "cropImage" -> {
+                        ObservationVariableValueDao.insertAttributeValue(it, cropImage.toString(), id)
                     }
                 }
             }

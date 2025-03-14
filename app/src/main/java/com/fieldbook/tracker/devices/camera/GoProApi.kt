@@ -2,8 +2,6 @@ package com.fieldbook.tracker.devices.camera
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.media3.common.Player
@@ -124,7 +122,7 @@ class GoProApi @Inject constructor(
                 }
 
                 Player.STATE_READY -> {
-                    Log.d(TAG, "Player Ready ${if (range.isNotEmpty()) range[0].range.plot_id else ""}")
+                    Log.d(TAG, "Player Ready ${if (range.isNotEmpty()) range[0].range.uniqueId else ""}")
 
                     callbacks?.onStreamReady()
                 }
@@ -440,7 +438,7 @@ class GoProApi @Inject constructor(
      */
     private fun requestFileUrl(url: String, model: ImageRequestData) {
 
-        Log.d(TAG, "Image request: $url for model: ${model.range.plot_id}")
+        Log.d(TAG, "Image request: $url for model: ${model.range.uniqueId}")
 
         //stop stream first, on fail or success start stream again:
         val requestImage: Request = Request.Builder()

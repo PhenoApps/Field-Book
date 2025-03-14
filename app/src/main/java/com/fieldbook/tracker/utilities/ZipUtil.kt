@@ -149,7 +149,7 @@ class ZipUtil {
         //  b. preferences should be cleared of the old values
         //  c. iterate over the converted map and populate the preferences
         @Throws(IOException::class)
-        fun unzip(ctx: Context, zipFile: InputStream?, databaseStream: OutputStream) {
+        fun unzip(ctx: Context, zipFile: InputStream?, databaseStream: OutputStream, isSampleDb: Boolean) {
 
             try {
 
@@ -186,6 +186,12 @@ class ZipUtil {
                             null -> throw IOException()
 
                             else -> {
+
+                                // only process .db files (not .xml) for sample_db.zip
+                                if (isSampleDb) {
+                                    Log.d("ZipUtil", "Skip processing ${ze?.name} for sample_db.zip")
+                                    continue
+                                }
 
                                 var prefMap: Map<*, *>
 

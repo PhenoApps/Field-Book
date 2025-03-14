@@ -538,7 +538,10 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
     fun checkTraitsExist(callback: (Int) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            val traits = database.getVisibleTrait()
+            val currentSortOrder: String =
+            preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: ""
+
+            val traits = database.getVisibleTrait(currentSortOrder)
             val result = when {
                 traits.isEmpty() -> {
                     withContext(Dispatchers.Main) {

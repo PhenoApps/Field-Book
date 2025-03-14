@@ -45,9 +45,9 @@
     <item name="traitRight" type="id" />
     <item name="traitDetails" type="id" />
     <item name="rangeLeft" type="id" />
-    <item name="rangeName" type="id" />
+    <item name="primaryNameTv" type="id" />
     <item name="range" type="id" />
-    <item name="plotName" type="id" />
+    <item name="secondaryNameTv" type="id" />
     <item name="plot" type="id" />
     <item name="rangeRight" type="id" />
     <item name="tNum" type="id" />

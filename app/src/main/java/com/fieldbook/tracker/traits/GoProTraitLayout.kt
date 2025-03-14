@@ -99,7 +99,7 @@ class GoProTraitLayout :
     override fun loadLayout() {
         super.loadLayout()
         setup()
-        currentPlotId = currentRange.plot_id
+        currentPlotId = currentRange.uniqueId
     }
 
     private fun initializeConnectButton() {
@@ -223,7 +223,7 @@ class GoProTraitLayout :
 
     private fun connect() {
 
-        controller.advisor().withNearby { adapter ->
+        controller.advisor().withNearby { adapter: BluetoothAdapter ->
 
             if (!adapter.isEnabled) {
 
