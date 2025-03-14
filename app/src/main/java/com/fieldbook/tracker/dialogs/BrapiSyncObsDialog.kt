@@ -25,6 +25,7 @@ import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 
 data class StudyObservations(var fieldBookStudyDbId:Int=0, val traitList: MutableList<TraitObject> = mutableListOf(), val observationList: MutableList<Observation> = mutableListOf()) {
     fun merge(newStudy: StudyObservations) {
@@ -78,7 +79,7 @@ class BrapiSyncObsDialog(context: Context, private val syncController: FieldSync
     private fun setupUI() {
         brAPIService = BrAPIServiceFactory.getBrAPIService(this.context)
         val pageSize = PreferenceManager.getDefaultSharedPreferences(context)
-            .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50")!!.toInt()
+            .getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50")!!.toInt()
         paginationManager = BrapiPaginationManager(0, pageSize)
         saveBtn = dialogBrAPISyncObs?.getButton(AlertDialog.BUTTON_POSITIVE)
         noObsLabel = dialogBrAPISyncObs?.findViewById(R.id.noObservationLbl)

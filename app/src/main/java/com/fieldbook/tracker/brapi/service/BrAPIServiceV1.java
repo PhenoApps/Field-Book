@@ -26,6 +26,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
@@ -135,7 +136,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     }
 
     private String getBrapiToken() {
-        return "Bearer " + PreferenceManager.getDefaultSharedPreferences(context).getString(GeneralKeys.BRAPI_TOKEN, "");
+        return "Bearer " + PreferenceManager.getDefaultSharedPreferences(context).getString(PreferenceKeys.BRAPI_TOKEN, "");
     }
 
     public void postImageMetaData(FieldBookImage image,
@@ -462,7 +463,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             final String level = levelName;
 
             final AtomicInteger currentPage = new AtomicInteger(0);
-            final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
+            final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setValues(new ArrayList<>());
 

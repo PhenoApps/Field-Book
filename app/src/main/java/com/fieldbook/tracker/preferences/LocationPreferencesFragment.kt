@@ -50,6 +50,8 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
         registerPreferenceListeners()
 
         (activity as PreferencesActivity).supportActionBar?.title = getString(R.string.preferences_location_title)
+
+        mPairDevicePref = findPreference(PreferenceKeys.PAIR_BLUETOOTH)
     }
 
     private fun setupUi() {
@@ -76,15 +78,15 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
                 true
             }
 
-        findPreference<ListPreference>(GeneralKeys.GEONAV_SEARCH_METHOD)?.onPreferenceChangeListener =
+        findPreference<ListPreference>(PreferenceKeys.GEONAV_SEARCH_METHOD)?.onPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { _, newValue ->
-                preferences.edit().putString(GeneralKeys.GEONAV_SEARCH_METHOD, newValue as String).apply()
+                preferences.edit().putString(PreferenceKeys.GEONAV_SEARCH_METHOD, newValue as String).apply()
                 if (newValue == "1") checkRequiredSensors()
                 updatePreferencesVisibility(isGeoNavEnabled())
                 true
             }
 
-        findPreference<Preference>(GeneralKeys.PAIR_BLUETOOTH)?.let { pairDevicePref ->
+        findPreference<Preference>(PreferenceKeys.PAIR_BLUETOOTH)?.let { pairDevicePref ->
             pairDevicePref.onPreferenceClickListener = Preference.OnPreferenceClickListener {
                 advisor.connectWith {
                     startDeviceChoiceDialog()
@@ -93,7 +95,7 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
             }
         }
 
-        findPreference<EditTextPreference>(GeneralKeys.GEONAV_DISTANCE_THRESHOLD)?.let { distPref ->
+        findPreference<EditTextPreference>(PreferenceKeys.GEONAV_DISTANCE_THRESHOLD)?.let { distPref ->
             distPref.setOnBindEditTextListener { editText ->
                 editText.inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
             }
@@ -101,10 +103,10 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
 
         setPreferenceChangeListeners(
             listOf(
-                GeneralKeys.GEONAV_PARAMETER_D1,
-                GeneralKeys.GEONAV_PARAMETER_D2,
-                GeneralKeys.SEARCH_ANGLE,
-                GeneralKeys.UPDATE_INTERVAL
+                PreferenceKeys.GEONAV_PARAMETER_D1,
+                PreferenceKeys.GEONAV_PARAMETER_D2,
+                PreferenceKeys.SEARCH_ANGLE,
+                PreferenceKeys.UPDATE_INTERVAL
             )
         )
     }
@@ -128,8 +130,8 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     private fun updateCoordinateFormatVisibility(selectedValue: Int? = null) {
-        val currentValue = selectedValue ?: preferences.getString("com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION", "0")?.toIntOrNull() ?: LOCATION_COLLECTION_OFF
-        val coordinateFormatPref = findPreference<Preference>("com.fieldbook.tracker.COORDINATE_FORMAT")
+        val currentValue = selectedValue ?: preferences.getString(PreferenceKeys.GENERAL_LOCATION_COLLECTION, "0")?.toIntOrNull() ?: LOCATION_COLLECTION_OFF
+        val coordinateFormatPref = findPreference<Preference>(PreferenceKeys.COORDINATE_FORMAT)
         coordinateFormatPref?.isVisible = currentValue != LOCATION_COLLECTION_OFF
     }
 
@@ -157,8 +159,8 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     private fun changeGeoNavLoggingModeView() {
-        val geoNavLoggingMode = findPreference<ListPreference>(GeneralKeys.GEONAV_LOGGING_MODE)
-        val currentMode = preferences.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0")
+        val geoNavLoggingMode = findPreference<ListPreference>(PreferenceKeys.GEONAV_LOGGING_MODE)
+        val currentMode = preferences.getString(PreferenceKeys.GEONAV_LOGGING_MODE, "0")
 
         if (currentMode == GeoNavHelper.GeoNavLoggingMode.OFF.value) {
             geoNavLoggingMode?.summary = getString(R.string.pref_geonav_log_off_description)
@@ -182,15 +184,15 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
 
     private fun updateParametersSummaryText() {
 
-        val d1 = preferences.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")
-        val d2 = preferences.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")
-        val theta = preferences.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
-        val interval = preferences.getString(GeneralKeys.UPDATE_INTERVAL, "0")
+        val d1 = preferences.getString(PreferenceKeys.GEONAV_PARAMETER_D1, "0.001")
+        val d2 = preferences.getString(PreferenceKeys.GEONAV_PARAMETER_D2, "0.01")
+        val theta = preferences.getString(PreferenceKeys.SEARCH_ANGLE, "22.5")
+        val interval = preferences.getString(PreferenceKeys.UPDATE_INTERVAL, "0")
 
-        val trapBase = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D1)
-        val trapDst = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D2)
-        val trapAngle = findPreference<ListPreference>(GeneralKeys.SEARCH_ANGLE)
-        val updateInterval = findPreference<ListPreference>(GeneralKeys.UPDATE_INTERVAL)
+        val trapBase = findPreference<EditTextPreference>(PreferenceKeys.GEONAV_PARAMETER_D1)
+        val trapDst = findPreference<EditTextPreference>(PreferenceKeys.GEONAV_PARAMETER_D2)
+        val trapAngle = findPreference<ListPreference>(PreferenceKeys.SEARCH_ANGLE)
+        val updateInterval = findPreference<ListPreference>(PreferenceKeys.UPDATE_INTERVAL)
 
         trapBase?.summary = getString(R.string.pref_geonav_search_trapezoid_d1_summary, d1)
         trapDst?.summary = getString(R.string.pref_geonav_search_trapezoid_d2_summary, d2)
@@ -201,7 +203,7 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
 
     private fun updatePreferencesVisibility(isChecked: Boolean) {
         val geonavCategory = findPreference<PreferenceCategory>("com.fieldbook.tracker.geonav.CATEGORY")
-        val searchMethodValue = preferences.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
+        val searchMethodValue = preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
 
         geonavCategory?.let { category ->
             for (i in 0 until category.preferenceCount) {
@@ -219,12 +221,12 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     private fun updateMethodSummaryText() {
-        val method = if (preferences.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") == "0")
+        val method = if (preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, "0") == "0")
             getString(R.string.pref_geonav_method_distance)
         else
             getString(R.string.pref_geonav_method_trapezoid)
 
-        findPreference<ListPreference>(GeneralKeys.GEONAV_SEARCH_METHOD)?.summary = getString(R.string.pref_geonav_search_method_summary, method)
+        findPreference<ListPreference>(PreferenceKeys.GEONAV_SEARCH_METHOD)?.summary = getString(R.string.pref_geonav_search_method_summary, method)
     }
 
     /**
@@ -232,8 +234,8 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
      */
     private fun updateDeviceAddressSummary() {
         if (mPairDevicePref != null) {
-            val address = preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
-            mPairDevicePref!!.summary = address
+            val address = preferences.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, "")
+            mPairDevicePref?.summary = address
         }
     }
 
@@ -279,7 +281,7 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
                     if (device != null) {
                         address = device.address
                     }
-                    preferences.edit().putString(GeneralKeys.PAIRED_DEVICE_ADDRESS, address)
+                    preferences.edit().putString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, address)
                         .apply()
                     updateDeviceAddressSummary()
                     dialog.dismiss()

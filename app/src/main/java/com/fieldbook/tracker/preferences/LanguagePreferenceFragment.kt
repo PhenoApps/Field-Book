@@ -42,7 +42,7 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
         try {
             context?.let { ctx ->
                 val currentPrefTag = PreferenceManager.getDefaultSharedPreferences(ctx)
-                    .getString(GeneralKeys.LANGUAGE_LOCALE_ID, "en-US")
+                    .getString(PreferenceKeys.LANGUAGE_LOCALE_ID, "en-US")
 
                 var id = preference.key
                 var languageSummary = preference.title.toString()
@@ -64,8 +64,8 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
                 }
                 Log.d("LanguagePrefFragment", "Switching language to: $id")
                 with (PreferenceManager.getDefaultSharedPreferences(ctx)) {
-                    edit().putString(GeneralKeys.LANGUAGE_LOCALE_ID, id).apply()
-                    edit().putString(GeneralKeys.LANGUAGE_LOCALE_SUMMARY, languageSummary).apply()
+                    edit().putString(PreferenceKeys.LANGUAGE_LOCALE_ID, id).apply()
+                    edit().putString(PreferenceKeys.LANGUAGE_LOCALE_SUMMARY, languageSummary).apply()
                 }
 
                 AlertDialog.Builder(ctx, R.style.AppAlertDialog).apply {

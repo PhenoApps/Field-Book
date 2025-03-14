@@ -37,8 +37,8 @@ class TtsLanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnP
 
                 with (PreferenceManager.getDefaultSharedPreferences(ctx)) {
 
-                    edit().putString(GeneralKeys.TTS_LANGUAGE, id).apply()
-                    edit().putString(GeneralKeys.TTS_LANGUAGE_SUMMARY, preference.title.toString()).apply()
+                    edit().putString(PreferenceKeys.TTS_LANGUAGE, id).apply()
+                    edit().putString(PreferenceKeys.TTS_LANGUAGE_SUMMARY, preference.title.toString()).apply()
 
                 }
             }

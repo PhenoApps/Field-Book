@@ -9,6 +9,7 @@ import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivit
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
@@ -37,13 +38,13 @@ class BrapiFilterCache {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             val currentTime = System.currentTimeMillis()
             when (prefs.getString(
-                GeneralKeys.BRAPI_INVALIDATE_CACHE_INTERVAL,
+                PreferenceKeys.BRAPI_INVALIDATE_CACHE_INTERVAL,
                 CacheClearInterval.NEVER.ordinal.toString()
             )) {
                 CacheClearInterval.EVERY.ordinal.toString() -> delete(context, false)
                 CacheClearInterval.DAILY.ordinal.toString() -> {
                     val lastCleared =
-                        prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
+                        prefs.getLong(PreferenceKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
                     if (currentTime - lastCleared > 24 * 60 * 60 * 1000) {
                         delete(context, false)
                     }
@@ -51,7 +52,7 @@ class BrapiFilterCache {
 
                 CacheClearInterval.WEEKLY.ordinal.toString() -> {
                     val lastCleared =
-                        prefs.getLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
+                        prefs.getLong(PreferenceKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
                     if (currentTime - lastCleared > 7 * 24 * 60 * 60 * 1000) {
                         delete(context, false)
                     }
@@ -101,7 +102,7 @@ class BrapiFilterCache {
                     remove("$filterer$f")
                     remove("${f}${GeneralKeys.LIST_FILTER_TEXTS}")
                 }
-                remove(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR)
+                remove(PreferenceKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR)
                 apply()
             }
         }
@@ -120,7 +121,7 @@ class BrapiFilterCache {
 
             PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
-                .putLong(GeneralKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, System.currentTimeMillis())
+                .putLong(PreferenceKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, System.currentTimeMillis())
                 .apply()
 
         }

@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.view.KeyEvent
 import com.fieldbook.tracker.interfaces.CollectController
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.views.TraitBoxView
 
@@ -23,19 +24,19 @@ class MediaKeyCodeActionHelper {
 
             //bugfix for compatibility with old preference
             try {
-                prefs.getString(GeneralKeys.VOLUME_NAVIGATION, VolumeNavigation.DISABLED.ordinal.toString())
+                prefs.getString(PreferenceKeys.VOLUME_NAVIGATION, VolumeNavigation.DISABLED.ordinal.toString())
             } catch (e: ClassCastException) {
-                prefs.edit().remove(GeneralKeys.VOLUME_NAVIGATION).apply()
+                prefs.edit().remove(PreferenceKeys.VOLUME_NAVIGATION).apply()
             }
 
-            val volumeNavEnabled = when(prefs.getString(GeneralKeys.VOLUME_NAVIGATION, VolumeNavigation.DISABLED.ordinal.toString())) {
+            val volumeNavEnabled = when(prefs.getString(PreferenceKeys.VOLUME_NAVIGATION, VolumeNavigation.DISABLED.ordinal.toString())) {
                 VolumeNavigation.DISABLED.ordinal.toString() -> VolumeNavigation.DISABLED
                 VolumeNavigation.TRAIT_NAVIGATION.ordinal.toString() -> VolumeNavigation.TRAIT_NAVIGATION
                 VolumeNavigation.RANGE_NAVIGATION.ordinal.toString() -> VolumeNavigation.RANGE_NAVIGATION
                 else -> VolumeNavigation.DISABLED
             }
 
-            val mediaControlEnabled = prefs.getBoolean(GeneralKeys.MEDIA_KEYCODE_NAVIGATION, false)
+            val mediaControlEnabled = prefs.getBoolean(PreferenceKeys.MEDIA_KEYCODE_NAVIGATION, false)
 
             //return early if settings are disabled
             if (volumeNavEnabled == VolumeNavigation.DISABLED && !mediaControlEnabled) {

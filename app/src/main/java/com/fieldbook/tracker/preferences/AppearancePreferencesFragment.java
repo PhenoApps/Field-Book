@@ -111,10 +111,10 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private void updateLanguageSummary() {
-        Preference langPref = findPreference(GeneralKeys.LANGUAGE_PREF);
+        Preference langPref = findPreference(PreferenceKeys.LANGUAGE_PREF);
         if (langPref != null) {
             String summary = PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(GeneralKeys.LANGUAGE_LOCALE_SUMMARY, getString(R.string.preference_language_default));
+                    .getString(PreferenceKeys.LANGUAGE_LOCALE_SUMMARY, getString(R.string.preference_language_default));
             langPref.setSummary(summary);
         }
     }

@@ -22,6 +22,7 @@ import com.fieldbook.tracker.interfaces.CollectController;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RepeatedValuesView;
 
@@ -210,7 +211,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
             inputView.getRepeatView().userDeleteCurrentRep();
         }
         //check if sound on delete is enabled in preferences and play sound
-        if (getPrefs().getBoolean(GeneralKeys.DELETE_OBSERVATION_SOUND, false)) {
+        if (getPrefs().getBoolean(PreferenceKeys.DELETE_OBSERVATION_SOUND, false)) {
             controller.getSoundHelper().playDelete();
         }
     }
@@ -247,7 +248,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     public String getDisplayColor() {
         return String.format("#%06X", (0xFFFFFF & PreferenceManager.getDefaultSharedPreferences(getContext())
-                .getInt(GeneralKeys.SAVED_DATA_COLOR, resolveThemeColor(R.attr.fb_value_saved_color))));
+                .getInt(PreferenceKeys.SAVED_DATA_COLOR, resolveThemeColor(R.attr.fb_value_saved_color))));
     }
 
     public int getButtonTextColor() {
