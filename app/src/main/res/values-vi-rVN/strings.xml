@@ -396,4 +396,6 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <!-- gopro -->
     <!-- canon camera strings -->
     <string name="brapi_traits_filter_title">(Các) Tính trạng</string>
+    <string name="dialog_quick_goto_title">Đi đến (nghiệm thức) nhanh</string>
+    <string name="traits_sort_default">Mặc định</string>
 </resources>

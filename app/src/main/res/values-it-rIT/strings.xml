@@ -449,4 +449,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <!-- gopro -->
     <!-- canon camera strings -->
     <string name="brapi_traits_filter_title">Caratteri</string>
+    <string name="dialog_quick_goto_title">Tasto Rapido</string>
+    <string name="dialog_quick_goto_go">Vai</string>
+    <string name="traits_sort_default">Impostazioni predefinite</string>
 </resources>

@@ -211,4 +211,5 @@
     <!-- gopro -->
     <!-- canon camera strings -->
     <string name="brapi_traits_filter_title">Wanta ideefanonn guuramuuf</string>
+    <string name="traits_sort_default">Akkuma jirutti</string>
 </resources>
