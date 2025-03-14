@@ -192,6 +192,16 @@ public class GeneralKeys {
     @NotNull
     public static final String RESET_PREFERENCES = "RESET_PREFERENCES";
 
+    /**
+     * Function that returns the key for the crop coordinates of a trait
+     * @param traitId --the internal db id of the trait
+     * @return key used in preferences to obtain the (tl, tr, br, bl) coordinates used for cropping images
+     */
+    @NotNull
+    public static String getCropCoordinatesKey(int traitId) {
+        return "com.fieldbook.tracker.crop_coordinates." + traitId;
+    }
+
     private GeneralKeys() {
 
     }

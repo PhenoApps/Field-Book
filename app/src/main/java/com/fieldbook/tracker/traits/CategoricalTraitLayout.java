@@ -132,8 +132,6 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
                         }
 
-                        getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
-
                     }
                 }
 

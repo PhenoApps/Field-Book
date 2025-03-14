@@ -130,7 +130,7 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
                 paths.add(fullGeoNavFile)
             paths.add(traitsDocumentFile)
 
-            val mGeneratedName = "field_audio_log" + context.cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(c.time)    + ".zip"
+            val mGeneratedName = "field_audio_log" + context.cRange.uniqueId + "_" + fieldAlias + " " + timeStamp.format(c.time)    + ".zip"
 
             val exportDir = getDirectory(context, R.string.dir_field_export)
             val zipFile = exportDir?.createFile("*/*", mGeneratedName)
@@ -208,10 +208,10 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
         val mGeneratedName: String
         val fieldAlias = preferences.getString(GeneralKeys.FIELD_FILE, "")
         mGeneratedName = try {
-            if (isFieldAudio) "field_audio_" + (context as CollectActivity).cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(
+            if (isFieldAudio) "field_audio_" + (context as CollectActivity).cRange.uniqueId + "_" + fieldAlias + " " + timeStamp.format(
                 c.time
             )
-            else (context as CollectActivity).cRange.plot_id + " " + timeStamp.format(c.time)
+            else (context as CollectActivity).cRange.uniqueId + " " + timeStamp.format(c.time)
         } catch (e: Exception) {
             "error " + timeStamp.format(c.time)
         }

@@ -314,7 +314,8 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
             this?.let { collector ->
 
-                if (attribute in database.visibleTrait) {
+                val sortOrder = collector.preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
+                if (attribute in database.getVisibleTrait(sortOrder)) {
 
                     collector.navigateToTrait(attribute)
 

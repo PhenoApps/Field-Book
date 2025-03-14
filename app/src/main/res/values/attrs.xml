@@ -314,4 +314,6 @@
     <attr name="fb_third_chip_color" format="color" />
     <attr name="fb_fourth_chip_color" format="color" />
 
+    <attr name="fb_inverse_crop_region_color" format="color"/>
+
 </resources>

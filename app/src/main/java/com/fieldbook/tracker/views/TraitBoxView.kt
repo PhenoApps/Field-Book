@@ -113,6 +113,13 @@ class TraitBoxView : ConstraintLayout {
 
         // Go to next trait
         traitRight.setOnClickListener { moveTrait("right") }
+
+        traitsStatusBarRv?.adapter = TraitsStatusAdapter(this)
+        traitsStatusBarRv?.layoutManager = object : LinearLayoutManager(context, HORIZONTAL, false) {
+            override fun canScrollHorizontally(): Boolean {
+                return false
+            }
+        }
     }
 
     fun initTraitDetails() {
@@ -134,13 +141,6 @@ class TraitBoxView : ConstraintLayout {
         this.visibleTraitsList = visibleTraits
         this.rangeSuppress = rangeSuppress
 
-        traitsStatusBarRv?.adapter = TraitsStatusAdapter(this)
-        traitsStatusBarRv?.layoutManager = object : LinearLayoutManager(context, HORIZONTAL, false) {
-            override fun canScrollHorizontally(): Boolean {
-                return false
-            }
-        }
-
 //        recyclerView?.viewTreeObserver?.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
 //            override fun onGlobalLayout() {
 //                recyclerView?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
@@ -161,16 +161,26 @@ class TraitBoxView : ConstraintLayout {
             // Display dialog or menu for trait selection
             showTraitPickerDialog(visibleTraits)
         }
+
+        updateTraitsStatusBar()
+
     }
 
     fun getRecyclerView(): RecyclerView? {
         return traitsStatusBarRv
     }
 
+    private var previousSelection = 0
+
     fun loadLayout(rangeSuppress: Boolean) {
         val traitPosition = getSelectedItemPosition()
 
         setSelection(traitPosition)
+
+        traitsStatusBarRv?.adapter?.notifyItemChanged(previousSelection)
+        traitsStatusBarRv?.adapter?.notifyItemChanged(traitPosition)
+
+        previousSelection = traitPosition
 
         // This updates the in memory hashmap from database
         currentTrait = controller.getDatabase().getDetail(
@@ -178,15 +188,13 @@ class TraitBoxView : ConstraintLayout {
                 .toString()
         )
 
-        updateTraitsStatusBar()
-
         // Update last used trait so it is preserved when entry moves
         controller.getPreferences().edit().putString(GeneralKeys.LAST_USED_TRAIT,traitTypeTv.text.toString()).apply()
         traitTypeTv.text = currentTrait?.name
 
-
         val imm =
             context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
+
         if (currentTrait?.format != "text") {
 
             try {
@@ -194,7 +202,9 @@ class TraitBoxView : ConstraintLayout {
             } catch (ignore: Exception) {
             }
         }
-        traitDetails.text = currentTrait?.details
+
+        traitDetails.text = currentTrait?.details ?: ""
+
         if (!rangeSuppress or (currentTrait?.format != "numeric")) {
             if (controller.getInputView().visibility == VISIBLE) {
                 controller.getInputView().visibility = GONE
@@ -222,8 +232,6 @@ class TraitBoxView : ConstraintLayout {
             controller.getInputView().visibility = VISIBLE
             controller.getInputView().isEnabled = true
         }
-
-        updateTraitsStatusBar()
     }
 
     private fun showTraitPickerDialog(visibleTraits: Array<String>?) {
@@ -255,7 +263,9 @@ class TraitBoxView : ConstraintLayout {
     }
 
     private fun updateTraitsStatusBar() {
-        val visibleTraits: Array<String> = controller.getDatabase().getVisibleTrait()
+
+        val currentSortOrder = controller.getPreferences().getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
+        val visibleTraits: Array<String> = controller.getDatabase().getVisibleTrait(currentSortOrder)
 
         // images saved are not stored in newTraits hashMap
         // get the data for current plot_id again
@@ -268,6 +278,7 @@ class TraitBoxView : ConstraintLayout {
                 traitsValue.containsKey(trait)
             )
         }
+
         (traitsStatusBarRv?.adapter as TraitsStatusAdapter).submitList(traitBoxItemModels)
 
         // the recyclerView height was 0 initially, so calculate the icon size again
@@ -279,8 +290,6 @@ class TraitBoxView : ConstraintLayout {
                 }
             }
         }
-        (traitsStatusBarRv?.adapter as TraitsStatusAdapter).notifyDataSetChanged()
-
     }
 
     fun getNewTraits(): Map<String, String> {

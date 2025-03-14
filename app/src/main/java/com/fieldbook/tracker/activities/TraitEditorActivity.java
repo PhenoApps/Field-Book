@@ -121,6 +121,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 int to = target.getBindingAdapterPosition();
 
                 try {
+                    preferences.edit().putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position").apply();
+                    queryAndLoadTraits();
                     adapter.moveItem(from, to);
                 } catch (IndexOutOfBoundsException iobe) {
                     iobe.printStackTrace();
@@ -400,6 +402,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             Toast.makeText(this, R.string.act_trait_editor_no_traits_exist, Toast.LENGTH_SHORT).show();
         } else {
             showDeleteTraitDialog((dialog, which) -> {
+                for (TraitObject t : traits) {
+                    preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(t.getId()))).apply();
+                }
                 database.deleteTraitsTable();
                 queryAndLoadTraits();
                 dialog.dismiss();
@@ -587,6 +592,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         if (!traits.isEmpty()) {
 
+            for (TraitObject t : traits) {
+                preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(t.getId()))).apply();
+            }
+
             showDeleteTraitDialog((dialog, which) -> {
 
                 database.deleteTraitsTable();
@@ -644,9 +653,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     private void showTraitSortDialog() {
         Map<String, String> sortOptions = new LinkedHashMap<>();
-        final String defaultSortOrder = "internal_id_observation_variable";
+        final String defaultSortOrder = "position";
         String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, defaultSortOrder);
 
+        sortOptions.put(getString(R.string.traits_sort_default), "position");
         sortOptions.put(getString(R.string.traits_sort_name), "observation_variable_name");
         sortOptions.put(getString(R.string.traits_sort_format), "observation_variable_field_book_format");
         sortOptions.put(getString(R.string.traits_sort_import_order), "internal_id_observation_variable");
@@ -924,6 +934,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
+
+                preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(trait.getId()))).apply();
 
                 getDatabase().deleteTrait(trait.getId());
 

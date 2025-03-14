@@ -55,12 +55,5 @@
             android:summary="@string/preferences_appearance_infobar_hide_prefix_description"
             android:title="@string/preferences_appearance_infobar_hide_prefix" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_quick_goto"
-            android:key="QuickGoTo"
-            android:summary="@string/preferences_appearance_quickgoto_description"
-            android:title="@string/preferences_appearance_quickgoto" />
-
     </PreferenceCategory>
 </PreferenceScreen>

@@ -13,8 +13,8 @@ data class ObservationUnitModel(val map: Row) {
     val internal_id_observation_unit: Int by map //comp. pk 1
     val study_id: Int by map  //fk to studies table
     val observation_unit_db_id: String by map //unique id
-    val primary_id: String by map
-    val secondary_id: String by map
+    var primary_id: String? = (map["primary_id"] as? String) ?: ""
+    var secondary_id: String? = (map["secondary_id"] as? String) ?: ""
     var geo_coordinates: String? = (map["geo_coordinates"] as? String) ?: "" //blob?
     val additionalInfo: String? by map //blob, can be replaced with value/attr query?
     val germplasmDbId: String? by map //brapId ?

@@ -457,7 +457,11 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     fun checkTraitsExist(): Int {
-        val traits = database.getVisibleTrait()
+
+        val currentSortOrder: String =
+            preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: ""
+
+        val traits = database.getVisibleTrait(currentSortOrder)
 
         return when {
             traits.isEmpty() -> {

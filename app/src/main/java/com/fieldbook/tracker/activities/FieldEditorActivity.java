@@ -110,9 +110,7 @@ public class FieldEditorActivity extends ThemedActivity
     private static final Handler mHandler = new Handler();
     private FieldFileObject.FieldFileBase fieldFile;
     private final int PERMISSIONS_REQUEST_STORAGE = 998;
-    Spinner unique;
-    Spinner primary;
-    Spinner secondary;
+    private Spinner unique;
     private Menu systemMenu;
     private GPSTracker mGpsTracker;
     private ActionMode actionMode;
@@ -136,9 +134,7 @@ public class FieldEditorActivity extends ThemedActivity
             new ImportRunnableTask(FieldEditorActivity.this,
                     fieldFile,
                     unique.getSelectedItemPosition(),
-                    unique.getSelectedItem().toString(),
-                    primary.getSelectedItem().toString(),
-                    secondary.getSelectedItem().toString()).execute(0);
+                    unique.getSelectedItem().toString()).execute(0);
         }
     };
 
@@ -942,15 +938,11 @@ public class FieldEditorActivity extends ThemedActivity
 
     private void importDialog(String[] columns) {
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_import, null);
+        View layout = inflater.inflate(R.layout.dialog_field_file_import, null);
 
         unique = layout.findViewById(R.id.uniqueSpin);
-        primary = layout.findViewById(R.id.primarySpin);
-        secondary = layout.findViewById(R.id.secondarySpin);
 
         setSpinner(unique, columns, GeneralKeys.UNIQUE_NAME);
-        setSpinner(primary, columns, GeneralKeys.PRIMARY_NAME);
-        setSpinner(secondary, columns, GeneralKeys.SECONDARY_NAME);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
         builder.setTitle(R.string.fields_new_dialog_title)
@@ -958,9 +950,7 @@ public class FieldEditorActivity extends ThemedActivity
                 .setView(layout);
 
         builder.setPositiveButton(getString(R.string.dialog_import), (dialogInterface, i) -> {
-            if (checkImportColumnNames()) {
-                mHandler.post(importRunnable);
-            }
+            mHandler.post(importRunnable);
         });
 
         builder.show();
@@ -972,20 +962,6 @@ public class FieldEditorActivity extends ThemedActivity
         spinner.setAdapter(itemsAdapter);
         int spinnerPosition = itemsAdapter.getPosition(preferences.getString(pref, itemsAdapter.getItem(0)));
         spinner.setSelection(spinnerPosition);
-    }
-
-    // Validate that column choices are different from one another
-    private boolean checkImportColumnNames() {
-        final String uniqueS = unique.getSelectedItem().toString();
-        final String primaryS = primary.getSelectedItem().toString();
-        final String secondaryS = secondary.getSelectedItem().toString();
-
-        if (uniqueS.equals(primaryS) || uniqueS.equals(secondaryS) || primaryS.equals(secondaryS)) {
-            Utils.makeToast(getApplicationContext(), getString(R.string.import_error_column_choice));
-            return false;
-        }
-
-        return true;
     }
 
     @Override

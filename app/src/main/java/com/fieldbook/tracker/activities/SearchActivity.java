@@ -334,8 +334,9 @@ public class SearchActivity extends ActivityDialog {
         if (col != null) {
             rangeUntil = col.length;
 
+            String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
             ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinner_layout,
-                    concat(col, database.getVisibleTrait()));
+                    concat(col, database.getVisibleTrait(currentSortOrder)));
             adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
             c.setAdapter(adapter2);

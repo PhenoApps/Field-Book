@@ -22,6 +22,7 @@ import android.os.Message
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -527,7 +528,17 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         //add all units that have non null coordinates.
         for (model in units) {
             if (model.geo_coordinates != null && model.geo_coordinates!!.isNotEmpty()) {
-                coordinates.add(model)
+                val entryKeys = controller.getDatabase().getRange(
+                    preferences.getString(GeneralKeys.PRIMARY_NAME, null),
+                    preferences.getString(GeneralKeys.SECONDARY_NAME, null),
+                    model.observation_unit_db_id,
+                    model.internal_id_observation_unit,
+                )
+                //set currently chosen primary/secondary ids to model
+                coordinates.add(model.also {
+                    it.primary_id = entryKeys.primaryId
+                    it.secondary_id = entryKeys.secondaryId
+                })
             }
         }
 
@@ -557,7 +568,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
                 val id = first.observation_unit_db_id
                 with((controller.getContext() as CollectActivity)) {
-                    if (id != getRangeBox().cRange.plot_id && id != lastPlotIdNav) {
+                    if (id != getRangeBox().cRange.uniqueId && id != lastPlotIdNav) {
                         lastPlotIdNav = id
                         runOnUiThread {
                             if (preferences.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
@@ -573,7 +584,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                     findViewById(R.id.toolbarBottom),
                                     id, Snackbar.LENGTH_INDEFINITE
                                 )
-                                val snackLayout = mGeoNavSnackbar?.view as SnackbarLayout
                                 val snackView: View =
                                     layoutInflater.inflate(
                                         R.layout.geonav_snackbar_layout,
@@ -610,13 +620,15 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
                                 params.bottomToTop = R.id.toolbarBottom
                                 snackView.layoutParams = params
-                                snackLayout.addView(snackView)
-                                snackLayout.setPadding(0, 0, 0, 0)
+                                (mGeoNavSnackbar?.view as? FrameLayout)?.addView(snackView)
+                                (mGeoNavSnackbar?.view as? FrameLayout)?.setPadding(0, 0, 0, 0)
+
                                 val tv =
                                     snackView.findViewById<TextView>(R.id.geonav_snackbar_tv)
 
-                                var popupHeader =
+                                val popupHeader =
                                     preferences.getString(GeneralKeys.GEONAV_POPUP_DISPLAY, "plot_id")
+
                                 tv.text = getPopupInfo(id, popupHeader ?: "plot_id")
 
                                 // if the value saved in GEONAV_POPUP_DISPLAY was disabled in traits
@@ -628,17 +640,12 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                     preferenceChangeListener
                                 )
 
-//                                    if (tv != null) {
-//                                        tv.text = id
-//                                    }
-
                                 val btn =
                                     snackView.findViewById<ImageButton>(R.id.geonav_snackbar_btn)
                                 btn?.setOnClickListener { v: View? ->
                                     mGeoNavSnackbar?.dismiss()
                                     lastPlotIdNav = null
 
-                                    println(snackView.height)
                                     //when navigate button is pressed use rangeBox to go to the plot id
                                     moveToSearch(
                                         "id",

@@ -2,7 +2,6 @@ package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
@@ -215,7 +214,6 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
         refreshList();
         refreshCategoryText();
-        getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
 
     }
 
