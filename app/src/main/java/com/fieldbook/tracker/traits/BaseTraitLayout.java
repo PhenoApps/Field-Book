@@ -182,6 +182,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public void afterLoadExists(CollectActivity act, @Nullable String value) {
+        getCollectInputView().markObservationSaved();
+        getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
         //lock data if frozen or locked state
         isLocked = act.isFrozen() || act.isLocked();
     }
@@ -311,6 +313,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
      */
     public void updateObservation(TraitObject trait, String value) {
         ((CollectActivity) getContext()).updateObservation(trait, value, null);
+
+        setCurrentValueAsEdited();
     }
 
     public void removeTrait(TraitObject trait) {
@@ -338,4 +342,9 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     protected DataHelper getDatabase() { return controller.getDatabase(); }
+
+    protected void setCurrentValueAsEdited() {
+        getCollectInputView().markObservationEdited();
+        getCollectInputView().setTextColor(getTextColor());
+    }
 }

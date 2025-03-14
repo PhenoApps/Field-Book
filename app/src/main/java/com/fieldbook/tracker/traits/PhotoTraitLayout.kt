@@ -146,7 +146,9 @@ class PhotoTraitLayout : CameraTrait {
                 setupCaptureUi(camera, executor, capture)
             }
 
-        } catch (_: IllegalArgumentException) {
+        } catch (e: IllegalArgumentException) {
+
+            e.printStackTrace()
 
         }
     }
@@ -191,14 +193,17 @@ class PhotoTraitLayout : CameraTrait {
 
             controller.getCameraXFacade().bindPreview(
                 previewViewHolder?.previewView,
-                resolution
+                resolution,
+                currentTrait.id,
+                Handler(Looper.getMainLooper())
             ) { camera, executor, capture ->
 
                 setupCaptureUi(camera, executor, capture)
             }
 
-        } catch (_: IllegalArgumentException) {
+        } catch (e: IllegalArgumentException) {
 
+            e.printStackTrace()
         }
     }
 
@@ -248,6 +253,8 @@ class PhotoTraitLayout : CameraTrait {
             setupSystemCameraMode()
 
         } else {
+
+            controller.getCameraXFacade().unbind()
 
             previewViewHolder = null
 
@@ -325,7 +332,6 @@ class PhotoTraitLayout : CameraTrait {
         }
     }
 
-
     /**
      * When button is pressed, create a cached image and switch to the camera intent.
      * CollectActivity will receive REQUEST_IMAGE_CAPTURE and call this layout's makeImage() method.
@@ -354,7 +360,10 @@ class PhotoTraitLayout : CameraTrait {
     }
 
     private fun launchCameraX() {
+        controller.getCameraXFacade().unbind()
         val intent = Intent(context, CameraActivity::class.java)
+        //set current trait id to set crop region
+        intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, currentTrait.id)
         activity?.startActivityForResult(intent, PICTURE_REQUEST_CODE)
     }
 

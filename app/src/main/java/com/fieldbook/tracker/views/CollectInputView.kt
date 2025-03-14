@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.views
 
 import android.content.Context
+import android.graphics.Typeface
 import android.util.AttributeSet
 import android.widget.EditText
 import android.widget.TextView
@@ -21,6 +22,8 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
     var forceInitialRep = -1
 
     var hasData: Boolean = false
+
+    private var isObservationSaved: Boolean = false
 
     private val originalEditText: EditText
 
@@ -51,6 +54,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         } else {
 
             text = ""
+            markObservationEdited()
         }
     }
 
@@ -59,6 +63,8 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         initialize(models)
 
         repeatView.prepareModeNonEmpty()
+
+        markObservationSaved()
     }
 
     fun initialize(models: List<ObservationModel>) {
@@ -70,6 +76,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         } else {
 
             text = models.minByOrNull { it.rep.toInt() }?.value ?: ""
+            markObservationEdited()
         }
     }
 
@@ -138,4 +145,26 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
     fun resetInitialIndex() {
         forceInitialRep = -1
     }
+
+    fun markObservationEdited() {
+        isObservationSaved = false
+        updateCurrentValueETStyle()
+    }
+
+    /**
+     * Mark current input as saved and update styling
+     */
+    fun markObservationSaved() {
+        isObservationSaved = true
+        updateCurrentValueETStyle()
+    }
+
+    /**
+     * Updates the text style based on saved/edited state
+     */
+    private fun updateCurrentValueETStyle() {
+        val style = if (isObservationSaved) Typeface.BOLD else Typeface.ITALIC
+        editText.setTypeface(null, style)
+    }
+
 }

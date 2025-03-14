@@ -98,7 +98,6 @@ class ImportDBFragment : Fragment(){
                 try {
                     selectFirstField()
                 } catch (e: Exception) {
-                    Log.d("Switch Field", "onCreate: loadSampleData switch Field")
                     e.printStackTrace()
                 }
 

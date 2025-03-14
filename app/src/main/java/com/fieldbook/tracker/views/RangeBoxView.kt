@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.views
 
-import android.app.Service
 import android.content.Context
 import android.content.SharedPreferences
 import android.database.Cursor
@@ -9,19 +8,17 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.util.Log
-import android.view.KeyEvent
 import android.view.MotionEvent
-import android.view.View
 import android.view.View.OnTouchListener
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.dialogs.AttributeChooserDialog
+import com.fieldbook.tracker.dialogs.QuickGotoDialog
 import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
@@ -33,6 +30,8 @@ class RangeBoxView : ConstraintLayout {
 
     companion object {
         const val TAG = "RangeBoxView"
+        //truncate to three characters plus the colon
+        const val TRUNCATE_LENGTH = 3 + 1
     }
 
     private var controller: CollectRangeController
@@ -43,16 +42,12 @@ class RangeBoxView : ConstraintLayout {
     var cRange: RangeObject
     private var lastRange: String
 
-    private var rangeName: TextView
-    private var plotName: TextView
+    private var primaryNameTv: TextView
+    private var secondaryNameTv: TextView
 
-    //edit text used for quick goto feature range = primary id
-    private var rangeEt: EditText
+    var primaryIdTv: TextView
+    var secondaryIdTv: TextView
 
-    //edit text used for quick goto feature plot = secondary id
-    private var plotEt: EditText
-    private var tvRange: TextView
-    private var tvPlot: TextView
     private var rangeLeft: ImageView
     private var rangeRight: ImageView
 
@@ -66,14 +61,6 @@ class RangeBoxView : ConstraintLayout {
     private var rangeEdited = false
     private var plotEdited = false
 
-    /**
-     * unique plot names used in range queries
-     * query and save them once during initialization
-     */
-    private var firstName: String
-    private var secondName: String
-    private var uniqueName: String
-
     private var delay = 100
     private var count = 1
 
@@ -85,25 +72,20 @@ class RangeBoxView : ConstraintLayout {
 
         this.rangeLeft = v.findViewById(R.id.rangeLeft)
         this.rangeRight = v.findViewById(R.id.rangeRight)
-        this.tvRange = v.findViewById(R.id.tvRange)
-        this.tvPlot = v.findViewById(R.id.tvPlot)
-        this.plotEt = v.findViewById(R.id.plot)
-        this.rangeEt = v.findViewById(R.id.range)
-        this.rangeName = v.findViewById(R.id.rangeName)
-        this.plotName = v.findViewById(R.id.plotName)
+        this.primaryIdTv = v.findViewById(R.id.primaryIdTv)
+        this.secondaryIdTv = v.findViewById(R.id.secondaryIdTv)
+        this.primaryNameTv = v.findViewById(R.id.primaryNameTv)
+        this.secondaryNameTv = v.findViewById(R.id.secondaryNameTv)
         this.plotsProgressBar = v.findViewById(R.id.plotsProgressBar)
 
         this.controller = context as CollectRangeController
 
         rangeID = this.controller.getDatabase().allRangeID
         cRange = RangeObject()
-        cRange.plot = ""
-        cRange.plot_id = ""
-        cRange.range = ""
+        cRange.secondaryId = ""
+        cRange.uniqueId = ""
+        cRange.primaryId = ""
         lastRange = ""
-        firstName = controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
-        secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
-        uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
     }
 
     constructor(ctx: Context) : super(ctx)
@@ -122,6 +104,18 @@ class RangeBoxView : ConstraintLayout {
         defStyle,
         defStyleRes
     )
+
+    private fun getPrimaryName(): String {
+        return controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
+    }
+
+    private fun getSecondaryName(): String {
+        return controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
+    }
+
+    private fun getUniqueName(): String {
+        return controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+    }
 
     fun toggleNavigation(toggle: Boolean) {
         rangeLeft.isEnabled = toggle
@@ -145,11 +139,11 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun getPlotID(): String? {
-        return cRange.plot_id
+        return cRange.uniqueId
     }
 
     fun isEmpty(): Boolean {
-        return cRange.plot_id.isEmpty()
+        return cRange.uniqueId.isEmpty()
     }
 
     fun connectTraitBox(traitBoxView: TraitBoxView) {
@@ -166,39 +160,107 @@ class RangeBoxView : ConstraintLayout {
         // Go to next range
         rangeRight.setOnClickListener { moveEntryRight() }
 
-        rangeEt.setOnEditorActionListener(createOnEditorListener(rangeEt, "range"))
-        plotEt.setOnEditorActionListener(createOnEditorListener(plotEt, "plot"))
-        rangeEt.setOnTouchListener { _, _ ->
-            rangeEt.isCursorVisible = true
-            false
+        setName()
+
+        val attributeChooserDialog = AttributeChooserDialog(
+            showTraits = false,
+            showOther = false,
+            showSystemAttributes = false
+        )
+
+        primaryNameTv.setOnClickListener {
+            attributeChooserDialog.setOnAttributeSelectedListener(object :
+                AttributeChooserDialog.OnAttributeSelectedListener {
+                override fun onAttributeSelected(label: String) {
+                    //update preference primary name
+                    controller.getPreferences().edit().putString(GeneralKeys.PRIMARY_NAME, label).apply()
+                    setName()
+                    refresh()
+                }
+            })
+            attributeChooserDialog.show(
+                (controller.getContext() as CollectActivity).supportFragmentManager,
+                "attributeChooserDialog"
+            )
         }
 
-        plotEt.setOnTouchListener { _, _ ->
-            plotEt.isCursorVisible = true
-            false
-        }
-        setName(10)
-        rangeName.setOnTouchListener { _, _ ->
-            Utils.makeToast(
-                context,
-                controller.getPreferences().getString(
-                    GeneralKeys.PRIMARY_NAME,
-                    context.getString(R.string.search_results_dialog_range)
-                )
+        secondaryNameTv.setOnClickListener {
+            attributeChooserDialog.setOnAttributeSelectedListener(object :
+                AttributeChooserDialog.OnAttributeSelectedListener {
+                override fun onAttributeSelected(label: String) {
+                    //update preference primary name
+                    controller.getPreferences().edit().putString(GeneralKeys.SECONDARY_NAME, label).apply()
+                    setName()
+                    refresh()
+                }
+            })
+            attributeChooserDialog.show(
+                (controller.getContext() as CollectActivity).supportFragmentManager,
+                "attributeChooserDialog"
             )
-            false
         }
 
-        //TODO https://stackoverflow.com/questions/47107105/android-button-has-setontouchlistener-called-on-it-but-does-not-override-perform
-        plotName.setOnTouchListener { v: View, _: MotionEvent? ->
-            Utils.makeToast(
-                context,
-                controller.getPreferences().getString(
-                    GeneralKeys.SECONDARY_NAME,
-                    context.getString(R.string.search_results_dialog_range)
-                )
-            )
-            v.performClick()
+        primaryIdTv.setOnClickListener {
+            showQuickGoToDialog()
+        }
+
+        secondaryIdTv.setOnClickListener {
+            showQuickGoToDialog(primaryClicked = false)
+        }
+    }
+
+    /**
+     * Builds and shows an alert dialog with two edit text fields for the primary/secondary ids
+     */
+    private fun showQuickGoToDialog(primaryClicked: Boolean = true) {
+
+        val dialog = QuickGotoDialog(controller, primaryClicked) { primaryId, secondaryId ->
+
+            quickGoToNavigateFromDialog(primaryId, secondaryId)
+        }
+
+        dialog.show((context as CollectActivity).supportFragmentManager, "quickGotoDialog")
+
+    }
+
+    private fun quickGoToNavigateFromDialog(primaryId: String, secondaryId: String) {
+
+        try {
+
+            when {
+
+                primaryId.isNotBlank() && secondaryId.isNotBlank() -> {
+                    controller.moveToSearch(
+                        "quickgoto", rangeID,
+                        primaryId,
+                        secondaryId, null, -1
+                    )
+                }
+
+                primaryId.isNotBlank() && secondaryId.isBlank() -> {
+                    controller.moveToSearch(
+                        "range", rangeID,
+                        primaryId,
+                        null, primaryId, -1
+                    )
+                }
+
+                primaryId.isBlank() && secondaryId.isNotBlank() -> {
+                    controller.moveToSearch(
+                        "plot", rangeID,
+                        null,
+                        secondaryId, secondaryId, -1
+                    )
+                }
+
+                else -> return
+
+            }
+
+        } catch (e: Exception) {
+
+            Log.e(TAG, "Error in quickGoToNavigateFromDialog: $e")
+
         }
     }
 
@@ -210,72 +272,6 @@ class RangeBoxView : ConstraintLayout {
 
     private fun truncate(s: String, maxLen: Int): String {
         return if (s.length > maxLen) s.substring(0, maxLen - 1) + ":" else s
-    }
-
-    /**
-     * This listener is used in the QuickGoto feature.
-     * This listens to the primary/secondary edit text's in the rangebox.
-     * When the soft keyboard enter key action is pressed (IME_ACTION_DONE)
-     * this will use the moveToSearch function.
-     * First it will search for both primary/secondary ids if they have both been changed.
-     * If one has not been changed or a plot is not found for both terms then it defaults to
-     * a search with whatever was changed last.
-     * @param edit the edit text to assign this listener to
-     * @param searchType the type used in moveToSearch, either plot or range
-     */
-    private fun createOnEditorListener(
-        edit: EditText,
-        searchType: String
-    ): TextView.OnEditorActionListener {
-        return object : TextView.OnEditorActionListener {
-            override fun onEditorAction(view: TextView, actionId: Int, event: KeyEvent?): Boolean {
-                // do not do bit check on event, crashes keyboard
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    try {
-
-                        //if both quick goto et's have been changed, attempt a search with them
-                        if (rangeEdited && plotEdited) {
-
-                            //if the search fails back-down to the original search
-                            if (!controller.moveToSearch(
-                                    "quickgoto", rangeID,
-                                    rangeEt.text.toString(),
-                                    plotEt.text.toString(), null, -1
-                                )
-                            ) {
-                                controller.moveToSearch(
-                                    searchType,
-                                    rangeID,
-                                    null,
-                                    null,
-                                    view.text.toString(),
-                                    -1
-                                )
-                            }
-                        } else { //original search if only one has changed
-                            controller.moveToSearch(
-                                searchType,
-                                rangeID,
-                                null,
-                                null,
-                                view.text.toString(),
-                                -1
-                            )
-                        }
-
-                        //reset the changed flags
-                        rangeEdited = false
-                        plotEdited = false
-                        val imm: InputMethodManager =
-                            context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
-                        imm.hideSoftInputFromWindow(edit.windowToken, 0)
-                    } catch (ignore: Exception) {
-                    }
-                    return true
-                }
-                return false
-            }
-        }
     }
 
     private fun createRunnable(directionStr: String): Runnable {
@@ -366,10 +362,10 @@ class RangeBoxView : ConstraintLayout {
             // Refresh onscreen controls
             updateCurrentRange(rangeID[paging - 1])
             saveLastPlot()
-            if (cRange.plot_id.isEmpty()) return
+            if (cRange.uniqueId.isEmpty()) return
             if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
-                if (cRange.range != lastRange && lastRange != "") {
-                    lastRange = cRange.range
+                if (cRange.primaryId != lastRange && lastRange != "") {
+                    lastRange = cRange.primaryId
                     controller.getSoundHelper().playPlonk()
                 }
             }
@@ -388,11 +384,15 @@ class RangeBoxView : ConstraintLayout {
      */
     private fun updateCurrentRange(id: Int) {
 
-        if (firstName.isNotEmpty() && secondName.isNotEmpty() && uniqueName.isNotEmpty()) {
+        val primaryId = getPrimaryName()
+        val secondaryId = getSecondaryName()
+        val uniqueId = getUniqueName()
+
+        if (primaryId.isNotEmpty() && secondaryId.isNotEmpty() && uniqueId.isNotEmpty()) {
 
             try {
 
-                cRange = controller.getDatabase().getRange(firstName, secondName, uniqueName, id)
+                cRange = controller.getDatabase().getRange(primaryId, secondaryId, uniqueId, id)
 
                 // RangeID is a sorted list of obs unit ids for the current field.
                 // Set bar maximum to number of obs units in the field
@@ -420,20 +420,14 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun reload() {
-
-        firstName = controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
-        secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
-        uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-
-        switchVisibility(controller.getPreferences().getBoolean(GeneralKeys.QUICK_GOTO, false))
-        setName(8)
+        setName()
         paging = 1
         setAllRangeID()
         if (rangeID.isNotEmpty()) {
             updateCurrentRange(rangeID[0])
-            lastRange = cRange.range
+            lastRange = cRange.primaryId
             display()
-            controller.getTraitBox().setNewTraits(cRange.plot_id)
+            controller.getTraitBox().setNewTraits(cRange.uniqueId)
         } else { //if no fields, print a message and finish with result canceled
             Utils.makeToast(context, context.getString(R.string.act_collect_no_plots))
             controller.cancelAndFinish()
@@ -445,8 +439,8 @@ class RangeBoxView : ConstraintLayout {
         updateCurrentRange(rangeID[paging - 1])
         display()
         if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
-            if (cRange.range != lastRange && lastRange != "") {
-                lastRange = cRange.range
+            if (cRange.primaryId != lastRange && lastRange != "") {
+                lastRange = cRange.primaryId
                 controller.getSoundHelper().playPlonk()
             }
         }
@@ -454,12 +448,8 @@ class RangeBoxView : ConstraintLayout {
 
     // Updates the data shown in the dropdown
     fun display() {
-        rangeEt.setText(cRange.range)
-        plotEt.setText(cRange.plot)
-        rangeEt.isCursorVisible = false
-        plotEt.isCursorVisible = false
-        tvRange.text = cRange.range
-        tvPlot.text = cRange.plot
+        primaryIdTv.text = cRange.primaryId
+        secondaryIdTv.text = cRange.secondaryId
     }
 
     fun rightClick() {
@@ -468,7 +458,7 @@ class RangeBoxView : ConstraintLayout {
 
     fun saveLastPlot() {
         val ed: SharedPreferences.Editor = controller.getPreferences().edit()
-        ed.putString(GeneralKeys.LAST_PLOT, cRange.plot_id)
+        ed.putString(GeneralKeys.LAST_PLOT, cRange.uniqueId)
         ed.apply()
     }
 
@@ -482,25 +472,7 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
-    private fun switchVisibility(textview: Boolean) {
-        if (textview) {
-            tvRange.visibility = GONE
-            tvPlot.visibility = GONE
-            rangeEt.visibility = VISIBLE
-            plotEt.visibility = VISIBLE
-
-            //when the et's are visible create text watchers to listen for changes
-            rangeEt.addTextChangedListener(createTextWatcher("range"))
-            plotEt.addTextChangedListener(createTextWatcher("plot"))
-        } else {
-            tvRange.visibility = VISIBLE
-            tvPlot.visibility = VISIBLE
-            rangeEt.visibility = GONE
-            plotEt.visibility = GONE
-        }
-    }
-
-    fun setName(maxLen: Int) {
+    fun setName() {
         val primaryName = controller.getPreferences().getString(
             GeneralKeys.PRIMARY_NAME,
             context.getString(R.string.search_results_dialog_range)
@@ -509,8 +481,8 @@ class RangeBoxView : ConstraintLayout {
             GeneralKeys.SECONDARY_NAME,
             context.getString(R.string.search_results_dialog_plot)
         ) + ":"
-        rangeName.text = truncate(primaryName, maxLen)
-        plotName.text = truncate(secondaryName, maxLen)
+        this.primaryNameTv.text = truncate(primaryName, TRUNCATE_LENGTH)
+        this.secondaryNameTv.text = truncate(secondaryName, TRUNCATE_LENGTH)
     }
 
     fun setAllRangeID() {
@@ -528,10 +500,8 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun setLastRange() {
-        lastRange = cRange.range
+        lastRange = cRange.primaryId
     }
-
-    ///// paging /////
 
     ///// paging /////
     fun moveEntryLeft() {
@@ -609,7 +579,8 @@ class RangeBoxView : ConstraintLayout {
                 moveToNextUncollectedObs(pos, step, arrayListOf(currentTraitObj))
             }
             2 -> {
-                val visibleTraits = ArrayList(controller.getDatabase().visibleTraitObjects.filterNotNull())
+                val sortOrder = controller.getPreferences().getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
+                val visibleTraits = ArrayList(controller.getDatabase().getVisibleTraitObjects(sortOrder).filterNotNull())
                 moveToNextUncollectedObs(pos, step, visibleTraits)
             }
             else -> moveSimply(pos, step)

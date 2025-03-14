@@ -202,7 +202,7 @@ class StudyDao {
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
-                ORDER BY $sortOrder COLLATE NOCASE ${if (isDateSort) "DESC" else "ASC"}
+                ORDER BY ${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ${if (isDateSort) "DESC" else "ASC"}
             """
             db.rawQuery(query, null).use { cursor ->
                 while (cursor.moveToNext()) {
@@ -218,7 +218,7 @@ class StudyDao {
         } ?: ArrayList()
 
 
-        fun getFieldObject(exp_id: Int, sortOrder: String = "internal_id_observation_variable"): FieldObject? = withDatabase { db ->
+        fun getFieldObject(exp_id: Int, sortOrder: String = "position"): FieldObject? = withDatabase { db ->
             val query = """
                 SELECT 
                     ${Study.PK},
@@ -253,7 +253,7 @@ class StudyDao {
                     }
                     map.toFieldObject().apply {
                         // Set the trait details
-                        this.setTraitDetails(getTraitDetailsForStudy(exp_id, sortOrder))
+                        this.traitDetails = getTraitDetailsForStudy(exp_id, sortOrder)
                     }
                 } else {
                     null
@@ -275,12 +275,9 @@ class StudyDao {
          * )
          */
 
-        fun getTraitDetailsForStudy(studyId: Int, sortOrder: String = "internal_id_observation_variable"): List<FieldObject.TraitDetail> {
+        fun getTraitDetailsForStudy(studyId: Int, sortOrder: String = "position"): List<FieldObject.TraitDetail> {
             return withDatabase { db ->
                 val traitDetails = mutableListOf<FieldObject.TraitDetail>()
-
-                // Sort ascending except for visibility, for visibility sort desc to have visible traits first
-                val orderDirection = if (sortOrder == "visible") "DESC" else "ASC"
 
                 val cursor = db.rawQuery("""
                     SELECT o.observation_variable_name, o.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
@@ -294,7 +291,7 @@ class StudyDao {
                     JOIN observation_variables ov ON o.observation_variable_db_id = ov.internal_id_observation_variable
                     WHERE o.study_id = ? AND o.observation_variable_db_id > 0
                     GROUP BY o.observation_variable_name, o.observation_variable_field_book_format
-                    ORDER BY ov.$sortOrder COLLATE NOCASE $orderDirection
+                    ORDER BY ov.${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ASC
                 """, arrayOf(studyId.toString(), studyId.toString(), studyId.toString()))
 
                 if (cursor.moveToFirst()) {
@@ -400,17 +397,15 @@ class StudyDao {
         /**
          * This function should always be called within a transaction.
          */
-        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) = withDatabase { db ->
+        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>, isBrapi: Boolean = false) = withDatabase { db ->
 
             val names = getNames(studyId)!!
 
-            //TODO: indexOf can return -1 which leads to array out of bounds exception
             //input data corresponds to original database column names
             val uniqueIndex = columns.indexOf(names.unique)
             val primaryIndex = columns.indexOf(names.primary)
             val secondaryIndex = columns.indexOf(names.secondary)
 
-            //TODO remove when we handle primary/secondary ids better
             //check if data size matches the columns size, on mismatch fill with dummy data
             //mainly fixes issues with BrAPI when xtype/ytype and row/col values are not given
             val actualData = if (data.size != columns.size) {
@@ -429,12 +424,10 @@ class StudyDao {
                     geoCoordinates = data[geoCoordinatesIndex]
                 }
             }
-            
+
             val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
                 Study.FK to studyId,
                 "observation_unit_db_id" to actualData[uniqueIndex],
-                "primary_id" to if (primaryIndex < 0) "NA" else actualData[primaryIndex],
-                "secondary_id" to if (secondaryIndex < 0) "NA" else actualData[secondaryIndex],
                 "geo_coordinates" to geoCoordinates
             ))
 
@@ -452,28 +445,31 @@ class StudyDao {
                 }
             }
 
-            if (primaryIndex < 0) {
+            if (isBrapi) {
 
-                val attrId = ObservationUnitAttributeDao.getIdByName("Row")
+                if (primaryIndex < 0) {
 
-                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                    Study.FK to studyId,
-                    ObservationUnit.FK to rowid,
-                    ObservationUnitAttribute.FK to attrId,
-                    "observation_unit_value_name" to "NA"
-                ))
-            }
+                    val attrId = ObservationUnitAttributeDao.getIdByName("Row")
 
-            if (secondaryIndex < 0) {
+                    db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                        Study.FK to studyId,
+                        ObservationUnit.FK to rowid,
+                        ObservationUnitAttribute.FK to attrId,
+                        "observation_unit_value_name" to "NA"
+                    ))
+                }
 
-                val attrId = ObservationUnitAttributeDao.getIdByName("Column")
+                if (secondaryIndex < 0) {
 
-                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                    Study.FK to studyId,
-                    ObservationUnit.FK to rowid,
-                    ObservationUnitAttribute.FK to attrId,
-                    "observation_unit_value_name" to "NA"
-                ))
+                    val attrId = ObservationUnitAttributeDao.getIdByName("Column")
+
+                    db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                        Study.FK to studyId,
+                        ObservationUnit.FK to rowid,
+                        ObservationUnitAttribute.FK to attrId,
+                        "observation_unit_value_name" to "NA"
+                    ))
+                }
             }
         }
 

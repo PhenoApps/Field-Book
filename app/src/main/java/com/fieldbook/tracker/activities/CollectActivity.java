@@ -55,6 +55,7 @@ import com.fieldbook.tracker.devices.camera.CanonApi;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
 import com.fieldbook.tracker.dialogs.SearchDialog;
+import com.fieldbook.tracker.fragments.CropImageFragment;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -117,6 +118,7 @@ import org.phenoapps.utils.SoftKeyboardUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -153,6 +155,7 @@ public class CollectActivity extends ThemedActivity
         SensorHelper.RelativeRotationListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
+    public static final int REQUEST_CROP_IMAGE_CODE = 101;
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
 
@@ -483,7 +486,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public String getObservationUnit() {
-        return getCRange().plot_id;
+        return getCRange().uniqueId;
     }
 
     public String getPerson() {
@@ -842,11 +845,11 @@ public class CollectActivity extends ThemedActivity
 
         traitBox.initTraitDetails();
 
+        String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
         // trait is unique, format is not
-        String[] traits = database.getVisibleTrait();
+        String[] traits = database.getVisibleTrait(currentSortOrder);
         if (traits != null) {
             traitBox.initTraitType(traits, rangeSuppress);
-
         }
     }
 
@@ -881,7 +884,7 @@ public class CollectActivity extends ThemedActivity
                 RangeObject ro = rangeBox.getCRange();
 
                 //issue #634 fix for now to check the search query by plot_id which should be the unique id
-                if (Objects.equals(ro.plot_id, searchUnique)) {
+                if (Objects.equals(ro.uniqueId, searchUnique)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -893,7 +896,7 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
+                if (rangeBox.getCRange().primaryId.equals(range) & rangeBox.getCRange().secondaryId.equals(plot)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -905,7 +908,7 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().plot.equals(data)) {
+                if (rangeBox.getCRange().secondaryId.equals(data)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -917,7 +920,7 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().range.equals(data)) {
+                if (rangeBox.getCRange().primaryId.equals(data)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -930,7 +933,7 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().plot_id.equals(data)) {
+                if (rangeBox.getCRange().uniqueId.equals(data)) {
 
                     if (trait == -1) {
                         moveToResultCore(j);
@@ -1186,8 +1189,9 @@ public class CollectActivity extends ThemedActivity
 
         if (trait != null) {
 
+            String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
             //get all traits, filter the preference trait and check it's visibility
-            String[] traits = database.getVisibleTrait();
+            String[] traits = database.getVisibleTrait(currentSortOrder);
 
             try {
 
@@ -1453,7 +1457,7 @@ public class CollectActivity extends ThemedActivity
                             collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), 60),
                             collectDataTapTargetView(R.id.traitTypeTv, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), 80),
                             collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), 60),
-                            collectDataTapTargetView(R.id.valuesPlotRangeHolder, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), 60),
+                            collectDataTapTargetView(R.id.namesHolderLayout, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), 60),
                             collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), 200),
                             collectDataTapTargetView(R.id.missingValue, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description), 60),
                             collectDataTapTargetView(R.id.deleteValue, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description), 60)
@@ -2115,6 +2119,13 @@ public class CollectActivity extends ThemedActivity
 
                 } else triggerTts(fail);
                 break;
+            case REQUEST_CROP_IMAGE_CODE:
+                if (resultCode == RESULT_OK) {
+                    File f = new File(getContext().getCacheDir(), AbstractCameraTrait.TEMPORARY_IMAGE_NAME);
+                    Uri uri = Uri.fromFile(f);
+                    startCropActivity(getCurrentTrait().getId(), uri);
+                }
+                break;
         }
     }
 
@@ -2281,7 +2292,8 @@ public class CollectActivity extends ThemedActivity
      */
     @Override
     public int existsAllTraits(final int traitIndex, final int plotId) {
-        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
+        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects(sortOrder);
         for (int i = 0; i < traits.size(); i++) {
             if (i != traitIndex
                     && !database.getTraitExists(plotId, traits.get(i).getId())) return i;
@@ -2292,7 +2304,8 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public List<Integer> getNonExistingTraits(final int plotId) {
-        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
+        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects(sortOrder);
         final ArrayList<Integer> indices = new ArrayList<>();
         for (int i = 0; i < traits.size(); i++) {
             if (!database.getTraitExists(plotId, traits.get(i).getId()))
@@ -2880,6 +2893,52 @@ public class CollectActivity extends ThemedActivity
 
             Log.e(TAG, "Error logging study entry attributes: " + ex);
 
+        }
+    }
+
+    /**
+     * a function that starts the crop activity and sends it required intent data
+     */
+    public void startCropActivity(String traitId, Uri uri) {
+        try {
+            Intent intent = new Intent(this, CropImageActivity.class);
+            intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(traitId));
+            intent.putExtra(CropImageFragment.EXTRA_IMAGE_URI, uri.toString());
+            cameraXFacade.unbind();
+            startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void requestAndCropImage() {
+        try {
+            Intent intent = new Intent(this, CameraActivity.class);
+            intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
+            cameraXFacade.unbind();
+            startActivityForResult(intent, REQUEST_CROP_IMAGE_CODE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * shows an alert dialog that asks user to define a crop region
+     */
+    public void showCropDialog(String traitId, Uri uri) {
+        try {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+            builder.setTitle(R.string.dialog_crop_title);
+            builder.setMessage(R.string.dialog_crop_message);
+            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                startCropActivity(traitId, uri);
+            });
+            builder.setNegativeButton(android.R.string.no, (dialog, which) -> {
+                dialog.dismiss();
+            });
+            builder.create().show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

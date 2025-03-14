@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- crop handle default size -->
+    <dimen name="crop_handle_size">32dp</dimen>
+
     <!-- landscape image preview sizes for camera trait recycler view, these should be 4:3-->
     <dimen name="camera_preview_landscape_width">150dp</dimen>
     <dimen name="camera_preview_landscape_height">115dp</dimen>
@@ -8,6 +11,10 @@
     <!-- portrait image preview sizes for camera trait recycler view, these should be 4:3-->
     <dimen name="camera_preview_portrait_width">230dp</dimen>
     <dimen name="camera_preview_portrait_height">300dp</dimen>
+
+    <!-- 4:3 crop image sizes, a bit larger than the preview -->
+    <dimen name="crop_image_portrait_width">340dp</dimen>
+    <dimen name="crop_image_portrait_height">480dp</dimen>
 
     <dimen name="brapi_importer_filter_height">40dp</dimen>
 

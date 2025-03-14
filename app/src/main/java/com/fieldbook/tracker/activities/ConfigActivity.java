@@ -378,7 +378,8 @@ public class ConfigActivity extends ThemedActivity {
      */
     private int checkTraitsExist() {
 
-        String[] traits = database.getVisibleTrait();
+        String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+        String[] traits = database.getVisibleTrait(currentSortOrder);
 
         if (!preferences.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
                 || preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
