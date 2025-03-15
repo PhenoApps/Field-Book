@@ -13,3 +13,4 @@
 "location","location","","","","","","true","12"
 "gnss","gnss","","","","","","true","13"
 "GoPro","gopro","","","","","","true","14"
+"angle","angle","","","","degrees","","true","15"
