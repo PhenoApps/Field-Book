@@ -379,11 +379,11 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             checkShowDeleteDialog();
         } else if (itemId == R.id.sortTrait) {
             showTraitSortDialog();
-        } else if (itemId == R.id.importexport) {
+        } else if (itemId == R.id.export) {
             if (BaseDocumentTreeUtil.Companion.getRoot(this) != null
                     && BaseDocumentTreeUtil.Companion.isEnabled(this)
                     && BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait) != null) {
-                importExportDialog();
+                exportTraitFilePermission();
             } else {
                 Toast.makeText(this, R.string.error_storage_directory, Toast.LENGTH_LONG).show();
             }
@@ -436,50 +436,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         ed.putBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, globalVis);
         ed.apply();
         queryAndLoadTraits();
-    }
-
-    private void importExportDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
-
-        ListView myList = layout.findViewById(R.id.myList);
-        String[] sortOptions = new String[2];
-        sortOptions[0] = getString(R.string.dialog_import);
-        sortOptions[1] = getString(R.string.traits_dialog_export);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, sortOptions);
-        myList.setAdapter(adapter);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.settings_traits)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        final AlertDialog importExport = builder.create();
-        importExport.show();
-
-        android.view.WindowManager.LayoutParams params = importExport.getWindow().getAttributes();
-        params.width = LayoutParams.WRAP_CONTENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        importExport.getWindow().setAttributes(params);
-
-        myList.setOnItemClickListener((av, arg1, which, arg3) -> {
-            switch (which) {
-                case 0:
-                    loadTraitFilePermission();
-                    break;
-                case 1:
-                    exportTraitFilePermission();
-                    break;
-            }
-            importExport.dismiss();
-        });
-
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE_IMPORT)
