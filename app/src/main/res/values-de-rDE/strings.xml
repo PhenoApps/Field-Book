@@ -206,4 +206,5 @@
     <!-- canon camera strings -->
     <string name="brapi_traits_filter_title">Merkmale</string>
     <string name="traits_sort_default">Vorgegeben</string>
+    <!--  NearbyShare  -->
 </resources>
