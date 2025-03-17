@@ -1406,7 +1406,6 @@
     <string name="trait_error_invalid_multicat_value">Invalid categorical data was entered.</string>
     <string name="dialog_crash_report_title">Failed to load data</string>
     <string name="dialog_crash_report_message">Press OK to send an anonymous diagnostic report to help improve the app.</string>
-    <string name="dialog_att_chooser_title_default">Choose an attribute</string>
     <string name="dialog_quick_goto_title">Quick GoTo</string>
     <string name="dialog_quick_goto_go">Go</string>
     <string name="quick_goto_primary_hint">Primary ID</string>
