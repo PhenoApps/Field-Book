@@ -152,7 +152,8 @@ public class CollectActivity extends ThemedActivity
         InfoBarAdapter.InfoBarController,
         GPSTracker.GPSTrackerListener,
         SearchDialog.onSearchResultsClickedListener,
-        SensorHelper.RelativeRotationListener {
+        SensorHelper.RelativeRotationListener,
+        SensorHelper.GravityRotationListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int REQUEST_CROP_IMAGE_CODE = 101;
@@ -220,6 +221,7 @@ public class CollectActivity extends ThemedActivity
 
     //used to track rotation relative to device
     private SensorHelper.RotationModel rotationModel = null;
+    private SensorHelper.RotationModel gravityRotationModel = null;
 
     private GPSTracker gps;
 
@@ -2942,6 +2944,16 @@ public class CollectActivity extends ThemedActivity
     @Override
     public SensorHelper.RotationModel getRotationRelativeToDevice() {
         return rotationModel;
+    }
+
+    @Override
+    public void onGravityRotationChanged(@NonNull SensorHelper.RotationModel rotationModel) {
+        this.gravityRotationModel = rotationModel;
+    }
+
+    @Nullable
+    public SensorHelper.RotationModel getDeviceTilt() {
+        return gravityRotationModel;
     }
 
     @Override
