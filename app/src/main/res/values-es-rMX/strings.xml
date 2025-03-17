@@ -1171,4 +1171,6 @@
     <string name="failed_to_fetch_observation_levels">Fallo obteniendo el nivel de las observaciónes</string>
     <string name="traits_sort_default">Predeterminado</string>
     <string name="traits_crop_image_parameter">Cultivo</string>
+    <!--  NearbyShare  -->
+    <string name="preferences_preferences_title">Preferencias</string>
 </resources>
