@@ -956,6 +956,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     @Override
     public void onNewTraitDialogDismiss() {
+        if (!brapiDialogShown) {
+            brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, null, true);
+        }
         queryAndLoadTraits();
     }
 }
