@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
+import android.widget.CheckBox
 import android.widget.ProgressBar
 import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
@@ -50,14 +51,15 @@ open class AttributeChooserDialog(
         fun onAttributeSelected(label: String)
     }
 
-    private lateinit var tabLayout: TabLayout
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var progressBar: ProgressBar
+    protected lateinit var tabLayout: TabLayout
+    protected lateinit var recyclerView: RecyclerView
+    protected lateinit var progressBar: ProgressBar
+    protected lateinit var applyAllCheckbox: CheckBox
 
-    private var attributes = arrayOf<String>()
-    private var traits = arrayOf<TraitObject>()
-    private var other = arrayOf<TraitObject>()
-    private var onAttributeSelectedListener: OnAttributeSelectedListener? = null
+    protected var attributes = arrayOf<String>()
+    protected var traits = arrayOf<TraitObject>()
+    protected var other = arrayOf<TraitObject>()
+    protected var attributeSelectedListener: OnAttributeSelectedListener? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val inflater = requireActivity().layoutInflater
@@ -72,6 +74,7 @@ open class AttributeChooserDialog(
         tabLayout = view.findViewById(R.id.dialog_collect_att_chooser_tl)
         recyclerView = view.findViewById(R.id.dialog_collect_att_chooser_lv)
         progressBar = view.findViewById(R.id.dialog_collect_att_chooser_pb)
+        applyAllCheckbox = view.findViewById(R.id.dialog_collect_att_chooser_checkbox)
 
         recyclerView.layoutManager = LinearLayoutManager(requireActivity())
         recyclerView.adapter = AttributeAdapter(this, null)
@@ -103,7 +106,7 @@ open class AttributeChooserDialog(
     }
 
     fun setOnAttributeSelectedListener(listener: OnAttributeSelectedListener) {
-        onAttributeSelectedListener = listener
+        attributeSelectedListener = listener
     }
 
     private fun loadData() {
@@ -126,7 +129,7 @@ open class AttributeChooserDialog(
         }
     }
 
-    private fun toggleProgressVisibility(show: Boolean) {
+    protected fun toggleProgressVisibility(show: Boolean) {
         progressBar.visibility = if (show) ProgressBar.VISIBLE else ProgressBar.GONE
         tabLayout.visibility = if (show) TabLayout.GONE else TabLayout.VISIBLE
         recyclerView.visibility = if (show) RecyclerView.GONE else RecyclerView.VISIBLE
@@ -137,7 +140,7 @@ open class AttributeChooserDialog(
      * select first tab programmatically to load initial data
      * save the selected tab as preference
      */
-    private fun setupTabLayout() {
+    protected fun setupTabLayout() {
 
         try {
 
@@ -178,7 +181,7 @@ open class AttributeChooserDialog(
     protected open fun getSelected(): String? = null
 
     /** Handles loading data into the recycler view adapter. */
-    private fun loadTab(label: String) {
+    protected fun loadTab(label: String) {
         val attributesLabel = getString(R.string.dialog_att_chooser_attributes)
         val traitsLabel = getString(R.string.dialog_att_chooser_traits)
 
@@ -197,7 +200,7 @@ open class AttributeChooserDialog(
     }
 
     override fun onAttributeClicked(label: String, position: Int) {
-        onAttributeSelectedListener?.onAttributeSelected(label) ?: run {
+        attributeSelectedListener?.onAttributeSelected(label) ?: run {
             Log.w(TAG, "No OnAttributeSelectedListener set for AttributeChooserDialog.")
         }
         dismiss()

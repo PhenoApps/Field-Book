@@ -33,6 +33,85 @@ class StudyDao {
 
     companion object {
 
+        fun getPossibleUniqueAttributes(studyId: Int): List<String> = withDatabase { db ->
+            val query = """
+                SELECT observation_unit_attribute_name 
+                FROM observation_units_attributes 
+                WHERE internal_id_observation_unit_attribute IN (
+                    SELECT observation_unit_attribute_db_id
+                    FROM observation_units_values
+                    WHERE study_id = ?
+                    GROUP BY observation_unit_attribute_db_id
+                    HAVING COUNT(DISTINCT observation_unit_value_name) = COUNT(observation_unit_value_name)
+                )
+            """
+
+            Log.d("StudyDao", "Running query: $query")
+            
+            db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
+                val attributes = mutableListOf<String>()
+                while (cursor.moveToNext()) {
+                    cursor.getString(0)?.let {
+                         attributes.add(it)
+                         Log.d("StudyDao", "Found unique attribute: $it")
+                    }
+                }
+                attributes
+            }
+        } ?: emptyList()
+
+        /**
+        * Updates the observation unit search attribute for a study record.
+        * This attribute is used to identify entries in the barcode search, by default it's the same as the unique_id
+        */
+
+        fun updateSearchAttribute(studyId: Int, newSearchAttribute: String) = withDatabase { db ->
+            db.update(Study.tableName,
+                contentValuesOf("observation_unit_search_attribute" to newSearchAttribute),
+                "${Study.PK} = $studyId",
+                null
+            )
+        }
+
+        /**
+        * Updates the observation unit search attribute for all studies that have this attribute
+        * @return The number of studies that were updated
+        */
+        fun updateSearchAttributeForAllFields(newSearchAttribute: String): Int = withDatabase { db ->
+            // First check which studies have this attribute
+            val studiesWithAttribute = mutableListOf<Int>()
+            
+            val query = """
+                SELECT DISTINCT study_id 
+                FROM observation_units_attributes 
+                WHERE observation_unit_attribute_name = ?
+            """
+            
+            Log.d("StudyDao", "Finding studies with attribute: $newSearchAttribute")
+            
+            db.rawQuery(query, arrayOf(newSearchAttribute)).use { cursor ->
+                while (cursor.moveToNext()) {
+                    cursor.getInt(0).let { studyId ->
+                        studiesWithAttribute.add(studyId)
+                        Log.d("StudyDao", "Found study with matching attribute: $studyId")
+                    }
+                }
+            }
+            
+            // Now update each study that has this attribute
+            var updatedCount = 0
+            if (studiesWithAttribute.isNotEmpty()) {
+                for (studyId in studiesWithAttribute) {
+                    // Fix: Add null safety with the Elvis operator (?:)
+                    val result = updateSearchAttribute(studyId, newSearchAttribute)
+                    if ((result ?: 0) > 0) updatedCount++
+                }
+            }
+            
+            Log.d("StudyDao", "Updated search attribute for $updatedCount studies")
+            updatedCount
+        } ?: 0
+
         private fun fixPlotAttributes(db: SQLiteDatabase) {
 
             db.rawQuery("PRAGMA foreign_keys=OFF;", null).close()
@@ -188,6 +267,7 @@ class StudyDao {
             it.trait_count = this["trait_count"]?.toString()
             it.observation_count = this["observation_count"]?.toString()
             it.trial_name = this["trial_name"]?.toString()
+            it.search_attribute = this["observation_unit_search_attribute"]?.toString()
         }
 
         fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
@@ -238,6 +318,7 @@ class StudyDao {
                     study_sort_name,
                     trial_name,
                     count,
+                    observation_unit_search_attribute,
                     (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count

@@ -204,6 +204,14 @@
     <string name="name_conflict_import_name">import name</string>
     <string name="name_conflict_display_name">display name</string>
 
+    <string name="dialog_att_chooser_title_default">Choose an attribute</string>
+    <string name="search_attribute_dialog_title">Set Search ID</string>
+    <string name="dialog_att_chooser_unique_attributes">Unique Attributes</string>
+    <string name="search_attribute_apply_to_all">Apply choice to all eligible fields</string>
+    <string name="search_attribute_updated">Search attribute updated</string>
+    <string name="search_attribute_updated_all">Search attribute updated for %1$d field(s)</string>
+    <string name="search_multiple_matches_found">Found %1$d matching plots. Showing the first one.</string>
+
 <!--    <string name="field_default_sort_order">import order</string>-->
 
     <string name="field_data_title">Data</string>
