@@ -401,4 +401,5 @@
     <string name="brapi_traits_filter_title">形質</string>
     <string name="dialog_quick_goto_title">Quick GoTo機能</string>
     <string name="traits_sort_default">初期値</string>
+    <!--  NearbyShare  -->
 </resources>
