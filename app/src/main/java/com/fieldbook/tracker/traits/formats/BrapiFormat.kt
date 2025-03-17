@@ -3,6 +3,7 @@ package com.fieldbook.tracker.traits.formats
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 
 class BrapiFormat : TraitFormat(
     format = Formats.BRAPI,
@@ -14,7 +15,7 @@ class BrapiFormat : TraitFormat(
     stringNameAux = { context ->
         PreferenceManager.getDefaultSharedPreferences(context)
             .getString(
-                GeneralKeys.BRAPI_DISPLAY_NAME,
+                PreferenceKeys.BRAPI_DISPLAY_NAME,
                 context.getString(R.string.brapi_edit_display_name_default)
             )
     }

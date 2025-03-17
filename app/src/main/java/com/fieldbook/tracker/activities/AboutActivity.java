@@ -26,6 +26,7 @@ import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.dialogs.CitationDialog;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
 import org.json.JSONException;
@@ -63,7 +64,7 @@ public class AboutActivity extends MaterialAboutActivity {
         MaterialAboutCard.Builder appCardBuilder = new MaterialAboutCard.Builder();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getString(GeneralKeys.THEME, "0").equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
+        if (prefs.getString(PreferenceKeys.THEME, "0").equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
             appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
                     .text(getString(R.string.field_book))
                     .icon(R.mipmap.ic_launcher_monochrome)
@@ -155,7 +156,7 @@ public class AboutActivity extends MaterialAboutActivity {
                 .build());
 
         String theme = PreferenceManager.getDefaultSharedPreferences(this)
-                .getString(GeneralKeys.THEME, "0");
+                .getString(PreferenceKeys.THEME, "0");
 
         int styleId = R.style.AboutLibrariesCustom;
         switch (theme) {

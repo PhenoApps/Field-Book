@@ -1,16 +1,13 @@
 package com.fieldbook.tracker.preferences
 
 import android.app.AlertDialog
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.preference.CheckBoxPreference
-import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.AppIntroActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -18,10 +15,6 @@ import com.fieldbook.tracker.utilities.GeoNavHelper
 
 @AndroidEntryPoint
 class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
-
-    companion object {
-        private const val REQUEST_CODE_APP_INTRO = 1
-    }
 
     @Inject
     lateinit var prefs: SharedPreferences
@@ -34,7 +27,7 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
             getString(R.string.preferences_experimental_title)
 
         hideEmptyPreferenceCategories()
-        val pref = findPreference<CheckBoxPreference>(GeneralKeys.REPEATED_VALUES_PREFERENCE_KEY)
+        val pref = findPreference<CheckBoxPreference>(PreferenceKeys.REPEATED_VALUES_PREFERENCE_KEY)
         pref?.setOnPreferenceChangeListener { _, newValue ->
 
             if (newValue == false) {
@@ -51,20 +44,20 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
             true
         }
 
-        val barcode = findPreference<CheckBoxPreference>(GeneralKeys.MLKIT_PREFERENCE_KEY)
+        val barcode = findPreference<CheckBoxPreference>(PreferenceKeys.MLKIT_PREFERENCE_KEY)
         barcode?.setOnPreferenceChangeListener { _, newValue ->
             true
         }
 
-        val fieldAudio = findPreference<CheckBoxPreference>(GeneralKeys.ENABLE_FIELD_AUDIO)
+        val fieldAudio = findPreference<CheckBoxPreference>(PreferenceKeys.ENABLE_FIELD_AUDIO)
         fieldAudio?.setOnPreferenceChangeListener { _, newValue ->
             context?.let { ctx ->
                 if (newValue as? Boolean == true) {
                     val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
                     prefs.edit()
-                        .putBoolean(GeneralKeys.ENABLE_GEONAV, true)
+                        .putBoolean(PreferenceKeys.ENABLE_GEONAV, true)
                         .putString(
-                            GeneralKeys.GEONAV_LOGGING_MODE,
+                            PreferenceKeys.GEONAV_LOGGING_MODE,
                             GeoNavHelper.GeoNavLoggingMode.LIMITED.value
                         ).apply()
                 }

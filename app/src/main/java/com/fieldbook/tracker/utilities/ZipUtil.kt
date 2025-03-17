@@ -243,7 +243,7 @@ class ZipUtil {
         /**
          * Updates the preferences
          */
-        private fun updatePreferences(ctx: Context, prefMap: Map<*, *>) {
+        fun updatePreferences(ctx: Context, prefMap: Map<*, *>) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
             with (prefs.edit()) {
 
@@ -283,7 +283,7 @@ class ZipUtil {
          * @param prefDoc: DocumentFile object of preference.xml
          * @return Map<String></String>, ?>
          */
-        private fun readXML(ctx: Context, prefDoc: DocumentFile): Map<String, *> {
+        fun readXML(ctx: Context, prefDoc: DocumentFile): Map<String, *> {
             val factory = DocumentBuilderFactory.newInstance()
             return try {
                 val inputStream: InputStream? =

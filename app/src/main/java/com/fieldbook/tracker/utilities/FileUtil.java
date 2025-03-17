@@ -17,6 +17,7 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -65,7 +66,7 @@ public final class FileUtil {
      */
     public static void shareFile(Context context, SharedPreferences preferences, DocumentFile docFile) {
         if (docFile != null && docFile.exists()) {
-            if (preferences.getBoolean(GeneralKeys.ENABLE_SHARE, true)) {
+            if (preferences.getBoolean(PreferenceKeys.ENABLE_SHARE, true)) {
                 Intent intent = new Intent();
                 intent.setAction(android.content.Intent.ACTION_SEND);
                 intent.setType("text/plain");

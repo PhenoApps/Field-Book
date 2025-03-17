@@ -148,7 +148,7 @@ dependencies {
 
     implementation 'com.google.zxing:core:3.4.1'
 
-    implementation('com.github.phenoapps:phenolib:v0.9.52')
+    implementation('com.github.phenoapps:phenolib:v0.9.53')
 
     implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
     implementation 'androidx.media3:media3-exoplayer:1.3.0'
@@ -241,6 +241,8 @@ dependencies {
 
     // Calendar date range picker library
     implementation 'io.github.architshah248.calendar:awesome-calendar:2.0.0'
+
+    implementation 'com.google.android.gms:play-services-nearby:19.3.0'
 
     //AppIntro
     implementation 'com.github.AppIntro:AppIntro:6.3.1'

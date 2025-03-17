@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -107,7 +108,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     public void afterLoadExists(CollectActivity act, @Nullable String value) {
         super.afterLoadExists(act, value);
 
-        String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
+        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
         showLabel = !labelValPref.equals("value");
 
         categoryList = new ArrayList<>();

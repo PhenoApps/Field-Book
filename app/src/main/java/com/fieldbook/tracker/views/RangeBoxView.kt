@@ -23,6 +23,7 @@ import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.Utils
 import java.util.*
 
@@ -363,7 +364,7 @@ class RangeBoxView : ConstraintLayout {
             updateCurrentRange(rangeID[paging - 1])
             saveLastPlot()
             if (cRange.uniqueId.isEmpty()) return
-            if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
+            if (controller.getPreferences().getBoolean(PreferenceKeys.PRIMARY_SOUND, false)) {
                 if (cRange.primaryId != lastRange && lastRange != "") {
                     lastRange = cRange.primaryId
                     controller.getSoundHelper().playPlonk()
@@ -438,7 +439,7 @@ class RangeBoxView : ConstraintLayout {
     fun refresh() {
         updateCurrentRange(rangeID[paging - 1])
         display()
-        if (controller.getPreferences().getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
+        if (controller.getPreferences().getBoolean(PreferenceKeys.PRIMARY_SOUND, false)) {
             if (cRange.primaryId != lastRange && lastRange != "") {
                 lastRange = cRange.primaryId
                 controller.getSoundHelper().playPlonk()
@@ -508,12 +509,12 @@ class RangeBoxView : ConstraintLayout {
         if (!controller.validateData(controller.getCurrentObservation()?.value)) {
             return
         }
-        if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
+        if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
         ) {
             controller.getSoundHelper().playAdvance()
         }
         val entryArrow =
-            controller.getPreferences().getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
+            controller.getPreferences().getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
         if ((entryArrow == "1" || entryArrow == "3") && !controller.getTraitBox().existsTrait()) {
             controller.getSoundHelper().playError()
         } else {
@@ -532,12 +533,12 @@ class RangeBoxView : ConstraintLayout {
         if (!controller.validateData(controller.getCurrentObservation()?.value)) {
             return
         }
-        if (controller.getPreferences().getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
+        if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
         ) {
             controller.getSoundHelper().playAdvance()
         }
         val entryArrow =
-            controller.getPreferences().getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
+            controller.getPreferences().getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
         if ((entryArrow == "2" || entryArrow == "3") && !traitBox.existsTrait()) {
             controller.getSoundHelper().playError()
         } else {
@@ -567,7 +568,7 @@ class RangeBoxView : ConstraintLayout {
         //three skipMode options: 0. disabled 1. skip active trait 2. skip but check all traits
 
         val skipMode = if (fromToolbar) {
-            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0")?.toIntOrNull() ?: 0
+            controller.getPreferences().getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0")?.toIntOrNull() ?: 0
         } else {
             controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "0")?.toIntOrNull() ?: 0
         }

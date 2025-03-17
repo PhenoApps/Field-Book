@@ -37,6 +37,7 @@ import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.ExportUtil
 import com.fieldbook.tracker.utilities.FileUtil
@@ -293,7 +294,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         if (importFormat == ImportFormat.BRAPI) {
             cardViewSync.visibility = View.VISIBLE
             cardViewSync.setOnClickListener {
-                if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
+                if (preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
                     if (BrAPIService.checkMatchBrapiUrl(requireContext(), field.exp_source)) {
                         startSync(field)
                     } else {
