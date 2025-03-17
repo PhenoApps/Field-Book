@@ -216,4 +216,5 @@
     <!-- canon camera strings -->
     <string name="brapi_traits_filter_title">ጸባዮች</string>
     <string name="traits_sort_default">እንደነበረ</string>
+    <!--  NearbyShare  -->
 </resources>
