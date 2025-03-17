@@ -387,4 +387,5 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <string name="brapi_traits_filter_title">caractères</string>
     <string name="dialog_quick_goto_title">Raccourci rapide</string>
     <string name="traits_sort_default">défaut</string>
+    <!--  NearbyShare  -->
 </resources>
