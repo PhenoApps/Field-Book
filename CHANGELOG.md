@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- New Angle trait that uses device accelerometer
 - Barcode attribute can now be selected on a per field basis
 - Primary/Secondar Order are no longer required when importing files (https://github.com/PhenoApps/Field-Book/pull/1169)
 - Labels between entry arrows can be swapped in Collect via new dialog (https://github.com/PhenoApps/Field-Book/pull/1169)
