@@ -969,7 +969,7 @@ public class CollectActivity extends ThemedActivity
                     rangeBox.setRangeByIndex(j - 1);
                     RangeObject ro = rangeBox.getCRange();
 
-                    if (ro.plot_id.equals(matchingObsUnitId)) {
+                    if (ro.uniqueId.equals(matchingObsUnitId)) {
                         moveToResultCore(j);
                         return true;
                     }
@@ -982,7 +982,7 @@ public class CollectActivity extends ThemedActivity
                 rangeBox.setRangeByIndex(j - 1);
                 RangeObject ro = rangeBox.getCRange();
 
-                if (ro.plot_id.equals(data)) {
+                if (ro.uniqueId.equals(data)) {
                     Log.d("Field Book", "Direct match found at index: " + j);
                     moveToResultCore(j);
                     return true;
