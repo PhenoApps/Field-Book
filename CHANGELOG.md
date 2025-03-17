@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quick GoTo setting removed and functionality moved to separate dialog that's enabled by default (https://github.com/PhenoApps/Field-Book/pull/1169)
 
 ### Fixed
+- GNSS trait no longer resets connection when moving between entries
 - Manual trait order no longer reset when leaving screen (https://github.com/PhenoApps/Field-Book/pull/1169)
 
 ## [v6.0.8] - 2025-02-24
