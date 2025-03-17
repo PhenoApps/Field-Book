@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
@@ -49,6 +50,7 @@ import com.fieldbook.tracker.adapters.TraitAdapterController;
 import com.fieldbook.tracker.async.ImportCSVTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.dialogs.ListAddDialog;
 import com.fieldbook.tracker.dialogs.ListSortDialog;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
 import com.fieldbook.tracker.objects.FieldFileObject;
@@ -329,7 +331,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         itemTouchHelper.attachToRecyclerView(traitList);
 
         FloatingActionButton fab = findViewById(R.id.newTrait);
-        fab.setOnClickListener(v -> showTraitDialog(null));
+        fab.setOnClickListener(v -> showImportDialog());
     }
 
     @Override
@@ -520,52 +522,62 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     private void showImportDialog() {
 
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
+        int optionCount = preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false) ? 4 : 3;
+        String[] importArray = new String[optionCount];
+        int[] icons = new int[optionCount];
+        
+        importArray[0] = getString(R.string.traits_dialog_create);
+        importArray[1] = getString(R.string.import_source_local);
+        importArray[2] = getString(R.string.import_source_cloud);
+        
+        icons[0] = R.drawable.ic_ruler;
+        icons[1] = R.drawable.ic_file_generic;
+        icons[2] = R.drawable.ic_file_cloud;
+        
+        // Add BrAPI option if enabled
+        if (optionCount > 3) {
+            String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, 
+                    getString(R.string.brapi_edit_display_name_default));
+            importArray[3] = displayName;
+            icons[3] = R.drawable.ic_adv_brapi;
+        }
 
-        ListView myList = layout.findViewById(R.id.myList);
-        String[] importArray = new String[2];
-        importArray[0] = getString(R.string.import_source_local);
-        importArray[1] = getString(R.string.import_source_cloud);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, importArray);
-        myList.setAdapter(adapter);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.import_dialog_title_traits)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, which) -> dialog.dismiss());
-
-        final AlertDialog importDialog = builder.create();
-
-        importDialog.show();
-
-        android.view.WindowManager.LayoutParams params = importDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        importDialog.getWindow().setAttributes(params);
-
-        myList.setOnItemClickListener((av, arg1, which, arg3) -> {
-            Intent intent = new Intent();
-            switch (which) {
-                case 0:
-                    DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
-                    if (traitDir != null && traitDir.exists()) {
-                        intent.setClassName(this, FileExploreActivity.class.getName());
-                        intent.putExtra("path", traitDir.getUri().toString());
-                        intent.putExtra("include", new String[]{"trt"});
-                        intent.putExtra("title", getString(R.string.traits_dialog_import));
-                        startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
-                    }
-                    break;
-                case 1:
-                    loadCloud();
-                    break;
+        AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0: // Create new trait
+                        showTraitDialog(null);
+                        break;
+                    case 1: // Local
+                        DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(TraitEditorActivity.this, R.string.dir_trait);
+                        if (traitDir != null && traitDir.exists()) {
+                            Intent intent = new Intent();
+                            intent.setClassName(TraitEditorActivity.this, FileExploreActivity.class.getName());
+                            intent.putExtra("path", traitDir.getUri().toString());
+                            intent.putExtra("include", new String[]{"trt"});
+                            intent.putExtra("title", getString(R.string.traits_dialog_import));
+                            startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
+                        }
+                        break;
+                    case 2: // Cloud
+                        loadCloud();
+                        break;
+                    case 3: // BrAPI
+                        startBrapiTraitActivity(false);
+                        break;
+                }
             }
-            importDialog.dismiss();
-        });
+        };
+        
+        ListAddDialog dialog = new ListAddDialog(
+            this,
+            getString(R.string.traits_new_dialog_title),
+            importArray, 
+            icons, 
+            onItemClickListener
+        );
+        dialog.show(getSupportFragmentManager(), "ListAddDialog");
     }
 
     public void startBrapiTraitActivity(boolean fromTraitCreator) {
