@@ -28,7 +28,6 @@ import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
-import io.swagger.client.model.Trait
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
 
@@ -543,6 +542,8 @@ class NewTraitDialog(
     }
 
     private var isShowingCameraOptions = false
+    private var isShowingSpectralOptions = false
+
     override fun onSelected(format: Formats) {
 
         if (format == Formats.BRAPI) {
@@ -569,6 +570,14 @@ class NewTraitDialog(
             traitFormatsRv.adapter = null
 
             showFormatLayouts(Formats.getCameraFormats(), showBack = true)
+
+        } else if (format == Formats.BASE_SPECTRAL && !isShowingSpectralOptions) {
+
+            isShowingSpectralOptions = true
+
+            traitFormatsRv.adapter = null
+
+            showFormatLayouts(Formats.getSpectralFormats(), showBack = true)
 
         } else {
 

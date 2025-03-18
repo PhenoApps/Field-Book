@@ -13,6 +13,7 @@ import com.fieldbook.tracker.utilities.BluetoothHelper
 import com.fieldbook.tracker.utilities.FfmpegHelper
 import com.fieldbook.tracker.utilities.GeoNavHelper
 import com.fieldbook.tracker.utilities.GnssThreadHelper
+import com.fieldbook.tracker.utilities.NixSensorHelper
 import com.fieldbook.tracker.utilities.SensorHelper
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
@@ -63,4 +64,5 @@ interface CollectController: FieldController {
     fun getCurrentObservation(): ObservationModel?
     fun getRotationRelativeToDevice(): SensorHelper.RotationModel?
     fun getDeviceTilt(): SensorHelper.RotationModel?
+    fun getNixSensorHelper(): NixSensorHelper
 }
