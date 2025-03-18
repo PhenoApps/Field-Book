@@ -28,6 +28,7 @@ public class LayoutCollections {
         traitLayouts.add(new UsbCameraTraitLayout(_activity));
         traitLayouts.add(new GoProTraitLayout(_activity));
         traitLayouts.add(new CanonTraitLayout(_activity));
+        traitLayouts.add(new SpectralTraitLayout(_activity));
     }
 
     /**

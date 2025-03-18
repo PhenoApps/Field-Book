@@ -64,6 +64,7 @@ import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
+import com.fieldbook.tracker.traits.SpectralTraitLayout;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
@@ -92,6 +93,7 @@ import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.MediaKeyCodeActionHelper;
+import com.fieldbook.tracker.utilities.NixSensorHelper;
 import com.fieldbook.tracker.utilities.SensorHelper;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -219,6 +221,9 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     CameraXFacade cameraXFacade;
+
+    @Inject
+    NixSensorHelper nixSensorHelper;
 
     //used to track rotation relative to device
     private SensorHelper.RotationModel rotationModel = null;
@@ -748,6 +753,8 @@ public class CollectActivity extends ThemedActivity
                 String format = currentTrait.getFormat();
                 if (format != null && Formats.Companion.isCameraTrait(format)) {
                     ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
+                } else if (format != null && Formats.Companion.isSpectralFormat(format)) {
+                    ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
                 } else {
                     updateObservation(currentTrait, "NA", null);
                     setNaText();
@@ -2927,6 +2934,10 @@ public class CollectActivity extends ThemedActivity
     public CanonApi getCanonApi() {
         return canonApi;
     }
+
+    @NonNull
+    @Override
+    public NixSensorHelper getNixSensorHelper() { return nixSensorHelper; }
 
     @Override
     public void onSearchResultsClicked(String unique, String range, String plot, boolean reload) {

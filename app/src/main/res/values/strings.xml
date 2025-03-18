@@ -283,6 +283,8 @@
     <string name="traits_format_usb_camera">Usb Camera</string>
     <string name="traits_format_go_pro_camera">GoPro</string>
     <string name="traits_format_angle">Angle</string>
+    <string name="traits_format_spectral">Spectral</string>
+    <string name="traits_format_nix">Nix</string>
 
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Trait Format</string>
@@ -1332,6 +1334,15 @@
     <string name="dialog_brapi_filter_active">Active</string>
     <string name="dialog_brapi_filter_choices_title">Filter By</string>
 
+    <!-- spectral trait strings -->
+    <string name="trait_spectral_connect_content_description">Starts a device connection.</string>
+    <string name="select_device">Select Device</string>
+    <string name="no_devices_found">traits_spectral_no_devices_found</string>
+    <string name="list_item_color_close_content_description">Delete this color</string>
+    <string name="delete_color">Delete Color Observation</string>
+    <string name="delete_color_message">This will permanently delete the observation</string>
+    <string name="nix_device_connecting">Device is connecting.</string>
+
     <string name="brapi_studies_filter_title">Studies</string>
     <string name="brapi_trials_filter_title">Trials</string>
     <string name="brapi_filter_dialog_title">Filter By</string>
@@ -1461,4 +1472,5 @@
     <string name="preferences_preferences_title">Preferences</string>
     <string name="nearby_share_export_preferences">Export Preferences</string>
     <string name="nearby_share_import_preferences">Import Preferences</string>
+
 </resources>
