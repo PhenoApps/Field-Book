@@ -11,7 +11,7 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
     //CUSTOM formats
     DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM),
     BASE_PHOTO(Types.CUSTOM), USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM, isCamera = true),
-    LABEL_PRINT(Types.CUSTOM), BRAPI(Types.CUSTOM);
+    LABEL_PRINT(Types.CUSTOM);
 
     companion object {
         fun isCameraTrait(format: String) = format in setOf("photo", "usb camera", "gopro", "canon")
@@ -45,7 +45,6 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
         PERCENT -> PercentFormat()
         DISEASE_RATING -> DiseaseRatingFormat()
         LABEL_PRINT -> ZebraLabelPrintFormat()
-        BRAPI -> BrapiFormat()
         else -> TextFormat()
     }
 

@@ -20,14 +20,14 @@ import com.fieldbook.tracker.R;
 public class ListAddDialog extends DialogFragment {
 
     private Activity activity;
-    private int dialogTitle;
+    private String title;
     private String[] items;
     private int[] icons;
     private AdapterView.OnItemClickListener onItemClickListener;
 
-    public ListAddDialog(Activity activity, int dialogTitle, String[] items, int[] icons, AdapterView.OnItemClickListener onItemClickListener) {
+    public ListAddDialog(Activity activity, String title, String[] items, int[] icons, AdapterView.OnItemClickListener onItemClickListener) {
         this.activity = activity;
-        this.dialogTitle = dialogTitle;
+        this.title = title;
         this.items = items;
         this.icons = icons;
         this.onItemClickListener = onItemClickListener;
@@ -50,7 +50,7 @@ public class ListAddDialog extends DialogFragment {
         listView.setAdapter(adapter);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.AppAlertDialog);
-        builder.setTitle(dialogTitle)
+        builder.setTitle(title)
                 .setCancelable(true)
                 .setView(layout)
                 .setPositiveButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
