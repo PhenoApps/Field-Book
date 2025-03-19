@@ -62,4 +62,5 @@ interface CollectController: FieldController {
     fun takePicture()
     fun getCurrentObservation(): ObservationModel?
     fun getRotationRelativeToDevice(): SensorHelper.RotationModel?
+    fun getDeviceTilt(): SensorHelper.RotationModel?
 }

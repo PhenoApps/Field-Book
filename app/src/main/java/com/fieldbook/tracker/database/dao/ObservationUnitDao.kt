@@ -2,6 +2,7 @@ package com.fieldbook.tracker.database.dao
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
+import android.util.Log
 import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.models.ObservationUnitModel
@@ -58,6 +59,44 @@ class ObservationUnitDao {
                 null
             }
         }
+
+        /**
+        * Find observation units matching a search attribute value
+        * @param studyId The study ID to search within
+        * @param searchValue The value to search for
+        * @return Array of matching observation unit models, or empty array if none found
+        */
+        fun getBySearchAttribute(studyId: Int, searchValue: String): Array<ObservationUnitModel> = withDatabase { db ->
+
+            Log.d("Field Book", "getBySearchAttribute called with studyId: $studyId, searchValue: $searchValue")
+
+            val query = """
+                SELECT ou.*
+                FROM ${ObservationUnit.tableName} ou
+                JOIN observation_units_values ouv ON 
+                    ou.${ObservationUnit.PK} = ouv.observation_unit_id
+                    AND ouv.study_id = ?
+                    AND ouv.observation_unit_value_name = ?
+                    AND ouv.observation_unit_attribute_db_id IN (
+                        SELECT internal_id_observation_unit_attribute
+                        FROM observation_units_attributes
+                        WHERE observation_unit_attribute_name = (
+                            SELECT observation_unit_search_attribute
+                            FROM ${Study.tableName}
+                            WHERE ${Study.PK} = ?
+                        )
+                    )
+            """
+
+            db.rawQuery(query, arrayOf(
+                studyId.toString(),
+                searchValue,
+                studyId.toString()
+            ))
+            .toTable()
+            .map { ObservationUnitModel(it) }
+            .toTypedArray()
+        } ?: emptyArray()
 
         fun getAll(eid: Int): Array<ObservationUnitModel> = withDatabase { db ->
 

@@ -1,5 +1,20 @@
 <changelog>
 
+    <release date="2025-03-17" versionCode="60100" versionName="v6.1.0">
+        <new>Primary/Secondar Order are no longer required when importing files</new>
+        <new>Labels between entry arrows can be swapped in Collect via new dialog</new>
+        <new>New or edited data values are now italicized</new>
+        <new>Settings can be shared between devices using Nearby Share</new>
+        <new>New Angle trait that uses device accelerometer</new>
+        <new>Barcode attribute can now be selected on a per field basis</new>
+        <new>Incoming photos can now be cropped</new>
+        <info>Date trait layout modified to match other formats</info>
+        <info>Audio trait layout modified to display more information</info>
+        <info>Quick GoTo setting removed and functionality moved to separate dialog that's enabled by default</info>
+        <bugfix>GNSS trait no longer resets connection when moving between entries</bugfix>
+        <bugfix>Manual trait order no longer reset when leaving screen</bugfix>
+    </release>
+
     <release date="2025-02-24" versionCode="60008" versionName="v6.0.8">
         <bugfix>Preferences are now correctly imported from database zip files</bugfix>
         <bugfix>BrAPI authorization fix for specific devices</bugfix>

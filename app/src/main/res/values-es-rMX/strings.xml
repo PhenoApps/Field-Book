@@ -927,7 +927,7 @@
     <string name="number_traits_label">Número de Variables:</string>
     <string name="number_observation_label">Número de Observaciones:</string>
     <string name="no_observations_warning">No Se Encontraron Observaciones Para El Estudio. Por favor, Presione Cancelar.</string>
-    <string name="brapi_skipped_traits">Variables obtenidas con éxito. Variables %1$d ignoradas debido a la falta de \"Variable\" BrAPI</string>
+    <string name="brapi_skipped_traits">Variables obtenidas con éxito. %1$d variables ignoradas debido a la falta de \"Variable\" BrAPI</string>
     <string name="brapi_study_incompatible">Este estudio BrAPI es actualmente incompatible con Field Book. Los estudios deben incluir fila y columna en el encabezado.</string>
     <string name="act_collect_no_plots">Este estudio no tiene parcelas guardadas.</string>
     <!-- BrAPI Export -->
@@ -1166,4 +1166,11 @@
     <string name="trait_error_invalid_multicat_value">Se introdujeron datos categóricos inválidos.</string>
     <string name="dialog_crash_report_title">Error al cargar los datos</string>
     <string name="dialog_crash_report_message">Presione OK para enviar un informe de diagnóstico anónimo para ayudar a mejorar la app.</string>
+    <string name="dialog_quick_goto_title">Rápido Ir a</string>
+    <string name="dialog_quick_goto_go">Ir</string>
+    <string name="failed_to_fetch_observation_levels">Fallo obteniendo el nivel de las observaciónes</string>
+    <string name="traits_sort_default">Predeterminado</string>
+    <string name="traits_crop_image_parameter">Cultivo</string>
+    <!--  NearbyShare  -->
+    <string name="preferences_preferences_title">Preferencias</string>
 </resources>

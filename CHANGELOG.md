@@ -8,9 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v6.1.0] - 2025-03-17
+
+### Added
 - Primary/Secondar Order are no longer required when importing files (https://github.com/PhenoApps/Field-Book/pull/1169)
 - Labels between entry arrows can be swapped in Collect via new dialog (https://github.com/PhenoApps/Field-Book/pull/1169)
 - New or edited data values are now italicized (https://github.com/PhenoApps/Field-Book/pull/1169)
+- Settings can be shared between devices using Nearby Share (https://github.com/PhenoApps/Field-Book/pull/1162)
+- New Angle trait that uses device accelerometer (https://github.com/PhenoApps/Field-Book/pull/1140)
+- Barcode attribute can now be selected on a per field basis (https://github.com/PhenoApps/Field-Book/pull/1165)
 - Incoming photos can now be cropped (enable when creating new photo traits) (https://github.com/PhenoApps/Field-Book/pull/1169)
 
 ### Changed
@@ -19,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quick GoTo setting removed and functionality moved to separate dialog that's enabled by default (https://github.com/PhenoApps/Field-Book/pull/1169)
 
 ### Fixed
+- GNSS trait no longer resets connection when moving between entries (https://github.com/PhenoApps/Field-Book/pull/1179)
 - Manual trait order no longer reset when leaving screen (https://github.com/PhenoApps/Field-Book/pull/1169)
 
 ## [v6.0.8] - 2025-02-24
@@ -615,3 +627,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.0.7]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.7
 
 [v6.0.8]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.8
+
+[v6.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.0

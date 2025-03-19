@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.InfoBarModel
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.Utils
 
 /**
@@ -61,7 +62,7 @@ class InfoBarAdapter(private val context: Context) :
     )
 
     init {
-        hidePrefixEnabled = preferences.getBoolean(GeneralKeys.HIDE_INFOBAR_PREFIX, false)
+        hidePrefixEnabled = preferences.getBoolean(PreferenceKeys.HIDE_INFOBAR_PREFIX, false)
         notifyDataSetChanged()
     }
 

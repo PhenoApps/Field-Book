@@ -396,4 +396,7 @@
     <!-- gopro -->
     <!-- canon camera strings -->
     <string name="brapi_traits_filter_title">السمات</string>
+    <string name="dialog_quick_goto_title">إنتقل مباشرة إلى</string>
+    <string name="traits_sort_default">افتراضي</string>
+    <!--  NearbyShare  -->
 </resources>

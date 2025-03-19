@@ -11,6 +11,7 @@ import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 
 public class BrapiPaginationManager {
 
@@ -53,7 +54,7 @@ public class BrapiPaginationManager {
 
     public Integer getDefaultPageSize(){
         String pageSizeStr = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(GeneralKeys.BRAPI_PAGE_SIZE, "50");
+                .getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50");
 
         Integer pageSize = 1000;
 

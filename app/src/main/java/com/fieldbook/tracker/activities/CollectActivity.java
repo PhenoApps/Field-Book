@@ -62,6 +62,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -152,7 +153,8 @@ public class CollectActivity extends ThemedActivity
         InfoBarAdapter.InfoBarController,
         GPSTracker.GPSTrackerListener,
         SearchDialog.onSearchResultsClickedListener,
-        SensorHelper.RelativeRotationListener {
+        SensorHelper.RelativeRotationListener,
+        SensorHelper.GravityRotationListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int REQUEST_CROP_IMAGE_CODE = 101;
@@ -220,6 +222,7 @@ public class CollectActivity extends ThemedActivity
 
     //used to track rotation relative to device
     private SensorHelper.RotationModel rotationModel = null;
+    private SensorHelper.RotationModel gravityRotationModel = null;
 
     private GPSTracker gps;
 
@@ -339,7 +342,7 @@ public class CollectActivity extends ThemedActivity
         geoNavHelper = new GeoNavHelper(this);
 
         ttsHelper = new TextToSpeechHelper(this, () -> {
-            String lang = mPrefs.getString(GeneralKeys.TTS_LANGUAGE, "-1");
+            String lang = mPrefs.getString(PreferenceKeys.TTS_LANGUAGE, "-1");
             if (!lang.equals("-1")) {
                 Set<Locale> locales = TextToSpeechHelper.Companion.getAvailableLocales();
                 for (Locale l : locales) {
@@ -354,7 +357,7 @@ public class CollectActivity extends ThemedActivity
 
         sensorHelper.register();
 
-        mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
+        mlkitEnabled = mPrefs.getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
 
         loadScreen();
 
@@ -377,7 +380,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public void triggerTts(String text) {
-        if (preferences.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
+        if (preferences.getBoolean(PreferenceKeys.TTS_LANGUAGE_ENABLED, false)) {
             ttsHelper.speak(text);
         }
     }
@@ -579,7 +582,7 @@ public class CollectActivity extends ThemedActivity
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layout);
 
-        if (preferences.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)) {
+        if (preferences.getBoolean(PreferenceKeys.FLIP_FLOP_ARROWS, false)) {
             constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.TOP,
                     R.id.act_collect_infobar_rv, ConstraintSet.BOTTOM, 0);
             constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.BOTTOM,
@@ -928,7 +931,7 @@ public class CollectActivity extends ThemedActivity
         }
 
         //move to plot id
-        if (command.equals("id") || command.equals("barcode")) {
+        if (command.equals("id")) {
             int rangeSize = plotIndices.length;
             for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);
@@ -944,10 +947,146 @@ public class CollectActivity extends ThemedActivity
             }
         }
 
+        if (command.equals("barcode")) {
+            int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+            Log.d("Field Book", "Barcode search in current field: " + currentFieldId + ", searching for: " + data);
+
+            ObservationUnitModel[] matchingUnits = database.getObservationUnitsBySearchAttribute(
+                    currentFieldId, data);
+            Log.d("Field Book", "Search attribute results: " + matchingUnits.length + " units found");
+
+            if (matchingUnits.length > 0) {
+                // If found by search attribute, move to that observation unit
+                String matchingObsUnitId = matchingUnits[0].getObservation_unit_db_id();
+                Log.d("Field Book", "Found match by search attribute. Unit ID: " + matchingObsUnitId);
+
+                // If multiple matches found, show notification
+                if (matchingUnits.length > 1) {
+                    Utils.makeToast(this, getString(R.string.search_multiple_matches_found, matchingUnits.length));
+                }
+
+                for (int j = 1; j <= plotIndices.length; j++) {
+                    rangeBox.setRangeByIndex(j - 1);
+                    RangeObject ro = rangeBox.getCRange();
+
+                    if (ro.uniqueId.equals(matchingObsUnitId)) {
+                        moveToResultCore(j);
+                        return true;
+                    }
+                }
+            }
+
+            // Fallback: check if the barcode directly matches a plot_id
+            Log.d("Field Book", "Falling back to direct plot_id matching");
+            for (int j = 1; j <= plotIndices.length; j++) {
+                rangeBox.setRangeByIndex(j - 1);
+                RangeObject ro = rangeBox.getCRange();
+
+                if (ro.uniqueId.equals(data)) {
+                    Log.d("Field Book", "Direct match found at index: " + j);
+                    moveToResultCore(j);
+                    return true;
+                }
+            }
+
+            // Check other fields if we didn't find it in the current field
+            Log.d("Field Book", "Not found in current field, trying other fields");
+            return searchAcrossAllFields(data);
+        }
+
         if (!command.equals("quickgoto") && !command.equals("barcode"))
             Utils.makeToast(this, getString(R.string.main_toolbar_moveto_no_match));
 
         return false;
+    }
+
+    /**
+     * Searches for a barcode across all fields when not found in the current field.
+     * @param searchValue The barcode or search value to find
+     * @return true if found in another field, false otherwise
+     */
+    private boolean searchAcrossAllFields(String searchValue) {
+        Log.d("Field Book", "Searching across all fields for: " + searchValue);
+
+        boolean found = false;
+        FieldObject studyObj = null;
+
+        // Store search value in inputPlotId for use in the fallback
+        inputPlotId = searchValue;
+
+        int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+        Log.d("Field Book", "Current field ID: " + currentFieldId);
+
+        // Check all other fields by search attribute
+        ArrayList<FieldObject> allFields = database.getAllFieldObjects();
+        Log.d("Field Book", "Searching across " + allFields.size() + " fields");
+
+        for (FieldObject field : allFields) {
+            // Skip the current field
+            if (field.getExp_id() == currentFieldId) {
+                continue;
+            }
+
+            Log.d("Field Book", "Checking field: " + field.getExp_id() + " (" + field.getExp_name() + ")");
+
+            ObservationUnitModel[] matchingUnits = database.getObservationUnitsBySearchAttribute(
+                    field.getExp_id(), searchValue);
+
+            Log.d("Field Book", "Found " + matchingUnits.length + " matches in field " + field.getExp_id());
+
+            if (matchingUnits.length > 0) {
+                studyObj = field;
+                String oldPlotId = inputPlotId;
+                inputPlotId = matchingUnits[0].getObservation_unit_db_id();
+                Log.d("Field Book", "Match found! Field: " + field.getExp_name() +
+                        ", unit ID updated from " + oldPlotId + " to " + inputPlotId);
+                found = true;
+                break;
+            }
+        }
+
+        // If not found by search attribute in any field, try direct plot_id matching
+        if (!found) {
+            Log.d("Field Book", "No matches by search attribute, trying direct ID match");
+
+            ObservationUnitModel[] models = database.getAllObservationUnits();
+
+            for (ObservationUnitModel m : models) {
+                if (m.getObservation_unit_db_id().equals(searchValue)) {
+                    FieldObject study = database.getFieldObject(m.getStudy_id());
+                    if (study != null && study.getExp_name() != null) {
+                        studyObj = study;
+                        found = true;
+                        Log.d("Field Book", "Direct match found in study: " + study.getExp_name());
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Handle the result of the search
+        if (found && studyObj != null && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
+            int studyId = studyObj.getExp_id();
+            String fieldName = studyObj.getExp_alias();
+            
+            // Save the matching observation unit ID from the matched unit, not the search value
+            final String matchedObsUnitId = inputPlotId; // This should be the one set earlier from matchingUnits[0]
+            
+            Log.d("Field Book", "Showing navigation prompt to field: " + fieldName + " and plot ID: " + matchedObsUnitId);
+            
+            String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
+            
+            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), 
+                msg, R.id.toolbarBottom, 8000, null,
+                (v) -> switchField(studyId, matchedObsUnitId));
+                
+            return true;
+        } else {
+            Log.d("Field Book", "No match found in any field");
+            soundHelper.playError();
+            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+            return false;
+        }
     }
 
     private void moveToResultCore(int j) {
@@ -1088,10 +1227,10 @@ public class CollectActivity extends ThemedActivity
 
         // Update menu item visibility
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
-            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
-            systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
-            systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
+            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
+            systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
+            systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(PreferenceKeys.DATAGRID_SETTING, false));
         }
 
         refreshInfoBarAdapter();
@@ -1138,7 +1277,7 @@ public class CollectActivity extends ThemedActivity
 
         mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
 
-        if (mPrefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
+        if (mPrefs.getBoolean(PreferenceKeys.ENABLE_GEONAV, false)) {
 
             //setup logger whenever activity resumes
             geoNavHelper.setupGeoNavLogger();
@@ -1343,7 +1482,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     private void customizeToolbarIcons() {
-        Set<String> entries = preferences.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
+        Set<String> entries = preferences.getStringSet(PreferenceKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
 
         if (systemMenu != null) {
             systemMenu.findItem(R.id.search).setVisible(entries.contains("search"));
@@ -1359,22 +1498,22 @@ public class CollectActivity extends ThemedActivity
 
         systemMenu = menu;
 
-        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
-        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
-        systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
-        systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
+        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
+        systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
+        systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(PreferenceKeys.DATAGRID_SETTING, false));
 
         //toggle repeated values indicator
         systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator).setVisible(collectInputView.isRepeatEnabled());
 
         //added in geonav 310 only make goenav switch visible if preference is set
         MenuItem geoNavEnable = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
-        geoNavEnable.setVisible(mPrefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false));
+        geoNavEnable.setVisible(mPrefs.getBoolean(PreferenceKeys.ENABLE_GEONAV, false));
 //        View actionView = MenuItemCompat.getActionView(geoNavEnable);
 //        actionView.setOnClickListener((View) -> onOptionsItemSelected(geoNavEnable));
 
         MenuItem fieldAudioMic = systemMenu.findItem(R.id.field_audio_mic);
-        fieldAudioMic.setVisible(mPrefs.getBoolean(GeneralKeys.ENABLE_FIELD_AUDIO, false));
+        fieldAudioMic.setVisible(mPrefs.getBoolean(PreferenceKeys.ENABLE_FIELD_AUDIO, false));
 
         customizeToolbarIcons();
 
@@ -1503,7 +1642,7 @@ public class CollectActivity extends ThemedActivity
             rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, true));
             refreshMain();
         } else if (itemId == jumpToPlotId) {
-            String moveToUniqueIdValue = preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "");
+            String moveToUniqueIdValue = preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "");
             if (moveToUniqueIdValue.equals("1")) {
                 moveToPlotID();
             } else if (moveToUniqueIdValue.equals("2")) {
@@ -1850,7 +1989,7 @@ public class CollectActivity extends ThemedActivity
                 inputPlotId = barcodeId.getText().toString();
                 rangeBox.setAllRangeID();
                 int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id", rangeID, null, null, inputPlotId, -1);
+                moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
                 goToId.dismiss();
             }
         });
@@ -1996,57 +2135,42 @@ public class CollectActivity extends ThemedActivity
                 }
                 break;
             case BARCODE_SEARCH_CODE:
-                if(resultCode == RESULT_OK) {
+                if (resultCode == RESULT_OK) {
+                    Log.d("Field Book", "Barcode scan successful");
 
-                    if (geoNavHelper.getSnackbar() != null) geoNavHelper.getSnackbar().dismiss();
-                    if(mlkitEnabled) {
-                        inputPlotId = data.getStringExtra("barcode");
+                    if (geoNavHelper.getSnackbar() != null) {
+                        geoNavHelper.getSnackbar().dismiss();
                     }
-                    else {
-                        IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                        inputPlotId = plotSearchResult.getContents();
-                    }
-                    rangeBox.setAllRangeID();
-                    int[] rangeID = rangeBox.getRangeID();
-                    boolean success = moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
 
-                    //play success or error sound if the plotId was not found
-                    if (success) {
-                        soundHelper.playCelebrate();
+                    String barcodeValue;
+                    if (mlkitEnabled) {
+                        barcodeValue = data.getStringExtra("barcode");
                     } else {
-                        boolean found = false;
-                        FieldObject studyObj = null;
-                        ObservationUnitModel[] models = database.getAllObservationUnits();
-                        for (ObservationUnitModel m : models) {
-                            if (m.getObservation_unit_db_id().equals(inputPlotId)) {
-
-                                FieldObject study = database.getFieldObject(m.getStudy_id());
-                                if (study != null && study.getExp_name() != null) {
-                                    studyObj = study;
-                                    found = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (found && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
-
-                            int studyId = studyObj.getExp_id();
-                            String fieldName = studyObj.getExp_alias();
-
-                            String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
-
-                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, R.id.toolbarBottom,8000, null,
-                                (v) -> switchField(studyId, null));
-
-                        } else {
-
-                            soundHelper.playError();
-
-                            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
-
-                        }
+                        IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                        barcodeValue = plotSearchResult.getContents();
                     }
+
+                    if (barcodeValue != null && !barcodeValue.isEmpty()) {
+                        Log.d("Field Book", "Scanned barcode: " + barcodeValue);
+
+                        // Set inputPlotId globally to ensure it's available everywhere
+                        inputPlotId = barcodeValue;
+
+                        rangeBox.setAllRangeID();
+                        int[] rangeID = rangeBox.getRangeID();
+
+                        boolean success = moveToSearch("barcode", rangeID, null, null, barcodeValue, -1);
+
+                        // If success is true, moveToSearch found the barcode, either in current field
+                        // or via the fallback in another field. Success sound happens in moveToSearch
+                        // if needed. No additional action required here.
+                    } else {
+                        Log.d("Field Book", "Barcode scan returned empty result");
+                        soundHelper.playError();
+                        Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+                    }
+                } else {
+                    Log.d("Field Book", "Barcode scan cancelled or failed");
                 }
                 break;
             case BARCODE_COLLECT_CODE:
@@ -2383,11 +2507,11 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public boolean isCyclingTraitsAdvances() {
-        return preferences.getBoolean(GeneralKeys.CYCLING_TRAITS_ADVANCES, false);
+        return preferences.getBoolean(PreferenceKeys.CYCLING_TRAITS_ADVANCES, false);
     }
 
     public boolean isReturnFirstTrait() {
-        return preferences.getBoolean(GeneralKeys.RETURN_FIRST_TRAIT, false);
+        return preferences.getBoolean(PreferenceKeys.RETURN_FIRST_TRAIT, false);
     }
 
     /**
@@ -2545,7 +2669,7 @@ public class CollectActivity extends ThemedActivity
             try {
 
                 String labelValPref = ((CollectActivity) context).getPreferences()
-                        .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value");
+                        .getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value");
                 if (labelValPref == null) {
                     labelValPref = "value";
                 }
@@ -2821,6 +2945,16 @@ public class CollectActivity extends ThemedActivity
     @Override
     public SensorHelper.RotationModel getRotationRelativeToDevice() {
         return rotationModel;
+    }
+
+    @Override
+    public void onGravityRotationChanged(@NonNull SensorHelper.RotationModel rotationModel) {
+        this.gravityRotationModel = rotationModel;
+    }
+
+    @Nullable
+    public SensorHelper.RotationModel getDeviceTilt() {
+        return gravityRotationModel;
     }
 
     @Override

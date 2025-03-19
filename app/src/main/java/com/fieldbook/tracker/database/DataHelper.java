@@ -52,15 +52,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,7 +78,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
 public class DataHelper {
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 11;
+    public static final int DATABASE_VERSION = 12;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -886,6 +890,26 @@ public class DataHelper {
 //
 //        db.setTransactionSuccessful();
 //        db.endTransaction();
+    }
+
+    public List<String> getPossibleUniqueAttributes(int studyId) {
+        open();
+        return StudyDao.Companion.getPossibleUniqueAttributes(studyId);
+    }
+
+    public void updateSearchAttribute(int studyId, String newSearchAttribute) {
+        open();
+        StudyDao.Companion.updateSearchAttribute(studyId, newSearchAttribute);
+    }
+    
+    public int updateSearchAttributeForAllFields(String newSearchAttribute) {
+        open();
+        return StudyDao.Companion.updateSearchAttributeForAllFields(newSearchAttribute);
+    }
+
+    public ObservationUnitModel[] getObservationUnitsBySearchAttribute(int studyId, String searchValue) {
+        open();
+        return ObservationUnitDao.Companion.getBySearchAttribute(studyId, searchValue);
     }
 
     public void updateImages(List<FieldBookImage> images) {
@@ -3054,6 +3078,13 @@ public class DataHelper {
                 helper.fixStudyAliases(db);
 
             }
+
+            if (oldVersion <= 11 && newVersion >= 12) {
+                // Add observation_unit_search_attribute column to studies table, use study_unique_id_name as default value
+                db.execSQL("ALTER TABLE studies ADD COLUMN observation_unit_search_attribute TEXT");
+                db.execSQL("UPDATE studies SET observation_unit_search_attribute = study_unique_id_name");
+            }
+
         }
     }
 }

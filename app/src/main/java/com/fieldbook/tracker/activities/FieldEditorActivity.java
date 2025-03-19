@@ -64,6 +64,7 @@ import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
@@ -195,7 +196,7 @@ public class FieldEditorActivity extends ThemedActivity
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
         }
 
         queryAndLoadFields();
@@ -384,8 +385,8 @@ public class FieldEditorActivity extends ThemedActivity
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_cloud);
         importArray[2] = getString(R.string.fields_new_create_field);
-        if (preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false)) {
-            String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
+        if (preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
+            String displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
             importArray = Arrays.copyOf(importArray, importArray.length + 1);
             importArray[3] = displayName;
         }
@@ -460,7 +461,7 @@ public class FieldEditorActivity extends ThemedActivity
     public void loadBrAPI() {
 
         if (Utils.isConnected(this)) {
-            if (prefs.getBoolean(GeneralKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)) {
+            if (prefs.getBoolean(PreferenceKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)) {
                 Intent intent = new Intent(this, BrapiStudyFilterActivity.class);
                 BrapiFilterCache.Companion.checkClearCache(this);
                 startActivityForResult(intent, REQUEST_BRAPI_IMPORT_ACTIVITY);
@@ -516,7 +517,7 @@ public class FieldEditorActivity extends ThemedActivity
         new MenuInflater(FieldEditorActivity.this).inflate(R.menu.menu_fields, menu);
 
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
 
         return true;
     }

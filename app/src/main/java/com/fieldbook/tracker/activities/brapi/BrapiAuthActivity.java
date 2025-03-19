@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.ThemedActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 
 import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthorizationException;
@@ -59,7 +60,7 @@ public class BrapiAuthActivity extends ThemedActivity {
         // Start our login process
         //when coming back from deep link this check keeps app from auto-re-authenticating
         if (getIntent() != null && getIntent().getData() == null) {
-            String flow = preferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+            String flow = preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
             if (flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
                 authorizeBrAPI_OLD(preferences, this);
             } else {
@@ -88,7 +89,7 @@ public class BrapiAuthActivity extends ThemedActivity {
 
             if (data != null) {
                 // authorization completed
-                String flow = preferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+                String flow = preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
                 if (flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
                     checkBrapiAuth_OLD(data);
                 } else {
@@ -149,22 +150,22 @@ public class BrapiAuthActivity extends ThemedActivity {
 
     public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(GeneralKeys.BRAPI_TOKEN, null);
+        editor.putString(PreferenceKeys.BRAPI_TOKEN, null);
         editor.apply();
 
-        String flow = sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+        String flow = sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
         final String responseType = flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)) ?
                 ResponseTypeValues.TOKEN : ResponseTypeValues.CODE;
 
         try {
-            String clientId = sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
-            String scope = sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_SCOPE, "");
+            String clientId = sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
+            String scope = sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, "");
 
             // Authorization code flow works better with custom URL scheme fieldbook://app/auth
             // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
             Uri redirectURI = flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)) ?
                     Uri.parse("https://phenoapps.org/field-book") : Uri.parse("fieldbook://app/auth");
-            Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_URL, ""));
+            Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_URL, ""));
 
             ConnectionBuilder builder = getConnectionBuilder();
 
@@ -237,11 +238,11 @@ public class BrapiAuthActivity extends ThemedActivity {
 
     public void authorizeBrAPI_OLD(SharedPreferences sharedPreferences, Context context) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(GeneralKeys.BRAPI_TOKEN, null);
+        editor.putString(PreferenceKeys.BRAPI_TOKEN, null);
         editor.apply();
 
         try {
-            String url = sharedPreferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://";
+            String url = sharedPreferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://";
             try {
                 // Go to url with the default browser
                 Uri uri = Uri.parse(url);
@@ -274,7 +275,7 @@ public class BrapiAuthActivity extends ThemedActivity {
     private void authSuccess(String accessToken) {
 
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(GeneralKeys.BRAPI_TOKEN, accessToken);
+        editor.putString(PreferenceKeys.BRAPI_TOKEN, accessToken);
         editor.apply();
 
         // Clear our data from our deep link so the app doesn't think it is
