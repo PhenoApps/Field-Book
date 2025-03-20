@@ -488,7 +488,7 @@ class CropImageView : ConstraintLayout {
                                 cropHandleMid
                             )) {
                                 hand?.x = hand!!.x + deltaX
-                                hand.y += deltaY
+                                hand?.y = hand!!.y + deltaY
                             }
                         }
 
