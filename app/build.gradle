@@ -249,6 +249,9 @@ dependencies {
     //AppIntro
     implementation 'com.github.AppIntro:AppIntro:6.3.1'
 
+    // DataGrid
+    implementation "io.github.oleksandrbalan:lazytable:1.10.0"
+
     // Add Compose related plugins
     implementation platform('androidx.compose:compose-bom:2025.03.00')
     // Integration with activities
