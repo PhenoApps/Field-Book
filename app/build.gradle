@@ -1,10 +1,11 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'com.google.dagger.hilt.android'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: 'com.google.devtools.ksp'
 
 Properties props = new Properties()
 props.load(new FileInputStream("$project.rootDir/version.properties"))
@@ -89,6 +90,7 @@ android {
         buildConfig = true
         dataBinding = true
         viewBinding = true
+        compose true
     }
 
     compileOptions {
@@ -199,15 +201,15 @@ dependencies {
     implementation 'androidx.documentfile:documentfile:1.0.1'
 
     //hilt dependency injection
-    implementation "com.google.dagger:hilt-android:2.49"
+    implementation "com.google.dagger:hilt-android:2.51.1"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-    kapt "com.google.dagger:hilt-compiler:2.49"
+    ksp "com.google.dagger:hilt-compiler:2.51.1"
 
     implementation 'androidx.test.ext:junit-ktx:1.1.5'
 
     implementation 'com.google.mlkit:barcode-scanning:17.2.0'
 
-    kapt 'com.android.databinding:compiler:3.1.4'
+    ksp 'com.android.databinding:compiler:3.1.4'
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
@@ -247,6 +249,21 @@ dependencies {
     //AppIntro
     implementation 'com.github.AppIntro:AppIntro:6.3.1'
 
+    // Add Compose related plugins
+    implementation platform('androidx.compose:compose-bom:2025.03.00')
+    // Integration with activities
+    implementation 'androidx.activity:activity-compose:1.7.2'
+
+    // Material Design 3
+    implementation 'androidx.compose.material3:material3'
+    //  foundational components
+    implementation 'androidx.compose.foundation:foundation'
+    implementation 'androidx.compose.ui:ui'
+
+    // Android Studio Preview support
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+
     // Core library
     androidTestImplementation "androidx.test:core:$coreVersion"
 
@@ -273,19 +290,14 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
 
     // For instrumented tests.
-    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.49'
+    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.56'
     // ...with Kotlin.
-    kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.49'
+    kspAndroidTest 'com.google.dagger:hilt-android-compiler:256'
 
     // For trait data charts
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
-}
-
-kapt {
-    //used in hilt documentation says 'Allow references to generated code"
-    correctErrorTypes true
 }
 
 repositories {
