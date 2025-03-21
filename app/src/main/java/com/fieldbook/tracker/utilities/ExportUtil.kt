@@ -436,6 +436,9 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private fun createExportFile(cursor: Cursor, fileType: String, fileString: String, columns: ArrayList<String>) {
         val fileName = "${fileString}_$fileType.csv"
         val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+
+        val deviceName = preferences.getString(GeneralKeys.DEVICE_NAME, Build.MODEL) ?: Build.MODEL
+
         exportDir?.let { dir ->
             if (dir.exists()) {
                 val file = dir.createFile("text/csv", fileName)
@@ -447,7 +450,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                             val fw = OutputStreamWriter(stream)
                             val csvWriter = CSVWriter(fw, cursor)
                             when (fileType) {
-                                "database" -> csvWriter.writeDatabaseFormat(columns)
+                                "database" -> csvWriter.writeDatabaseFormat(columns, deviceName)
                                 "table" -> {
                                     val newColumns = columns.toTypedArray()
                                     val labels = exportTrait.map { it.name }

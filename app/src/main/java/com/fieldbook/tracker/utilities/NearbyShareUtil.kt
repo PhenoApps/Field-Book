@@ -341,7 +341,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                 val advertisingOptions = AdvertisingOptions.Builder().setStrategy(STRATEGY).build()
 
                 try {
-                    val deviceName = prefs.getString(GeneralKeys.DEVICE_NAME, "") ?: Build.MODEL
+                    val deviceName = prefs.getString(GeneralKeys.DEVICE_NAME, Build.MODEL) ?: Build.MODEL
 
                     connectionsClient.startAdvertising(deviceName, SERVICE_ID, connectionLifecycleCallback, advertisingOptions)
                         .addOnSuccessListener {
@@ -522,7 +522,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
             return
         }
 
-        val discoveringDeviceName = prefs.getString(GeneralKeys.DEVICE_NAME, "") ?: Build.MODEL
+        val discoveringDeviceName = prefs.getString(GeneralKeys.DEVICE_NAME, Build.MODEL) ?: Build.MODEL
         val endpoints = mDiscoveredEndpoints.values.toList()
         val deviceNames = endpoints.map { it.name }.toTypedArray()
 
