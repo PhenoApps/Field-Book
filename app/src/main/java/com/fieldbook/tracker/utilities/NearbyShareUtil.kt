@@ -2,6 +2,7 @@ package com.fieldbook.tracker.utilities
 
 import android.Manifest
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
@@ -15,6 +16,7 @@ import androidx.core.app.ActivityCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.FragmentActivity
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.AdvertisingOptions
 import com.google.android.gms.nearby.connection.ConnectionInfo
@@ -80,6 +82,9 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
     private var isMostRecentTransferSuccess: Boolean = false
 
     private val scope = CoroutineScope(Dispatchers.Main)
+
+    @Inject
+    lateinit var prefs: SharedPreferences
 
     companion object {
         private val STRATEGY = Strategy.P2P_STAR
@@ -336,7 +341,9 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                 val advertisingOptions = AdvertisingOptions.Builder().setStrategy(STRATEGY).build()
 
                 try {
-                    connectionsClient.startAdvertising(Build.MODEL, SERVICE_ID, connectionLifecycleCallback, advertisingOptions)
+                    val deviceName = prefs.getString(GeneralKeys.DEVICE_NAME, "") ?: Build.MODEL
+
+                    connectionsClient.startAdvertising(deviceName, SERVICE_ID, connectionLifecycleCallback, advertisingOptions)
                         .addOnSuccessListener {
                             isAdvertising = true
                             setProgressMessage(getString(R.string.nearby_share_waiting_for_receivers))
@@ -403,8 +410,17 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
     }
 
     private fun disconnectEstablishedConnections() {
-        mEstablishedConnections.toList().forEach { endpointId ->
-            connectionsClient.disconnectFromEndpoint(endpointId)
+        try {
+            mEstablishedConnections.toList().forEach { endpointId ->
+                try {
+                    connectionsClient.disconnectFromEndpoint(endpointId)
+                } catch (e: Exception) {
+                    Log.e("NearbyShareUtil", "Error disconnecting from endpoint $endpointId: ${e.message}", e)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("NearbyShareUtil", "Error during disconnection: ${e.message}", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
 
@@ -421,14 +437,14 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
 
         if (isAdvertising) stopAdvertising()
         if (isDiscovering) stopDiscovering()
+
+        resetParameters()
     }
 
     private fun stopAdvertising() {
         if (isAdvertising) {
             connectionsClient.stopAdvertising()
             isAdvertising = false
-
-            resetParameters()
         }
     }
 
@@ -436,8 +452,6 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         if (isDiscovering) {
             connectionsClient.stopDiscovery()
             isDiscovering = false
-
-            resetParameters()
         }
     }
 
@@ -508,6 +522,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
             return
         }
 
+        val discoveringDeviceName = prefs.getString(GeneralKeys.DEVICE_NAME, "") ?: Build.MODEL
         val endpoints = mDiscoveredEndpoints.values.toList()
         val deviceNames = endpoints.map { it.name }.toTypedArray()
 
@@ -517,7 +532,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
             .setTitle(getString(R.string.dialog_device_selection_title))
             .setItems(deviceNames) { dialog, which ->
                 val selectedEndpoint = endpoints[which]
-                connectionsClient.requestConnection(Build.MODEL, selectedEndpoint.id, connectionLifecycleCallback)
+                connectionsClient.requestConnection(discoveringDeviceName, selectedEndpoint.id, connectionLifecycleCallback)
                     .addOnFailureListener { e ->
                         Utils.makeToast(context, String.format(getString(R.string.nearby_share_failed_request), e.message))
                     }
