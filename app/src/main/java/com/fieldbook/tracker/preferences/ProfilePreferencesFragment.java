@@ -2,8 +2,8 @@ package com.fieldbook.tracker.preferences;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,17 +11,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import androidx.preference.CheckBoxPreference;
-import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
-import com.google.firebase.crashlytics.FirebaseCrashlytics;
-
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
@@ -38,6 +32,10 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 //    private ListPreference verificationInterval;
     private AlertDialog personDialog;
 
+    private Preference profileDeviceName;
+
+    private AlertDialog deviceNameDialog;
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
@@ -46,11 +44,23 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_profile));
 
         profilePerson = findPreference("pref_profile_person");
-        profilePerson.setSummary(personSummary());
-//        verificationInterval = findPreference("com.tracker.fieldbook.preference.require_user_interval");
+        if (profilePerson != null) {
+            profilePerson.setSummary(personSummary());
+        }
+        //        verificationInterval = findPreference("com.tracker.fieldbook.preference.require_user_interval");
+
+        profileDeviceName = findPreference("pref_profile_device_name");
+        if (profileDeviceName != null) {
+            profileDeviceName.setSummary(deviceNameSummary());
+        }
 
         profilePerson.setOnPreferenceClickListener(preference -> {
             showPersonDialog();
+            return true;
+        });
+
+        profileDeviceName.setOnPreferenceClickListener(preference -> {
+            showDeviceNameDialog();
             return true;
         });
 
@@ -126,6 +136,55 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         personDialog.getWindow().setAttributes(langParams);
     }
 
+
+    private void showDeviceNameDialog() {
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.dialog_device_name, null);
+        final EditText deviceName = layout.findViewById(R.id.deviceName);
+        // set name to default if not set
+        deviceName.setText(preferences.getString(GeneralKeys.DEVICE_NAME, Build.MODEL));
+
+        deviceName.setSelectAllOnFocus(true);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
+        builder.setTitle(R.string.preferences_profile_device_name_dialog_title)
+                .setCancelable(true)
+                .setView(layout);
+
+        builder.setPositiveButton(getString(R.string.dialog_save), null);
+        builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, i) -> dialog.dismiss());
+        builder.setNeutralButton(getString(R.string.dialog_clear), null);
+
+        deviceNameDialog = builder.create();
+        deviceNameDialog.setOnShowListener(dialog -> {
+            AlertDialog alertDialog = (AlertDialog) dialog;
+            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String deviceNameStr = deviceName.getText().toString().trim();
+                if (deviceNameStr.isEmpty()) {
+                    // Display an error message
+                    deviceName.setError(getString(R.string.preferences_profile_name_error));
+                } else {
+                    // Save the names
+                    SharedPreferences.Editor e = preferences.edit();
+                    e.putString(GeneralKeys.DEVICE_NAME, deviceNameStr);
+                    e.apply();
+                    profileDeviceName.setSummary(deviceNameSummary());
+                    alertDialog.dismiss();
+                }
+            });
+            // Set click listener for neutral button
+            alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
+                deviceName.setText("");
+            });
+        });
+
+        deviceNameDialog.show();
+
+        android.view.WindowManager.LayoutParams langParams = deviceNameDialog.getWindow().getAttributes();
+        langParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
+        deviceNameDialog.getWindow().setAttributes(langParams);
+    }
+
     private String personSummary() {
         String tagName = "";
 
@@ -136,6 +195,13 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         }
 
         return tagName;
+    }
+
+    private String deviceNameSummary() {
+        String deviceName = preferences.getString(GeneralKeys.DEVICE_NAME, "");
+        String defaultDeviceName = getString(R.string.preferences_profile_device_name_default_format, Build.MODEL);
+
+        return deviceName.isEmpty() ? defaultDeviceName : deviceName;
     }
 
     @Override
