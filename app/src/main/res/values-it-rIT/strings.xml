@@ -21,6 +21,7 @@
     <string name="dialog_sort_by">Ordina Per</string>
     <string name="dialog_enable">Abilita</string>
     <string name="dialog_delete">Cancella</string>
+    <string name="dialog_accept">Accetta</string>
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dati di prova</string>
