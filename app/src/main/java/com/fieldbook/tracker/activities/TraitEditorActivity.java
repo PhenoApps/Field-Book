@@ -479,24 +479,22 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     private void showImportDialog() {
 
-        int optionCount = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false) ? 4 : 3;
+        int optionCount = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false) ? 3 : 2;
         String[] importArray = new String[optionCount];
         int[] icons = new int[optionCount];
         
         importArray[0] = getString(R.string.traits_dialog_create);
-        importArray[1] = getString(R.string.import_source_local);
-        importArray[2] = getString(R.string.import_source_cloud);
-        
+        importArray[1] = getString(R.string.traits_dialog_import_from_file);
+
         icons[0] = R.drawable.ic_ruler;
         icons[1] = R.drawable.ic_file_generic;
-        icons[2] = R.drawable.ic_file_cloud;
         
         // Add BrAPI option if enabled
-        if (optionCount > 3) {
+        if (optionCount > 2) {
             String displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME,
                     getString(R.string.brapi_edit_display_name_default));
-            importArray[3] = displayName;
-            icons[3] = R.drawable.ic_adv_brapi;
+            importArray[2] = displayName;
+            icons[2] = R.drawable.ic_adv_brapi;
         }
 
         AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
@@ -506,7 +504,42 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                     case 0: // Create new trait
                         showTraitDialog(null);
                         break;
-                    case 1: // Local
+                    case 1: // Import from file
+                        showFileImportDialog();
+                        break;
+                    case 2: // BrAPI
+                        startBrapiTraitActivity(false);
+                        break;
+                }
+            }
+        };
+        
+        ListAddDialog dialog = new ListAddDialog(
+            this,
+            getString(R.string.traits_new_dialog_title),
+            importArray, 
+            icons, 
+            onItemClickListener
+        );
+        dialog.show(getSupportFragmentManager(), "ListAddDialog");
+    }
+
+    private void showFileImportDialog() {
+        
+        String[] importArray = new String[2];
+        int[] icons = new int[2];
+        
+        importArray[0] = getString(R.string.import_source_local);
+        importArray[1] = getString(R.string.import_source_cloud);
+        
+        icons[0] = R.drawable.ic_file_generic;
+        icons[1] = R.drawable.ic_file_cloud;
+
+        AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0: // Local
                         DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(TraitEditorActivity.this, R.string.dir_trait);
                         if (traitDir != null && traitDir.exists()) {
                             Intent intent = new Intent();
@@ -517,11 +550,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                             startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
                         }
                         break;
-                    case 2: // Cloud
+                    case 1: // Cloud
                         loadCloud();
-                        break;
-                    case 3: // BrAPI
-                        startBrapiTraitActivity(false);
                         break;
                 }
             }
@@ -529,7 +559,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         
         ListAddDialog dialog = new ListAddDialog(
             this,
-            getString(R.string.traits_new_dialog_title),
+            getString(R.string.traits_dialog_import_from_file),
             importArray, 
             icons, 
             onItemClickListener
