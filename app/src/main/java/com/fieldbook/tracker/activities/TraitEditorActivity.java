@@ -479,7 +479,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     private void showImportDialog() {
 
-        int optionCount = preferences.getBoolean(GeneralKeys.BRAPI_ENABLED, false) ? 4 : 3;
+        int optionCount = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false) ? 4 : 3;
         String[] importArray = new String[optionCount];
         int[] icons = new int[optionCount];
         
@@ -493,7 +493,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         
         // Add BrAPI option if enabled
         if (optionCount > 3) {
-            String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, 
+            String displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME,
                     getString(R.string.brapi_edit_display_name_default));
             importArray[3] = displayName;
             icons[3] = R.drawable.ic_adv_brapi;
