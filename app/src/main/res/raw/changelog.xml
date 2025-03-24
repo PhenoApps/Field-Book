@@ -1,5 +1,9 @@
 <changelog>
 
+    <release date="2025-03-24" versionCode="60101" versionName="v6.1.1">
+        <bugfix>Field imports from BrAPI now include the correct metadata</bugfix>
+    </release>
+
     <release date="2025-03-17" versionCode="60100" versionName="v6.1.0">
         <new>Primary/Secondar Order are no longer required when importing files</new>
         <new>Labels between entry arrows can be swapped in Collect via new dialog</new>

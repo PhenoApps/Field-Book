@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+
+## [v6.1.1] - 2025-03-24
+
+### Added
+
+### Changed
+
+### Fixed
 - Field imports from BrAPI now include the correct metadata
 
 ## [v6.1.0] - 2025-03-17
@@ -630,3 +638,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.0.8]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.8
 
 [v6.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.0
+[v6.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.1
