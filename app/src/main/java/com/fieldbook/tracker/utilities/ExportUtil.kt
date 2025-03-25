@@ -73,6 +73,10 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private val timeStamp = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault())
     private var multipleFields = false
 
+    // a temporary directory is created when activeTraits is selected
+    // this needs to be deleted AFTER zipping is completed
+    private var tempDirectory: DocumentFile? = null
+
     fun exportMultipleFields(fieldIds: List<Int>) {
         this.fieldIds = fieldIds
         this.multipleFields = fieldIds.size > 1
@@ -483,11 +487,55 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, studyName)
             mediaDir?.let { dir ->
                 if (dir.exists() && dir.isDirectory) {
-                    filesToExport.add(dir)
+                    if (activeTraits?.isChecked == true) {
+                        bundledFilesForActiveTraits(studyName, dir)
+                    } else { // allTraits are to be exported
+                        filesToExport.add(dir)
+                    }
                 } else {
-                    Log.e(TAG, "Media directory is invalid or does not exist: ${mediaDir?.uri}")
+                    Log.e(TAG, "Media directory is invalid or does not exist: ${dir.uri}")
                 }
             }
+        }
+    }
+
+    /**
+     * activeTraits might result into NOT ALL media directories under plot_data/studyName/ added into the zip file
+     * Creates a temporary structure of studyName/ where active trait media directories will be added
+     */
+    private fun bundledFilesForActiveTraits(studyName: String, mediaDir: DocumentFile) {
+        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+        val tempDirName = "temp_export_${timeStamp.format(Calendar.getInstance().time)}"
+        tempDirectory = exportDir?.createDirectory(tempDirName)
+
+        try {
+            tempDirectory?.let { tmpDir ->
+                // create study name directory
+                val studyDir = tmpDir.createDirectory(studyName)
+
+                studyDir?.let { studyDirectory ->
+                    val activeTraitNames = exportTrait.map { it.name }
+
+                    mediaDir.listFiles().forEach { traitDir ->
+                        val traitDirName = traitDir.name ?: ""
+
+                        // copy only the active trait media directories
+                        if (traitDir.isDirectory && activeTraitNames.contains(traitDirName)) {
+                            Log.d(TAG, "Copying trait directory: $traitDirName")
+                            val newDir = studyDirectory.createDirectory(traitDirName)
+                            newDir?.let {
+                                traitDir.listFiles().forEach { file ->
+                                    if (file.isFile) copyFileToDirectory(file, it, file.name ?: "")
+                                }
+                            }
+                        }
+                    }
+
+                    filesToExport.add(studyDirectory)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error handling activeTrait bundled files: ${e.message}", e)
         }
     }
 
@@ -553,6 +601,10 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 progressDialog?.dismiss()
                 Toast.makeText(context, context.getString(R.string.export_error_data_missing), Toast.LENGTH_SHORT).show()
             }
+        }
+        if (activeTraits?.isChecked == true) {
+            // delete the temp dir that was previously created
+            tempDirectory?.delete()
         }
     }
 
