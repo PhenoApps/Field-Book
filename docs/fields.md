@@ -23,17 +23,14 @@ Any other part of the field list item can be pressed to open the field details v
 
 When importing a file, each row of the file reprents an `entry`.
 
-Each entry within a field must have the following:
-
- - A `unique identifier` is used to associate data with the specific entry.
-It must be unique across all of your fields.
+Each entry within a field must have a `unique identifier`. The `unique identifier` is used to associate data with the specific entry. It must be unique across all of your fields.
 The sample field import file shown below contains a unique identifier called **plot_id** (highlighted in red).
- - A `primary identifier`, and a `secondary identifier`.
-These columns will remain visible while advancing through the field's entries, and can be whatever makes the most sense for your experiment.
-Common choices are row/plot, range/plot, rep/plot, etc.
-The sample field import file contains primary and secondary unique identifiers called **row** and **plot** (highlighted in blue).
 
-Additional information such as variety name, pedigree, or treatments is optional, but can be included and viewed in the InfoBars or in the Summary dialog on the Collect screen.
+Any number of additional columns can be included to provide contextual information on the collect screen. Values from two additional columns can be displayed as the primary and secondary id between the entry navigation arrows, and any number of additional columns can be displayed in the infobar section (default is three infobars). Details of how to customize these choices and use the primary and secondary ids for quick-go-to are documented in <img class="icon" src="_static/icons/home/barley.png"> [Collect](collect.md).
+
+Examples of useful columns for navigation include layout numbers like plot_number, row, column, rep, or block, and sorting information like zigzag_order or serpentine_order. The sample field import file contains columns called **row** and **plot** (highlighted in blue) which are used as the primary and secondary identifiers in this documentation.
+
+Other useful context columns like variety_name, pedigree, or treatment are optional, but can be included and viewed in the InfoBars or in the Summary dialog on the Collect screen.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/fields_import_format.png" width="900px"> 
@@ -71,7 +68,8 @@ Only `.csv`, `.xls`, or `.xlsx` files will appear in the import dialog.
 
 !> Filenames and column headers must exclude the special characters: `/ ? < > * | "`
 
-Once a file has been selected, the dropdown menus are used to select columns that correspond to Field Book's required columns.
+Once a file has been selected, the dropdown menu is used to select which column from the file should be used as the `unique_identifier`.
+
 Pressing **Import** will complete the import process.
 
 #### Cloud storage
@@ -145,7 +143,7 @@ A confirmation dialog message will be displayed prior to field deletion.
 </figure>
 
 The top card includes metadata about the field (import source, entry count, attribute count).
-**Renaming** fields will change the name displayed for the field throughout the app. **Sorting** displays a dialog to modify the entry order.
+**Renaming** fields will change the name displayed for the field throughout the app. **Sorting** displays a dialog to modify the entry order. <img class="icon" src="_static/icons/fields/barcode-scan.png"> **Search ID** displays a dialog to choose which unique attribute a barcode search will check against (default is the unique identifer selected on import).
 
 The sort dialog is populated by pressing the <img class="icon" src="_static/icons/fields/plus.png"> icon, and selecting from the list of available columns.
 Column priority for sorting can be modified by using using the <img class="icon" src="_static/icons/traits/reorder-horizontal.png"> icon to drag and reorder them.
