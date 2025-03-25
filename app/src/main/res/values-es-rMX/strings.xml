@@ -1173,4 +1173,6 @@
     <string name="traits_crop_image_parameter">Cultivo</string>
     <!--  NearbyShare  -->
     <string name="preferences_preferences_title">Preferencias</string>
+    <string name="nearby_share_export_preferences">Exportar Preferencias</string>
+    <string name="nearby_share_import_preferences">Importar Preferencias</string>
 </resources>
