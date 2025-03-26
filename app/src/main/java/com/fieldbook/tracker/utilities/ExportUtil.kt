@@ -506,7 +506,8 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
      * will be added
      */
     private fun bundleMediaDirectories(studyName: String, mediaDir: DocumentFile) {
-        val traitList = exportTrait.map { trait -> trait.name }
+        // sanitize the trait names, this will be compared against already sanitized traitDirectories
+        val traitList = exportTrait.map { trait -> FileUtil.sanitizeFileName(trait.name) }
         val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
         val tempDirName = "temp_export_${timeStamp.format(Calendar.getInstance().time)}"
         tempDirectory = exportDir?.createDirectory(tempDirName)
