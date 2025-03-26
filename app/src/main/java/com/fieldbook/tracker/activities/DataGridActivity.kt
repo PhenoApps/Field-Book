@@ -466,11 +466,16 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         val trait = mTraits[col]
         val repeatedValues = database.getRepeatedValues(studyId, plotId, trait.id)
 
-        if (repeatedValues.size <= 1) {
-            navigateFromValueClicked(plotId, col)
-        } else {
-            //show alert dialog with repeated values
-            showRepeatedValuesNavigatorDialog(repeatedValues)
+        try {
+            if (repeatedValues.size <= 1) {
+                navigateFromValueClicked(plotId, col)
+            } else {
+                //show alert dialog with repeated values
+                showRepeatedValuesNavigatorDialog(repeatedValues)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error occurred while trying to navigate: " + e.printStackTrace());
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
 
