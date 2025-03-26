@@ -356,6 +356,9 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                 },
                 rowSize = { 48.dp } // row height
             ),
+            pinConfiguration = lazyTablePinConfiguration(
+                rows = 1     // pin the columnHeaders (first row)
+            ),
             modifier = Modifier.fillMaxSize()
         ) {
             // set up the header row
