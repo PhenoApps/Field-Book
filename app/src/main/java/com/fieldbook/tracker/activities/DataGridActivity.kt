@@ -27,6 +27,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.database.getStringOrNull
@@ -431,22 +433,20 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
      */
     @Composable
     fun HeaderCell(text: String) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .background(Color.White)
-                .border(Dp.Hairline, Color(cellTextColor))
-        ) { Text(text = text, color = Color(cellTextColor)) }
+        TableCell(
+            text = text,
+            backgroundColor = Color.White,
+            textColor = Color(cellTextColor)
+        )
     }
 
     @Composable
     fun RowHeaderCell(text: String) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .background(Color(emptyCellBgColor))
-                .border(Dp.Hairline, Color(cellTextColor))
-        ) { Text(text = text, color = Color(cellTextColor)) }
+        TableCell(
+            text = text,
+            backgroundColor = Color(emptyCellBgColor),
+            textColor = Color(cellTextColor)
+        )
     }
 
     @Composable
@@ -459,13 +459,38 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
         val textColor = if (isHighlighted) Color(activeCellTextColor) else Color(cellTextColor)
 
+        TableCell(
+            text = value,
+            backgroundColor = backgroundColor,
+            textColor = textColor,
+            onClick = onClick,
+            isClickable = true
+        )
+    }
+
+    @Composable
+    fun TableCell(
+        text: String,
+        backgroundColor: Color,
+        textColor: Color,
+        onClick: () -> Unit = {},
+        isClickable: Boolean = false
+    ) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .background(backgroundColor)
                 .border(Dp.Hairline, Color(cellTextColor))
-                .clickable(onClick = onClick)
-        ) { Text(text = value, color = textColor) }
+                .then(if (isClickable) Modifier.clickable(onClick = onClick) else Modifier)
+        ) {
+            Text(
+                text = text,
+                color = textColor,
+                textAlign = TextAlign.Center,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+            )
+        }
     }
 
     /**
