@@ -226,6 +226,11 @@ class ObservationUnitPropertyDao {
                     addAll(traitRequiredFields)
                 }.toTypedArray()
 
+                // get the column indices for the requiredColumns from fullCursor
+                val columnIndices = requiredColumns.map { columnName ->
+                    fullCursor.getColumnIndex(columnName)
+                }
+
                 // Create and return a cursor that only includes the required columns
                 val matrixCursor = MatrixCursor(requiredColumns)
 
@@ -233,12 +238,13 @@ class ObservationUnitPropertyDao {
 
                     val row = arrayListOf<String?>()
 
-                    requiredColumns.forEachIndexed { index, s ->
-
+                    columnIndices.forEachIndexed { index, s ->
                         try {
-
-                            row.add(fullCursor.getStringOrNull(index))
-
+                            if (index != -1) {
+                                row.add(fullCursor.getStringOrNull(index))
+                            } else {
+                                row.add(null) // column not found
+                            }
                         } catch (e: Exception) {
 
                             e.printStackTrace()
