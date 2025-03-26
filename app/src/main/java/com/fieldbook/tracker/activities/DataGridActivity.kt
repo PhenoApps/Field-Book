@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Text
@@ -50,7 +49,9 @@ import javax.inject.Inject
 import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import eu.wewox.lazytable.LazyTableState
+import eu.wewox.lazytable.lazyTablePinConfiguration
 import eu.wewox.lazytable.rememberSaveableLazyTableState
 
 /**
@@ -333,13 +334,13 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         val columnCount = mTraits.size + 1 // +1 for rowHeader column
         val rowCount = mRowHeaders.size + 1 // +1 for column headers (traits)
 
-        val targetColumn = (activeTrait ?: 0) + 1
-        val targetRow = (activePlotId ?: 0) + 1
+        val targetColumn = activeTrait ?: 1
+        val targetRow = activePlotId ?: 1
 
         LaunchedEffect(mTraits, mRowHeaders) {
             // this will trigger when traits or row headers are updated
             Log.d("DataGridActivity", "Data loaded: ${mTraits.size} traits, ${mRowHeaders.size} rows")
-            if (mTraits.isNotEmpty() && mRowHeaders.isNotEmpty()) {
+            if (mTraits.isNotEmpty() && mRowHeaders.isNotEmpty() && targetColumn <= mTraits.size && targetRow <= mRowHeaders.size) {
                 lazyTableState.animateToCell(column = targetColumn, row = targetRow)
             }
         }
@@ -421,7 +422,6 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
             modifier = Modifier
                 .background(Color(emptyCellBgColor))
                 .border(Dp.Hairline, Color(cellTextColor))
-                .padding(8.dp)
         ) { Text(text = text, color = Color(cellTextColor)) }
     }
 
@@ -440,7 +440,6 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
             modifier = Modifier
                 .background(backgroundColor)
                 .border(Dp.Hairline, Color(cellTextColor))
-                .padding(8.dp)
                 .clickable(onClick = onClick)
         ) { Text(text = value, color = textColor) }
     }
