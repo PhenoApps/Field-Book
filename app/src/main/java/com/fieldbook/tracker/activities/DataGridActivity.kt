@@ -388,9 +388,9 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                     // rowHeaders (first column)
                     if (row < mRowHeaders.size) {
                         val headerText = mRowHeaders[row].name
-                        HeaderCell(text = headerText)
+                        RowHeaderCell(text = headerText)
                     } else {
-                        HeaderCell(text = "")
+                        RowHeaderCell(text = "")
                     }
                 } else {
                     // data cells
@@ -401,7 +401,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
                     DataCell(
                         value = cellData?.value ?: "",
-                        isHighlighted = (row == activePlotId?.minus(1) && columnIndex == activeTrait?.minus(1))
+                        isHighlighted = (row + 1 == activePlotId && columnIndex + 1 == activeTrait)
                     ) {
                         if (cellData != null && row < mPlotIds.size) {
                             onCellClicked(row, columnIndex)
@@ -413,10 +413,20 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     }
 
     /**
-     * This is used for the first row and first column in the data grid
+     * This is used for the first row in the data grid
      */
     @Composable
     fun HeaderCell(text: String) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .background(Color.White)
+                .border(Dp.Hairline, Color(cellTextColor))
+        ) { Text(text = text, color = Color(cellTextColor)) }
+    }
+
+    @Composable
+    fun RowHeaderCell(text: String) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
