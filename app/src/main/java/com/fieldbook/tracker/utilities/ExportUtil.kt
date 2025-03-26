@@ -73,7 +73,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private val timeStamp = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault())
     private var multipleFields = false
 
-    // a temporary directory is created when activeTraits is selected
+    // a temporary directory is created for bundled media export
     // this needs to be deleted AFTER zipping is completed
     private var tempDirectory: DocumentFile? = null
 
@@ -487,11 +487,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, studyName)
             mediaDir?.let { dir ->
                 if (dir.exists() && dir.isDirectory) {
-                    if (activeTraits?.isChecked == true) {
-                        bundledFilesForActiveTraits(studyName, dir)
-                    } else { // allTraits are to be exported
-                        filesToExport.add(dir)
-                    }
+                    bundleMediaDirectories(studyName, dir)
                 } else {
                     Log.e(TAG, "Media directory is invalid or does not exist: ${dir.uri}")
                 }
@@ -500,10 +496,17 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     }
 
     /**
-     * activeTraits might result into NOT ALL media directories under plot_data/studyName/ added into the zip file
-     * Creates a temporary structure of studyName/ where active trait media directories will be added
+     * There might be some media directories under plot_data/studyName/
+     * that might be from non-existing traits anymore or might just be some randomly created directories.
+     * Simply doing filesToExport.add(dir) will add all the directories under plot_data/studyName/ to the zip file
+     *
+     * Creates a temporary structure of studyName/ where only the media directories for
+     *  - existing trait when allTraits is selected
+     *  - existing and active traits when activeTraits is selected
+     * will be added
      */
-    private fun bundledFilesForActiveTraits(studyName: String, mediaDir: DocumentFile) {
+    private fun bundleMediaDirectories(studyName: String, mediaDir: DocumentFile) {
+        val traitList = exportTrait.map { trait -> trait.name }
         val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
         val tempDirName = "temp_export_${timeStamp.format(Calendar.getInstance().time)}"
         tempDirectory = exportDir?.createDirectory(tempDirName)
@@ -514,13 +517,11 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 val studyDir = tmpDir.createDirectory(studyName)
 
                 studyDir?.let { studyDirectory ->
-                    val activeTraitNames = exportTrait.map { it.name }
-
                     mediaDir.listFiles().forEach { traitDir ->
                         val traitDirName = traitDir.name ?: ""
 
-                        // copy only the active trait media directories
-                        if (traitDir.isDirectory && activeTraitNames.contains(traitDirName)) {
+                        // copy only the trait directories present in traitList
+                        if (traitDir.isDirectory && traitList.contains(traitDirName)) {
                             Log.d(TAG, "Copying trait directory: $traitDirName")
                             val newDir = studyDirectory.createDirectory(traitDirName)
                             newDir?.let {
@@ -535,7 +536,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error handling activeTrait bundled files: ${e.message}", e)
+            Log.e(TAG, "Error handling bundled files: ${e.message}", e)
         }
     }
 
@@ -602,10 +603,9 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 Toast.makeText(context, context.getString(R.string.export_error_data_missing), Toast.LENGTH_SHORT).show()
             }
         }
-        if (activeTraits?.isChecked == true) {
-            // delete the temp dir that was previously created
-            tempDirectory?.delete()
-        }
+
+        // delete the temp dir that was previously created
+        tempDirectory?.delete()
     }
 
     private fun archivePreviousExport(newFile: DocumentFile) {
