@@ -1188,6 +1188,7 @@
     <string name="nearby_share_connection_cancelled">Conexión cancelada</string>
     <string name="nearby_share_transfer_complete">Transferencia completa</string>
     <string name="nearby_share_transfer_in_progress">Transferencia en curso</string>
+    <string name="nearby_share_file_imported_successfully">%s importado exitosamente</string>
     <string name="nearby_share_authenticating_connection">Autenticando conexión con %s…</string>
     <string name="dialog_device_selection_title">Seleccionar un dispositivo</string>
     <string name="dialog_nearby_authentication_title">Aceptar Conexión a %s</string>
