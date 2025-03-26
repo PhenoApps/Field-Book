@@ -341,9 +341,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                 val advertisingOptions = AdvertisingOptions.Builder().setStrategy(STRATEGY).build()
 
                 try {
-                    val deviceName = prefs.getString(GeneralKeys.DEVICE_NAME, Build.MODEL) ?: Build.MODEL
-
-                    connectionsClient.startAdvertising(deviceName, SERVICE_ID, connectionLifecycleCallback, advertisingOptions)
+                    connectionsClient.startAdvertising(getDeviceName(), SERVICE_ID, connectionLifecycleCallback, advertisingOptions)
                         .addOnSuccessListener {
                             isAdvertising = true
                             setProgressMessage(getString(R.string.nearby_share_waiting_for_receivers))
@@ -522,7 +520,6 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
             return
         }
 
-        val discoveringDeviceName = prefs.getString(GeneralKeys.DEVICE_NAME, Build.MODEL) ?: Build.MODEL
         val endpoints = mDiscoveredEndpoints.values.toList()
         val deviceNames = endpoints.map { it.name }.toTypedArray()
 
@@ -532,7 +529,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
             .setTitle(getString(R.string.dialog_device_selection_title))
             .setItems(deviceNames) { dialog, which ->
                 val selectedEndpoint = endpoints[which]
-                connectionsClient.requestConnection(discoveringDeviceName, selectedEndpoint.id, connectionLifecycleCallback)
+                connectionsClient.requestConnection(getDeviceName(), selectedEndpoint.id, connectionLifecycleCallback)
                     .addOnFailureListener { e ->
                         Utils.makeToast(context, String.format(getString(R.string.nearby_share_failed_request), e.message))
                     }
@@ -567,5 +564,16 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
 
     private fun getString(stringRes: Int): String {
         return context.getString(stringRes)
+    }
+
+    // if user has defined custom device name, add the device build model to the name
+    private fun getDeviceName(): String {
+        val deviceName = prefs.getString(GeneralKeys.DEVICE_NAME, Build.MODEL) ?: Build.MODEL
+
+        return if (deviceName != Build.MODEL) {
+            "$deviceName (${Build.MODEL})"
+        } else {
+            deviceName
+        }
     }
 }
