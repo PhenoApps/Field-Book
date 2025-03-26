@@ -1192,6 +1192,13 @@
     <string name="nearby_share_transfer_cancelled">Transferencia cancelada</string>
     <string name="nearby_share_devices_disconnected">Dispositivos Desconectados</string>
     <string name="nearby_share_receiving_file">Recibiendo archivo…</string>
+    <string name="nearby_share_starting_transfer">Transfiriendo Archivo %s…</string>
+    <string name="nearby_share_waiting_for_receivers">Esperando que los receptores conecten…</string>
+    <string name="nearby_share_searching_for_senders">Buscando dispositivos cercanos...</string>
+    <string name="nearby_share_already_waiting_for_receivers">Esperando a que los receptores se conecten…</string>
+    <string name="nearby_share_already_searching_for_sender">Buscando ya el remitente…</string>
+    <string name="nearby_share_no_devices_found">Ningún dispositivo encontrado aún</string>
+    <string name="nearby_share_permissions_required">Permisos de Dispositivso Cercanos Requeridos</string>
     <string name="nearby_share_file_imported_successfully">%s importado exitosamente</string>
     <string name="nearby_share_authenticating_connection">Autenticando conexión con %s…</string>
     <string name="dialog_device_selection_title">Seleccionar un dispositivo</string>
