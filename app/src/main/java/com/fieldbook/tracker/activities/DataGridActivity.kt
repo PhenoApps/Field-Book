@@ -14,7 +14,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Text
@@ -132,15 +134,17 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         initialize()
 
         binding.composeView.setContent {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(color = Color(activeCellBgColor))
-                } else {
-                    DataGridTable()
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(color = Color(activeCellBgColor))
+                    } else {
+                        DataGridTable()
+                    }
                 }
             }
         }
@@ -345,69 +349,76 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
             }
         }
 
-        LazyTable(
-            state = lazyTableState,
-            dimensions = lazyTableDimensions(
-                columnSize = { col ->
-                    when (col) {
-                        0 -> 120.dp
-                        else -> 100.dp
-                    }
-                },
-                rowSize = { 48.dp } // row height
-            ),
-            pinConfiguration = lazyTablePinConfiguration(
-                rows = 1     // pin the columnHeaders (first row)
-            ),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // set up the header row
-            items(count = columnCount, layoutInfo = { LazyTableItem(column = it, row = 0) }) { index ->
-                if (index == 0) {
-                    HeaderCell(text = getCurrentRowHeader())
-                } else {
-                    val traitIndex = index - 1
-                    if (traitIndex < mTraits.size) {
-                        HeaderCell(text = mTraits[traitIndex].name)
+        Box(modifier = Modifier.fillMaxWidth()) {
+            LazyTable(
+                state = lazyTableState,
+                dimensions = lazyTableDimensions(
+                    columnSize = { col ->
+                        when (col) {
+                            0 -> 120.dp
+                            else -> 100.dp
+                        }
+                    },
+                    rowSize = { 48.dp } // row height
+                ),
+                contentPadding = PaddingValues(0.dp),
+                pinConfiguration = lazyTablePinConfiguration(
+                    rows = 1     // pin the columnHeaders (first row)
+                ),
+                // modifier = Modifier
+                //     .fillMaxWidth()
+            ) {
+                // set up the header row
+                items(
+                    count = columnCount,
+                    layoutInfo = { LazyTableItem(column = it, row = 0) }) { index ->
+                    if (index == 0) {
+                        HeaderCell(text = getCurrentRowHeader())
                     } else {
-                        HeaderCell(text = "")
+                        val traitIndex = index - 1
+                        if (traitIndex < mTraits.size) {
+                            HeaderCell(text = mTraits[traitIndex].name)
+                        } else {
+                            HeaderCell(text = "")
+                        }
                     }
                 }
-            }
 
-            // set up the remaining grid cells
-            items(
-                count = (rowCount - 1) * columnCount,
-                layoutInfo = {
-                    val row = (it / columnCount) + 1  // +1 to skip header row
-                    val column = it % columnCount
-                    LazyTableItem(column = column, row = row)
-                }
-            ) { index ->
-                val row = (index / columnCount)
-                val column = index % columnCount
-
-                if (column == 0) {
-                    // rowHeaders (first column)
-                    if (row < mRowHeaders.size) {
-                        val headerText = mRowHeaders[row].name
-                        RowHeaderCell(text = headerText)
-                    } else {
-                        RowHeaderCell(text = "")
+                // set up the remaining grid cells
+                items(
+                    count = (rowCount - 1) * columnCount,
+                    layoutInfo = {
+                        val row = (it / columnCount) + 1  // +1 to skip header row
+                        val column = it % columnCount
+                        LazyTableItem(column = column, row = row)
                     }
-                } else {
-                    // data cells
-                    val columnIndex = column - 1 // -1 for header column
-                    val cellData = if (row < mGridData.size && columnIndex < mGridData[row].size) {
-                        mGridData[row][columnIndex]
-                    } else null
+                ) { index ->
+                    val row = (index / columnCount)
+                    val column = index % columnCount
 
-                    DataCell(
-                        value = cellData?.value ?: "",
-                        isHighlighted = (row + 1 == activePlotId && columnIndex + 1 == activeTrait)
-                    ) {
-                        if (cellData != null && row < mPlotIds.size) {
-                            onCellClicked(row, columnIndex)
+                    if (column == 0) {
+                        // rowHeaders (first column)
+                        if (row < mRowHeaders.size) {
+                            val headerText = mRowHeaders[row].name
+                            RowHeaderCell(text = headerText)
+                        } else {
+                            RowHeaderCell(text = "")
+                        }
+                    } else {
+                        // data cells
+                        val columnIndex = column - 1 // -1 for header column
+                        val cellData =
+                            if (row < mGridData.size && columnIndex < mGridData[row].size) {
+                                mGridData[row][columnIndex]
+                            } else null
+
+                        DataCell(
+                            value = cellData?.value ?: "",
+                            isHighlighted = (row + 1 == activePlotId && columnIndex + 1 == activeTrait)
+                        ) {
+                            if (cellData != null && row < mPlotIds.size) {
+                                onCellClicked(row, columnIndex)
+                            }
                         }
                     }
                 }
@@ -487,7 +498,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                 showRepeatedValuesNavigatorDialog(repeatedValues)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error occurred while trying to navigate: " + e.printStackTrace());
+            Log.e(TAG, "Error occurred while trying to navigate: " + e.printStackTrace())
             FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
