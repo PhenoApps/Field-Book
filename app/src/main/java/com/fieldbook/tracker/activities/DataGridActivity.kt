@@ -365,7 +365,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                 ),
                 contentPadding = PaddingValues(0.dp),
                 pinConfiguration = lazyTablePinConfiguration(
-                    rows = 1     // pin the columnHeaders (first row)
+                    columns = 1,    // pin the rowHeaders (first column)
+                    rows = 1        // pin the columnHeaders (first row)
                 ),
                 // modifier = Modifier
                 //     .fillMaxWidth()
@@ -444,7 +445,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     fun RowHeaderCell(text: String) {
         TableCell(
             text = text,
-            backgroundColor = Color(emptyCellBgColor),
+            backgroundColor = Color.White,
             textColor = Color(cellTextColor)
         )
     }
