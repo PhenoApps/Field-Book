@@ -107,12 +107,10 @@
     <string name="traits_sort_format">Formato</string>
     <string name="warning_traits_missing_modify">Crea un carattere prima di poterlo modificare</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">Importa/Esporta</string>
     <string name="traits_dialog_import">Importa</string>
+    <string name="import_error_format_trait">Solo i file TRT possono essere importati come un elenco di caratteri</string>
     <string name="traits_export_check">Esporta l\'elenco caratteri corrente?</string>
     <string name="traits_dialog_export">Esporta</string>
-    <string name="import_error_format_trait">Solo i file TRT possono essere importati come un elenco di caratteri</string>
-    <string name="import_dialog_title_traits">Importa caratteri</string>
     <string name="traits_toolbar_delete_all">Cancella tutti i caratteri</string>
     <!-- Trait item menu -->
     <string name="traits_options_copy">Copia</string>
