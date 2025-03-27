@@ -202,13 +202,11 @@
     <string name="traits_sort_format">Formato</string>
     <string name="warning_traits_missing_modify">Crie características antes de modificá-las.</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">Importar/Exportar</string>
     <string name="traits_dialog_import">Importar</string>
+    <string name="import_error_format_trait">Somente arquivos TRT podem ser importados como uma lista de características</string>
     <string name="traits_export_check">Exportar lista de características atual?</string>
     <string name="traits_dialog_export">Exportar</string>
     <string name="dialog_delete_traits_message">Gostaria de excluir todas as características atuais?</string>
-    <string name="import_error_format_trait">Somente arquivos TRT podem ser importados como uma lista de características</string>
-    <string name="import_dialog_title_traits">Importar características</string>
     <string name="traits_toolbar_delete_all">Excluir todas as características</string>
     <string name="act_trait_editor_no_traits_exist">Não existem características.</string>
     <!-- Trait item menu -->
