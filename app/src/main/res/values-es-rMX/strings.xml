@@ -383,7 +383,7 @@
     <string name="trait_go_pro_camera_delete_photo_title">Eliminar Imagen</string>
     <string name="go_pro_layout_black_11_not_detected">Esta Variable fue creada para una GoPro Black 11, por favor contacte con los desarrolladores para implementar su modelo GoPro.\n</string>
     <string name="go_pro_frag_connect_btn_content_description">Conectar a una cámara GoPro.\n</string>
-    <string name="trait_go_pro_capture_content_description">Capturar una imagen desde un dispositivo GoPro conectado.\n</string>
+    <string name="trait_go_pro_capture_content_description">Capturar una foto desde un dispositivo GoPro conectado.\n</string>
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_zoom_in_button_text">Acercar</string>
     <string name="trait_usb_camera_zoom_out_button_text">Alejar</string>
@@ -1168,9 +1168,43 @@
     <string name="dialog_crash_report_message">Presione OK para enviar un informe de diagnóstico anónimo para ayudar a mejorar la app.</string>
     <string name="dialog_quick_goto_title">Rápido Ir a</string>
     <string name="dialog_quick_goto_go">Ir</string>
+    <string name="quick_goto_primary_hint">ID Primario</string>
+    <string name="quick_goto_secondary_hint">ID Secundario</string>
+    <string name="quick_goto_dialog_icon_description">persona en funciones</string>
     <string name="failed_to_fetch_observation_levels">Fallo obteniendo el nivel de las observaciónes</string>
     <string name="traits_sort_default">Predeterminado</string>
-    <string name="traits_crop_image_parameter">Cultivo</string>
+    <string name="traits_crop_image_parameter">Recortar</string>
+    <string name="dialog_crop_title">Configurar Región de Recorte</string>
+    <string name="dialog_crop_message">Definir una región de recorte que se aplicará a todas las fotos futuras de esta variable.</string>
+    <string name="view_trait_photo_settings_crop">Fijar Región de Recorte</string>
+    <string name="crop_image_clip_data_label">Datos de región de recorte en Field Book</string>
+    <string name="quick_goto_swap_content_description">alternar tipo de entrada</string>
     <!--  NearbyShare  -->
+    <string name="nearby_share_title">Compartir Cerca</string>
+    <string name="nearby_share_preferences_title">Compartir Preferencias</string>
+    <string name="nearby_share_connection_established">Conexión Establecida</string>
+    <string name="nearby_share_connection_rejected">Conexión Rechazada</string>
+    <string name="nearby_share_connection_error">Error de Conexión</string>
+    <string name="nearby_share_connection_cancelled">Conexión cancelada</string>
+    <string name="nearby_share_transfer_complete">Transferencia completa</string>
+    <string name="nearby_share_transfer_in_progress">Transferencia en curso</string>
+    <string name="nearby_share_transfer_failed">Error al transferir</string>
+    <string name="nearby_share_transfer_cancelled">Transferencia cancelada</string>
+    <string name="nearby_share_devices_disconnected">Dispositivos Desconectados</string>
+    <string name="nearby_share_receiving_file">Recibiendo archivo…</string>
+    <string name="nearby_share_starting_transfer">Transfiriendo Archivo %s…</string>
+    <string name="nearby_share_waiting_for_receivers">Esperando que los receptores conecten…</string>
+    <string name="nearby_share_searching_for_senders">Buscando dispositivos cercanos...</string>
+    <string name="nearby_share_already_waiting_for_receivers">Esperando a que los receptores se conecten…</string>
+    <string name="nearby_share_already_searching_for_sender">Buscando ya el remitente…</string>
+    <string name="nearby_share_no_devices_found">Ningún dispositivo encontrado aún</string>
+    <string name="nearby_share_permissions_required">Permisos de Dispositivso Cercanos Requeridos</string>
+    <string name="nearby_share_file_imported_successfully">%s importado exitosamente</string>
+    <string name="nearby_share_authenticating_connection">Autenticando conexión con %s…</string>
+    <string name="dialog_device_selection_title">Seleccionar un dispositivo</string>
+    <string name="dialog_nearby_authentication_title">Aceptar Conexión a %s</string>
+    <string name="dialog_nearby_authentication_summary">Confirmar que el código coincide en ambos dispositivos: %s</string>
     <string name="preferences_preferences_title">Preferencias</string>
+    <string name="nearby_share_export_preferences">Exportar Preferencias</string>
+    <string name="nearby_share_import_preferences">Importar Preferencias</string>
 </resources>
