@@ -5,6 +5,7 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'com.google.dagger.hilt.android'
+apply plugin: "org.jetbrains.kotlin.plugin.serialization"
 
 Properties props = new Properties()
 props.load(new FileInputStream("$project.rootDir/version.properties"))
@@ -126,6 +127,13 @@ dependencies {
 
     //add zebra jar file to dependencies
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
+
+    //nix (color sensors) universal sdk
+    implementation "com.nixsensor:universalsdk:4.2.1"
+    // Optional dependency used to enable USB support
+    implementation 'com.github.mik3y:usb-serial-for-android:v3.8.1'
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
     //zebra dependency
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
