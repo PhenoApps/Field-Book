@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Bundled media is now exported as expected for active and existing traits
 - Exporting with 'Only unique identifier' no longer shifts data
 
 ## [v6.1.1] - 2025-03-24
