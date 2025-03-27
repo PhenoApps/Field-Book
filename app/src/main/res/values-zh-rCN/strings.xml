@@ -81,12 +81,10 @@
     <string name="traits_sort_format">格式</string>
     <string name="warning_traits_missing_modify">先创建性状，才能修改。</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">导入/导出</string>
     <string name="traits_dialog_import">导入</string>
+    <string name="import_error_format_trait">只有TRT文件可作为性状列表导入</string>
     <string name="traits_export_check">导出当前性状列表？</string>
     <string name="traits_dialog_export">导出</string>
-    <string name="import_error_format_trait">只有TRT文件可作为性状列表导入</string>
-    <string name="import_dialog_title_traits">导入性状</string>
     <string name="traits_toolbar_delete_all">删除全部性状</string>
     <!-- Trait item menu -->
     <string name="traits_options_copy">复制</string>
