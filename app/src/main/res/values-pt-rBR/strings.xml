@@ -21,6 +21,7 @@
     <string name="dialog_sort_by">Organizar por</string>
     <string name="dialog_enable">Habilitar</string>
     <string name="dialog_delete">Excluir</string>
+    <string name="dialog_accept">Aceitar</string>
     <string name="barcode_scanner_text">Escanear código de barras</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dados de amostra</string>
@@ -177,6 +178,13 @@
     <string name="name_conflict_message">\"%1$s\" já está sendo usado como um %2$s para outro campo.</string>
     <string name="name_conflict_import_name">nome da importação</string>
     <string name="name_conflict_display_name">nome de exibição</string>
+    <string name="dialog_att_chooser_title_default">Escolha um atributo</string>
+    <string name="search_attribute_dialog_title">Definir ID de Procura</string>
+    <string name="dialog_att_chooser_unique_attributes">Atributos Únicos</string>
+    <string name="search_attribute_apply_to_all">Aplicar escolha para todos os campos elegíveis</string>
+    <string name="search_attribute_updated">Procurar atributo atualizado</string>
+    <string name="search_attribute_updated_all">Procurar atributo atualizado no(s) campo(s) %1$d</string>
+    <string name="search_multiple_matches_found">Encontrados %1$d parcelas correspondentes. Mostrando a primeira.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_data_title">Dados</string>
     <string name="field_trait_observation_total">\"%d\"observações</string>
@@ -202,6 +210,9 @@
     <string name="traits_sort_format">Formato</string>
     <string name="warning_traits_missing_modify">Crie características antes de modificá-las.</string>
     <!-- Trait import/export -->
+    <string name="traits_new_dialog_title">Novo(s) Característica(s)</string>
+    <string name="traits_dialog_create">Criar nova característica</string>
+    <string name="traits_dialog_import_from_file">Importar de um arquivo</string>
     <string name="traits_dialog_import">Importar</string>
     <string name="import_error_format_trait">Somente arquivos TRT podem ser importados como uma lista de características</string>
     <string name="traits_export_check">Exportar lista de características atual?</string>
@@ -234,6 +245,7 @@
     <string name="traits_format_labelprint">Impressão nas etiquetas Zebra</string>
     <string name="traits_format_usb_camera">Câmera USB</string>
     <string name="traits_format_go_pro_camera">GoPro</string>
+    <string name="traits_format_angle">Ângulo</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Característica</string>
     <string name="trait_creator_title_layout">Disposição de Característica</string>
@@ -724,6 +736,10 @@
     <string name="trait_audio_recording_warning">Áudio ao nível de característica já está gravando. Para isso primeiro.</string>
     <string name="trait_audio_playing_warning">Áudio está sendo reproduzido. Pare isso primeiro.</string>
     <string name="field_audio_zip_error">Erro ao criar arquivo zip</string>
+    <string name="trait_audio_placeholder_filename">Arquivo de Áudio Gravado</string>
+    <string name="trait_audio_timestamp">Timestamp: </string>
+    <string name="trait_audio_duration">Duração: </string>
+    <string name="trait_audio_file_size">Tamanho do Arquivo </string>
     <string name="pref_beta_enable_individual_field_page_title">Habilitar Páginas de Campo Individuais</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selecionar um campo na lista de campos abre uma página de detalhes</string>
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
@@ -1166,9 +1182,27 @@
     <string name="dialog_crash_report_message">Pressione OK para enviar um relatório de diagnóstico anônimo para ajudar a melhorar o aplicativo.</string>
     <string name="dialog_quick_goto_title">Ir Rápido Para</string>
     <string name="dialog_quick_goto_go">Ir</string>
+    <string name="quick_goto_dialog_icon_description">pessoa executando</string>
     <string name="failed_to_fetch_observation_levels">Falha ao buscar nível de observações</string>
     <string name="traits_sort_default">Padrão</string>
-    <string name="traits_crop_image_parameter">Colheita</string>
+    <string name="traits_crop_image_parameter">Recortar</string>
+    <string name="dialog_crop_title">Configuração Região de Recorte</string>
+    <string name="dialog_crop_message">Defina uma região de recorte que será aplicada a todas as imagens futuras para esta característica.</string>
+    <string name="view_trait_photo_settings_crop">Definir Região de Recorte</string>
+    <string name="crop_image_clip_data_label">Dados da região de recorte de Field Book</string>
     <!--  NearbyShare  -->
+    <string name="nearby_share_preferences_title">Compartilhar Preferências</string>
+    <string name="nearby_share_connection_established">Conexão Estabelecida</string>
+    <string name="nearby_share_connection_rejected">Conexão Recusada</string>
+    <string name="nearby_share_connection_error">Erro de Conexão</string>
+    <string name="nearby_share_connection_cancelled">Conexão cancelada</string>
+    <string name="nearby_share_transfer_complete">Transferência concluída</string>
+    <string name="nearby_share_transfer_in_progress">Transferência em andamento</string>
+    <string name="nearby_share_failed_export_generation">Erro ao gerar arquivo para compartilhar</string>
+    <string name="dialog_device_selection_title">Selecione um dispositivo</string>
+    <string name="dialog_nearby_authentication_title">Aceitar Conexão com %s</string>
+    <string name="dialog_nearby_authentication_summary">Confirme que o código corresponde a ambos os dispositivos: %s</string>
     <string name="preferences_preferences_title">Preferências</string>
+    <string name="nearby_share_export_preferences">Exportar Preferências</string>
+    <string name="nearby_share_import_preferences">Importar Preferências</string>
 </resources>
