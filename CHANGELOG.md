@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Additional attributes are now included when importing fields using BrAPI
 
 ### Changed
+- Improvements to the trait import and creation process
 - Angle trait animation has been reversed
 
 ### Fixed
