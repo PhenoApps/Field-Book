@@ -10,12 +10,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
+import com.fieldbook.tracker.utilities.FileUtil;
 
 import javax.inject.Inject;
 
@@ -141,6 +143,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_device_name, null);
         final EditText deviceName = layout.findViewById(R.id.deviceName);
+        final TextView errorMessageView = layout.findViewById(R.id.error_message);
+
         // set name to default if not set
         deviceName.setText(preferences.getString(GeneralKeys.DEVICE_NAME, Build.MODEL));
 
@@ -164,12 +168,19 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                     // Display an error message
                     deviceName.setError(getString(R.string.preferences_profile_name_error));
                 } else {
-                    // Save the names
-                    SharedPreferences.Editor e = preferences.edit();
-                    e.putString(GeneralKeys.DEVICE_NAME, deviceNameStr);
-                    e.apply();
-                    profileDeviceName.setSummary(deviceNameSummary());
-                    alertDialog.dismiss();
+                    // check if deviceName has illegal characters
+                    String illegalCharactersMessage = FileUtil.checkForIllegalCharacters(deviceNameStr);
+                    if (illegalCharactersMessage.isEmpty()) {
+                        // Save the deviceName
+                        SharedPreferences.Editor e = preferences.edit();
+                        e.putString(GeneralKeys.DEVICE_NAME, deviceNameStr);
+                        e.apply();
+                        profileDeviceName.setSummary(deviceNameSummary());
+                        alertDialog.dismiss();
+                    } else {
+                        // illegal characters found
+                        showErrorMessage(errorMessageView, getString(R.string.illegal_characters_message, illegalCharactersMessage));
+                    }
                 }
             });
             // Set click listener for neutral button
@@ -183,6 +194,11 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         android.view.WindowManager.LayoutParams langParams = deviceNameDialog.getWindow().getAttributes();
         langParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
         deviceNameDialog.getWindow().setAttributes(langParams);
+    }
+
+    private void showErrorMessage(TextView messageView, String message) {
+        messageView.setText(message);
+        messageView.setVisibility(View.VISIBLE);
     }
 
     private String personSummary() {
