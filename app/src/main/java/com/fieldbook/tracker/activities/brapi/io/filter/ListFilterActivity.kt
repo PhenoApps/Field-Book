@@ -109,6 +109,8 @@ abstract class ListFilterActivity : ThemedActivity(),
         progressBar = findViewById(R.id.act_list_filter_pb)
         searchBar = findViewById(R.id.act_list_filter_sb)
 
+        searchBar.editText.setDropDownBackgroundResource(org.phenoapps.androidlibrary.R.color.WHITE)
+
         importTextView.text = getString(R.string.act_brapi_filter_apply)
 
         setupRecyclerView()
