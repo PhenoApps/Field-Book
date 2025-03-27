@@ -93,6 +93,20 @@ import pub.devrel.easypermissions.EasyPermissions;
 @AndroidEntryPoint
 public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController, TraitAdapter.TraitSorter, NewTraitDialog.TraitDialogDismissListener {
 
+    private enum ImportOptions {
+        CREATE_NEW(R.drawable.ic_ruler, R.string.traits_dialog_create),
+        IMPORT_FROM_FILE(R.drawable.ic_file_generic, R.string.traits_dialog_import_from_file),
+        IMPORT_FROM_BRAPI(R.drawable.ic_adv_brapi, 0); // 0 as placeholder, uses PreferenceKeys.BRAPI_DISPLAY_NAME
+
+        final int iconResource;
+        final int stringResource;
+
+        ImportOptions(int iconResource, int stringResource) {
+            this.iconResource = iconResource;
+            this.stringResource = stringResource;
+        }
+    }
+
     public static final String TAG = "TraitEditor";
     public static int REQUEST_CLOUD_FILE_CODE = 5;
     public static int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -478,23 +492,23 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     private void showImportDialog() {
+        boolean brapiEnabled = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false);
+        int optionCount = brapiEnabled ? ImportOptions.values().length : ImportOptions.values().length - 1;
 
-        int optionCount = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false) ? 3 : 2;
         String[] importArray = new String[optionCount];
         int[] icons = new int[optionCount];
         
-        importArray[0] = getString(R.string.traits_dialog_create);
-        importArray[1] = getString(R.string.traits_dialog_import_from_file);
-
-        icons[0] = R.drawable.ic_ruler;
-        icons[1] = R.drawable.ic_file_generic;
+        importArray[ImportOptions.CREATE_NEW.ordinal()] = getString(ImportOptions.CREATE_NEW.stringResource);
+        importArray[ImportOptions.IMPORT_FROM_FILE.ordinal()] = getString(ImportOptions.IMPORT_FROM_FILE.stringResource);
+        icons[ImportOptions.CREATE_NEW.ordinal()] = ImportOptions.CREATE_NEW.iconResource;
+        icons[ImportOptions.IMPORT_FROM_FILE.ordinal()] = ImportOptions.IMPORT_FROM_FILE.iconResource;
         
         // Add BrAPI option if enabled
-        if (optionCount > 2) {
+        if (brapiEnabled) {
             String displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME,
                     getString(R.string.brapi_edit_display_name_default));
-            importArray[2] = displayName;
-            icons[2] = R.drawable.ic_adv_brapi;
+            importArray[ImportOptions.IMPORT_FROM_BRAPI.ordinal()] = displayName;
+            icons[ImportOptions.IMPORT_FROM_BRAPI.ordinal()] = ImportOptions.IMPORT_FROM_BRAPI.iconResource;
         }
 
         AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
