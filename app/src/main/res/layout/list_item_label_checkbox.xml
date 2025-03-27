@@ -6,7 +6,8 @@
     android:id="@+id/list_item_brapi_filter_cv"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp">
+    android:layout_margin="4dp"
+    android:backgroundTint="@color/WHITE">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/list_item_brapi_filter_cl"
@@ -33,6 +34,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_margin="16dp"
+            android:textColor="@color/BLACK"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/list_item_brapi_filter_cb"
             app:layout_constraintStart_toEndOf="@id/list_item_brapi_filter_iv"
@@ -47,6 +49,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
+            android:textColor="@color/BLACK"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/list_item_brapi_filter_cb"
             app:layout_constraintHorizontal_bias="0"

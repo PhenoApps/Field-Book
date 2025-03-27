@@ -475,7 +475,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             R.id.action_reset_cache -> {
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(this, R.style.AppAlertDialog)
                     .setTitle(R.string.act_brapi_list_filter_reset_cache_title)
                     .setMessage(getString(R.string.act_brapi_list_filter_reset_cache_message))
                     .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
@@ -486,7 +486,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             R.id.action_clear_selection -> {
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(this, R.style.AppAlertDialog)
                     .setTitle(R.string.act_brapi_list_filter_reset_cache_title)
                     .setMessage(getString(R.string.act_brapi_list_filter_reset_selection_message))
                     .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }

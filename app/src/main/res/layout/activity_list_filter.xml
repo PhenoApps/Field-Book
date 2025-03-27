@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/WHITE">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/act_list_filter_tb"
@@ -31,6 +32,7 @@
         android:id="@+id/act_list_filter_sb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/WHITE"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/act_list_filter_tb" />
 
