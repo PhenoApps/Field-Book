@@ -244,14 +244,15 @@
     <string name="warning_traits_missing_modify">Create traits before modifying them.</string>
 
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">Import/Export</string>
+    <string name="traits_new_dialog_title">New Trait(s)</string>
+    <string name="traits_dialog_create">Create new trait</string>
+    <string name="traits_dialog_import_from_file">Import from file</string>
     <string name="traits_dialog_import">Import</string>
+    <string name="import_error_format_trait">Only TRT files can be imported as a trait list</string>
+
     <string name="traits_export_check">Export current trait list?</string>
     <string name="traits_dialog_export">Export</string>
     <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
-
-    <string name="import_error_format_trait">Only TRT files can be imported as a trait list</string>
-    <string name="import_dialog_title_traits">Import traits</string>
 
     <string name="traits_toolbar_delete_all">Delete all traits</string>
     <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
