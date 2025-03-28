@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Angle trait animation has been reversed
 
 ### Fixed
+- Nearest field snackbar no longer overlaps add field button
 - BrAPI Import background color is now white
 - Bundled media is now exported as expected for active and existing traits
 - Exporting with 'Only unique identifier' no longer shifts data
