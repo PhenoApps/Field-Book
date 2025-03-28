@@ -25,7 +25,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="transfer_defaults"
+        android:key="settings_device"
         android:title="@string/preferences_profile_device_title"
         app:iconSpaceReserved="false">
         <Preference
