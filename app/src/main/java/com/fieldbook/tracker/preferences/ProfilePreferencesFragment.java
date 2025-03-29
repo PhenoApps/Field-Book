@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -18,6 +17,9 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.utilities.FileUtil;
+import com.fieldbook.tracker.utilities.PersonNameManager;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -30,8 +32,12 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     SharedPreferences preferences;
 
     Context context;
+
+    private PersonNameManager nameManager;
     private Preference profilePerson;
-//    private ListPreference verificationInterval;
+    //    private ListPreference verificationInterval;
+    private EditText firstName;
+    private EditText lastName;
     private AlertDialog personDialog;
 
     private Preference profileDeviceName;
@@ -42,6 +48,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
         setPreferencesFromResource(R.xml.preferences_profile, rootKey);
+
+        nameManager = new PersonNameManager(preferences);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_profile));
 
@@ -86,14 +94,16 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     private void showPersonDialog() {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_person, null);
-        final EditText firstName = layout.findViewById(R.id.firstName);
-        final EditText lastName = layout.findViewById(R.id.lastName);
+        firstName = layout.findViewById(R.id.firstName);
+        lastName = layout.findViewById(R.id.lastName);
 
         firstName.setText(preferences.getString(GeneralKeys.FIRST_NAME, ""));
         lastName.setText(preferences.getString(GeneralKeys.LAST_NAME, ""));
 
         firstName.setSelectAllOnFocus(true);
         lastName.setSelectAllOnFocus(true);
+
+        List<PersonNameManager.PersonName> previouslySavedNames = nameManager.getPersonNames();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
         builder.setTitle(R.string.preferences_profile_person_dialog_title)
@@ -102,7 +112,11 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         builder.setPositiveButton(getString(R.string.dialog_save), null);
         builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, i) -> dialog.dismiss());
-        builder.setNeutralButton(getString(R.string.dialog_clear), null);
+        if (!previouslySavedNames.isEmpty()) { // neutral button to show "previous names"
+            builder.setNeutralButton(getString(R.string.dialog_previous_names), null);
+        } else { // if no previous names, neutral button to show "clear" option
+            builder.setNeutralButton(getString(R.string.dialog_clear), null);
+        }
 
         personDialog = builder.create();
         personDialog.setOnShowListener(dialog -> {
@@ -120,14 +134,21 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                     e.putString(GeneralKeys.FIRST_NAME, firstNameStr);
                     e.putString(GeneralKeys.LAST_NAME, lastNameStr);
                     e.apply();
+                    nameManager.savePersonName(firstNameStr, lastNameStr);
                     profilePerson.setSummary(personSummary());
                     alertDialog.dismiss();
                 }
             });
             // Set click listener for neutral button
             alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
-                firstName.setText("");
-                lastName.setText("");
+                if (!previouslySavedNames.isEmpty()) {
+                    alertDialog.dismiss();
+                    showPreviouslyUsedNamesDialog(previouslySavedNames);
+                } else {
+                    // Clear fields
+                    firstName.setText("");
+                    lastName.setText("");
+                }
             });
         });
 
@@ -138,6 +159,29 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         personDialog.getWindow().setAttributes(langParams);
     }
 
+    private void showPreviouslyUsedNamesDialog(List<PersonNameManager.PersonName> names) {
+        String[] previousNames = new String[names.size()];
+        for (int i = 0; i < names.size(); i++) {
+            previousNames[i] = names.get(i).fullName();
+        }
+
+        new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+                .setTitle(R.string.preferences_profile_previous_names)
+                .setItems(previousNames, (dialogInterface, which) -> {
+                    PersonNameManager.PersonName selectedName = names.get(which);
+                    showPersonDialog();
+                    firstName.setText(selectedName.getFirstName());
+                    lastName.setText(selectedName.getLastName());
+                })
+                .setNegativeButton(R.string.dialog_cancel, null)
+                .setNeutralButton(R.string.dialog_clear, (d, which) -> {
+                    nameManager.clearPersonNames();
+                    // show person dialog after clearing
+                    showPersonDialog();
+                    d.dismiss();
+                })
+                .show();
+    }
 
     private void showDeviceNameDialog() {
         LayoutInflater inflater = this.getLayoutInflater();

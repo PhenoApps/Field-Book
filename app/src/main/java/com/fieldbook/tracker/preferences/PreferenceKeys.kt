@@ -14,6 +14,7 @@ package com.fieldbook.tracker.preferences
 class PreferenceKeys {
     companion object {
         // PROFILE
+        const val LIST_OF_PERSON_NAMES = "ListOfPersonNames"
         const val VERIFICATION_INTERVAL = "com.tracker.fieldbook.preference.profile_verification_interval"
 
         private val profilePreferenceKeys = setOf(VERIFICATION_INTERVAL)
