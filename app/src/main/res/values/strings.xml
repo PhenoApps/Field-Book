@@ -639,6 +639,8 @@
 
     <string name="preferences_profile_set_person">Person Name</string>
     <string name="preferences_profile_person_dialog_title">Set Person</string>
+    <string name="dialog_previous_names">Previous Used Names</string>
+    <string name="preferences_profile_previous_names">Select a Previously Used Name</string>
     <string name="preferences_profile_name_first">First Name</string>
     <string name="preferences_profile_name_last">Last Name</string>
     <string name="preferences_profile_name_error">Both fields cannot be blank</string>
