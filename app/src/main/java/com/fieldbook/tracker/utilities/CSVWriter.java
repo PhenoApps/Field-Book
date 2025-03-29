@@ -75,7 +75,7 @@ public class CSVWriter {
      * database, and so is passed in as a parameter
      * V2 - Range added, columns selectable
      */
-    public void writeDatabaseFormat(ArrayList<String> range) throws Exception {
+    public void writeDatabaseFormat(ArrayList<String> range, String deviceName) throws Exception {
         // Simply loop through all items
         if (curCSV.getCount() > 0) {
 
@@ -85,6 +85,7 @@ public class CSVWriter {
             range.add("person");
             range.add("location");
             range.add("number");
+            range.add("device_name");
 
             String[] labels = range.toArray(new String[range.size()]);
 
@@ -95,11 +96,13 @@ public class CSVWriter {
             while (curCSV.moveToNext()) {
                 String[] arrStr = new String[labels.length];
 
-                for (int i = 0; i < labels.length; i++) {
-
+                for (int i = 0; i < labels.length - 1; i++) {
                     String value = curCSV.getString(i);
                     arrStr[i] = value;
                 }
+
+                // add device name
+                arrStr[labels.length - 1] = deviceName;
 
                 writeNext(arrStr);
             }

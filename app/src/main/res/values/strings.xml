@@ -649,6 +649,12 @@
     <string name="verification_interval_every_24">Every 24 hours</string>
     <string name="verification_interval_never">Never</string>
 
+    <string name="preferences_profile_device_title">Device</string>
+    <string name="preferences_profile_set_device_name">Device Name</string>
+    <string name="preferences_profile_device_name_dialog_title">Set Device Name</string>
+    <string name="preferences_profile_device_name_error">This field cannot be blank</string>
+    <string name="preferences_profile_device_name_default_format">Default: %s</string>
+
     <string name="preferences_profile_crashlytics" translatable="false">Crashlytics</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Include an anonymous, unique ID in crash logs to help the development team fix bugs</string>
