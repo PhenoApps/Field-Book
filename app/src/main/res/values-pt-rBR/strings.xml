@@ -1182,6 +1182,8 @@
     <string name="dialog_crash_report_message">Pressione OK para enviar um relatório de diagnóstico anônimo para ajudar a melhorar o aplicativo.</string>
     <string name="dialog_quick_goto_title">Ir Rápido Para</string>
     <string name="dialog_quick_goto_go">Ir</string>
+    <string name="quick_goto_primary_hint">ID Primário</string>
+    <string name="quick_goto_secondary_hint">ID Secundário</string>
     <string name="quick_goto_dialog_icon_description">pessoa executando</string>
     <string name="failed_to_fetch_observation_levels">Falha ao buscar nível de observações</string>
     <string name="traits_sort_default">Padrão</string>
@@ -1190,6 +1192,7 @@
     <string name="dialog_crop_message">Defina uma região de recorte que será aplicada a todas as imagens futuras para esta característica.</string>
     <string name="view_trait_photo_settings_crop">Definir Região de Recorte</string>
     <string name="crop_image_clip_data_label">Dados da região de recorte de Field Book</string>
+    <string name="quick_goto_swap_content_description">alternar tipo de entrada</string>
     <!--  NearbyShare  -->
     <string name="nearby_share_preferences_title">Compartilhar Preferências</string>
     <string name="nearby_share_connection_established">Conexão Estabelecida</string>
@@ -1198,6 +1201,16 @@
     <string name="nearby_share_connection_cancelled">Conexão cancelada</string>
     <string name="nearby_share_transfer_complete">Transferência concluída</string>
     <string name="nearby_share_transfer_in_progress">Transferência em andamento</string>
+    <string name="nearby_share_transfer_failed">Transferência falhou</string>
+    <string name="nearby_share_transfer_cancelled">Transferência cancelada</string>
+    <string name="nearby_share_devices_disconnected">Dispositivos Desconectados</string>
+    <string name="nearby_share_receiving_file">Recebendo arquivo…</string>
+    <string name="nearby_share_starting_transfer">Transferindo Arquivo %s…</string>
+    <string name="nearby_share_waiting_for_receivers">Aguardando os receptores conectarem…</string>
+    <string name="nearby_share_searching_for_senders">Procurando por dispositivos próximos…</string>
+    <string name="nearby_share_already_waiting_for_receivers">Já esperando que os receptores conectem…</string>
+    <string name="nearby_share_already_searching_for_sender">Já procurando o remetente…</string>
+    <string name="nearby_share_no_devices_found">Nenhum dispositivo encontrado ainda</string>
     <string name="nearby_share_failed_export_generation">Erro ao gerar arquivo para compartilhar</string>
     <string name="dialog_device_selection_title">Selecione um dispositivo</string>
     <string name="dialog_nearby_authentication_title">Aceitar Conexão com %s</string>
