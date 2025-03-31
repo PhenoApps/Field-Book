@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -53,8 +54,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         nameManager = new PersonNameManager(preferences);
 
-        previouslySavedNames = nameManager.getPersonNames();
-
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_profile));
 
         profilePerson = findPreference("pref_profile_person");
@@ -69,6 +68,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         }
 
         profilePerson.setOnPreferenceClickListener(preference -> {
+            previouslySavedNames = nameManager.getPersonNames();
             if (!previouslySavedNames.isEmpty() && previouslySavedNames.size() > 1) { // > 1 names stored, show list
                 showPreviouslyUsedNamesDialog();
             } else { // otherwise show person dialog
@@ -89,7 +89,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             boolean updatePerson = arguments.getBoolean(GeneralKeys.PERSON_UPDATE, false);
 
             if (updatePerson) {
-
+                previouslySavedNames = nameManager.getPersonNames();
                 if (!previouslySavedNames.isEmpty() && previouslySavedNames.size() > 1) { // > 1 names stored, show list
                     showPreviouslyUsedNamesDialog();
                 } else { // otherwise show person dialog
@@ -184,12 +184,27 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                 })
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .setNeutralButton(R.string.dialog_clear, (d, which) -> {
+                    showPersonResetWarning();
+                })
+                .show();
+    }
+
+    private void showPersonResetWarning() {
+        AlertDialog alertDialog = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+                .setTitle(R.string.dialog_warning)
+                .setMessage(R.string.preferences_profile_previous_names_warning)
+                .setNegativeButton(R.string.dialog_cancel, null)
+                .setPositiveButton(R.string.dialog_delete, (d, which) -> {
                     nameManager.clearPersonNames();
+                    preferences.edit().putString(GeneralKeys.FIRST_NAME,"").apply();
+                    preferences.edit().putString(GeneralKeys.LAST_NAME,"").apply();
+                    profilePerson.setSummary(personSummary());
                     // show person dialog after clearing
                     showPersonDialog();
                     d.dismiss();
-                })
-                .show();
+                }).show();
+
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(context, R.color.main_value_saved_color));
     }
 
     private void showDeviceNameDialog() {
