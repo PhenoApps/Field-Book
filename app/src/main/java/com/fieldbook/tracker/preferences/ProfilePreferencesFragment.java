@@ -78,7 +78,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             if (!previouslySavedNames.isEmpty() && previouslySavedNames.size() > 1) { // > 1 names stored, show list
                 showPreviouslyUsedNamesDialog();
             } else { // otherwise show person dialog
-                showPersonDialog();
+                showPersonDialog(true);
             }
             return true;
         });
@@ -99,7 +99,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                 if (!previouslySavedNames.isEmpty() && previouslySavedNames.size() > 1) { // > 1 names stored, show list
                     showPreviouslyUsedNamesDialog();
                 } else { // otherwise show person dialog
-                    showPersonDialog();
+                    showPersonDialog(true);
                 }
             }
         }
@@ -108,14 +108,18 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
     }
 
-    private void showPersonDialog() {
+    /**
+     * Dialog to add new person
+     * @param populatePersonName - whether to try to show current person's name in the editTexts
+     */
+    private void showPersonDialog(boolean populatePersonName) {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_person, null);
         firstName = layout.findViewById(R.id.firstName);
         lastName = layout.findViewById(R.id.lastName);
 
-        firstName.setText(preferences.getString(GeneralKeys.FIRST_NAME, ""));
-        lastName.setText(preferences.getString(GeneralKeys.LAST_NAME, ""));
+        firstName.setText(populatePersonName ? preferences.getString(GeneralKeys.FIRST_NAME, ""): "");
+        lastName.setText(populatePersonName ? preferences.getString(GeneralKeys.LAST_NAME, ""): "");
 
         firstName.setSelectAllOnFocus(true);
         lastName.setSelectAllOnFocus(true);
@@ -127,11 +131,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         builder.setPositiveButton(getString(R.string.dialog_save), null);
         builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, i) -> dialog.dismiss());
-        if (!previouslySavedNames.isEmpty()) { // neutral button to show "previous names"
-            builder.setNeutralButton(getString(R.string.dialog_previous_names), null);
-        } else { // if no previous names, neutral button to show "clear" option
-            builder.setNeutralButton(getString(R.string.dialog_clear), null);
-        }
+        builder.setNeutralButton(getString(R.string.dialog_clear), null);
 
         personDialog = builder.create();
         personDialog.setOnShowListener(dialog -> {
@@ -156,14 +156,9 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             });
             // Set click listener for neutral button
             alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
-                if (!previouslySavedNames.isEmpty()) {
-                    alertDialog.dismiss();
-                    showPreviouslyUsedNamesDialog();
-                } else {
-                    // Clear fields
-                    firstName.setText("");
-                    lastName.setText("");
-                }
+                // Clear fields
+                firstName.setText("");
+                lastName.setText("");
             });
         });
 
@@ -201,8 +196,9 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                     preferences.edit().putString(GeneralKeys.LAST_NAME, selectedName.getLastName()).apply();
                     profilePerson.setSummary(personSummary());
                 })
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .setNeutralButton(R.string.dialog_clear, (d, which) -> showPersonResetWarning());
+                .setNegativeButton(R.string.preferences_profile_new_person, (d, which) -> showPersonDialog(false))
+                .setNeutralButton(R.string.dialog_clear, (d, which) -> showPersonResetWarning())
+                .setPositiveButton(R.string.dialog_cancel, null);
 
         builder.show();
     }
@@ -218,7 +214,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                     preferences.edit().putString(GeneralKeys.LAST_NAME,"").apply();
                     profilePerson.setSummary(personSummary());
                     // show person dialog after clearing
-                    showPersonDialog();
+                    showPersonDialog(false);
                     d.dismiss();
                 }).show();
 
