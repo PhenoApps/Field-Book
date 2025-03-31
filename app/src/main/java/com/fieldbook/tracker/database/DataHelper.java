@@ -1483,6 +1483,14 @@ public class DataHelper {
 //        return data;
     }
 
+    public TraitObject getTraitById(Integer traitId) {
+
+        open();
+
+        return ObservationVariableDao.Companion.getTraitById(traitId);
+
+    }
+
     /**
      * Returns saved data based on plot_id
      * v1.6 - Amended to consider both trait and format

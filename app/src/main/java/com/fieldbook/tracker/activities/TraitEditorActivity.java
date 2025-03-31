@@ -91,7 +91,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
-public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController, TraitAdapter.TraitSorter, NewTraitDialog.TraitDialogDismissListener {
+public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController, TraitAdapter.TraitSorter, NewTraitDialog.TraitDialogDismissListener, TraitAdapter.OnTraitSelectedListener {
 
     private enum ImportOptions {
         CREATE_NEW(R.drawable.ic_ruler, R.string.traits_dialog_create),
@@ -340,6 +340,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         brapiDialogShown = false;
 
         traitAdapter = new TraitAdapter(this);
+        traitAdapter.setOnTraitSelectedListener(this);
         traitAdapter.submitList(database.getAllTraitObjects());
         traitList.setAdapter(traitAdapter);
 
@@ -347,6 +348,40 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         FloatingActionButton fab = findViewById(R.id.newTrait);
         fab.setOnClickListener(v -> showImportDialog());
+    }
+
+    // Implement the interface
+    @Override
+    public void onTraitSelected(String traitId) {
+        // Disable touch events on the RecyclerView
+        traitList.setEnabled(false);
+        
+        // Create and show the TraitDetailFragment
+        TraitDetailFragment fragment = new TraitDetailFragment();
+        Bundle args = new Bundle();
+        args.putString("traitId", traitId);
+        fragment.setArguments(args);
+        
+        getSupportFragmentManager().beginTransaction()
+            .replace(android.R.id.content, fragment, "TraitDetailFragmentTag")
+            .addToBackStack(null)
+            .commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            // Return to Traits screen if pressed in detail fragment
+            if (traitAdapter != null) {
+                traitAdapter.notifyDataSetChanged();
+            }
+            getSupportFragmentManager().popBackStack();
+            traitList.setEnabled(true); // Re-enable touch events
+        } else {
+            super.onBackPressed();
+            CollectActivity.reloadData = true;
+            finish();
+        }
     }
 
     @Override
@@ -742,12 +777,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         alert.show();
     }
 
-    public void onBackPressed() {
-        super.onBackPressed();
-        CollectActivity.reloadData = true;
-        finish();
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -929,7 +958,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         popupMenu.show(); //showing popup menu
     }
 
-    private void showTraitDialog(@Nullable TraitObject traitObject) {
+    public void showTraitDialog(@Nullable TraitObject traitObject) {
         queryAndLoadTraits();
         NewTraitDialog traitDialog = new NewTraitDialog(this);
         traitDialog.setTraitObject(traitObject);
@@ -937,7 +966,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     // Delete trait
-    private void deleteTrait(TraitObject trait) {
+    public void deleteTrait(TraitObject trait) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 

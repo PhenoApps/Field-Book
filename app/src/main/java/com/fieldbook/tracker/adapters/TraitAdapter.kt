@@ -30,6 +30,19 @@ class TraitAdapter(private val sorter: TraitSorter):
         fun onMenuItemClicked(v: View, trait: TraitObject)
     }
 
+    // Add OnTraitSelectedListener interface
+    interface OnTraitSelectedListener {
+        fun onTraitSelected(traitId: String)
+    }
+
+    // Add a property to store the listener
+    private var onTraitSelectedListener: OnTraitSelectedListener? = null
+
+    // Add a method to set the listener
+    fun setOnTraitSelectedListener(listener: OnTraitSelectedListener) {
+        onTraitSelectedListener = listener
+    }
+
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nameTextView: TextView = view.findViewById(R.id.list_item_trait_trait_name)
         val formatImageView = view.findViewById<ImageView>(R.id.traitType)
@@ -115,6 +128,11 @@ class TraitAdapter(private val sorter: TraitSorter):
             // Check or uncheck the list items
             val visible = sorter.getDatabase().traitVisibility[this.name]
             viewHolder.visibleCheckBox.isChecked = visible == null || visible == "true"
+            
+            // Add click listener to the item view
+            viewHolder.itemView.setOnClickListener {
+                onTraitSelectedListener?.onTraitSelected(this.id)
+            }
         }
     }
 

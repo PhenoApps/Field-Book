@@ -338,6 +338,24 @@
     <string name="select_trait">Select Trait</string>
     <string name="edit_traits">Edit</string>
 
+    <!-- Trait Detail Strings -->
+    <string name="trait_detail_title">Trait Details</string>
+    <string name="trait_format_details">Format Details</string>
+    <string name="trait_data_title">Observation Data</string>
+    <string name="trait_default_value">Default Value: %s</string>
+    <string name="trait_min_value">Minimum Value: %s</string>
+    <string name="trait_max_value">Maximum Value: %s</string>
+    <string name="trait_categories">Categories: %s</string>
+    <string name="trait_details">Details: %s</string>
+    <string name="trait_visible">Visible</string>
+    <string name="trait_hidden">Hidden</string>
+    <string name="trait_observation_data">Data</string>
+    <string name="trait_observation_count">%d observations</string>
+    <string name="trait_fields_count">Used in %d fields</string>
+    <string name="trait_observations_count">%d total observations</string>
+    <string name="trait_not_chartable">This trait format cannot be visualized in a chart</string>
+    <string name="unknown_date">Unknown date</string>
+    <string name="traits_rename">Rename Trait</string>
 
     <!-- COLLECT -->
 
