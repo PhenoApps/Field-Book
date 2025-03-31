@@ -156,7 +156,7 @@ class TraitDetailFragment : Fragment() {
                 // Convert the string ID to an integer
                 val idInt = idString.toInt()
                 CoroutineScope(Dispatchers.IO).launch {
-                    val trait = database.getTraitById(id)
+                    val trait = database.getTraitById(idInt)
                     
                     withContext(Dispatchers.Main) {
                         traitObject = trait  // Store the trait object
@@ -286,26 +286,31 @@ class TraitDetailFragment : Fragment() {
         
         toolbar?.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                 R.id.delete -> {
-                // Show confirmation dialog
-                AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-                    .setTitle(getString(R.string.traits_options_delete_title))
-                    .setMessage(getString(R.string.traits_warning_delete))
-                    .setPositiveButton(getString(R.string.dialog_yes)) { dialog, _ ->
-                        // Call the existing deleteTrait method
-                        (activity as? TraitEditorActivity)?.deleteTrait(trait)
-                        // Pop back stack to return to the trait list
-                        parentFragmentManager.popBackStack()
-                        dialog.dismiss()
-                    }
-                    .setNegativeButton(getString(R.string.dialog_no)) { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .show()
-                true
+                android.R.id.home -> {
+                    parentFragmentManager.popBackStack()
+                }
+                R.id.delete -> {
+                    // Show confirmation dialog
+                    AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+                        .setTitle(getString(R.string.traits_options_delete_title))
+                        .setMessage(getString(R.string.traits_warning_delete))
+                        .setPositiveButton(getString(R.string.dialog_yes)) { dialog, _ ->
+                            // Call the existing deleteTrait method
+                            (activity as? TraitEditorActivity)?.deleteTrait(trait)
+                            // Pop back stack to return to the trait list
+                            parentFragmentManager.popBackStack()
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton(getString(R.string.dialog_no)) { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .show()
+                    true
+                }
             }
-                else -> false
-            }
-        }
+
+            true
+        }  
     }
+    
 }

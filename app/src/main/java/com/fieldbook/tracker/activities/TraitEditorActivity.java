@@ -378,9 +378,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             getSupportFragmentManager().popBackStack();
             traitList.setEnabled(true); // Re-enable touch events
         } else {
-            super.onBackPressed();
             CollectActivity.reloadData = true;
-            finish();
+            super.onBackPressed();
         }
     }
 
