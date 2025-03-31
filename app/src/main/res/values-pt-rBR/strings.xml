@@ -1194,6 +1194,7 @@
     <string name="crop_image_clip_data_label">Dados da região de recorte de Field Book</string>
     <string name="quick_goto_swap_content_description">alternar tipo de entrada</string>
     <!--  NearbyShare  -->
+    <string name="nearby_share_title">Compartilhar Próximo</string>
     <string name="nearby_share_preferences_title">Compartilhar Preferências</string>
     <string name="nearby_share_connection_established">Conexão Estabelecida</string>
     <string name="nearby_share_connection_rejected">Conexão Recusada</string>
@@ -1216,6 +1217,9 @@
     <string name="nearby_share_failed_advertising">Erro ao esperar dispositivos: %s</string>
     <string name="nearby_share_failed_transfer">Falha ao iniciar a transferência: %s</string>
     <string name="nearby_share_failed_payload">Falha ao criar o arquivo payload</string>
+    <string name="nearby_share_failed_request">Falha ao solicitar a conexão: %s</string>
+    <string name="nearby_share_failed_handle_file">Falha ao manipular arquivo: %s</string>
+    <string name="nearby_share_generating_file">Preparando o arquivo para transferência</string>
     <string name="nearby_share_failed_import">Falha ao importar arquivo: %s</string>
     <string name="nearby_share_failed_export_generation_message">Erro ao gerar arquivo para compartilhar: %s</string>
     <string name="nearby_share_failed_export_generation">Erro ao gerar arquivo para compartilhar</string>
