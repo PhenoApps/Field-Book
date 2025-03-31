@@ -44,12 +44,16 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
     private AlertDialog deviceNameDialog;
 
+    private List<PersonNameManager.PersonName> previouslySavedNames;
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
         setPreferencesFromResource(R.xml.preferences_profile, rootKey);
 
         nameManager = new PersonNameManager(preferences);
+
+        previouslySavedNames = nameManager.getPersonNames();
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_profile));
 
@@ -65,7 +69,11 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         }
 
         profilePerson.setOnPreferenceClickListener(preference -> {
-            showPersonDialog();
+            if (!previouslySavedNames.isEmpty() && previouslySavedNames.size() > 1) { // > 1 names stored, show list
+                showPreviouslyUsedNamesDialog();
+            } else { // otherwise show person dialog
+                showPersonDialog();
+            }
             return true;
         });
 
@@ -82,8 +90,11 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
             if (updatePerson) {
 
-                showPersonDialog();
-
+                if (!previouslySavedNames.isEmpty() && previouslySavedNames.size() > 1) { // > 1 names stored, show list
+                    showPreviouslyUsedNamesDialog();
+                } else { // otherwise show person dialog
+                    showPersonDialog();
+                }
             }
         }
 
@@ -102,8 +113,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         firstName.setSelectAllOnFocus(true);
         lastName.setSelectAllOnFocus(true);
-
-        List<PersonNameManager.PersonName> previouslySavedNames = nameManager.getPersonNames();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
         builder.setTitle(R.string.preferences_profile_person_dialog_title)
@@ -143,7 +152,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
                 if (!previouslySavedNames.isEmpty()) {
                     alertDialog.dismiss();
-                    showPreviouslyUsedNamesDialog(previouslySavedNames);
+                    showPreviouslyUsedNamesDialog();
                 } else {
                     // Clear fields
                     firstName.setText("");
@@ -159,16 +168,16 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         personDialog.getWindow().setAttributes(langParams);
     }
 
-    private void showPreviouslyUsedNamesDialog(List<PersonNameManager.PersonName> names) {
-        String[] previousNames = new String[names.size()];
-        for (int i = 0; i < names.size(); i++) {
-            previousNames[i] = names.get(i).fullName();
+    private void showPreviouslyUsedNamesDialog() {
+        String[] previousNames = new String[previouslySavedNames.size()];
+        for (int i = 0; i < previouslySavedNames.size(); i++) {
+            previousNames[i] = previouslySavedNames.get(i).fullName();
         }
 
         new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
                 .setTitle(R.string.preferences_profile_previous_names)
                 .setItems(previousNames, (dialogInterface, which) -> {
-                    PersonNameManager.PersonName selectedName = names.get(which);
+                    PersonNameManager.PersonName selectedName = previouslySavedNames.get(which);
                     showPersonDialog();
                     firstName.setText(selectedName.getFirstName());
                     lastName.setText(selectedName.getLastName());
