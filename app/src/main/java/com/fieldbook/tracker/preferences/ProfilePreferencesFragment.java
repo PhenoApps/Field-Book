@@ -3,14 +3,20 @@ package com.fieldbook.tracker.preferences;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -170,23 +176,35 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
     private void showPreviouslyUsedNamesDialog() {
         String[] previousNames = new String[previouslySavedNames.size()];
+        final String currentFirstName = preferences.getString(GeneralKeys.FIRST_NAME, "");
+        final String currentLastName = preferences.getString(GeneralKeys.LAST_NAME, "");
+
+        int currentPersonIndex = -1;
+
         for (int i = 0; i < previouslySavedNames.size(); i++) {
             previousNames[i] = previouslySavedNames.get(i).fullName();
+
+            PersonNameManager.PersonName name = previouslySavedNames.get(i);
+            if (name.getFirstName().equals(currentFirstName) && name.getLastName().equals(currentLastName)) {
+                currentPersonIndex = i;
+            }
         }
 
-        new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+        ArrayAdapter<String> adapter = getPersonNameAdapter(currentPersonIndex, previousNames);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
                 .setTitle(R.string.preferences_profile_previous_names)
-                .setItems(previousNames, (dialogInterface, which) -> {
+                .setAdapter(adapter, (dialogInterface, which) -> {
                     PersonNameManager.PersonName selectedName = previouslySavedNames.get(which);
-                    showPersonDialog();
-                    firstName.setText(selectedName.getFirstName());
-                    lastName.setText(selectedName.getLastName());
+
+                    preferences.edit().putString(GeneralKeys.FIRST_NAME, selectedName.getFirstName()).apply();
+                    preferences.edit().putString(GeneralKeys.LAST_NAME, selectedName.getLastName()).apply();
+                    profilePerson.setSummary(personSummary());
                 })
                 .setNegativeButton(R.string.dialog_cancel, null)
-                .setNeutralButton(R.string.dialog_clear, (d, which) -> {
-                    showPersonResetWarning();
-                })
-                .show();
+                .setNeutralButton(R.string.dialog_clear, (d, which) -> showPersonResetWarning());
+
+        builder.show();
     }
 
     private void showPersonResetWarning() {
@@ -286,6 +304,34 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         String defaultDeviceName = getString(R.string.preferences_profile_device_name_default_format, Build.MODEL);
 
         return deviceName.isEmpty() ? defaultDeviceName : deviceName;
+    }
+
+    @NonNull
+    private ArrayAdapter<String> getPersonNameAdapter(int currentPersonIndex, String[] previousNames) {
+        TypedValue fbTraitButtonBackgroundTintValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.fb_trait_button_background_tint, fbTraitButtonBackgroundTintValue, true);
+        int backgroundColor = fbTraitButtonBackgroundTintValue.data;
+        final int highlightedIndex = currentPersonIndex;
+
+        return new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, previousNames) {
+            @NonNull
+            @Override
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView textView = view.findViewById(android.R.id.text1);
+
+                // Highlight the active person
+                if (position == highlightedIndex) {
+                    textView.setBackgroundColor(backgroundColor);
+                    textView.setTypeface(null, Typeface.BOLD);
+                } else {
+                    textView.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
+                    textView.setTypeface(null, Typeface.NORMAL);
+                }
+
+                return view;
+            }
+        };
     }
 
     @Override
