@@ -126,6 +126,20 @@ The bar at the top of the section shows progress through all entries in the fiel
 Pressing and holding the an arrow will continuously scroll through the entries.
 The longer the arrows are pressed, the faster the scrolling becomes.
 
+Primary and secondary ids are displayed between the entry arrows. Like the Infobars the labels can be pressed to modify which attributes are displayed as the primary and secondary id.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/collect/collect_choose_id_framed.png" width="325px"> 
+  <figcaption class="screenshot-caption"><i>Modifying which attribute is used as primary id</i></figcaption> 
+</figure>
+
+The values can be pressed to open the new Quick GoTo dialog (The legacy Quick GoTo setting has been removed now that the feature is available by default). Enter a new value to jump to the first matching entry.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/collect/collect_quick_go_to.png" width="325px"> 
+  <figcaption class="screenshot-caption"><i>The Quick GoTo dialog</i></figcaption> 
+</figure>
+
 #### Data input
 
 The bottom half of the screen is used to input data.
