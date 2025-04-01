@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Improvements for the GoPro Hero 9
 
 ## [v6.1.2] - 2025-03-31
 
