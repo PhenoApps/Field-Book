@@ -3,7 +3,6 @@ package com.fieldbook.tracker.preferences;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,8 +38,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     SharedPreferences preferences;
 
     Context context;
-
-    private PersonNameManager nameManager;
+    @Inject
+    PersonNameManager nameManager;
     private Preference profilePerson;
     //    private ListPreference verificationInterval;
     private EditText firstName;
@@ -57,8 +56,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
         setPreferencesFromResource(R.xml.preferences_profile, rootKey);
-
-        nameManager = new PersonNameManager(preferences);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_profile));
 

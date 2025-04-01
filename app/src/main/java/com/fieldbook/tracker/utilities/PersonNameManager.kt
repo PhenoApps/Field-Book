@@ -7,13 +7,16 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import androidx.core.content.edit
+import com.fieldbook.tracker.preferences.GeneralKeys
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Utility class for managing person names
  * Saves person names as an array of JSON string
  * eg. [{"firstName": "John", "lastName": "Doe" ]
  */
-class PersonNameManager(private val preferences: SharedPreferences) {
+class PersonNameManager @Inject constructor(private val preferences: SharedPreferences) {
 
     data class PersonName(val firstName: String, val lastName: String) {
         fun fullName(): String = "$firstName $lastName"
@@ -106,6 +109,19 @@ class PersonNameManager(private val preferences: SharedPreferences) {
             }
         }
         return false
+    }
+
+    /**
+     * Migrate existing person name to the preference
+     * Useful when the existing person on the device is not already present in the JSONArray
+     */
+    fun migrateExistingPersonName() {
+        val firstName = preferences.getString(GeneralKeys.FIRST_NAME, "") ?: ""
+        val lastName = preferences.getString(GeneralKeys.LAST_NAME, "") ?: ""
+
+        if ((firstName.isNotEmpty() == true || lastName.isNotEmpty() == true)) {
+            savePersonName(firstName, lastName)
+        }
     }
 
     /**
