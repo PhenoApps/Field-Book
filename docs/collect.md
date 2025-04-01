@@ -146,6 +146,8 @@ The bottom half of the screen is used to input data.
 The elements and layout of this area change based on the trait that is currently active.
 Information for each specific trait format can be found in the Trait Formats pages.
 
+Newly input values are colored black and displayed with italic font. Saved values are colored red and displayed in red font. The font difference can be used to distinguish between the two even on black and white screens.
+
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_framed.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Collect screen</i></figcaption> 

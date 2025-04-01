@@ -23,6 +23,14 @@ Field Book allows photos to be captured from different camera sources including 
 
 On the Collect Screen, pressing the <img class="icon" src="_static/icons/formats/shutter.png"> icon captures an image from the camera.
 Pressing the <img class="icon" src="_static/icons/formats/cog.png"> icon opens a settings dialog, where the resolution, preview, and other options can be adjusted.
+
+If crop region was set to true when creating the trait then the "Set Crop Region" option will show up in the settings. Press it to take a photo and adjust the crop dimensions that will automatically be applied to captured photos. 
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/traits/formats/crop_region_joined.png" width="1100px"> 
+  <figcaption class="screenshot-caption"><i>Setting a photo trait's crop region</i></figcaption> 
+</figure>
+
 Multiple photos can be captured for each entry. 
 
 Captured photos are stored in `.jpg` format, and named by using underscores to join the entry's `unique id`, the trait name, the photo number, and a timestamp.
