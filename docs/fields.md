@@ -155,6 +155,13 @@ The <img class="icon" src="_static/icons/settings/sounds/delete.png"> icon will 
   <figcaption class="screenshot-caption"><i>Sorting entries by ascending row, then column</i></figcaption> 
 </figure>
 
+The Search ID dialog displays a list of attributes that are unique within the field. By default barcode searches check against the unique identifer that was selected on import. Select a different attribute to modify that behavior - barcode searches will check against the selected Search ID first, then fall back to checking against the unique identifier if no match is found. If desired, check the checkbox to apply this choice to all fields that have the same attribute.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/field_detail_search_id.png" width="350px"> 
+  <figcaption class="screenshot-caption"><i>The Search ID dialog</i></figcaption> 
+</figure>
+
 The <img class="icon" src="_static/icons/home/barley.png"> [Collect](collect.md) card will navigate to the Collect screen where data can be collected.
 
 The <img class="icon" src="_static/icons/home/save.png"> [Export](export.md) card will export data that has been collected.
