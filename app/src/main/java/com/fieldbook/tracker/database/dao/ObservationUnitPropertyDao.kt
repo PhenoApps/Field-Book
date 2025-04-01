@@ -233,11 +233,15 @@ class ObservationUnitPropertyDao {
 
                     val row = arrayListOf<String?>()
 
-                    requiredColumns.forEachIndexed { index, s ->
+                    fullCursor.columnNames.forEachIndexed { index, col ->
 
                         try {
 
-                            row.add(fullCursor.getStringOrNull(index))
+                            if (col in requiredColumns) {
+
+                                row.add(fullCursor.getStringOrNull(index))
+
+                            }
 
                         } catch (e: Exception) {
 

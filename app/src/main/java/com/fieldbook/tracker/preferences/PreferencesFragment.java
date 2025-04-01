@@ -149,7 +149,7 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
                         break;
                 }
             };
-            ListAddDialog dialog = new ListAddDialog(getActivity(), R.string.nearby_share_preferences_title, options, icons, onItemClickListener);
+            ListAddDialog dialog = new ListAddDialog(getActivity(), getString(R.string.nearby_share_preferences_title), options, icons, onItemClickListener);
             dialog.show(getActivity().getSupportFragmentManager(), "ListAddDialog");
         }
     }

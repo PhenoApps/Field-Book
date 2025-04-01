@@ -1,5 +1,15 @@
 <changelog>
 
+    <release date="2025-03-31" versionCode="60102" versionName="v6.1.2">
+        <new>Additional attributes are now included when importing fields using BrAPI</new>
+        <info>Improvements to the trait import and creation process</info>
+        <info>Angle trait animation has been reversed</info>
+        <bugfix>Nearest field snackbar no longer overlaps add field button</bugfix>
+        <bugfix>BrAPI Import background color is now white</bugfix>
+        <bugfix>Bundled media is now exported as expected for active and existing traits</bugfix>
+        <bugfix>Exporting with 'Only unique identifier' no longer shifts data</bugfix>
+    </release>
+
     <release date="2025-03-24" versionCode="60101" versionName="v6.1.1">
         <bugfix>Field imports from BrAPI now include the correct metadata</bugfix>
     </release>

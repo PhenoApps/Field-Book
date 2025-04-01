@@ -64,7 +64,6 @@
     <string name="traits_sort_visibility">দৃশ্যমান</string>
     <string name="warning_traits_missing_modify">বৈশিষ্ট্য তৈরি করুন তাদেরকে পরিবর্তনের পূর্বেই।</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">ভীতারে নিয়ে আসা/ বাহিরে পাঠানো</string>
     <string name="traits_dialog_import">উত্তোলন</string>
     <string name="traits_dialog_export">দিয়ে দেয়া</string>
     <string name="traits_toolbar_delete_all">সকল বৈশিষ্ট্যই মুছে ফেলুন</string>

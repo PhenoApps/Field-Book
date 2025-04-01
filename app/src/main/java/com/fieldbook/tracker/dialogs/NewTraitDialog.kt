@@ -86,13 +86,6 @@ class NewTraitDialog(
     private var originalInitialTraitObject: TraitObject? = null
 
     //private var createVisible: Boolean
-    private var brapiDialogShown = false
-
-    init {
-        (activity as? TraitEditorActivity)?.brAPIDialogShown?.let {
-            setBrAPIDialogShown(it)
-        }
-    }
 
     fun setTraitObject(traitObject: TraitObject?) {
 
@@ -302,9 +295,7 @@ class NewTraitDialog(
 
             traitFormatsRv.adapter = formatsAdapter
 
-            if (isSelectingFormat) { //remove brapi format
-                formatsAdapter.submitList(formats.filter { it != Formats.BRAPI })
-            } else formatsAdapter.submitList(formats)
+            formatsAdapter.submitList(formats)
         }
     }
 
@@ -380,18 +371,6 @@ class NewTraitDialog(
             val ed = this.prefs.edit()
             ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false)
             ed.apply()
-
-            // Display our BrAPI dialog if it has not been show already
-            // Get our dialog state from our adapter to see if a trait has been selected
-            (activity as? TraitEditorActivity)?.adapter?.infoDialogShown?.let {
-                setBrAPIDialogShown(it)
-
-                if (!brapiDialogShown) {
-                    setBrAPIDialogShown(
-                        activity.displayBrapiInfo(activity, null, true)
-                    )
-                }
-            }
 
             CollectActivity.reloadData = true
 
@@ -517,15 +496,6 @@ class NewTraitDialog(
         )
     }
 
-    // when this value changes in this class,
-    // the value in TraitEditorActivity must change
-    private fun setBrAPIDialogShown(b: Boolean) {
-        if (!isSelectingFormat) {
-            brapiDialogShown = b
-            (activity as? TraitEditorActivity)?.brAPIDialogShown = b
-        }
-    }
-
     private fun showFormatParameters() {
 
         val adapter = traitFormatsRv.adapter as? TraitFormatAdapter
@@ -545,24 +515,7 @@ class NewTraitDialog(
     private var isShowingCameraOptions = false
     override fun onSelected(format: Formats) {
 
-        if (format == Formats.BRAPI) {
-
-            if (initialTraitObject != null) {
-
-                Toast.makeText(
-                    context,
-                    R.string.dialog_new_trait_error_cannot_update_to_brapi_trait,
-                    Toast.LENGTH_SHORT
-                ).show()
-
-            } else {
-
-                dismiss()
-
-                (activity as? TraitEditorActivity)?.startBrapiTraitActivity(true)
-            }
-
-        } else if (format == Formats.BASE_PHOTO && !isShowingCameraOptions) {
+        if (format == Formats.BASE_PHOTO && !isShowingCameraOptions) {
 
             isShowingCameraOptions = true
 

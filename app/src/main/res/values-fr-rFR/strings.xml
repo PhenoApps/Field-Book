@@ -75,12 +75,10 @@
     <string name="traits_sort_visibility">Visibilité</string>
     <string name="warning_traits_missing_modify">Créé les caractères avant de les modifier.</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">Importer/Exporter</string>
     <string name="traits_dialog_import">Importer</string>
+    <string name="import_error_format_trait">Seulement les fichiers de type TRT peuvent être importés comme liste de caractères</string>
     <string name="traits_export_check">Exporter la liste actuelle de caractères ?</string>
     <string name="traits_dialog_export">Exporter</string>
-    <string name="import_error_format_trait">Seulement les fichiers de type TRT peuvent être importés comme liste de caractères</string>
-    <string name="import_dialog_title_traits">Importer caractères</string>
     <string name="traits_toolbar_delete_all">supprimer tous les caractères</string>
     <!-- Trait item menu -->
     <string name="traits_options_copy">copier</string>
