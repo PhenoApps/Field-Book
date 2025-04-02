@@ -72,7 +72,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         profilePerson.setOnPreferenceClickListener(preference -> {
             previouslySavedNames = nameManager.getPersonNames();
-            if (!previouslySavedNames.isEmpty() && previouslySavedNames.size() > 1) { // > 1 names stored, show list
+            if (!previouslySavedNames.isEmpty()) { // >= 1 names stored, show list
                 showPreviouslyUsedNamesDialog();
             } else { // otherwise show person dialog
                 showPersonDialog(true);
@@ -93,7 +93,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
             if (updatePerson) {
                 previouslySavedNames = nameManager.getPersonNames();
-                if (!previouslySavedNames.isEmpty() && previouslySavedNames.size() > 1) { // > 1 names stored, show list
+                if (!previouslySavedNames.isEmpty()) { // >= 1 names stored, show list
                     showPreviouslyUsedNamesDialog();
                 } else { // otherwise show person dialog
                     showPersonDialog(true);
