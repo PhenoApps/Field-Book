@@ -9,7 +9,6 @@ import org.json.JSONObject
 import androidx.core.content.edit
 import com.fieldbook.tracker.preferences.GeneralKeys
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Utility class for managing person names
@@ -24,6 +23,8 @@ class PersonNameManager @Inject constructor(private val preferences: SharedPrefe
 
     companion object {
         const val TAG = "PersonNameManager"
+        const val FIRST_NAME_KEY = "firstName"
+        const val LAST_NAME_KEY = "lastName"
     }
 
     /**
@@ -39,8 +40,8 @@ class PersonNameManager @Inject constructor(private val preferences: SharedPrefe
             val namesArray = getCurrentNamesArray()
 
             val newPerson = JSONObject().apply {
-                put("firstName", firstName)
-                put("lastName", lastName)
+                put(FIRST_NAME_KEY, firstName)
+                put(LAST_NAME_KEY, lastName)
             }
 
             // check if name already exists
@@ -73,8 +74,8 @@ class PersonNameManager @Inject constructor(private val preferences: SharedPrefe
 
             for (i in 0 until namesArray.length()) {
                 val nameObj = namesArray.getJSONObject(i)
-                val firstName = nameObj.getString("firstName")
-                val lastName = nameObj.getString("lastName")
+                val firstName = nameObj.getString(FIRST_NAME_KEY)
+                val lastName = nameObj.getString(LAST_NAME_KEY)
                 namesList.add(PersonName(firstName, lastName))
             }
         } catch (e: JSONException) {
@@ -100,8 +101,8 @@ class PersonNameManager @Inject constructor(private val preferences: SharedPrefe
         for (i in 0 until namesArray.length()) {
             try {
                 val nameObj = namesArray.getJSONObject(i)
-                if (nameObj.getString("firstName").equals(firstName)
-                    && nameObj.getString("lastName").equals(lastName)) {
+                if (nameObj.getString(FIRST_NAME_KEY).equals(firstName)
+                    && nameObj.getString(LAST_NAME_KEY).equals(lastName)) {
                     return true
                 }
             } catch (e: JSONException) {
