@@ -72,12 +72,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         }
 
         profilePerson.setOnPreferenceClickListener(preference -> {
-            previouslySavedNames = nameManager.getPersonNames();
-            if (!previouslySavedNames.isEmpty()) { // >= 1 names stored, show list
-                showPreviouslyUsedNamesDialog();
-            } else { // otherwise show person dialog
-                showPersonDialog(true);
-            }
+            checkNamesAndShowDialog();
             return true;
         });
 
@@ -93,17 +88,21 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             boolean updatePerson = arguments.getBoolean(GeneralKeys.PERSON_UPDATE, false);
 
             if (updatePerson) {
-                previouslySavedNames = nameManager.getPersonNames();
-                if (!previouslySavedNames.isEmpty()) { // >= 1 names stored, show list
-                    showPreviouslyUsedNamesDialog();
-                } else { // otherwise show person dialog
-                    showPersonDialog(true);
-                }
+                checkNamesAndShowDialog();
             }
         }
 
         preferences.edit().putLong(GeneralKeys.LAST_TIME_OPENED, System.nanoTime()).apply();
 
+    }
+
+    private void checkNamesAndShowDialog() {
+        previouslySavedNames = nameManager.getPersonNames();
+        if (!previouslySavedNames.isEmpty()) { // >= 1 names stored, show list
+            showPreviouslyUsedNamesDialog();
+        } else { // otherwise show person dialog
+            showPersonDialog(true);
+        }
     }
 
     /**
