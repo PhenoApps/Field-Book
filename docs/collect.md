@@ -2,7 +2,7 @@
 
 # Collect
 
-Field Book increases data collection speed be collected by optimizing and simplifying data input.
+Field Book increases data collection speed by optimizing and simplifying data input.
 Only a single entry and trait are visible for data input which reduces the risk of error and allows custom trait-specific layouts.
 
 ## Overview
