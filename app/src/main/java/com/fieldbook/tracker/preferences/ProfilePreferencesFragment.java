@@ -3,6 +3,7 @@ package com.fieldbook.tracker.preferences;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
@@ -313,6 +314,9 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                 View view = super.getView(position, convertView, parent);
                 TextView textView = view.findViewById(android.R.id.text1);
 
+                // align names with "Clear" button
+                textView.setPadding(isTablet(context) ? 36 : 64, 0, 0, 0);
+
                 // Highlight the active person
                 if (position == highlightedIndex) {
                     textView.setBackgroundColor(backgroundColor);
@@ -325,6 +329,12 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                 return view;
             }
         };
+    }
+
+    private boolean isTablet(Context context) {
+        return (context.getResources().getConfiguration().screenLayout
+                & Configuration.SCREENLAYOUT_SIZE_MASK)
+                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
     @Override
