@@ -37,7 +37,7 @@ First, press the <img class="icon" src="_static/icons/settings/swap-horizontal-c
   <figcaption class="screenshot-caption"><i>Initial steps to share settings with nearby share</i></figcaption> 
 </figure>
 
-Follow the same steps on the other device you are importing from/exporting to. The importing device will then display a list of devices it sees nearby that are trying to share data. Select the desired device, confirm the pairing codes match between the device and accept the connection on both devices. Once accepted the transfer will occur and indicate it is finished with a "Transfer completed" message. 
+Follow the same steps on the other device you are importing from/exporting to. The importing device will then display a list of devices it sees nearby that are trying to share data. Select the desired device, confirm the pairing codes match, and accept the connection on both devices. Once accepted the transfer will occur and indicate it is finished with a "Transfer completed" message. 
 
 <figure class="image">
   <img class="screenshot" src="_static/images/settings/settings_share_joined_2.png" width="1100px"> 
