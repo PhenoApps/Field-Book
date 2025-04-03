@@ -75,6 +75,10 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop" /> <!-- available within the collect activity, user can search by building sql statements -->
         <activity
+            android:name=".activities.OldDataGridActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop" /> <!-- available within the collect activity, user can search by building sql statements -->
+        <activity
             android:name=".activities.SearchActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
