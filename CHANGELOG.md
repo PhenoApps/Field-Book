@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Device name can now be customized in Profile Settings
 - User names are now saved in a list for rapid switching
 
 ### Changed
