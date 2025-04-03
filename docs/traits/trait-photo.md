@@ -5,7 +5,7 @@
 ## Overview
 
 The photo trait formats are used to capture images.
-Field Book allows photos to be captured from different camera sources including the device camera, <img class="icon" src="_static/icons/formats/webcam.png"> USB cameras, <img class="icon" src="_static/icons/formats/camera-gopro.png"> GoPro cameras, and <img class="icon" src="_static/icons/formats/shutter.png"> Canon DSLRs.
+Field Book allows photos to be captured from different camera sources including the device camera, <img class="icon" src="_static/icons/formats/webcam.png"> USB cameras, <img class="icon" src="_static/icons/formats/camera-gopro.png"> GoPro cameras, and <img class="icon" src="_static/icons/formats/shutter.png"> [compatible](https://developercommunity.usa.canon.com/s/article/CCAPI-Supported-Cameras) Canon cameras.
 
 ## Creation
 
