@@ -638,6 +638,10 @@
 
     <string name="preferences_profile_set_person">Person Name</string>
     <string name="preferences_profile_person_dialog_title">Set Person</string>
+    <string name="dialog_previous_names">Previous Used Names</string>
+    <string name="preferences_profile_previous_names">Previous Names</string>
+    <string name="preferences_profile_new_person">New Person</string>
+    <string name="preferences_profile_previous_names_warning">All saved person names would be deleted, and this cannot be reversed. Are you sure you want to continue?</string>
     <string name="preferences_profile_name_first">First Name</string>
     <string name="preferences_profile_name_last">Last Name</string>
     <string name="preferences_profile_name_error">Both fields cannot be blank</string>

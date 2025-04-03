@@ -40,6 +40,7 @@ import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
+import com.fieldbook.tracker.utilities.PersonNameManager;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -101,6 +102,8 @@ public class ConfigActivity extends ThemedActivity {
     VerifyPersonHelper verifyPersonHelper;
     @Inject
     SharedPreferences preferences;
+    @Inject
+    PersonNameManager nameManager;
     @Inject
     public ExportUtil exportUtil;
     Handler mHandler = new Handler();
@@ -167,6 +170,9 @@ public class ConfigActivity extends ThemedActivity {
         preferencesSetup();
 
         verifyPersonHelper.updateLastOpenedTime();
+
+        // save the current person name
+        nameManager.migrateExistingPersonName();
     }
 
     private void versionBasedSetup() {
