@@ -15,18 +15,10 @@ import com.fieldbook.tracker.database.getTime
 import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
 import com.fieldbook.tracker.database.toFirst
-import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 
 
 class StudyDao {
@@ -268,6 +260,7 @@ class StudyDao {
             it.observation_count = this["observation_count"]?.toString()
             it.trial_name = this["trial_name"]?.toString()
             it.search_attribute = this["observation_unit_search_attribute"]?.toString()
+            it.groupName = this["group_name"]?.toString()
         }
 
         fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
@@ -646,6 +639,34 @@ class StudyDao {
                     whereArgs = arrayOf(id)
                 ).toFirst()
             )
+        }
+
+        /**
+         * Returns distinct group_names from the studies table
+         */
+        fun getDistinctGroups(): List<String> = withDatabase { db ->
+            val groupNames = mutableListOf<String>()
+            val query = "SELECT DISTINCT group_name FROM studies WHERE group_name IS NOT NULL AND group_name <> '' ORDER BY group_name ASC"
+
+            db.rawQuery(query, null).use { cursor ->
+                while (cursor.moveToNext()) {
+                    cursor.getString(0)?.let { groupNames.add(it) }
+                }
+            }
+            groupNames
+        } ?: emptyList()
+
+        /**
+         * Updates the group_name for a study
+         */
+        fun updateFieldGroup(studyId: Int, groupName: String?) = withDatabase { db ->
+            val contentValues = ContentValues()
+            if (groupName == null) {
+                contentValues.putNull("group_name")
+            } else {
+                contentValues.put("group_name", groupName)
+            }
+            db.update(Study.tableName, contentValues, "${Study.PK} = ?", arrayOf("$studyId"))
         }
     }
 }

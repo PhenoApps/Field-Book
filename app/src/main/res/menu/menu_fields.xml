@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
     <item
+        android:id="@+id/groupFields"
+        android:icon="@drawable/ic_tb_help"
+        android:showAsAction="always"
+        android:title="@string/tutorial_dialog_title" />
+    <item
         android:id="@+id/help"
         android:icon="@drawable/ic_tb_help"
         android:showAsAction="always"
