@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,9 +20,10 @@ import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -31,7 +31,7 @@ import java.util.Set;
  * Loads data on field manager screen
  */
 
-public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHolder> {
+public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, RecyclerView.ViewHolder> {
     private Set<Integer> selectedIds = new LinkedHashSet<>();
     private boolean isInSelectionMode = false;
     private static final String TAG = "FieldAdapter";
@@ -42,6 +42,9 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
     private OnFieldSelectedListener listener;
     private String filterText = "";
     private final List<FieldObject> fullFieldList = new ArrayList<>();
+    public enum FieldViewType {
+        TYPE_GROUP_HEADER, TYPE_FIELD
+    }
 
     public interface OnFieldSelectedListener {
         void onFieldSelected(int itemId);
@@ -53,14 +56,35 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
     }
 
     public FieldAdapter(Context context, FieldSwitcher switcher, AdapterCallback callback) {
-        super(new DiffUtil.ItemCallback<FieldObject>() {
+        super(new DiffUtil.ItemCallback<FieldViewItem>() {
             @Override
-            public boolean areItemsTheSame(@NonNull FieldObject oldItem, @NonNull FieldObject newItem) {
-                return oldItem.getExp_id() == newItem.getExp_id();
+            public boolean areItemsTheSame(@NonNull FieldViewItem oldItem, @NonNull FieldViewItem newItem) {
+                if (oldItem.viewType != newItem.viewType) {
+                    return false;
+                }
+
+                if (oldItem.isGroupHeader()) { // group header
+                    return areNamesEqual(oldItem.groupName, newItem.groupName);
+                } else { // field
+                    return oldItem.field.getExp_id() == newItem.field.getExp_id();
+                }
             }
+
             @Override
-            public boolean areContentsTheSame(@NonNull FieldObject oldItem, @NonNull FieldObject newItem) {
-                return oldItem.getExp_alias().equals(newItem.getExp_alias());
+            public boolean areContentsTheSame(@NonNull FieldViewItem oldItem, @NonNull FieldViewItem newItem) {
+                if (oldItem.viewType != newItem.viewType) {
+                    return false;
+                }
+
+                if (oldItem.isGroupHeader()) { // group header
+                    return areNamesEqual(oldItem.groupName, newItem.groupName) && (oldItem.isExpanded == newItem.isExpanded);
+                } else { // field
+                    return oldItem.field.getExp_alias().equals(newItem.field.getExp_alias());
+                }
+            }
+
+            private boolean areNamesEqual(String name1, String name2) {
+                return (name1 == null && name2 == null) || (name1 != null && name1.equals(name2));
             }
         });
         this.context = context;
@@ -98,9 +122,11 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
     }
 
     public void selectAll() {
-        List<FieldObject> currentList = getCurrentList();
-        for (FieldObject item : currentList) {
-            selectedIds.add(item.getExp_id());
+        List<FieldViewItem> currentList = getCurrentList();
+        for (FieldViewItem fieldViewItem : currentList) {
+            if (!fieldViewItem.isGroupHeader()) {
+                selectedIds.add(fieldViewItem.field.getExp_id());
+            }
         }
         notifyDataSetChanged();
         isInSelectionMode = true;
@@ -118,11 +144,29 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
         }
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    class GroupViewHolder extends RecyclerView.ViewHolder {
+        TextView groupName;
+        ImageView expandIcon;
+
+        GroupViewHolder(View itemView) {
+            super(itemView);
+            groupName = itemView.findViewById(R.id.groupName);
+            expandIcon = itemView.findViewById(R.id.expandIcon);
+
+            itemView.setOnClickListener(v -> {
+                int position = getBindingAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    toggleGroupExpansion(position);
+                }
+            });
+        }
+    }
+
+    class FieldViewHolder extends RecyclerView.ViewHolder {
         ImageView sourceIcon;
         TextView name, count;
 
-        ViewHolder(View itemView) {
+        FieldViewHolder(View itemView) {
             super(itemView);
             sourceIcon = itemView.findViewById(R.id.fieldSourceIcon);
             name = itemView.findViewById(R.id.fieldName);
@@ -132,11 +176,14 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
             sourceIcon.setOnClickListener(v -> {
                 int position = getBindingAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
-                    FieldObject field = getItem(position);
-                    if (field != null && isInSelectionMode) {
-                        toggleSelection(field.getExp_id());
-                    } else if (field != null && context instanceof FieldEditorActivity) {
-                        ((FieldEditorActivity) context).setActiveField(field.getExp_id());
+                    FieldViewItem fieldViewItem = getItem(position);
+                    if (!fieldViewItem.isGroupHeader()) {
+                        FieldObject field = fieldViewItem.field;
+                        if (field != null && isInSelectionMode) {
+                            toggleSelection(field.getExp_id());
+                        } else if (field != null && context instanceof FieldEditorActivity) {
+                            ((FieldEditorActivity) context).setActiveField(field.getExp_id());
+                        }
                     }
                 }
             });
@@ -146,11 +193,14 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
                 if (v != sourceIcon) { // Check if the click is not on the icon
                     int position = getBindingAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
-                        FieldObject field = getItem(position);
-                        if (field != null && isInSelectionMode) {
-                            toggleSelection(field.getExp_id());
-                        } else if (field != null && listener != null) {
-                            listener.onFieldSelected(field.getExp_id());
+                        FieldViewItem fieldViewItem = getItem(position);
+                        if (!fieldViewItem.isGroupHeader()) {
+                            FieldObject field = fieldViewItem.field;
+                            if (field != null && isInSelectionMode) {
+                                toggleSelection(field.getExp_id());
+                            } else if (field != null && listener != null) {
+                                listener.onFieldSelected(field.getExp_id());
+                            }
                         }
                     }
                 }
@@ -160,11 +210,14 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
             itemView.setOnLongClickListener(v -> {
                 int position = getBindingAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
-                    FieldObject field = getItem(position);
-                    if (field != null) {
-                        toggleSelection(field.getExp_id());
-                        isInSelectionMode = true;
-                        return true;
+                    FieldViewItem fieldViewItem = getItem(position);
+                    if (!fieldViewItem.isGroupHeader()) {
+                        FieldObject field = fieldViewItem.field;
+                        if (field != null) {
+                            toggleSelection(field.getExp_id());
+                            isInSelectionMode = true;
+                            return true;
+                        }
                     }
                 }
                 return false;
@@ -172,15 +225,40 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
         }
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_field_recycler, parent, false);
-        return new ViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == FieldViewType.TYPE_GROUP_HEADER.ordinal()) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.list_item_field_group_header, parent, false);
+            return new GroupViewHolder(view);
+        } else {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.list_item_field_recycler, parent, false);
+            return new FieldViewHolder(view);
+        }
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        FieldObject field = getItem(position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        FieldViewItem fieldViewItem = getItem(position);
+
+        if (fieldViewItem.isGroupHeader()) {
+            GroupViewHolder groupHolder = (GroupViewHolder) holder;
+            groupHolder.groupName.setText(
+                    (fieldViewItem.groupName == null || fieldViewItem.groupName.isEmpty())
+                            ? context.getString(R.string.fields_ungrouped) : fieldViewItem.groupName);
+            groupHolder.expandIcon.setImageResource(fieldViewItem.isExpanded ? R.drawable.ic_chevron_up : R.drawable.ic_chevron_down);
+        } else {
+            FieldViewHolder fieldHolder = (FieldViewHolder) holder;
+            bindFieldViewHolder(fieldHolder, fieldViewItem);
+        }
+    }
+
+    private void bindFieldViewHolder(FieldViewHolder holder, FieldViewItem fieldViewItem) {
+        if (fieldViewItem.isGroupHeader()) return;
+
+        FieldObject field = fieldViewItem.field;
         holder.itemView.setActivated(selectedIds.contains(field.getExp_id()));
         String name = field.getExp_alias();
         holder.name.setText(name);
@@ -222,7 +300,7 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
         if (field.getExp_id() == activeStudyId) {
             // Indicate active state
             Log.d("FieldAdapter", "Setting icon background for active field " + name);
-//            holder.sourceIcon.setBackgroundResource(R.drawable.custom_round_button);
+            // holder.sourceIcon.setBackgroundResource(R.drawable.custom_round_button);
             holder.sourceIcon.setBackgroundResource(R.drawable.round_outline_button);
 
         } else {
@@ -231,23 +309,129 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
         }
     }
 
-    @Override
-    public void submitList(@Nullable List<FieldObject> list, @Nullable Runnable commitCallback) {
-        super.submitList(list, commitCallback);
-        fullFieldList.clear();
-        if (list != null) {
-            fullFieldList.addAll(list);
+    private void toggleGroupExpansion(int headerPosition) {
+        FieldViewItem header = getItem(headerPosition);
+        header.isExpanded = !header.isExpanded;
+
+        notifyItemChanged(headerPosition);
+
+        String groupName = header.groupName;
+        List<FieldViewItem> currentList = new ArrayList<>(getCurrentList());
+
+        if (header.isExpanded) {
+            // add all fields for this group
+            int insertPosition = headerPosition + 1;
+            for (FieldObject field : fullFieldList) {
+                if ((groupName == null && field.getGroupName() == null) ||
+                        (groupName != null && groupName.equals(field.getGroupName()))) {
+                    currentList.add(insertPosition++, new FieldViewItem(field));
+                }
+            }
+        } else {
+            // remove all fields for this group
+            int i = headerPosition + 1;
+            while (i < currentList.size() && !currentList.get(i).isGroupHeader()) {
+                currentList.remove(i);
+            }
         }
+
+        submitList(currentList);
+    }
+
+    public void submitFieldList(List<FieldObject> fields) {
+        fullFieldList.clear();
+        if (fields != null) {
+            fullFieldList.addAll(fields);
+        }
+
+        Map<String, List<FieldObject>> groupedFields = getGroupedFields(fullFieldList);
+
+        List<FieldViewItem> arrayList = new ArrayList<>();
+        for (Map.Entry<String, List<FieldObject>> entry : groupedFields.entrySet()) {
+            String groupName = entry.getKey();
+            List<FieldObject> groupFields = entry.getValue();
+
+            if (!groupFields.isEmpty()) {
+                FieldViewItem header = new FieldViewItem(groupName);
+                arrayList.add(header);
+
+                for (FieldObject field : groupFields) {
+                    arrayList.add(new FieldViewItem(field));
+                }
+            }
+        }
+
+        submitList(arrayList);
+    }
+
+    /**
+     * Returns a structure of group/fields, and the same order will be shown
+     */
+    private Map<String, List<FieldObject>> getGroupedFields(List<FieldObject> fields) {
+        Map<String, List<FieldObject>> groupedFields = new LinkedHashMap<>();
+        String archivedVal = context.getString(R.string.group_archived_value);
+
+        // "null" for ungrouped fields
+        groupedFields.put(null, new ArrayList<>());
+
+        for (FieldObject field : fields) {
+            String group = field.getGroupName();
+
+            // add all groups
+            if (group != null && !archivedVal.equals(group)) {
+                groupedFields.putIfAbsent(group, new ArrayList<>());
+            }
+
+            // add archived group
+            if (archivedVal.equals(group)) {
+                groupedFields.putIfAbsent(archivedVal, new ArrayList<>());
+            }
+
+            // add the field to its group
+            List<FieldObject> fieldList = groupedFields.get(group);
+            if (fieldList != null){
+                fieldList.add(field);
+            }
+        }
+
+        return groupedFields;
     }
 
     public void setTextFilter(String filter) {
         this.filterText = filter;
-        List<FieldObject> filterFields = new ArrayList<>(fullFieldList);
+        List<FieldObject> filteredFields = new ArrayList<>(fullFieldList);
         for (FieldObject field : fullFieldList) {
             if (!filter.isEmpty() && !field.getExp_name().toLowerCase().contains(filter.toLowerCase())) {
-                filterFields.remove(field);
+                filteredFields.remove(field);
             }
         }
-        submitList(filterFields);
+        submitFieldList(filteredFields);
+    }
+
+    public static class FieldViewItem {
+        public FieldViewType viewType;
+        public String groupName;
+        public FieldObject field;
+        public boolean isExpanded = true;
+
+        public FieldViewItem(String groupName) {
+            this.viewType = FieldViewType.TYPE_GROUP_HEADER;
+            this.groupName = groupName;
+        }
+
+        public FieldViewItem(FieldObject field) {
+            this.viewType = FieldViewType.TYPE_FIELD;
+            this.field = field;
+            this.groupName = field.getGroupName();
+        }
+
+        public boolean isGroupHeader() {
+            return viewType == FieldViewType.TYPE_GROUP_HEADER;
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return getItem(position).viewType.ordinal();
     }
 }
