@@ -56,16 +56,13 @@ class GoProApi @Inject constructor(
         fun onStreamReady()
         fun onStreamRequested()
         fun onImageRequestReady(bytes: ByteArray, data: ImageRequestData)
-        fun onBusyStateChanged(state: Int)
+        fun onBusyStateChanged(isBusy: Int, isEncoding: Int)
     }
 
-    enum class GoProBusyState(value: Int) {
-        BUSY(1),
-        NOT_BUSY(0)
-    }
-
+    //state id refers to https://gopro.github.io/OpenGoPro/http#tag/Query/operation/OGP_GET_STATE
     enum class GoProStateKeys(val key: String) {
-        BUSY("8")
+        BUSY("8"),
+        IS_ENCODING("10")
     }
 
     companion object {
@@ -130,6 +127,7 @@ class GoProApi @Inject constructor(
         }
     }
 
+    private var requestedUrls = arrayListOf<String>()
     private var player: ExoPlayer? = null
     private var callbacks: Callbacks? = null
 
@@ -169,10 +167,12 @@ class GoProApi @Inject constructor(
             //Log.d(TAG, json.toString(1))
             val state = json.getJSONObject("status")
             //Log.d(TAG, "GoPro state: $state")
-            val busy = state.getInt("8")
-            Log.d(TAG, "Camera is busy: ${busy == 1}")
+            val busy = state.getInt(GoProStateKeys.BUSY.key)
+            val isEncoding = state.getInt(GoProStateKeys.IS_ENCODING.key)
+            //Log.d(TAG, "Camera is busy: ${busy == 1}")
+            //Log.d(TAG, "Camera is encoding: ${isEncoding == 1}")
 
-            callbacks?.onBusyStateChanged(busy)
+            callbacks?.onBusyStateChanged(busy, isEncoding)
 
         } catch (e: JSONException) {
             e.printStackTrace()
@@ -424,7 +424,10 @@ class GoProApi @Inject constructor(
 
             val latest = images.maxBy { it.fileName.split(".")[0].split(FILE_SYSTEM_PREFIX)[1].toInt() }.url
 
-            requestFileUrl(latest, model)
+            if (latest !in requestedUrls) {
+                requestedUrls.add(latest)
+                requestFileUrl(latest, model)
+            }
 
         } catch (e: JSONException) {
 

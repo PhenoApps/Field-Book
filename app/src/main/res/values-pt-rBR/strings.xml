@@ -1194,6 +1194,7 @@
     <string name="crop_image_clip_data_label">Dados da região de recorte de Field Book</string>
     <string name="quick_goto_swap_content_description">alternar tipo de entrada</string>
     <!--  NearbyShare  -->
+    <string name="nearby_share_title">Compartilhar Próximo</string>
     <string name="nearby_share_preferences_title">Compartilhar Preferências</string>
     <string name="nearby_share_connection_established">Conexão Estabelecida</string>
     <string name="nearby_share_connection_rejected">Conexão Recusada</string>
@@ -1211,7 +1212,19 @@
     <string name="nearby_share_already_waiting_for_receivers">Já esperando que os receptores conectem…</string>
     <string name="nearby_share_already_searching_for_sender">Já procurando o remetente…</string>
     <string name="nearby_share_no_devices_found">Nenhum dispositivo encontrado ainda</string>
+    <string name="nearby_share_permissions_required">Permissões de Dispositivos Próximos Requeridas</string>
+    <string name="nearby_share_failed_discovery">Falha ao iniciar a descoberta: %s</string>
+    <string name="nearby_share_failed_advertising">Erro ao esperar dispositivos: %s</string>
+    <string name="nearby_share_failed_transfer">Falha ao iniciar a transferência: %s</string>
+    <string name="nearby_share_failed_payload">Falha ao criar o arquivo payload</string>
+    <string name="nearby_share_failed_request">Falha ao solicitar a conexão: %s</string>
+    <string name="nearby_share_failed_handle_file">Falha ao manipular arquivo: %s</string>
+    <string name="nearby_share_generating_file">Preparando o arquivo para transferência</string>
+    <string name="nearby_share_failed_import">Falha ao importar arquivo: %s</string>
+    <string name="nearby_share_failed_export_generation_message">Erro ao gerar arquivo para compartilhar: %s</string>
     <string name="nearby_share_failed_export_generation">Erro ao gerar arquivo para compartilhar</string>
+    <string name="nearby_share_file_imported_successfully">%s importado com sucesso</string>
+    <string name="nearby_share_authenticating_connection">Autenticando conexão com %s…</string>
     <string name="dialog_device_selection_title">Selecione um dispositivo</string>
     <string name="dialog_nearby_authentication_title">Aceitar Conexão com %s</string>
     <string name="dialog_nearby_authentication_summary">Confirme que o código corresponde a ambos os dispositivos: %s</string>
