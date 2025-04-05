@@ -15,6 +15,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.android.gms.nearby.Nearby
@@ -41,7 +43,6 @@ import kotlinx.coroutines.withContext
 import org.phenoapps.security.SecureBluetoothActivityImpl
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.FileInputStream
-import java.io.IOException
 import javax.inject.Inject
 
 /**
@@ -88,6 +89,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
     lateinit var prefs: SharedPreferences
 
     companion object {
+        private const val TAG = "NearbyShareUtil"
         private val STRATEGY = Strategy.P2P_STAR
         private const val SERVICE_ID = "com.fieldbook.tracker.SERVICE_ID"
     }
@@ -96,8 +98,20 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         SecureBluetoothActivityImpl(context as FragmentActivity)
     }
 
-    init {
-        secureBluetooth.initialize()
+    /**
+     * Call this function in the fragment/activity
+     */
+    fun initialize() {
+        if (context is LifecycleOwner) {
+            val currentState = (context as LifecycleOwner).lifecycle.currentState
+            if (currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                Log.e(TAG, "Initialize called too late in lifecycle")
+            } else { // state = INITIALIZED or CREATED are okay
+                secureBluetooth.initialize()
+            }
+        } else {
+            secureBluetooth.initialize()
+        }
     }
 
     /**

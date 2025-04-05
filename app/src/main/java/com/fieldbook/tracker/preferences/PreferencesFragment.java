@@ -90,6 +90,8 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
     public void onAttach(Context context) {
         super.onAttach(context);
         PreferencesFragment.this.context = context;
+
+        nearbyShareUtil.initialize();
     }
 
     @Override
