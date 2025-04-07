@@ -552,6 +552,9 @@
     <string name="preferences_profile_require_person_summary">Rastreie o nome da pessoa que está coletando os dados</string>
     <string name="preferences_profile_set_person">Nome da Pessoa</string>
     <string name="preferences_profile_person_dialog_title">Definir Pessoa</string>
+    <string name="dialog_previous_names">Nomes Usados Anteriormente</string>
+    <string name="preferences_profile_previous_names">Nomes Anteriores</string>
+    <string name="preferences_profile_new_person">Nova Pessoa</string>
     <string name="preferences_profile_name_first">Nome</string>
     <string name="preferences_profile_name_last">Sobrenome</string>
     <string name="preferences_profile_name_error">Ambos os campos não podem estar em branco</string>
