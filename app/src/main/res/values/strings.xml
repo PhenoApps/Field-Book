@@ -235,6 +235,12 @@
 
 
     <!-- TRAITS -->
+
+    <!--Detail-->
+    <string name="trait_observation_count_fields">%1$d observations across %2$d fields</string>
+    <string name="trait_no_observations">No observations recorded</string>
+    <string name="trait_fields_with_observations">Fields with observations: %1$d</string>
+
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sort Traits</string>
     <string name="traits_sort_name">Name</string>

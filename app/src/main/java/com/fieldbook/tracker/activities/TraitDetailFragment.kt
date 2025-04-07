@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -20,6 +21,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.TraitDetailAdapter
 import com.fieldbook.tracker.adapters.TraitDetailItem
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.Formats
@@ -31,6 +33,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import java.math.BigDecimal
+import com.fieldbook.tracker.charts.HorizontalBarChartHelper
+import com.fieldbook.tracker.charts.HistogramChartHelper
+import com.fieldbook.tracker.charts.PieChartHelper
+import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.charts.HorizontalBarChart
+import com.github.mikephil.charting.charts.PieChart
 
 @AndroidEntryPoint
 class TraitDetailFragment : Fragment() {
@@ -54,6 +64,12 @@ class TraitDetailFragment : Fragment() {
     private lateinit var visibilityChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: TraitDetailAdapter? = null
+    private lateinit var fieldCountChip: Chip
+    private lateinit var observationCountChip: Chip
+    private lateinit var completenessChart: PieChart
+    private lateinit var histogram: BarChart
+    private lateinit var barChart: HorizontalBarChart
+    private lateinit var noChartAvailableTextView: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -67,7 +83,14 @@ class TraitDetailFragment : Fragment() {
         formatChip = rootView.findViewById(R.id.formatChip)
         editNameChip = rootView.findViewById(R.id.editNameChip)
         visibilityChip = rootView.findViewById(R.id.visibilityChip)
-        detailRecyclerView = rootView.findViewById(R.id.traitDetailRecyclerView)
+
+        // Initialize data card views
+        fieldCountChip = rootView.findViewById(R.id.fieldCountChip)
+        observationCountChip = rootView.findViewById(R.id.observationCountChip)
+        completenessChart = rootView.findViewById(R.id.completenessChart)
+        histogram = rootView.findViewById(R.id.histogram)
+        barChart = rootView.findViewById(R.id.barChart)
+        noChartAvailableTextView = rootView.findViewById(R.id.noChartAvailableTextView)
 
         traitId = arguments?.getString("traitId")
         loadTraitDetails()
@@ -150,35 +173,62 @@ class TraitDetailFragment : Fragment() {
         loadTraitDetails()
     }
 
+    // fun loadTraitDetails() {
+    //     traitId?.let { idString ->
+    //         try {
+    //             // Convert the string ID to an integer
+    //             val idInt = idString.toInt()
+    //             CoroutineScope(Dispatchers.IO).launch {
+    //                 val trait = database.getTraitById(idInt)
+                    
+    //                 withContext(Dispatchers.Main) {
+    //                     traitObject = trait  // Store the trait object
+                        
+    //                     if (trait != null) {
+    //                         updateTraitData(trait)
+    //                         setupToolbar(trait)
+                            
+    //                         if (detailRecyclerView.adapter == null) { // initial load
+    //                             detailRecyclerView.layoutManager = LinearLayoutManager(context)
+    //                             val detailItems = createTraitDetailItems(trait)
+    //                             adapter = TraitDetailAdapter(detailItems.toMutableList())
+    //                             detailRecyclerView.adapter = adapter
+    //                         } else { // reload after data change
+    //                             val newItems = createTraitDetailItems(trait)
+    //                             adapter?.updateItems(newItems)
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         } catch (e: NumberFormatException) {
+    //             // Handle the case where the ID string cannot be converted to an integer
+    //             Log.e(TAG, "Invalid trait ID format: $idString", e)
+    //             parentFragmentManager.popBackStack()
+    //         }
+    //     } ?: Log.e(TAG, "Trait ID is null")
+    // }
+
+    // Modify loadTraitDetails to update the data card directly
     fun loadTraitDetails() {
         traitId?.let { idString ->
             try {
-                // Convert the string ID to an integer
                 val idInt = idString.toInt()
                 CoroutineScope(Dispatchers.IO).launch {
                     val trait = database.getTraitById(idInt)
                     
                     withContext(Dispatchers.Main) {
-                        traitObject = trait  // Store the trait object
+                        traitObject = trait
                         
                         if (trait != null) {
                             updateTraitData(trait)
                             setupToolbar(trait)
                             
-                            if (detailRecyclerView.adapter == null) { // initial load
-                                detailRecyclerView.layoutManager = LinearLayoutManager(context)
-                                val detailItems = createTraitDetailItems(trait)
-                                adapter = TraitDetailAdapter(detailItems.toMutableList())
-                                detailRecyclerView.adapter = adapter
-                            } else { // reload after data change
-                                val newItems = createTraitDetailItems(trait)
-                                adapter?.updateItems(newItems)
-                            }
+                            // Load observation data for the trait
+                            loadObservationData(trait)
                         }
                     }
                 }
             } catch (e: NumberFormatException) {
-                // Handle the case where the ID string cannot be converted to an integer
                 Log.e(TAG, "Invalid trait ID format: $idString", e)
                 parentFragmentManager.popBackStack()
             }
@@ -222,58 +272,172 @@ class TraitDetailFragment : Fragment() {
             if (trait.visible) R.drawable.ic_eye else R.drawable.ic_eye_off)
     }
 
-    private fun createTraitDetailItems(trait: TraitObject): List<TraitDetailItem> {
-        val items = mutableListOf<TraitDetailItem>()
+    // private fun createTraitDetailItems(trait: TraitObject): List<TraitDetailItem> {
+    //     val items = mutableListOf<TraitDetailItem>()
         
-        // Add format details item
-        val formatIcon = Formats.entries
-            .find { it.getDatabaseName() == trait.format }?.getIcon()
-            ?: R.drawable.ic_trait_categorical
+    //     // Add format details item
+    //     val formatIcon = Formats.entries
+    //         .find { it.getDatabaseName() == trait.format }?.getIcon()
+    //         ?: R.drawable.ic_trait_categorical
             
-        items.add(TraitDetailItem(
-            id = trait.id,
-            title = getString(R.string.trait_format_details),
-            subtitle = trait.format,
-            format = trait.format,
-            categories = trait.categories ?: "",
-            icon = ContextCompat.getDrawable(requireContext(), formatIcon),
-            defaultValue = trait.defaultValue,
-            minimum = trait.minimum,
-            maximum = trait.maximum,
-            details = trait.details
-        ))
+    //     items.add(TraitDetailItem(
+    //         id = trait.id,
+    //         title = getString(R.string.trait_format_details),
+    //         subtitle = trait.format,
+    //         format = trait.format,
+    //         categories = trait.categories ?: "",
+    //         icon = ContextCompat.getDrawable(requireContext(), formatIcon),
+    //         defaultValue = trait.defaultValue,
+    //         minimum = trait.minimum,
+    //         maximum = trait.maximum,
+    //         details = trait.details
+    //     ))
         
-        // Get observation data for this trait
+    //     // Get observation data for this trait
+    //     CoroutineScope(Dispatchers.IO).launch {
+    //         val observations = database.getAllObservationsOfVariable(trait.id)
+            
+    //         withContext(Dispatchers.Main) {
+    //             if (observations.isNotEmpty()) {
+    //                 val observationValues = observations.map { it.value }
+    //                 // val completeness = observations.size.toFloat() / 
+    //                     // (database.getTotalPossibleObservationsForTrait(trait.name) ?: 1).toFloat()
+    //                 val totalPossible = 100 // Placeholder value
+    //                 val completeness = if (observations.isNotEmpty()) 
+    //                     observations.size.toFloat() / totalPossible.toFloat() 
+    //                 else 0f
+
+    //                 val dataItem = TraitDetailItem(
+    //                     id = trait.id,
+    //                     title = getString(R.string.trait_observation_data),
+    //                     subtitle = getString(R.string.trait_observation_count, observations.size),
+    //                     format = trait.format,
+    //                     categories = trait.categories ?: "",
+    //                     icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_chart_bar),
+    //                     observations = observationValues,
+    //                     completeness = completeness
+    //                 )
+                    
+    //                 adapter?.addOrUpdateItem(dataItem)
+    //             }
+    //         }
+    //     }
+        
+    //     return items
+    // }
+
+    private fun loadObservationData(trait: TraitObject) {
         CoroutineScope(Dispatchers.IO).launch {
+            // Get all observations for this trait
             val observations = database.getAllObservationsOfVariable(trait.id)
             
+            // Get unique fields with observations
+            val fieldsWithObservations = observations.map { it.study_id }.distinct()
+            
+            // Calculate completeness
+            val missingObservations = ObservationDao.getMissingObservationsCount(trait.id)
+            val totalObservations = observations.size + missingObservations
+            val completeness = if (totalObservations > 0) 
+                observations.size.toFloat() / totalObservations.toFloat() 
+            else 0f
+            
             withContext(Dispatchers.Main) {
+                // Update chips
+                fieldCountChip.text = getString(R.string.trait_fields_count, fieldsWithObservations.size)
+                observationCountChip.text = getString(R.string.trait_observations_count, observations.size)
+                
+                // Setup completeness chart
+                val chartTextSize = getChartTextSize()
+                PieChartHelper.setupPieChart(requireContext(), completenessChart, completeness, chartTextSize)
+                
+                // Setup observation chart if there are observations
                 if (observations.isNotEmpty()) {
-                    val observationValues = observations.map { it.value }
-                    // val completeness = observations.size.toFloat() / 
-                        // (database.getTotalPossibleObservationsForTrait(trait.name) ?: 1).toFloat()
-                    val totalPossible = 100 // Placeholder value
-                    val completeness = if (observations.isNotEmpty()) 
-                        observations.size.toFloat() / totalPossible.toFloat() 
-                    else 0f
-
-                    val dataItem = TraitDetailItem(
-                        id = trait.id,
-                        title = getString(R.string.trait_observation_data),
-                        subtitle = getString(R.string.trait_observation_count, observations.size),
-                        format = trait.format,
-                        categories = trait.categories ?: "",
-                        icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_chart_bar),
-                        observations = observationValues,
-                        completeness = completeness
-                    )
-                    
-                    adapter?.addOrUpdateItem(dataItem)
+                    setupObservationChart(trait, observations.map { it.value }, chartTextSize)
+                } else {
+                    showNoChartMessage(getString(R.string.field_trait_chart_no_data))
                 }
             }
         }
+    }
+
+    // Add helper methods for chart setup
+    private fun setupObservationChart(trait: TraitObject, observations: List<String>, textSize: Float) {
+        val nonChartableFormats = setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
         
-        return items
+        // Filter out empty values and "NA"
+        val filteredObservations = observations.filter { it.isNotEmpty() && it != "NA" }
+        
+        if (filteredObservations.isEmpty()) {
+            showNoChartMessage(getString(R.string.field_trait_chart_no_data))
+            return
+        }
+        
+        if (trait.format in nonChartableFormats) {
+            showNoChartMessage(getString(R.string.field_trait_chart_incompatible_format))
+            return
+        }
+        
+        try {
+            // Try to parse as numeric for histogram
+            if (trait.format == "categorical" || trait.format == "multicat" || trait.format == "boolean") {
+                throw NumberFormatException("Categorical traits must use bar chart")
+            }
+            
+            val numericObservations = filteredObservations.map { BigDecimal(it) }
+            barChart.visibility = View.GONE
+            histogram.visibility = View.VISIBLE
+            noChartAvailableTextView.visibility = View.GONE
+            
+            HistogramChartHelper.setupHistogram(
+                requireContext(),
+                histogram,
+                numericObservations,
+                textSize
+            )
+        } catch (e: NumberFormatException) {
+            // Use bar chart for categorical data
+            barChart.visibility = View.VISIBLE
+            histogram.visibility = View.GONE
+            noChartAvailableTextView.visibility = View.GONE
+            
+            val parsedCategories = parseCategories(trait.categories ?: "")
+            
+            HorizontalBarChartHelper.setupHorizontalBarChart(
+                requireContext(),
+                barChart,
+                filteredObservations,
+                parsedCategories.takeIf { it.isNotEmpty() },
+                textSize
+            )
+        }
+    }
+
+    private fun showNoChartMessage(message: String) {
+        barChart.visibility = View.GONE
+        histogram.visibility = View.GONE
+        noChartAvailableTextView.visibility = View.VISIBLE
+        noChartAvailableTextView.text = message
+    }
+
+    private fun parseCategories(categories: String): List<String> {
+        return try {
+            if (categories.startsWith("[")) {
+                val parsedCategories = CategoryJsonUtil.decode(categories)
+                parsedCategories.map { it.value }
+            } else {
+                categories.split("/").map { it.trim() }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse categories: $categories", e)
+            emptyList()
+        }
+    }
+
+    private fun getChartTextSize(): Float {
+        val typedValue = TypedValue()
+        requireContext().theme.resolveAttribute(R.attr.fb_subheading_text_size, typedValue, true)
+        val textSizePx = resources.getDimension(typedValue.resourceId)
+        return textSizePx / resources.displayMetrics.scaledDensity
     }
 
     private fun setupToolbar(trait: TraitObject) {

@@ -2760,6 +2760,15 @@ public class DataHelper {
         return ObservationDao.Companion.getAllOfTrait(traitDbId);
     }
 
+    /**
+     * Get the count of missing observations for a trait
+     * @param traitId the trait ID
+     * @return the count of missing observations
+     */
+    public int getMissingObservationsCount(String traitId) {
+        return ObservationDao.Companion.getMissingObservationsCount(traitId);
+    }
+
     public ObservationModel[] getAllObservations(SQLiteDatabase db) {
 
         return ObservationDao.Companion.getAll(db);

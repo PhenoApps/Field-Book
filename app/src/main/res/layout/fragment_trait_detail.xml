@@ -150,115 +150,130 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Data Card -->
-        <androidx.cardview.widget.CardView
+    <!-- Data Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp">
+
+        <!-- Card Content -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp">
+            android:orientation="vertical"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp">
 
-            <!-- Card Content -->
+            <!-- Header for collapsible area -->
             <LinearLayout
+                android:id="@+id/data_collapsible_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="8dp"
+                    android:src="@drawable/ic_chart_bar" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextViewStyle.Bold.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/field_data_title" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleLine="true"
+                        app:chipSpacingHorizontal="8dp">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/fieldCountChip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIcon="@drawable/ic_land_fields"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/defaultChipBackground"
+                            tools:text="5 fields" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/observationCountChip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIcon="@drawable/ic_eye"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/defaultChipBackground"
+                            tools:text="123 observations" />
+                    </com.google.android.material.chip.ChipGroup>
+                </LinearLayout>
+
+                <!-- Completeness Pie Chart -->
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/completenessChart"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <!-- Collapse/Expand Icon -->
+                <ImageView
+                    android:id="@+id/data_expand_collapse_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_chevron_down" />
+            </LinearLayout>
+
+            <!-- Collapsible Content -->
+            <LinearLayout
+                android:id="@+id/data_collapsible_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp">
+                android:visibility="gone"
+                android:padding="16dp">
 
-                <!-- Header for collapsible area -->
-                <LinearLayout
-                    android:id="@+id/data_collapsible_header"
+                <!-- Charts -->
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/histogram"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:visibility="gone"/>
+
+                <com.github.mikephil.charting.charts.HorizontalBarChart
+                    android:id="@+id/barChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/noChartAvailableTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_margin="8dp"
-                        android:src="@drawable/ic_chart_bar" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            style="@style/TextViewStyle.Bold.Title"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/field_data_title"
-                            android:paddingRight="16dp"
-                            android:paddingBottom="8dp"/>
-
-                        <com.google.android.material.chip.ChipGroup
-                            android:id="@+id/dataChipGroup"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            app:singleLine="false"
-                            app:chipSpacingHorizontal="8dp"
-                            app:chipSpacingVertical="8dp"
-                            android:descendantFocusability="blocksDescendants">
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/fieldCountChip"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:clickable="false"
-                                android:focusable="false"
-                                app:chipIcon="@drawable/ic_land_fields"
-                                app:chipIconSize="24dp"
-                                app:ensureMinTouchTargetSize="false"
-                                app:closeIconVisible="false"
-                                app:chipBackgroundColor="?attr/defaultChipBackground" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/observationCountChip"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:clickable="false"
-                                android:focusable="false"
-                                app:chipIcon="@drawable/ic_eye"
-                                app:chipIconSize="24dp"
-                                app:ensureMinTouchTargetSize="false"
-                                app:closeIconVisible="false"
-                                app:chipBackgroundColor="?attr/defaultChipBackground" />
-                        </com.google.android.material.chip.ChipGroup>
-                    </LinearLayout>
-
-                    <!-- Collapse/Expand Icon -->
-                    <ImageView
-                        android:id="@+id/data_expand_collapse_icon"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/ic_chevron_down" />
-                </LinearLayout>
-
-                <!-- Collapsible Content -->
-                <LinearLayout
-                    android:id="@+id/data_collapsible_content"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone"
-                    android:paddingTop="8dp"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp">
-
-                    <!-- Individual Trait Data Cards -->
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/traitDetailRecyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="@string/field_trait_chart_no_data"
+                    android:visibility="gone"/>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
     </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

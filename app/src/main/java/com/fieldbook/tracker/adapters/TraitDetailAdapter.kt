@@ -100,6 +100,7 @@ class TraitDetailAdapter(private var items: MutableList<TraitDetailItem>) : Recy
         
         // Handle observation data item
         setupObservationCharts(holder, item, chartTextSize)
+
     }
     
     private fun setupFormatDetails(holder: ViewHolder, item: TraitDetailItem, context: Context) {
@@ -149,6 +150,50 @@ class TraitDetailAdapter(private var items: MutableList<TraitDetailItem>) : Recy
         }
     }
     
+    // private fun setupObservationCharts(holder: ViewHolder, item: TraitDetailItem, chartTextSize: Float) {
+    //     holder.formatDetailsLayout.visibility = View.GONE
+        
+    //     val nonChartableFormats = setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
+
+    //     // Check for null and filter out NAs and empty strings
+    //     val filteredObservations = item.observations?.filter { it.isNotEmpty() && it != "NA" } ?: emptyList()
+
+    //     if (filteredObservations.isEmpty()) {
+    //         noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_no_data))
+    //         return
+    //     } else if (item.format in nonChartableFormats) {
+    //         noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_incompatible_format))
+    //     } else {
+    //         try {
+    //             val numericObservations = filteredObservations.map { BigDecimal(it) }
+    //             if (item.format == "categorical") {
+    //                 throw NumberFormatException("Categorical traits must use bar chart")
+    //             }
+    //             holder.barChart.visibility = View.GONE
+    //             holder.histogram.visibility = View.VISIBLE
+    //             holder.noChartAvailableTextView.visibility = View.GONE
+    //             HistogramChartHelper.setupHistogram(
+    //                 holder.itemView.context,
+    //                 holder.histogram,
+    //                 numericObservations,
+    //                 chartTextSize
+    //             )
+    //         } catch (e: NumberFormatException) {
+    //             holder.barChart.visibility = View.VISIBLE
+    //             holder.histogram.visibility = View.GONE
+    //             holder.noChartAvailableTextView.visibility = View.GONE
+    //             val parsedCategories = parseCategories(item.categories)
+    //             HorizontalBarChartHelper.setupHorizontalBarChart(
+    //                 holder.itemView.context,
+    //                 holder.barChart,
+    //                 filteredObservations,
+    //                 parsedCategories.takeIf { it.isNotEmpty() },
+    //                 chartTextSize
+    //             )
+    //         }
+    //     }
+    // }
+
     private fun setupObservationCharts(holder: ViewHolder, item: TraitDetailItem, chartTextSize: Float) {
         holder.formatDetailsLayout.visibility = View.GONE
         
@@ -164,8 +209,9 @@ class TraitDetailAdapter(private var items: MutableList<TraitDetailItem>) : Recy
             noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_incompatible_format))
         } else {
             try {
+                // Try to parse as numeric for histogram
                 val numericObservations = filteredObservations.map { BigDecimal(it) }
-                if (item.format == "categorical") {
+                if (item.format == "categorical" || item.format == "multicat" || item.format == "boolean") {
                     throw NumberFormatException("Categorical traits must use bar chart")
                 }
                 holder.barChart.visibility = View.GONE
@@ -178,6 +224,7 @@ class TraitDetailAdapter(private var items: MutableList<TraitDetailItem>) : Recy
                     chartTextSize
                 )
             } catch (e: NumberFormatException) {
+                // Use bar chart for categorical data
                 holder.barChart.visibility = View.VISIBLE
                 holder.histogram.visibility = View.GONE
                 holder.noChartAvailableTextView.visibility = View.GONE
@@ -252,6 +299,21 @@ class TraitDetailAdapter(private var items: MutableList<TraitDetailItem>) : Recy
     }
 }
 
+// data class TraitDetailItem(
+//     val id: String,
+//     val title: String,
+//     val subtitle: String,
+//     val format: String,
+//     val categories: String,
+//     val icon: Drawable?,
+//     val observations: List<String>? = null,
+//     val completeness: Float = 0.0f,
+//     val defaultValue: String? = null,
+//     val minimum: String? = null,
+//     val maximum: String? = null,
+//     val details: String? = null
+// )
+
 data class TraitDetailItem(
     val id: String,
     val title: String,
@@ -264,5 +326,6 @@ data class TraitDetailItem(
     val defaultValue: String? = null,
     val minimum: String? = null,
     val maximum: String? = null,
-    val details: String? = null
+    val details: String? = null,
+    val fieldsCount: Int = 0
 )
