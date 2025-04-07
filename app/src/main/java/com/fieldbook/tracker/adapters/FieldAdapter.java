@@ -43,7 +43,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     private String filterText = "";
     private final List<FieldObject> fullFieldList = new ArrayList<>();
     public enum FieldViewType {
-        TYPE_GROUP_HEADER, TYPE_FIELD
+        TYPE_GROUP_HEADER, TYPE_FIELD, TYPE_ARCHIVE_HEADER
     }
 
     public interface OnFieldSelectedListener {
@@ -63,7 +63,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                     return false;
                 }
 
-                if (oldItem.isGroupHeader()) { // group header
+                if (oldItem.isGroupHeader() || oldItem.isArchiveHeader()) { // group or archive header
                     return areNamesEqual(oldItem.groupName, newItem.groupName);
                 } else { // field
                     return oldItem.field.getExp_id() == newItem.field.getExp_id();
@@ -76,7 +76,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                     return false;
                 }
 
-                if (oldItem.isGroupHeader()) { // group header
+                if (oldItem.isGroupHeader() || oldItem.isArchiveHeader()) { // group or archive header
                     return areNamesEqual(oldItem.groupName, newItem.groupName) && (oldItem.isExpanded == newItem.isExpanded);
                 } else { // field
                     return oldItem.field.getExp_alias().equals(newItem.field.getExp_alias());
@@ -145,8 +145,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     class GroupViewHolder extends RecyclerView.ViewHolder {
-        TextView groupName;
-        ImageView expandIcon;
+        final TextView groupName;
+        final ImageView expandIcon;
 
         GroupViewHolder(View itemView) {
             super(itemView);
@@ -162,9 +162,20 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         }
     }
 
+    static class ArchiveViewHolder extends RecyclerView.ViewHolder {
+        final TextView groupName;
+        final ImageView folderIcon;
+
+        ArchiveViewHolder(View itemView) {
+            super(itemView);
+            groupName = itemView.findViewById(R.id.archiveName);
+            folderIcon = itemView.findViewById(R.id.archiveIcon);
+        }
+    }
+
     class FieldViewHolder extends RecyclerView.ViewHolder {
-        ImageView sourceIcon;
-        TextView name, count;
+        final ImageView sourceIcon;
+        final TextView name, count;
 
         FieldViewHolder(View itemView) {
             super(itemView);
@@ -177,7 +188,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                 int position = getBindingAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
                     FieldViewItem fieldViewItem = getItem(position);
-                    if (!fieldViewItem.isGroupHeader()) {
+                    if (fieldViewItem.isFieldItem()) {
                         FieldObject field = fieldViewItem.field;
                         if (field != null && isInSelectionMode) {
                             toggleSelection(field.getExp_id());
@@ -194,7 +205,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                     int position = getBindingAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         FieldViewItem fieldViewItem = getItem(position);
-                        if (!fieldViewItem.isGroupHeader()) {
+                        if (fieldViewItem.isFieldItem()) {
                             FieldObject field = fieldViewItem.field;
                             if (field != null && isInSelectionMode) {
                                 toggleSelection(field.getExp_id());
@@ -211,7 +222,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                 int position = getBindingAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
                     FieldViewItem fieldViewItem = getItem(position);
-                    if (!fieldViewItem.isGroupHeader()) {
+                    if (fieldViewItem.isFieldItem()) {
                         FieldObject field = fieldViewItem.field;
                         if (field != null) {
                             toggleSelection(field.getExp_id());
@@ -232,6 +243,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.list_item_field_group_header, parent, false);
             return new GroupViewHolder(view);
+        } else if (viewType == FieldViewType.TYPE_ARCHIVE_HEADER.ordinal()) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.list_item_archived_fields_header, parent, false);
+            return new ArchiveViewHolder(view);
         } else {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.list_item_field_recycler, parent, false);
@@ -249,6 +264,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                     (fieldViewItem.groupName == null || fieldViewItem.groupName.isEmpty())
                             ? context.getString(R.string.fields_ungrouped) : fieldViewItem.groupName);
             groupHolder.expandIcon.setImageResource(fieldViewItem.isExpanded ? R.drawable.ic_chevron_up : R.drawable.ic_chevron_down);
+        } else if (fieldViewItem.isArchiveHeader()) {
+            ArchiveViewHolder archiveHolder = (ArchiveViewHolder) holder;
+            archiveHolder.groupName.setText(context.getString(R.string.group_archived_value));
+            archiveHolder.folderIcon.setImageResource(R.drawable.ic_archive);
         } else {
             FieldViewHolder fieldHolder = (FieldViewHolder) holder;
             bindFieldViewHolder(fieldHolder, fieldViewItem);
@@ -256,8 +275,6 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     private void bindFieldViewHolder(FieldViewHolder holder, FieldViewItem fieldViewItem) {
-        if (fieldViewItem.isGroupHeader()) return;
-
         FieldObject field = fieldViewItem.field;
         holder.itemView.setActivated(selectedIds.contains(field.getExp_id()));
         String name = field.getExp_alias();
@@ -330,7 +347,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         } else {
             // remove all fields for this group
             int i = headerPosition + 1;
-            while (i < currentList.size() && !currentList.get(i).isGroupHeader()) {
+            while (i < currentList.size() && currentList.get(i).isFieldItem()) {
                 currentList.remove(i);
             }
         }
@@ -345,6 +362,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         }
 
         Map<String, List<FieldObject>> groupedFields = getGroupedFields(fullFieldList);
+        String archivedVal = context.getString(R.string.group_archived_value);
 
         List<FieldViewItem> arrayList = new ArrayList<>();
         for (Map.Entry<String, List<FieldObject>> entry : groupedFields.entrySet()) {
@@ -352,11 +370,16 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             List<FieldObject> groupFields = entry.getValue();
 
             if (!groupFields.isEmpty()) {
-                FieldViewItem header = new FieldViewItem(groupName);
-                arrayList.add(header);
+                if (archivedVal.equals(groupName)) {
+                    FieldViewItem archiveHeader = new FieldViewItem(groupName, true);
+                    arrayList.add(archiveHeader);
+                } else {
+                    FieldViewItem header = new FieldViewItem(groupName, false);
+                    arrayList.add(header);
 
-                for (FieldObject field : groupFields) {
-                    arrayList.add(new FieldViewItem(field));
+                    for (FieldObject field : groupFields) {
+                        arrayList.add(new FieldViewItem(field));
+                    }
                 }
             }
         }
@@ -414,8 +437,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         public FieldObject field;
         public boolean isExpanded = true;
 
-        public FieldViewItem(String groupName) {
-            this.viewType = FieldViewType.TYPE_GROUP_HEADER;
+        public FieldViewItem(String groupName, boolean isArchive) {
+            this.viewType = isArchive? FieldViewType.TYPE_ARCHIVE_HEADER : FieldViewType.TYPE_GROUP_HEADER;
             this.groupName = groupName;
         }
 
@@ -427,6 +450,14 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         public boolean isGroupHeader() {
             return viewType == FieldViewType.TYPE_GROUP_HEADER;
+        }
+
+        public boolean isArchiveHeader() {
+            return viewType == FieldViewType.TYPE_ARCHIVE_HEADER;
+        }
+
+        public boolean isFieldItem() {
+            return viewType == FieldViewType.TYPE_FIELD;
         }
     }
 
