@@ -276,6 +276,14 @@ public class FieldEditorActivity extends ThemedActivity
             } else if (itemId == R.id.groupFields) {
                 showGroupAssignmentDialog(mAdapter.getSelectedItems());
                 return true;
+            } else if (itemId == R.id.archiveFields) {
+                String archivedVal = getString(R.string.group_archived_value);
+                for (Integer fieldId : mAdapter.getSelectedItems()) {
+                    database.updateFieldGroup(fieldId, archivedVal);
+                }
+                queryAndLoadFields();
+                mAdapter.exitSelectionMode();
+                return true;
             } else if (itemId == R.id.menu_delete) {
                 showDeleteConfirmationDialog(mAdapter.getSelectedItems(), false);
                 return true;
@@ -1120,7 +1128,6 @@ public class FieldEditorActivity extends ThemedActivity
 
         // check if any of the selected fields are in a group
         boolean anyFieldsInGroup = false;
-        boolean allFieldsArchived = true;
 
         for (Integer fieldId : fieldIds) {
             FieldObject field = fieldList.stream()
@@ -1132,12 +1139,7 @@ public class FieldEditorActivity extends ThemedActivity
                 String groupName = field.getGroupName();
                 if (groupName != null && !groupName.isEmpty()) {
                     anyFieldsInGroup = true;
-                    if (!groupName.equals(archivedVal)) { // not all fields are archived
-                        allFieldsArchived = false;
-                        break; // since both the flags were set
-                    }
-                } else { // if field has no group, not all fields are archived
-                    allFieldsArchived = false;
+                    break;
                 }
             }
         }
@@ -1154,12 +1156,6 @@ public class FieldEditorActivity extends ThemedActivity
         // "new group" option
         optionStrings.add(getString(R.string.group_new));
         optionIcon.add(R.drawable.ic_new_group);
-
-        // "archive" option
-        if (!allFieldsArchived) {
-            optionStrings.add(getString(R.string.group_archive));
-            optionIcon.add(R.drawable.ic_archive);
-        }
 
         // "remove from group" option
         if (anyFieldsInGroup) {
@@ -1180,12 +1176,6 @@ public class FieldEditorActivity extends ThemedActivity
                 showExistingGroupsDialog(fieldIds);
             } else if (selectedOption.equals(getString(R.string.group_new))) {
                 showNewGroupDialog(fieldIds);
-            } else if (selectedOption.equals(getString(R.string.group_archive))) {
-                for (Integer fieldId : fieldIds) {
-                    database.updateFieldGroup(fieldId, archivedVal);
-                }
-                queryAndLoadFields();
-                mAdapter.exitSelectionMode();
             } else if (selectedOption.equals(getString(R.string.group_remove))) {
                 for (Integer fieldId : fieldIds) {
                     database.updateFieldGroup(fieldId, null);

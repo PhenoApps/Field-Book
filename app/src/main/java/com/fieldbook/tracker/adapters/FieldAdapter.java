@@ -369,19 +369,19 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             String groupName = entry.getKey();
             List<FieldObject> groupFields = entry.getValue();
 
-            if (!groupFields.isEmpty()) {
-                if (archivedVal.equals(groupName)) {
-                    FieldViewItem archiveHeader = new FieldViewItem(groupName, true);
-                    arrayList.add(archiveHeader);
-                } else {
-                    FieldViewItem header = new FieldViewItem(groupName, false);
-                    arrayList.add(header);
+            if (!groupFields.isEmpty() && !archivedVal.equals(groupName)) {
+                FieldViewItem header = new FieldViewItem(groupName, false);
+                arrayList.add(header);
 
-                    for (FieldObject field : groupFields) {
-                        arrayList.add(new FieldViewItem(field));
-                    }
+                for (FieldObject field : groupFields) {
+                    arrayList.add(new FieldViewItem(field));
                 }
             }
+        }
+
+        if (groupedFields.containsKey(archivedVal) && !groupedFields.get(archivedVal).isEmpty()) {
+            FieldViewItem archiveHeader = new FieldViewItem(archivedVal, true);
+            arrayList.add(archiveHeader);
         }
 
         submitList(arrayList);
