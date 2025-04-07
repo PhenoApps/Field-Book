@@ -6,12 +6,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
     <item
-        android:id="@+id/groupFields"
+        android:id="@+id/menu_group_fields"
         android:icon="@drawable/ic_group"
         android:title="@string/menu_group"
         android:showAsAction="ifRoom" />
     <item
-        android:id="@+id/archiveFields"
+        android:id="@+id/menu_archive_fields"
         android:icon="@drawable/ic_archive_add"
         android:title="@string/menu_archive"
         android:showAsAction="ifRoom" />

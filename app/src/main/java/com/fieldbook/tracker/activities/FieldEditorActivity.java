@@ -160,7 +160,7 @@ public class FieldEditorActivity extends ThemedActivity
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         // Initialize adapter
-        mAdapter = new FieldAdapter(this, fieldSwitcher, this);
+        mAdapter = new FieldAdapter(this, fieldSwitcher, this, false);
         mAdapter.setOnFieldSelectedListener(new FieldAdapter.OnFieldSelectedListener() {
             @Override
             public void onFieldSelected(int fieldId) {
@@ -273,10 +273,10 @@ public class FieldEditorActivity extends ThemedActivity
                 mAdapter.exitSelectionMode();
                 mode.finish();
                 return true;
-            } else if (itemId == R.id.groupFields) {
+            } else if (itemId == R.id.menu_group_fields) {
                 showGroupAssignmentDialog(mAdapter.getSelectedItems());
                 return true;
-            } else if (itemId == R.id.archiveFields) {
+            } else if (itemId == R.id.menu_archive_fields) {
                 String archivedVal = getString(R.string.group_archived_value);
                 for (Integer fieldId : mAdapter.getSelectedItems()) {
                     database.updateFieldGroup(fieldId, archivedVal);

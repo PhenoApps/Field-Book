@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,10 +11,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.FieldArchivedActivity;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -42,6 +46,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     private OnFieldSelectedListener listener;
     private String filterText = "";
     private final List<FieldObject> fullFieldList = new ArrayList<>();
+    private SharedPreferences preferences;
+    private boolean isArchivedFieldsActivity;
     public enum FieldViewType {
         TYPE_GROUP_HEADER, TYPE_FIELD, TYPE_ARCHIVE_HEADER
     }
@@ -55,7 +61,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         void onItemClear();
     }
 
-    public FieldAdapter(Context context, FieldSwitcher switcher, AdapterCallback callback) {
+    public FieldAdapter(Context context, FieldSwitcher switcher, AdapterCallback callback, boolean isArchivedFieldsActivity) {
         super(new DiffUtil.ItemCallback<FieldViewItem>() {
             @Override
             public boolean areItemsTheSame(@NonNull FieldViewItem oldItem, @NonNull FieldViewItem newItem) {
@@ -91,6 +97,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         mLayoutInflater = LayoutInflater.from(context);
         this.fieldSwitcher = switcher;
         this.callback = callback;
+        this.isArchivedFieldsActivity = isArchivedFieldsActivity;
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public void setOnFieldSelectedListener(OnFieldSelectedListener listener) {
@@ -162,7 +170,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         }
     }
 
-    static class ArchiveViewHolder extends RecyclerView.ViewHolder {
+    class ArchiveViewHolder extends RecyclerView.ViewHolder {
         final TextView groupName;
         final ImageView folderIcon;
 
@@ -170,6 +178,11 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             super(itemView);
             groupName = itemView.findViewById(R.id.archiveName);
             folderIcon = itemView.findViewById(R.id.archiveIcon);
+
+            itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(context, FieldArchivedActivity.class);
+                context.startActivity(intent);
+            });
         }
     }
 
@@ -312,7 +325,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         }
 
         // Determine if this field is active
-        int activeStudyId = ((FieldEditorActivity) context).getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+        int activeStudyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
         Log.d("FieldAdapter", "Field is is " + field.getExp_id() + " and active field is is "+activeStudyId);
         if (field.getExp_id() == activeStudyId) {
             // Indicate active state
@@ -364,27 +377,61 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         Map<String, List<FieldObject>> groupedFields = getGroupedFields(fullFieldList);
         String archivedVal = context.getString(R.string.group_archived_value);
 
+        List<FieldViewItem> arrayList;
+        if (isArchivedFieldsActivity) {
+            arrayList = buildArchivedFieldsList(archivedVal);
+        } else {
+            arrayList = buildFieldsList(groupedFields, archivedVal);
+        }
+
+        submitList(arrayList);
+    }
+
+    /**
+     * Builds a list of field items for the ArchivedFieldsActivity
+     * Only includes fields that are in the archived group
+     */
+    private List<FieldViewItem> buildArchivedFieldsList(String archivedVal) {
+        List<FieldViewItem> items = new ArrayList<>();
+        for (FieldObject field : fullFieldList) {
+            String groupName = field.getGroupName();
+            if (groupName != null && groupName.equals(archivedVal)) {
+                items.add(new FieldViewItem(field));
+            }
+        }
+        return items;
+    }
+
+    /**
+     * Builds a list of field items for the FieldEditorActivity
+     * Groups fields by their group name and includes group headers
+     */
+    private List<FieldViewItem> buildFieldsList(Map<String, List<FieldObject>> groupedFields, String archivedVal) {
         List<FieldViewItem> arrayList = new ArrayList<>();
+
         for (Map.Entry<String, List<FieldObject>> entry : groupedFields.entrySet()) {
             String groupName = entry.getKey();
             List<FieldObject> groupFields = entry.getValue();
 
             if (!groupFields.isEmpty() && !archivedVal.equals(groupName)) {
+                // group header
                 FieldViewItem header = new FieldViewItem(groupName, false);
                 arrayList.add(header);
 
+                // fields in this group
                 for (FieldObject field : groupFields) {
                     arrayList.add(new FieldViewItem(field));
                 }
             }
         }
 
+        // add archived fields header at the end
         if (groupedFields.containsKey(archivedVal) && !groupedFields.get(archivedVal).isEmpty()) {
             FieldViewItem archiveHeader = new FieldViewItem(archivedVal, true);
             arrayList.add(archiveHeader);
         }
 
-        submitList(arrayList);
+        return arrayList;
     }
 
     /**

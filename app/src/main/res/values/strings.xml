@@ -108,6 +108,9 @@
     <string name="menu_group">Group</string>
     <string name="menu_archive">Archive</string>
 
+    <string name="archived_fields">Archived Fields</string>
+    <string name="menu_unarchive">Remove from archive</string>
+
 
     <!-- FIELDS -->
     <!-- General -->

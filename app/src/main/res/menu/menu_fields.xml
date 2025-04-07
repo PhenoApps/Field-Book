@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
     <item
-        android:id="@+id/groupFields"
+        android:id="@+id/menu_group_fields"
         android:icon="@drawable/ic_tb_help"
         android:showAsAction="always"
         android:title="@string/tutorial_dialog_title" />
