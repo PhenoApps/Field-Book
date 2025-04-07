@@ -555,6 +555,7 @@
     <string name="dialog_previous_names">Nomes Usados Anteriormente</string>
     <string name="preferences_profile_previous_names">Nomes Anteriores</string>
     <string name="preferences_profile_new_person">Nova Pessoa</string>
+    <string name="preferences_profile_previous_names_warning">Todos os nomes de pessoas salvas seriam excluídos, e isso não pode ser revertido. Tem certeza que deseja continuar?</string>
     <string name="preferences_profile_name_first">Nome</string>
     <string name="preferences_profile_name_last">Sobrenome</string>
     <string name="preferences_profile_name_error">Ambos os campos não podem estar em branco</string>
@@ -563,6 +564,11 @@
     <string name="verification_interval_every_12">A cada 12 horas</string>
     <string name="verification_interval_every_24">A cada 24 horas</string>
     <string name="verification_interval_never">Nunca</string>
+    <string name="preferences_profile_device_title">Dispositivo</string>
+    <string name="preferences_profile_set_device_name">Nome do Dispositivo</string>
+    <string name="preferences_profile_device_name_dialog_title">Definir Nome do Dispositivo</string>
+    <string name="preferences_profile_device_name_error">Este campo não pode ficar em branco</string>
+    <string name="preferences_profile_device_name_default_format">Padrão: %s</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Único</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Incluir uma ID anônima e única nos logs de erro para ajudar a equipe de desenvolvimento a corrigir bugs</string>
     <string name="pref_profile_crashlytics_refresh_title">Atualizar ID</string>
