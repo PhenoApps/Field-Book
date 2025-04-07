@@ -78,7 +78,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
 public class DataHelper {
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 12;
+    public static final int DATABASE_VERSION = 13;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -2219,6 +2219,22 @@ public class DataHelper {
         close();
     }
 
+    /**
+     * Get distinct group names from the studies table
+     */
+    public List<String> getDistinctGroups() {
+        open();
+        return StudyDao.Companion.getDistinctGroups();
+    }
+
+    /**
+     * Update the group_name for a study
+     */
+    public void updateFieldGroup(int studyId, String groupName) {
+        open();
+        StudyDao.Companion.updateFieldGroup(studyId, groupName);
+    }
+
     public void deleteField(int studyId) {
 
         open();
@@ -3083,6 +3099,11 @@ public class DataHelper {
                 // Add observation_unit_search_attribute column to studies table, use study_unique_id_name as default value
                 db.execSQL("ALTER TABLE studies ADD COLUMN observation_unit_search_attribute TEXT");
                 db.execSQL("UPDATE studies SET observation_unit_search_attribute = study_unique_id_name");
+            }
+
+            if (oldVersion <= 12 && newVersion >= 13) {
+                // Add group_name column to studies table
+                db.execSQL("ALTER TABLE studies ADD COLUMN group_name TEXT DEFAULT NULL");
             }
 
         }
