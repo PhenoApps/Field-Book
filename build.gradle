@@ -7,18 +7,20 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.1'
+        classpath 'com.android.tools.build:gradle:8.9.0'
         classpath 'com.google.gms:google-services:4.4.0'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.10"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.7.5"
-        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.49'
+        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.56'
     }
 }
 
 plugins {
-    id 'com.google.dagger.hilt.android' version '2.49' apply false
-    id 'org.jetbrains.kotlin.android' version '1.8.0' apply false
+    id 'com.google.dagger.hilt.android' version '2.56' apply false
+    id 'org.jetbrains.kotlin.android' version '2.1.10' apply false
+    id "org.jetbrains.kotlin.plugin.compose" version "2.1.10"
+    id 'com.google.devtools.ksp' version '2.1.10-1.0.31' apply false
 }
 
 allprojects {

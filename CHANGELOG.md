@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v6.2.0] - 2025-04-03
+
+### Added
+- Data grid updated with new interface
+- Device name can now be customized in Profile Settings
+- User names are now saved in a list for rapid switching
+
+### Changed
+
+### Fixed
+- Improvements for the GoPro Hero 9
+
+## [v6.1.2] - 2025-03-31
+
+### Added
 - Additional attributes are now included when importing fields using BrAPI
 
 ### Changed
@@ -646,3 +666,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [v6.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.0
 [v6.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.1
+[v6.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.2
+
+[v6.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.0

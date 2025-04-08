@@ -210,6 +210,9 @@
     <string name="traits_sort_format">Formato</string>
     <string name="warning_traits_missing_modify">Crear variables antes de modificarlas.</string>
     <!-- Trait import/export -->
+    <string name="traits_new_dialog_title">Nueva(s) Variable(s)</string>
+    <string name="traits_dialog_create">Crear una nueva variable</string>
+    <string name="traits_dialog_import_from_file">Importar desde archivo</string>
     <string name="traits_dialog_import">Importar</string>
     <string name="import_error_format_trait">Solo se pueden importar archivos TRT como lista de variables</string>
     <string name="traits_export_check">¿Exportar lista de variables actual?</string>
