@@ -204,7 +204,9 @@ class TraitDetailFragment : Fragment() {
                         
                         if (trait != null) {
                             updateTraitData(trait)
-                            setupToolbar(trait)
+                            if (toolbar?.menu?.size() == 0) { // Check if menu is empty
+                                setupToolbar(trait)
+                            }
                             
                             // Load observation data for the trait
                             loadObservationData(trait)
