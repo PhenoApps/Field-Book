@@ -4,9 +4,11 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteConstraintException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
+import android.util.Log
 import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
+import com.fieldbook.tracker.database.migrators.ExampleMigratorVersionN
 import com.fieldbook.tracker.objects.TraitObject
 
 /**
@@ -22,6 +24,8 @@ import com.fieldbook.tracker.objects.TraitObject
 class Migrator {
 
     companion object {
+
+        const val TAG = "Migrator"
 
         const val sVisibleObservationVariableViewName = "VisibleObservationVariable"
         val sVisibleObservationVariableView = """
@@ -386,6 +390,16 @@ class Migrator {
 
         }
 
+        fun migrateToVersionExampleN(db: SQLiteDatabase) {
+
+            ExampleMigratorVersionN().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version N", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version N")
+                }
+        }
     }
 
     class ObservationUnit private constructor() {
