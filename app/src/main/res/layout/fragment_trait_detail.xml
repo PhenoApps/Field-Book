@@ -225,12 +225,21 @@
                     </com.google.android.material.chip.ChipGroup>
                 </LinearLayout>
 
-                <!-- Completeness Pie Chart -->
-                <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/completenessChart"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="8dp"/>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="0dp">
+
+                    <com.github.mikephil.charting.charts.PieChart
+                        android:id="@+id/completenessChart"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <!-- Collapse/Expand Icon -->
                 <ImageView
