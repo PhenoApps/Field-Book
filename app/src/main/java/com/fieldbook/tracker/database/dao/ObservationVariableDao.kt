@@ -33,56 +33,132 @@ class ObservationVariableDao {
             }
         } ?: 0
 
-        fun getTraitById(id: Int): TraitObject? = withDatabase { db ->
+        /**
+        * Generic function to get trait objects with optional filtering criteria
+        * @param id_filter Optional ID to filter by
+        * @param name_filter Optional name to filter by
+        * @param externalDbId_filter Optional external DB ID to filter by
+        * @param traitDataSource_filter Optional data source to filter by
+        * @param sortOrder How to sort the results
+        * @return List of matching TraitObjects with attributes loaded
+        */
+        fun getTraitObjects(
+            id_filter: Int? = null,
+            name_filter: String? = null,
+            externalDbId_filter: String? = null,
+            traitDataSource_filter: String? = null,
+            sortOrder: String = "position"
+        ): ArrayList<TraitObject> = withDatabase { db ->
+            val traits = ArrayList<TraitObject>()
+            
+            // Build WHERE clause based on provided parameters
+            val whereClauseBuilder = StringBuilder()
+            val whereArgs = ArrayList<String>()
+            
+            if (id_filter != null) {
+                whereClauseBuilder.append("internal_id_observation_variable = ?")
+                whereArgs.add(id_filter.toString())
+            }
+            
+            if (name_filter != null) {
+                if (whereClauseBuilder.isNotEmpty()) whereClauseBuilder.append(" AND ")
+                whereClauseBuilder.append("observation_variable_name = ? COLLATE NOCASE")
+                whereArgs.add(name_filter)
+            }
+            
+            if (externalDbId_filter != null && traitDataSource_filter != null) {
+                if (whereClauseBuilder.isNotEmpty()) whereClauseBuilder.append(" AND ")
+                whereClauseBuilder.append("external_db_id = ? AND trait_data_source = ?")
+                whereArgs.add(externalDbId_filter)
+                whereArgs.add(traitDataSource_filter)
+            }
+            
+            val whereClause = if (whereClauseBuilder.isEmpty()) null else whereClauseBuilder.toString()
+            
+            val query = """
+                SELECT * FROM ${ObservationVariable.tableName}
+                ${if (whereClause != null) "WHERE $whereClause" else ""}
+                ORDER BY ${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ASC
+            """
 
-            db.query(ObservationVariable.tableName,
-//                    select = arrayOf("observation_variable_name"),
-                where = "internal_id_observation_variable = ?",
-                whereArgs = arrayOf("$id")).toFirst().toTraitObject()
+            Log.d("ObservationVariableDao", "Full query: $query")
+            Log.d("ObservationVariableDao", "Query args: ${whereArgs.joinToString()}")
 
-        }
+            db.rawQuery(query, whereArgs.toTypedArray()).use { cursor ->
+                while (cursor.moveToNext()) {
+                    val trait = TraitObject().apply {
+                        name = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name")) ?: ""
+                        format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format")) ?: ""
+                        defaultValue = cursor.getString(cursor.getColumnIndexOrThrow("default_value")) ?: ""
+                        details = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_details")) ?: ""
+                        id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariable.PK)).toString()
+                        externalDbId = cursor.getString(cursor.getColumnIndexOrThrow("external_db_id")) ?: ""
+                        realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("position"))
+                        visible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()
+                        additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
 
-        fun getTraitByName(name: String): TraitObject? = withDatabase { db ->
+                        // Initialize these to the empty string or else they will be null
+                        maximum = ""
+                        minimum = ""
+                        categories = ""
+                        closeKeyboardOnOpen = false
+                        cropImage = false
 
-            db.query(ObservationVariable.tableName,
-//                    select = arrayOf("observation_variable_name"),
-                    where = "observation_variable_name = ? COLLATE NOCASE",
-                    whereArgs = arrayOf(name)).toFirst().toTraitObject()
-
-        }
-
-        fun getTraitByExternalDbId(externalDbId: String, traitDataSource: String): TraitObject? = withDatabase { db ->
-
-            db.query(ObservationVariable.tableName,
-                    where = "external_db_id = ? AND trait_data_source = ? ",
-                    whereArgs = arrayOf(externalDbId, traitDataSource)).toFirst().toTraitObject()
-
-        }
-
-        private fun Map<String, Any?>.toTraitObject() = if (this.isEmpty()) {null} else { TraitObject().also {
-
-            it.id = this[ObservationVariable.PK].toString()
-            it.name = this["observation_variable_name"] as? String ?: ""
-            it.format = this["observation_variable_field_book_format"] as? String ?: ""
-            it.defaultValue = this["default_value"].toString()
-            it.details = this["observation_variable_details"].toString()
-
-            it.realPosition = try {
-
-                 this["position"].toString().toInt()
-
-            } catch (nfe: java.lang.NumberFormatException) {
-
-                //return 0 if the position column is empty or cannot be parsed into an integer
-                0
+                        val values = ObservationVariableValueDao.getVariableValues(id.toInt())
+                        values?.forEach { value ->
+                            val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
+                            when (attrName) {
+                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String ?: ""
+                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String ?: ""
+                                "category" -> categories = value["observation_variable_attribute_value"] as? String ?: ""
+                                "closeKeyboardOnOpen" -> closeKeyboardOnOpen = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
+                                "cropImage" -> cropImage = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
+                            }
+                        }
+                    }
+                    traits.add(trait)
+                }
             }
 
-            it.visible = this["visible"].toString() == "true"
-            it.externalDbId = this["external_db_id"].toString()
-            it.traitDataSource = this["trait_data_source"].toString()
+            if (sortOrder == "visible") {
+                val visibleTraits = traits.filter { it.visible }
+                val invisibleTraits = traits.filter { !it.visible }
 
+                ArrayList(visibleTraits.sortedBy { it.realPosition } + ArrayList(invisibleTraits.sortedBy { it.realPosition }))
+
+            } else {
+                ArrayList(traits)
+            }
+        } ?: ArrayList()
+
+        fun getAllTraitObjects(sortOrder: String = "position"): ArrayList<TraitObject> = 
+            getTraitObjects(sortOrder = sortOrder)
+
+        // Overload for Java compatibility
+        fun getAllTraitObjects(): ArrayList<TraitObject> = 
+            getAllTraitObjects("position")
+
+        // fun getTraitById(id: Int): TraitObject? = 
+        //     getTraitObjects(id_filter = id).firstOrNull()
+        fun getTraitById(id: Int): TraitObject? {
+            Log.d("ObservationVariableDao", "getTraitById called with id: $id")
+            
+            val result = getTraitObjects(id_filter = id).also { traits ->
+                Log.d("ObservationVariableDao", "getTraitObjects returned ${traits.size} traits")
+                if (traits.isNotEmpty()) {
+                    Log.d("ObservationVariableDao", "First trait: id=${traits[0].id}, name=${traits[0].name}")
+                }
+            }.firstOrNull()
+            
+            Log.d("ObservationVariableDao", "getTraitById returning: ${result?.name ?: "null"}")
+            return result
         }
-        }
+
+        fun getTraitByName(name: String): TraitObject? = 
+            getTraitObjects(name_filter = name).firstOrNull()
+
+        fun getTraitByExternalDbId(externalDbId: String, traitDataSource: String): TraitObject? = 
+            getTraitObjects(externalDbId_filter = externalDbId, traitDataSource_filter = traitDataSource).firstOrNull()
 
         /**
          * TODO: Replace with View.
@@ -213,107 +289,6 @@ class ObservationVariableDao {
                 ).toFirst()
             )
         }
-
-        fun getAllTraitObjects(sortOrder: String = "position"): ArrayList<TraitObject> = withDatabase { db ->
-            val traits = ArrayList<TraitObject>()
-
-            val query = """
-                SELECT * FROM ${ObservationVariable.tableName}
-                ORDER BY ${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ASC
-            """
-
-            db.rawQuery(query, null).use { cursor ->
-                while (cursor.moveToNext()) {
-                    val trait = TraitObject().apply {
-                        name = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name")) ?: ""
-                        format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format")) ?: ""
-                        defaultValue = cursor.getString(cursor.getColumnIndexOrThrow("default_value")) ?: ""
-                        details = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_details")) ?: ""
-                        id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariable.PK)).toString()
-                        externalDbId = cursor.getString(cursor.getColumnIndexOrThrow("external_db_id")) ?: ""
-                        realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("position"))
-                        visible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()
-                        additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
-
-                        // Initialize these to the empty string or else they will be null
-                        maximum = ""
-                        minimum = ""
-                        categories = ""
-                        closeKeyboardOnOpen = false
-                        cropImage = false
-
-                        val values = ObservationVariableValueDao.getVariableValues(id.toInt())
-                        values?.forEach { value ->
-                            val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
-                            when (attrName) {
-                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "category" -> categories = value["observation_variable_attribute_value"] as? String ?: ""
-                                "closeKeyboardOnOpen" -> closeKeyboardOnOpen = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
-                                "cropImage" -> cropImage = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
-                            }
-                        }
-                    }
-                    traits.add(trait)
-                }
-            }
-
-            if (sortOrder == "visible") {
-                val visibleTraits = traits.filter { it.visible }
-                val invisibleTraits = traits.filter { !it.visible }
-
-                ArrayList(visibleTraits.sortedBy { it.realPosition } + ArrayList(invisibleTraits.sortedBy { it.realPosition }))
-
-            } else {
-                ArrayList(traits)
-            }
-        } ?: ArrayList()
-
-        // Overload for Java compatibility
-        fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("position")
-
-
-//        fun getAllTraitObjects(sortOrder: String): ArrayList<TraitObject> = withDatabase { db ->
-//
-//            ArrayList(db.query(ObservationVariable.tableName, orderBy = "position").toTable().map {
-//
-//                TraitObject().apply {
-//
-//                    name = (it["observation_variable_name"] as? String ?: "")
-//                    format = it["observation_variable_field_book_format"] as? String ?: ""
-//                    defaultValue = it["default_value"] as? String ?: ""
-//                    details = it["observation_variable_details"] as? String ?: ""
-//                    id = (it[ObservationVariable.PK] as? Int ?: -1).toString()
-//                    externalDbId = it["external_db_id"] as? String ?: ""
-//                    realPosition = (it["position"] as? Int ?: -1)
-//                    visible = (it["visible"] as String).toBoolean()
-//                    additionalInfo = it["additional_info"] as? String ?: ""
-//
-//                    //initialize these to the empty string or else they will be null
-//                    maximum = ""
-//                    minimum = ""
-//                    categories = ""
-//
-//                    ObservationVariableValueDao.getVariableValues(id.toInt()).also { values ->
-//
-//                        values?.forEach { value ->
-//
-//                            val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
-//
-//                            when (attrName) {
-//                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                                "category" -> categories = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                            }
-//                        }
-//                    }
-//                }
-//            })
-//
-//        } ?: ArrayList()
 
         fun getTraitVisibility(): HashMap<String, String> = withDatabase { db ->
 

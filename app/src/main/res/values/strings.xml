@@ -357,11 +357,9 @@
     <string name="trait_hidden">Hidden</string>
     <string name="trait_observation_data">Data</string>
     <string name="trait_observation_count">%d observations</string>
-    <string name="trait_fields_count">Used in %d fields</string>
-    <string name="trait_observations_count">%d total observations</string>
     <string name="trait_not_chartable">This trait format cannot be visualized in a chart</string>
     <string name="unknown_date">Unknown date</string>
-    <string name="traits_rename">Rename Trait</string>
+    <string name="traits_rename">Edit</string>
 
     <!-- COLLECT -->
 

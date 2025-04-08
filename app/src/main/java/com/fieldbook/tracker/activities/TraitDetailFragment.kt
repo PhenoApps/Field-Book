@@ -110,27 +110,10 @@ class TraitDetailFragment : Fragment() {
             GeneralKeys.TRAIT_DETAIL_DATA_COLLAPSED
         )
 
-        // Set up edit name chip click
+        // Set up edit chip click
         editNameChip.setOnClickListener {
             traitObject?.let { trait ->
                 (activity as? TraitEditorActivity)?.showTraitDialog(trait)
-            }
-        }
-        
-        // Set up format chip click
-        formatChip.setOnClickListener {
-            traitObject?.let { trait ->
-                (activity as? TraitEditorActivity)?.showTraitDialog(trait)
-            }
-        }
-        
-        // Set up visibility chip click
-        visibilityChip.setOnClickListener {
-            traitObject?.let { trait ->
-                val newVisibility = !trait.visible
-                database.updateTraitVisibility(trait.id, newVisibility)
-                trait.visible = newVisibility
-                updateVisibilityChip(trait)
             }
         }
 
@@ -343,8 +326,8 @@ class TraitDetailFragment : Fragment() {
             
             withContext(Dispatchers.Main) {
                 // Update chips
-                fieldCountChip.text = getString(R.string.trait_fields_count, fieldsWithObservations.size)
-                observationCountChip.text = getString(R.string.trait_observations_count, observations.size)
+                fieldCountChip.text = fieldsWithObservations.size.toString()
+                observationCountChip.text = observations.size.toString()
                 
                 // Setup completeness chart
                 val chartTextSize = getChartTextSize()
