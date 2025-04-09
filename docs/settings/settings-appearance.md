@@ -56,12 +56,3 @@ Displays icons in place of InfoBar prefixes.
   <img class="screenshot" src="_static/images/settings/appearance/settings_appearance_infobar_prefixes_framed.png" width="325px"> 
   <figcaption class="screenshot-caption"><i>InfoBars with InfoBar prefixes hidden</i></figcaption> 
 </figure>
-
-#### <img class="icon" src="_static/icons/settings/appearance/run-fast.png"> Quick GoTo
-
-Changes the primary/secondary order on the Collect screen to edit texts that can search and move to specific entries.
-
-<figure class="image">
-  <img class="screenshot" src="_static/images/settings/appearance/settings_appearance_quick_goto.png" width="325px"> 
-  <figcaption class="screenshot-caption"><i>Editable primary/secondary order</i></figcaption> 
-</figure>

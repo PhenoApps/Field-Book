@@ -33,7 +33,7 @@ Adds a button to the Collect top toolbar thats skips to the next entry without d
 #### <img class="icon" src="_static/icons/settings/features/barcode-scan.png"> Move to unique identifier
 
 Adds a <img class="icon" src="_static/icons/settings/features/barcode-scan.png"> icon to the Collect toolbar.
-Can be set to one of two behavior option. 
+Can be set to one of two behavior options. 
 One option is for the tool to open a text entry dialog.
 Move to a specific entry by typing a `unique id` or by pressing scan and scanning a barcode that encodes a `unique id`.
 Alternatively, choose the second option to directly initiate a barcode scan with the device camera.
