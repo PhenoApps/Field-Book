@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+
+## [v6.2.1] - 2025-04-09
+
+### Added
+
+### Changed
+
+### Fixed
 - Date traits using day of year now correctly saves
 - Fixed an issue with Settings search
 
@@ -671,3 +679,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.2
 
 [v6.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.0
+[v6.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.1
