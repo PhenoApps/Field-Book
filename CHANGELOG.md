@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Date traits using day of year now correctly saves
 - Fixed an issue with Settings search
 
 ## [v6.2.0] - 2025-04-03
