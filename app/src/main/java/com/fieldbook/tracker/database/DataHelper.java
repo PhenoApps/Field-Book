@@ -165,7 +165,7 @@ public class DataHelper {
      */
     public static String replaceIdentifiers(String s) {
 
-        return s.replaceAll("'", "''");
+        return s.replaceAll("'", "''").replaceAll("\"", "\"\"");
     }
 
     /**
