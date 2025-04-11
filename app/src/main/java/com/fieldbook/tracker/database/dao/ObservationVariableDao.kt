@@ -93,6 +93,7 @@ class ObservationVariableDao {
                         details = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_details")) ?: ""
                         id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariable.PK)).toString()
                         externalDbId = cursor.getString(cursor.getColumnIndexOrThrow("external_db_id")) ?: ""
+                        traitDataSource = cursor.getString(cursor.getColumnIndexOrThrow("trait_data_source")) ?: ""
                         realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("position"))
                         visible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()
                         additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""

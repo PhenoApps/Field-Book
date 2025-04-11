@@ -70,7 +70,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:ellipsize="end"/>
-                            
+
                     </LinearLayout>
 
                     <!-- Collapse/Expand Icon -->
@@ -99,6 +99,18 @@
                         app:singleLine="false"
                         app:chipSpacingHorizontal="8dp"
                         app:chipSpacingVertical="8dp">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/sourceChip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIcon="@drawable/ic_table_arrow_right"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/defaultChipBackground" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/formatChip"

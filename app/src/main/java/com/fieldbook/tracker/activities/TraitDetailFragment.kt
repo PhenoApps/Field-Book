@@ -58,6 +58,7 @@ class TraitDetailFragment : Fragment() {
 
     private lateinit var rootView: View
     private lateinit var traitNameTextView: TextView
+    private lateinit var sourceChip: Chip
     private lateinit var formatChip: Chip
     private lateinit var editNameChip: Chip
     private lateinit var visibilityChip: Chip
@@ -78,6 +79,7 @@ class TraitDetailFragment : Fragment() {
         
         toolbar = rootView.findViewById(R.id.toolbar)
         traitNameTextView = rootView.findViewById(R.id.traitDisplayName)
+        sourceChip = rootView.findViewById(R.id.sourceChip)
         formatChip = rootView.findViewById(R.id.formatChip)
         editNameChip = rootView.findViewById(R.id.editNameChip)
         visibilityChip = rootView.findViewById(R.id.visibilityChip)
@@ -222,9 +224,9 @@ class TraitDetailFragment : Fragment() {
         // Basic trait info
         traitNameTextView.text = trait.name
         
-        // Format chip
+        sourceChip.text = trait.traitDataSource
         val format = trait.format
-        formatChip.text = format
+        formatChip.text = trait.format
         
         // Set format icon
         val formatEnum = Formats.entries.find { it.getDatabaseName() == format }
