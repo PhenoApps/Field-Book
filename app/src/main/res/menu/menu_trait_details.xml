@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/edit"
+        android:icon="@drawable/ic_rename"
+        app:showAsAction="always"
+        android:title="@string/traits_rename" />
+    <item
         android:id="@+id/delete"
         android:icon="@drawable/ic_tb_delete"
         app:showAsAction="always"

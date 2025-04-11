@@ -60,7 +60,6 @@ class TraitDetailFragment : Fragment() {
     private lateinit var traitNameTextView: TextView
     private lateinit var sourceChip: Chip
     private lateinit var formatChip: Chip
-    private lateinit var editNameChip: Chip
     private lateinit var visibilityChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: TraitDetailAdapter? = null
@@ -81,7 +80,6 @@ class TraitDetailFragment : Fragment() {
         traitNameTextView = rootView.findViewById(R.id.traitDisplayName)
         sourceChip = rootView.findViewById(R.id.sourceChip)
         formatChip = rootView.findViewById(R.id.formatChip)
-        editNameChip = rootView.findViewById(R.id.editNameChip)
         visibilityChip = rootView.findViewById(R.id.visibilityChip)
 
         // Initialize data card views
@@ -109,13 +107,6 @@ class TraitDetailFragment : Fragment() {
             R.id.data_expand_collapse_icon,
             GeneralKeys.TRAIT_DETAIL_DATA_COLLAPSED
         )
-
-        // Set up edit chip click
-        editNameChip.setOnClickListener {
-            traitObject?.let { trait ->
-                (activity as? TraitEditorActivity)?.showTraitDialog(trait)
-            }
-        }
 
         Log.d(TAG, "onCreateView End")
         return rootView
@@ -428,6 +419,12 @@ class TraitDetailFragment : Fragment() {
             when (item.itemId) {
                 android.R.id.home -> {
                     parentFragmentManager.popBackStack()
+                }
+                R.id.edit -> {
+                    traitObject?.let { trait ->
+                        (activity as? TraitEditorActivity)?.showTraitDialog(trait)
+                    }
+                    true
                 }
                 R.id.delete -> {
                     // Show confirmation dialog

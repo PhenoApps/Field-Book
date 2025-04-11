@@ -135,20 +135,6 @@
                             app:closeIconVisible="false"
                             app:chipBackgroundColor="?attr/defaultChipBackground" />
 
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/editNameChip"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:chipIcon="@drawable/ic_rename"
-                            app:chipIconSize="24dp"
-                            app:ensureMinTouchTargetSize="false"
-                            app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/selectableChipBackground"
-                            app:chipStartPadding="6dp"
-                            app:chipStrokeColor="?attr/selectableChipStroke"
-                            app:chipStrokeWidth="2dp"
-                            android:text="@string/traits_rename" />
-
                     </com.google.android.material.chip.ChipGroup>
 
                 </LinearLayout>
