@@ -70,12 +70,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:ellipsize="end"/>
-
-                        <TextView
-                            style="@style/TextViewStyle.Sub"
-                            android:id="@+id/importDateTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
+                            
                     </LinearLayout>
 
                     <!-- Collapse/Expand Icon -->

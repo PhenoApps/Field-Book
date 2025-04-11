@@ -58,7 +58,6 @@ class TraitDetailFragment : Fragment() {
 
     private lateinit var rootView: View
     private lateinit var traitNameTextView: TextView
-    private lateinit var importDateTextView: TextView
     private lateinit var formatChip: Chip
     private lateinit var editNameChip: Chip
     private lateinit var visibilityChip: Chip
@@ -79,7 +78,6 @@ class TraitDetailFragment : Fragment() {
         
         toolbar = rootView.findViewById(R.id.toolbar)
         traitNameTextView = rootView.findViewById(R.id.traitDisplayName)
-        importDateTextView = rootView.findViewById(R.id.importDateTextView)
         formatChip = rootView.findViewById(R.id.formatChip)
         editNameChip = rootView.findViewById(R.id.editNameChip)
         visibilityChip = rootView.findViewById(R.id.visibilityChip)
@@ -223,15 +221,6 @@ class TraitDetailFragment : Fragment() {
     private fun updateTraitData(trait: TraitObject) {
         // Basic trait info
         traitNameTextView.text = trait.name
-        
-        // Import date
-        // val importDate = trait.creation_date
-        val importDate = ""
-        if (!importDate.isNullOrEmpty()) {
-            importDateTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), importDate)
-        } else {
-            importDateTextView.text = getString(R.string.unknown_date)
-        }
         
         // Format chip
         val format = trait.format
