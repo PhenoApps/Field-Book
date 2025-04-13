@@ -21,6 +21,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
+import com.fieldbook.tracker.database.dao.StudyGroupDao;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
@@ -52,25 +53,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.qualifiers.ActivityContext;
+import kotlin.Pair;
 
 /**
  * All database related functions are here
@@ -2220,19 +2218,38 @@ public class DataHelper {
     }
 
     /**
-     * Get distinct group names from the studies table
+     * Get all study group names
      */
-    public List<String> getDistinctGroups() {
-        open();
-        return StudyDao.Companion.getDistinctGroups();
+    public List<Pair<Integer, String>> getAllStudyGroups() {
+        return StudyGroupDao.Companion.getAllStudyGroups();
     }
 
     /**
-     * Update the group_name for a study
+     * Delete the unassigned study groups
      */
-    public void updateFieldGroup(int studyId, String groupName) {
-        open();
-        StudyDao.Companion.updateFieldGroup(studyId, groupName);
+    public void deleteUnusedStudyGroups() {
+        StudyGroupDao.Companion.deleteUnusedStudyGroups();
+    }
+
+    /**
+     * Create a study group
+     */
+    public Integer createOrGetStudyGroup(String groupName) {
+        return StudyGroupDao.Companion.createOrGetStudyGroup(groupName);
+    }
+
+    /**
+     * Update the group_id for a study
+     */
+    public void updateStudyGroup(int studyId, Integer groupId) {
+        StudyDao.Companion.updateStudyGroup(studyId, groupId);
+    }
+
+    /**
+     * Update the isArchived flag for a study
+     */
+    public void setIsArchived(int studyId, boolean isArchived) {
+        StudyDao.Companion.setIsArchived(studyId, isArchived);
     }
 
     public void deleteField(int studyId) {
@@ -3107,7 +3124,7 @@ public class DataHelper {
 //            }
             if (oldVersion <= 12 && newVersion >= 13) {
                 // Add group_name column to studies table
-                db.execSQL("ALTER TABLE studies ADD COLUMN group_name TEXT DEFAULT NULL");
+                Migrator.Companion.migrateToVersion13(db);
             }
 
         }

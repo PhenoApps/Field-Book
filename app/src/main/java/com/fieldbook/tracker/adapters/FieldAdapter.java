@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.FieldArchivedActivity;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
+import com.fieldbook.tracker.database.dao.StudyGroupDao;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
@@ -345,15 +346,16 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         notifyItemChanged(headerPosition);
 
-        String groupName = header.groupName;
+        String headerName = header.groupName;
         List<FieldViewItem> currentList = new ArrayList<>(getCurrentList());
 
         if (header.isExpanded) {
             // add all fields for this group
             int insertPosition = headerPosition + 1;
             for (FieldObject field : fullFieldList) {
-                if ((groupName == null && field.getGroupName() == null) ||
-                        (groupName != null && groupName.equals(field.getGroupName()))) {
+                String fieldGroupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
+                if ((headerName == null && fieldGroupName == null) || // ungrouped
+                        (headerName != null && headerName.equals(fieldGroupName))) { // grouped
                     currentList.add(insertPosition++, new FieldViewItem(field));
                 }
             }
@@ -374,14 +376,11 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             fullFieldList.addAll(fields);
         }
 
-        Map<String, List<FieldObject>> groupedFields = getGroupedFields(fullFieldList);
-        String archivedVal = context.getString(R.string.group_archived_value);
-
         List<FieldViewItem> arrayList;
         if (isArchivedFieldsActivity) {
-            arrayList = buildArchivedFieldsList(archivedVal);
+            arrayList = buildArchivedFieldsList();
         } else {
-            arrayList = buildFieldsList(groupedFields, archivedVal);
+            arrayList = buildFieldsList();
         }
 
         submitList(arrayList);
@@ -389,13 +388,11 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
     /**
      * Builds a list of field items for the ArchivedFieldsActivity
-     * Only includes fields that are in the archived group
      */
-    private List<FieldViewItem> buildArchivedFieldsList(String archivedVal) {
+    private List<FieldViewItem> buildArchivedFieldsList() {
         List<FieldViewItem> items = new ArrayList<>();
         for (FieldObject field : fullFieldList) {
-            String groupName = field.getGroupName();
-            if (groupName != null && groupName.equals(archivedVal)) {
+            if (field.getIsArchived()) {
                 items.add(new FieldViewItem(field));
             }
         }
@@ -405,15 +402,19 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     /**
      * Builds a list of field items for the FieldEditorActivity
      * Groups fields by their group name and includes group headers
+     * Attaches archived list item at the end
      */
-    private List<FieldViewItem> buildFieldsList(Map<String, List<FieldObject>> groupedFields, String archivedVal) {
+    private List<FieldViewItem> buildFieldsList() {
         List<FieldViewItem> arrayList = new ArrayList<>();
+        Map<String, List<FieldObject>> groupedFields = getGroupedFields(fullFieldList);
+
+        String archivedVal = context.getString(R.string.group_archived_value);
 
         for (Map.Entry<String, List<FieldObject>> entry : groupedFields.entrySet()) {
             String groupName = entry.getKey();
             List<FieldObject> groupFields = entry.getValue();
 
-            if (!groupFields.isEmpty() && !archivedVal.equals(groupName)) {
+            if (!groupFields.isEmpty()) {
                 // group header
                 FieldViewItem header = new FieldViewItem(groupName, false);
                 arrayList.add(header);
@@ -425,8 +426,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             }
         }
 
-        // add archived fields header at the end
-        if (groupedFields.containsKey(archivedVal) && !groupedFields.get(archivedVal).isEmpty()) {
+        boolean hasArchivedFields = fullFieldList.stream().anyMatch(FieldObject::getIsArchived);
+        if (hasArchivedFields) { // add archived list item at the bottom
             FieldViewItem archiveHeader = new FieldViewItem(archivedVal, true);
             arrayList.add(archiveHeader);
         }
@@ -435,30 +436,25 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     /**
-     * Returns a structure of group/fields, and the same order will be shown
+     * Returns a structure of group/fields, and the same order will be shown (skips archived fields)
      */
     private Map<String, List<FieldObject>> getGroupedFields(List<FieldObject> fields) {
         Map<String, List<FieldObject>> groupedFields = new LinkedHashMap<>();
-        String archivedVal = context.getString(R.string.group_archived_value);
 
         // "null" for ungrouped fields
         groupedFields.put(null, new ArrayList<>());
 
         for (FieldObject field : fields) {
-            String group = field.getGroupName();
-
-            // add all groups
-            if (group != null && !archivedVal.equals(group)) {
-                groupedFields.putIfAbsent(group, new ArrayList<>());
+            if (field.getIsArchived()) { // handle archived fields in buildFieldList
+                continue;
             }
 
-            // add archived group
-            if (archivedVal.equals(group)) {
-                groupedFields.putIfAbsent(archivedVal, new ArrayList<>());
-            }
+            String groupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
+
+            groupedFields.putIfAbsent(groupName, new ArrayList<>());
 
             // add the field to its group
-            List<FieldObject> fieldList = groupedFields.get(group);
+            List<FieldObject> fieldList = groupedFields.get(groupName);
             if (fieldList != null){
                 fieldList.add(field);
             }
@@ -492,7 +488,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         public FieldViewItem(FieldObject field) {
             this.viewType = FieldViewType.TYPE_FIELD;
             this.field = field;
-            this.groupName = field.getGroupName();
+            this.groupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
         }
 
         public boolean isGroupHeader() {

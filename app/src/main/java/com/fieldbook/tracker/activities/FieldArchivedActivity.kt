@@ -160,7 +160,7 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
                 }
                 R.id.menu_unarchive_fields -> {
                     for (fieldId in mAdapter.selectedItems) {
-                        db.updateFieldGroup(fieldId, null)
+                        db.setIsArchived(fieldId, false)
                     }
                     queryAndLoadArchivedFields()
                     mAdapter.exitSelectionMode()
@@ -248,7 +248,7 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
             fieldList.clear()
 
             for (field in allFields) {
-                if (archivedVal == field.groupName) {
+                if (field.isArchived) {
                     fieldList.add(field)
                 }
             }

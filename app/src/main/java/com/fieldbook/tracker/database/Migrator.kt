@@ -9,6 +9,7 @@ import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
 import com.fieldbook.tracker.database.migrators.ExampleMigratorVersionN
+import com.fieldbook.tracker.database.migrators.MigratorVersion13
 import com.fieldbook.tracker.objects.TraitObject
 
 /**
@@ -400,6 +401,17 @@ class Migrator {
                     Log.d(TAG, "Migrated to version N")
                 }
         }
+
+        fun migrateToVersion13(db: SQLiteDatabase) {
+
+            MigratorVersion13().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version N", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version N")
+                }
+        }
     }
 
     class ObservationUnit private constructor() {
@@ -653,6 +665,14 @@ class Migrator {
                         "count" to "Int",
                         PK to "INTEGER PRIMARY KEY AUTOINCREMENT")
             }
+        }
+    }
+
+    class StudyGroup private constructor() {
+        companion object Schema {
+            const val PK = "id"
+            const val FK = "group_id"
+            const val TABLE_NAME = "study_groups"
         }
     }
 }

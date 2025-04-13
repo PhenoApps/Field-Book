@@ -11,6 +11,7 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.Study
+import com.fieldbook.tracker.database.Migrator.StudyGroup
 import com.fieldbook.tracker.database.getTime
 import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
@@ -260,7 +261,8 @@ class StudyDao {
             it.observation_count = this["observation_count"]?.toString()
             it.trial_name = this["trial_name"]?.toString()
             it.search_attribute = this["observation_unit_search_attribute"]?.toString()
-            it.groupName = this["group_name"]?.toString()
+            it.groupId = this["group_id"]?.toString()?.toIntOrNull()
+            it.isArchived = this["isArchived"].toString() == "true"
         }
 
         fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
@@ -312,6 +314,8 @@ class StudyDao {
                     trial_name,
                     count,
                     observation_unit_search_attribute,
+                    isArchived,
+                    group_id,
                     (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
@@ -642,31 +646,26 @@ class StudyDao {
         }
 
         /**
-         * Returns distinct group_names from the studies table
+         * Updates the group_id for a study
          */
-        fun getDistinctGroups(): List<String> = withDatabase { db ->
-            val groupNames = mutableListOf<String>()
-            val query = "SELECT DISTINCT group_name FROM studies WHERE group_name IS NOT NULL AND group_name <> '' ORDER BY group_name ASC"
-
-            db.rawQuery(query, null).use { cursor ->
-                while (cursor.moveToNext()) {
-                    cursor.getString(0)?.let { groupNames.add(it) }
-                }
-            }
-            groupNames
-        } ?: emptyList()
+        fun updateStudyGroup(studyId: Int, groupId: Int?) = withDatabase { db ->
+            db.update(
+                Study.tableName,
+                contentValuesOf(StudyGroup.FK to groupId),
+                "${Study.PK} = ?", arrayOf("$studyId")
+            )
+        }
 
         /**
-         * Updates the group_name for a study
+         * Updates the isArchived flag of a study
          */
-        fun updateFieldGroup(studyId: Int, groupName: String?) = withDatabase { db ->
-            val contentValues = ContentValues()
-            if (groupName == null) {
-                contentValues.putNull("group_name")
-            } else {
-                contentValues.put("group_name", groupName)
-            }
-            db.update(Study.tableName, contentValues, "${Study.PK} = ?", arrayOf("$studyId"))
+        fun setIsArchived(studyId: Int, isArchived: Boolean) = withDatabase { db ->
+            val value = if (isArchived) "true" else "false"
+            db.update(
+                Study.tableName,
+                contentValuesOf("isArchived" to value),
+                "${Study.PK} = ?", arrayOf("$studyId")
+            )
         }
     }
 }

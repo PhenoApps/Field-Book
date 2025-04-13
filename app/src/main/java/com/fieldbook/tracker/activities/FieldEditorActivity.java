@@ -52,6 +52,7 @@ import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.StudyGroupDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialogFragment;
 import com.fieldbook.tracker.dialogs.FieldSortDialogFragment;
@@ -83,17 +84,16 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.StringJoiner;
 import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
+import kotlin.Pair;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -277,9 +277,8 @@ public class FieldEditorActivity extends ThemedActivity
                 showGroupAssignmentDialog(mAdapter.getSelectedItems());
                 return true;
             } else if (itemId == R.id.menu_archive_fields) {
-                String archivedVal = getString(R.string.group_archived_value);
                 for (Integer fieldId : mAdapter.getSelectedItems()) {
-                    database.updateFieldGroup(fieldId, archivedVal);
+                    database.setIsArchived(fieldId, true);
                 }
                 queryAndLoadFields();
                 mAdapter.exitSelectionMode();
@@ -1065,6 +1064,8 @@ public class FieldEditorActivity extends ThemedActivity
             fieldList = database.getAllFieldObjects(); // Fetch data from the database
             mAdapter.submitFieldList(new ArrayList<>(fieldList)); // Use submitFieldList instead of submitList
 
+            database.deleteUnusedStudyGroups();
+
             new Handler(Looper.getMainLooper()).postDelayed(this::setupSearchBar, 100);
 
         } catch (Exception e) {
@@ -1122,9 +1123,9 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     private void showGroupAssignmentDialog(List<Integer> fieldIds) {
-        List<String> existingGroups = database.getDistinctGroups();
+        List<Pair<Integer, String>> existingGroups = database.getAllStudyGroups();
         String archivedVal = getString(R.string.group_archived_value);
-        boolean hasNonArchivedGroups = existingGroups.stream().anyMatch(group -> !group.equals(archivedVal));
+        boolean hasNonArchivedGroups = existingGroups.stream().anyMatch(group -> !group.component2().equals(archivedVal));
 
         // check if any of the selected fields are in a group
         boolean anyFieldsInGroup = false;
@@ -1136,7 +1137,7 @@ public class FieldEditorActivity extends ThemedActivity
                     .orElse(null);
 
             if (field != null) {
-                String groupName = field.getGroupName();
+                String groupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
                 if (groupName != null && !groupName.isEmpty()) {
                     anyFieldsInGroup = true;
                     break;
@@ -1178,7 +1179,7 @@ public class FieldEditorActivity extends ThemedActivity
                 showNewGroupDialog(fieldIds);
             } else if (selectedOption.equals(getString(R.string.group_remove))) {
                 for (Integer fieldId : fieldIds) {
-                    database.updateFieldGroup(fieldId, null);
+                    database.updateStudyGroup(fieldId, null);
                 }
                 queryAndLoadFields();
                 mAdapter.exitSelectionMode();
@@ -1196,20 +1197,20 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     private void showExistingGroupsDialog(List<Integer> fieldIds) {
-        List<String> existingGroups = database.getDistinctGroups();
+        List<Pair<Integer, String>> existingGroups = database.getAllStudyGroups();
 
         // filter out "Archived" group
-        existingGroups.removeIf(group -> group.equals(getString(R.string.group_archived_value)));
-
-        String[] options = existingGroups.toArray(new String[0]);
+        existingGroups.removeIf(group -> group.component2().equals(getString(R.string.group_archived_value)));
 
         new AlertDialog.Builder(this, R.style.AppAlertDialog)
                 .setTitle(R.string.group_existing)
-                .setItems(options, (dialog, which) -> {
-                    String selectedGroup = options[which];
+                .setItems(existingGroups.stream()
+                        .map(Pair::component2)
+                        .toArray(String[]::new), (dialog, which) -> {
+                    Integer groupId = existingGroups.get(which).component1();
 
                     for (Integer fieldId : fieldIds) {
-                        database.updateFieldGroup(fieldId, selectedGroup);
+                        database.updateStudyGroup(fieldId, groupId);
                     }
                     queryAndLoadFields();
                     mAdapter.exitSelectionMode();
@@ -1236,7 +1237,8 @@ public class FieldEditorActivity extends ThemedActivity
             String groupNameStr = groupName.getText().toString().trim();
             if (!groupNameStr.isEmpty()) { // add selected fields to group
                 for (Integer fieldId : fieldIds) {
-                    database.updateFieldGroup(fieldId, groupNameStr);
+                    Integer groupId = database.createOrGetStudyGroup(groupNameStr);
+                    database.updateStudyGroup(fieldId, groupId);
                 }
                 queryAndLoadFields();
                 mAdapter.exitSelectionMode();
@@ -1247,73 +1249,5 @@ public class FieldEditorActivity extends ThemedActivity
         }));
 
         dialog.show();
-    }
-    private void showFilterGroupsDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.menu_action_brapi_filter);
-
-        // Get all groups
-        List<String> allGroups = database.getDistinctGroups();
-        allGroups.add(0, getString(R.string.fields_ungrouped));
-
-        // Track which groups are visible
-        Set<String> visibleGroups = new HashSet<>(preferences.getStringSet("GeneralKeys.VISIBLE_FIELD_GROUPS", new HashSet<>()));
-        if (visibleGroups.isEmpty()) {
-            // Default: all groups visible
-            visibleGroups.addAll(allGroups);
-        }
-
-        boolean[] checkedItems = new boolean[allGroups.size()];
-        for (int i = 0; i < allGroups.size(); i++) {
-            checkedItems[i] = visibleGroups.contains(allGroups.get(i));
-        }
-
-        builder.setMultiChoiceItems(allGroups.toArray(new String[0]), checkedItems, (dialog, which, isChecked) -> {
-            String group = allGroups.get(which);
-            if (isChecked) {
-                visibleGroups.add(group);
-            } else {
-                visibleGroups.remove(group);
-            }
-        });
-
-        builder.setPositiveButton(getString(R.string.dialog_ok), (dialog, which) -> {
-            // Save visible groups preference
-            preferences.edit().putStringSet("GeneralKeys.VISIBLE_FIELD_GROUPS", visibleGroups).apply();
-
-            // Update displayed fields
-            applyGroupFilter();
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), null);
-
-        builder.show();
-    }
-
-    private void applyGroupFilter() {
-        // Get visible groups
-        Set<String> visibleGroups = preferences.getStringSet("GeneralKeys.VISIBLE_FIELD_GROUPS", null);
-
-        if (visibleGroups == null || visibleGroups.isEmpty()) {
-            // If no filter set, show all groups
-            mAdapter.submitFieldList(new ArrayList<>(fieldList));
-            return;
-        }
-
-        // Filter fields by visible groups
-        List<FieldObject> filteredFields = new ArrayList<>();
-        for (FieldObject field : fieldList) {
-            String group = field.getGroupName();
-            if (group == null) {
-                // Handle ungrouped fields
-                if (visibleGroups.contains(getString(R.string.fields_ungrouped))) {
-                    filteredFields.add(field);
-                }
-            } else if (visibleGroups.contains(group)) {
-                filteredFields.add(field);
-            }
-        }
-
-        mAdapter.submitFieldList(filteredFields);
     }
 }
