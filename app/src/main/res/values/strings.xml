@@ -358,8 +358,10 @@
     <string name="trait_observation_data">Data</string>
     <string name="trait_observation_count">%d observations</string>
     <string name="trait_not_chartable">This trait format cannot be visualized in a chart</string>
-    <string name="unknown_date">Unknown date</string>
-    <string name="traits_rename">Edit</string>
+    <string name="traits_options_copy_title">Copy Trait</string>
+    <string name="trait_name_empty_error">Trait name cannot be empty</string>
+    <string name="trait_name_exists_error">A trait with this name already exists</string>
+    <string name="trait_copied_success">Trait copied to %1$s</string>
 
     <!-- COLLECT -->
 

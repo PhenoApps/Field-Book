@@ -9,9 +9,11 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -420,6 +422,12 @@ class TraitDetailFragment : Fragment() {
                 android.R.id.home -> {
                     parentFragmentManager.popBackStack()
                 }
+                R.id.copy -> {
+                    traitObject?.let { trait ->
+                        showCopyTraitDialog(trait)
+                    }
+                    true
+                }
                 R.id.edit -> {
                     traitObject?.let { trait ->
                         (activity as? TraitEditorActivity)?.showTraitDialog(trait)
@@ -448,6 +456,58 @@ class TraitDetailFragment : Fragment() {
 
             true
         }  
+    }
+
+      // Copy trait name
+    private fun copyTraitName(traitName: String): String {
+        var baseName = traitName
+        if (baseName.contains("-Copy")) {
+            baseName = baseName.substring(0, baseName.indexOf("-Copy"))
+        }
+        
+        var newTraitName = ""
+        val allTraits = database.getAllTraitNames()
+        
+        for (i in 0 until allTraits.size) {
+            newTraitName = baseName + "-Copy-(" + i + ")"
+            if (!allTraits.contains(newTraitName)) {
+                return newTraitName
+            }
+        }
+        
+        return "" // not come here
+    }
+
+    private fun showCopyTraitDialog(trait: TraitObject) {
+        val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+        builder.setTitle(getString(R.string.traits_options_copy_title))
+        
+        // Set up the input field
+        val input = EditText(requireContext())
+        val suggestedName = copyTraitName(trait.name)
+        input.setText(suggestedName)
+        builder.setView(input)
+        
+        builder.setPositiveButton(getString(R.string.dialog_save)) { _, _ ->
+            CoroutineScope(Dispatchers.IO).launch {
+                val pos = database.getMaxPositionFromTraits() + 1
+                val newTraitName = input.text.toString().trim()
+                
+                trait.name = newTraitName
+                trait.visible = true
+                trait.realPosition = pos
+                
+                database.insertTraits(trait)
+                
+                withContext(Dispatchers.Main) {
+                    (activity as? TraitEditorActivity)?.queryAndLoadTraits()
+                    CollectActivity.reloadData = true
+                }
+            }
+        }
+        
+        builder.setNegativeButton(getString(R.string.dialog_cancel), null)
+        builder.show()
     }
     
 }
