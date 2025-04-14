@@ -1,5 +1,8 @@
 package com.fieldbook.tracker.adapters
 
+import android.content.Context
+import android.util.DisplayMetrics
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -73,24 +76,32 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
 
     }
 
+    private val defaultMaxSizePx: Int by lazy {
+        val context = traitBoxView.context
+        val displayMetrics = context.resources.displayMetrics
+        val screenWidthDp = displayMetrics.widthPixels / displayMetrics.density
+        val defaultMaxSizeDp = if (screenWidthDp >= 600) { // tablet
+            context.resources.getDimension(R.dimen.fb_trait_status_bar_icon_default_max_size_tablet_screen)
+        } else { // small screens
+            context.resources.getDimension(R.dimen.fb_trait_status_bar_icon_default_max_size)
+        }
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            defaultMaxSizeDp,
+            context.resources.displayMetrics
+        ).toInt() // in px
+    }
+
     // calculate item size and update the view
     fun calculateAndSetItemSize(viewHolder: ViewHolder) {
         val recyclerView = traitBoxView.getRecyclerView() ?: return
         recyclerView.post {
             val itemCount = itemCount
-            val context = viewHolder.imageView.context
 
             val parentWidth = recyclerView.width
 
             val availableWidth = parentWidth - recyclerView.paddingLeft - recyclerView.paddingRight
             val calculatedSize = availableWidth / itemCount
-
-            val defaultMaxSizeDp = context.resources.getDimension(R.dimen.fb_trait_status_bar_icon_default_max_size)
-            val defaultMaxSizePx = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                defaultMaxSizeDp,
-                traitBoxView.context.resources.displayMetrics
-            ).toInt() // in px
 
             val itemSize = minOf(calculatedSize, defaultMaxSizePx)
 
@@ -99,7 +110,6 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
                 height = itemSize
             }
         }
-
     }
 
     fun setCurrentSelection(newSelection: Int) {
