@@ -236,9 +236,6 @@
 
     <!-- TRAITS -->
 
-    <!--Detail-->
-    <string name="trait_options_title">Options</string>
-
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sort Traits</string>
     <string name="traits_sort_name">Name</string>
@@ -353,6 +350,9 @@
     <string name="trait_details">Details: %s</string>
     <string name="trait_visible">Visible</string>
     <string name="trait_hidden">Hidden</string>
+    <string name="trait_options_title">Options</string>
+    <string name="trait_resource_chip_title">Set resource file</string>
+    <string name="trait_brapi_label_chip_title">Swap name field</string>
     <string name="trait_observation_data">Data</string>
     <string name="trait_observation_count">%d observations</string>
     <string name="trait_not_chartable">This trait format cannot be visualized in a chart</string>

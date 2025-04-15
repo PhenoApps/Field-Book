@@ -63,6 +63,8 @@ class TraitDetailFragment : Fragment() {
     private lateinit var sourceChip: Chip
     private lateinit var formatChip: Chip
     private lateinit var visibilityChip: Chip
+    private lateinit var resourceChip: Chip
+    private lateinit var brapiLabelChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: TraitDetailAdapter? = null
     private lateinit var fieldCountChip: Chip
@@ -83,6 +85,8 @@ class TraitDetailFragment : Fragment() {
         sourceChip = rootView.findViewById(R.id.sourceChip)
         formatChip = rootView.findViewById(R.id.formatChip)
         visibilityChip = rootView.findViewById(R.id.visibilityChip)
+        resourceChip = rootView.findViewById(R.id.resourceChip)
+        brapiLabelChip = rootView.findViewById(R.id.brapiLabelChip)
 
         // Initialize data card views
         fieldCountChip = rootView.findViewById(R.id.fieldCountChip)
@@ -102,6 +106,13 @@ class TraitDetailFragment : Fragment() {
             R.id.overview_expand_collapse_icon,
             GeneralKeys.TRAIT_DETAIL_OVERVIEW_COLLAPSED
         )
+
+        setupCollapsibleSection(
+            R.id.options_collapsible_header,
+            R.id.options_collapsible_content,
+            R.id.options_expand_collapse_icon,
+            GeneralKeys.TRAIT_DETAIL_OPTIONS_COLLAPSED
+        )
         
         setupCollapsibleSection(
             R.id.data_collapsible_header,
@@ -109,6 +120,14 @@ class TraitDetailFragment : Fragment() {
             R.id.data_expand_collapse_icon,
             GeneralKeys.TRAIT_DETAIL_DATA_COLLAPSED
         )
+
+        resourceChip.setOnClickListener {
+           // Set resource file
+        }
+
+        brapiLabelChip.setOnClickListener {
+           // Set brapi label behavior for this trait
+        }
 
         Log.d(TAG, "onCreateView End")
         return rootView
@@ -228,6 +247,9 @@ class TraitDetailFragment : Fragment() {
         
         // Update visibility chip
         updateVisibilityChip(trait)
+
+        resourceChip.text = getString(R.string.trait_resource_chip_title)
+        brapiLabelChip.text = getString(R.string.trait_brapi_label_chip_title)
     }
     
     private fun updateVisibilityChip(trait: TraitObject) {

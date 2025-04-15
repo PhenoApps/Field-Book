@@ -217,24 +217,26 @@
                             android:id="@+id/resourceChip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:clickable="false"
-                            android:focusable="false"
-                            app:chipIcon="@drawable/ic_table_arrow_right"
+                            app:chipIcon="@drawable/ic_tb_folder"
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+                            app:chipBackgroundColor="?attr/selectableChipBackground"
+                            app:chipStartPadding="6dp"
+                            app:chipStrokeColor="?attr/selectableChipStroke"
+                            app:chipStrokeWidth="2dp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/brapiLabelChip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:clickable="false"
-                            android:focusable="false"
-                            app:chipIconSize="24dp"
+                            app:chipIcon="@drawable/ic_swap_horizontal"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+                            app:chipBackgroundColor="?attr/selectableChipBackground"
+                            app:chipStartPadding="6dp"
+                            app:chipStrokeColor="?attr/selectableChipStroke"
+                            app:chipStrokeWidth="2dp" />
 
                     </com.google.android.material.chip.ChipGroup>
 
