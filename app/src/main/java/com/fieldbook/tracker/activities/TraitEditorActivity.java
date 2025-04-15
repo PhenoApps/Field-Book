@@ -928,28 +928,11 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     // Delete trait
     public void deleteTrait(TraitObject trait) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+        preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(trait.getId()))).apply();
+        getDatabase().deleteTrait(trait.getId());
+        queryAndLoadTraits();
 
-        builder.setTitle(getString(R.string.traits_options_delete_title));
-        builder.setMessage(getString(R.string.traits_warning_delete));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-
-                preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(trait.getId()))).apply();
-
-                getDatabase().deleteTrait(trait.getId());
-
-                queryAndLoadTraits();
-
-                CollectActivity.reloadData = true;
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), (dialog, which) -> dialog.dismiss());
-
-        AlertDialog alert = builder.create();
-        alert.show();
+        CollectActivity.reloadData = true;
     }
 
     private void refreshTraitDetailFragment() {
