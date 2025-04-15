@@ -31,7 +31,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
-import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -919,44 +918,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         itemTouchHelper.startDrag(item);
     }
 
-    /**
-     * Interface implementation to delegate menu options: copy, delete, edit
-     * @param v view to anchor popup menu
-     * @param trait trait object to handle
-     */
-    @Override
-    public void onMenuItemClicked(View v, TraitObject trait) {
-
-        Context wrapper = new ContextThemeWrapper(this, R.style.PopupMenuStyle);
-        PopupMenu popupMenu = new PopupMenu(wrapper, v);
-
-        //Inflating the Popup using xml file
-        popupMenu.getMenuInflater().inflate(R.menu.menu_trait_list_item, popupMenu.getMenu());
-
-        //registering popup with OnMenuItemClickListener
-        popupMenu.setOnMenuItemClickListener((item) -> {
-
-                if (item.getTitle().equals(getString(R.string.traits_options_copy))) {
-
-                    copyTrait(trait);
-
-                } else if (item.getTitle().equals(getString(R.string.traits_options_delete))) {
-
-                    deleteTrait(trait);
-
-                } else if (item.getTitle().equals(getString(R.string.traits_options_edit))) {
-
-                    showTraitDialog(trait);
-
-                }
-
-                return false;
-            }
-        );
-
-        popupMenu.show(); //showing popup menu
-    }
-
     public void showTraitDialog(@Nullable TraitObject traitObject) {
         queryAndLoadTraits();
         NewTraitDialog traitDialog = new NewTraitDialog(this);
@@ -989,42 +950,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         AlertDialog alert = builder.create();
         alert.show();
-    }
-
-    // Copy trait name
-    private String copyTraitName(String traitName) {
-        if (traitName.contains("-Copy")) {
-            traitName = traitName.substring(0, traitName.indexOf("-Copy"));
-        }
-
-        String newTraitName = "";
-
-        String[] allTraits = getDatabase().getAllTraitNames();
-
-        for (int i = 0; i < allTraits.length; i++) {
-            newTraitName = traitName + "-Copy-(" + i + ")";
-            if (!Arrays.asList(allTraits).contains(newTraitName)) {
-                return newTraitName;
-            }
-        }
-        return "";    // not come here
-    }
-
-    // Copy trait to new trait
-    private void copyTrait(TraitObject trait) {
-
-        int pos = getDatabase().getMaxPositionFromTraits() + 1;
-
-        final String newTraitName = copyTraitName(trait.getName());
-
-        trait.setName(newTraitName);
-        trait.setVisible(true);
-        trait.setRealPosition(pos);
-
-        getDatabase().insertTraits(trait);
-        queryAndLoadTraits();
-
-        CollectActivity.reloadData = true;
     }
 
     private void refreshTraitDetailFragment() {

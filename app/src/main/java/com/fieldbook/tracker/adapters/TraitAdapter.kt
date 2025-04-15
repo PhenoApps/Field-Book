@@ -27,7 +27,6 @@ class TraitAdapter(private val sorter: TraitSorter):
     interface TraitSorter {
         fun onDrag(item: TraitAdapter.ViewHolder)
         fun getDatabase(): DataHelper
-        fun onMenuItemClicked(v: View, trait: TraitObject)
     }
 
     // Add OnTraitSelectedListener interface
@@ -48,7 +47,6 @@ class TraitAdapter(private val sorter: TraitSorter):
         val formatImageView = view.findViewById<ImageView>(R.id.traitType)
         val visibleCheckBox = view.findViewById<CheckBox>(R.id.visible)
         val dragSortImageView = view.findViewById<ImageView>(R.id.dragSort)
-        val menuImageView = view.findViewById<ImageView>(R.id.popupMenu)
 
         init {
 
@@ -74,13 +72,6 @@ class TraitAdapter(private val sorter: TraitSorter):
                 }
             }
 
-            menuImageView.setOnClickListener { v ->
-
-                val trait = view.tag as TraitObject
-
-                sorter.onMenuItemClicked(v, trait)
-
-            }
         }
     }
 

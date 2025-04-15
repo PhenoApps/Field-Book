@@ -20,26 +20,10 @@
         android:src="@drawable/ic_reorder" />
 
     <View
-        android:id="@+id/spacer4"
-        android:layout_width="15dp"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/dragSort" />
-
-    <ImageView
-        android:id="@+id/popupMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/spacer4"
-        android:paddingLeft="5dp"
-        android:paddingTop="3dp"
-        android:src="@drawable/ic_more_vert" />
-
-    <View
         android:id="@+id/spacer1"
         android:layout_width="15dp"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/popupMenu" />
+        android:layout_toRightOf="@+id/dragSort" />
 
     <CheckBox
         android:id="@+id/visible"
