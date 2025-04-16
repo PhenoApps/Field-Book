@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Trait indicator icons in Collect now resize as expected
 - Device dark mode no longer affects Field Book UI
 - Traits with quotes now export correctly in table format
 
