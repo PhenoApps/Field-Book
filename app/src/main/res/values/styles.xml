@@ -7,7 +7,7 @@
     <style name="AppTheme" parent="BaseAppTheme"/>
 
     <!-- all other themes inherit from the default one, but overwrite the colors -->
-    <style name="BaseAppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+    <style name="BaseAppTheme" parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
 
         <item name="android:windowActivityTransitions">false</item>
         <item name="windowNoTitle">true</item>
