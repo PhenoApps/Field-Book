@@ -1,8 +1,5 @@
 package com.fieldbook.tracker.adapters
 
-import android.content.Context
-import android.util.DisplayMetrics
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -78,13 +75,7 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
 
     private val defaultMaxSizePx: Int by lazy {
         val context = traitBoxView.context
-        val displayMetrics = context.resources.displayMetrics
-        val screenWidthDp = displayMetrics.widthPixels / displayMetrics.density
-        val defaultMaxSizeDp = if (screenWidthDp >= 600) { // tablet
-            context.resources.getDimension(R.dimen.fb_trait_status_bar_icon_default_max_size_tablet_screen)
-        } else { // small screens
-            context.resources.getDimension(R.dimen.fb_trait_status_bar_icon_default_max_size)
-        }
+        val defaultMaxSizeDp = context.resources.getDimension(R.dimen.fb_trait_status_bar_icon_default_max_size)
         TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             defaultMaxSizeDp,
