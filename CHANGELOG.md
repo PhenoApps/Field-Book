@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Traits with quotes now export correctly in table format
 
 ## [v6.2.1] - 2025-04-09
 
