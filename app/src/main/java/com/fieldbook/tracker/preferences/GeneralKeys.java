@@ -181,6 +181,8 @@ public class GeneralKeys {
 
     @NotNull
     public static final String TRAITS_LIST_SORT_ORDER = "com.fieldbook.tracker.traits_list_sort_order";
+
+    public static final String FIELD_GROUPING_ENABLED = "com.fieldbook.tracker.field_grouping_enabled";
     
     // app intro
     public static final String LOAD_SAMPLE_DATA = "com.fieldbook.tracker.load_sample_data";

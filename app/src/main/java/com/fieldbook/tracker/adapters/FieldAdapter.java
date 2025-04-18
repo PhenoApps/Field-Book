@@ -406,30 +406,37 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
      */
     private List<FieldViewItem> buildFieldsList() {
         List<FieldViewItem> arrayList = new ArrayList<>();
-        Map<String, List<FieldObject>> groupedFields = getGroupedFields(fullFieldList);
+        boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
 
-        String archivedVal = context.getString(R.string.group_archived_value);
+        if (groupingEnabled) {
+            Map<String, List<FieldObject>> groupedFields = getGroupedFields(fullFieldList);
 
-        for (Map.Entry<String, List<FieldObject>> entry : groupedFields.entrySet()) {
-            String groupName = entry.getKey();
-            List<FieldObject> groupFields = entry.getValue();
+            for (Map.Entry<String, List<FieldObject>> entry : groupedFields.entrySet()) {
+                String groupName = entry.getKey();
+                List<FieldObject> groupFields = entry.getValue();
 
-            if (!groupFields.isEmpty()) {
-                // group header
-                FieldViewItem header = new FieldViewItem(groupName, false);
-                arrayList.add(header);
+                if (!groupFields.isEmpty()) {
+                    // group header
+                    FieldViewItem header = new FieldViewItem(groupName, false);
+                    arrayList.add(header);
 
-                // fields in this group
-                for (FieldObject field : groupFields) {
-                    arrayList.add(new FieldViewItem(field));
+                    // fields in this group
+                    for (FieldObject field : groupFields) {
+                        arrayList.add(new FieldViewItem(field));
+                    }
                 }
             }
-        }
 
-        boolean hasArchivedFields = fullFieldList.stream().anyMatch(FieldObject::getIsArchived);
-        if (hasArchivedFields) { // add archived list item at the bottom
-            FieldViewItem archiveHeader = new FieldViewItem(archivedVal, true);
-            arrayList.add(archiveHeader);
+            boolean hasArchivedFields = fullFieldList.stream().anyMatch(FieldObject::getIsArchived);
+            if (hasArchivedFields) { // add archived list item at the bottom
+                String archivedVal = context.getString(R.string.group_archived_value);
+                FieldViewItem archiveHeader = new FieldViewItem(archivedVal, true);
+                arrayList.add(archiveHeader);
+            }
+        } else {
+            for (FieldObject field : fullFieldList) {
+                arrayList.add(new FieldViewItem(field));
+            }
         }
 
         return arrayList;

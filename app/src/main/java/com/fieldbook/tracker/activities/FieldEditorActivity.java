@@ -526,6 +526,8 @@ public class FieldEditorActivity extends ThemedActivity
         systemMenu = menu;
         systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
 
+        updateGroupingIcon(menu.findItem(R.id.toggle_group_visibility));
+
         return true;
     }
 
@@ -576,8 +578,25 @@ public class FieldEditorActivity extends ThemedActivity
             }
         } else if (itemId == R.id.sortFields) {
             showFieldsSortDialog();
+        } else if (itemId == R.id.toggle_group_visibility) {
+            boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
+            preferences.edit().putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, !groupingEnabled).apply();
+
+            if (systemMenu != null) {
+                updateGroupingIcon(systemMenu.findItem(R.id.toggle_group_visibility));
+            }
+
+            queryAndLoadFields();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateGroupingIcon(MenuItem item) {
+        if (item != null) {
+            boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
+            item.setIcon(groupingEnabled ? R.drawable.ic_eye : R.drawable.ic_eye_off);
+        }
     }
 
     private void showFieldsSortDialog() {
@@ -1062,7 +1081,7 @@ public class FieldEditorActivity extends ThemedActivity
     public void queryAndLoadFields() {
         try {
             fieldList = database.getAllFieldObjects(); // Fetch data from the database
-            mAdapter.submitFieldList(new ArrayList<>(fieldList)); // Use submitFieldList instead of submitList
+            mAdapter.submitFieldList(new ArrayList<>(fieldList));
 
             database.deleteUnusedStudyGroups();
 

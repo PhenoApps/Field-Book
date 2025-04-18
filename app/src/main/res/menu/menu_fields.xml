@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
     <item
-        android:id="@+id/menu_group_fields"
-        android:icon="@drawable/ic_tb_help"
+        android:id="@+id/toggle_group_visibility"
+        android:icon="@drawable/ic_eye"
         android:showAsAction="always"
-        android:title="@string/tutorial_dialog_title" />
+        android:title="@string/menu_groups_toggle" />
     <item
         android:id="@+id/help"
         android:icon="@drawable/ic_tb_help"

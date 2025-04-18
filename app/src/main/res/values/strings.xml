@@ -93,6 +93,7 @@
     <!-- Changelog -->
     <string name="changelog_title">Changelog</string>
 
+    <!--  Field Grouping  -->
     <string name="group_archived_value">Archived</string>
     <string name="fields_ungrouped">Ungrouped</string>
     <string name="dialog_group_options">Grouping Options</string>
@@ -108,6 +109,7 @@
     <string name="menu_group">Group</string>
     <string name="menu_archive">Archive</string>
 
+    <string name="menu_groups_toggle">Toggle Groups Visibility</string>
     <string name="archived_fields">Archived Fields</string>
     <string name="menu_unarchive">Remove from archive</string>
 
