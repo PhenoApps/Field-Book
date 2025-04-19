@@ -1081,7 +1081,7 @@ public class FieldEditorActivity extends ThemedActivity
     public void queryAndLoadFields() {
         try {
             fieldList = database.getAllFieldObjects(); // Fetch data from the database
-            mAdapter.submitFieldList(new ArrayList<>(fieldList));
+            mAdapter.resetFieldsList(new ArrayList<>(fieldList));
 
             database.deleteUnusedStudyGroups();
 

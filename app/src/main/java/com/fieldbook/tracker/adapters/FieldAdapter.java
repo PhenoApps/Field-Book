@@ -370,17 +370,21 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         submitList(currentList);
     }
 
-    public void submitFieldList(List<FieldObject> fields) {
+    public void resetFieldsList(List<FieldObject> fields) {
         fullFieldList.clear();
         if (fields != null) {
             fullFieldList.addAll(fields);
         }
 
+        submitFieldsList(fullFieldList);
+    }
+
+    private void submitFieldsList(List<FieldObject> fields) {
         List<FieldViewItem> arrayList;
         if (isArchivedFieldsActivity) {
-            arrayList = buildArchivedFieldsList();
+            arrayList = buildArchivedFieldsList(fields);
         } else {
-            arrayList = buildFieldsList();
+            arrayList = buildFieldsList(fields);
         }
 
         submitList(arrayList);
@@ -389,9 +393,9 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     /**
      * Builds a list of field items for the ArchivedFieldsActivity
      */
-    private List<FieldViewItem> buildArchivedFieldsList() {
+    private List<FieldViewItem> buildArchivedFieldsList(List<FieldObject> fieldsList) {
         List<FieldViewItem> items = new ArrayList<>();
-        for (FieldObject field : fullFieldList) {
+        for (FieldObject field : fieldsList) {
             if (field.getIsArchived()) {
                 items.add(new FieldViewItem(field));
             }
@@ -404,12 +408,12 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
      * Groups fields by their group name and includes group headers
      * Attaches archived list item at the end
      */
-    private List<FieldViewItem> buildFieldsList() {
+    private List<FieldViewItem> buildFieldsList(List<FieldObject> fieldsList) {
         List<FieldViewItem> arrayList = new ArrayList<>();
         boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
 
         if (groupingEnabled) {
-            Map<String, List<FieldObject>> groupedFields = getGroupedFields(fullFieldList);
+            Map<String, List<FieldObject>> groupedFields = getGroupedFields(fieldsList);
 
             for (Map.Entry<String, List<FieldObject>> entry : groupedFields.entrySet()) {
                 String groupName = entry.getKey();
@@ -427,14 +431,14 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                 }
             }
 
-            boolean hasArchivedFields = fullFieldList.stream().anyMatch(FieldObject::getIsArchived);
+            boolean hasArchivedFields = fieldsList.stream().anyMatch(FieldObject::getIsArchived);
             if (hasArchivedFields) { // add archived list item at the bottom
                 String archivedVal = context.getString(R.string.group_archived_value);
                 FieldViewItem archiveHeader = new FieldViewItem(archivedVal, true);
                 arrayList.add(archiveHeader);
             }
         } else {
-            for (FieldObject field : fullFieldList) {
+            for (FieldObject field : fieldsList) {
                 arrayList.add(new FieldViewItem(field));
             }
         }
@@ -478,7 +482,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                 filteredFields.remove(field);
             }
         }
-        submitFieldList(filteredFields);
+        submitFieldsList(filteredFields);
     }
 
     public static class FieldViewItem {

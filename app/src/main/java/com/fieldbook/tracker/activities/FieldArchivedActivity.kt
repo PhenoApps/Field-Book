@@ -253,7 +253,7 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
                 }
             }
 
-            mAdapter.submitFieldList(ArrayList(fieldList))
+            mAdapter.resetFieldsList(ArrayList(fieldList))
 
             if (fieldList.isEmpty()) {
                 // return to FieldEditorActivity
