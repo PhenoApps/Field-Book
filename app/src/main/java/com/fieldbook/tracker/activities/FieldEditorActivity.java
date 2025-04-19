@@ -52,6 +52,7 @@ import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.StudyGroupDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialogFragment;
 import com.fieldbook.tracker.dialogs.FieldSortDialogFragment;
@@ -92,6 +93,7 @@ import java.util.stream.Collectors;
 import java.util.StringJoiner;
 import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
+import kotlin.Pair;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -158,7 +160,7 @@ public class FieldEditorActivity extends ThemedActivity
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         // Initialize adapter
-        mAdapter = new FieldAdapter(this, fieldSwitcher, this);
+        mAdapter = new FieldAdapter(this, fieldSwitcher, this, false);
         mAdapter.setOnFieldSelectedListener(new FieldAdapter.OnFieldSelectedListener() {
             @Override
             public void onFieldSelected(int fieldId) {
@@ -271,11 +273,16 @@ public class FieldEditorActivity extends ThemedActivity
                 mAdapter.exitSelectionMode();
                 mode.finish();
                 return true;
-//            } else if (itemId == R.id.menu_archive) {
-//                Toast.makeText(getApplicationContext(), "Archive not yet implemented", Toast.LENGTH_SHORT).show();
-//                mAdapter.exitSelectionMode();
-//                mode.finish();
-//                return true;
+            } else if (itemId == R.id.menu_group_fields) {
+                showGroupAssignmentDialog(mAdapter.getSelectedItems());
+                return true;
+            } else if (itemId == R.id.menu_archive_fields) {
+                for (Integer fieldId : mAdapter.getSelectedItems()) {
+                    database.setIsArchived(fieldId, true);
+                }
+                queryAndLoadFields();
+                mAdapter.exitSelectionMode();
+                return true;
             } else if (itemId == R.id.menu_delete) {
                 showDeleteConfirmationDialog(mAdapter.getSelectedItems(), false);
                 return true;
@@ -519,6 +526,8 @@ public class FieldEditorActivity extends ThemedActivity
         systemMenu = menu;
         systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
 
+        updateGroupingIcon(menu.findItem(R.id.toggle_group_visibility));
+
         return true;
     }
 
@@ -569,8 +578,25 @@ public class FieldEditorActivity extends ThemedActivity
             }
         } else if (itemId == R.id.sortFields) {
             showFieldsSortDialog();
+        } else if (itemId == R.id.toggle_group_visibility) {
+            boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
+            preferences.edit().putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, !groupingEnabled).apply();
+
+            if (systemMenu != null) {
+                updateGroupingIcon(systemMenu.findItem(R.id.toggle_group_visibility));
+            }
+
+            queryAndLoadFields();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateGroupingIcon(MenuItem item) {
+        if (item != null) {
+            boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
+            item.setIcon(groupingEnabled ? R.drawable.ic_eye : R.drawable.ic_eye_off);
+        }
     }
 
     private void showFieldsSortDialog() {
@@ -1055,8 +1081,9 @@ public class FieldEditorActivity extends ThemedActivity
     public void queryAndLoadFields() {
         try {
             fieldList = database.getAllFieldObjects(); // Fetch data from the database
-            mAdapter.submitList(new ArrayList<>(fieldList), () -> recyclerView.scrollToPosition(0));
-            mAdapter.notifyDataSetChanged();
+            mAdapter.resetFieldsList(new ArrayList<>(fieldList));
+
+            database.deleteUnusedStudyGroups();
 
             new Handler(Looper.getMainLooper()).postDelayed(this::setupSearchBar, 100);
 
@@ -1112,5 +1139,134 @@ public class FieldEditorActivity extends ThemedActivity
             searchBar.setVisibility(View.GONE);
 
         }
+    }
+
+    private void showGroupAssignmentDialog(List<Integer> fieldIds) {
+        List<Pair<Integer, String>> existingGroups = database.getAllStudyGroups();
+        String archivedVal = getString(R.string.group_archived_value);
+        boolean hasNonArchivedGroups = existingGroups.stream().anyMatch(group -> !group.component2().equals(archivedVal));
+
+        // check if any of the selected fields are in a group
+        boolean anyFieldsInGroup = false;
+
+        for (Integer fieldId : fieldIds) {
+            FieldObject field = fieldList.stream()
+                    .filter(f -> f.getExp_id() == fieldId)
+                    .findFirst()
+                    .orElse(null);
+
+            if (field != null) {
+                String groupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
+                if (groupName != null && !groupName.isEmpty()) {
+                    anyFieldsInGroup = true;
+                    break;
+                }
+            }
+        }
+
+        List<String> optionStrings = new ArrayList<>();
+        List<Integer> optionIcon = new ArrayList<>();
+
+        // "existing group" option
+        if (hasNonArchivedGroups) {
+            optionStrings.add(getString(R.string.group_existing));
+            optionIcon.add(R.drawable.ic_existing_group);
+        }
+
+        // "new group" option
+        optionStrings.add(getString(R.string.group_new));
+        optionIcon.add(R.drawable.ic_new_group);
+
+        // "remove from group" option
+        if (anyFieldsInGroup) {
+            optionStrings.add(getString(R.string.group_remove));
+            optionIcon.add(R.drawable.ic_ungroup);
+        }
+
+        String[] options = optionStrings.toArray(new String[0]);
+        int[] icons = new int[optionIcon.size()];
+        for (int i = 0; i < optionIcon.size(); i++) {
+            icons[i] = optionIcon.get(i);
+        }
+
+        AdapterView.OnItemClickListener onItemClickListener = (parent, view, position, id) -> {
+            String selectedOption = options[position];
+
+            if (selectedOption.equals(getString(R.string.group_existing))) {
+                showExistingGroupsDialog(fieldIds);
+            } else if (selectedOption.equals(getString(R.string.group_new))) {
+                showNewGroupDialog(fieldIds);
+            } else if (selectedOption.equals(getString(R.string.group_remove))) {
+                for (Integer fieldId : fieldIds) {
+                    database.updateStudyGroup(fieldId, null);
+                }
+                queryAndLoadFields();
+                mAdapter.exitSelectionMode();
+            }
+        };
+
+        ListAddDialog dialog = new ListAddDialog(
+                this,
+                getString(R.string.dialog_group_options),
+                options,
+                icons,
+                onItemClickListener
+        );
+        dialog.show(getSupportFragmentManager(), "ListAddDialog");
+    }
+
+    private void showExistingGroupsDialog(List<Integer> fieldIds) {
+        List<Pair<Integer, String>> existingGroups = database.getAllStudyGroups();
+
+        // filter out "Archived" group
+        existingGroups.removeIf(group -> group.component2().equals(getString(R.string.group_archived_value)));
+
+        new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                .setTitle(R.string.group_existing)
+                .setItems(existingGroups.stream()
+                        .map(Pair::component2)
+                        .toArray(String[]::new), (dialog, which) -> {
+                    Integer groupId = existingGroups.get(which).component1();
+
+                    for (Integer fieldId : fieldIds) {
+                        database.updateStudyGroup(fieldId, groupId);
+                    }
+                    queryAndLoadFields();
+                    mAdapter.exitSelectionMode();
+                })
+                .setNegativeButton(R.string.dialog_cancel, (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private void showNewGroupDialog(List<Integer> fieldIds) {
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.dialog_group_name, null);
+        final EditText groupName = layout.findViewById(R.id.groupName);
+
+        groupName.clearFocus();
+
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                .setTitle(R.string.create_new_group)
+                .setView(layout)
+                .setPositiveButton(getString(R.string.dialog_ok), null)
+                .setNegativeButton(getString(R.string.dialog_cancel), (d, i) -> d.dismiss())
+                .create();
+
+        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String groupNameStr = groupName.getText().toString().trim();
+            if (!groupNameStr.isEmpty()) { // add selected fields to group
+                for (Integer fieldId : fieldIds) {
+                    Integer groupId = database.createOrGetStudyGroup(groupNameStr);
+                    database.updateStudyGroup(fieldId, groupId);
+                }
+                queryAndLoadFields();
+                mAdapter.exitSelectionMode();
+                dialog.dismiss();
+            } else {
+                groupName.setError(getString(R.string.dialog_group_name_warning));
+            }
+        }));
+
+        dialog.show();
     }
 }
