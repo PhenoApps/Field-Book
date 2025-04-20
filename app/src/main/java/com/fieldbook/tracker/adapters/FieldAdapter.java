@@ -169,6 +169,18 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                     toggleGroupExpansion(position);
                 }
             });
+
+            itemView.setOnLongClickListener(v -> {
+                int position = getBindingAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    String groupNameTxt = groupName.getText().toString();
+                    if (!groupNameTxt.isEmpty()) {
+                        Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(groupNameTxt);
+                        selectAllFieldsInGroup(groupId);
+                    }
+                }
+                return false;
+            });
         }
     }
 
@@ -369,6 +381,21 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         }
 
         submitList(currentList);
+    }
+    private void selectAllFieldsInGroup(Integer groupId) {
+        for (FieldObject field : fullFieldList) {
+            if (!field.getIsArchived()) { // make we are not selecting archived fields
+                if ((groupId == null && field.getGroupId() == null) ||
+                        (groupId != null && groupId.equals(field.getGroupId()))) {
+                    selectedIds.add(field.getExp_id());
+                }
+            }
+        }
+
+        notifyDataSetChanged();
+        if (callback != null) {
+            callback.onItemSelected(selectedIds.size());
+        }
     }
 
     public void resetFieldsList(List<FieldObject> fields) {

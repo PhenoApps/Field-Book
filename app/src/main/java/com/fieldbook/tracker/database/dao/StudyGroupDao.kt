@@ -34,6 +34,7 @@ class StudyGroupDao {
 
         /**
          * Get a group's ID by its name
+         * Ungrouped fields will return null
          */
         fun getStudyGroupIdByName(groupName: String?): Int? = withDatabase { db ->
             if (groupName == null) return@withDatabase null
