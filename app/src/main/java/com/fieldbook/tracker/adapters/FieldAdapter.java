@@ -25,6 +25,7 @@ import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -415,6 +416,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         if (groupingEnabled) {
             Map<String, List<FieldObject>> groupedFields = getGroupedFields(fieldsList);
 
+            // add group-field entries
             for (Map.Entry<String, List<FieldObject>> entry : groupedFields.entrySet()) {
                 String groupName = entry.getKey();
                 List<FieldObject> groupFields = entry.getValue();
@@ -471,7 +473,30 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             }
         }
 
-        return groupedFields;
+        String currentSortOrder = preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import");
+        boolean isSortingByName = "study_alias".equals(currentSortOrder);
+
+        return isSortingByName ? sortGroupsByName(groupedFields) : groupedFields;
+    }
+
+    /**
+     * Returns the grouped fields in sorted order
+     */
+    private Map<String, List<FieldObject>> sortGroupsByName(Map<String, List<FieldObject>> groupedFields) {
+        Map<String, List<FieldObject>> sortedGroups = new LinkedHashMap<>();
+
+        // add the ungrouped fields at the beginning
+        sortedGroups.put(null, groupedFields.remove(null));
+
+        // add all other groups in sorted order
+        List<String> groupNames = new ArrayList<>(groupedFields.keySet());
+        Collections.sort(groupNames, String::compareToIgnoreCase);
+
+        for (String name : groupNames) {
+            sortedGroups.put(name, groupedFields.get(name));
+        }
+
+        return sortedGroups;
     }
 
     public void setTextFilter(String filter) {
