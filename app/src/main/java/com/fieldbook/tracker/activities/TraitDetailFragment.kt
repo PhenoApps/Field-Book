@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities
 
 import android.app.AlertDialog
 import android.content.SharedPreferences
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -14,6 +15,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -36,6 +38,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import com.fieldbook.tracker.charts.HorizontalBarChartHelper
 import com.fieldbook.tracker.charts.HistogramChartHelper
 import com.fieldbook.tracker.charts.PieChartHelper
@@ -65,6 +70,12 @@ class TraitDetailFragment : Fragment() {
     private lateinit var visibilityChip: Chip
     private lateinit var resourceChip: Chip
     private lateinit var brapiLabelChip: Chip
+
+    private lateinit var dateFormatContainer: LinearLayout
+    private lateinit var dateFormatText: TextView
+    private lateinit var dayOfYearFormatText: TextView
+    private lateinit var dateFormatSwitch: SwitchCompat
+
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: TraitDetailAdapter? = null
     private lateinit var fieldCountChip: Chip
@@ -87,6 +98,11 @@ class TraitDetailFragment : Fragment() {
         visibilityChip = rootView.findViewById(R.id.visibilityChip)
         resourceChip = rootView.findViewById(R.id.resourceChip)
         brapiLabelChip = rootView.findViewById(R.id.brapiLabelChip)
+
+        dateFormatContainer = rootView.findViewById(R.id.dateFormatContainer)
+        dateFormatText = rootView.findViewById(R.id.dateFormatText)
+        dayOfYearFormatText = rootView.findViewById(R.id.dayOfYearFormatText)
+        dateFormatSwitch = rootView.findViewById(R.id.dateFormatSwitch)
 
         // Initialize data card views
         fieldCountChip = rootView.findViewById(R.id.fieldCountChip)
@@ -127,6 +143,11 @@ class TraitDetailFragment : Fragment() {
 
         brapiLabelChip.setOnClickListener {
            // Set brapi label behavior for this trait
+        }
+
+        dateFormatSwitch.setOnCheckedChangeListener { _, isChecked ->
+            preferences.edit().putBoolean("UseDay", isChecked).apply()
+            updateDateFormatDisplay(isChecked)
         }
 
         Log.d(TAG, "onCreateView End")
@@ -250,6 +271,49 @@ class TraitDetailFragment : Fragment() {
 
         resourceChip.text = getString(R.string.trait_resource_chip_title)
         brapiLabelChip.text = getString(R.string.trait_brapi_label_chip_title)
+
+        if (trait.format == "date") {
+            dateFormatContainer.visibility = View.VISIBLE
+            val isUseDayOfYear = preferences.getBoolean("UseDay", false)
+            dateFormatSwitch.isChecked = isUseDayOfYear
+            updateDateFormatDisplay(isUseDayOfYear)
+        } else {
+            dateFormatContainer.visibility = View.GONE
+        }
+    }
+
+    private fun updateDateFormatDisplay(useDayOfYear: Boolean) {
+        val calendar = Calendar.getInstance()
+        
+        // Format as standard date (YYYY-MM-DD)
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+        val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
+        
+        // Format as day of year
+        val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+        
+        // Set the text for both formats
+        dateFormatText.text = getString(R.string.trait_date_format_example, formattedDate)
+        dayOfYearFormatText.text = getString(R.string.trait_day_format_example, dayOfYear)
+        
+        // Update styling based on which format is active
+        if (useDayOfYear) {
+            // Day of Year is active
+            dateFormatText.alpha = 0.5f
+            dateFormatText.setTypeface(null, Typeface.NORMAL)
+            
+            dayOfYearFormatText.alpha = 1.0f
+            dayOfYearFormatText.setTypeface(null, Typeface.BOLD)
+        } else {
+            // Date is active
+            dateFormatText.alpha = 1.0f
+            dateFormatText.setTypeface(null, Typeface.BOLD)
+            
+            dayOfYearFormatText.alpha = 0.5f
+            dayOfYearFormatText.setTypeface(null, Typeface.NORMAL)
+        }
     }
     
     private fun updateVisibilityChip(trait: TraitObject) {

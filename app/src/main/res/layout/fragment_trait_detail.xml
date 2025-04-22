@@ -239,6 +239,39 @@
                             app:chipStrokeWidth="2dp" />
 
                     </com.google.android.material.chip.ChipGroup>
+                    <LinearLayout
+                        android:id="@+id/dateFormatContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:visibility="gone"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp">
+                        
+                        <TextView
+                            android:id="@+id/dateFormatText"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Date: 2023-05-15"
+                            android:textStyle="bold"/>
+                            
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/dateFormatSwitch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"/>
+                            
+                        <TextView
+                            android:id="@+id/dayOfYearFormatText"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Day of Year: 135"
+                            android:alpha="0.5"/>
+                    </LinearLayout>
 
                 </LinearLayout>
 

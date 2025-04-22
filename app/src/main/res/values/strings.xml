@@ -360,6 +360,10 @@
     <string name="trait_name_empty_error">Trait name cannot be empty</string>
     <string name="trait_name_exists_error">A trait with this name already exists</string>
     <string name="trait_copied_success">Trait copied to %1$s</string>
+    <string name="trait_date_format_title">Date Format</string>
+    <string name="trait_use_day_of_year">Use Day of Year</string>
+    <string name="trait_date_format_example">Date: %s</string>
+    <string name="trait_day_format_example">Day of Year: %d</string>
 
     <!-- COLLECT -->
 

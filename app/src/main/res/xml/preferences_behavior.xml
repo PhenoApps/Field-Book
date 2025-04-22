@@ -73,18 +73,4 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="preferences_behavior_data"
-        android:title="@string/preferences_behavior_data_title"
-        app:iconSpaceReserved="false">
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_use_day"
-            android:key="UseDay"
-            android:summary="@string/preferences_general_use_day_number_description"
-            android:title="@string/preferences_general_use_day_number" />
-
-    </PreferenceCategory>
-
 </PreferenceScreen>
