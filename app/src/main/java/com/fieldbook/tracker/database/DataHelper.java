@@ -165,7 +165,7 @@ public class DataHelper {
      */
     public static String replaceIdentifiers(String s) {
 
-        return s.replaceAll("'", "''");
+        return s.replaceAll("'", "''").replaceAll("\"", "\"\"");
     }
 
     /**
@@ -3102,6 +3102,10 @@ public class DataHelper {
                 db.execSQL("UPDATE studies SET observation_unit_search_attribute = study_unique_id_name");
             }
 
+//            if (oldVersion <= 12 && newVersion >= 13) {
+//                // migrate to version that has new tables to handle spectral data and device parameters
+//                Migrator.Companion.migrateToVersionExampleN(db);
+//            }
         }
     }
 }

@@ -418,8 +418,13 @@ public class DateTraitLayout extends BaseTraitLayout {
     @NonNull
     @Override
     public Boolean validate(String data) {
+        boolean useDayOfYear = getPrefs().getBoolean(PreferenceKeys.USE_DAY_OF_YEAR, false);
         try {
-            Date d = dateFormat.parse(data);
+            if (useDayOfYear) {
+                Integer.parseInt(data);
+            } else {
+                Date d = dateFormat.parse(data);
+            }
             return true;
         } catch (Exception e) {
             return false;

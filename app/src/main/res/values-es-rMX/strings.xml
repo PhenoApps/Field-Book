@@ -103,7 +103,7 @@
     <string name="list_item_field_sort_drag_content_description">Arrastre para mover elemento.</string>
     <string name="dialog_field_sort_no_attributes_found">No se encontraron atributos.</string>
     <string name="dialog_field_sort_no_more_attributes_found">Se han usado todos los atributos.</string>
-    <string name="dialog_field_sort_delete_all_content_description">Elimina todas las entradas de ordenación.</string>
+    <string name="dialog_field_sort_delete_all_content_description">Elimina todas las entradas ordenadas.</string>
     <string name="dialog_field_sort_toggle_order_content_description">Invierte el orden.</string>
     <string name="dialog_field_sort_add_content_description">Abre un diálogo para agregar un nuevo atributo para ordenar por.</string>
     <!-- Modify -->
@@ -552,14 +552,23 @@
     <string name="preferences_profile_require_person_summary">Registra el nombre de la persona que captura datos</string>
     <string name="preferences_profile_set_person">Nombre de la Persona</string>
     <string name="preferences_profile_person_dialog_title">Establecer Persona</string>
+    <string name="dialog_previous_names">Nombres Usados Previamente</string>
+    <string name="preferences_profile_previous_names">Nombres Previos</string>
+    <string name="preferences_profile_new_person">Nueva Persona</string>
+    <string name="preferences_profile_previous_names_warning">Todos los nombres de personas guardadas se eliminarán, y esto no se puede revertir. ¿Está seguro de que desea continuar?</string>
     <string name="preferences_profile_name_first">Nombre</string>
     <string name="preferences_profile_name_last">Apellido</string>
-    <string name="preferences_profile_name_error">Ambos campos no pueden estar vacíos</string>
+    <string name="preferences_profile_name_error">Ambos campos no pueden estar en blanco</string>
     <string name="preferences_profile_require_interval_title">Intervalo de Verificación</string>
     <string name="verification_interval_every_open">Cada vez que se abre la aplicación</string>
     <string name="verification_interval_every_12">Cada 12 horas</string>
     <string name="verification_interval_every_24">Cada 24 horas</string>
     <string name="verification_interval_never">Nunca</string>
+    <string name="preferences_profile_device_title">Dispositivo</string>
+    <string name="preferences_profile_set_device_name">Nombre Dispositivo</string>
+    <string name="preferences_profile_device_name_dialog_title">Definir Nombre del Dispositivo</string>
+    <string name="preferences_profile_device_name_error">Este campo no puede estar en blanco</string>
+    <string name="preferences_profile_device_name_default_format">Predeterminado: %s</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Único</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Incluye un ID único y anónimo en los registros de fallos para ayudar al equipo de desarrollo a corregir errores</string>
     <string name="pref_profile_crashlytics_refresh_title">Refrescar ID</string>

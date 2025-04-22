@@ -10,4 +10,6 @@
     <dimen name="text_size_xxlarge">90sp</dimen>
 
     <dimen name="button_default_width">180dp</dimen>
+
+    <dimen name="fb_trait_status_bar_icon_default_max_size">16dp</dimen>
 </resources>
