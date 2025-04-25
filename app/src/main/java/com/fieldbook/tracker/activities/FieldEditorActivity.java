@@ -587,6 +587,12 @@ public class FieldEditorActivity extends ThemedActivity
             }
 
             queryAndLoadFields();
+
+            new Handler(Looper.getMainLooper()).postDelayed(
+                    () -> recyclerView.scrollToPosition(0),
+                    100
+            );
+
             return true;
         }
         return super.onOptionsItemSelected(item);
