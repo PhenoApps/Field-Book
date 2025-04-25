@@ -114,5 +114,25 @@ class StudyGroupDao {
                 arrayOf("$groupId")
             )
         }
+
+        fun updateIsExpanded(groupId: Int, isExpanded: Boolean) = withDatabase { db ->
+            db.update(
+                StudyGroup.TABLE_NAME,
+                contentValuesOf("isExpanded" to if (isExpanded) "true" else "false"),
+                "${StudyGroup.PK} = ?",
+                arrayOf("$groupId")
+            )
+        }
+
+        fun getIsExpanded(groupId: Int): Boolean = withDatabase { db ->
+            val result = db.query(
+                StudyGroup.TABLE_NAME,
+                select = arrayOf("isExpanded"),
+                where = "${StudyGroup.PK} = ?",
+                whereArgs = arrayOf("$groupId")
+            ).toFirst()["isExpanded"] as? String
+
+            result != "false"
+        } == true
     }
 }

@@ -406,10 +406,10 @@ class Migrator {
 
             MigratorVersion13().migrate(db)
                 .onFailure {
-                    Log.e(TAG, "Failed to migrate to version N", it)
+                    Log.e(TAG, "Failed to migrate to version 13", it)
                 }
                 .onSuccess {
-                    Log.d(TAG, "Migrated to version N")
+                    Log.d(TAG, "Migrated to version 13")
                 }
         }
     }

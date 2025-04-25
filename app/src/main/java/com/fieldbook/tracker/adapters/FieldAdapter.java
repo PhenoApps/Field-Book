@@ -353,13 +353,28 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         }
     }
 
+    private void setGroupExpansionStatus(FieldViewItem header) {
+        String headerName = header.groupName;
+        if (headerName != null && !headerName.isEmpty()) { // save the isExpanded status
+            Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(headerName);
+            if (groupId != null) {
+                StudyGroupDao.Companion.updateIsExpanded(groupId, header.isExpanded);
+            }
+        } else { // if "ungrouped", save in preference
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean(GeneralKeys.UNGROUPED_FIELDS_EXPANDED, header.isExpanded);
+            editor.apply();
+        }
+    }
+
     private void toggleGroupExpansion(int headerPosition) {
         FieldViewItem header = getItem(headerPosition);
         header.isExpanded = !header.isExpanded;
+        String headerName = header.groupName;
 
+        setGroupExpansionStatus(header);
         notifyItemChanged(headerPosition);
 
-        String headerName = header.groupName;
         List<FieldViewItem> currentList = new ArrayList<>(getCurrentList());
 
         if (header.isExpanded) {
@@ -384,7 +399,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
     private void selectAllFieldsInGroup(Integer groupId) {
         for (FieldObject field : fullFieldList) {
-            if (!field.getIsArchived()) { // make we are not selecting archived fields
+            if (!field.getIsArchived()) { // make sure we are not selecting archived fields
                 if ((groupId == null && field.getGroupId() == null) ||
                         (groupId != null && groupId.equals(field.getGroupId()))) {
                     selectedIds.add(field.getExp_id());
@@ -449,13 +464,26 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                 List<FieldObject> groupFields = entry.getValue();
 
                 if (!groupFields.isEmpty()) {
-                    // group header
+                    boolean isExpanded = true;
+
+                    if (groupName != null) {
+                        Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(groupName);
+                        if (groupId != null) { // get the isExpanded status
+                            isExpanded = StudyGroupDao.Companion.getIsExpanded(groupId);
+                        }
+                    } else { // for "ungrouped"
+                        isExpanded = preferences.getBoolean(GeneralKeys.UNGROUPED_FIELDS_EXPANDED, true);
+                    }
+
                     FieldViewItem header = new FieldViewItem(groupName, false);
+                    header.isExpanded = isExpanded;
                     arrayList.add(header);
 
-                    // fields in this group
-                    for (FieldObject field : groupFields) {
-                        arrayList.add(new FieldViewItem(field));
+                    // add fields if the group is expanded
+                    if (isExpanded) {
+                        for (FieldObject field : groupFields) {
+                            arrayList.add(new FieldViewItem(field));
+                        }
                     }
                 }
             }

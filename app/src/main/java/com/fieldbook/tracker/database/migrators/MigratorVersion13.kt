@@ -19,7 +19,7 @@ class MigratorVersion13: FieldBookMigrator {
 
         Log.d(TAG, "Starting migration to version 13 - Adding group_studies table")
 
-        createGroupsTable(db)
+        createStudyGroupsTable(db)
 
         addArchivedColumnToStudies(db)
 
@@ -31,11 +31,12 @@ class MigratorVersion13: FieldBookMigrator {
 
     }
 
-    private fun createGroupsTable(db: SQLiteDatabase) {
+    private fun createStudyGroupsTable(db: SQLiteDatabase) {
         val query = ("""
             CREATE TABLE IF NOT EXISTS ${StudyGroup.TABLE_NAME} (
                 ${StudyGroup.PK} INTEGER PRIMARY KEY AUTOINCREMENT, 
-                group_name TEXT UNIQUE NOT NULL
+                group_name TEXT UNIQUE NOT NULL,
+                isExpanded TEXT DEFAULT 'true' NOT NULL
             )
         """).trimIndent()
 
