@@ -9,6 +9,7 @@ import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.MaximumParameter
 import com.fieldbook.tracker.traits.formats.parameters.MinimumParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.utilities.SnackbarUtils
 
 open class NumericFormat(
@@ -25,7 +26,8 @@ open class NumericFormat(
             DefaultNumericParameter<Double>(),
             MinimumParameter<Double>(),
             MaximumParameter<Double>(),
-            DetailsParameter()
+            DetailsParameter(),
+            ResourceFileParameter()
         )
 ) : TraitFormat(
     format = format,

@@ -110,6 +110,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     public static int REQUEST_CLOUD_FILE_CODE = 5;
     public static int REQUEST_FILE_EXPLORER_CODE = 1;
     public static int REQUEST_CODE_BRAPI_TRAIT_ACTIVITY = 2;
+    public static int REQUEST_RESOURCE_FILE_CODE = 6;
     private RecyclerView traitList;
     public TraitAdapter traitAdapter;
     public static boolean brapiDialogShown = false;
@@ -785,6 +786,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             } else {
                 Toast.makeText(this, R.string.act_file_explorer_no_file_error, Toast.LENGTH_SHORT).show();
             }
+        }
+
+        if (requestCode == REQUEST_RESOURCE_FILE_CODE) {
+            com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
         }
 
         if (requestCode == REQUEST_CODE_BRAPI_TRAIT_ACTIVITY) {

@@ -335,6 +335,9 @@ class ObservationVariableDao {
                 Log.d("ObservationVariableDao", "categories: ${t.categories.orEmpty()}")
                 Log.d("ObservationVariableDao", "closeKeyboardOnOpen: ${t.closeKeyboardOnOpen ?: "false"}")
                 Log.d("ObservationVariableDao", "cropImage: ${t.cropImage ?: "false"}")
+                Log.d("ObservationVariableDao", "useDayOfYear: ${t.useDayOfYear ?: "false"}")
+                Log.d("ObservationVariableDao", "displayValue: ${t.displayValue ?: "false"}")
+                Log.d("ObservationVariableDao", "resourceFile: ${t.resourceFile.orEmpty()}")
 
                 val varRowId = db.insert(ObservationVariable.tableName, null, contentValues)
 
@@ -345,6 +348,9 @@ class ObservationVariableDao {
                         t.categories.orEmpty(),
                         (t.closeKeyboardOnOpen ?: "false").toString(),
                         (t.cropImage ?: "false").toString(),
+                        (t.useDayOfYear ?: "false").toString(),
+                        (t.displayValue ?: "false").toString(),
+                        t.resourceFile.orEmpty(),
                         varRowId.toString()
                     )
                     Log.d("ObservationVariableDao", "Trait ${t.name} inserted successfully with row ID: $varRowId")
