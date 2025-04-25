@@ -175,11 +175,12 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             itemView.setOnLongClickListener(v -> {
                 int position = getBindingAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
-                    String groupNameTxt = headerTv.getText().toString();
-                    if (!groupNameTxt.isEmpty()) {
-                        Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(groupNameTxt);
-                        selectAllFieldsInGroup(groupId);
+                    FieldViewItem headerItem = getItem(position);
+                    if (!headerItem.isExpanded) { // expand group
+                        toggleGroupExpansion(position);
                     }
+                    Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(headerItem.groupName);
+                    selectAllFieldsInGroup(groupId);
                 }
                 return false;
             });
