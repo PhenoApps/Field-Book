@@ -1231,8 +1231,8 @@ public class FieldEditorActivity extends ThemedActivity
                     for (Integer fieldId : fieldIds) {
                         database.updateStudyGroup(fieldId, groupId);
                     }
-                    queryAndLoadFields();
                     mAdapter.exitSelectionMode();
+                    queryAndLoadFields();
                 })
                 .setNegativeButton(R.string.dialog_cancel, (dialog, which) -> dialog.dismiss())
                 .show();

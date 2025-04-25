@@ -84,8 +84,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                     return false;
                 }
 
-                if (oldItem.isGroupHeader() || oldItem.isArchiveHeader()) { // group or archive header
-                    return areNamesEqual(oldItem.groupName, newItem.groupName) && (oldItem.isExpanded == newItem.isExpanded);
+                if (oldItem.isGroupHeader() || oldItem.isArchiveHeader()) {
+                    return areNamesEqual(oldItem.groupName, newItem.groupName)
+                            && oldItem.isExpanded == newItem.isExpanded
+                            && oldItem.groupSize == newItem.groupSize;
                 } else { // field
                     return oldItem.field.getExp_alias().equals(newItem.field.getExp_alias());
                 }
@@ -155,12 +157,12 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     class GroupViewHolder extends RecyclerView.ViewHolder {
-        final TextView groupName;
+        final TextView headerTv;
         final ImageView expandIcon;
 
         GroupViewHolder(View itemView) {
             super(itemView);
-            groupName = itemView.findViewById(R.id.groupName);
+            headerTv = itemView.findViewById(R.id.groupName);
             expandIcon = itemView.findViewById(R.id.expandIcon);
 
             itemView.setOnClickListener(v -> {
@@ -173,7 +175,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             itemView.setOnLongClickListener(v -> {
                 int position = getBindingAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
-                    String groupNameTxt = groupName.getText().toString();
+                    String groupNameTxt = headerTv.getText().toString();
                     if (!groupNameTxt.isEmpty()) {
                         Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(groupNameTxt);
                         selectAllFieldsInGroup(groupId);
@@ -185,12 +187,12 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     class ArchiveViewHolder extends RecyclerView.ViewHolder {
-        final TextView groupName;
+        final TextView headerTv;
         final ImageView folderIcon;
 
         ArchiveViewHolder(View itemView) {
             super(itemView);
-            groupName = itemView.findViewById(R.id.archiveName);
+            headerTv = itemView.findViewById(R.id.archiveName);
             folderIcon = itemView.findViewById(R.id.archiveIcon);
 
             itemView.setOnClickListener(v -> {
@@ -287,13 +289,19 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         if (fieldViewItem.isGroupHeader()) {
             GroupViewHolder groupHolder = (GroupViewHolder) holder;
-            groupHolder.groupName.setText(
-                    (fieldViewItem.groupName == null || fieldViewItem.groupName.isEmpty())
-                            ? context.getString(R.string.fields_ungrouped) : fieldViewItem.groupName);
+
+            String groupName = ((fieldViewItem.groupName == null || fieldViewItem.groupName.isEmpty())
+                    ? context.getString(R.string.fields_ungrouped) : fieldViewItem.groupName);
+            String headerText = groupName + " (" + fieldViewItem.groupSize + ")";
+
+            groupHolder.headerTv.setText(headerText);
             groupHolder.expandIcon.setImageResource(fieldViewItem.isExpanded ? R.drawable.ic_chevron_up : R.drawable.ic_chevron_down);
         } else if (fieldViewItem.isArchiveHeader()) {
             ArchiveViewHolder archiveHolder = (ArchiveViewHolder) holder;
-            archiveHolder.groupName.setText(context.getString(R.string.group_archived_value));
+
+            String headerText = fieldViewItem.groupName + " (" + fieldViewItem.groupSize + ")";
+
+            archiveHolder.headerTv.setText(headerText);
             archiveHolder.folderIcon.setImageResource(R.drawable.ic_archive);
         } else {
             FieldViewHolder fieldHolder = (FieldViewHolder) holder;
@@ -356,7 +364,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     private void setGroupExpansionStatus(FieldViewItem header) {
         String headerName = header.groupName;
         if (headerName != null && !headerName.isEmpty()) { // save the isExpanded status
-            Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(headerName);
+            Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(header.groupName);
             if (groupId != null) {
                 StudyGroupDao.Companion.updateIsExpanded(groupId, header.isExpanded);
             }
@@ -487,10 +495,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             addGroupToList(arrayList, null, ungroupedExpanded, ungroupedFields);
         }
 
-        boolean hasArchivedFields = fieldsList.stream().anyMatch(FieldObject::getIsArchived);
-        if (hasArchivedFields) { // add archived list item at the bottom
+        long archivedCount = fieldsList.stream().filter(FieldObject::getIsArchived).count();
+        if (archivedCount > 0) { // add archived list item at the bottom
             String archivedVal = context.getString(R.string.group_archived_value);
-            FieldViewItem archiveHeader = new FieldViewItem(archivedVal, true);
+            FieldViewItem archiveHeader = new FieldViewItem(archivedVal, archivedCount, true);
             arrayList.add(archiveHeader);
         }
 
@@ -500,14 +508,19 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     /**
      * Adds a group to the array list with header and fields (if expanded and not archived)
      */
-    private void addGroupToList(List<FieldViewItem> arrayList, String groupName, boolean isExpanded, List<FieldObject> groupFields) {
+    private void addGroupToList(
+            List<FieldViewItem> arrayList,
+            String groupName,
+            boolean isExpanded,
+            @NonNull List<FieldObject> groupFields
+    ) {
         // add header
-        FieldViewItem header = new FieldViewItem(groupName, false);
+        FieldViewItem header = new FieldViewItem(groupName, groupFields.size(), false);
         header.isExpanded = isExpanded;
         arrayList.add(header);
 
         // add children if expanded
-        if (isExpanded && groupFields != null) {
+        if (isExpanded) {
             for (FieldObject f : groupFields) {
                 if (!f.getIsArchived()) {
                     arrayList.add(new FieldViewItem(f));
@@ -526,6 +539,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         groupedFields.put(null, new ArrayList<>());
 
         for (FieldObject field : fields) {
+            if (field.getIsArchived()) { // handle archived fields in buildFieldList
+                continue;
+            }
+
             String groupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
 
             groupedFields.putIfAbsent(groupName, new ArrayList<>());
@@ -563,6 +580,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         return sortedGroups;
     }
 
+    private String formatGroupNameWithCount(String name, long count) {
+        return String.format("%s (%d)", name, count);
+    }
+
     public void setTextFilter(String filter) {
         this.filterText = filter;
         List<FieldObject> filteredFields = new ArrayList<>(fullFieldList);
@@ -577,12 +598,14 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     public static class FieldViewItem {
         public FieldViewType viewType;
         public String groupName;
+        public long groupSize;
         public FieldObject field;
         public boolean isExpanded = true;
 
-        public FieldViewItem(String groupName, boolean isArchive) {
+        public FieldViewItem(String groupName, long groupSize, boolean isArchive) {
             this.viewType = isArchive? FieldViewType.TYPE_ARCHIVE_HEADER : FieldViewType.TYPE_GROUP_HEADER;
             this.groupName = groupName;
+            this.groupSize = groupSize;
         }
 
         public FieldViewItem(FieldObject field) {
