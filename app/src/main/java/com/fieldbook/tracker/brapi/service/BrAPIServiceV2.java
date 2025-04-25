@@ -30,6 +30,8 @@ import com.fieldbook.tracker.brapi.service.pheno.ObservationVariableService;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.database.dao.StudyDao;
+import com.fieldbook.tracker.database.dao.StudyGroupDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
@@ -1641,12 +1643,25 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             if (fail) {
                 return new BrapiControllerResponse(false, failMessage);
             } else {
+                addStudyToGroup(field);
                 return new BrapiControllerResponse(true, "", field);
             }
 
 
         } catch (Exception e) {
             return new BrapiControllerResponse(false, e.toString());
+        }
+    }
+
+    /**
+     * Assign group_name based on trial_name
+     */
+    private void addStudyToGroup(FieldObject field) {
+        if (field.getTrial_name() != null && !field.getTrial_name().isEmpty()) {
+            Integer groupId = StudyGroupDao.Companion.createOrGetStudyGroup(field.getTrial_name());
+            field.setGroupId(groupId);
+
+            StudyDao.Companion.updateStudyGroup(field.getExp_id(), groupId);
         }
     }
 
