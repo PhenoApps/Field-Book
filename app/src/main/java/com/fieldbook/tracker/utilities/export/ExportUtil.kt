@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.utilities
+package com.fieldbook.tracker.utilities.export
 
 import android.Manifest
 import android.app.Activity
@@ -13,7 +13,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.ListView
+import android.widget.RadioButton
+import android.widget.TextView
+import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
@@ -28,6 +35,8 @@ import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.utilities.CSVWriter
+import com.fieldbook.tracker.utilities.ZipUtil
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,15 +48,20 @@ import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 import javax.inject.Inject
-
 
 /**
  * Checks preconditions before collect and export.
  */
 
-class ExportUtil @Inject constructor(@ActivityContext private val context: Context, private val database: DataHelper) : CoroutineScope by MainScope() {
+class ExportUtil @Inject constructor(
+    @ActivityContext private val context: Context,
+    private val database: DataHelper,
+    private val spectralFileExporter: SpectralFileExporter
+) : CoroutineScope by MainScope() {
+
     companion object {
         private const val PERMISSIONS_REQUEST_EXPORT_DATA = 9990
         private const val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
@@ -59,7 +73,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private var allColumns: RadioButton? = null
     private var allTraits: RadioButton? = null
     private var activeTraits: RadioButton? = null
-    private var exportTrait: ArrayList<TraitObject> = arrayListOf()
+    private var exportTrait: java.util.ArrayList<TraitObject> = arrayListOf()
     private var checkDbBool = false
     private var checkTableBool = false
     private var defaultFieldString = ""
@@ -90,9 +104,9 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     }
 
     fun export() {
-        val exporter = preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "")
+        val exporter = preferences.getString(PreferenceKeys.Companion.EXPORT_SOURCE_DEFAULT, "")
 
-        if (!allFieldsBrAPI() || exporter == "local" || !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
+        if (!allFieldsBrAPI() || exporter == "local" || !preferences.getBoolean(PreferenceKeys.Companion.BRAPI_ENABLED, false)) {
             // use local export if any fields aren't all brapi, if brapi is disabled, or if local pref is set
             exportPermission()
         } else if (exporter == "brapi") {
@@ -144,7 +158,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
         val exportArray = arrayOf(
             context.getString(R.string.export_source_local),
-            preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.brapi_edit_display_name_default))
+            preferences.getString(PreferenceKeys.Companion.BRAPI_DISPLAY_NAME, context.getString(R.string.brapi_edit_display_name_default))
         )
 
         val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
@@ -286,7 +300,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 apply()
             }
 
-            BaseDocumentTreeUtil.getDirectory(context as Activity, R.string.dir_field_export)
+            BaseDocumentTreeUtil.Companion.getDirectory(context as Activity, R.string.dir_field_export)
 
             exportTrait.clear()
             if (isActiveTraitsChecked) {
@@ -314,7 +328,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val positiveButton: Button = saveDialog.getButton(AlertDialog.BUTTON_POSITIVE)
         positiveButton.setOnClickListener {
 
-            val repeatedMeasuresEnabled = preferences.getBoolean(PreferenceKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
+            val repeatedMeasuresEnabled = preferences.getBoolean(PreferenceKeys.Companion.REPEATED_VALUES_PREFERENCE_KEY, false)
 
             //show a warning if table is selected and repeated measures is enabled
             if (checkTable.isChecked && repeatedMeasuresEnabled) {
@@ -427,6 +441,8 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 handleBundledFiles(fieldId)
             }
 
+            spectralFileExporter.exportSpectralFile(fieldId)
+
             database.updateExportDate(fieldId)
             Log.d(TAG, "Export finished successfully for field ${fo.exp_name}")
             ExportResult.Success("Export successful for field ${fo.exp_name}")
@@ -437,9 +453,9 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         }
     }
 
-    private fun createExportFile(cursor: Cursor, fileType: String, fileString: String, columns: ArrayList<String>) {
+    private fun createExportFile(cursor: Cursor, fileType: String, fileString: String, columns: java.util.ArrayList<String>) {
         val fileName = "${fileString}_$fileType.csv"
-        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+        val exportDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_field_export)
 
         val deviceName = preferences.getString(GeneralKeys.DEVICE_NAME, Build.MODEL) ?: Build.MODEL
 
@@ -487,7 +503,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
         val fieldObject = database.getFieldObject(fieldId)
         fieldObject?.let {
             val studyName = it.exp_name
-            val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, studyName)
+            val mediaDir = BaseDocumentTreeUtil.Companion.getFile(context, R.string.dir_plot_data, studyName)
             mediaDir?.let { dir ->
                 if (dir.exists() && dir.isDirectory) {
                     bundleMediaDirectories(studyName, dir)
@@ -510,7 +526,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
      */
     private fun bundleMediaDirectories(studyName: String, mediaDir: DocumentFile) {
         // sanitize the trait names, this will be compared against already sanitized traitDirectories
-        val traitList = exportTrait.map { trait -> FileUtil.sanitizeFileName(trait.name) }
+        val traitList: List<String> = exportTrait.map { trait -> com.fieldbook.tracker.utilities.FileUtil.sanitizeFileName(trait.name) }
         val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
         val tempDirName = "temp_export_${timeStamp.format(Calendar.getInstance().time)}"
         tempDirectory = exportDir?.createDirectory(tempDirName)
@@ -545,15 +561,15 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     }
 
     private fun createZipFile(files: List<DocumentFile>, fileName: String): DocumentFile? {
-        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+        val exportDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_field_export)
         val zipFileName = "${fileName}.zip"
         return exportDir?.let { dir ->
             if (dir.exists()) {
                 val zipFile = dir.createFile("application/zip", zipFileName)
                 zipFile?.let { zf ->
-                    val outputStream = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
+                    val outputStream = BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
                     outputStream?.let { os ->
-                        ZipUtil.zip(context, files.toTypedArray(), os)
+                        ZipUtil.Companion.zip(context, files.toTypedArray(), os)
                         zf
                     }
                 }
@@ -613,7 +629,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     }
 
     private fun archivePreviousExport(newFile: DocumentFile) {
-        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+        val exportDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_field_export)
         val newFileName = newFile.name ?: return
         Log.d(TAG, "Exported file is $newFileName and overwrite checkbox was checked. Looking for previous exports to archive.")
 
@@ -628,7 +644,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
             // Check if the truncated file name matches and the file name is not exactly the new file name
             if (fileName != newFileName && truncatedFileName == truncatedNewFileName) {
-                val oldDoc = BaseDocumentTreeUtil.getFile(context, R.string.dir_field_export, fileName)
+                val oldDoc = BaseDocumentTreeUtil.Companion.getFile(context, R.string.dir_field_export, fileName)
 
                 if (oldDoc != null) {
                     Log.d(TAG, "Archiving previous version: $fileName")
@@ -649,7 +665,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
 
     private fun archiveFile(file: DocumentFile, newFileName: String) {
-        val archiveDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_archive)
+        val archiveDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_archive)
         if (archiveDir != null && archiveDir.exists()) {
             val archivedFile = copyFileToDirectory(file, archiveDir, newFileName)
             if (archivedFile != null) {
@@ -685,7 +701,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
      * Scan file to update file list and share exported file
      */
     private fun shareFile(docFile: DocumentFile) {
-        if (preferences.getBoolean(PreferenceKeys.ENABLE_SHARE, true)) {
+        if (preferences.getBoolean(PreferenceKeys.Companion.ENABLE_SHARE, true)) {
             val intent = Intent()
             intent.action = Intent.ACTION_SEND
             intent.type = "text/plain"

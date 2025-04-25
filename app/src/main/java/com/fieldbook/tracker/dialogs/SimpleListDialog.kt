@@ -18,12 +18,12 @@ class SimpleListDialog {
          * @param items The list of items to show
          * @param onItemSelected The callback to call when an item is selected
          */
-        fun show(
+        fun <T> show(
             context: Context,
             titleResId: Int,
-            items: List<Any>,
+            items: List<T>,
             itemNames: List<String>,
-            onItemSelected: (Any) -> Unit
+            onItemSelected: (T) -> Unit
         ) {
 
             assert(items.size == itemNames.size)

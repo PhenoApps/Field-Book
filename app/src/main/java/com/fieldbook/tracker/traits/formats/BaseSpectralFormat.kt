@@ -11,7 +11,7 @@ open class BaseSpectralFormat(
     layoutView: android.view.View? = null,
     databaseName: String = "spectral",
     nameStringResourceId: Int = R.string.traits_format_spectral,
-    iconDrawableResourceId: Int = R.drawable.lightbulb,
+    iconDrawableResourceId: Int = R.drawable.cube_scan,
     stringNameAux: ((android.content.Context) -> String?)? = null,
 ) : TraitFormat(
     format = format,

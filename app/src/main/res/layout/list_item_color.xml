@@ -17,6 +17,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
+    <TextView
+        android:id="@+id/color_hex_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/color_preview"
+        app:layout_constraintEnd_toEndOf="@id/color_preview"
+        app:layout_constraintBottom_toTopOf="@id/color_preview"
+        android:gravity="center"
+        tools:text="#CAFEBABE"/>
+
     <ImageButton
         android:layout_margin="8dp"
         android:background="@drawable/circle_background_simple"

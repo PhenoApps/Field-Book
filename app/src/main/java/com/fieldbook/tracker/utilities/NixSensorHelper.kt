@@ -1,20 +1,18 @@
 package com.fieldbook.tracker.utilities
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
-import com.fieldbook.tracker.traits.SpectralTraitLayout
-import com.fieldbook.tracker.traits.SpectralTraitLayout.Companion
-import com.nixsensor.universalsdk.CommandStatus
+import android.widget.Toast
+import com.fieldbook.tracker.R
 import com.nixsensor.universalsdk.DeviceCompat
 import com.nixsensor.universalsdk.DeviceScanner
 import com.nixsensor.universalsdk.DeviceStatus
 import com.nixsensor.universalsdk.IDeviceCompat
 import com.nixsensor.universalsdk.IDeviceScanner
-import com.nixsensor.universalsdk.IMeasurementData
 import com.nixsensor.universalsdk.LicenseManager
 import com.nixsensor.universalsdk.LicenseManagerState
-import com.nixsensor.universalsdk.OnDeviceResultListener
-import com.nixsensor.universalsdk.ScanMode
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -29,9 +27,16 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
         private const val SCAN_PERIOD_MS = 30000L
     }
 
+    data class NixDevice(
+        val id: String,
+        val name: String,
+        val device: IDeviceCompat,
+        val description: String
+    )
+
     private var licenseManagerState: LicenseManagerState = LicenseManagerState.INACTIVE
-    private var deviceList: MutableList<IDeviceCompat> = mutableListOf()
-    private var isSearching: Boolean = false
+    private var deviceList: MutableList<NixDevice> = mutableListOf()
+    private var scanner = DeviceScanner(context)
 
     var connectedDevice: IDeviceCompat? = null
 
@@ -79,66 +84,105 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
         connectedDevice = device
     }
 
-    fun search() {
+    fun search(onResult: (Boolean) -> Unit) {
 
-        if (!isSearching) {
+        if (licenseManagerState != LicenseManagerState.ACTIVE) {
 
-            isSearching = true
+            // License is not active, do not proceed
+            Log.d(TAG, "License is not active")
 
-            if (licenseManagerState != LicenseManagerState.ACTIVE) {
-                // License is not active, do not proceed
-                Log.d(TAG, "License is not active")
-                return
+            Toast.makeText(context, R.string.nix_error_license, Toast.LENGTH_SHORT).show()
+
+            return
+        }
+
+        scanner.stop()
+
+        scanner = DeviceScanner(context)
+
+        val usb = scanner.listUsbDevices()
+
+        if (usb.isNotEmpty()) {
+            Log.d(TAG, "Found ${usb.size} USB devices")
+            usb.forEach {
+                Log.d(TAG, "USB device: ${it.name}")
+                if (!deviceList.map { it.id }.contains(it.id)) {
+                    deviceList.add(NixDevice(
+                        id = it.id,
+                        name = it.name,
+                        device = it,
+                        description = context.getString(R.string.usb_device_description)
+                    ))
+                }
+            }
+        } else {
+            Log.d(TAG, "No USB devices found")
+        }
+
+        scanner.setOnScannerStateChangeListener(object : IDeviceScanner.OnScannerStateChangeListener {
+
+            override fun onScannerStarted(sender: IDeviceScanner) {
+                Log.d(TAG, "Scanner started")
             }
 
-            deviceList.clear()
+            override fun onScannerStopped(sender: IDeviceScanner) {
+                Log.d(TAG, "Scanner stopped")
+            }
+        })
 
-            with (DeviceScanner(context)) {
+        if (scanner.state == IDeviceScanner.DeviceScannerState.IDLE) {
 
-                val usb = listUsbDevices()
-
-                if (usb.isNotEmpty()) {
-                    Log.d(TAG, "Found ${usb.size} USB devices")
-                    usb.forEach {
-                        Log.d(TAG, "USB device: ${it.name}")
-                        if (!deviceList.map { it.id }.contains(it.id)) {
-                            deviceList.add(it)
-                        }
+            scanner.start(object : IDeviceScanner.OnDeviceFoundListener {
+                override fun onScanResult(sender: IDeviceScanner, device: IDeviceCompat) {
+                    //log device details
+                    val logMsg = "Device found: ${device.name} ID: ${device.id} Type: ${device.type} ScanCount: ${device.scanCount} RSSI: ${device.rssi} Battery: ${device.batteryLevel}"
+                    Log.d(TAG, logMsg)
+                    if (!deviceList.map { it.id }.contains(device.id)) {
+                        deviceList.add(NixDevice(
+                            id = device.id,
+                            name = device.name,
+                            device = device,
+                            description = "${device.type} (${device.id})"
+                        ))
                     }
-                } else {
-                    Log.d(TAG, "No USB devices found")
                 }
 
-                setOnScannerStateChangeListener(object : IDeviceScanner.OnScannerStateChangeListener {
+                override fun onScanFailed(sender: IDeviceScanner, errorCode: Int) {
+                    super.onScanFailed(sender, errorCode)
+                    Log.d(TAG, "Scan failed with error code: $errorCode")
+                }
+            })
 
-                    override fun onScannerStarted(sender: IDeviceScanner) {
-                        Log.d(TAG, "Scanner started")
-                    }
+        } else if (scanner.state in
+            setOf(IDeviceScanner.DeviceScannerState.ERROR_BLUETOOTH_DISABLED,
+                IDeviceScanner.DeviceScannerState.ERROR_LICENSE,
+                IDeviceScanner.DeviceScannerState.ERROR_INTERNAL,
+                IDeviceScanner.DeviceScannerState.ERROR_INVALID_HARDWARE_ID,
+                IDeviceScanner.DeviceScannerState.ERROR_BLUETOOTH_PERMISSIONS,
+                IDeviceScanner.DeviceScannerState.ERROR_BLUETOOTH_UNAVAILABLE)) {
 
-                    override fun onScannerStopped(sender: IDeviceScanner) {
-                        Log.d(TAG, "Scanner stopped")
-                        isSearching = false
-                    }
-                })
+            Log.d(TAG, "Scanner is not idle, cannot start scanning ${scanner.state.name}")
 
-                start(object : IDeviceScanner.OnDeviceFoundListener {
-                    override fun onScanResult(sender: IDeviceScanner, device: IDeviceCompat) {
-                        //log device details
-                        val logMsg = "Device found: ${device.name} ID: ${device.id} Type: ${device.type} ScanCount: ${device.scanCount} RSSI: ${device.rssi} Battery: ${device.batteryLevel}"
-                        Log.d(TAG, logMsg)
-                        if (!deviceList.map { it.id }.contains(device.id)) {
-                            deviceList.add(device)
-                        }
-                    }
-
-                    override fun onScanFailed(sender: IDeviceScanner, errorCode: Int) {
-                        super.onScanFailed(sender, errorCode)
-                        Log.d(TAG, "Scan failed with error code: $errorCode")
-                    }
-
-                })
+            val errorMessage = when (scanner.state) {
+                IDeviceScanner.DeviceScannerState.ERROR_BLUETOOTH_DISABLED -> context.getString(R.string.nix_error_bluetooth_disabled)
+                IDeviceScanner.DeviceScannerState.ERROR_LICENSE -> context.getString(R.string.nix_error_license)
+                IDeviceScanner.DeviceScannerState.ERROR_INTERNAL -> context.getString(R.string.nix_error_internal)
+                IDeviceScanner.DeviceScannerState.ERROR_INVALID_HARDWARE_ID -> context.getString(R.string.nix_error_invalid_hardware_id)
+                IDeviceScanner.DeviceScannerState.ERROR_BLUETOOTH_PERMISSIONS -> context.getString(R.string.nix_error_bluetooth_permissions)
+                IDeviceScanner.DeviceScannerState.ERROR_BLUETOOTH_UNAVAILABLE -> context.getString(R.string.nix_error_bluetooth_unavailable)
+                else -> context.getString(R.string.nix_error_unknown)
             }
+
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+
+            scanner.stop()
+
+            onResult(false)
         }
+    }
+
+    fun stopScan() {
+        scanner.stop()
     }
 
     fun getDeviceById(address: String, name: String): IDeviceCompat {
@@ -150,20 +194,6 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
     }
 
     fun getDeviceList() = deviceList.toImmutableList()
-
-    fun measure(device: IDeviceCompat) {
-        device.measure(object : OnDeviceResultListener {
-            override fun onDeviceResult(
-                status: CommandStatus,
-                measurements: Map<ScanMode, IMeasurementData>?
-            ) {
-                for ((mode, data) in measurements!!) {
-                    Log.d(TAG, "Mode: $mode")
-                    Log.d(TAG, "Data: $data")
-                }
-            }
-        })
-    }
 
     fun connect(device: IDeviceCompat, onConnected: (Boolean) -> Unit) {
 
@@ -188,5 +218,10 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
                 super.onExtPowerStateChanged(sender, newState)
             }
         })
+    }
+
+    fun disconnect() {
+        connectedDevice?.disconnect()
+        connectedDevice = null
     }
 }

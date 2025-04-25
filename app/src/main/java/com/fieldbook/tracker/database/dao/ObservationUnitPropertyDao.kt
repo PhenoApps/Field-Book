@@ -19,7 +19,10 @@ import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.CategoricalTraitLayout
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 
 class ObservationUnitPropertyDao {
 
@@ -158,7 +161,8 @@ class ObservationUnitPropertyDao {
             context: Context,
             studyId: Int,
             fieldList: Array<String?>,
-            traits: ArrayList<TraitObject>
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? = withDatabase { db ->
 
             val traitRequiredFields =
@@ -177,7 +181,7 @@ class ObservationUnitPropertyDao {
 
                 val sortOrderClause = getSortOrderClause(context, studyId.toString())
                 val query = """
-                    SELECT $unitSelectAttributes, ${obsSelectAttributes.joinToString { "obs.`$it` AS `$it`" }}
+                    SELECT $unitSelectAttributes, ${obsSelectAttributes.joinToString { "obs.`$it` AS `$it`" }}, observation_variable_field_book_format
                     FROM observations AS obs
                     LEFT JOIN observation_units AS units ON units.observation_unit_db_id = obs.observation_unit_id
                     LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
@@ -195,7 +199,12 @@ class ObservationUnitPropertyDao {
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
                         when (it) {
                             "trait" -> row["observation_variable_name"]
-                            "userValue" -> CategoryJsonUtil.processValue(row)
+                            "userValue" -> {
+                                val value = row["value"].toString()
+                                val format = row["observation_variable_field_book_format"].toString()
+                                val processedValue = processor.processValue(value, format)
+                                processedValue
+                            }
                             "timeTaken" -> row["observation_time_stamp"]
                             "person" -> row["collector"]
                             "location" -> row["geoCoordinates"]
@@ -207,7 +216,6 @@ class ObservationUnitPropertyDao {
             }
         }
 
-
         /**
          * Same as database export function above, but filters all all attribute columns other than the unique id
          * (The other attributes need to be retrieved for sorting, but can then be discarded)
@@ -217,10 +225,11 @@ class ObservationUnitPropertyDao {
             studyId: Int,
             fieldList: Array<String?>,
             uniqueName: String,
-            traits: ArrayList<TraitObject>
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? {
             // Get the full data set
-            getExportDbData(context, studyId, fieldList, traits)?.use { fullCursor ->
+            getExportDbData(context, studyId, fieldList, traits, processor)?.use { fullCursor ->
                 val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
                 val requiredColumns = mutableListOf(uniqueName).apply {
                     addAll(traitRequiredFields)
@@ -275,25 +284,27 @@ class ObservationUnitPropertyDao {
         fun getExportTableData(
             context: Context,
             expId: Int,
-            traits: ArrayList<TraitObject>
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? = withDatabase { db ->
             val headers = ObservationUnitAttributeDao.getAllNames(expId)
 
-            val selectAttributes = headers.map { attributeName ->
+            val selectAttributes = headers.joinToString(", ") { attributeName ->
                 "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
-            }.joinToString(", ")
+            }
 
-            val selectObservations = traits.map { trait ->
-                val traitName = DataHelper.replaceIdentifiers(trait.name)
-                "MAX(CASE WHEN obs.observation_variable_name='$traitName' THEN obs.value ELSE NULL END) AS \"$traitName\""
-            }.joinToString(", ")
+            val traitNames = traits.map { DataHelper.replaceIdentifiers(it.name) }
+
+            val selectObservations = traitNames.joinToString(", ") { trait ->
+                "MAX(CASE WHEN obs.observation_variable_name='$trait' THEN obs.value ELSE NULL END) AS \"$trait\""
+            }
 
             val combinedSelection = listOf(selectAttributes, selectObservations).filter { it.isNotEmpty() }.joinToString(", ")
 
             val orderByClause = getSortOrderClause(context, expId.toString())
             //                SELECT units.internal_id_observation_unit AS id, $combinedSelection
             val query = """
-                SELECT $combinedSelection
+                SELECT $combinedSelection, observation_variable_field_book_format
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
@@ -304,7 +315,27 @@ class ObservationUnitPropertyDao {
             """.trimIndent()
 
             Log.d("getExportTableData", "Executing query: $query")
-            db.rawQuery(query, null)
+            val cursor = db.rawQuery(query, null)
+            //build new cursor and process user values with processor
+            val matrixCursor = MatrixCursor(cursor.columnNames).also {
+                while (cursor.moveToNext()) {
+                    val row = mutableListOf<String?>()
+                    for (i in 0 until cursor.columnCount) {
+                        val columnName = cursor.getColumnName(i)
+                        val value = cursor.getStringOrNull(i) ?: ""
+                        if (columnName in traitNames) {
+                            row.add(processor.processValue(value.toString(),
+                                cursor.getStringOrNull(cursor.getColumnIndex("observation_variable_field_book_format")).toString()))
+
+                        } else {
+                            row.add(value)
+                        }
+                    }
+                    it.addRow(row.toTypedArray())
+                }
+            }
+
+            matrixCursor
         }
 
         /**
@@ -316,10 +347,11 @@ class ObservationUnitPropertyDao {
             context: Context,
             expId: Int,
             uniqueName: String,
-            traits: ArrayList<TraitObject>
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? {
 
-            getExportTableData(context, expId, traits)?.use { cursor ->
+            getExportTableData(context, expId, traits, processor)?.use { cursor ->
 
                 val requiredTraits = traits.map { it.name }.toTypedArray()
                 val requiredColumns = arrayOf(uniqueName) + requiredTraits

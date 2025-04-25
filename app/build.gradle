@@ -8,6 +8,7 @@ apply plugin: 'com.google.dagger.hilt.android'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.serialization"
+apply plugin: "kotlin-parcelize"
 
 Properties props = new Properties()
 props.load(new FileInputStream("$project.rootDir/version.properties"))
@@ -140,6 +141,9 @@ dependencies {
 
     //zebra dependency
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+
+    //live data
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.7'
 
     implementation 'androidx.appcompat:appcompat:1.7.0-alpha02'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'

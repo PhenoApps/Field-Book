@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.preferences;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -202,6 +203,22 @@ public class GeneralKeys {
     public static String getCropCoordinatesKey(int traitId) {
         return "com.fieldbook.tracker.crop_coordinates." + traitId;
     }
+
+    /**
+     * InnoSpectra Nano
+     */
+
+    @NonNull
+    public static final String INNOSPECTRA_NANO_CONFIG_INDEX = "com.fieldbook.tracker.traits.innospectra_nano.INDEX";
+
+    @NonNull
+    public static final String NIX_NAME = "com.fieldbook.tracker.traits.nix.NAME";
+
+    @NonNull
+    public static final String NIX_ADDRESS = "com.fieldbook.tracker.traits.nix.ADDRESS";
+
+    @NonNull
+    public static final String SPECTRAL_MODE = "com.fieldbook.tracker.traits.spectral.MODE";
 
     private GeneralKeys() {
 

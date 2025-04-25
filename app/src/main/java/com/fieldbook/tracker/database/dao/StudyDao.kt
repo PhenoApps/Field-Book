@@ -15,18 +15,10 @@ import com.fieldbook.tracker.database.getTime
 import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
 import com.fieldbook.tracker.database.toFirst
-import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 
 
 class StudyDao {
