@@ -13,6 +13,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [v6.2.2] - 2025-04-16
+
+### Added
+
+### Changed
+
+### Fixed
+- Trait indicator icons in Collect now resize as expected
+- Device dark mode no longer affects Field Book UI
+- Traits with quotes now export correctly in table format
+
+## [v6.2.1] - 2025-04-09
+
+### Added
+
+### Changed
+
+### Fixed
+- Date traits using day of year now correctly saves
+- Fixed an issue with Settings search
+
+## [v6.2.0] - 2025-04-03
+
+### Added
+- Data grid updated with new interface
+- Device name can now be customized in Profile Settings
+- User names are now saved in a list for rapid switching
+
+### Changed
+
+### Fixed
+- Improvements for the GoPro Hero 9
+
+## [v6.1.2] - 2025-03-31
+
+### Added
+- Additional attributes are now included when importing fields using BrAPI
+
+### Changed
+- Improvements to the trait import and creation process
+- Angle trait animation has been reversed
+
+### Fixed
+- Nearest field snackbar no longer overlaps add field button
+- BrAPI Import background color is now white
+- Bundled media is now exported as expected for active and existing traits
+- Exporting with 'Only unique identifier' no longer shifts data
+
+## [v6.1.1] - 2025-03-24
+
+### Added
+
+### Changed
+
+### Fixed
+- Field imports from BrAPI now include the correct metadata
+
 ## [v6.1.0] - 2025-03-17
 
 ### Added
@@ -629,3 +686,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.0.8]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.8
 
 [v6.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.0
+[v6.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.1
+[v6.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.2
+
+[v6.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.0
+[v6.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.1
+[v6.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.2

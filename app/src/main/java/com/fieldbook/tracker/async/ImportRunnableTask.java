@@ -154,7 +154,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                                     }
                                 }
 
-                                controller.getDatabase().createFieldData(studyId, nonEmptyColumns, nonEmptyData, false);
+                                controller.getDatabase().createFieldData(studyId, nonEmptyColumns, nonEmptyData);
 
                             }
                         }

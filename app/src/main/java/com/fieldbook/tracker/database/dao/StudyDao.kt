@@ -47,7 +47,7 @@ class StudyDao {
             """
 
             Log.d("StudyDao", "Running query: $query")
-            
+
             db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
                 val attributes = mutableListOf<String>()
                 while (cursor.moveToNext()) {
@@ -80,15 +80,15 @@ class StudyDao {
         fun updateSearchAttributeForAllFields(newSearchAttribute: String): Int = withDatabase { db ->
             // First check which studies have this attribute
             val studiesWithAttribute = mutableListOf<Int>()
-            
+
             val query = """
                 SELECT DISTINCT study_id 
                 FROM observation_units_attributes 
                 WHERE observation_unit_attribute_name = ?
             """
-            
+
             Log.d("StudyDao", "Finding studies with attribute: $newSearchAttribute")
-            
+
             db.rawQuery(query, arrayOf(newSearchAttribute)).use { cursor ->
                 while (cursor.moveToNext()) {
                     cursor.getInt(0).let { studyId ->
@@ -97,7 +97,7 @@ class StudyDao {
                     }
                 }
             }
-            
+
             // Now update each study that has this attribute
             var updatedCount = 0
             if (studiesWithAttribute.isNotEmpty()) {
@@ -107,7 +107,7 @@ class StudyDao {
                     if ((result ?: 0) > 0) updatedCount++
                 }
             }
-            
+
             Log.d("StudyDao", "Updated search attribute for $updatedCount studies")
             updatedCount
         } ?: 0
@@ -478,7 +478,7 @@ class StudyDao {
         /**
          * This function should always be called within a transaction.
          */
-        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>, isBrapi: Boolean = false) = withDatabase { db ->
+        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) = withDatabase { db ->
 
             val names = getNames(studyId)!!
 
@@ -522,33 +522,6 @@ class StudyDao {
                         ObservationUnit.FK to rowid,
                         ObservationUnitAttribute.FK to attrId,
                         "observation_unit_value_name" to actualData[index]
-                    ))
-                }
-            }
-
-            if (isBrapi) {
-
-                if (primaryIndex < 0) {
-
-                    val attrId = ObservationUnitAttributeDao.getIdByName("Row")
-
-                    db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                        Study.FK to studyId,
-                        ObservationUnit.FK to rowid,
-                        ObservationUnitAttribute.FK to attrId,
-                        "observation_unit_value_name" to "NA"
-                    ))
-                }
-
-                if (secondaryIndex < 0) {
-
-                    val attrId = ObservationUnitAttributeDao.getIdByName("Column")
-
-                    db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                        Study.FK to studyId,
-                        ObservationUnit.FK to rowid,
-                        ObservationUnitAttribute.FK to attrId,
-                        "observation_unit_value_name" to "NA"
                     ))
                 }
             }

@@ -165,7 +165,7 @@ public class DataHelper {
      */
     public static String replaceIdentifiers(String s) {
 
-        return s.replaceAll("'", "''");
+        return s.replaceAll("'", "''").replaceAll("\"", "\"\"");
     }
 
     /**
@@ -2376,11 +2376,11 @@ public class DataHelper {
 //        return (int) exp_id;
     }
 
-    public void createFieldData(int studyId, List<String> columns, List<String> data, Boolean isBrapi) {
+    public void createFieldData(int studyId, List<String> columns, List<String> data) {
 
         open();
 
-        StudyDao.Companion.createFieldData(studyId, columns, data, isBrapi);
+        StudyDao.Companion.createFieldData(studyId, columns, data);
 
 //        // get unique_id, primary_id, secondary_id names from exp_id
 //        Cursor cursor = db.rawQuery("SELECT exp_id.unique_id, exp_id.primary_id, exp_id.secondary_id from exp_id where exp_id.exp_id = " + exp_id, null);
@@ -3085,6 +3085,10 @@ public class DataHelper {
                 db.execSQL("UPDATE studies SET observation_unit_search_attribute = study_unique_id_name");
             }
 
+//            if (oldVersion <= 12 && newVersion >= 13) {
+//                // migrate to version that has new tables to handle spectral data and device parameters
+//                Migrator.Companion.migrateToVersionExampleN(db);
+//            }
         }
     }
 }

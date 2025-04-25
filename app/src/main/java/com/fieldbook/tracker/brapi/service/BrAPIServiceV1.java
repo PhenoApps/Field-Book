@@ -1204,7 +1204,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
                 System.out.println("Size of study details: "+studyDetails.getValues().size());
 
                 for (List<String> dataRow : studyDetails.getValues()) {
-                    dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow, true);
+                    dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
                 }
 
                 // Insert the traits already associated with this study

@@ -73,24 +73,26 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
 
     }
 
+    private val defaultMaxSizePx: Int by lazy {
+        val context = traitBoxView.context
+        val defaultMaxSizeDp = context.resources.getDimension(R.dimen.fb_trait_status_bar_icon_default_max_size)
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            defaultMaxSizeDp,
+            context.resources.displayMetrics
+        ).toInt() // in px
+    }
+
     // calculate item size and update the view
     fun calculateAndSetItemSize(viewHolder: ViewHolder) {
         val recyclerView = traitBoxView.getRecyclerView() ?: return
         recyclerView.post {
             val itemCount = itemCount
-            val context = viewHolder.imageView.context
 
             val parentWidth = recyclerView.width
 
             val availableWidth = parentWidth - recyclerView.paddingLeft - recyclerView.paddingRight
             val calculatedSize = availableWidth / itemCount
-
-            val defaultMaxSizeDp = context.resources.getDimension(R.dimen.fb_trait_status_bar_icon_default_max_size)
-            val defaultMaxSizePx = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                defaultMaxSizeDp,
-                traitBoxView.context.resources.displayMetrics
-            ).toInt() // in px
 
             val itemSize = minOf(calculatedSize, defaultMaxSizePx)
 
@@ -99,7 +101,6 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
                 height = itemSize
             }
         }
-
     }
 
     fun setCurrentSelection(newSelection: Int) {

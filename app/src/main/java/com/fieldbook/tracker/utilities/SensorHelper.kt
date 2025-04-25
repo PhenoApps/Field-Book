@@ -103,14 +103,14 @@ class SensorHelper @Inject constructor(@ActivityContext private val context: Con
 
         // roll: x axis and plane perpendicular to gravity (horizontal plane) (side to side tilt)
         // (gx, sqrt(gy^2 + gz^2)
-        val roll = -toDegrees(atan2(gx.toDouble(), sqrt((gy * gy + gz * gz).toDouble()))).toFloat()
+        val roll = toDegrees(atan2(gx.toDouble(), sqrt((gy * gy + gz * gz).toDouble()))).toFloat()
 
         // pitch: y axis and horizontal plane (forward/backward tilt)
         // (gy, sqrt(gx^2 + gz^2)
         val pitch = toDegrees(atan2(gy.toDouble(), sqrt((gx * gx + gz * gz).toDouble()))).toFloat()
 
         // yaw: angle between z axis and the gravity vector
-        // this is not true yaw, rather it is title from the vertical plane
+        // this is not true yaw, rather it is tilt from the vertical plane
         // (gz, sqrt(gx^2 + gy^2)
         val tiltFromVertical = toDegrees(atan2(gz.toDouble(), sqrt((gx * gx + gy * gy).toDouble()))).toFloat()
 

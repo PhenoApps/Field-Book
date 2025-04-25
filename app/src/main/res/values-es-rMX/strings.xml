@@ -21,6 +21,7 @@
     <string name="dialog_sort_by">Ordenar Por</string>
     <string name="dialog_enable">Activar</string>
     <string name="dialog_delete">Eliminar</string>
+    <string name="dialog_accept">Aceptar</string>
     <string name="barcode_scanner_text">Escanear un código de barras</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Datos de ejemplo</string>
@@ -102,7 +103,7 @@
     <string name="list_item_field_sort_drag_content_description">Arrastre para mover elemento.</string>
     <string name="dialog_field_sort_no_attributes_found">No se encontraron atributos.</string>
     <string name="dialog_field_sort_no_more_attributes_found">Se han usado todos los atributos.</string>
-    <string name="dialog_field_sort_delete_all_content_description">Elimina todas las entradas de ordenación.</string>
+    <string name="dialog_field_sort_delete_all_content_description">Elimina todas las entradas ordenadas.</string>
     <string name="dialog_field_sort_toggle_order_content_description">Invierte el orden.</string>
     <string name="dialog_field_sort_add_content_description">Abre un diálogo para agregar un nuevo atributo para ordenar por.</string>
     <!-- Modify -->
@@ -177,6 +178,13 @@
     <string name="name_conflict_message">\"%1$s\" ya se usó como %2$s para otro campo.</string>
     <string name="name_conflict_import_name">nombre de importación</string>
     <string name="name_conflict_display_name">nombre a mostrar</string>
+    <string name="dialog_att_chooser_title_default">Elegir atributo</string>
+    <string name="search_attribute_dialog_title">Establecer ID de búsqueda</string>
+    <string name="dialog_att_chooser_unique_attributes">Atributos Únicos</string>
+    <string name="search_attribute_apply_to_all">Aplicar elección a todos los campos elegibles</string>
+    <string name="search_attribute_updated">Atributo de búsqueda actualizado</string>
+    <string name="search_attribute_updated_all">Buscar atributo actualizado para %1$d campo(s)</string>
+    <string name="search_multiple_matches_found">Se encontraron parcelas coincidentes con %1$d . Mostrando la primera.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_data_title">Datos</string>
     <string name="field_trait_observation_total">\"%d\" observaciones</string>
@@ -202,13 +210,14 @@
     <string name="traits_sort_format">Formato</string>
     <string name="warning_traits_missing_modify">Crear variables antes de modificarlas.</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">Importar/Exportar</string>
+    <string name="traits_new_dialog_title">Nueva(s) Variable(s)</string>
+    <string name="traits_dialog_create">Crear una nueva variable</string>
+    <string name="traits_dialog_import_from_file">Importar desde archivo</string>
     <string name="traits_dialog_import">Importar</string>
+    <string name="import_error_format_trait">Solo se pueden importar archivos TRT como lista de variables</string>
     <string name="traits_export_check">¿Exportar lista de variables actual?</string>
     <string name="traits_dialog_export">Exportar</string>
     <string name="dialog_delete_traits_message">¿Desea eliminar todas las variables actuales?</string>
-    <string name="import_error_format_trait">Solo se pueden importar archivos TRT como lista de variables</string>
-    <string name="import_dialog_title_traits">Importar variables</string>
     <string name="traits_toolbar_delete_all">Eliminar todas las variables</string>
     <string name="act_trait_editor_no_traits_exist">No existen variables.</string>
     <!-- Trait item menu -->
@@ -236,6 +245,7 @@
     <string name="traits_format_labelprint">Impresión de etiqueta Zebra</string>
     <string name="traits_format_usb_camera">Cámara USB</string>
     <string name="traits_format_go_pro_camera">GoPro</string>
+    <string name="traits_format_angle">Ángulo</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Variable</string>
     <string name="trait_creator_title_layout">Diseño de Variable</string>
@@ -383,7 +393,7 @@
     <string name="trait_go_pro_camera_delete_photo_title">Eliminar Imagen</string>
     <string name="go_pro_layout_black_11_not_detected">Esta Variable fue creada para una GoPro Black 11, por favor contacte con los desarrolladores para implementar su modelo GoPro.\n</string>
     <string name="go_pro_frag_connect_btn_content_description">Conectar a una cámara GoPro.\n</string>
-    <string name="trait_go_pro_capture_content_description">Capturar una imagen desde un dispositivo GoPro conectado.\n</string>
+    <string name="trait_go_pro_capture_content_description">Capturar una foto desde un dispositivo GoPro conectado.\n</string>
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_zoom_in_button_text">Acercar</string>
     <string name="trait_usb_camera_zoom_out_button_text">Alejar</string>
@@ -542,14 +552,23 @@
     <string name="preferences_profile_require_person_summary">Registra el nombre de la persona que captura datos</string>
     <string name="preferences_profile_set_person">Nombre de la Persona</string>
     <string name="preferences_profile_person_dialog_title">Establecer Persona</string>
+    <string name="dialog_previous_names">Nombres Usados Previamente</string>
+    <string name="preferences_profile_previous_names">Nombres Previos</string>
+    <string name="preferences_profile_new_person">Nueva Persona</string>
+    <string name="preferences_profile_previous_names_warning">Todos los nombres de personas guardadas se eliminarán, y esto no se puede revertir. ¿Está seguro de que desea continuar?</string>
     <string name="preferences_profile_name_first">Nombre</string>
     <string name="preferences_profile_name_last">Apellido</string>
-    <string name="preferences_profile_name_error">Ambos campos no pueden estar vacíos</string>
+    <string name="preferences_profile_name_error">Ambos campos no pueden estar en blanco</string>
     <string name="preferences_profile_require_interval_title">Intervalo de Verificación</string>
     <string name="verification_interval_every_open">Cada vez que se abre la aplicación</string>
     <string name="verification_interval_every_12">Cada 12 horas</string>
     <string name="verification_interval_every_24">Cada 24 horas</string>
     <string name="verification_interval_never">Nunca</string>
+    <string name="preferences_profile_device_title">Dispositivo</string>
+    <string name="preferences_profile_set_device_name">Nombre Dispositivo</string>
+    <string name="preferences_profile_device_name_dialog_title">Definir Nombre del Dispositivo</string>
+    <string name="preferences_profile_device_name_error">Este campo no puede estar en blanco</string>
+    <string name="preferences_profile_device_name_default_format">Predeterminado: %s</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Único</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Incluye un ID único y anónimo en los registros de fallos para ayudar al equipo de desarrollo a corregir errores</string>
     <string name="pref_profile_crashlytics_refresh_title">Refrescar ID</string>
@@ -726,6 +745,10 @@
     <string name="trait_audio_recording_warning">El audio a nivel de variable ya se está grabando. Deténgalo primero.</string>
     <string name="trait_audio_playing_warning">El audio a nivel de variable se está reproduciendo. Deténgalo primero.</string>
     <string name="field_audio_zip_error">Error al crear archivo zip</string>
+    <string name="trait_audio_placeholder_filename">Archivo de Audio Grabado</string>
+    <string name="trait_audio_timestamp">Timestamp: </string>
+    <string name="trait_audio_duration">Duración: </string>
+    <string name="trait_audio_file_size">Tamaño de Archivo</string>
     <string name="pref_beta_enable_individual_field_page_title">Habilitar Páginas de Campos Individuales</string>
     <string name="pref_beta_enable_individual_field_page_summary">Seleccionar un campo en la lista de campos abre una página de detalles</string>
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
@@ -1168,9 +1191,53 @@
     <string name="dialog_crash_report_message">Presione OK para enviar un informe de diagnóstico anónimo para ayudar a mejorar la app.</string>
     <string name="dialog_quick_goto_title">Rápido Ir a</string>
     <string name="dialog_quick_goto_go">Ir</string>
+    <string name="quick_goto_primary_hint">ID Primario</string>
+    <string name="quick_goto_secondary_hint">ID Secundario</string>
+    <string name="quick_goto_dialog_icon_description">persona en funciones</string>
     <string name="failed_to_fetch_observation_levels">Fallo obteniendo el nivel de las observaciónes</string>
     <string name="traits_sort_default">Predeterminado</string>
-    <string name="traits_crop_image_parameter">Cultivo</string>
+    <string name="traits_crop_image_parameter">Recortar</string>
+    <string name="dialog_crop_title">Configurar Región de Recorte</string>
+    <string name="dialog_crop_message">Definir una región de recorte que se aplicará a todas las fotos futuras de esta variable.</string>
+    <string name="view_trait_photo_settings_crop">Fijar Región de Recorte</string>
+    <string name="crop_image_clip_data_label">Datos de región de recorte en Field Book</string>
+    <string name="quick_goto_swap_content_description">alternar tipo de entrada</string>
     <!--  NearbyShare  -->
+    <string name="nearby_share_title">Compartir Cerca</string>
+    <string name="nearby_share_preferences_title">Compartir Preferencias</string>
+    <string name="nearby_share_connection_established">Conexión Establecida</string>
+    <string name="nearby_share_connection_rejected">Conexión Rechazada</string>
+    <string name="nearby_share_connection_error">Error de Conexión</string>
+    <string name="nearby_share_connection_cancelled">Conexión cancelada</string>
+    <string name="nearby_share_transfer_complete">Transferencia completa</string>
+    <string name="nearby_share_transfer_in_progress">Transferencia en curso</string>
+    <string name="nearby_share_transfer_failed">Error al transferir</string>
+    <string name="nearby_share_transfer_cancelled">Transferencia cancelada</string>
+    <string name="nearby_share_devices_disconnected">Dispositivos Desconectados</string>
+    <string name="nearby_share_receiving_file">Recibiendo archivo…</string>
+    <string name="nearby_share_starting_transfer">Transfiriendo Archivo %s…</string>
+    <string name="nearby_share_waiting_for_receivers">Esperando que los receptores conecten…</string>
+    <string name="nearby_share_searching_for_senders">Buscando dispositivos cercanos...</string>
+    <string name="nearby_share_already_waiting_for_receivers">Esperando a que los receptores se conecten…</string>
+    <string name="nearby_share_already_searching_for_sender">Buscando ya el remitente…</string>
+    <string name="nearby_share_no_devices_found">Ningún dispositivo encontrado aún</string>
+    <string name="nearby_share_permissions_required">Permisos de Dispositivso Cercanos Requeridos</string>
+    <string name="nearby_share_failed_discovery">Error al iniciar el descubrimiento: %s</string>
+    <string name="nearby_share_failed_advertising">Error esperando dispositivos: %s</string>
+    <string name="nearby_share_failed_transfer">Error al iniciar la transferencia: %s</string>
+    <string name="nearby_share_failed_payload">Error al crear la carga útil del archivo</string>
+    <string name="nearby_share_failed_request">Fallo al solicitar conexión: %s</string>
+    <string name="nearby_share_failed_handle_file">Error al manejar el archivo: %s</string>
+    <string name="nearby_share_generating_file">Preparando el archivo para la transferencia</string>
+    <string name="nearby_share_failed_import">Error al importar archivo: %s</string>
+    <string name="nearby_share_failed_export_generation_message">Error al generar el archivo para compartir: %s</string>
+    <string name="nearby_share_failed_export_generation">Error al generar el archivo para compartir</string>
+    <string name="nearby_share_file_imported_successfully">%s importado exitosamente</string>
+    <string name="nearby_share_authenticating_connection">Autenticando conexión con %s…</string>
+    <string name="dialog_device_selection_title">Seleccionar un dispositivo</string>
+    <string name="dialog_nearby_authentication_title">Aceptar Conexión a %s</string>
+    <string name="dialog_nearby_authentication_summary">Confirmar que el código coincide en ambos dispositivos: %s</string>
     <string name="preferences_preferences_title">Preferencias</string>
+    <string name="nearby_share_export_preferences">Exportar Preferencias</string>
+    <string name="nearby_share_import_preferences">Importar Preferencias</string>
 </resources>

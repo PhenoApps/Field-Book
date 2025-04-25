@@ -1305,6 +1305,8 @@ public class CollectActivity extends ThemedActivity
         traitLayouts.registerAllReceivers();
 
         refreshLock();
+
+        traitBox.recalculateTraitStatusBarSizes();
     }
 
     private void startGeoNav() {

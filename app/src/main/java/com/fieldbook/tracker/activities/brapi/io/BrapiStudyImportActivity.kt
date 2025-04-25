@@ -336,6 +336,16 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 attributes["Germplasm"] = unit.germplasmName
             }
 
+            unit.locationName?.takeIf { it.isNotEmpty() }?.let {
+                attributes["Location"] = it
+            }
+
+            unit.additionalInfo?.entrySet()?.forEach { entry ->
+                entry.value?.asString?.takeIf { it.isNotEmpty() }?.let {
+                    attributes[entry.key] = it
+                }
+            }
+
             val position = unit.observationUnitPosition
             if (position != null) {
                 position.observationLevelRelationships?.forEach { level ->

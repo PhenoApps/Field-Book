@@ -2,6 +2,7 @@ package com.fieldbook.tracker.utilities
 
 import android.Manifest
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
@@ -14,7 +15,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.AdvertisingOptions
 import com.google.android.gms.nearby.connection.ConnectionInfo
@@ -81,7 +85,11 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
 
     private val scope = CoroutineScope(Dispatchers.Main)
 
+    @Inject
+    lateinit var prefs: SharedPreferences
+
     companion object {
+        private const val TAG = "NearbyShareUtil"
         private val STRATEGY = Strategy.P2P_STAR
         private const val SERVICE_ID = "com.fieldbook.tracker.SERVICE_ID"
     }
@@ -90,8 +98,20 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         SecureBluetoothActivityImpl(context as FragmentActivity)
     }
 
-    init {
-        secureBluetooth.initialize()
+    /**
+     * Call this function in the fragment/activity
+     */
+    fun initialize() {
+        if (context is LifecycleOwner) {
+            val currentState = (context as LifecycleOwner).lifecycle.currentState
+            if (currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                Log.e(TAG, "Initialize called too late in lifecycle")
+            } else { // state = INITIALIZED or CREATED are okay
+                secureBluetooth.initialize()
+            }
+        } else {
+            secureBluetooth.initialize()
+        }
     }
 
     /**
@@ -128,17 +148,17 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                                 fileHandler?.onFileReceived(docFile)
                             }
                             withContext(Dispatchers.Main) {
-                                Utils.makeToast(context, String.format(getString(R.string.nearby_share_file_imported_successfully), fileName))
+                                Utils.makeToast(context, getString(R.string.nearby_share_file_imported_successfully, fileName))
                             }
                         } catch (e: Exception) {
                             withContext(Dispatchers.Main) {
                                 Log.e("PreferencesFragment", "Failed to import file", e)
-                                setProgressStatus(String.format(getString(R.string.nearby_share_failed_import), e.message), R.drawable.ic_transfer_error)
+                                setProgressStatus(getString(R.string.nearby_share_failed_import, e.message), R.drawable.ic_transfer_error)
                             }
                         }
                     } catch (e: Exception) {
                         withContext(Dispatchers.Main) {
-                            setProgressStatus(String.format(getString(R.string.nearby_share_failed_handle_file), e.message), R.drawable.ic_transfer_error)
+                            setProgressStatus(getString(R.string.nearby_share_failed_handle_file, e.message), R.drawable.ic_transfer_error)
                             FirebaseCrashlytics.getInstance().recordException(e)
                         }
                     }
@@ -160,7 +180,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                             documentFile.name?.let { name ->
                                 try {
                                     setFileName(name)
-                                    setProgressMessage(String.format(getString(R.string.nearby_share_starting_transfer), name))
+                                    setProgressMessage(getString(R.string.nearby_share_starting_transfer, name))
                                 } catch (e: Exception) {
                                     Log.e("NearbyShareUtil", "Failed to set filename", e)
                                     setProgressStatus(getString(R.string.nearby_share_failed_payload), R.drawable.ic_transfer_error)
@@ -184,7 +204,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                         setProgressMessage(getString(R.string.nearby_share_transfer_complete))
                     }
                     .addOnFailureListener { e ->
-                        setProgressStatus(String.format(getString(R.string.nearby_share_failed_transfer), e.message), R.drawable.ic_transfer_error)
+                        setProgressStatus(getString(R.string.nearby_share_failed_transfer, e.message), R.drawable.ic_transfer_error)
                         stopAdvertising()
                     }
             } ?: run {
@@ -261,7 +281,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         // add endpoint to pending connections
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
             mPendingConnections[endpointId] = Endpoint(endpointId, info.endpointName)
-            setProgressMessage(String.format(getString(R.string.nearby_share_authenticating_connection), info.endpointName))
+            setProgressMessage(getString(R.string.nearby_share_authenticating_connection, info.endpointName))
 
             showAuthDialog(context, endpointId, info)
         }
@@ -321,7 +341,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                         docFile = fileHandler?.prepareFileForTransfer()
                     }
                 } catch (e: Exception) {
-                    setProgressStatus(String.format(getString(R.string.nearby_share_failed_export_generation_message), e), R.drawable.ic_transfer_error)
+                    setProgressStatus(getString(R.string.nearby_share_failed_export_generation_message, e.message), R.drawable.ic_transfer_error)
                     stopNearbyShare()
                     FirebaseCrashlytics.getInstance().recordException(e)
                     return@launch
@@ -336,13 +356,13 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                 val advertisingOptions = AdvertisingOptions.Builder().setStrategy(STRATEGY).build()
 
                 try {
-                    connectionsClient.startAdvertising(Build.MODEL, SERVICE_ID, connectionLifecycleCallback, advertisingOptions)
+                    connectionsClient.startAdvertising(getDeviceName(), SERVICE_ID, connectionLifecycleCallback, advertisingOptions)
                         .addOnSuccessListener {
                             isAdvertising = true
                             setProgressMessage(getString(R.string.nearby_share_waiting_for_receivers))
                         }.addOnFailureListener { e ->
                             stopNearbyShare()
-                            setProgressStatus(String.format(getString(R.string.nearby_share_failed_advertising), e.message), R.drawable.ic_transfer_error)
+                            setProgressStatus(getString(R.string.nearby_share_failed_advertising, e.message), R.drawable.ic_transfer_error)
                         }
                         .addOnCanceledListener {
                             stopNearbyShare()
@@ -350,7 +370,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                         }
                 } catch (e: Exception) {
                     stopNearbyShare()
-                    setProgressStatus(String.format(getString(R.string.nearby_share_failed_advertising), e.message), R.drawable.ic_transfer_error)
+                    setProgressStatus(getString(R.string.nearby_share_failed_advertising, e.message), R.drawable.ic_transfer_error)
                     FirebaseCrashlytics.getInstance().recordException(e)
                 }
             }
@@ -388,7 +408,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                         setProgressMessage(getString(R.string.nearby_share_searching_for_senders))
                     }.addOnFailureListener { e ->
                         stopNearbyShare()
-                        setProgressStatus(String.format(getString(R.string.nearby_share_failed_discovery), e.message), R.drawable.ic_transfer_error)
+                        setProgressStatus(getString(R.string.nearby_share_failed_discovery, e.message), R.drawable.ic_transfer_error)
                     }
                     .addOnCanceledListener {
                         stopNearbyShare()
@@ -396,15 +416,24 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                     }
             } catch (e: Exception) {
                 stopNearbyShare()
-                setProgressStatus(String.format(getString(R.string.nearby_share_failed_discovery), e.message), R.drawable.ic_transfer_error)
+                setProgressStatus(getString(R.string.nearby_share_failed_discovery, e.message), R.drawable.ic_transfer_error)
                 FirebaseCrashlytics.getInstance().recordException(e)
             }
         }
     }
 
     private fun disconnectEstablishedConnections() {
-        mEstablishedConnections.toList().forEach { endpointId ->
-            connectionsClient.disconnectFromEndpoint(endpointId)
+        try {
+            mEstablishedConnections.toList().forEach { endpointId ->
+                try {
+                    connectionsClient.disconnectFromEndpoint(endpointId)
+                } catch (e: Exception) {
+                    Log.e("NearbyShareUtil", "Error disconnecting from endpoint $endpointId: ${e.message}", e)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("NearbyShareUtil", "Error during disconnection: ${e.message}", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
 
@@ -421,14 +450,14 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
 
         if (isAdvertising) stopAdvertising()
         if (isDiscovering) stopDiscovering()
+
+        resetParameters()
     }
 
     private fun stopAdvertising() {
         if (isAdvertising) {
             connectionsClient.stopAdvertising()
             isAdvertising = false
-
-            resetParameters()
         }
     }
 
@@ -436,8 +465,6 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         if (isDiscovering) {
             connectionsClient.stopDiscovery()
             isDiscovering = false
-
-            resetParameters()
         }
     }
 
@@ -517,9 +544,9 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
             .setTitle(getString(R.string.dialog_device_selection_title))
             .setItems(deviceNames) { dialog, which ->
                 val selectedEndpoint = endpoints[which]
-                connectionsClient.requestConnection(Build.MODEL, selectedEndpoint.id, connectionLifecycleCallback)
+                connectionsClient.requestConnection(getDeviceName(), selectedEndpoint.id, connectionLifecycleCallback)
                     .addOnFailureListener { e ->
-                        Utils.makeToast(context, String.format(getString(R.string.nearby_share_failed_request), e.message))
+                        Utils.makeToast(context, getString(R.string.nearby_share_failed_request, e.message))
                     }
                 dialog.dismiss()
             }
@@ -539,8 +566,8 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
 
     private fun showAuthDialog(context: Context, endpointId: String, info: ConnectionInfo) {
         authenticationDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
-            .setTitle(String.format(getString(R.string.dialog_nearby_authentication_title), info.endpointName))
-            .setMessage(String.format(getString(R.string.dialog_nearby_authentication_summary), info.authenticationDigits))
+            .setTitle(getString(R.string.dialog_nearby_authentication_title, info.endpointName))
+            .setMessage(getString(R.string.dialog_nearby_authentication_summary, info.authenticationDigits))
             .setPositiveButton(getString(R.string.dialog_accept)) { _, _ ->
                 connectionsClient.acceptConnection(endpointId, payloadCallback)
             }
@@ -552,5 +579,20 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
 
     private fun getString(stringRes: Int): String {
         return context.getString(stringRes)
+    }
+
+    private fun getString(stringRes: Int, vararg formatArgs: Any?): String {
+        return context.getString(stringRes, *formatArgs)
+    }
+
+    // if user has defined custom device name, add the device build model to the name
+    private fun getDeviceName(): String {
+        val deviceName = prefs.getString(GeneralKeys.DEVICE_NAME, Build.MODEL) ?: Build.MODEL
+
+        return if (deviceName != Build.MODEL) {
+            "$deviceName (${Build.MODEL})"
+        } else {
+            deviceName
+        }
     }
 }

@@ -73,6 +73,10 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private val timeStamp = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault())
     private var multipleFields = false
 
+    // a temporary directory is created for bundled media export
+    // this needs to be deleted AFTER zipping is completed
+    private var tempDirectory: DocumentFile? = null
+
     fun exportMultipleFields(fieldIds: List<Int>) {
         this.fieldIds = fieldIds
         this.multipleFields = fieldIds.size > 1
@@ -436,6 +440,9 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private fun createExportFile(cursor: Cursor, fileType: String, fileString: String, columns: ArrayList<String>) {
         val fileName = "${fileString}_$fileType.csv"
         val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+
+        val deviceName = preferences.getString(GeneralKeys.DEVICE_NAME, Build.MODEL) ?: Build.MODEL
+
         exportDir?.let { dir ->
             if (dir.exists()) {
                 val file = dir.createFile("text/csv", fileName)
@@ -447,7 +454,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                             val fw = OutputStreamWriter(stream)
                             val csvWriter = CSVWriter(fw, cursor)
                             when (fileType) {
-                                "database" -> csvWriter.writeDatabaseFormat(columns)
+                                "database" -> csvWriter.writeDatabaseFormat(columns, deviceName)
                                 "table" -> {
                                     val newColumns = columns.toTypedArray()
                                     val labels = exportTrait.map { it.name }
@@ -483,11 +490,57 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, studyName)
             mediaDir?.let { dir ->
                 if (dir.exists() && dir.isDirectory) {
-                    filesToExport.add(dir)
+                    bundleMediaDirectories(studyName, dir)
                 } else {
-                    Log.e(TAG, "Media directory is invalid or does not exist: ${mediaDir?.uri}")
+                    Log.e(TAG, "Media directory is invalid or does not exist: ${dir.uri}")
                 }
             }
+        }
+    }
+
+    /**
+     * There might be some media directories under plot_data/studyName/
+     * that might be from non-existing traits anymore or might just be some randomly created directories.
+     * Simply doing filesToExport.add(dir) will add all the directories under plot_data/studyName/ to the zip file
+     *
+     * Creates a temporary structure of studyName/ where only the media directories for
+     *  - existing trait when allTraits is selected
+     *  - existing and active traits when activeTraits is selected
+     * will be added
+     */
+    private fun bundleMediaDirectories(studyName: String, mediaDir: DocumentFile) {
+        // sanitize the trait names, this will be compared against already sanitized traitDirectories
+        val traitList = exportTrait.map { trait -> FileUtil.sanitizeFileName(trait.name) }
+        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
+        val tempDirName = "temp_export_${timeStamp.format(Calendar.getInstance().time)}"
+        tempDirectory = exportDir?.createDirectory(tempDirName)
+
+        try {
+            tempDirectory?.let { tmpDir ->
+                // create study name directory
+                val studyDir = tmpDir.createDirectory(studyName)
+
+                studyDir?.let { studyDirectory ->
+                    mediaDir.listFiles().forEach { traitDir ->
+                        val traitDirName = traitDir.name ?: ""
+
+                        // copy only the trait directories present in traitList
+                        if (traitDir.isDirectory && traitList.contains(traitDirName)) {
+                            Log.d(TAG, "Copying trait directory: $traitDirName")
+                            val newDir = studyDirectory.createDirectory(traitDirName)
+                            newDir?.let {
+                                traitDir.listFiles().forEach { file ->
+                                    if (file.isFile) copyFileToDirectory(file, it, file.name ?: "")
+                                }
+                            }
+                        }
+                    }
+
+                    filesToExport.add(studyDirectory)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error handling bundled files: ${e.message}", e)
         }
     }
 
@@ -554,6 +607,9 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 Toast.makeText(context, context.getString(R.string.export_error_data_missing), Toast.LENGTH_SHORT).show()
             }
         }
+
+        // delete the temp dir that was previously created
+        tempDirectory?.delete()
     }
 
     private fun archivePreviousExport(newFile: DocumentFile) {

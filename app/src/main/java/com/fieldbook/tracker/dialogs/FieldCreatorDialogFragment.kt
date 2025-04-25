@@ -490,7 +490,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
         val col = j.toString()
         val index = k.toString()
 
-        helper.createFieldData(studyDbId, fieldColumns, listOf(row, col, index, uuid), false)
+        helper.createFieldData(studyDbId, fieldColumns, listOf(row, col, index, uuid))
 
         updatePlotInsertText(row, col, index)
 

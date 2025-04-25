@@ -244,14 +244,15 @@
     <string name="warning_traits_missing_modify">Create traits before modifying them.</string>
 
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">Import/Export</string>
+    <string name="traits_new_dialog_title">New Trait(s)</string>
+    <string name="traits_dialog_create">Create new trait</string>
+    <string name="traits_dialog_import_from_file">Import from file</string>
     <string name="traits_dialog_import">Import</string>
+    <string name="import_error_format_trait">Only TRT files can be imported as a trait list</string>
+
     <string name="traits_export_check">Export current trait list?</string>
     <string name="traits_dialog_export">Export</string>
     <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
-
-    <string name="import_error_format_trait">Only TRT files can be imported as a trait list</string>
-    <string name="import_dialog_title_traits">Import traits</string>
 
     <string name="traits_toolbar_delete_all">Delete all traits</string>
     <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
@@ -640,6 +641,10 @@
 
     <string name="preferences_profile_set_person">Person Name</string>
     <string name="preferences_profile_person_dialog_title">Set Person</string>
+    <string name="dialog_previous_names">Previous Used Names</string>
+    <string name="preferences_profile_previous_names">Previous Names</string>
+    <string name="preferences_profile_new_person">New Person</string>
+    <string name="preferences_profile_previous_names_warning">All saved person names would be deleted, and this cannot be reversed. Are you sure you want to continue?</string>
     <string name="preferences_profile_name_first">First Name</string>
     <string name="preferences_profile_name_last">Last Name</string>
     <string name="preferences_profile_name_error">Both fields cannot be blank</string>
@@ -649,6 +654,12 @@
     <string name="verification_interval_every_12">Every 12 hours</string>
     <string name="verification_interval_every_24">Every 24 hours</string>
     <string name="verification_interval_never">Never</string>
+
+    <string name="preferences_profile_device_title">Device</string>
+    <string name="preferences_profile_set_device_name">Device Name</string>
+    <string name="preferences_profile_device_name_dialog_title">Set Device Name</string>
+    <string name="preferences_profile_device_name_error">This field cannot be blank</string>
+    <string name="preferences_profile_device_name_default_format">Default: %s</string>
 
     <string name="preferences_profile_crashlytics" translatable="false">Crashlytics</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
