@@ -382,9 +382,11 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             int insertPosition = headerPosition + 1;
             for (FieldObject field : fullFieldList) {
                 String fieldGroupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
-                if ((headerName == null && fieldGroupName == null) || // ungrouped
-                        (headerName != null && headerName.equals(fieldGroupName))) { // grouped
-                    currentList.add(insertPosition++, new FieldViewItem(field));
+                if (!field.getIsArchived()) {
+                    if ((headerName == null && fieldGroupName == null) || // ungrouped
+                            (headerName != null && headerName.equals(fieldGroupName))) { // grouped
+                        currentList.add(insertPosition++, new FieldViewItem(field));
+                    }
                 }
             }
         } else {
@@ -455,56 +457,67 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         List<FieldViewItem> arrayList = new ArrayList<>();
         boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
 
-        if (groupingEnabled) {
-            Map<String, List<FieldObject>> groupedFields = getGroupedFields(fieldsList);
-
-            // add group-field entries
-            for (Map.Entry<String, List<FieldObject>> entry : groupedFields.entrySet()) {
-                String groupName = entry.getKey();
-                List<FieldObject> groupFields = entry.getValue();
-
-                if (!groupFields.isEmpty()) {
-                    boolean isExpanded = true;
-
-                    if (groupName != null) {
-                        Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(groupName);
-                        if (groupId != null) { // get the isExpanded status
-                            isExpanded = StudyGroupDao.Companion.getIsExpanded(groupId);
-                        }
-                    } else { // for "ungrouped"
-                        isExpanded = preferences.getBoolean(GeneralKeys.UNGROUPED_FIELDS_EXPANDED, true);
-                    }
-
-                    FieldViewItem header = new FieldViewItem(groupName, false);
-                    header.isExpanded = isExpanded;
-                    arrayList.add(header);
-
-                    // add fields if the group is expanded
-                    if (isExpanded) {
-                        for (FieldObject field : groupFields) {
-                            arrayList.add(new FieldViewItem(field));
-                        }
-                    }
-                }
-            }
-
-            boolean hasArchivedFields = fieldsList.stream().anyMatch(FieldObject::getIsArchived);
-            if (hasArchivedFields) { // add archived list item at the bottom
-                String archivedVal = context.getString(R.string.group_archived_value);
-                FieldViewItem archiveHeader = new FieldViewItem(archivedVal, true);
-                arrayList.add(archiveHeader);
-            }
-        } else {
+        if (!groupingEnabled) {
             for (FieldObject field : fieldsList) {
                 arrayList.add(new FieldViewItem(field));
             }
+            return arrayList;
+        }
+
+        Map<String, List<FieldObject>> groupedFields = getGroupedFields(fieldsList);
+
+        List<FieldObject> ungroupedFields = groupedFields.remove(null);
+
+        // add group-field entries
+        for (Map.Entry<String, List<FieldObject>> entry : groupedFields.entrySet()) {
+            String groupName = entry.getKey();
+            List<FieldObject> groupFields = entry.getValue();
+
+            if (groupFields.isEmpty()) continue;
+
+            Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(groupName);
+            boolean isExpanded = groupId == null || StudyGroupDao.Companion.getIsExpanded(groupId);
+
+            addGroupToList(arrayList, groupName, isExpanded, groupFields);
+        }
+
+        if (ungroupedFields != null && !ungroupedFields.isEmpty()) { // add ungrouped header at the end BEFORE archived list item
+            boolean ungroupedExpanded = preferences.getBoolean(GeneralKeys.UNGROUPED_FIELDS_EXPANDED, true);
+
+            addGroupToList(arrayList, null, ungroupedExpanded, ungroupedFields);
+        }
+
+        boolean hasArchivedFields = fieldsList.stream().anyMatch(FieldObject::getIsArchived);
+        if (hasArchivedFields) { // add archived list item at the bottom
+            String archivedVal = context.getString(R.string.group_archived_value);
+            FieldViewItem archiveHeader = new FieldViewItem(archivedVal, true);
+            arrayList.add(archiveHeader);
         }
 
         return arrayList;
     }
 
     /**
-     * Returns a structure of group/fields, and the same order will be shown (skips archived fields)
+     * Adds a group to the array list with header and fields (if expanded and not archived)
+     */
+    private void addGroupToList(List<FieldViewItem> arrayList, String groupName, boolean isExpanded, List<FieldObject> groupFields) {
+        // add header
+        FieldViewItem header = new FieldViewItem(groupName, false);
+        header.isExpanded = isExpanded;
+        arrayList.add(header);
+
+        // add children if expanded
+        if (isExpanded && groupFields != null) {
+            for (FieldObject f : groupFields) {
+                if (!f.getIsArchived()) {
+                    arrayList.add(new FieldViewItem(f));
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns a structure of group/fields, and the same order will be shown
      */
     private Map<String, List<FieldObject>> getGroupedFields(List<FieldObject> fields) {
         Map<String, List<FieldObject>> groupedFields = new LinkedHashMap<>();
@@ -513,10 +526,6 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         groupedFields.put(null, new ArrayList<>());
 
         for (FieldObject field : fields) {
-            if (field.getIsArchived()) { // handle archived fields in buildFieldList
-                continue;
-            }
-
             String groupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
 
             groupedFields.putIfAbsent(groupName, new ArrayList<>());
