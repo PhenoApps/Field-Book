@@ -513,6 +513,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         studyDetails.setCommonCropName(study.getCommonCropName());
         studyDetails.setStudyDescription(study.getStudyDescription());
         studyDetails.setStudyLocation(study.getLocationName());
+        studyDetails.setTrialName(study.getTrialName());
         return studyDetails;
     }
 
