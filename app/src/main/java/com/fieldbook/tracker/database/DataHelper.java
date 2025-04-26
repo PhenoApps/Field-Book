@@ -32,6 +32,7 @@ import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
+import com.fieldbook.tracker.database.models.StudyGroupModel;
 import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
@@ -2220,7 +2221,7 @@ public class DataHelper {
     /**
      * Get all study group names
      */
-    public List<Pair<Integer, String>> getAllStudyGroups() {
+    public List<StudyGroupModel> getAllStudyGroups() {
         return StudyGroupDao.Companion.getAllStudyGroups();
     }
 

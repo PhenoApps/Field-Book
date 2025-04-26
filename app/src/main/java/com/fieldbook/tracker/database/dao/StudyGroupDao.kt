@@ -3,11 +3,15 @@ package com.fieldbook.tracker.database.dao
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.database.Migrator.StudyGroup
 import com.fieldbook.tracker.database.Migrator.Study
+import com.fieldbook.tracker.database.models.StudyGroupModel
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.database.query
 import com.fieldbook.tracker.database.toFirst
 
-
+/**
+ * Assign groups to fields
+ * Structured in a way that unused groups are deleted
+ */
 class StudyGroupDao {
     companion object {
         private const val TAG = "StudyGroupDao"
@@ -15,17 +19,18 @@ class StudyGroupDao {
         /**
          * Returns all group names from the database
          */
-        fun getAllStudyGroups(): MutableList<Pair<Int, String>>? = withDatabase { db ->
-            val groups = mutableListOf<Pair<Int, String>>()
+        fun getAllStudyGroups(): List<StudyGroupModel>? = withDatabase { db ->
+            val groups = mutableListOf<StudyGroupModel>()
 
             db.query(
                 StudyGroup.TABLE_NAME,
-                orderBy = "group_name"
+                select = arrayOf(StudyGroup.PK, "group_name", "isExpanded"),
             ).use { cursor ->
                 while (cursor.moveToNext()) {
                     val id = cursor.getInt(cursor.getColumnIndexOrThrow(StudyGroup.PK))
                     val name = cursor.getString(cursor.getColumnIndexOrThrow("group_name"))
-                    groups.add(Pair(id, name))
+                    val expanded = cursor.getString(cursor.getColumnIndexOrThrow("isExpanded")) != "false"
+                    groups.add(StudyGroupModel(id, name, expanded))
                 }
             }
 

@@ -112,6 +112,8 @@
     <string name="menu_groups_toggle">Toggle Groups Visibility</string>
     <string name="archived_fields">Archived Fields</string>
     <string name="menu_unarchive">Remove from archive</string>
+    <string name="menu_collapse_all">Collapse All</string>
+    <string name="menu_expand_all">Expand All</string>
 
 
     <!-- FIELDS -->

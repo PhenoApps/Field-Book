@@ -581,10 +581,6 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         return sortedGroups;
     }
 
-    private String formatGroupNameWithCount(String name, long count) {
-        return String.format("%s (%d)", name, count);
-    }
-
     public void setTextFilter(String filter) {
         this.filterText = filter;
         List<FieldObject> filteredFields = new ArrayList<>(fullFieldList);

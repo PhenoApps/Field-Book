@@ -22,4 +22,14 @@
         android:icon="@drawable/ic_sort"
         android:showAsAction="ifRoom"
         android:title="@string/menu_fields_sort_list" />
+    <item
+        android:id="@+id/collapseGroups"
+        android:icon="@drawable/ic_collapse"
+        android:showAsAction="collapseActionView"
+        android:title="@string/menu_collapse_all" />
+    <item
+        android:id="@+id/expandGroups"
+        android:icon="@drawable/ic_expand"
+        android:showAsAction="collapseActionView"
+        android:title="@string/menu_expand_all" />
 </menu>

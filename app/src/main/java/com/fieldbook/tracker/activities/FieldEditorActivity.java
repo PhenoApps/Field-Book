@@ -54,6 +54,7 @@ import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.StudyGroupDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.database.models.StudyGroupModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialogFragment;
 import com.fieldbook.tracker.dialogs.FieldSortDialogFragment;
 import com.fieldbook.tracker.dialogs.ListAddDialog;
@@ -93,7 +94,6 @@ import java.util.stream.Collectors;
 import java.util.StringJoiner;
 import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
-import kotlin.Pair;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -531,7 +531,19 @@ public class FieldEditorActivity extends ThemedActivity
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        List<Pair<Integer, String>> allStudyGroups = database.getAllStudyGroups();
+        setupGroupingIcon(menu);
+
+        // set collapse/expand item visibility
+        boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
+
+        menu.findItem(R.id.collapseGroups).setVisible(groupingEnabled);
+        menu.findItem(R.id.expandGroups).setVisible(groupingEnabled);
+
+        return true;
+    }
+
+    private void setupGroupingIcon(Menu menu) {
+        List<StudyGroupModel> allStudyGroups = database.getAllStudyGroups();
 
         boolean hasArchivedFields = fieldList.stream().anyMatch(FieldObject::getIsArchived);
         boolean hasGroups = allStudyGroups != null && !allStudyGroups.isEmpty();
@@ -548,7 +560,6 @@ public class FieldEditorActivity extends ThemedActivity
             preferences.edit().putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false).apply();
             mAdapter.resetFieldsList(fieldList);
         }
-        return true;
     }
 
     private Rect fieldsListItemLocation(int item) {
@@ -614,8 +625,23 @@ public class FieldEditorActivity extends ThemedActivity
             );
 
             return true;
+        } else if (itemId == R.id.collapseGroups) {
+            changeStateOfAllGroups(false);
+        } else if (itemId == R.id.expandGroups) {
+            changeStateOfAllGroups(true);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void changeStateOfAllGroups(boolean isExpanded) {
+        List<StudyGroupModel> allStudyGroups = StudyGroupDao.Companion.getAllStudyGroups();
+        if (allStudyGroups != null) {
+            for (StudyGroupModel group : allStudyGroups) {
+                StudyGroupDao.Companion.updateIsExpanded(group.getId(), isExpanded);
+            }
+        }
+        preferences.edit().putBoolean(GeneralKeys.UNGROUPED_FIELDS_EXPANDED, isExpanded).apply();
+        queryAndLoadFields();
     }
 
    // private void updateGroupingIcon() {
@@ -1168,7 +1194,7 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     private void showGroupAssignmentDialog(List<Integer> fieldIds) {
-        List<Pair<Integer, String>> allStudyGroups = database.getAllStudyGroups();
+        List<StudyGroupModel> allStudyGroups = database.getAllStudyGroups();
         boolean hasStudyGroups = allStudyGroups != null && !allStudyGroups.isEmpty();
 
         // check if any of the selected fields are in a group
@@ -1241,12 +1267,12 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     private void showExistingGroupsDialog(List<Integer> fieldIds) {
-        List<Pair<Integer, String>> existingGroups = database.getAllStudyGroups();
+        List<StudyGroupModel> existingGroups = database.getAllStudyGroups();
 
         new AlertDialog.Builder(this, R.style.AppAlertDialog)
                 .setTitle(R.string.group_existing)
                 .setItems(existingGroups.stream()
-                        .map(Pair::component2)
+                        .map(StudyGroupModel::getGroupName)
                         .toArray(String[]::new), (dialog, which) -> {
                     Integer groupId = existingGroups.get(which).component1();
 
