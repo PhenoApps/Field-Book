@@ -110,6 +110,7 @@
     <string name="menu_archive">Archive</string>
 
     <string name="menu_groups_toggle">Toggle Groups Visibility</string>
+    <string name="group_toggle_icon">Toggle Group</string>
     <string name="archived_fields">Archived Fields</string>
     <string name="menu_unarchive">Remove from archive</string>
     <string name="menu_collapse_all">Collapse All</string>
