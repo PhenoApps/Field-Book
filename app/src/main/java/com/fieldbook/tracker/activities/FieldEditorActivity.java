@@ -526,8 +526,28 @@ public class FieldEditorActivity extends ThemedActivity
         systemMenu = menu;
         systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
 
-        updateGroupingIcon(menu.findItem(R.id.toggle_group_visibility));
+        return true;
+    }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        List<Pair<Integer, String>> allStudyGroups = database.getAllStudyGroups();
+
+        boolean hasArchivedFields = fieldList.stream().anyMatch(FieldObject::getIsArchived);
+        boolean hasGroups = allStudyGroups != null && !allStudyGroups.isEmpty();
+        boolean showGroupingIcon = hasArchivedFields || hasGroups;
+
+        MenuItem groupToggleItem = menu.findItem(R.id.toggle_group_visibility);
+
+        // only show icon if at least one field is archived or assigned to a group
+        if (showGroupingIcon) { // show toggle icon
+            groupToggleItem.setVisible(true);
+            // updateGroupingIcon();
+        } else { // hide toggle icon, disable field grouping preference
+            groupToggleItem.setVisible(false);
+            preferences.edit().putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false).apply();
+            mAdapter.resetFieldsList(fieldList);
+        }
         return true;
     }
 
@@ -582,9 +602,9 @@ public class FieldEditorActivity extends ThemedActivity
             boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
             preferences.edit().putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, !groupingEnabled).apply();
 
-            if (systemMenu != null) {
-                updateGroupingIcon(systemMenu.findItem(R.id.toggle_group_visibility));
-            }
+            // if (systemMenu != null) {
+            //     updateGroupingIcon();
+            // }
 
             queryAndLoadFields();
 
@@ -598,12 +618,10 @@ public class FieldEditorActivity extends ThemedActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void updateGroupingIcon(MenuItem item) {
-        if (item != null) {
-            boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
-            item.setIcon(groupingEnabled ? R.drawable.ic_eye : R.drawable.ic_eye_off);
-        }
-    }
+   // private void updateGroupingIcon() {
+   //     boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
+   //     systemMenu.findItem(R.id.toggle_group_visibility).setIcon(groupingEnabled ? R.drawable.ic_existing_group : R.drawable.ic_ungroup);
+   // }
 
     private void showFieldsSortDialog() {
         Map<String, String> sortOptions = new LinkedHashMap<>();
@@ -1091,6 +1109,8 @@ public class FieldEditorActivity extends ThemedActivity
 
             database.deleteUnusedStudyGroups();
 
+            invalidateOptionsMenu(); // invokes onPrepareOptionsMenu
+
             new Handler(Looper.getMainLooper()).postDelayed(this::setupSearchBar, 100);
 
         } catch (Exception e) {
@@ -1148,9 +1168,8 @@ public class FieldEditorActivity extends ThemedActivity
     }
 
     private void showGroupAssignmentDialog(List<Integer> fieldIds) {
-        List<Pair<Integer, String>> existingGroups = database.getAllStudyGroups();
-        String archivedVal = getString(R.string.group_archived_value);
-        boolean hasNonArchivedGroups = existingGroups.stream().anyMatch(group -> !group.component2().equals(archivedVal));
+        List<Pair<Integer, String>> allStudyGroups = database.getAllStudyGroups();
+        boolean hasStudyGroups = allStudyGroups != null && !allStudyGroups.isEmpty();
 
         // check if any of the selected fields are in a group
         boolean anyFieldsInGroup = false;
@@ -1174,7 +1193,7 @@ public class FieldEditorActivity extends ThemedActivity
         List<Integer> optionIcon = new ArrayList<>();
 
         // "existing group" option
-        if (hasNonArchivedGroups) {
+        if (hasStudyGroups) {
             optionStrings.add(getString(R.string.group_existing));
             optionIcon.add(R.drawable.ic_existing_group);
         }
@@ -1223,9 +1242,6 @@ public class FieldEditorActivity extends ThemedActivity
 
     private void showExistingGroupsDialog(List<Integer> fieldIds) {
         List<Pair<Integer, String>> existingGroups = database.getAllStudyGroups();
-
-        // filter out "Archived" group
-        existingGroups.removeIf(group -> group.component2().equals(getString(R.string.group_archived_value)));
 
         new AlertDialog.Builder(this, R.style.AppAlertDialog)
                 .setTitle(R.string.group_existing)

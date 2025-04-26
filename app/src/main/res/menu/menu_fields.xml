@@ -4,7 +4,7 @@
     tools:ignore="AppCompatResource">
     <item
         android:id="@+id/toggle_group_visibility"
-        android:icon="@drawable/ic_eye"
+        android:icon="@drawable/ic_existing_group"
         android:showAsAction="always"
         android:title="@string/menu_groups_toggle" />
     <item
