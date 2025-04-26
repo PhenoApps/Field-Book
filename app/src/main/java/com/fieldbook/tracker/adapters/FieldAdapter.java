@@ -190,12 +190,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
     class ArchiveViewHolder extends RecyclerView.ViewHolder {
         final TextView headerTv;
-        final ImageView folderIcon;
 
         ArchiveViewHolder(View itemView) {
             super(itemView);
             headerTv = itemView.findViewById(R.id.archiveName);
-            folderIcon = itemView.findViewById(R.id.archiveIcon);
 
             itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(context, FieldArchivedActivity.class);
@@ -304,7 +302,6 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             String headerText = fieldViewItem.groupName + " (" + fieldViewItem.groupSize + ")";
 
             archiveHolder.headerTv.setText(headerText);
-            archiveHolder.folderIcon.setImageResource(R.drawable.ic_archive);
         } else {
             FieldViewHolder fieldHolder = (FieldViewHolder) holder;
             bindFieldViewHolder(fieldHolder, fieldViewItem);
