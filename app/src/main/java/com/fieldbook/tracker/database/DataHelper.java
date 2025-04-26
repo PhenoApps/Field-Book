@@ -2239,6 +2239,10 @@ public class DataHelper {
         return StudyGroupDao.Companion.createOrGetStudyGroup(groupName);
     }
 
+    public String getStudyGroupNameById(Integer groupId) {
+        return StudyGroupDao.Companion.getStudyGroupNameById(groupId);
+    }
+
     /**
      * Update the group_id for a study
      */

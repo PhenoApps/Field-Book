@@ -11,8 +11,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -86,6 +84,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var traitCountChip: Chip
     private lateinit var observationCountChip: Chip
     private lateinit var trialNameChip: Chip
+    private lateinit var studyGroupNameChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
 
@@ -112,6 +111,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         observationCountChip = rootView.findViewById(R.id.observationCountChip)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
         trialNameChip = rootView.findViewById(R.id.trialNameChip)
+        studyGroupNameChip = rootView.findViewById(R.id.studyGroupName)
 
         fieldId = arguments?.getInt("fieldId")
         loadFieldDetails()
@@ -311,6 +311,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             if (trialNameChip.text.isNotBlank()) {
                 trialNameChip.visibility = View.VISIBLE
             }
+
+
         }
 
 //        val sortOrder = field.exp_sort.takeIf { !it.isNullOrBlank() } ?: getString(R.string.field_default_sort_order)
@@ -352,6 +354,13 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             observationCountChip.visibility = View.GONE
         }
 
+
+        studyGroupNameChip.visibility = View.GONE
+        val groupName = database.getStudyGroupNameById(field.groupId)
+        if (!groupName.isNullOrEmpty()) {
+            studyGroupNameChip.visibility = View.VISIBLE
+            studyGroupNameChip.text = groupName
+        }
     }
 
     private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
