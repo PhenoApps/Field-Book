@@ -19,6 +19,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.FieldArchivedActivity;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.database.dao.StudyGroupDao;
+import com.fieldbook.tracker.database.models.StudyGroupModel;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
@@ -532,6 +533,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
     /**
      * Returns a structure of group/fields, and the same order will be shown
+     * Order of addition to groupedFields affects the ordering on screen as we are using LinkedHashMap
+     * Ungrouped fields are handled in buildFieldsList
      */
     private Map<String, List<FieldObject>> getGroupedFields(List<FieldObject> fields) {
         Map<String, List<FieldObject>> groupedFields = new LinkedHashMap<>();
@@ -539,14 +542,20 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         // "null" for ungrouped fields
         groupedFields.put(null, new ArrayList<>());
 
+        // add all study group names
+        List<StudyGroupModel> allStudyGroups = StudyGroupDao.Companion.getAllStudyGroups();
+        if (allStudyGroups != null && !allStudyGroups.isEmpty()) {
+            for (StudyGroupModel group : allStudyGroups) {
+                groupedFields.put(group.getGroupName(), new ArrayList<>());
+            }
+        }
+
         for (FieldObject field : fields) {
             if (field.getIsArchived()) { // handle archived fields in buildFieldList
                 continue;
             }
 
             String groupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
-
-            groupedFields.putIfAbsent(groupName, new ArrayList<>());
 
             // add the field to its group
             List<FieldObject> fieldList = groupedFields.get(groupName);
