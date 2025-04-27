@@ -598,6 +598,18 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         submitFieldsList(filteredFields);
     }
 
+    public void changeStateOfAllGroups(boolean isExpanded) {
+        List<StudyGroupModel> allStudyGroups = StudyGroupDao.Companion.getAllStudyGroups();
+        if (allStudyGroups != null) {
+            for (StudyGroupModel group : allStudyGroups) {
+                StudyGroupDao.Companion.updateIsExpanded(group.getId(), isExpanded);
+            }
+        }
+        preferences.edit().putBoolean(GeneralKeys.UNGROUPED_FIELDS_EXPANDED, isExpanded).apply();
+
+        submitFieldsList(fullFieldList);
+    }
+
     public static class FieldViewItem {
         public FieldViewType viewType;
         public String groupName;

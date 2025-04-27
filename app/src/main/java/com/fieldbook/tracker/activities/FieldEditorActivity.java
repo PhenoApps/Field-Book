@@ -262,11 +262,15 @@ public class FieldEditorActivity extends ThemedActivity
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             int itemId = item.getItemId();
             if (itemId == R.id.menu_select_all) {
-                mAdapter.selectAll();
-                int selectedCount = mAdapter.getSelectedItemCount();
-                if (actionMode != null && customTitleView != null) {
-                    customTitleView.setText(getString(R.string.selected_count, selectedCount));
-                }
+                mAdapter.changeStateOfAllGroups(true); // expand all groups
+
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    mAdapter.selectAll();
+                    int selectedCount = mAdapter.getSelectedItemCount();
+                    if (actionMode != null && customTitleView != null) {
+                        customTitleView.setText(getString(R.string.selected_count, selectedCount));
+                    }
+                }, 100);
                 return true;
             } else if (itemId == R.id.menu_export) {
                 exportUtil.exportMultipleFields(mAdapter.getSelectedItems());
@@ -637,22 +641,11 @@ public class FieldEditorActivity extends ThemedActivity
 
             return true;
         } else if (itemId == R.id.collapseGroups) {
-            changeStateOfAllGroups(false);
+            mAdapter.changeStateOfAllGroups(false);
         } else if (itemId == R.id.expandGroups) {
-            changeStateOfAllGroups(true);
+            mAdapter.changeStateOfAllGroups(true);
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void changeStateOfAllGroups(boolean isExpanded) {
-        List<StudyGroupModel> allStudyGroups = StudyGroupDao.Companion.getAllStudyGroups();
-        if (allStudyGroups != null) {
-            for (StudyGroupModel group : allStudyGroups) {
-                StudyGroupDao.Companion.updateIsExpanded(group.getId(), isExpanded);
-            }
-        }
-        preferences.edit().putBoolean(GeneralKeys.UNGROUPED_FIELDS_EXPANDED, isExpanded).apply();
-        queryAndLoadFields();
     }
 
    // private void updateGroupingIcon() {
