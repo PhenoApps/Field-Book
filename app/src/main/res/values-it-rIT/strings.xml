@@ -43,8 +43,11 @@
     <string name="app_intro_load_sample_data_title">Carica dati campione</string>
     <string name="app_intro_load_sample_data_summary">Importa un database campione che comprenda campi e caratteri d\'esempio.</string>
     <string name="app_intro_tutorial_title">Guida</string>
+    <string name="app_intro_tutorial_summary">Aggiungi un\'icona d\'aiuto alla barra degli strumenti in cima, che descriva le varie funzionalità dell\'applicazione.</string>
     <string name="app_intro_high_contrast_title">Modalità a contrasto elevato</string>
+    <string name="app_intro_high_contrast_summary">Abilita il tema ad alto contrasto per una migliore visibilità sui dispositivi elnk.</string>
     <!-- Storage Definer -->
+    <string name="storage_definer_title">Posizione di archiviazione</string>
     <string name="define_button_text">Scegli la cartella</string>
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
@@ -132,8 +135,17 @@
     <string name="act_field_editor_load_file_failed">Si è verificato un errore durante il caricamento del file.</string>
     <string name="act_field_editor_file_open_failed">Impossibile aprire il file.</string>
     <!-- Field Creator  -->
+    <string name="dialog_field_creator_ask_name_hint">Nome</string>
+    <string name="dialog_field_creator_ask_row_hint">File</string>
+    <string name="dialog_field_creator_ask_columns_hint">Colonne</string>
     <!-- Geo-Navigate to Field -->
+    <string name="menu_fields_plot_by_distance_title">Seleziona il campo più vicino</string>
+    <string name="activity_field_editor_no_field_found">Nessuna coordinata trovata.</string>
     <!-- Field Details -->
+    <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
+    <string name="name_conflict_import_name">importa nome</string>
+    <string name="name_conflict_display_name">visualizza nome</string>
+    <string name="dialog_att_chooser_title_default">Seleziona attributo</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <!-- Field Detail Charts -->
     <!-- Semantic dates -->
@@ -170,6 +182,7 @@
     <string name="traits_format_barcode">Codice a barre</string>
     <string name="traits_format_labelprint">Stampa etichetta Zebra</string>
     <!-- Trait Creation Dialog -->
+    <string name="traits_create_name">Nome</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Impostazioni predefinite</string>
     <string name="traits_create_value_minimum">Minimo</string>
