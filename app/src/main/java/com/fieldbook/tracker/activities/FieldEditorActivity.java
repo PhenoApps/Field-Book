@@ -531,7 +531,22 @@ public class FieldEditorActivity extends ThemedActivity
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        setupGroupingIcon(menu);
+        boolean isGroupingPossible = areFieldsGrouped();
+        boolean isGroupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
+        boolean userHasToggledGrouping = preferences.getBoolean(GeneralKeys.USER_TOGGLED_FIELD_GROUPING, false);
+
+        MenuItem groupToggleItem = menu.findItem(R.id.toggle_group_visibility);
+        groupToggleItem.setVisible(isGroupingPossible); // change icon visibility
+
+        if (!isGroupingPossible) { // if grouping is not possible, force disable grouping state
+            preferences.edit().putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false).apply();
+            preferences.edit().putBoolean(GeneralKeys.USER_TOGGLED_FIELD_GROUPING, false).apply(); // set user toggle to false since forced
+        }
+        else if (!isGroupingEnabled && !userHasToggledGrouping) { // grouping was disabled AND user did not toggle it, enable grouping
+            preferences.edit().putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, true).apply();
+            // if user had toggled grouping to false using the menu item
+            // then not including !userHasToggledGrouping in the condition would set the grouping to true
+        }
 
         // set collapse/expand item visibility
         boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
@@ -539,27 +554,21 @@ public class FieldEditorActivity extends ThemedActivity
         menu.findItem(R.id.collapseGroups).setVisible(groupingEnabled);
         menu.findItem(R.id.expandGroups).setVisible(groupingEnabled);
 
+        mAdapter.resetFieldsList(fieldList);
         return true;
     }
 
-    private void setupGroupingIcon(Menu menu) {
+    /**
+     * Return true if:
+     *  - at least one study group exists OR
+     *  - at least one field is archived
+     */
+    private boolean areFieldsGrouped() {
         List<StudyGroupModel> allStudyGroups = database.getAllStudyGroups();
 
         boolean hasArchivedFields = fieldList.stream().anyMatch(FieldObject::getIsArchived);
         boolean hasGroups = allStudyGroups != null && !allStudyGroups.isEmpty();
-        boolean showGroupingIcon = hasArchivedFields || hasGroups;
-
-        MenuItem groupToggleItem = menu.findItem(R.id.toggle_group_visibility);
-
-        // only show icon if at least one field is archived or assigned to a group
-        if (showGroupingIcon) { // show toggle icon
-            groupToggleItem.setVisible(true);
-            // updateGroupingIcon();
-        } else { // hide toggle icon, disable field grouping preference
-            groupToggleItem.setVisible(false);
-            preferences.edit().putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false).apply();
-            mAdapter.resetFieldsList(fieldList);
-        }
+        return hasArchivedFields || hasGroups;
     }
 
     private Rect fieldsListItemLocation(int item) {
@@ -611,7 +620,9 @@ public class FieldEditorActivity extends ThemedActivity
             showFieldsSortDialog();
         } else if (itemId == R.id.toggle_group_visibility) {
             boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
+
             preferences.edit().putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, !groupingEnabled).apply();
+            preferences.edit().putBoolean(GeneralKeys.USER_TOGGLED_FIELD_GROUPING, true).apply();
 
             // if (systemMenu != null) {
             //     updateGroupingIcon();
