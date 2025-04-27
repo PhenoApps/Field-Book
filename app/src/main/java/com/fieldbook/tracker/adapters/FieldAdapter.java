@@ -137,7 +137,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     public void selectAll() {
         List<FieldViewItem> currentList = getCurrentList();
         for (FieldViewItem fieldViewItem : currentList) {
-            if (!fieldViewItem.isGroupHeader()) {
+            if (fieldViewItem.isFieldItem()) {
                 selectedIds.add(fieldViewItem.field.getExp_id());
             }
         }
