@@ -93,8 +93,28 @@
     <!-- Changelog -->
     <string name="changelog_title">Changelog</string>
 
+    <!--  Field Grouping  -->
+    <string name="group_archived_value">Archived</string>
+    <string name="fields_ungrouped">Ungrouped</string>
+    <string name="dialog_group_options">Grouping Options</string>
+    <string name="group_existing">Existing group</string>
+    <string name="group_archive">Archive</string>
+    <string name="group_new">New group</string>
+    <string name="group_remove">Remove from group</string>
 
+    <string name="create_new_group">Create New Group</string>
+    <string name="dialog_group_name">Group Name</string>
+    <string name="dialog_group_name_warning">Field cannot be blank</string>
 
+    <string name="menu_group">Group</string>
+    <string name="menu_archive">Archive</string>
+
+    <string name="menu_groups_toggle">Toggle Groups Visibility</string>
+    <string name="group_toggle_icon">Toggle Group</string>
+    <string name="archived_fields">Archived Fields</string>
+    <string name="menu_unarchive">Remove from archive</string>
+    <string name="menu_collapse_all">Collapse All</string>
+    <string name="menu_expand_all">Expand All</string>
 
 
     <!-- FIELDS -->

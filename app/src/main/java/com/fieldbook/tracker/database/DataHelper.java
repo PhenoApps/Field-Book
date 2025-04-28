@@ -21,6 +21,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
+import com.fieldbook.tracker.database.dao.StudyGroupDao;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
@@ -31,6 +32,7 @@ import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
+import com.fieldbook.tracker.database.models.StudyGroupModel;
 import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
@@ -52,25 +54,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.qualifiers.ActivityContext;
+import kotlin.Pair;
 
 /**
  * All database related functions are here
@@ -78,7 +77,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
 public class DataHelper {
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 12;
+    public static final int DATABASE_VERSION = 13;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -2219,6 +2218,45 @@ public class DataHelper {
         close();
     }
 
+    /**
+     * Get all study group names
+     */
+    public List<StudyGroupModel> getAllStudyGroups() {
+        return StudyGroupDao.Companion.getAllStudyGroups();
+    }
+
+    /**
+     * Delete the unassigned study groups
+     */
+    public void deleteUnusedStudyGroups() {
+        StudyGroupDao.Companion.deleteUnusedStudyGroups();
+    }
+
+    /**
+     * Create a study group
+     */
+    public Integer createOrGetStudyGroup(String groupName) {
+        return StudyGroupDao.Companion.createOrGetStudyGroup(groupName);
+    }
+
+    public String getStudyGroupNameById(Integer groupId) {
+        return StudyGroupDao.Companion.getStudyGroupNameById(groupId);
+    }
+
+    /**
+     * Update the group_id for a study
+     */
+    public void updateStudyGroup(int studyId, Integer groupId) {
+        StudyDao.Companion.updateStudyGroup(studyId, groupId);
+    }
+
+    /**
+     * Update the isArchived flag for a study
+     */
+    public void setIsArchived(int studyId, boolean isArchived) {
+        StudyDao.Companion.setIsArchived(studyId, isArchived);
+    }
+
     public void deleteField(int studyId) {
 
         open();
@@ -3089,6 +3127,11 @@ public class DataHelper {
 //                // migrate to version that has new tables to handle spectral data and device parameters
 //                Migrator.Companion.migrateToVersionExampleN(db);
 //            }
+            if (oldVersion <= 12 && newVersion >= 13) {
+                // Add group_name column to studies table
+                Migrator.Companion.migrateToVersion13(db);
+            }
+
         }
     }
 }
