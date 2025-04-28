@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.location.Location;
 import android.net.Uri;
@@ -29,21 +28,20 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.AdapterView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiActivity;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
@@ -82,6 +80,7 @@ import org.phenoapps.utils.BaseDocumentTreeUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -90,9 +89,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
+
 import dagger.hilt.android.AndroidEntryPoint;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -101,35 +102,25 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class FieldEditorActivity extends ThemedActivity
         implements FieldSortController, FieldAdapterController, FieldAdapter.AdapterCallback {
 
-    private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
     private static final int REQUEST_CLOUD_FILE_CODE = 5;
     private static final int REQUEST_BRAPI_IMPORT_ACTIVITY = 10;
-
-    private ArrayList<FieldObject> fieldList;
+    private static final Handler mHandler = new Handler();
+    private final String TAG = "FieldEditor";
+    private final int PERMISSIONS_REQUEST_STORAGE = 998;
     public FieldAdapter mAdapter;
     public EditText trait;
-    private static final Handler mHandler = new Handler();
-    private FieldFileObject.FieldFileBase fieldFile;
-    private final int PERMISSIONS_REQUEST_STORAGE = 998;
-    private Spinner unique;
-    private Menu systemMenu;
-    private GPSTracker mGpsTracker;
-    private ActionMode actionMode;
-    private TextView customTitleView;
     public ExportUtil exportUtil;
-    private SearchBar searchBar;
-
     @Inject
     DataHelper database;
-
     @Inject
     FieldSwitchImpl fieldSwitcher;
-
     @Inject
     SharedPreferences preferences;
     RecyclerView recyclerView;
-
+    private ArrayList<FieldObject> fieldList;
+    private FieldFileObject.FieldFileBase fieldFile;
+    private Spinner unique;
     // Creates a new thread to do importing
     private final Runnable importRunnable = new Runnable() {
         public void run() {
@@ -139,6 +130,9 @@ public class FieldEditorActivity extends ThemedActivity
                     unique.getSelectedItem().toString()).execute(0);
         }
     };
+    private Menu systemMenu;
+    private GPSTracker mGpsTracker;
+    private SearchBar searchBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -173,7 +167,7 @@ public class FieldEditorActivity extends ThemedActivity
                 recyclerView.setEnabled(false);
 
                 getSupportFragmentManager().beginTransaction()
-                        .replace(android.R.id.content, fragment,"FieldDetailFragmentTag")
+                        .replace(android.R.id.content, fragment, "FieldDetailFragmentTag")
                         .addToBackStack(null)
                         .commit();
             }
@@ -213,95 +207,24 @@ public class FieldEditorActivity extends ThemedActivity
     // Implementations of methods from FieldAdapter.AdapterCallback
     @Override
     public void onItemSelected(int selectedCount) {
-        if (selectedCount == 0 && actionMode != null) {
-            actionMode.finish();
-        } else if (selectedCount > 0 && actionMode == null) {
-            actionMode = startSupportActionMode(actionModeCallback);
+
+        if (mAdapter.getSelectedItemCount() > 0) {
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(getString(R.string.selected_count, selectedCount));
+            }
+        } else {
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(getString(R.string.settings_fields));
+            }
         }
-        if (actionMode != null && customTitleView != null) {
-            customTitleView.setText(getString(R.string.selected_count, selectedCount));
-        }
+
+        invalidateOptionsMenu();
     }
 
     @Override
     public void onItemClear() {
-        if (actionMode != null) {
-            actionMode.finish();
-        }
+
     }
-
-    private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.cab_menu, menu);
-
-            // Create and style the custom title view
-            customTitleView = new TextView(FieldEditorActivity.this);
-            customTitleView.setTextColor(Color.BLACK); // Set text color
-            customTitleView.setTextSize(18); // Set text size
-
-            // Set layout parameters
-            ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.WRAP_CONTENT,
-                    ActionBar.LayoutParams.WRAP_CONTENT);
-            customTitleView.setLayoutParams(layoutParams);
-
-            // Set the custom view
-            mode.setCustomView(customTitleView);
-
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            int itemId = item.getItemId();
-            if (itemId == R.id.menu_select_all) {
-                mAdapter.changeStateOfAllGroups(true); // expand all groups
-
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    mAdapter.selectAll();
-                    int selectedCount = mAdapter.getSelectedItemCount();
-                    if (actionMode != null && customTitleView != null) {
-                        customTitleView.setText(getString(R.string.selected_count, selectedCount));
-                    }
-                }, 100);
-                return true;
-            } else if (itemId == R.id.menu_export) {
-                exportUtil.exportMultipleFields(mAdapter.getSelectedItems());
-                mAdapter.exitSelectionMode();
-                mode.finish();
-                return true;
-            } else if (itemId == R.id.menu_group_fields) {
-                showGroupAssignmentDialog(mAdapter.getSelectedItems());
-                return true;
-            } else if (itemId == R.id.menu_archive_fields) {
-                for (Integer fieldId : mAdapter.getSelectedItems()) {
-                    database.setIsArchived(fieldId, true);
-                }
-                queryAndLoadFields();
-                mAdapter.exitSelectionMode();
-                return true;
-            } else if (itemId == R.id.menu_delete) {
-                showDeleteConfirmationDialog(mAdapter.getSelectedItems(), false);
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            mAdapter.exitSelectionMode();
-            actionMode = null;
-        }
-    };
 
     public void setActiveField(int studyId) {
 
@@ -332,21 +255,23 @@ public class FieldEditorActivity extends ThemedActivity
         }
 
         new AlertDialog.Builder(this, R.style.AppAlertDialog)
-            .setTitle(getString(R.string.fields_delete_study))
-            .setMessage(formattedMessage)
-            .setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    deleteFields(fieldIds);
-                    if (isFromDetailFragment) { getSupportFragmentManager().popBackStack(); }
-                }
-            })
-            .setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            })
-            .show();
+                .setTitle(getString(R.string.fields_delete_study))
+                .setMessage(formattedMessage)
+                .setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteFields(fieldIds);
+                        if (isFromDetailFragment) {
+                            getSupportFragmentManager().popBackStack();
+                        }
+                    }
+                })
+                .setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 
     private String getFieldNames(final List<Integer> fieldIds) {
@@ -384,11 +309,6 @@ public class FieldEditorActivity extends ThemedActivity
 
         queryAndLoadFields();
         mAdapter.exitSelectionMode();
-        if (actionMode != null) {
-            actionMode.finish();
-            actionMode = null;
-        }
-
     }
 
     private void showFileDialog() {
@@ -443,11 +363,11 @@ public class FieldEditorActivity extends ThemedActivity
         };
 
         ListAddDialog dialog = new ListAddDialog(
-            this,
-            getString(R.string.fields_new_dialog_title),
-            importArray,
-            icons,
-            onItemClickListener
+                this,
+                getString(R.string.fields_new_dialog_title),
+                importArray,
+                icons,
+                onItemClickListener
         );
         dialog.show(getSupportFragmentManager(), "ListAddDialog");
     }
@@ -530,6 +450,23 @@ public class FieldEditorActivity extends ThemedActivity
         systemMenu = menu;
         systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
 
+        //TODO rather not use reflection here...
+        //https://stackoverflow.com/questions/18374183/how-to-show-icons-in-overflow-menu-in-actionbar
+        if(menu.getClass().getSimpleName().equals("MenuBuilder")){
+            try{
+                Method m = menu.getClass().getDeclaredMethod(
+                        "setOptionalIconsVisible", Boolean.TYPE);
+                m.setAccessible(true);
+                m.invoke(menu, true);
+            }
+            catch(NoSuchMethodException e){
+                Log.e(TAG, "onMenuOpened", e);
+            }
+            catch(Exception e){
+                throw new RuntimeException(e);
+            }
+        }
+
         return true;
     }
 
@@ -540,13 +477,19 @@ public class FieldEditorActivity extends ThemedActivity
         boolean userHasToggledGrouping = preferences.getBoolean(GeneralKeys.USER_TOGGLED_FIELD_GROUPING, false);
 
         MenuItem groupToggleItem = menu.findItem(R.id.toggle_group_visibility);
+        MenuItem sortFieldsItem = menu.findItem(R.id.sortFields);
+        MenuItem exportItem = menu.findItem(R.id.menu_export);
+        MenuItem selectAllItem = menu.findItem(R.id.menu_select_all);
+        MenuItem groupFieldsItem = menu.findItem(R.id.menu_group_fields);
+        MenuItem archiveFieldsItem = menu.findItem(R.id.menu_archive_fields);
+        MenuItem deleteFieldsItem = menu.findItem(R.id.menu_delete);
+
         groupToggleItem.setVisible(isGroupingPossible); // change icon visibility
 
         if (!isGroupingPossible) { // if grouping is not possible, force disable grouping state
             preferences.edit().putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false).apply();
             preferences.edit().putBoolean(GeneralKeys.USER_TOGGLED_FIELD_GROUPING, false).apply(); // set user toggle to false since forced
-        }
-        else if (!isGroupingEnabled && !userHasToggledGrouping) { // grouping was disabled AND user did not toggle it, enable grouping
+        } else if (!isGroupingEnabled && !userHasToggledGrouping) { // grouping was disabled AND user did not toggle it, enable grouping
             preferences.edit().putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, true).apply();
             // if user had toggled grouping to false using the menu item
             // then not including !userHasToggledGrouping in the condition would set the grouping to true
@@ -559,13 +502,54 @@ public class FieldEditorActivity extends ThemedActivity
         menu.findItem(R.id.expandGroups).setVisible(groupingEnabled);
 
         mAdapter.resetFieldsList(fieldList);
+
+        MenuItem[] defaultMenuListItems = new MenuItem[]{
+                sortFieldsItem,
+        };
+
+        MenuItem[] selectedMenuListItems = new MenuItem[]{
+                exportItem,
+                selectAllItem,
+                groupFieldsItem,
+                archiveFieldsItem,
+                deleteFieldsItem};
+
+        if (mAdapter.getSelectedItemCount() == 0) {
+
+            for (MenuItem item : defaultMenuListItems) {
+                toggleMenuItem(item, true);
+            }
+
+            for (MenuItem item : selectedMenuListItems) {
+                toggleMenuItem(item, false);
+            }
+
+        } else {
+
+            groupToggleItem.setVisible(false);
+            groupToggleItem.setEnabled(false);
+
+            for (MenuItem item : defaultMenuListItems) {
+                toggleMenuItem(item, false);
+            }
+
+            for (MenuItem item : selectedMenuListItems) {
+                toggleMenuItem(item, true);
+            }
+        }
+
         return true;
+    }
+
+    private void toggleMenuItem(MenuItem item, boolean enabled) {
+        item.setEnabled(enabled);
+        item.setVisible(enabled);
     }
 
     /**
      * Return true if:
-     *  - at least one study group exists OR
-     *  - at least one field is archived
+     * - at least one study group exists OR
+     * - at least one field is archived
      */
     private boolean areFieldsGrouped() {
         List<StudyGroupModel> allStudyGroups = database.getAllStudyGroups();
@@ -602,9 +586,9 @@ public class FieldEditorActivity extends ThemedActivity
         int itemId = item.getItemId();
         if (itemId == R.id.help) {
             TapTargetSequence sequence = new TapTargetSequence(this)
-                .targets(fieldsTapTargetMenu(R.id.newField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
-                        fieldsTapTargetMenu(R.id.newField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
-                );
+                    .targets(fieldsTapTargetMenu(R.id.newField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description), 60),
+                            fieldsTapTargetMenu(R.id.newField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description), 60)
+                    );
             if (fieldExists()) {
                 sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_select_title), getString(R.string.tutorial_fields_select_description)));
                 sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_delete_title), getString(R.string.tutorial_fields_delete_description)));
@@ -644,14 +628,43 @@ public class FieldEditorActivity extends ThemedActivity
             mAdapter.changeStateOfAllGroups(false);
         } else if (itemId == R.id.expandGroups) {
             mAdapter.changeStateOfAllGroups(true);
+        } else if (itemId == R.id.menu_select_all) {
+            mAdapter.changeStateOfAllGroups(true); // expand all groups
+            mAdapter.selectAll();
+            return true;
+        } else if (itemId == R.id.menu_export) {
+            exportUtil.exportMultipleFields(mAdapter.getSelectedItems());
+            mAdapter.exitSelectionMode();
+            invalidateOptionsMenu();
+            return true;
+        } else if (itemId == R.id.menu_group_fields) {
+            showGroupAssignmentDialog(mAdapter.getSelectedItems());
+            mAdapter.exitSelectionMode();
+            invalidateOptionsMenu();
+            return true;
+        } else if (itemId == R.id.menu_archive_fields) {
+            for (Integer fieldId : mAdapter.getSelectedItems()) {
+                database.setIsArchived(fieldId, true);
+            }
+            queryAndLoadFields();
+            mAdapter.exitSelectionMode();
+            invalidateOptionsMenu();
+            return true;
+        } else if (itemId == R.id.menu_delete) {
+            showDeleteConfirmationDialog(mAdapter.getSelectedItems(), false);
+            mAdapter.exitSelectionMode();
+            invalidateOptionsMenu();
+            return true;
+        } else {
+            return false;
         }
         return super.onOptionsItemSelected(item);
     }
 
-   // private void updateGroupingIcon() {
-   //     boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
-   //     systemMenu.findItem(R.id.toggle_group_visibility).setIcon(groupingEnabled ? R.drawable.ic_existing_group : R.drawable.ic_ungroup);
-   // }
+    // private void updateGroupingIcon() {
+    //     boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
+    //     systemMenu.findItem(R.id.toggle_group_visibility).setIcon(groupingEnabled ? R.drawable.ic_existing_group : R.drawable.ic_ungroup);
+    // }
 
     private void showFieldsSortDialog() {
         Map<String, String> sortOptions = new LinkedHashMap<>();
@@ -743,7 +756,7 @@ public class FieldEditorActivity extends ThemedActivity
                                 getString(R.string.activity_field_editor_switch_field_same),
                                 null,
                                 8000, null, null
-                                );
+                        );
 
                     } else {
 
