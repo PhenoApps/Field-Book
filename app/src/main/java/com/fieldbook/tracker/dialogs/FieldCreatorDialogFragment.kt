@@ -9,10 +9,18 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.Group
 import androidx.fragment.app.DialogFragment
 import com.fieldbook.tracker.R
@@ -20,6 +28,11 @@ import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
+import com.fieldbook.tracker.utilities.FieldConfig
+import com.fieldbook.tracker.utilities.FieldPattern
+import com.fieldbook.tracker.utilities.FieldPlotCalculator
+import com.fieldbook.tracker.utilities.FieldStartCorner
+import com.fieldbook.tracker.views.FieldPreviewGrid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -53,6 +66,23 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
 
     var fieldCreatorDialog: AlertDialog? = null
 
+    // grid preview colors
+    private var cellTextColor: Int = 0
+    private var headerCellBgColor: Int = 0
+    private var cellBgColor: Int = 0
+
+    private var fieldConfig by mutableStateOf(
+        FieldConfig(
+            rows = 0,
+            cols = 0,
+            pattern = FieldPattern.HORIZONTAL_LINEAR,
+            startCorner = FieldStartCorner.TOP_LEFT,
+            cellTextColor = 0,
+            headerCellBgColor = 0,
+            cellBgColor = 0
+        )
+    )
+
     // Inside FieldCreatorDialog class
     interface FieldCreationCallback {
         fun onFieldCreated(studyDbId: Int)
@@ -80,8 +110,25 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
 
         setupSizeGroup()
 
+        initializeThemeColors()
 
         return fieldCreatorDialog!!
+    }
+
+    private fun initializeThemeColors() {
+        val typedValue = TypedValue()
+        val theme = context?.theme
+        theme?.resolveAttribute(R.attr.cellTextColor, typedValue, true)
+        cellTextColor = typedValue.data
+        theme?.resolveAttribute(R.attr.emptyCellColor, typedValue, true)
+        cellBgColor = typedValue.data
+        headerCellBgColor = android.graphics.Color.WHITE
+
+        fieldConfig = fieldConfig.copy(
+            cellTextColor = cellTextColor,
+            headerCellBgColor = headerCellBgColor,
+            cellBgColor = cellBgColor
+        )
     }
 
     //the initial step that asks the user for row/column size of their field
@@ -147,7 +194,9 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
                         //change current group visibility before setting up next group
                         sizeGroup?.visibility = View.GONE
 
-                        setupRadioGroup(nameText.toString(), rows, cols)
+                        fieldConfig = fieldConfig.copy(rows = rows, cols = cols)
+
+                        setupStartingPointSelection(nameText.toString())
 
                     } else {
 
@@ -169,7 +218,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
         }
     }
 
-    private fun setupRadioGroup(name: String, rows: Int, cols: Int) {
+    private fun setupStartingPointSelection(name: String) {
 
         titleTextView?.setText(R.string.dialog_field_creator_ask_start_point)
 
@@ -192,39 +241,41 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
             setupSizeGroup()
         }
 
-        //set click listeners for the buttons, when one is pressed switch to the next group
-        group?.referencedIds?.forEach { id ->
+        val composeView = fieldCreatorDialog?.findViewById<ComposeView>(R.id.dialog_field_preview_starting_point)
+        composeView?.visibility = View.VISIBLE
 
-            (fieldCreatorDialog?.findViewById(id) as? RadioButton)?.apply {
 
-                isChecked = false
-            }
-        }
-
-        //set click listeners for the buttons, when one is pressed switch to the next group
-        group?.referencedIds?.forEach { id ->
-
-            (fieldCreatorDialog?.findViewById(id) as? RadioButton)?.apply {
-
-                setOnClickListener {
-
-                    group.visibility = View.GONE
-
-                    setupPatternGroup(name, rows, cols, this.id)
-
+        composeView?.setContent {
+            MaterialTheme {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    FieldPreviewGrid(
+                        config = fieldConfig.copy(showHeaders = true),
+                        onCornerSelected = { corner ->
+                            fieldConfig = fieldConfig.copy(startCorner = corner)
+                            composeView.visibility = View.GONE
+                            setupPatternGroup(name)
+                        },
+                        showPlotNumbers = false
+                    )
                 }
             }
         }
     }
 
-    private fun setupPatternGroup(name: String, rows: Int, cols: Int, startId: Int) {
+    private fun setupPatternGroup(name: String) {
 
         titleTextView?.setText(R.string.dialog_field_creator_ask_pattern)
 
         val patternGroup = fieldCreatorDialog?.findViewById<Group>(R.id.dialog_field_creator_group_pattern)
 
-        val linearButton = fieldCreatorDialog?.findViewById<ImageButton>(R.id.plot_linear_button)
-        val zigButton = fieldCreatorDialog?.findViewById<ImageButton>(R.id.plot_zigzag_button)
+        val horizontalLinearBtn = fieldCreatorDialog?.findViewById<ImageButton>(R.id.plot_horizontal_linear_button)
+        val horizontalZigzagBtn = fieldCreatorDialog?.findViewById<ImageButton>(R.id.plot_horizontal_zigzag_button)
+        val verticalLinearBtn = fieldCreatorDialog?.findViewById<ImageButton>(R.id.plot_vertical_linear_button)
+        val verticalZigzagBtn = fieldCreatorDialog?.findViewById<ImageButton>(R.id.plot_vertical_zigzag_button)
 
         val positiveButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_POSITIVE)
         val negativeButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEGATIVE)
@@ -238,40 +289,36 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
 
             patternGroup?.visibility = View.GONE
 
-            setupRadioGroup(name, rows, cols)
+            setupStartingPointSelection(name)
         }
 
-        //rotate the image patterns based on the chosen starting point
-        when (startId) {
-            R.id.dialog_field_creator_top_right_radio_button,
-            R.id.dialog_field_creator_bottom_right_radio_button -> {
-                linearButton?.scaleX = -1.0f
-                linearButton?.scaleY = -1.0f
-
-                if (startId == R.id.dialog_field_creator_bottom_right_radio_button) {
-                    zigButton?.scaleY = -1.0f
-                }
-                zigButton?.scaleX = -1.0f
-            }
-            R.id.dialog_field_creator_bottom_left_radio_button -> {
-                zigButton?.scaleY = -1.0f
-            }
+        horizontalLinearBtn?.setOnClickListener {
+            fieldConfig = fieldConfig.copy(pattern = FieldPattern.HORIZONTAL_LINEAR)
+            hidePatternAndReview(patternGroup, name)
+        }
+        horizontalZigzagBtn?.setOnClickListener {
+            fieldConfig = fieldConfig.copy(pattern = FieldPattern.HORIZONTAL_ZIGZAG)
+            hidePatternAndReview(patternGroup, name)
+        }
+        verticalLinearBtn?.setOnClickListener {
+            fieldConfig = fieldConfig.copy(pattern = FieldPattern.VERTICAL_LINEAR)
+            hidePatternAndReview(patternGroup, name)
+        }
+        verticalZigzagBtn?.setOnClickListener {
+            fieldConfig = fieldConfig.copy(pattern = FieldPattern.VERTICAL_ZIGZAG)
+            hidePatternAndReview(patternGroup, name)
         }
 
         patternGroup?.visibility = View.VISIBLE
-
-        patternGroup?.referencedIds?.forEach { id ->
-
-            (fieldCreatorDialog?.findViewById(id) as? ImageButton)?.setOnClickListener {
-
-                patternGroup.visibility = View.GONE
-
-                setupReviewGroup(name, rows, cols, startId, id)
-            }
-        }
     }
 
-    private fun setupReviewGroup(name: String, rows: Int, cols: Int, startId: Int, pattern: Int) {
+    private fun hidePatternAndReview(patternGroup: Group?, name:String) {
+        patternGroup?.visibility = View.GONE
+        setupReviewGroup(name)
+    }
+
+
+    private fun setupReviewGroup(name: String) {
 
         titleTextView?.text = context?.getString(R.string.dialog_field_creator_review_title)
 
@@ -286,51 +333,31 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
         val submitButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_POSITIVE)
         val cancelButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEGATIVE)
         val backButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEUTRAL)
-        val imageView = fieldCreatorDialog?.findViewById<ImageView>(R.id.dialog_field_creator_review_image)
 
         //warning if numbers are greater than 50
-        if (rows*cols > 50*50) {
+        if (fieldConfig.rows * fieldConfig.cols > 50*50) {
             largeTextView?.text = activity.getString(R.string.dialog_field_creator_large_field)
         }
 
-        //set current plow(?) pattern: use rotation
-        when (pattern) {
-            R.id.plot_linear_button -> {
-
-                imageView?.setImageResource(R.drawable.ic_plot_pattern_linear)
-
-                //mirror linear pattern when starting on the right
-                when (startId) {
-                    R.id.dialog_field_creator_top_right_radio_button,
-                    R.id.dialog_field_creator_bottom_right_radio_button -> {
-                        imageView?.scaleX = -1.0f
-                        imageView?.scaleY = -1.0f
-                    }
-                }
-            }
-            R.id.plot_zigzag_button -> {
-
-                imageView?.setImageResource(R.drawable.ic_plot_pattern_zigzag)
-
-                //mirror or flip zig zag pattern
-                when (startId) {
-                    R.id.dialog_field_creator_top_right_radio_button,
-                    R.id.dialog_field_creator_bottom_right_radio_button -> {
-                        if (startId == R.id.dialog_field_creator_bottom_right_radio_button) {
-                            imageView?.scaleY = -1.0f
-                        }
-                        imageView?.scaleX = -1.0f
-                    }
-                    R.id.dialog_field_creator_bottom_left_radio_button -> {
-                        imageView?.scaleY = -1.0f
-                    }
-                }
+        val composeView = fieldCreatorDialog?.findViewById<ComposeView>(R.id.dialog_field_creator_grid_preview)
+        composeView?.visibility = View.VISIBLE
+        composeView?.setContent {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                FieldPreviewGrid(
+                    config = fieldConfig.copy(showHeaders = false),
+                    showPlotNumbers = true,
+                    selectedCorner = fieldConfig.startCorner
+                )
             }
         }
 
         //set field format review, shows rows and columns
         reviewTitleText?.text = activity.getString(R.string.dialog_field_creator_insert_field,
-            rows.toString(), cols.toString())
+            fieldConfig.rows.toString(), fieldConfig.cols.toString())
 
         submitButton?.visibility = View.VISIBLE
         cancelButton?.visibility = View.VISIBLE
@@ -345,7 +372,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
 
             reviewGroup?.visibility = View.GONE
 
-            setupPatternGroup(name, rows, cols, startId)
+            setupPatternGroup(name)
 
         }
 
@@ -355,7 +382,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
 
             backButton?.isEnabled = false //no going back now
 
-            insertBasicField(name, rows, cols, pattern)
+            insertBasicField(name)
         }
 
     }
@@ -363,7 +390,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     //launch database IO coroutine that creates the field and its data
 //    private fun insertBasicField(name: String, rows: Int, cols: Int, startId: Int, pattern: Int) {
 
-    private fun insertBasicField(name: String, rows: Int, cols: Int, pattern: Int) {
+    private fun insertBasicField(name: String) {
         Log.d("FieldCreatorDialog", "Starting to insert basic field with name: $name")
         //insert job is cancelled when the cancel button is pressed
         val cancelButton = fieldCreatorDialog?.getButton(AlertDialog.BUTTON_NEGATIVE)
@@ -388,66 +415,24 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
                         exp_alias = name
                         exp_source = activity.getString(R.string.field_book)
                         import_format = ImportFormat.INTERNAL
-                        count = (rows * cols).toString()
+                        count = (fieldConfig.rows * fieldConfig.cols).toString()
                     }
 
-                    val fieldColumns = listOf("Row", "Column", "Plot", "plot_id")
+                    val fieldColumns = listOf(
+                        "Row",
+                        "Column",
+                        "Plot",
+                        "plot_id",
+                        "position_coordinate_x_type",
+                        "position_coordinate_y_type",
+                        "position_coordinate_x",
+                        "position_coordinate_y"
+                    )
                     studyDbId = helper.createField(field, fieldColumns, false)
 
-                    updateFieldInsertText(rows.toString(), cols.toString())
-                    insertPlotData(
-                        fieldColumns,
-                        rows,
-                        cols,
-                        linear = pattern == R.id.plot_linear_button
-                    )
+                    updateFieldInsertText(fieldConfig.rows.toString(), fieldConfig.cols.toString())
 
-                    //eight different cases to consider, P = patterns (linear and zigzag), S = starting states (TL, BR, TR, BL)
-//                    when (startId) {
-//                        R.id.dialog_field_creator_top_left_radio_button -> {
-//                            if (pattern == R.id.plot_linear_button) insertPlotData(
-//                                fieldColumns,
-//                                rows,
-//                                cols
-//                            )
-//                            else insertPlotData(fieldColumns, rows, cols, linear = false)
-//                        }
-//                        R.id.dialog_field_creator_bottom_left_radio_button -> {
-//                            if (pattern == R.id.plot_linear_button) insertPlotData(
-//                                fieldColumns,
-//                                rows,
-//                                cols,
-//                                ttb = false
-//                            )
-//                            else insertPlotData(fieldColumns, rows, cols, linear = false, ttb = false)
-//                        }
-//                        R.id.dialog_field_creator_top_right_radio_button -> {
-//                            if (pattern == R.id.plot_linear_button) insertPlotData(
-//                                fieldColumns,
-//                                rows,
-//                                cols,
-//                                ltr = false
-//                            )
-//                            else insertPlotData(fieldColumns, rows, cols, linear = false, ltr = false)
-//                        }
-//                        else -> {
-//                            if (pattern == R.id.plot_linear_button) insertPlotData(
-//                                fieldColumns,
-//                                rows,
-//                                cols,
-//                                ttb = false,
-//                                ltr = false
-//                            )
-//                            else insertPlotData(
-//                                fieldColumns,
-//                                rows,
-//                                cols,
-//                                linear = false,
-//                                ttb = false,
-//                                ltr = false
-//                            )
-//                        }
-//                    }
+                    insertPlotData(fieldColumns)
 
                     DataHelper.db.setTransactionSuccessful()
                     studyDbId // Return the new study ID
@@ -490,7 +475,11 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
         val col = j.toString()
         val index = k.toString()
 
-        helper.createFieldData(studyDbId, fieldColumns, listOf(row, col, index, uuid))
+        val (posX, posY) = FieldPlotCalculator.calculatePositionCoordinates(i, j, fieldConfig)
+
+        val values = listOf(row, col, index, uuid, "x_coordinate", "y_coordinate", posX.toString(), posY.toString())
+
+        helper.createFieldData(studyDbId, fieldColumns, values)
 
         updatePlotInsertText(row, col, index)
 
@@ -501,26 +490,45 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     //top-to-bottom parameter is used to change vertical orientation
     //left-to-right parameter is used to change horizontal orientation
     //zigzag patterns use an additional variable to toggle the "sow" direction
-    private fun insertPlotData(fieldColumns: List<String>, rows: Int, cols: Int,
-                                     linear: Boolean = true, ttb: Boolean = true, ltr: Boolean = true) {
-
-        var direction = ltr
+    private fun insertPlotData(fieldColumns: List<String>) {
         var plotIndex = 0
-        for (i in if (ttb) 1 until rows+1 else rows downTo 1) {
+        val pattern = fieldConfig.pattern
 
-            for (j in if (direction) 1 until cols+1 else cols downTo 1) {
+        val rows = fieldConfig.rows
+        val cols = fieldConfig.cols
 
-                plotIndex += 1
+        // add position coordinate attributes ONCE to the attribute table
+        // helper.insertPositionCoordinateAttributes(studyDbId)
 
-                insertPlotData(fieldColumns, i, j, plotIndex)
-
-                //throws an exception which is caught in a transaction
-                if (mCancelJobFlag) throw SQLiteAbortException()
-
+        when (pattern) {
+            FieldPattern.HORIZONTAL_LINEAR, FieldPattern.HORIZONTAL_ZIGZAG -> {
+                var ltr = true
+                for (i in 1..rows) {// outer: rows
+                    for (j in if (ltr) 1..cols else cols downTo 1) { // inner: cols, L→R or R→L
+                        plotIndex++
+                        insertPlotData(fieldColumns, i, j ,plotIndex)
+                        if (mCancelJobFlag) throw SQLiteAbortException()
+                    }
+                    //flip the direction before iterating over columns again
+                    if (pattern == FieldPattern.HORIZONTAL_ZIGZAG) {
+                        ltr = !ltr
+                    }
+                }
             }
-
-            //flip the direction before iterating over columns again
-            if (!linear) direction = !direction
+            FieldPattern.VERTICAL_LINEAR, FieldPattern.VERTICAL_ZIGZAG -> {
+                var topToBottom = true
+                for (j in 1..cols) {// outer: cols
+                    for (i in if (topToBottom) 1..rows else rows downTo 1) { // inner: rows, T→B or B→T
+                        plotIndex++
+                        insertPlotData(fieldColumns, i, j, plotIndex)
+                        if (mCancelJobFlag) throw SQLiteAbortException()
+                    }
+                    //flip the direction before iterating over columns again
+                    if (pattern == FieldPattern.VERTICAL_ZIGZAG) {
+                        topToBottom = !topToBottom
+                    }
+                }
+            }
         }
     }
 }

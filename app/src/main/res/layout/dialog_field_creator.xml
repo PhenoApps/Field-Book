@@ -13,17 +13,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="dialog_field_creator_top_left_radio_button,
-            dialog_field_creator_top_right_radio_button,
-            dialog_field_creator_bottom_left_radio_button,
-            dialog_field_creator_bottom_right_radio_button"/>
+        app:constraint_referenced_ids="dialog_field_preview_starting_point"/>
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/dialog_field_creator_group_pattern"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="plot_linear_button, plot_zigzag_button"/>
+        app:constraint_referenced_ids="plot_horizontal_linear_button, plot_horizontal_zigzag_button,
+                plot_vertical_linear_button, plot_vertical_zigzag_button"/>
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/dialog_field_creator_group_size"
@@ -79,44 +77,20 @@
 
     <!---region Choose starting point view group -->
 
-    <RadioButton
-        android:id="@+id/dialog_field_creator_bottom_right_radio_button"
-        android:layout_width="wrap_content"
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/dialog_field_preview_starting_point"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/dialog_field_creator_bottom_right"
-        app:layout_constraintStart_toEndOf="@+id/dialog_field_creator_bottom_left_radio_button"
-        app:layout_constraintTop_toBottomOf="@+id/dialog_field_creator_top_right_radio_button" />
-
-    <RadioButton
-        android:id="@+id/dialog_field_creator_bottom_left_radio_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_field_creator_bottom_left"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dialog_field_creator_top_left_radio_button" />
-
-    <RadioButton
-        android:id="@+id/dialog_field_creator_top_left_radio_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_field_creator_top_left"
-        app:layout_constraintStart_toStartOf="@+id/dialog_field_creator_bottom_left_radio_button"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title" />
-
-    <RadioButton
-        android:id="@+id/dialog_field_creator_top_right_radio_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_field_creator_top_right"
-        app:layout_constraintStart_toStartOf="@+id/dialog_field_creator_bottom_right_radio_button"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title" />
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- endregion -->
 
     <!---region Choose plot pattern view group -->
 
     <ImageButton
-        android:id="@+id/plot_linear_button"
+        android:id="@+id/plot_horizontal_linear_button"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/ic_plot_pattern_linear"
@@ -125,12 +99,30 @@
         android:contentDescription="@string/dialog_field_creator_linear_button_content_desc" />
 
     <ImageButton
-        android:id="@+id/plot_zigzag_button"
+        android:id="@+id/plot_horizontal_zigzag_button"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/ic_plot_pattern_zigzag"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
+        android:contentDescription="@string/dialog_field_creator_zig_button_content_desc" />
+
+    <ImageButton
+        android:id="@+id/plot_vertical_linear_button"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/ic_plot_pattern_linear"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/plot_horizontal_linear_button"
+        android:contentDescription="@string/dialog_field_creator_linear_button_content_desc" />
+
+    <ImageButton
+        android:id="@+id/plot_vertical_zigzag_button"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/ic_plot_pattern_zigzag"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/plot_horizontal_zigzag_button"
         android:contentDescription="@string/dialog_field_creator_zig_button_content_desc" />
 
     <!--endregion-->
@@ -144,8 +136,18 @@
         android:layout_margin="16dp"
         android:visibility="gone"
         app:constraint_referenced_ids="dialog_field_creator_review_text,
-            field_creator_plot_large_field_text_view,
-            dialog_field_creator_review_image, field_creator_plot_insert_text_view"/>
+        field_creator_plot_large_field_text_view,
+        field_creator_plot_insert_text_view,
+        dialog_field_creator_grid_preview"/>
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/dialog_field_creator_grid_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:layout_width="match_parent"
@@ -153,7 +155,7 @@
         android:id="@+id/dialog_field_creator_review_text"
         tools:text="Creating 3x3 field."
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_review_image"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_grid_preview"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
@@ -173,15 +175,5 @@
         app:layout_constraintTop_toBottomOf="@id/field_creator_plot_large_field_text_view"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
-
-    <ImageView
-        android:id="@+id/dialog_field_creator_review_image"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
-        tools:src="@drawable/ic_plot_pattern_linear"
-        android:contentDescription="@string/dialog_field_creator_review_image_content_desc" />
     <!--endregion-->
-
 </androidx.constraintlayout.widget.ConstraintLayout>
