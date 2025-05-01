@@ -122,6 +122,7 @@ class ObservationVariableDao {
 
         } ?: arrayOf()
 
+        //TODO 471 refactor and remove unused column when statement, it always searches for "trait"/observation_variable_name replace with trait db id
         fun getTraitColumnData(column: String): Array<String> = withDatabase { db ->
 
             val queryColumn = when(column) {
@@ -325,6 +326,7 @@ class ObservationVariableDao {
 
         } ?: hashMapOf()
 
+        //TODO 471 remove getTraitByName if not required
         //TODO missing obs. vars. for min/max/categories
         fun insertTraits(t: TraitObject) = withDatabase { db ->
 
@@ -398,6 +400,7 @@ class ObservationVariableDao {
         }
 
         //TODO need to edit min/max/category obs. var. val/attrs
+        //TODO 471, uses getAttributeByName, but probably unnecessary to change
         fun editTraits(id: String, trait: String, format: String, defaultValue: String,
                        minimum: String, maximum: String, details: String, categories: String,
                        closeKeyboardOnOpen: Boolean,

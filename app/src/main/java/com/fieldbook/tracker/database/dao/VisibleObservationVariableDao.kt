@@ -63,6 +63,7 @@ class VisibleObservationVariableDao {
 //
 //        } ?: arrayOf()
 
+        //TODO 471 trait name is used instead of trait db id
         fun getDetail(trait: String): TraitObject? = withDatabase { db ->
 
             //return a trait object but requires multiple queries to use the attr/values table.

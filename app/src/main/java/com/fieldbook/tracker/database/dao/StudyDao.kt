@@ -409,6 +409,7 @@ class StudyDao {
          * This function uses a field object to create a exp/study row in the database.
          * Columns are new observation unit attribute names that are inserted as well.
          */
+        //TODO 471 checkFieldNameAndObsLvl uses e.exp_name instead of studyDbId
         fun createField(e: FieldObject, timestamp: String, columns: List<String>, fromBrapi: Boolean): Int = withDatabase { db ->
 
             when (val sid = if (fromBrapi) checkBrapiStudyUnique(
@@ -478,6 +479,7 @@ class StudyDao {
         /**
          * This function should always be called within a transaction.
          */
+        //TODO 471 refactor if primary/secondary are not used
         fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) = withDatabase { db ->
 
             val names = getNames(studyId)!!

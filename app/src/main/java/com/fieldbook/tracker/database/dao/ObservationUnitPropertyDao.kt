@@ -34,6 +34,7 @@ class ObservationUnitPropertyDao {
                     .toFirst()[column].toString()
         }?: ""
 
+        //TODO 471 studyId should be sent as parameter
         fun getAllRangeId(context: Context): Array<Int> {
             val studyId = PreferenceManager.getDefaultSharedPreferences(context)
                 .getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
@@ -53,6 +54,7 @@ class ObservationUnitPropertyDao {
         }
 
 
+        //TODO 471, check if possible to use sortedObservationUnitData query instead of the property view, check performance
         fun getRangeFromId(firstName: String, secondName: String, uniqueName: String, id: Int): RangeObject = withDatabase { db ->
 //            data.range = cursor.getString(0);
 //                data.plot = cursor.getString(1);
@@ -154,6 +156,7 @@ class ObservationUnitPropertyDao {
          * "13RPN00001","1","1","1","13RPN_TRAY001","12GHT00001B","Kharkof","Kharkof","height","3","2021-08-05 11:52:45.379-05:00"," ","","2"
          */
 
+        //TODO 471 MAX CASE statements can add an additional AND vals.study_id = studyIdParameter, but probably unnecessary
         fun getExportDbData(
             context: Context,
             studyId: Int,
@@ -361,6 +364,7 @@ class ObservationUnitPropertyDao {
         }
 
 
+        //TODO 471 max case statements could use trait db id instead of name
         /**
          * Same as above but filters by obs unit and trait format
          */

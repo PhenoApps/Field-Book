@@ -1663,6 +1663,7 @@ public class DataHelper {
      *
      * TODO: When is this used and what queries are sent to this ?
      */
+    //TODO 471 double check the sql parameter
     public SearchData[] getRangeBySql(String sql) {
 
         open();
@@ -1795,6 +1796,7 @@ public class DataHelper {
      * Returns saved data based on trait, range and plot Meant for the on screen
      * drop downs
      */
+    //TODO 471 check this method, it uses trait name in select statement, might be a better way to do this with trait db id
     public String[] getDropDownRange(String trait, String plotId) {
 
         open();
@@ -2152,6 +2154,7 @@ public class DataHelper {
 //        }
     }
 
+    //TODO 471 check if this is necessary
     public TraitObject getTraitByName(String name) {
 
         open();
@@ -2159,6 +2162,7 @@ public class DataHelper {
         return ObservationVariableDao.Companion.getTraitByName(name);
     }
 
+    //TODO 471 used by brapi but might check if there is an alternative way to use trait db id as well
     public TraitObject getTraitByExternalDbId(String externalDbId, String traitDataSource) {
 
         open();
@@ -2219,6 +2223,7 @@ public class DataHelper {
         close();
     }
 
+    //TODO 471, not name based but looks like deleteFieldSortOrder is unnecessarily called twice
     public void deleteField(int studyId) {
 
         open();
@@ -2310,6 +2315,7 @@ public class DataHelper {
 //        //db.execSQL(index);
     }
 
+    //TODO 471, check if this is necessary anymore
     public int checkFieldName(String name) {
 
         open();
@@ -2730,6 +2736,7 @@ public class DataHelper {
         openHelper.getWritableDatabase().setTransactionSuccessful();
     }
 
+    //TODO 471 query that just returns trait names, check how it is being used
     public String[] getAllTraitNames() {
 
         open();
