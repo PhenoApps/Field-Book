@@ -40,7 +40,7 @@ class ObservationVariableValueDao {
             ))
         }
 
-        fun insert(min: String, max: String, categories: String, closeKeyboardOnOpen: String, cropImage: String, id: String) = withDatabase { db ->
+        fun insert(min: String, max: String, categories: String, closeKeyboardOnOpen: String, cropImage: String, allowDuplicates: String, id: String) = withDatabase { db ->
 
             //iterate through mapping of the old columns that are now attr/vals
             mapOf(
@@ -48,7 +48,8 @@ class ObservationVariableValueDao {
                     "validValuesMax" to max,
                     "category" to categories,
                     "closeKeyboardOnOpen" to closeKeyboardOnOpen,
-                    "cropImage" to cropImage
+                    "cropImage" to cropImage,
+                    "allowDuplicates" to allowDuplicates,
             ).asSequence().forEach { attrValue ->
 
                 insertAttributeValue(attrValue.key, attrValue.value, id)

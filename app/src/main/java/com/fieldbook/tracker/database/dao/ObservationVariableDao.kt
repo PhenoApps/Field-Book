@@ -150,7 +150,7 @@ class ObservationVariableDao {
         fun getAllTraitsForExport(): Cursor {
 
             val requiredFields = arrayOf("trait", "format", "defaultValue", "minimum",
-                "maximum", "details", "categories", "isVisible", "realPosition")
+                "maximum", "details", "categories", "isVisible", "realPosition", "allowDuplicates")
             //val requiredFields = getTraitPropertyColumns()
             //trait,format,defaultValue,minimum,maximum,details,categories,isVisible,realPosition
             return MatrixCursor(requiredFields).also { cursor ->
@@ -168,6 +168,7 @@ class ObservationVariableDao {
                             "categories" -> trait.categories
                             "isVisible" -> trait.visible
                             "realPosition" -> trait.realPosition
+                            "allowDuplicates" -> trait.allowDuplicates
                             else -> null!!
                         }
                     })
@@ -178,7 +179,7 @@ class ObservationVariableDao {
         fun getAllTraitObjectsForExport(): Cursor {
             val requiredFields = arrayOf(
                 "trait", "format", "defaultValue", "minimum", "maximum",
-                "details", "categories", "isVisible", "realPosition"
+                "details", "categories", "isVisible", "realPosition", "allowDuplicates"
             )
 
             return MatrixCursor(requiredFields).apply {
@@ -194,6 +195,7 @@ class ObservationVariableDao {
                             "categories" -> trait.categories
                             "isVisible" -> trait.visible.toString()
                             "realPosition" -> trait.realPosition.toString()
+                            "allowDuplicates" -> trait.allowDuplicates.toString()
                             else -> throw IllegalArgumentException("Unexpected field: $field")
                         }
                     })
@@ -340,6 +342,7 @@ class ObservationVariableDao {
                 Log.d("ObservationVariableDao", "categories: ${t.categories}")
                 Log.d("ObservationVariableDao", "closeKeyboardOnOpen: ${t.closeKeyboardOnOpen}")
                 Log.d("ObservationVariableDao", "cropImage: ${t.cropImage}")
+                Log.d("ObservationVariableDao", "allowDuplicates: ${t.allowDuplicates}")
 
                 val varRowId = db.insert(ObservationVariable.tableName, null, contentValues)
 
@@ -376,7 +379,8 @@ class ObservationVariableDao {
         fun editTraits(id: String, trait: String, format: String, defaultValue: String,
                        minimum: String, maximum: String, details: String, categories: String,
                        closeKeyboardOnOpen: Boolean,
-                       cropImage: Boolean): Long = withDatabase { db ->
+                       cropImage: Boolean,
+                       allowDuplicates: Boolean): Long = withDatabase { db ->
 
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
@@ -402,6 +406,7 @@ class ObservationVariableDao {
                     this.categories = categories
                     this.closeKeyboardOnOpen = closeKeyboardOnOpen
                     this.cropImage = cropImage
+                    this.allowDuplicates = allowDuplicates
                 }
 
                 traitObj.saveAttributeValues()

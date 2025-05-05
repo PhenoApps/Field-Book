@@ -44,6 +44,9 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.CROP_IMAGE)
         set(value) = attributeValues.setValue(TraitAttributes.CROP_IMAGE, value.toString())
 
+    var allowDuplicates: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.ALLOW_DUPLICATES)
+        set(value) = attributeValues.setValue(TraitAttributes.ALLOW_DUPLICATES, value.toString())
 
     fun loadAttributeAndValues() {
         attributeValues.load()
@@ -57,6 +60,7 @@ class TraitObject {
             setValue(TraitAttributes.CATEGORIES, categories)
             setValue(TraitAttributes.CLOSE_KEYBOARD, closeKeyboardOnOpen.toString())
             setValue(TraitAttributes.CROP_IMAGE, cropImage.toString())
+            setValue(TraitAttributes.ALLOW_DUPLICATES, allowDuplicates.toString())
         }
         attributeValuesHelper.save()
     }
