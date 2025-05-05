@@ -105,14 +105,15 @@ class TraitObject {
                 additionalInfo == that.additionalInfo &&
                 observationLevelNames == that.observationLevelNames &&
                 closeKeyboardOnOpen == that.closeKeyboardOnOpen &&
-                cropImage == that.cropImage
+                cropImage == that.cropImage &&
+                allowDuplicates == that.allowDuplicates
     }
 
     override fun hashCode(): Int {
         return Objects.hash(
             name, format, defaultValue, minimum, maximum, details, categories,
             realPosition, id, visible, externalDbId, traitDataSource,
-            additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage
+            additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage, allowDuplicates
         )
     }
 
@@ -134,6 +135,7 @@ class TraitObject {
         t.observationLevelNames = this.observationLevelNames
         t.closeKeyboardOnOpen = this.closeKeyboardOnOpen
         t.cropImage = this.cropImage
+        t.allowDuplicates = this.allowDuplicates
 
         return t
     }
