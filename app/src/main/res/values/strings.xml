@@ -184,8 +184,10 @@
     <string name="dialog_field_creator_size_group_error">Please enter a valid name and format.</string>
     <string name="dialog_field_creator_field_name_not_unique">Field name already in use.</string>
     <string name="dialog_field_creator_large_field">Large Field Detected, transaction might take a long time.</string>
-    <string name="dialog_field_creator_linear_button_content_desc">Button to choose linear plot pattern.</string>
-    <string name="dialog_field_creator_zig_button_content_desc">Button to choose zig zag plot pattern.</string>
+    <string name="dialog_field_creator_horizontal_linear_button_content_desc">Button to choose horizontal linear plot pattern.</string>
+    <string name="dialog_field_creator_horizontal_zig_button_content_desc">Button to choose horizontal zig zag plot pattern.</string>
+    <string name="dialog_field_creator_vertical_linear_button_content_desc">Button to choose vertical linear plot pattern.</string>
+    <string name="dialog_field_creator_vertical_zig_button_content_desc">Button to choose vertical zig zag plot pattern.</string>
     <string name="dialog_field_creator_review_image_content_desc">Image showing orientation and plot pattern.</string>
 
     <!-- Geo-Navigate to Field -->

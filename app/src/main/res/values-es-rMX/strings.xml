@@ -160,8 +160,8 @@
     <string name="dialog_field_creator_size_group_error">Por favor, ingrese un nombre y formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">El nombre del Campo ya está en uso.</string>
     <string name="dialog_field_creator_large_field">Se detecta un Campo grande, la transacción puede tardar mucho.</string>
-    <string name="dialog_field_creator_linear_button_content_desc">Botón para elegir el patrón de parcelas lineal.</string>
-    <string name="dialog_field_creator_zig_button_content_desc">Botón para elegir el patrón de parcelas en zig-zag.</string>
+    <string name="dialog_field_creator_horizontal_linear_button_content_desc">Botón para elegir el patrón de parcelas lineal.</string>
+    <string name="dialog_field_creator_horizontal_zig_button_content_desc">Botón para elegir el patrón de parcelas en zig-zag.</string>
     <string name="dialog_field_creator_review_image_content_desc">Imagen mostrando la orientación y el patrón de las parcelas.</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Seleccionar Campo más cercano</string>

@@ -93,37 +93,37 @@
         android:id="@+id/plot_horizontal_linear_button"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:src="@drawable/ic_plot_pattern_linear"
+        android:src="@drawable/ic_direction_horizontal_linear"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
-        android:contentDescription="@string/dialog_field_creator_linear_button_content_desc" />
+        android:contentDescription="@string/dialog_field_creator_horizontal_linear_button_content_desc" />
 
     <ImageButton
         android:id="@+id/plot_horizontal_zigzag_button"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:src="@drawable/ic_plot_pattern_zigzag"
+        android:src="@drawable/ic_direction_horizontal_serpentine"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
-        android:contentDescription="@string/dialog_field_creator_zig_button_content_desc" />
+        android:contentDescription="@string/dialog_field_creator_horizontal_zig_button_content_desc" />
 
     <ImageButton
         android:id="@+id/plot_vertical_linear_button"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:src="@drawable/ic_plot_pattern_linear"
+        android:src="@drawable/ic_direction_vertical_linear"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/plot_horizontal_linear_button"
-        android:contentDescription="@string/dialog_field_creator_linear_button_content_desc" />
+        android:contentDescription="@string/dialog_field_creator_vertical_linear_button_content_desc" />
 
     <ImageButton
         android:id="@+id/plot_vertical_zigzag_button"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:src="@drawable/ic_plot_pattern_zigzag"
+        android:src="@drawable/ic_direction_vertical_serpentine"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/plot_horizontal_zigzag_button"
-        android:contentDescription="@string/dialog_field_creator_zig_button_content_desc" />
+        android:contentDescription="@string/dialog_field_creator_vertical_zig_button_content_desc" />
 
     <!--endregion-->
 
