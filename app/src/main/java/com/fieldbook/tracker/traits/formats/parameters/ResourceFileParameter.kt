@@ -1,24 +1,3 @@
-// package com.fieldbook.tracker.traits.formats.parameters
-
-// import com.fieldbook.tracker.R
-// import java.util.UUID
-// import javax.inject.Inject
-
-// class ResourceFileParameter @Inject constructor(
-//     uniqueId: String = UUID.randomUUID().toString(),
-//     override val nameStringResourceId: Int = R.string.trait_parameter_resource_file,
-//     override val defaultLayoutId: Int = R.layout.list_item_trait_parameter_text,
-//     override val parameter: Parameters = Parameters.RESOURCE_FILE
-// ) : BaseFormatParameter(
-//     uniqueId,
-//     nameStringResourceId,
-//     defaultLayoutId,
-//     parameter
-// ) {
-//     val attributeName = "resourceFile"
-//     val defaultValue = ""
-// }
-
 package com.fieldbook.tracker.traits.formats.parameters
 
 import android.app.Activity
@@ -26,10 +5,6 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.FragmentActivity
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.FileExploreActivity

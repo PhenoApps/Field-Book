@@ -80,10 +80,10 @@ class ObservationVariableDao {
                 ${if (whereClause != null) "WHERE $whereClause" else ""}
                 ORDER BY ${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ASC
             """
-
+            
             Log.d("ObservationVariableDao", "Full query: $query")
             Log.d("ObservationVariableDao", "Query args: ${whereArgs.joinToString()}")
-
+            
             db.rawQuery(query, whereArgs.toTypedArray()).use { cursor ->
                 while (cursor.moveToNext()) {
                     val trait = TraitObject().apply {
@@ -97,14 +97,17 @@ class ObservationVariableDao {
                         realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("position"))
                         visible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()
                         additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
-
+                        
                         // Initialize these to the empty string or else they will be null
                         maximum = ""
                         minimum = ""
                         categories = ""
                         closeKeyboardOnOpen = false
                         cropImage = false
-
+                        useDayOfYear = false
+                        displayValue = false
+                        resourceFile = ""
+                        
                         val values = ObservationVariableValueDao.getVariableValues(id.toInt())
                         values?.forEach { value ->
                             val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
@@ -114,19 +117,20 @@ class ObservationVariableDao {
                                 "category" -> categories = value["observation_variable_attribute_value"] as? String ?: ""
                                 "closeKeyboardOnOpen" -> closeKeyboardOnOpen = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
                                 "cropImage" -> cropImage = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
+                                "useDayOfYear" -> useDayOfYear = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
+                                "displayValue" -> displayValue = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
+                                "resourceFile" -> resourceFile = value["observation_variable_attribute_value"] as? String ?: ""
                             }
                         }
                     }
                     traits.add(trait)
                 }
             }
-
+            
             if (sortOrder == "visible") {
                 val visibleTraits = traits.filter { it.visible }
                 val invisibleTraits = traits.filter { !it.visible }
-
                 ArrayList(visibleTraits.sortedBy { it.realPosition } + ArrayList(invisibleTraits.sortedBy { it.realPosition }))
-
             } else {
                 ArrayList(traits)
             }
@@ -380,23 +384,35 @@ class ObservationVariableDao {
         }
 
         //TODO need to edit min/max/category obs. var. val/attrs
-        fun editTraits(id: String, trait: String, format: String, defaultValue: String,
-                       minimum: String, maximum: String, details: String, categories: String,
-                       closeKeyboardOnOpen: Boolean,
-                       cropImage: Boolean): Long = withDatabase { db ->
-
-            val rowid = db.update(ObservationVariable.tableName, ContentValues().apply {
-                put("observation_variable_name", trait)
-                put("observation_variable_field_book_format", format)
-                put("default_value", defaultValue)
-                put("observation_variable_details", details)
-            }, "${ObservationVariable.PK} = ?", arrayOf(id)).toLong()
-
-
+        fun editTraits(
+            id: String, 
+            trait: String, 
+            format: String, 
+            defaultValue: String,
+            minimum: String, 
+            maximum: String, 
+            details: String, 
+            categories: String,
+            closeKeyboardOnOpen: Boolean,
+            cropImage: Boolean,
+            useDayOfYear: Boolean,
+            displayValue: Boolean,
+            resourceFile: String
+        ): Long = withDatabase { db ->
+            val rowid = db.update(
+                ObservationVariable.tableName, 
+                ContentValues().apply {
+                    put("observation_variable_name", trait)
+                    put("observation_variable_field_book_format", format)
+                    put("default_value", defaultValue)
+                    put("observation_variable_details", details)
+                }, 
+                "${ObservationVariable.PK} = ?", 
+                arrayOf(id)
+            ).toLong()
+            
             Parameters.System.forEach {
-
                 val attrId = ObservationVariableAttributeDao.getAttributeIdByName(it)
-
                 when(it) {
                     "validValuesMin" -> {
                         ObservationVariableValueDao.update(id, attrId.toString(), minimum)
@@ -415,9 +431,24 @@ class ObservationVariableDao {
                     }
                 }
             }
-
+            
+            // Add handling for the new parameters
+            
+            // Handle useDayOfYear parameter
+            val useDayOfYearAttrId = ObservationVariableAttributeDao.getAttributeIdByName("useDayOfYear")
+            ObservationVariableValueDao.insertAttributeValue("useDayOfYear", useDayOfYear.toString(), id)
+            
+            // Handle displayValue parameter
+            val displayValueAttrId = ObservationVariableAttributeDao.getAttributeIdByName("displayValue")
+            ObservationVariableValueDao.insertAttributeValue("displayValue", displayValue.toString(), id)
+            
+            // Handle resourceFile parameter
+            if (resourceFile != null) {
+                val resourceFileAttrId = ObservationVariableAttributeDao.getAttributeIdByName("resourceFile")
+                ObservationVariableValueDao.insertAttributeValue("resourceFile", resourceFile, id)
+            }
+            
             rowid
-
         } ?: -1L
 
         fun updateTraitVisibility(traitDbId: String, visible: String) = withDatabase { db ->

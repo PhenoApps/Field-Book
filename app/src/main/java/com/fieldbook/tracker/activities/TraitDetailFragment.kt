@@ -1,8 +1,10 @@
 package com.fieldbook.tracker.activities
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -26,6 +28,7 @@ import com.fieldbook.tracker.adapters.TraitDetailAdapter
 import com.fieldbook.tracker.adapters.TraitDetailItem
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.dao.ObservationDao
+import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
@@ -49,6 +52,7 @@ import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.charts.PieChart
+import org.phenoapps.utils.BaseDocumentTreeUtil
 
 @AndroidEntryPoint
 class TraitDetailFragment : Fragment() {
@@ -150,7 +154,20 @@ class TraitDetailFragment : Fragment() {
         )
 
         resourceChip.setOnClickListener {
-           // Set resource file
+            val dir = BaseDocumentTreeUtil.Companion.getDirectory(requireContext(), R.string.dir_resources)
+            if (dir != null && dir.exists()) {
+                val intent = Intent(requireContext(), FileExploreActivity::class.java)
+                intent.putExtra("path", dir.uri.toString())
+                intent.putExtra("title", requireContext().getString(R.string.main_toolbar_resources))
+                
+                // Use the same request code as defined in TraitEditorActivity
+                (activity as? TraitEditorActivity)?.startActivityForResult(
+                    intent, 
+                    TraitEditorActivity.REQUEST_RESOURCE_FILE_CODE
+                )
+            } else {
+                Toast.makeText(requireContext(), R.string.error_storage_directory, Toast.LENGTH_LONG).show()
+            }
         }
 
         brapiLabelChip.setOnClickListener {
@@ -206,6 +223,38 @@ class TraitDetailFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         loadTraitDetails()
+    }
+
+    fun updateResourceFile(fileUri: String) {
+        traitId?.let { id ->
+            try {
+                val idInt = id.toInt()
+                
+                // Extract just the filename from the URI
+                val fileObject = FieldFileObject.create(requireContext(), Uri.parse(fileUri), null, null)
+                val fileName = fileObject.fileStem
+                
+                CoroutineScope(Dispatchers.IO).launch {
+                    val trait = database.getTraitById(idInt)
+                    
+                    if (trait != null) {
+                        // Update the resource file in the trait object with just the filename
+                        trait.resourceFile = fileName
+                        database.updateTrait(trait)
+                        
+                        withContext(Dispatchers.Main) {
+                            // Update the UI with just the filename
+                            resourceChip.text = fileName
+                            Toast.makeText(requireContext(), 
+                                getString(R.string.trait_resource_file_updated), 
+                                Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating resource file: ${e.message}")
+            }
+        }
     }
 
     // fun loadTraitDetails() {
@@ -288,7 +337,13 @@ class TraitDetailFragment : Fragment() {
         // Update visibility chip
         updateVisibilityChip(trait)
 
-        resourceChip.text = getString(R.string.trait_resource_chip_title)
+        // resourceChip.text = getString(R.string.trait_resource_chip_title)
+            // Update resource chip text based on whether a resource file is set
+        resourceChip.text = if (!trait.resourceFile.isNullOrEmpty()) {
+            trait.resourceFile // Show the resource file name if it exists
+        } else {
+            getString(R.string.trait_resource_chip_title) // Show default text otherwise
+        }
         brapiLabelChip.text = getString(R.string.trait_brapi_label_chip_title)
 
         if (trait.format == "date") {

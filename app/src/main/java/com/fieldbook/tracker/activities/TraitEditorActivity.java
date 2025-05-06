@@ -788,8 +788,21 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             }
         }
 
-        if (requestCode == REQUEST_RESOURCE_FILE_CODE) {
+        // if (requestCode == REQUEST_RESOURCE_FILE_CODE) {
+        //     com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
+        // }
+        if (requestCode == REQUEST_RESOURCE_FILE_CODE && resultCode == RESULT_OK && data != null) {
+            String fileName = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
+            
+            // First, handle the ResourceFileParameter case (for trait creation/editing)
             com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
+            
+            // Then, check if we're in the TraitDetailFragment and update it
+            TraitDetailFragment fragment = (TraitDetailFragment) getSupportFragmentManager()
+                    .findFragmentByTag("TraitDetailFragmentTag");
+            if (fragment != null && fileName != null) {
+                fragment.updateResourceFile(fileName);
+            }
         }
 
         if (requestCode == REQUEST_CODE_BRAPI_TRAIT_ACTIVITY) {

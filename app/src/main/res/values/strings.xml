@@ -369,6 +369,7 @@
     <string name="trait_parameter_resource_file">Resource File</string>
     <string name="trait_parameter_use_day_of_year">Use Day of Year</string>
     <string name="list_item_trait_parameter_resource_file_hint">Select a resource file</string>
+    <string name="trait_resource_file_updated">Resource File Updated</string>
 
     <!-- COLLECT -->
 

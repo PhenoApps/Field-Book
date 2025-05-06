@@ -473,7 +473,10 @@ class NewTraitDialog(
             traitObject.details,
             traitObject.categories,
             traitObject.closeKeyboardOnOpen,
-            traitObject.cropImage
+            traitObject.cropImage,
+            traitObject.useDayOfYear,
+            traitObject.displayValue,
+            traitObject.resourceFile
         )
     }
 

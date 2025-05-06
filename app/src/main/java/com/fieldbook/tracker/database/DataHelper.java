@@ -2137,12 +2137,12 @@ public class DataHelper {
     public long editTraits(String traitDbId, String trait, String format, String defaultValue,
                            String minimum, String maximum, String details, String categories,
                            Boolean closeKeyboardOnOpen,
-                           Boolean cropImage) {
+                           Boolean cropImage, Boolean useDayOfYear, Boolean displayValue, String resourceFile) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
-                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage);
+                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage, useDayOfYear, displayValue, resourceFile);
 //        try {
 //            ContentValues c = new ContentValues();
 //            c.put("trait", trait);
@@ -2180,7 +2180,8 @@ public class DataHelper {
 
         return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
-                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage());
+                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage(),
+                trait.getUseDayOfYear(), trait.getDisplayValue(), trait.getResourceFile());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
