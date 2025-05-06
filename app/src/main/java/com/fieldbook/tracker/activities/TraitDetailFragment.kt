@@ -344,6 +344,14 @@ class TraitDetailFragment : Fragment() {
         } else {
             getString(R.string.trait_resource_chip_title) // Show default text otherwise
         }
+
+        // Only show the BrAPI label chip for BrAPI traits
+
+
+        val isBrapiTrait = trait.externalDbId != null && trait.externalDbId.isNotEmpty()
+        || trait.traitDataSource?.contains("brapi", ignoreCase = true) == true
+        
+        brapiLabelChip.visibility = if (isBrapiTrait) View.VISIBLE else View.GONE
         brapiLabelChip.text = getString(R.string.trait_brapi_label_chip_title)
 
         if (trait.format == "date") {
@@ -357,8 +365,6 @@ class TraitDetailFragment : Fragment() {
 
         // Show/hide BrAPI label/value container based on trait source and format
         // A trait is from BrAPI if it has an external ID or the data source contains "brapi"
-        val isBrapiTrait = trait.externalDbId != null && trait.externalDbId.isNotEmpty()
-            || trait.traitDataSource?.contains("brapi", ignoreCase = true) == true
         
         traitHasBrapiCategories = isBrapiTrait && 
                                 (trait.format == "categorical" || trait.format == "multicat") &&
