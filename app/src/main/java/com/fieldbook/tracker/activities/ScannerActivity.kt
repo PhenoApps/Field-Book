@@ -160,9 +160,15 @@ class ScannerActivity : ThemedActivity() {
     }
 
     private fun bindCameraLifecycle() {
-        cameraPreview = Preview.Builder()
-            .setTargetRotation(binding.previewView.display.rotation)
-            .build()
+        val display = binding.previewView.display
+        cameraPreview = if (display != null) {
+            Preview.Builder()
+                .setTargetRotation(display.rotation)
+                .build()
+        } else {
+            Preview.Builder()
+                .build()
+        }
         imageCapture = ImageCapture.Builder().build()
         cameraPreview.setSurfaceProvider(binding.previewView.surfaceProvider)
 
@@ -185,9 +191,15 @@ class ScannerActivity : ThemedActivity() {
                 .build()
         )
 
-        imageAnalysis = ImageAnalysis.Builder()
-            .setTargetRotation(binding.previewView.display.rotation)
-            .build()
+        val display = binding.previewView.display
+        imageAnalysis = if (display != null) {
+            ImageAnalysis.Builder()
+                .setTargetRotation(display.rotation)
+                .build()
+        } else {
+            ImageAnalysis.Builder()
+                .build()
+        }
 
         val cameraExecutor = Executors.newSingleThreadExecutor()
 
