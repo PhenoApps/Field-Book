@@ -52,7 +52,7 @@ class TraitObject {
     fun saveAttributeValues() {
         val attributeValuesHelper = TraitAttributeValuesHelper(id)
         attributeValuesHelper.apply {
-            setValue(TraitAttributes.MIN_VALUE, maximum)
+            setValue(TraitAttributes.MIN_VALUE, minimum)
             setValue(TraitAttributes.MAX_VALUE, maximum)
             setValue(TraitAttributes.CATEGORIES, categories)
             setValue(TraitAttributes.CLOSE_KEYBOARD, closeKeyboardOnOpen.toString())
