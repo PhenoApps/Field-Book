@@ -27,8 +27,24 @@
     <string name="startup_sample_data_message">Ladda exempeldata?</string>
     <!-- App Intro -->
     <string name="app_intro_intro_title_slide1">Välkommen till Field Book!</string>
+    <string name="app_intro_intro_summary_slide1">Att samla in data i fält har traditionellt krävt att man skriver och transkriberar från papper. Field Book skapades som en digital lösning för datainsamling som möjliggör ökad insamlingshastighet med ökad dataintegritet.</string>
+    <string name="app_intro_intro_title_slide2">Funktioner och anpassning</string>
+    <string name="app_intro_intro_summary_slide2">Data matas in i Field Book som specialanpassade karaktärer, utformade för att förenkla datainmatning och minimera misstag.\n\n Som standard sparas insamlade data lokalt, men Field Book stödjer Breeding API, som gör det möjligt att skicka data till BrAPI-kompatibla system.</string>
+    <string name="app_intro_required_setup_summary">För att komma igång med Field Book, ge appen nödvändiga behörigheter och definiera sedan en mapp där dina data kommer att lagras.</string>
+    <string name="app_intro_permissions_title">Behörigheter</string>
+    <string name="app_intro_permissions_warning">Godkänn nödvändiga behörigheter</string>
+    <string name="app_intro_storage_title">Definiera lagring</string>
+    <string name="app_intro_storage_summary">Definiera en mapp där dina data kommer att lagras.</string>
+    <string name="app_intro_storage_warning">Ange lagringsplats</string>
+    <string name="app_intro_required_optional_title">Valfri inställning</string>
+    <string name="app_intro_required_optional_summary">Dessa valfria inställningar anpassa Field Book, och kan justeras i sinställningarna.</string>
+    <string name="app_intro_load_sample_data_title">Ladda exempeldata</string>
     <string name="app_intro_tutorial_title">Vägledning</string>
+    <string name="app_intro_tutorial_summary">Lägg till en hjälpikon i det översta verktygsfältet som beskriver funktioner i appen.</string>
+    <string name="app_intro_high_contrast_title">Högkontrasttema</string>
+    <string name="app_intro_high_contrast_summary">Aktivera ett tema med hög kontrast för bättre synbarhet på eInk-enheter.</string>
     <!-- Storage Definer -->
+    <string name="storage_definer_summary">Välj eller skapa en mapp som Field Book kan använda för att lagra appdata.</string>
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">För att importera filer krävs åtkomst till enhetens filer.</string>
     <string name="permission_rationale_storage_export">För att exportera data krävs åtkomst till enhetens filer.</string>
@@ -41,10 +57,14 @@
     <string name="settings_advanced">Inställningar </string>
     <string name="settings_profile">Profil</string>
     <!-- Config Activity Fuzzy Search  -->
+    <string name="act_config_fuzzy_search_error">Något gick fel vid sökning efter %s</string>
+    <string name="act_config_search_fab_content_description">Sök i alla parceller och fält för att ladda/navigera till det streckkodade objekt.</string>
     <!-- File manager  -->
     <string name="import_source_local">Lokal lagring</string>
     <string name="import_source_cloud">Molnlagring</string>
     <!-- Warnings/Catches -->
+    <string name="warning_field_missing">Inget fält är laddat. Ladda ett fält innan du samlar in data.</string>
+    <string name="warning_traits_missing">Det finns inga karaktärer. Skapa karaktärerinnan du samlar in data.</string>
     <!-- Changelog -->
     <string name="changelog_title">Ändringslogg</string>
     <!-- FIELDS -->
@@ -59,8 +79,24 @@
     <!-- Import -->
     <string name="fields_study_exists_message">Fältet finns redan.</string>
     <!-- Field Creator  -->
+    <string name="dialog_field_creator_top_left">Överst till vänster</string>
+    <string name="dialog_field_creator_bottom_left">Nederst till vänster</string>
+    <string name="dialog_field_creator_top_right">Överst till höger</string>
+    <string name="dialog_field_creator_bottom_right">Nederst till höger</string>
     <!-- Geo-Navigate to Field -->
+    <string name="menu_fields_plot_by_distance_title">Välj närmaste fält</string>
+    <string name="activity_field_editor_no_field_found">Inga koordinater kunde hittas.</string>
+    <string name="activity_field_editor_switch_field">"Växla till fält %s"</string>
+    <string name="activity_field_editor_switch_field_action">Växla</string>
     <!-- Field Details -->
+    <string name="field_detail_title">Fältdetalj</string>
+    <string name="name_cannot_be_empty">Du måste ange ett namn.</string>
+    <string name="illegal_characters_message">Otillåtna tecken hittade: %1$s</string>
+    <string name="name_conflict_message">\"%1$s\" används redan som %2$s för ett annat fält.</string>
+    <string name="name_conflict_import_name">ii%1$s\" används redan som %2$s för ett annat fält.</string>
+    <string name="dialog_att_chooser_title_default">Välj ett attribut</string>
+    <string name="search_attribute_dialog_title">Ange sök-ID</string>
+    <string name="dialog_att_chooser_unique_attributes">Unika egenskaper</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <!-- Field Detail Charts -->
     <!-- Semantic dates -->
