@@ -41,5 +41,44 @@ class RefactorMigratorVersion13: FieldBookMigrator {
         db.execSQL("ALTER TABLE observation_units DROP COLUMN germplasm_name")
         db.execSQL("ALTER TABLE observation_units DROP COLUMN observation_level")
 
+        //update unit values to the first occurrence of an attribute name
+        db.execSQL("""
+            --create CTE for easy access to first occurrences of attribute names
+            WITH attribute_ids AS (
+                SELECT MIN(A.internal_id_observation_unit_attribute) AS first_id, 
+                       A.observation_unit_attribute_name AS name
+                FROM observation_units_attributes AS A
+                JOIN observation_units_values AS V 
+                    ON A.internal_id_observation_unit_attribute = V.observation_unit_attribute_db_id
+                GROUP BY A.observation_unit_attribute_name
+            )
+            --update actual values by joining values and attributes, and using the above CTE
+            --AStudio complains about the AS syntax here but it is valid SQLite https://sqlite.org/lang_update.html
+            UPDATE observation_units_values AS V
+            SET observation_unit_attribute_db_id = I.first_id
+            FROM attribute_ids AS I
+            JOIN observation_units_attributes AS A 
+                ON A.internal_id_observation_unit_attribute = V.observation_unit_attribute_db_id
+            WHERE I.name = A.observation_unit_attribute_name;
+        """.trimIndent())
+
+        //delete unused/redundant observation attribute rows
+        db.execSQL("""
+            --delete unused observation unit attributes
+            DELETE FROM observation_units_attributes
+            WHERE internal_id_observation_unit_attribute IN
+                --find all attribute/values pairs that aren't used
+                (SELECT internal_id_observation_unit_attribute
+                FROM observation_units_attributes
+                WHERE internal_id_observation_unit_attribute NOT IN (
+                --find all attribute/values pairs
+                    SELECT internal_id_observation_unit_attribute
+                    FROM observation_units_values AS V
+                    JOIN observation_units_attributes AS A ON A.internal_id_observation_unit_attribute = V.observation_unit_attribute_db_id));
+        """.trimIndent())
+
+        //drop unnecessary study_id column from unit attributes
+        db.execSQL("ALTER TABLE observation_unit_attribute DROP COLUMN study_id")
+
     }
 }
