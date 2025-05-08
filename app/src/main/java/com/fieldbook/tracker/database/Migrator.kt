@@ -493,8 +493,11 @@ class Migrator {
     class ObservationUnitAttribute private constructor() {
 
         companion object Schema {
-            const val PK = "internal_id_observation_unit_attribute"
-            const val FK = "observation_unit_attribute_db_id"
+            const val INTERNAL_ID_OBSERVATION_UNIT_ATTRIBUTE = "internal_id_observation_unit_attribute"
+            const val OBSERVATION_UNIT_ATTRIBUTE_NAME = "observation_unit_attribute_name"
+            const val OBSERVATION_UNIT_ATTRIBUTE_DB_ID = "observation_unit_attribute_db_id"
+            const val PK = INTERNAL_ID_OBSERVATION_UNIT_ATTRIBUTE
+            const val FK = OBSERVATION_UNIT_ATTRIBUTE_DB_ID
             const val migrateFromTableName = "plot_attributes"
             const val tableName = "observation_units_attributes"
             val columnDefs by lazy {
@@ -513,7 +516,12 @@ class Migrator {
     class ObservationUnitValue private constructor() {
 
         companion object Schema {
-            const val PK = "internal_id_observation_unit_value"
+            const val INTERNAL_ID_OBSERVATION_UNIT_VALUE = "internal_id_observation_unit_value"
+            const val OBSERVATION_UNIT_VALUE_NAME = "observation_unit_value_name"
+            const val OBSERVATION_UNIT_ATTRIBUTE_DB_ID = "observation_unit_attribute_db_id"
+            const val OBSERVATION_UNIT_ID = "observation_unit_id"
+            const val STUDY_ID = "study_id"
+            const val PK = INTERNAL_ID_OBSERVATION_UNIT_VALUE
             const val FK = "observation_unit_value_db_id"
             const val migrateFromTableName = "plot_values"
             const val tableName = "observation_units_values"
