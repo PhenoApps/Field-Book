@@ -31,6 +31,12 @@ object TraitAttributes {
         defaultValue = "false"
     )
 
+    val ALLOW_DUPLICATES = AttributeDefinition(
+        key = "allowDuplicates",
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
 
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD)
 

@@ -64,6 +64,14 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/list_item_trait_parameter_categories_allow_duplicates"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        style="@style/TextViewStyle"
+        android:text="@string/traits_create_categories_allow_duplicates" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_item_trait_parameter_categories_rv"
         android:layout_width="match_parent"

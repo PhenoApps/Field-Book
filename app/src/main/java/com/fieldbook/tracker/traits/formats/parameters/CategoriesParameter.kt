@@ -4,11 +4,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageButton
+import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.CategoryAdapter
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import com.fieldbook.tracker.utilities.CategoryJsonUtil.Companion.decodeCategories
 import com.fieldbook.tracker.utilities.CategoryJsonUtil.Companion.encode
@@ -39,11 +41,17 @@ class CategoriesParameter : BaseFormatParameter(
             itemView.findViewById(R.id.list_item_trait_parameter_categories_add_btn)
         val categoriesRv: RecyclerView =
             itemView.findViewById(R.id.list_item_trait_parameter_categories_rv)
+        val allowDuplicatesSwitch: SwitchCompat =
+            itemView.findViewById(R.id.list_item_trait_parameter_categories_allow_duplicates)
 
         private fun setupCategoriesRecyclerView() {
 
             categoriesRv.adapter = CategoryAdapter(this)
 
+        }
+
+        private fun isMultiCat(traitObject: TraitObject?): Boolean {
+            return traitObject?.format == "multicat"
         }
 
         private fun addCategory(value: String) {
@@ -71,6 +79,8 @@ class CategoriesParameter : BaseFormatParameter(
         override fun bind(parameter: BaseFormatParameter, initialTraitObject: TraitObject?) {
             super.bind(parameter, initialTraitObject)
 
+            allowDuplicatesSwitch.visibility = if (isMultiCat(initialTraitObject)) View.VISIBLE else View.GONE
+
             addBtn.setOnClickListener { v: View ->
                 val value = valueEt.text.toString()
                 addCategory(value)
@@ -88,6 +98,7 @@ class CategoriesParameter : BaseFormatParameter(
 
             try {
                 categories = encode(catList)
+                allowDuplicates = allowDuplicatesSwitch.isChecked
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -135,6 +146,14 @@ class CategoriesParameter : BaseFormatParameter(
             catList.clear()
 
             traitObject?.let { t ->
+
+                val isMultiCategorical = isMultiCat(t)
+
+                allowDuplicatesSwitch.visibility = if (isMultiCategorical) View.VISIBLE else View.GONE
+
+                if (isMultiCategorical) {
+                    allowDuplicatesSwitch.isChecked = t.allowDuplicates
+                }
 
                 if (!loadInitialTraitObject(t)) {
                     return false

@@ -12,6 +12,7 @@ enum class Parameters {
             "category",
             "closeKeyboardOnOpen",
             "cropImage",
+            "allowDuplicates",
         )
     }
 }

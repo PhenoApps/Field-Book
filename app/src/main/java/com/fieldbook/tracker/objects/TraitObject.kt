@@ -44,6 +44,9 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.CROP_IMAGE)
         set(value) = attributeValues.setValue(TraitAttributes.CROP_IMAGE, value.toString())
 
+    var allowDuplicates: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.ALLOW_DUPLICATES)
+        set(value) = attributeValues.setValue(TraitAttributes.ALLOW_DUPLICATES, value.toString())
 
     fun loadAttributeAndValues() {
         attributeValues.load()
@@ -57,6 +60,7 @@ class TraitObject {
             setValue(TraitAttributes.CATEGORIES, categories)
             setValue(TraitAttributes.CLOSE_KEYBOARD, closeKeyboardOnOpen.toString())
             setValue(TraitAttributes.CROP_IMAGE, cropImage.toString())
+            setValue(TraitAttributes.ALLOW_DUPLICATES, allowDuplicates.toString())
         }
         attributeValuesHelper.save()
     }
@@ -101,14 +105,15 @@ class TraitObject {
                 additionalInfo == that.additionalInfo &&
                 observationLevelNames == that.observationLevelNames &&
                 closeKeyboardOnOpen == that.closeKeyboardOnOpen &&
-                cropImage == that.cropImage
+                cropImage == that.cropImage &&
+                allowDuplicates == that.allowDuplicates
     }
 
     override fun hashCode(): Int {
         return Objects.hash(
             name, format, defaultValue, minimum, maximum, details, categories,
             realPosition, id, visible, externalDbId, traitDataSource,
-            additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage
+            additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage, allowDuplicates
         )
     }
 
@@ -130,6 +135,7 @@ class TraitObject {
         t.observationLevelNames = this.observationLevelNames
         t.closeKeyboardOnOpen = this.closeKeyboardOnOpen
         t.cropImage = this.cropImage
+        t.allowDuplicates = this.allowDuplicates
 
         return t
     }

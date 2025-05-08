@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.JsonUtil;
@@ -22,7 +21,6 @@ import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
-import com.google.gson.JsonParseException;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
@@ -36,6 +34,10 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     //on load layout, check preferences and save to variable
     //this will choose whether to display the label or value in subsequent functions
     private boolean showLabel = true;
+
+    // one category can be recorded multiple times
+    // color a category only if allowDuplicates is disabled (removal of categories is possible)
+    private boolean allowDuplicates = false;
 
     private ArrayList<BrAPIScaleValidValuesCategories> categoryList;
 
@@ -84,6 +86,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init(Activity act) {
+        allowDuplicates = getCurrentTrait().getAllowDuplicates();
 
         gridMultiCat = act.findViewById(R.id.catGrid);
 
@@ -152,7 +155,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
                 }
 
                 //has category checks the loaded categoryList to see if this button has been selected
-                if (hasCategory(cat[position])) {
+                if (hasCategory(cat[position]) && !allowDuplicates) {
 
                     pressOnButton(holder.mButton);
 
@@ -226,11 +229,13 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
                 BrAPIScaleValidValuesCategories cat = (BrAPIScaleValidValuesCategories) button.getTag();
 
-                if (hasCategory(cat)) {
+                if (hasCategory(cat) && !allowDuplicates) {
                     pressOffButton(button);
                     removeCategory(cat);
                 } else {
-                    pressOnButton(button);
+                    if (!allowDuplicates) { // change the color only if duplication is disabled
+                        pressOnButton(button);
+                    }
                     addCategory((BrAPIScaleValidValuesCategories) button.getTag());
                 }
 
@@ -322,9 +327,9 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     }
 
     private void removeCategory(final BrAPIScaleValidValuesCategories category) {
-
-        categoryList.remove(category);
-
+        if (!allowDuplicates) {
+            categoryList.remove(category);
+        }
         refreshCategoryText();
 
     }
