@@ -365,11 +365,11 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertObservation(String plotId, String traitDbId, String traitFormat, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
+    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
 
         open();
 
-        return ObservationDao.Companion.insertObservation(plotId, traitDbId, traitFormat, value, person, location, notes, studyId, observationDbId, lastSyncedTime, rep);
+        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, lastSyncedTime, rep);
 
 //        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
 //        int rep = cursor.getCount() + 1;

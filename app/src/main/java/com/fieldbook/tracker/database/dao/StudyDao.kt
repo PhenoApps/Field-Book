@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.database.dao
 
 import android.content.ContentValues
-import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.core.content.contentValuesOf
@@ -10,23 +9,16 @@ import com.fieldbook.tracker.database.Migrator.Observation
 import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
+import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.getTime
 import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
 import com.fieldbook.tracker.database.toFirst
-import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 
 
 class StudyDao {
@@ -259,7 +251,10 @@ class StudyDao {
                     (SELECT COUNT(*) FROM observation_units_attributes AS A
                         JOIN observation_units_values as V ON V.${ObservationUnitValue.OBSERVATION_UNIT_ATTRIBUTE_DB_ID} = A.${ObservationUnitAttribute.INTERNAL_ID_OBSERVATION_UNIT_ATTRIBUTE}
                         WHERE V.study_id = Studies.${Study.PK}) AS attribute_count,
-                    (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
+                    (SELECT COUNT(DISTINCT ov.observation_variable_name) 
+                        FROM observations 
+                        JOIN observation_variables AS ov ON ov.${ObservationVariable.PK} = observations.${ObservationVariable.FK}
+                        WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
                 ORDER BY ${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ${if (isDateSort) "DESC" else "ASC"}
@@ -278,7 +273,7 @@ class StudyDao {
         } ?: ArrayList()
 
 
-        fun getFieldObject(exp_id: Int, sortOrder: String = "position"): FieldObject? = withDatabase { db ->
+        fun getFieldObject(studyId: Int, sortOrder: String = "position"): FieldObject? = withDatabase { db ->
             val query = """
                 SELECT 
                     ${Study.PK},
@@ -303,13 +298,16 @@ class StudyDao {
                         JOIN observation_units_values AS V 
                             ON V.observation_unit_attribute_db_id = A.internal_id_observation_unit_attribute
                         WHERE V.study_id = Studies.${Study.PK}) AS attribute_count,
-                    (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
+                    (SELECT COUNT(DISTINCT ov.observation_variable_name) 
+                        FROM observations 
+                        JOIN observation_variables AS ov ON ov.${ObservationVariable.PK} = observations.${ObservationVariable.FK}
+                        WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
                 WHERE ${Study.PK} = ?
                 """
 //            Log.d("StudyDao", "Query is "+query)
-            val fieldData = db.rawQuery(query, arrayOf(exp_id.toString())).use { cursor ->
+            val fieldData = db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
                 if (cursor.moveToFirst()) {
                     val map = cursor.columnNames.associateWith { columnName ->
                         val columnIndex = cursor.getColumnIndex(columnName)
@@ -317,7 +315,7 @@ class StudyDao {
                     }
                     map.toFieldObject().apply {
                         // Set the trait details
-                        this.traitDetails = getTraitDetailsForStudy(exp_id, sortOrder)
+                        this.traitDetails = getTraitDetailsForStudy(studyId, sortOrder)
                     }
                 } else {
                     null
@@ -344,8 +342,11 @@ class StudyDao {
                 val traitDetails = mutableListOf<FieldObject.TraitDetail>()
 
                 val cursor = db.rawQuery("""
-                    SELECT o.observation_variable_name, o.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
-                    (SELECT COUNT(DISTINCT observation_unit_id) FROM observations WHERE study_id = ? AND observation_variable_name = o.observation_variable_name) AS distinct_obs_units,
+                    SELECT ov.observation_variable_name, ov.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
+                    (SELECT COUNT(DISTINCT observation_unit_id) 
+                        FROM observations 
+                        JOIN observation_variables AS ov ON ov.${ObservationVariable.PK} = observations.${ObservationVariable.FK}
+                        WHERE study_id = ?) AS distinct_obs_units,
                     (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units,
                     (SELECT v.observation_variable_attribute_value 
                      FROM observation_variable_values v
@@ -354,7 +355,7 @@ class StudyDao {
                     FROM observations o
                     JOIN observation_variables ov ON o.observation_variable_db_id = ov.internal_id_observation_variable
                     WHERE o.study_id = ? AND o.observation_variable_db_id > 0
-                    GROUP BY o.observation_variable_name, o.observation_variable_field_book_format
+                    GROUP BY ov.observation_variable_name, ov.observation_variable_field_book_format
                     ORDER BY ov.${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ASC
                 """, arrayOf(studyId.toString(), studyId.toString(), studyId.toString()))
 

@@ -107,5 +107,9 @@ class RefactorMigratorVersion13: FieldBookMigrator {
         db.execSQL("ALTER TABLE studies DROP COLUMN start_date")
         db.execSQL("ALTER TABLE studies DROP COLUMN location_name")
         db.execSQL("ALTER TABLE studies DROP COLUMN location_db_id")
+
+        //drop observation variable name from observations table
+        db.execSQL("ALTER TABLE observations DROP COLUMN observation_variable_name")
+        db.execSQL("ALTER TABLE observations DROP COLUMN observation_variable_field_book_format")
     }
 }

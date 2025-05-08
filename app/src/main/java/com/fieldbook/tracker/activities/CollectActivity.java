@@ -1407,7 +1407,7 @@ public class CollectActivity extends ThemedActivity
             }
 
             if (!pass) {
-                database.insertObservation(obsUnit, trait.getId(), trait.getFormat(), value, person,
+                database.insertObservation(obsUnit, trait.getId(), value, person,
                         getLocationByPreferences(), "", studyId, observationDbId,
                         lastSyncedTime, rep);
 
@@ -1427,7 +1427,7 @@ public class CollectActivity extends ThemedActivity
         String person = getPerson();
         String traitDbId = getTraitDbId();
 
-        database.insertObservation(obsUnit, traitDbId, getTraitFormat(), value, person,
+        database.insertObservation(obsUnit, traitDbId, value, person,
                 getLocationByPreferences(), "", expId, null, null, rep);
     }
 
@@ -2191,7 +2191,6 @@ public class CollectActivity extends ThemedActivity
                             String uri = data.getStringExtra(ScannerActivity.EXTRA_PHOTO_URI);
                             database.insertObservation(getObservationUnit(),
                                     getCurrentTrait().getId(),
-                                    getCurrentTrait().getFormat(),
                                     uri,
                                     getPerson(),
                                     getLocationByPreferences(),
@@ -2526,7 +2525,7 @@ public class CollectActivity extends ThemedActivity
     public void insertPrintObservation(String plotID, String traitID, String traitFormat, String labelNumber) {
         String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertObservation(plotID, traitID, traitFormat, labelNumber,
+        database.insertObservation(plotID, traitID, labelNumber,
                 getPerson(),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);

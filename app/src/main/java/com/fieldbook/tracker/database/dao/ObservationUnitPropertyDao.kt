@@ -11,6 +11,7 @@ import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropert
 import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
+import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.query
 import com.fieldbook.tracker.database.toFirst
@@ -156,7 +157,6 @@ class ObservationUnitPropertyDao {
          * "13RPN00001","1","1","1","13RPN_TRAY001","12GHT00001B","Kharkof","Kharkof","height","3","2021-08-05 11:52:45.379-05:00"," ","","2"
          */
 
-        //TODO 471 MAX CASE statements can add an additional AND vals.study_id = studyIdParameter, but probably unnecessary
         fun getExportDbData(
             context: Context,
             studyId: Int,
@@ -171,22 +171,26 @@ class ObservationUnitPropertyDao {
                 val placeholders = traits.joinToString(", ") { "?" }
                 val traitNames = traits.map { DataHelper.replaceIdentifiers(it.name) }.toTypedArray()
 
-                val unitSelectAttributes = fieldList.map { attributeName ->
+                val unitSelectAttributes = fieldList.joinToString(", ") { attributeName ->
                     "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
-                }.joinToString(", ")
+                }
 
                 val obsSelectAttributes =
-                    arrayOf("observation_variable_name", "observation_variable_field_book_format", "value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
+                    arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
+
+                val varSelectAttributes =
+                    arrayOf("observation_variable_name", "observation_variable_field_book_format")
 
                 val sortOrderClause = getSortOrderClause(context, studyId.toString())
                 val query = """
-                    SELECT $unitSelectAttributes, ${obsSelectAttributes.joinToString { "obs.`$it` AS `$it`" }}
+                    SELECT $unitSelectAttributes, ${obsSelectAttributes.joinToString { "obs.`$it` AS `$it`" }}, ${varSelectAttributes.joinToString { "vars.`$it` AS `$it`" }}
                     FROM observations AS obs
                     LEFT JOIN observation_units AS units ON units.observation_unit_db_id = obs.observation_unit_id
                     LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                     LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
+                    LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
                     WHERE obs.study_id = ?
-                      AND obs.observation_variable_name IN ($placeholders)
+                      AND vars.observation_variable_name IN ($placeholders)
                     GROUP BY obs.internal_id_observation
                     $sortOrderClause
                 """.trimIndent()
@@ -274,7 +278,6 @@ class ObservationUnitPropertyDao {
          * @param traits the list of traits to print, either all traits or just the active ones
          * @return a cursor that is used in CSVWriter and closed elsewhere
          */
-
         fun getExportTableData(
             context: Context,
             expId: Int,
@@ -282,14 +285,14 @@ class ObservationUnitPropertyDao {
         ): Cursor? = withDatabase { db ->
             val headers = ObservationUnitAttributeDao.getAllNames(expId)
 
-            val selectAttributes = headers.map { attributeName ->
+            val selectAttributes = headers.joinToString(", ") { attributeName ->
                 "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
-            }.joinToString(", ")
+            }
 
-            val selectObservations = traits.map { trait ->
+            val selectObservations = traits.joinToString(", ") { trait ->
                 val traitName = DataHelper.replaceIdentifiers(trait.name)
-                "MAX(CASE WHEN obs.observation_variable_name='$traitName' THEN obs.value ELSE NULL END) AS \"$traitName\""
-            }.joinToString(", ")
+                "MAX(CASE WHEN vars.observation_variable_name='$traitName' THEN obs.value ELSE NULL END) AS \"$traitName\""
+            }
 
             val combinedSelection = listOf(selectAttributes, selectObservations).filter { it.isNotEmpty() }.joinToString(", ")
 
@@ -301,6 +304,7 @@ class ObservationUnitPropertyDao {
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
                 LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = $expId
+                LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
                 WHERE units.study_id = $expId
                 GROUP BY units.internal_id_observation_unit
                 $orderByClause
@@ -384,7 +388,7 @@ class ObservationUnitPropertyDao {
             val maxStatements = arrayListOf<String>()
             sanitizeTraits.forEachIndexed { index, it ->
                 maxStatements.add(
-                    "MAX (CASE WHEN o.observation_variable_name='$it' AND o.observation_variable_field_book_format='${sanitizeFormats[index]}' THEN o.value ELSE NULL END) AS '$it'"
+                    "MAX (CASE WHEN vars.observation_variable_name='$it' AND vars.observation_variable_field_book_format='${sanitizeFormats[index]}' THEN o.value ELSE NULL END) AS '$it'"
                 )
             }
 
@@ -393,6 +397,7 @@ class ObservationUnitPropertyDao {
                 ${maxStatements.joinToString(",\n")}
                 FROM ObservationUnitProperty as props
                 LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $expId
+                LEFT JOIN ${ObservationVariable.tableName} AS vars ON vars.${ObservationVariable.PK} = o.${ObservationVariable.FK}
                 WHERE props.`${uniqueName}` = "$unit"
                 GROUP BY props.id
             """.trimIndent()
@@ -403,9 +408,9 @@ class ObservationUnitPropertyDao {
         fun getSortedObservationUnitData(context: Context, studyId: Int): Cursor? = withDatabase { db ->
             val headers = ObservationUnitAttributeDao.getAllNames(studyId).filter { it != "geo_coordinates" }
 
-            val selectStatement = headers.map { col ->
+            val selectStatement = headers.joinToString(", ") { col ->
                 "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
-            }.joinToString(", ")
+            }
 
             val orderByClause = getSortOrderClause(context, studyId.toString())
 
