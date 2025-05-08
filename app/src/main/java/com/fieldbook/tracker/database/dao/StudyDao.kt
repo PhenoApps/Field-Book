@@ -248,7 +248,7 @@ class StudyDao {
             val query = """
                 SELECT 
                     Studies.*,
-                    (SELECT COUNT(*) FROM observation_units_attributes AS A
+                    (SELECT COUNT(DISTINCT observation_unit_attribute_name) FROM observation_units_attributes AS A
                         JOIN observation_units_values as V ON V.${ObservationUnitValue.OBSERVATION_UNIT_ATTRIBUTE_DB_ID} = A.${ObservationUnitAttribute.INTERNAL_ID_OBSERVATION_UNIT_ATTRIBUTE}
                         WHERE V.study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT ov.observation_variable_name) 
@@ -294,20 +294,21 @@ class StudyDao {
                     trial_name,
                     count,
                     observation_unit_search_attribute,
-                    (SELECT COUNT(*) FROM observation_units_attributes AS A
+                    (SELECT COUNT(DISTINCT observation_unit_attribute_name) FROM observation_units_attributes AS A
                         JOIN observation_units_values AS V 
                             ON V.observation_unit_attribute_db_id = A.internal_id_observation_unit_attribute
-                        WHERE V.study_id = Studies.${Study.PK}) AS attribute_count,
+                        WHERE V.study_id = ?) AS attribute_count,
                     (SELECT COUNT(DISTINCT ov.observation_variable_name) 
                         FROM observations 
                         JOIN observation_variables AS ov ON ov.${ObservationVariable.PK} = observations.${ObservationVariable.FK}
-                        WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
-                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
+                        WHERE study_id = ? AND observation_variable_db_id > 0) AS trait_count,
+                    (SELECT COUNT(*) FROM observations WHERE study_id = ? AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
                 WHERE ${Study.PK} = ?
                 """
-//            Log.d("StudyDao", "Query is "+query)
-            val fieldData = db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
+            //Log.d("StudyDao", "Query is "+query)
+            val studyStringId = studyId.toString()
+            val fieldData = db.rawQuery(query, arrayOf(studyStringId, studyStringId, studyStringId, studyStringId)).use { cursor ->
                 if (cursor.moveToFirst()) {
                     val map = cursor.columnNames.associateWith { columnName ->
                         val columnIndex = cursor.getColumnIndex(columnName)
