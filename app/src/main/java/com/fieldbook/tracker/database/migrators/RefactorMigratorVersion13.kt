@@ -83,5 +83,12 @@ class RefactorMigratorVersion13: FieldBookMigrator {
         //drop unused observation variable columns
         db.execSQL("ALTER TABLE observation_variables DROP COLUMN observation_variable_db_id")
 
+        //drop unused studies columns
+        db.execSQL("ALTER TABLE studies DROP COLUMN study_type")
+        db.execSQL("ALTER TABLE studies DROP COLUMN study_description")
+        db.execSQL("ALTER TABLE studies DROP COLUMN study_code")
+        db.execSQL("ALTER TABLE studies DROP COLUMN start_date")
+        db.execSQL("ALTER TABLE studies DROP COLUMN location_name")
+        db.execSQL("ALTER TABLE studies DROP COLUMN location_db_id")
     }
 }
