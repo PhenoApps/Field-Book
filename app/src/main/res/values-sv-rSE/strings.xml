@@ -5,18 +5,28 @@
     <string name="field_book">FieldBook</string>
     <!-- Dialog -->
     <string name="dialog_cancel">Avbryt</string>
+    <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Ja</string>
     <string name="dialog_no">Nej</string>
+    <string name="dialog_clear">Rensa</string>
     <string name="dialog_close">Stäng</string>
     <string name="dialog_confirm">Är du säker?</string>
     <string name="dialog_import">Importera</string>
     <string name="dialog_warning">Varning</string>
     <string name="dialog_save">Spara</string>
+    <string name="dialog_save_error_title">Fel vid sparande</string>
+    <string name="dialog_back">Bakåt</string>
+    <string name="dialog_scan">Scanna</string>
+    <string name="dialog_sort_by">Sortera efter</string>
+    <string name="dialog_enable">Slå på</string>
     <string name="dialog_delete">Radera</string>
+    <string name="dialog_accept">Godkänn</string>
+    <string name="barcode_scanner_text">Skanna en streckkod</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Exempeldata</string>
     <string name="startup_sample_data_message">Ladda exempeldata?</string>
     <!-- App Intro -->
+    <string name="app_intro_intro_title_slide1">Välkommen till Field Book!</string>
     <string name="app_intro_tutorial_title">Vägledning</string>
     <!-- Storage Definer -->
     <!-- Permissions  -->
