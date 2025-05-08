@@ -31,5 +31,15 @@ class RefactorMigratorVersion13: FieldBookMigrator {
         db.execSQL("DROP TABLE IF EXISTS user_traits")
         db.execSQL("DROP TABLE IF EXISTS traits")
 
+        //drop unused columns
+        db.execSQL("ALTER TABLE observation_units DROP COLUMN position_coordinate_x")
+        db.execSQL("ALTER TABLE observation_units DROP COLUMN position_coordinate_y")
+        db.execSQL("ALTER TABLE observation_units DROP COLUMN position_coordinate_x_type")
+        db.execSQL("ALTER TABLE observation_units DROP COLUMN position_coordinate_y_type")
+        db.execSQL("ALTER TABLE observation_units DROP COLUMN additional_info")
+        db.execSQL("ALTER TABLE observation_units DROP COLUMN germplasm_db_id")
+        db.execSQL("ALTER TABLE observation_units DROP COLUMN germplasm_name")
+        db.execSQL("ALTER TABLE observation_units DROP COLUMN observation_level")
+
     }
 }
