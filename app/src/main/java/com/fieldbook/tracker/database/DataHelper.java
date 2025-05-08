@@ -28,6 +28,7 @@ import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
+import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
@@ -52,19 +53,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,9 +73,9 @@ import dagger.hilt.android.qualifiers.ActivityContext;
  * All database related functions are here
  */
 public class DataHelper {
-    public static final String RANGE = "range";
+    public static final String RANGE = "`range`";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 12;
+    public static final int DATABASE_VERSION = RefactorMigratorVersion13.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -2852,7 +2849,7 @@ public class DataHelper {
 
             db.execSQL("CREATE TABLE "
                     + RANGE
-                    + "(id INTEGER PRIMARY KEY, range TEXT, plot TEXT, entry TEXT, plot_id TEXT, pedigree TEXT)");
+                    + "(id INTEGER PRIMARY KEY, `range` TEXT, plot TEXT, entry TEXT, plot_id TEXT, pedigree TEXT)");
             db.execSQL("CREATE TABLE "
                     + TRAITS
                     + "(id INTEGER PRIMARY KEY, external_db_id TEXT, trait_data_source TEXT, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)");
@@ -2974,7 +2971,7 @@ public class DataHelper {
                         new String[]{preferences.getString(GeneralKeys.FIELD_FILE, ""), preferences.getString(GeneralKeys.FIELD_FILE, ""), preferences.getString(GeneralKeys.UNIQUE_NAME, ""), preferences.getString(GeneralKeys.PRIMARY_NAME, ""), preferences.getString(GeneralKeys.SECONDARY_NAME, "")});
 
                 // convert current range table to plots
-                Cursor cursor = db.rawQuery("SELECT * from range", null);
+                Cursor cursor = db.rawQuery("SELECT * from `range`", null);
 
                 // columns into attributes
                 String[] columnNames = cursor.getColumnNames();
@@ -3093,7 +3090,7 @@ public class DataHelper {
             }
 
             if (oldVersion <= 12 && newVersion >= 13) {
-                // migrate to version that has new tables to handle spectral data and device parameters
+                // migrate to version 13 for minor refactoring
                 Migrator.Companion.migrateToVersion13(db);
             }
         }

@@ -82,8 +82,10 @@ class StudyDao {
             val studiesWithAttribute = mutableListOf<Int>()
 
             val query = """
-                SELECT DISTINCT study_id 
-                FROM observation_units_attributes 
+                SELECT DISTINCT V.study_id 
+                FROM observation_units_attributes AS A
+                JOIN observation_units_values AS V 
+                    ON A.internal_id_observation_unit_attribute = V.observation_unit_attribute_db_id
                 WHERE observation_unit_attribute_name = ?
             """
 
@@ -112,27 +114,6 @@ class StudyDao {
             updatedCount
         } ?: 0
 
-        private fun fixPlotAttributes(db: SQLiteDatabase) {
-
-            db.rawQuery("PRAGMA foreign_keys=OFF;", null).close()
-
-            try {
-
-                db.execSQL("""
-                insert or replace into observation_units_attributes (internal_id_observation_unit_attribute, observation_unit_attribute_name, study_id)
-                select attribute_id as internal_id_observation_unit_attribute, attribute_name as observation_unit_attribute_name, exp_id as study_id
-                from plot_attributes as p
-            """.trimIndent())
-
-            } catch (e: Exception) {
-
-                e.printStackTrace()
-
-            }
-
-            db.rawQuery("PRAGMA foreign_keys=ON;", null).close()
-        }
-
         /**
          * Transpose obs. unit. attribute/values into a view based on the selected study.
          * On further testing, creating a view here is substantially faster but queries on the
@@ -141,8 +122,6 @@ class StudyDao {
         fun switchField(exp_id: Int) = withDatabase { db ->
 
             val headers = ObservationUnitAttributeDao.getAllNames(exp_id).filter { it != "geo_coordinates" }
-
-            fixPlotAttributes(db)
 
             //create a select statement based on the saved plot attribute names
             val select = headers.map { col ->
@@ -166,7 +145,6 @@ class StudyDao {
             FROM ${ObservationUnit.tableName} AS units
             LEFT JOIN ${ObservationUnitValue.tableName} AS vals ON units.${ObservationUnit.PK} = vals.${ObservationUnit.FK}
             LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr on vals.${ObservationUnitAttribute.FK} = attr.${ObservationUnitAttribute.PK}
-            LEFT JOIN plot_attributes as a on vals.observation_unit_attribute_db_id = a.attribute_id
             WHERE units.${Study.FK} = $exp_id
             GROUP BY units.${ObservationUnit.PK}
         """.trimMargin()
@@ -278,7 +256,9 @@ class StudyDao {
             val query = """
                 SELECT 
                     Studies.*,
-                    (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
+                    (SELECT COUNT(*) FROM observation_units_attributes AS A
+                        JOIN observation_units_values as V ON V.${ObservationUnitValue.OBSERVATION_UNIT_ATTRIBUTE_DB_ID} = A.${ObservationUnitAttribute.INTERNAL_ID_OBSERVATION_UNIT_ATTRIBUTE}
+                        WHERE V.study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
@@ -319,7 +299,10 @@ class StudyDao {
                     trial_name,
                     count,
                     observation_unit_search_attribute,
-                    (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
+                    (SELECT COUNT(*) FROM observation_units_attributes AS A
+                        JOIN observation_units_values AS V 
+                            ON V.observation_unit_attribute_db_id = A.internal_id_observation_unit_attribute
+                        WHERE V.study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies

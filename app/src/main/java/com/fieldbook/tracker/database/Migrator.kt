@@ -8,7 +8,6 @@ import android.util.Log
 import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
-import com.fieldbook.tracker.database.migrators.ExampleMigratorVersionN
 import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13
 import com.fieldbook.tracker.objects.TraitObject
 
@@ -389,17 +388,6 @@ class Migrator {
                     null,
                     null).use { it.toMigratedTable(pattern) })
 
-        }
-
-        fun migrateToVersionExampleN(db: SQLiteDatabase) {
-
-            ExampleMigratorVersionN().migrate(db)
-                .onFailure {
-                    Log.e(TAG, "Failed to migrate to version N", it)
-                }
-                .onSuccess {
-                    Log.d(TAG, "Migrated to version N")
-                }
         }
 
         fun migrateToVersion13(db: SQLiteDatabase) {
