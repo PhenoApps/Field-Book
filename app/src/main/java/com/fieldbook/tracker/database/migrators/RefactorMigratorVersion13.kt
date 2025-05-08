@@ -80,5 +80,8 @@ class RefactorMigratorVersion13: FieldBookMigrator {
         //drop unnecessary study_id column from unit attributes
         db.execSQL("ALTER TABLE observation_unit_attribute DROP COLUMN study_id")
 
+        //drop unused observation variable columns
+        db.execSQL("ALTER TABLE observation_variables DROP COLUMN observation_variable_db_id")
+
     }
 }
