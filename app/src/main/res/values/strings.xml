@@ -190,6 +190,11 @@
     <string name="dialog_field_creator_vertical_zig_button_content_desc">Button to choose vertical zig zag plot pattern.</string>
     <string name="dialog_field_creator_review_image_content_desc">Image showing orientation and plot pattern.</string>
 
+    <string name="field_creator_stepper_size">Size</string>
+    <string name="field_creator_stepper_start">Start Point</string>
+    <string name="field_creator_stepper_pattern">Walking Order</string>
+    <string name="field_creator_stepper_preview">Preview</string>
+
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Select nearest field</string>
     <string name="activity_field_editor_no_field_found">No coordinates could be found.</string>

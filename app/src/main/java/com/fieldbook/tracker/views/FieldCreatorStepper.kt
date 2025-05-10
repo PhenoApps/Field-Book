@@ -1,0 +1,130 @@
+package com.fieldbook.tracker.views
+
+import com.fieldbook.tracker.R
+import android.util.TypedValue
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.binayshaw7777.kotstep.v3.KotStep
+import com.binayshaw7777.kotstep.v3.model.step.StepLayoutStyle
+import com.binayshaw7777.kotstep.v3.model.style.BorderStyle
+import com.binayshaw7777.kotstep.v3.model.style.IconStyle
+import com.binayshaw7777.kotstep.v3.model.style.KotStepStyle
+import com.binayshaw7777.kotstep.v3.model.style.LineStyle
+import com.binayshaw7777.kotstep.v3.model.style.LineStyles
+import com.binayshaw7777.kotstep.v3.model.style.StepStyle
+import com.binayshaw7777.kotstep.v3.model.style.StepStyles
+import com.binayshaw7777.kotstep.v3.util.ExperimentalKotStep
+
+@OptIn(ExperimentalKotStep::class)
+@Composable
+fun FieldCreatorStepper(currentStep: FieldCreationStep) {
+    val context = LocalContext.current
+    val theme = context.theme
+    val typedValue = TypedValue()
+
+    theme.resolveAttribute(R.attr.stepper_icon_color, typedValue, true)
+    val stepperIconColor = Color(typedValue.data)
+
+    theme.resolveAttribute(R.attr.stepper_icon_bg_color, typedValue, true)
+    val stepperIconBgColor = Color(typedValue.data)
+
+    theme.resolveAttribute(R.attr.stepper_icon_on_done_color, typedValue, true)
+    val stepperIconOnDoneColor = Color(typedValue.data)
+
+    theme.resolveAttribute(R.attr.stepper_icon_on_done_bg_color, typedValue, true)
+    val stepperIconOnDoneBgColor = Color(typedValue.data)
+
+    theme.resolveAttribute(R.attr.stepper_line_color, typedValue, true)
+    val stepperLineColor = Color(typedValue.data)
+
+    theme.resolveAttribute(R.attr.stepper_line_on_done_color, typedValue, true)
+    val stepperLineOnDoneColor = Color(typedValue.data)
+
+    val kotStepStyle = KotStepStyle(
+        stepLayoutStyle = StepLayoutStyle.Horizontal,
+        stepStyle = StepStyles(
+            onTodo = StepStyle(
+                stepColor = stepperIconBgColor,
+                stepSize = 40.dp,
+                iconStyle = IconStyle(iconSize = 24.dp),
+                borderStyle = BorderStyle(color = stepperIconColor)
+            ),
+            onCurrent = StepStyle(
+                stepColor = stepperIconBgColor,
+                stepSize = 60.dp,
+                iconStyle = IconStyle(iconSize = 44.dp),
+                // textStyle = TextStyle(color = Color.Black, fontSize = 18.sp),
+                borderStyle = BorderStyle(color = stepperIconColor)
+            ),
+            onDone = StepStyle(
+                stepColor = stepperIconOnDoneBgColor,
+                stepSize = 40.dp,
+                iconStyle = IconStyle(iconSize = 24.dp, iconTint = stepperIconOnDoneColor),
+                borderStyle = BorderStyle(color = stepperIconColor)
+            )
+        ),
+        lineStyle = LineStyles(
+            onTodo = LineStyle(lineColor = stepperLineColor, progressColor = stepperLineColor),
+            onCurrent = LineStyle(lineColor = stepperLineColor, progressColor = stepperLineColor),
+            onDone = LineStyle(lineColor = stepperLineColor, progressColor = stepperLineOnDoneColor, lineThickness = 4.dp)
+        )
+    )
+
+    val steps = FieldCreationStep.displayableEntries()
+    val icons: Map<FieldCreationStep, ImageVector?> = steps.associateWith { step ->
+        step.icon?.let { ImageVector.vectorResource(id = it) }
+    }
+
+    KotStep(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .height(100.dp),
+        currentStep = { currentStep.position.toFloat() },
+        style = kotStepStyle
+    ) {
+        steps.forEach { step ->
+            icons[step]?.let { icon ->
+                step(
+                    icon = icon,
+                    label = {
+                        // hide the label if COMPLETED or not the current step
+                        if (step == currentStep && currentStep != FieldCreationStep.COMPLETED) {
+                            step.label?.let { Text(stringResource(it)) }
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+enum class FieldCreationStep(val position: Int, val icon: Int?, val label: Int?) {
+    FIELD_SIZE(0, R.drawable.ic_field_config, R.string.field_creator_stepper_size),
+    START_POINT(1, R.drawable.ic_start_point, R.string.field_creator_stepper_start),
+    WALKING_ORDER(2, R.drawable.ic_walk, R.string.field_creator_stepper_pattern),
+    FIELD_PREVIEW(3, R.drawable.ic_field_preview, R.string.field_creator_stepper_preview),
+
+    COMPLETED(4, null, null);
+
+    companion object {
+        // return all values except COMPLETED which is just denotes the state
+        fun displayableEntries(): Array<FieldCreationStep> {
+            return entries.filterNot { it == COMPLETED }.toTypedArray()
+        }
+    }
+}
+

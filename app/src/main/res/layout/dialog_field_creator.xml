@@ -8,6 +8,13 @@
     android:paddingHorizontal="30dp"
     android:paddingTop="30dp">
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/dialog_field_creator_header_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="dialog_field_creator_stepper, dialog_field_creator_title"/>
+
     <androidx.constraintlayout.widget.Group
         android:id="@+id/dialog_field_creator_group_start_point"
         android:layout_width="wrap_content"
@@ -20,6 +27,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_stepper"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:constraint_referenced_ids="plot_horizontal_linear_button, plot_horizontal_zigzag_button,
                 plot_vertical_linear_button, plot_vertical_zigzag_button"/>
 
@@ -32,6 +42,14 @@
         app:constraint_referenced_ids="dialog_field_creator_field_row_edit_text,
             dialog_field_creator_field_column_edit_text,
             dialog_field_creator_field_name_edit_text"/>
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/dialog_field_creator_stepper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:layout_width="match_parent"
@@ -51,7 +69,7 @@
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"/>
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_header_barrier"/>
 
     <EditText
         android:id="@+id/dialog_field_creator_field_row_edit_text"
@@ -82,7 +100,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_header_barrier"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- endregion -->
@@ -95,7 +113,7 @@
         android:layout_height="64dp"
         android:src="@drawable/ic_direction_horizontal_linear"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_header_barrier"
         android:contentDescription="@string/dialog_field_creator_horizontal_linear_button_content_desc" />
 
     <ImageButton
@@ -104,7 +122,7 @@
         android:layout_height="64dp"
         android:src="@drawable/ic_direction_horizontal_serpentine"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_header_barrier"
         android:contentDescription="@string/dialog_field_creator_horizontal_zig_button_content_desc" />
 
     <ImageButton
@@ -145,7 +163,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_title"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_header_barrier"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

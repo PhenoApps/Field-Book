@@ -3,6 +3,7 @@ package com.fieldbook.tracker.dialogs
 import android.app.AlertDialog
 import android.app.Dialog
 import android.database.sqlite.SQLiteAbortException
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -32,6 +33,8 @@ import com.fieldbook.tracker.utilities.FieldConfig
 import com.fieldbook.tracker.utilities.FieldPattern
 import com.fieldbook.tracker.utilities.FieldPlotCalculator
 import com.fieldbook.tracker.utilities.FieldStartCorner
+import com.fieldbook.tracker.views.FieldCreationStep
+import com.fieldbook.tracker.views.FieldCreatorStepper
 import com.fieldbook.tracker.views.FieldPreviewGrid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,9 +48,9 @@ import java.util.UUID
  * Each constraint group defined in field_creator_dialog.xml has a respective function which
  * starts by toggling its visibility.
  * Size group: User chooses a name which must not already exist, and row and column integer > 0
- * Start group: Four radio buttons to choose a starting point top left, top right, bottom left, bottom right
- * Pattern group: Two buttons are used to choose a linear or zigzag pattern
- * Review group: Summary of the chosen parameters, press OK to insert into database.
+ * Start group: User chooses a starting point top left, top right, bottom left, bottom right in the field preview grid
+ * Pattern group: Four buttons are used to choose from a combination of horizontal/vertical walking path paired with linear/zigzag pattern
+ * Review group: Field preview grid, press OK to insert into database.
  *
  *                 FieldCreatorDialog dialog = new FieldCreatorDialog(this);
  */
@@ -65,6 +68,9 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     var mCancelJobFlag = false
 
     var fieldCreatorDialog: AlertDialog? = null
+
+    // stepper ui index
+    private var fieldCreatorStep by mutableStateOf(FieldCreationStep.FIELD_SIZE)
 
     // grid preview colors
     private var cellTextColor: Int = 0
@@ -107,6 +113,20 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
         fieldCreatorDialog?.show()
 
         titleTextView = view.findViewById(R.id.dialog_field_creator_title)
+        val stepperComposeView = view.findViewById<ComposeView>(R.id.dialog_field_creator_stepper)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stepperComposeView?.setContent {
+                MaterialTheme {
+                    FieldCreatorStepper(fieldCreatorStep)
+                }
+            }
+            stepperComposeView?.visibility = View.VISIBLE
+            titleTextView?.visibility = View.GONE
+        } else {
+            stepperComposeView?.visibility = View.GONE
+            titleTextView?.visibility = View.VISIBLE
+        }
 
         setupSizeGroup()
 
@@ -134,6 +154,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     //the initial step that asks the user for row/column size of their field
     //row*column plots will be generated based on a chosen pattern
     private fun setupSizeGroup() {
+        fieldCreatorStep = FieldCreationStep.FIELD_SIZE
 
         titleTextView?.setText(R.string.dialog_field_creator_ask_size)
 
@@ -219,6 +240,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     }
 
     private fun setupStartingPointSelection(name: String) {
+        fieldCreatorStep = FieldCreationStep.START_POINT
 
         titleTextView?.setText(R.string.dialog_field_creator_ask_start_point)
 
@@ -267,6 +289,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     }
 
     private fun setupPatternGroup(name: String) {
+        fieldCreatorStep = FieldCreationStep.WALKING_ORDER
 
         titleTextView?.setText(R.string.dialog_field_creator_ask_pattern)
 
@@ -319,6 +342,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
 
 
     private fun setupReviewGroup(name: String) {
+        fieldCreatorStep = FieldCreationStep.FIELD_PREVIEW
 
         titleTextView?.text = context?.getString(R.string.dialog_field_creator_review_title)
 
@@ -381,6 +405,8 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
             it.isEnabled = false //no accidental double clicks...
 
             backButton?.isEnabled = false //no going back now
+
+            fieldCreatorStep = FieldCreationStep.COMPLETED
 
             insertBasicField(name)
         }
