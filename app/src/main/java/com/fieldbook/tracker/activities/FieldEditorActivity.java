@@ -223,7 +223,10 @@ public class FieldEditorActivity extends ThemedActivity
 
     @Override
     public void onItemClear() {
-
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(getString(R.string.settings_fields));
+        }
+        invalidateOptionsMenu();
     }
 
     public void setActiveField(int studyId) {
@@ -450,22 +453,22 @@ public class FieldEditorActivity extends ThemedActivity
         systemMenu = menu;
         systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
 
-        //TODO rather not use reflection here...
-        //https://stackoverflow.com/questions/18374183/how-to-show-icons-in-overflow-menu-in-actionbar
-        if(menu.getClass().getSimpleName().equals("MenuBuilder")){
-            try{
-                Method m = menu.getClass().getDeclaredMethod(
-                        "setOptionalIconsVisible", Boolean.TYPE);
-                m.setAccessible(true);
-                m.invoke(menu, true);
-            }
-            catch(NoSuchMethodException e){
-                Log.e(TAG, "onMenuOpened", e);
-            }
-            catch(Exception e){
-                throw new RuntimeException(e);
-            }
-        }
+        // //TODO rather not use reflection here...
+        // //https://stackoverflow.com/questions/18374183/how-to-show-icons-in-overflow-menu-in-actionbar
+        // if(menu.getClass().getSimpleName().equals("MenuBuilder")){
+        //     try{
+        //         Method m = menu.getClass().getDeclaredMethod(
+        //                 "setOptionalIconsVisible", Boolean.TYPE);
+        //         m.setAccessible(true);
+        //         m.invoke(menu, true);
+        //     }
+        //     catch(NoSuchMethodException e){
+        //         Log.e(TAG, "onMenuOpened", e);
+        //     }
+        //     catch(Exception e){
+        //         throw new RuntimeException(e);
+        //     }
+        // }
 
         return true;
     }
@@ -477,6 +480,8 @@ public class FieldEditorActivity extends ThemedActivity
         boolean userHasToggledGrouping = preferences.getBoolean(GeneralKeys.USER_TOGGLED_FIELD_GROUPING, false);
 
         MenuItem groupToggleItem = menu.findItem(R.id.toggle_group_visibility);
+        MenuItem tutorialItem = menu.findItem(R.id.help);
+        MenuItem nearestPlotItem = menu.findItem(R.id.action_select_plot_by_distance);
         MenuItem sortFieldsItem = menu.findItem(R.id.sortFields);
         MenuItem exportItem = menu.findItem(R.id.menu_export);
         MenuItem selectAllItem = menu.findItem(R.id.menu_select_all);
@@ -504,6 +509,8 @@ public class FieldEditorActivity extends ThemedActivity
         mAdapter.resetFieldsList(fieldList);
 
         MenuItem[] defaultMenuListItems = new MenuItem[]{
+                tutorialItem,
+                nearestPlotItem,
                 sortFieldsItem,
         };
 

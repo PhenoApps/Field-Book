@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.activities
 
 import android.content.SharedPreferences
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -9,10 +8,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.TextView
-import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.Toolbar
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -35,12 +31,12 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAdapter.AdapterCallback {
 
-    private val TAG = "FieldArchived"
+    companion object {
+        const val TAG = "FieldArchived"
+    }
 
     private var fieldList: ArrayList<FieldObject> = ArrayList()
     lateinit var mAdapter: FieldAdapter
-    private var actionMode: ActionMode? = null
-    private var customTitleView: TextView? = null
     lateinit var exportUtil: ExportUtil
     private lateinit var searchBar: SearchBar
 
@@ -54,6 +50,8 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
     lateinit var mPrefs: SharedPreferences
 
     lateinit var recyclerView: RecyclerView
+
+    private var systemMenu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,82 +100,56 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
         queryAndLoadArchivedFields()
     }
 
-    // Implementations of methods from FieldAdapter.AdapterCallback
     override fun onItemSelected(selectedCount: Int) {
-        if (selectedCount == 0 && actionMode != null) {
-            actionMode?.finish()
-        } else if (selectedCount > 0 && actionMode == null) {
-            actionMode = startSupportActionMode(actionModeCallback)
+        if (mAdapter.selectedItemCount > 0) {
+            supportActionBar?.title = getString(R.string.selected_count, selectedCount)
+        } else {
+            supportActionBar?.title = getString(R.string.archived_fields)
         }
-        actionMode?.let {
-            customTitleView?.text = getString(R.string.selected_count, selectedCount)
-        }
+
+        invalidateOptionsMenu()
     }
 
     override fun onItemClear() {
-        actionMode?.finish()
+        // Reset the title when exiting selection mode
+        supportActionBar?.title = getString(R.string.archived_fields)
+        invalidateOptionsMenu()
     }
 
-    private val actionModeCallback = object : ActionMode.Callback {
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            val inflater = mode.menuInflater
-            inflater.inflate(R.menu.cab_archived_menu, menu)
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_archived_fields, menu)
+        systemMenu = menu
+        return true
+    }
 
-            // Create and style the custom title view
-            customTitleView = TextView(this@FieldArchivedActivity).apply {
-                setTextColor(Color.BLACK)
-                textSize = 18f
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val exportItem = menu.findItem(R.id.menu_export)
+        val selectAllItem = menu.findItem(R.id.menu_select_all)
+        val unarchiveFieldsItem = menu.findItem(R.id.menu_unarchive_fields)
+        val deleteFieldsItem = menu.findItem(R.id.menu_delete)
+
+        val selectionMenuItems = arrayOf(
+            exportItem,
+            selectAllItem,
+            unarchiveFieldsItem,
+            deleteFieldsItem
+        )
+
+        if (mAdapter.selectedItemCount == 0) { // hide menu items
+            for (item in selectionMenuItems) {
+                toggleMenuItem(item, false)
             }
-
-            val layoutParams = ActionBar.LayoutParams(
-                ActionBar.LayoutParams.WRAP_CONTENT,
-                ActionBar.LayoutParams.WRAP_CONTENT
-            )
-            customTitleView?.layoutParams = layoutParams
-
-            mode.customView = customTitleView
-
-            return true
-        }
-
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            return false
-        }
-
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            return when (item.itemId) {
-                R.id.menu_select_all -> {
-                    mAdapter.selectAll()
-                    val selectedCount = mAdapter.selectedItemCount
-                    customTitleView?.text = getString(R.string.selected_count, selectedCount)
-                    true
-                }
-                R.id.menu_export -> {
-                    exportUtil.exportMultipleFields(mAdapter.selectedItems)
-                    mAdapter.exitSelectionMode()
-                    mode.finish()
-                    true
-                }
-                R.id.menu_unarchive_fields -> {
-                    for (fieldId in mAdapter.selectedItems) {
-                        db.setIsArchived(fieldId, false)
-                    }
-                    queryAndLoadArchivedFields()
-                    mAdapter.exitSelectionMode()
-                    true
-                }
-                R.id.menu_delete -> {
-                    showDeleteConfirmationDialog(mAdapter.selectedItems, false)
-                    true
-                }
-                else -> false
+        } else { // show menu items
+            for (item in selectionMenuItems) {
+                toggleMenuItem(item, true)
             }
         }
+        return true
+    }
 
-        override fun onDestroyActionMode(mode: ActionMode) {
-            mAdapter.exitSelectionMode()
-            actionMode = null
-        }
+    private fun toggleMenuItem(item: MenuItem?, enabled: Boolean) {
+        item?.isEnabled = enabled
+        item?.isVisible = enabled
     }
 
     fun showDeleteConfirmationDialog(fieldIds: List<Int>, isFromDetailFragment: Boolean) {
@@ -236,15 +208,12 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
 
         queryAndLoadArchivedFields()
         mAdapter.exitSelectionMode()
-        actionMode?.finish()
-        actionMode = null
     }
 
     private fun queryAndLoadArchivedFields() {
         try {
             val allFields = db.getAllFieldObjects()
 
-            val archivedVal = getString(R.string.group_archived_value)
             fieldList.clear()
 
             for (field in allFields) {
@@ -254,6 +223,8 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
             }
 
             mAdapter.resetFieldsList(ArrayList(fieldList))
+
+            invalidateOptionsMenu()
 
             if (fieldList.isEmpty()) {
                 // return to FieldEditorActivity
@@ -272,6 +243,31 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
         return when (item.itemId) {
             android.R.id.home -> {
                 finish()
+                true
+            }
+            R.id.menu_select_all -> {
+                mAdapter.selectAll()
+                invalidateOptionsMenu()
+                true
+            }
+            R.id.menu_export -> {
+                exportUtil.exportMultipleFields(mAdapter.selectedItems)
+                mAdapter.exitSelectionMode()
+                invalidateOptionsMenu()
+                true
+            }
+            R.id.menu_unarchive_fields -> {
+                for (fieldId in mAdapter.selectedItems) {
+                    db.setIsArchived(fieldId, false)
+                }
+                queryAndLoadArchivedFields()
+                mAdapter.exitSelectionMode()
+                true
+            }
+            R.id.menu_delete -> {
+                showDeleteConfirmationDialog(mAdapter.selectedItems, false)
+                mAdapter.exitSelectionMode()
+                invalidateOptionsMenu()
                 true
             }
             else -> super.onOptionsItemSelected(item)

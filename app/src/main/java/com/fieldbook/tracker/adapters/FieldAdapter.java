@@ -135,10 +135,11 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     public void selectAll() {
-        List<FieldViewItem> currentList = getCurrentList();
-        for (FieldViewItem fieldViewItem : currentList) {
-            if (fieldViewItem.isFieldItem()) {
-                selectedIds.add(fieldViewItem.field.getExp_id());
+        for (FieldObject field : fullFieldList) {
+            if (isArchivedFieldsActivity || !field.getIsArchived()) {
+                // for FieldEditorActivity, add all non archived fields
+                // for FieldArchivedActivity, add all archived fields
+                selectedIds.add(field.getExp_id());
             }
         }
         notifyDataSetChanged();
