@@ -50,7 +50,6 @@ import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.StudyGroupDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.StudyGroupModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialogFragment;
@@ -66,6 +65,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.ExportUtil;
+import com.fieldbook.tracker.utilities.FieldGroupControllerImpl;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -80,7 +80,6 @@ import org.phenoapps.utils.BaseDocumentTreeUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -115,6 +114,8 @@ public class FieldEditorActivity extends ThemedActivity
     DataHelper database;
     @Inject
     FieldSwitchImpl fieldSwitcher;
+    @Inject
+    FieldGroupControllerImpl fieldGroupController;
     @Inject
     SharedPreferences preferences;
     RecyclerView recyclerView;
@@ -154,7 +155,7 @@ public class FieldEditorActivity extends ThemedActivity
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         // Initialize adapter
-        mAdapter = new FieldAdapter(this, fieldSwitcher, this, false);
+        mAdapter = new FieldAdapter(this, this, fieldGroupController, false);
         mAdapter.setOnFieldSelectedListener(new FieldAdapter.OnFieldSelectedListener() {
             @Override
             public void onFieldSelected(int fieldId) {
@@ -1231,7 +1232,7 @@ public class FieldEditorActivity extends ThemedActivity
                     .orElse(null);
 
             if (field != null) {
-                String groupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
+                String groupName = database.getStudyGroupNameById(field.getGroupId());
                 if (groupName != null && !groupName.isEmpty()) {
                     anyFieldsInGroup = true;
                     break;

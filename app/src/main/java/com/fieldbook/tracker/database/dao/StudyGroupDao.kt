@@ -112,7 +112,7 @@ class StudyGroupDao {
         /**
          * Delete a studyGroup
          */
-        fun deleteStudyGroup(groupId: Int) = withDatabase { db ->
+        private fun deleteStudyGroup(groupId: Int) = withDatabase { db ->
             db.delete(
                 StudyGroup.TABLE_NAME,
                 "${StudyGroup.PK} = ?",
@@ -120,7 +120,7 @@ class StudyGroupDao {
             )
         }
 
-        fun updateIsExpanded(groupId: Int, isExpanded: Boolean) = withDatabase { db ->
+        fun updateStudyGroupIsExpanded(groupId: Int, isExpanded: Boolean) = withDatabase { db ->
             db.update(
                 StudyGroup.TABLE_NAME,
                 contentValuesOf("isExpanded" to if (isExpanded) "true" else "false"),

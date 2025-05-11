@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.FieldArchivedActivity;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
-import com.fieldbook.tracker.database.dao.StudyGroupDao;
 import com.fieldbook.tracker.database.models.StudyGroupModel;
+import com.fieldbook.tracker.interfaces.FieldGroupController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
@@ -42,15 +42,14 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     private Set<Integer> selectedIds = new LinkedHashSet<>();
     private boolean isInSelectionMode = false;
     private static final String TAG = "FieldAdapter";
-    private final LayoutInflater mLayoutInflater;
     private final Context context;
-    private final FieldSwitcher fieldSwitcher;
     private AdapterCallback callback;
+    private final FieldGroupController fieldGroupController;
     private OnFieldSelectedListener listener;
     private String filterText = "";
     private final List<FieldObject> fullFieldList = new ArrayList<>();
-    private SharedPreferences preferences;
-    private boolean isArchivedFieldsActivity;
+    private final SharedPreferences preferences;
+    private final boolean isArchivedFieldsActivity;
     public enum FieldViewType {
         TYPE_GROUP_HEADER, TYPE_FIELD, TYPE_ARCHIVE_HEADER
     }
@@ -64,7 +63,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         void onItemClear();
     }
 
-    public FieldAdapter(Context context, FieldSwitcher switcher, AdapterCallback callback, boolean isArchivedFieldsActivity) {
+    public FieldAdapter(Context context, AdapterCallback callback,
+                        FieldGroupController fieldGroupController, boolean isArchivedFieldsActivity) {
         super(new DiffUtil.ItemCallback<FieldViewItem>() {
             @Override
             public boolean areItemsTheSame(@NonNull FieldViewItem oldItem, @NonNull FieldViewItem newItem) {
@@ -99,9 +99,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             }
         });
         this.context = context;
-        mLayoutInflater = LayoutInflater.from(context);
-        this.fieldSwitcher = switcher;
         this.callback = callback;
+        this.fieldGroupController = fieldGroupController;
         this.isArchivedFieldsActivity = isArchivedFieldsActivity;
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
@@ -181,7 +180,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                     if (!headerItem.isExpanded) { // expand group
                         toggleGroupExpansion(position);
                     }
-                    Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(headerItem.groupName);
+                    Integer groupId = fieldGroupController.getStudyGroupIdByName(headerItem.groupName);
                     selectAllFieldsInGroup(groupId);
                 }
                 return false;
@@ -364,9 +363,9 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     private void setGroupExpansionStatus(FieldViewItem header) {
         String headerName = header.groupName;
         if (headerName != null && !headerName.isEmpty()) { // save the isExpanded status
-            Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(header.groupName);
+            Integer groupId = fieldGroupController.getStudyGroupIdByName(header.groupName);
             if (groupId != null) {
-                StudyGroupDao.Companion.updateIsExpanded(groupId, header.isExpanded);
+                fieldGroupController.updateIsExpanded(groupId, header.isExpanded);
             }
         } else { // if "ungrouped", save in preference
             SharedPreferences.Editor editor = preferences.edit();
@@ -389,11 +388,11 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             // add all fields for this group
             int insertPosition = headerPosition + 1;
             for (FieldObject field : fullFieldList) {
-                String fieldGroupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
+                String fieldGroupName = fieldGroupController.getStudyGroupNameById(field.getGroupId());
                 if (!field.getIsArchived()) {
                     if ((headerName == null && fieldGroupName == null) || // ungrouped
                             (headerName != null && headerName.equals(fieldGroupName))) { // grouped
-                        currentList.add(insertPosition++, new FieldViewItem(field));
+                        currentList.add(insertPosition++, new FieldViewItem(field, fieldGroupController));
                     }
                 }
             }
@@ -450,7 +449,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         List<FieldViewItem> items = new ArrayList<>();
         for (FieldObject field : fieldsList) {
             if (field.getIsArchived()) {
-                items.add(new FieldViewItem(field));
+                items.add(new FieldViewItem(field, fieldGroupController));
             }
         }
         return items;
@@ -467,7 +466,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         if (!groupingEnabled) {
             for (FieldObject field : fieldsList) {
-                arrayList.add(new FieldViewItem(field));
+                arrayList.add(new FieldViewItem(field, fieldGroupController));
             }
             return arrayList;
         }
@@ -483,8 +482,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
             if (groupFields.isEmpty()) continue;
 
-            Integer groupId = StudyGroupDao.Companion.getStudyGroupIdByName(groupName);
-            boolean isExpanded = groupId == null || StudyGroupDao.Companion.getIsExpanded(groupId);
+            Integer groupId = fieldGroupController.getStudyGroupIdByName(groupName);
+            boolean isExpanded = groupId == null || fieldGroupController.getIsExpanded(groupId);
 
             addGroupToList(arrayList, groupName, isExpanded, groupFields);
         }
@@ -523,7 +522,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         if (isExpanded) {
             for (FieldObject f : groupFields) {
                 if (!f.getIsArchived()) {
-                    arrayList.add(new FieldViewItem(f));
+                    arrayList.add(new FieldViewItem(f, fieldGroupController));
                 }
             }
         }
@@ -541,7 +540,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         groupedFields.put(null, new ArrayList<>());
 
         // add all study group names
-        List<StudyGroupModel> allStudyGroups = StudyGroupDao.Companion.getAllStudyGroups();
+        List<StudyGroupModel> allStudyGroups = fieldGroupController.getAllStudyGroups();
         if (allStudyGroups != null && !allStudyGroups.isEmpty()) {
             for (StudyGroupModel group : allStudyGroups) {
                 groupedFields.put(group.getGroupName(), new ArrayList<>());
@@ -553,7 +552,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                 continue;
             }
 
-            String groupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
+            String groupName = fieldGroupController.getStudyGroupNameById(field.getGroupId());
 
             // add the field to its group
             List<FieldObject> fieldList = groupedFields.get(groupName);
@@ -600,10 +599,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     public void changeStateOfAllGroups(boolean isExpanded) {
-        List<StudyGroupModel> allStudyGroups = StudyGroupDao.Companion.getAllStudyGroups();
+        List<StudyGroupModel> allStudyGroups = fieldGroupController.getAllStudyGroups();
         if (allStudyGroups != null) {
             for (StudyGroupModel group : allStudyGroups) {
-                StudyGroupDao.Companion.updateIsExpanded(group.getId(), isExpanded);
+                fieldGroupController.updateIsExpanded(group.getId(), isExpanded);
             }
         }
         preferences.edit().putBoolean(GeneralKeys.UNGROUPED_FIELDS_EXPANDED, isExpanded).apply();
@@ -624,10 +623,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             this.groupSize = groupSize;
         }
 
-        public FieldViewItem(FieldObject field) {
+        public FieldViewItem(FieldObject field, FieldGroupController fieldGroupController) {
             this.viewType = FieldViewType.TYPE_FIELD;
             this.field = field;
-            this.groupName = StudyGroupDao.Companion.getStudyGroupNameById(field.getGroupId());
+            this.groupName = fieldGroupController.getStudyGroupNameById(field.getGroupId());
         }
 
         public boolean isGroupHeader() {

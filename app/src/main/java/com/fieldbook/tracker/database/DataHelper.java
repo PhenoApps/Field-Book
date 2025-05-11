@@ -69,7 +69,6 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 import dagger.hilt.android.qualifiers.ActivityContext;
-import kotlin.Pair;
 
 /**
  * All database related functions are here
@@ -2243,6 +2242,10 @@ public class DataHelper {
         return StudyGroupDao.Companion.getStudyGroupNameById(groupId);
     }
 
+    public Integer getStudyGroupIdByName(String groupName) {
+        return StudyGroupDao.Companion.getStudyGroupIdByName(groupName);
+    }
+
     /**
      * Update the group_id for a study
      */
@@ -2255,6 +2258,14 @@ public class DataHelper {
      */
     public void setIsArchived(int studyId, boolean isArchived) {
         StudyDao.Companion.setIsArchived(studyId, isArchived);
+    }
+
+    public boolean getStudyGroupIsExpanded(int studyId) {
+        return StudyGroupDao.Companion.getIsExpanded(studyId);
+    }
+
+    public void updateStudyGroupIsExpanded(int studyId, boolean value) {
+        StudyGroupDao.Companion.updateStudyGroupIsExpanded(studyId, value);
     }
 
     public void deleteField(int studyId) {

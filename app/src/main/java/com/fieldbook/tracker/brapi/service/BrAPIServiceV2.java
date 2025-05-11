@@ -5,7 +5,6 @@ import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
 import androidx.preference.PreferenceManager;
@@ -30,13 +29,10 @@ import com.fieldbook.tracker.brapi.service.pheno.ObservationVariableService;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
-import com.fieldbook.tracker.database.dao.StudyDao;
-import com.fieldbook.tracker.database.dao.StudyGroupDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
@@ -49,7 +45,6 @@ import org.brapi.client.v2.ApiResponse;
 import org.brapi.client.v2.BrAPIClient;
 import org.brapi.client.v2.model.exceptions.ApiException;
 import org.brapi.client.v2.model.queryParams.core.ProgramQueryParams;
-import org.brapi.client.v2.model.queryParams.core.SeasonQueryParams;
 import org.brapi.client.v2.model.queryParams.core.StudyQueryParams;
 import org.brapi.client.v2.model.queryParams.core.TrialQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationQueryParams;
@@ -75,10 +70,7 @@ import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
 import org.brapi.v2.model.core.BrAPITrial;
-import org.brapi.v2.model.core.request.BrAPIStudySearchRequest;
-import org.brapi.v2.model.core.response.BrAPICommonCropNamesResponse;
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse;
-import org.brapi.v2.model.core.response.BrAPISeasonListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudyListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudySingleResponse;
 import org.brapi.v2.model.core.response.BrAPITrialListResponse;
@@ -121,8 +113,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-
-import kotlin.jvm.functions.Function1;
 
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
@@ -1644,7 +1634,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             if (fail) {
                 return new BrapiControllerResponse(false, failMessage);
             } else {
-                addStudyToGroup(field);
+                addStudyToGroup(field, dataHelper);
                 return new BrapiControllerResponse(true, "", field);
             }
 
@@ -1657,12 +1647,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     /**
      * Assign group_name based on trial_name
      */
-    private void addStudyToGroup(FieldObject field) {
+    private void addStudyToGroup(FieldObject field, DataHelper dataHelper) {
         if (field.getTrial_name() != null && !field.getTrial_name().isEmpty()) {
-            Integer groupId = StudyGroupDao.Companion.createOrGetStudyGroup(field.getTrial_name());
+            Integer groupId = dataHelper.createOrGetStudyGroup(field.getTrial_name());
             field.setGroupId(groupId);
 
-            StudyDao.Companion.updateStudyGroup(field.getExp_id(), groupId);
+            dataHelper.updateStudyGroup(field.getExp_id(), groupId);
         }
     }
 

@@ -22,6 +22,7 @@ import com.fieldbook.tracker.interfaces.FieldSwitcher
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.ExportUtil
+import com.fieldbook.tracker.utilities.FieldGroupControllerImpl
 import com.fieldbook.tracker.utilities.FieldSwitchImpl
 import com.fieldbook.tracker.views.SearchBar
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,6 +46,9 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
 
     @Inject
     lateinit var fieldSwitcher: FieldSwitchImpl
+
+    @Inject
+    lateinit var fieldGroupController: FieldGroupControllerImpl
 
     @Inject
     lateinit var mPrefs: SharedPreferences
@@ -72,7 +76,7 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
         recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
         // Initialize adapter
-        mAdapter = FieldAdapter(this, fieldSwitcher, this, true)
+        mAdapter = FieldAdapter(this, this, fieldGroupController, true)
         mAdapter.setOnFieldSelectedListener { fieldId ->
             val fragment = FieldDetailFragment()
             val args = Bundle()
