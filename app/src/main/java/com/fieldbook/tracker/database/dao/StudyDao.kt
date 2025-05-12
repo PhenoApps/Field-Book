@@ -11,7 +11,7 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.Study
-import com.fieldbook.tracker.database.Migrator.StudyGroup
+import com.fieldbook.tracker.database.StudyGroupsTable
 import com.fieldbook.tracker.database.getTime
 import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
@@ -262,7 +262,7 @@ class StudyDao {
             it.trial_name = this["trial_name"]?.toString()
             it.search_attribute = this["observation_unit_search_attribute"]?.toString()
             it.groupId = this["group_id"]?.toString()?.toIntOrNull()
-            it.isArchived = this["isArchived"].toString() == "true"
+            it.is_archived = this["is_archived"].toString() == "true"
         }
 
         fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
@@ -314,7 +314,7 @@ class StudyDao {
                     trial_name,
                     count,
                     observation_unit_search_attribute,
-                    isArchived,
+                    is_archived,
                     group_id,
                     (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
@@ -651,19 +651,19 @@ class StudyDao {
         fun updateStudyGroup(studyId: Int, groupId: Int?) = withDatabase { db ->
             db.update(
                 Study.tableName,
-                contentValuesOf(StudyGroup.FK to groupId),
+                contentValuesOf(StudyGroupsTable.FK to groupId),
                 "${Study.PK} = ?", arrayOf("$studyId")
             )
         }
 
         /**
-         * Updates the isArchived flag of a study
+         * Updates the is_archived flag of a study
          */
         fun setIsArchived(studyId: Int, isArchived: Boolean) = withDatabase { db ->
             val value = if (isArchived) "true" else "false"
             db.update(
                 Study.tableName,
-                contentValuesOf("isArchived" to value),
+                contentValuesOf("is_archived" to value),
                 "${Study.PK} = ?", arrayOf("$studyId")
             )
         }

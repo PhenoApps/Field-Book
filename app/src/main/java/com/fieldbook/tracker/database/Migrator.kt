@@ -666,12 +666,4 @@ class Migrator {
             }
         }
     }
-
-    class StudyGroup private constructor() {
-        companion object Schema {
-            const val PK = "id"
-            const val FK = "group_id"
-            const val TABLE_NAME = "study_groups"
-        }
-    }
 }

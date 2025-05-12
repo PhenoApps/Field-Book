@@ -1,8 +1,8 @@
 package com.fieldbook.tracker.database.dao
 
 import androidx.core.content.contentValuesOf
-import com.fieldbook.tracker.database.Migrator.StudyGroup
 import com.fieldbook.tracker.database.Migrator.Study
+import com.fieldbook.tracker.database.StudyGroupsTable
 import com.fieldbook.tracker.database.models.StudyGroupModel
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.database.query
@@ -23,13 +23,13 @@ class StudyGroupDao {
             val groups = mutableListOf<StudyGroupModel>()
 
             db.query(
-                StudyGroup.TABLE_NAME,
-                select = arrayOf(StudyGroup.PK, "group_name", "isExpanded"),
+                StudyGroupsTable.TABLE_NAME,
+                select = arrayOf(StudyGroupsTable.ID, "group_name", "is_expanded"),
             ).use { cursor ->
                 while (cursor.moveToNext()) {
-                    val id = cursor.getInt(cursor.getColumnIndexOrThrow(StudyGroup.PK))
+                    val id = cursor.getInt(cursor.getColumnIndexOrThrow(StudyGroupsTable.ID))
                     val name = cursor.getString(cursor.getColumnIndexOrThrow("group_name"))
-                    val expanded = cursor.getString(cursor.getColumnIndexOrThrow("isExpanded")) != "false"
+                    val expanded = cursor.getString(cursor.getColumnIndexOrThrow("is_expanded")) != "false"
                     groups.add(StudyGroupModel(id, name, expanded))
                 }
             }
@@ -45,11 +45,11 @@ class StudyGroupDao {
             if (groupName == null) return@withDatabase null
 
             db.query(
-                StudyGroup.TABLE_NAME,
-                select = arrayOf(StudyGroup.PK),
+                StudyGroupsTable.TABLE_NAME,
+                select = arrayOf(StudyGroupsTable.ID),
                 where = "group_name = ?",
                 whereArgs = arrayOf(groupName)
-            ).toFirst()[StudyGroup.PK] as? Int
+            ).toFirst()[StudyGroupsTable.ID] as? Int
         }
 
         /**
@@ -59,9 +59,9 @@ class StudyGroupDao {
             if (groupId == null) return@withDatabase null
 
             db.query(
-                StudyGroup.TABLE_NAME,
+                StudyGroupsTable.TABLE_NAME,
                 select = arrayOf("group_name"),
-                where = "${StudyGroup.PK} = ?",
+                where = "${StudyGroupsTable.ID} = ?",
                 whereArgs = arrayOf("$groupId")
             ).toFirst()["group_name"] as? String
         }
@@ -78,7 +78,7 @@ class StudyGroupDao {
             }
 
             val id = db.insert(
-                StudyGroup.TABLE_NAME,
+                StudyGroupsTable.TABLE_NAME,
                 null,
                 contentValuesOf("group_name" to groupName)
             )
@@ -92,18 +92,18 @@ class StudyGroupDao {
         fun deleteUnusedStudyGroups() = withDatabase { db ->
 
             val query = """
-                SELECT ${StudyGroup.PK} 
-                FROM ${StudyGroup.TABLE_NAME} 
-                WHERE ${StudyGroup.PK} NOT IN (
-                    SELECT DISTINCT ${StudyGroup.FK} 
+                SELECT ${StudyGroupsTable.ID} 
+                FROM ${StudyGroupsTable.TABLE_NAME} 
+                WHERE ${StudyGroupsTable.ID} NOT IN (
+                    SELECT DISTINCT ${StudyGroupsTable.FK} 
                     FROM ${Study.tableName} 
-                    WHERE ${StudyGroup.FK} IS NOT NULL
+                    WHERE ${StudyGroupsTable.FK} IS NOT NULL
                 )
             """
 
             db.rawQuery(query, null).use { cursor ->
                 while (cursor.moveToNext()) {
-                    val groupId = cursor.getInt(cursor.getColumnIndexOrThrow(StudyGroup.PK))
+                    val groupId = cursor.getInt(cursor.getColumnIndexOrThrow(StudyGroupsTable.ID))
                     deleteStudyGroup(groupId)
                 }
             }
@@ -114,28 +114,28 @@ class StudyGroupDao {
          */
         private fun deleteStudyGroup(groupId: Int) = withDatabase { db ->
             db.delete(
-                StudyGroup.TABLE_NAME,
-                "${StudyGroup.PK} = ?",
+                StudyGroupsTable.TABLE_NAME,
+                "${StudyGroupsTable.ID} = ?",
                 arrayOf("$groupId")
             )
         }
 
         fun updateStudyGroupIsExpanded(groupId: Int, isExpanded: Boolean) = withDatabase { db ->
             db.update(
-                StudyGroup.TABLE_NAME,
-                contentValuesOf("isExpanded" to if (isExpanded) "true" else "false"),
-                "${StudyGroup.PK} = ?",
+                StudyGroupsTable.TABLE_NAME,
+                contentValuesOf("is_expanded" to if (isExpanded) "true" else "false"),
+                "${StudyGroupsTable.ID} = ?",
                 arrayOf("$groupId")
             )
         }
 
         fun getIsExpanded(groupId: Int): Boolean = withDatabase { db ->
             val result = db.query(
-                StudyGroup.TABLE_NAME,
-                select = arrayOf("isExpanded"),
-                where = "${StudyGroup.PK} = ?",
+                StudyGroupsTable.TABLE_NAME,
+                select = arrayOf("is_expanded"),
+                where = "${StudyGroupsTable.ID} = ?",
                 whereArgs = arrayOf("$groupId")
-            ).toFirst()["isExpanded"] as? String
+            ).toFirst()["is_expanded"] as? String
 
             result != "false"
         } == true

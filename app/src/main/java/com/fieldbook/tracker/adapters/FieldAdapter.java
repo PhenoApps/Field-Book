@@ -20,7 +20,6 @@ import com.fieldbook.tracker.activities.FieldArchivedActivity;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.database.models.StudyGroupModel;
 import com.fieldbook.tracker.interfaces.FieldGroupController;
-import com.fieldbook.tracker.interfaces.FieldSwitcher;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -135,7 +134,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
     public void selectAll() {
         for (FieldObject field : fullFieldList) {
-            if (isArchivedFieldsActivity || !field.getIsArchived()) {
+            if (isArchivedFieldsActivity || !field.getIs_archived()) {
                 // for FieldEditorActivity, add all non archived fields
                 // for FieldArchivedActivity, add all archived fields
                 selectedIds.add(field.getExp_id());
@@ -389,7 +388,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             int insertPosition = headerPosition + 1;
             for (FieldObject field : fullFieldList) {
                 String fieldGroupName = fieldGroupController.getStudyGroupNameById(field.getGroupId());
-                if (!field.getIsArchived()) {
+                if (!field.getIs_archived()) {
                     if ((headerName == null && fieldGroupName == null) || // ungrouped
                             (headerName != null && headerName.equals(fieldGroupName))) { // grouped
                         currentList.add(insertPosition++, new FieldViewItem(field, fieldGroupController));
@@ -408,7 +407,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
     private void selectAllFieldsInGroup(Integer groupId) {
         for (FieldObject field : fullFieldList) {
-            if (!field.getIsArchived()) { // make sure we are not selecting archived fields
+            if (!field.getIs_archived()) { // make sure we are not selecting archived fields
                 if ((groupId == null && field.getGroupId() == null) ||
                         (groupId != null && groupId.equals(field.getGroupId()))) {
                     selectedIds.add(field.getExp_id());
@@ -448,7 +447,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     private List<FieldViewItem> buildArchivedFieldsList(List<FieldObject> fieldsList) {
         List<FieldViewItem> items = new ArrayList<>();
         for (FieldObject field : fieldsList) {
-            if (field.getIsArchived()) {
+            if (field.getIs_archived()) {
                 items.add(new FieldViewItem(field, fieldGroupController));
             }
         }
@@ -494,7 +493,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             addGroupToList(arrayList, null, ungroupedExpanded, ungroupedFields);
         }
 
-        long archivedCount = fieldsList.stream().filter(FieldObject::getIsArchived).count();
+        long archivedCount = fieldsList.stream().filter(FieldObject::getIs_archived).count();
         if (archivedCount > 0) { // add archived list item at the bottom
             String archivedVal = context.getString(R.string.group_archived_value);
             FieldViewItem archiveHeader = new FieldViewItem(archivedVal, archivedCount, true);
@@ -521,7 +520,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         // add children if expanded
         if (isExpanded) {
             for (FieldObject f : groupFields) {
-                if (!f.getIsArchived()) {
+                if (!f.getIs_archived()) {
                     arrayList.add(new FieldViewItem(f, fieldGroupController));
                 }
             }
@@ -548,7 +547,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         }
 
         for (FieldObject field : fields) {
-            if (field.getIsArchived()) { // handle archived fields in buildFieldList
+            if (field.getIs_archived()) { // handle archived fields in buildFieldList
                 continue;
             }
 

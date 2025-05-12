@@ -2292,7 +2292,7 @@ public class DataHelper {
     }
 
     /**
-     * Update the isArchived flag for a study
+     * Update the is_archived flag for a study
      */
     public void setIsArchived(int studyId, boolean isArchived) {
         StudyDao.Companion.setIsArchived(studyId, isArchived);

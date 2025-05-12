@@ -36,3 +36,12 @@ object SpectralFactTable {
     const val COMMENT = "comment"
     const val CREATED_AT = "created_at"
 }
+
+object StudyGroupsTable {
+    const val TABLE_NAME = "study_groups"
+    const val ID = "id"
+    const val GROUP_NAME = "group_name"
+    const val IS_EXPANDED = "is_expanded"
+
+    const val FK = "group_id"
+}

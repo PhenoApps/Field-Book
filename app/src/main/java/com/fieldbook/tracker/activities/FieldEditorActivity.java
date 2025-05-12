@@ -569,7 +569,7 @@ public class FieldEditorActivity extends ThemedActivity
     private boolean areFieldsGrouped() {
         List<StudyGroupModel> allStudyGroups = database.getAllStudyGroups();
 
-        boolean hasArchivedFields = fieldList.stream().anyMatch(FieldObject::getIsArchived);
+        boolean hasArchivedFields = fieldList.stream().anyMatch(FieldObject::getIs_archived);
         boolean hasGroups = allStudyGroups != null && !allStudyGroups.isEmpty();
         return hasArchivedFields || hasGroups;
     }

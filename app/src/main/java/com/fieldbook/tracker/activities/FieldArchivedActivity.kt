@@ -222,7 +222,7 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
             fieldList.clear()
 
             for (field in allFields) {
-                if (field.isArchived) {
+                if (field.is_archived) {
                     fieldList.add(field)
                 }
             }
