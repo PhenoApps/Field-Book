@@ -83,7 +83,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
 public class DataHelper {
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 13;
+    public static final int DATABASE_VERSION = 14;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -3183,6 +3183,11 @@ public class DataHelper {
             if (oldVersion <= 12 && newVersion >= 13) {
                 // migrate to version that has new tables to handle spectral data and device parameters
                 Migrator.Companion.migrateToVersion13(db);
+            }
+
+            if (oldVersion <= 13 && newVersion >= 14) {
+                // add study_groups table to add field grouping functionality
+                Migrator.Companion.migrateToVersion14(db);
             }
         }
     }

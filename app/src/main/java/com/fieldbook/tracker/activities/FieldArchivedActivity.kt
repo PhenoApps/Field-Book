@@ -21,7 +21,7 @@ import com.fieldbook.tracker.interfaces.FieldAdapterController
 import com.fieldbook.tracker.interfaces.FieldSwitcher
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.utilities.ExportUtil
+import com.fieldbook.tracker.utilities.export.ExportUtil
 import com.fieldbook.tracker.utilities.FieldGroupControllerImpl
 import com.fieldbook.tracker.utilities.FieldSwitchImpl
 import com.fieldbook.tracker.views.SearchBar
@@ -38,7 +38,6 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
 
     private var fieldList: ArrayList<FieldObject> = ArrayList()
     lateinit var mAdapter: FieldAdapter
-    lateinit var exportUtil: ExportUtil
     private lateinit var searchBar: SearchBar
 
     @Inject
@@ -53,6 +52,9 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
     @Inject
     lateinit var mPrefs: SharedPreferences
 
+    @Inject
+    lateinit var exportUtil: ExportUtil
+
     lateinit var recyclerView: RecyclerView
 
     private var systemMenu: Menu? = null
@@ -62,7 +64,6 @@ class FieldArchivedActivity : ThemedActivity(), FieldAdapterController, FieldAda
         setContentView(R.layout.activity_field_archived)
         val toolbar = findViewById<Toolbar>(R.id.field_archived_toolbar)
         setSupportActionBar(toolbar)
-        exportUtil = ExportUtil(this, db)
 
         supportActionBar?.apply {
             title = getString(R.string.archived_fields)

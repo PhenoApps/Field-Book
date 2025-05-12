@@ -9,15 +9,15 @@ import com.fieldbook.tracker.database.Migrator.Study
  * Migration for adding study_groups table
  * Adds group_id as FK, and isArchived to studies table
  */
-class MigratorVersion13: FieldBookMigrator {
+class StudyGroupMigratorVersion14: FieldBookMigrator {
 
     companion object {
-        private const val TAG = "MigratorVersion13"
+        private const val TAG = "StudyGroupMigrator14"
     }
 
     override fun migrate(db: SQLiteDatabase): Result<Any> = runCatching {
 
-        Log.d(TAG, "Starting migration to version 13 - Adding group_studies table")
+        Log.d(TAG, "Starting migration to version 14 - Adding group_studies table")
 
         createStudyGroupsTable(db)
 
@@ -27,7 +27,7 @@ class MigratorVersion13: FieldBookMigrator {
 
         createIndexes(db)
 
-        Log.d(TAG, "Completed migration to version 13")
+        Log.d(TAG, "Completed migration to version 14")
 
     }
 

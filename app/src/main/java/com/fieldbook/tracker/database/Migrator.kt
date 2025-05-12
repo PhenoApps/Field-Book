@@ -9,7 +9,7 @@ import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
 import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion13
-import com.fieldbook.tracker.database.migrators.MigratorVersion13
+import com.fieldbook.tracker.database.migrators.StudyGroupMigratorVersion14
 import com.fieldbook.tracker.objects.TraitObject
 
 /**
@@ -402,14 +402,14 @@ class Migrator {
                 }
         }
 
-        fun migrateToVersion13(db: SQLiteDatabase) {
+        fun migrateToVersion14(db: SQLiteDatabase) {
 
-            MigratorVersion13().migrate(db)
+            StudyGroupMigratorVersion14().migrate(db)
                 .onFailure {
-                    Log.e(TAG, "Failed to migrate to version 13", it)
+                    Log.e(TAG, "Failed to migrate to version 14", it)
                 }
                 .onSuccess {
-                    Log.d(TAG, "Migrated to version 13")
+                    Log.d(TAG, "Migrated to version 14")
                 }
         }
     }

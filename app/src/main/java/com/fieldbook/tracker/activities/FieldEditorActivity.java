@@ -105,6 +105,10 @@ public class FieldEditorActivity extends ThemedActivity
 
     private final String TAG = "FieldEditor";
 
+    private static final int REQUEST_FILE_EXPLORER_CODE = 1;
+    private static final int REQUEST_CLOUD_FILE_CODE = 5;
+    private static final int REQUEST_BRAPI_IMPORT_ACTIVITY = 10;
+
     private ArrayList<FieldObject> fieldList;
     public FieldAdapter mAdapter;
     public EditText trait;
