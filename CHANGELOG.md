@@ -13,6 +13,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [v6.2.2] - 2025-04-16
+
+### Added
+
+### Changed
+
+### Fixed
+- Trait indicator icons in Collect now resize as expected
+- Device dark mode no longer affects Field Book UI
+- Traits with quotes now export correctly in table format
+
+## [v6.2.1] - 2025-04-09
+
+### Added
+
+### Changed
+
+### Fixed
+- Date traits using day of year now correctly saves
+- Fixed an issue with Settings search
+
 ## [v6.2.0] - 2025-04-03
 
 ### Added
@@ -669,3 +690,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.2
 
 [v6.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.0
+[v6.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.1
+[v6.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.2

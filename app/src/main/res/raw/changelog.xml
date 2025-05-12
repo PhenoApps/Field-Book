@@ -1,5 +1,16 @@
 <changelog>
 
+    <release date="2025-04-16" versionCode="60202" versionName="v6.2.2">
+        <bugfix>Trait indicator icons in Collect now resize as expected</bugfix>
+        <bugfix>Device dark mode no longer affects Field Book UI</bugfix>
+        <bugfix>Traits with quotes now export correctly in table format</bugfix>
+    </release>
+
+    <release date="2025-04-09" versionCode="60201" versionName="v6.2.1">
+        <bugfix>Date traits using day of year now correctly saves</bugfix>
+        <bugfix>Fixed an issue with Settings search</bugfix>
+    </release>
+
     <release date="2025-04-03" versionCode="60200" versionName="v6.2.0">
         <new>Data grid updated with new interface</new>
         <new>Device name can now be customized in Profile Settings</new>

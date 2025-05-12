@@ -8,7 +8,7 @@ import android.util.Log
 import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
-import com.fieldbook.tracker.database.migrators.ExampleMigratorVersionN
+import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion13
 import com.fieldbook.tracker.database.migrators.MigratorVersion13
 import com.fieldbook.tracker.objects.TraitObject
 
@@ -391,14 +391,14 @@ class Migrator {
 
         }
 
-        fun migrateToVersionExampleN(db: SQLiteDatabase) {
+        fun migrateToVersion13(db: SQLiteDatabase) {
 
-            ExampleMigratorVersionN().migrate(db)
+            SpectralMigratorVersion13().migrate(db)
                 .onFailure {
-                    Log.e(TAG, "Failed to migrate to version N", it)
+                    Log.e(TAG, "Failed to migrate to version 13", it)
                 }
                 .onSuccess {
-                    Log.d(TAG, "Migrated to version N")
+                    Log.d(TAG, "Migrated to version 13")
                 }
         }
 
@@ -453,7 +453,6 @@ class Migrator {
 
         companion object Schema {
             const val PK = "internal_id_observation"
-            const val FK = "observation_id"
             const val migrateFromTableName = "user_traits"
             const val tableName = "observations"
             val columnDefs by lazy {

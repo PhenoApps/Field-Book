@@ -12,4 +12,6 @@
     <dimen name="button_default_width">150dp</dimen>
     <dimen name="button_width_numeric">120dp</dimen>
     <dimen name="button_width_disease">75dp</dimen>
+
+    <dimen name="fb_trait_status_bar_icon_default_max_size">12dp</dimen>
 </resources>

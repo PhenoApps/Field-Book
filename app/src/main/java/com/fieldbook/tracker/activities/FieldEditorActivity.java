@@ -32,9 +32,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
@@ -64,7 +66,7 @@ import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
-import com.fieldbook.tracker.utilities.ExportUtil;
+import com.fieldbook.tracker.utilities.export.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldGroupControllerImpl;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
@@ -101,27 +103,32 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class FieldEditorActivity extends ThemedActivity
         implements FieldSortController, FieldAdapterController, FieldAdapter.AdapterCallback {
 
-    private static final int REQUEST_FILE_EXPLORER_CODE = 1;
-    private static final int REQUEST_CLOUD_FILE_CODE = 5;
-    private static final int REQUEST_BRAPI_IMPORT_ACTIVITY = 10;
-    private static final Handler mHandler = new Handler();
     private final String TAG = "FieldEditor";
-    private final int PERMISSIONS_REQUEST_STORAGE = 998;
+
+    private ArrayList<FieldObject> fieldList;
     public FieldAdapter mAdapter;
     public EditText trait;
-    public ExportUtil exportUtil;
+    private static final Handler mHandler = new Handler();
+    private FieldFileObject.FieldFileBase fieldFile;
+    private final int PERMISSIONS_REQUEST_STORAGE = 998;
+    private Spinner unique;
+    private Menu systemMenu;
+    private GPSTracker mGpsTracker;
+    private SearchBar searchBar;
+
     @Inject
     DataHelper database;
+
     @Inject
     FieldSwitchImpl fieldSwitcher;
     @Inject
     FieldGroupControllerImpl fieldGroupController;
     @Inject
     SharedPreferences preferences;
+    @Inject
+    ExportUtil exportUtil;
+
     RecyclerView recyclerView;
-    private ArrayList<FieldObject> fieldList;
-    private FieldFileObject.FieldFileBase fieldFile;
-    private Spinner unique;
     // Creates a new thread to do importing
     private final Runnable importRunnable = new Runnable() {
         public void run() {
@@ -131,9 +138,6 @@ public class FieldEditorActivity extends ThemedActivity
                     unique.getSelectedItem().toString()).execute(0);
         }
     };
-    private Menu systemMenu;
-    private GPSTracker mGpsTracker;
-    private SearchBar searchBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -141,7 +145,6 @@ public class FieldEditorActivity extends ThemedActivity
         setContentView(R.layout.activity_fields);
         Toolbar toolbar = findViewById(R.id.field_toolbar);
         setSupportActionBar(toolbar);
-        exportUtil = new ExportUtil(this, database);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.settings_fields));
