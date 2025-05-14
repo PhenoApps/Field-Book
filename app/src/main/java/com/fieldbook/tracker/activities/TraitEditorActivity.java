@@ -234,28 +234,28 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 }
 
                 // Check if this is a BrAPI trait
-                if (traitName != null) {
-
-                    // Just returns an empty trait object in the case the trait isn't found
-                    TraitObject trait = database.getDetail(traitName);
-                    if (trait.getName() == null) {
-                        return false;
-                    }
-
-                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
-
-                        // Show info dialog if a BrAPI field is selected.
-                        BrapiInfoDialogFragment dialogFragment = new BrapiInfoDialogFragment().newInstance(getResources().getString(R.string.brapi_info_message));
-                        dialogFragment.show(this.getSupportFragmentManager(), "brapiInfoDialogFragment");
-
-                        // Only show the info dialog on the first non-BrAPI trait selected.
-                        return true;
-
-                    } else {
-                        // Dialog was not shown
-                        return false;
-                    }
-                }
+//                if (traitName != null) {
+//
+//                    // Just returns an empty trait object in the case the trait isn't found
+//                    TraitObject trait = database.getDetail(traitName);
+//                    if (trait.getName() == null) {
+//                        return false;
+//                    }
+//
+//                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
+//
+//                        // Show info dialog if a BrAPI field is selected.
+//                        BrapiInfoDialogFragment dialogFragment = new BrapiInfoDialogFragment().newInstance(getResources().getString(R.string.brapi_info_message));
+//                        dialogFragment.show(this.getSupportFragmentManager(), "brapiInfoDialogFragment");
+//
+//                        // Only show the info dialog on the first non-BrAPI trait selected.
+//                        return true;
+//
+//                    } else {
+//                        // Dialog was not shown
+//                        return false;
+//                    }
+//                }
             }
         } catch (Exception e) {
             Log.e("error", e.toString());

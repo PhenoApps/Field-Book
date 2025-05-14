@@ -34,6 +34,7 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.fragments.ImportDBFragment;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
@@ -385,14 +386,13 @@ public class ConfigActivity extends ThemedActivity {
      */
     private int checkTraitsExist() {
 
-        String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-        String[] traits = database.getVisibleTrait(currentSortOrder);
+        ArrayList<TraitObject> traits = database.getVisibleTraits();
 
         if (!preferences.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
                 || preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_field_missing));
             return -1;
-        } else if (traits.length == 0) {
+        } else if (traits.isEmpty()) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing));
             return -1;
         }

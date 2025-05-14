@@ -28,9 +28,11 @@ import android.widget.TextView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.SearchData;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.inject.Inject;
@@ -325,7 +327,7 @@ public class SearchActivity extends ActivityDialog {
         likes[4] = getString(R.string.search_dialog_query_is_more_than);
         likes[5] = getString(R.string.search_dialog_query_is_less_than);
 
-        ArrayAdapter adapter = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinner_layout, likes);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(SearchActivity.this, R.layout.custom_spinner_layout, likes);
         //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(adapter);
 
@@ -334,14 +336,19 @@ public class SearchActivity extends ActivityDialog {
         if (col != null) {
             rangeUntil = col.length;
 
-            String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-            ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinner_layout,
-                    concat(col, database.getVisibleTrait(currentSortOrder)));
+            ArrayList<TraitObject> traits = database.getVisibleTraits();
+            String[] traitNames = new String[traits.size()];
+            for (int i = 0; i < traits.size(); i++) {
+                traitNames[i] = traits.get(i).getName();
+            }
+            col = concat(col, traitNames);
+
+            ArrayAdapter<String> adapter2 = new ArrayAdapter<>(SearchActivity.this, R.layout.custom_spinner_layout, col);
             adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
             c.setAdapter(adapter2);
 
-            if (text.length() > 0)
+            if (!text.isEmpty())
                 e.setText(text);
 
             parent.addView(v);

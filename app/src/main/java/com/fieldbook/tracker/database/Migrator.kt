@@ -27,13 +27,6 @@ class Migrator {
 
         const val TAG = "Migrator"
 
-        const val sVisibleObservationVariableViewName = "VisibleObservationVariable"
-        val sVisibleObservationVariableView = """
-            CREATE VIEW IF NOT EXISTS $sVisibleObservationVariableViewName 
-            AS SELECT ${ObservationVariable.PK}, observation_variable_name, observation_variable_field_book_format, observation_variable_details, default_value, position
-            FROM ${ObservationVariable.tableName} WHERE visible LIKE "true" ORDER BY position
-        """.trimIndent()
-
         const val sObservationUnitPropertyViewName = "ObservationUnitProperty"
 
         //view for getUserTraitObservations call which uses joins
@@ -96,7 +89,6 @@ class Migrator {
                 ObservationUnitValue.tableName)
 
         private val sViewNames = arrayOf(
-                sVisibleObservationVariableViewName,
                 sNonImageObservationsViewName,
                 sLocalImageObservationsViewName,
                 sRemoteImageObservationsViewName,
@@ -225,8 +217,6 @@ class Migrator {
 //                        }
                     }
                 }
-
-                db.execSQL(sVisibleObservationVariableView)
 
                 db.execSQL(sLocalImageObservationsView)
 

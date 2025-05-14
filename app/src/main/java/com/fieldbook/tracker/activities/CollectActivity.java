@@ -128,7 +128,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -666,7 +665,6 @@ public class CollectActivity extends ThemedActivity
     public void refreshMain() {
         rangeBox.saveLastPlot();
         rangeBox.refresh();
-        traitBox.setNewTraits(rangeBox.getPlotID());
 
         Log.d(TAG, "Refresh main.");
 
@@ -822,16 +820,6 @@ public class CollectActivity extends ThemedActivity
         //gets the minimum default index
     }
 
-    // This update should only be called after repeating keypress ends
-    private void repeatUpdate() {
-        if (rangeBox.getRangeID() == null)
-            return;
-
-        traitBox.setNewTraits(rangeBox.getPlotID());
-
-        initWidgets(true);
-    }
-
     // This is central to the application
     // Calling this function resets all the controls for traits, and picks one
     // to show based on the current trait data
@@ -848,12 +836,15 @@ public class CollectActivity extends ThemedActivity
 
         traitBox.initTraitDetails();
 
-        String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-        // trait is unique, format is not
-        String[] traits = database.getVisibleTrait(currentSortOrder);
-        if (traits != null) {
-            traitBox.initTraitType(traits, rangeSuppress);
+        TraitObject[] visibleTraits = database.getVisibleTraits().toArray(new TraitObject[] {});
+
+        if (visibleTraits.length == 0) {
+            Utils.makeToast(this, getString(R.string.act_trait_editor_no_traits_exist));
+            setResult(RESULT_CANCELED);
+            finish();
         }
+
+        traitBox.initialize(visibleTraits, rangeSuppress);
     }
 
     /**
@@ -1095,10 +1086,6 @@ public class CollectActivity extends ThemedActivity
         // Reload traits based on selected plot
         rangeBox.display();
 
-        String pid = rangeBox.getPlotID();
-
-        traitBox.setNewTraits(pid);
-
         Log.d(TAG, "Move to result core: " + j);
 
         initWidgets(false);
@@ -1117,15 +1104,20 @@ public class CollectActivity extends ThemedActivity
         // Reload traits based on selected plot
         rangeBox.display();
 
-        traitBox.setNewTraits(rangeBox.getPlotID());
-
         traitBox.setSelection(traitIndex);
-        if (traitBox.getCurrentTrait() != null)
-            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
+
+        saveLastTrait();
 
         Log.d(TAG, "Move to result core: " + j + "with trait index "+ traitIndex);
 
         initWidgets(false);
+    }
+
+    private void saveLastTrait() {
+        TraitObject lastTrait = traitBox.getCurrentTrait();
+        if (lastTrait != null) {
+            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, lastTrait.getId()).apply();
+        }
     }
 
     @Override
@@ -1168,9 +1160,7 @@ public class CollectActivity extends ThemedActivity
 
         gnssThreadHelper.stop();
 
-        //save the last used trait
-        if (traitBox.getCurrentTrait() != null)
-            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
+        saveLastTrait();
 
         preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
 
@@ -1315,32 +1305,38 @@ public class CollectActivity extends ThemedActivity
 
     /**
      * LAST_USED_TRAIT is a preference saved in CollectActivity.onPause
-     *
      * This function is called to use that preference and navigate to the corresponding trait.
      */
     private void navigateToLastOpenedTrait() {
 
         //navigate to the last used trait using preferences
-        String trait = preferences.getString(GeneralKeys.LAST_USED_TRAIT, null);
+        String traitId = preferences.getString(GeneralKeys.LAST_USED_TRAIT, "-1");
 
-        navigateToTrait(trait);
+        navigateToTrait(traitId);
     }
 
-    public void navigateToTrait(String trait) {
+    public void navigateToTrait(String traitId) {
 
-        if (trait != null) {
+        if (!traitId.equals("-1")) {
 
-            String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-            //get all traits, filter the preference trait and check it's visibility
-            String[] traits = database.getVisibleTrait(currentSortOrder);
+            ArrayList<TraitObject> traits = database.getVisibleTraits();
 
             try {
 
-                traitBox.setSelection(Arrays.asList(traits).indexOf(trait));
+                //find trait position of the traitId param
+                int index = 0;
+                for (int i = 0; i < traits.size(); i++) {
+                    if (traits.get(i).getId().equals(traitId)) {
+                        index = i;
+                        break;
+                    }
+                }
+
+                traitBox.setSelection(index);
 
             } catch (NullPointerException e) {
 
-                e.printStackTrace();
+                Log.e(TAG, "Error while navigating to trait: " + traitId);
 
             }
         }
@@ -1369,8 +1365,6 @@ public class CollectActivity extends ThemedActivity
         if (rangeBox.isEmpty()) {
             return;
         }
-
-        traitBox.update(trait.getName(), value);
 
         String studyId = getStudyId();
         String obsUnit = getObservationUnit();
@@ -2038,19 +2032,6 @@ public class CollectActivity extends ThemedActivity
         goToId.getWindow().setAttributes(langParams);
     }
 
-    public void nextEmptyPlot() {
-        try {
-            final int id = rangeBox.nextEmptyPlot();
-            rangeBox.setRange(id);
-            rangeBox.display();
-            rangeBox.setLastRange();
-            traitBox.setNewTraits(rangeBox.getPlotID());
-            initWidgets(true);
-        } catch (Exception e) {
-
-        }
-    }
-
     private void showSummary() {
 
         SummaryFragment fragment = new SummaryFragment();
@@ -2417,8 +2398,7 @@ public class CollectActivity extends ThemedActivity
      */
     @Override
     public int existsAllTraits(final int traitIndex, final int plotId) {
-        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects(sortOrder);
+        final ArrayList<TraitObject> traits = database.getVisibleTraits();
         for (int i = 0; i < traits.size(); i++) {
             if (i != traitIndex
                     && !database.getTraitExists(plotId, traits.get(i).getId())) return i;
@@ -2429,22 +2409,13 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public List<Integer> getNonExistingTraits(final int plotId) {
-        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects(sortOrder);
+        final ArrayList<TraitObject> traits = database.getVisibleTraits();
         final ArrayList<Integer> indices = new ArrayList<>();
         for (int i = 0; i < traits.size(); i++) {
             if (!database.getTraitExists(plotId, traits.get(i).getId()))
                 indices.add(i);
         }
         return indices;
-    }
-
-    public Map<String, String> getNewTraits() {
-        return traitBox.getNewTraits();
-    }
-
-    public void setNewTraits(Map<String, String> newTraits) {
-        traitBox.setNewTraits(newTraits);
     }
 
     public TraitObject getCurrentTrait() {

@@ -308,16 +308,22 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
     /**
      * Navigate to the clicked trait
      */
+    //TODO necessary to switch Name usage?
     override fun onAttributeClicked(attribute: String) {
 
         with(activity as? CollectActivity) {
 
             this?.let { collector ->
 
-                val sortOrder = collector.preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
-                if (attribute in database.getVisibleTrait(sortOrder)) {
+                val traits = database.getAllTraitObjects()
+                val traitNames = traits.map { it.name }
+                val index = traitNames.indexOf(attribute)
 
-                    collector.navigateToTrait(attribute)
+                if (attribute in traitNames) {
+
+                    val traitId = traits[index].id
+
+                    collector.navigateToTrait(traitId)
 
                     parentFragmentManager.popBackStack()
 

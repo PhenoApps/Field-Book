@@ -222,10 +222,6 @@ public abstract class BaseTraitLayout extends LinearLayout {
         //((CollectActivity) getContext()).traitLockData();
     }
 
-    public Map<String, String> getNewTraits() {
-        return ((CollectActivity) getContext()).getNewTraits();
-    }
-
     public TraitObject getCurrentTrait() {
         return ((CollectActivity) getContext()).getCurrentTrait();
     }

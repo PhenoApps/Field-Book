@@ -27,7 +27,6 @@ import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
-import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
@@ -1073,76 +1072,14 @@ public class DataHelper {
     /**
      * Used by the application to return all traits which are visible
      */
-    public String[] getVisibleTrait(String sortOrder) {
+    public ArrayList<TraitObject> getVisibleTraits() {
 
         open();
 
-        return VisibleObservationVariableDao.Companion.getVisibleTrait(sortOrder);
+        String sortColumn = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
 
-//        String[] data = null;
-//
-//        Cursor cursor = db.query(TRAITS, new String[]{"id", "trait", "realPosition"},
-//                "isVisible like ?", new String[]{"true"}, null, null, "realPosition");
-//
-//        int count = 0;
-//
-//        if (cursor.moveToFirst()) {
-//            data = new String[cursor.getCount()];
-//
-//            do {
-//                data[count] = cursor.getString(1);
-//
-//                count += 1;
-//
-//            } while (cursor.moveToNext());
-//        }
-//
-//        if (!cursor.isClosed()) {
-//            cursor.close();
-//        }
-//
-//        return data;
-    }
+        return ObservationVariableDao.Companion.getAllVisibleTraitObjects(sortColumn);
 
-    public ArrayList<TraitObject> getVisibleTraitObjects(String sortOrder) {
-
-        open();
-
-        return VisibleObservationVariableDao.Companion.getVisibleTraitObjects(sortOrder);
-    }
-
-    /**
-     * Used by application to loops through formats which are visible
-     */
-    public String[] getFormat() {
-
-        open();
-
-        return VisibleObservationVariableDao.Companion.getFormat();
-
-//        String[] data = null;
-//
-//        Cursor cursor = db.query(TRAITS, new String[]{"id", "format", "realPosition"},
-//                "isVisible like ?", new String[]{"true"}, null, null, "realPosition");
-//
-//        int count = 0;
-//
-//        if (cursor.moveToFirst()) {
-//            data = new String[cursor.getCount()];
-//
-//            do {
-//                data[count] = cursor.getString(1);
-//
-//                count += 1;
-//
-//            } while (cursor.moveToNext());
-//        }
-//
-//        if (!cursor.isClosed()) {
-//            cursor.close();
-//        }
-//
-//        return data;
     }
 
     /**
@@ -1438,49 +1375,6 @@ public class DataHelper {
     }
 
     /**
-     * Returns a particular trait as an object
-     */
-    public TraitObject getDetail(String trait) {
-
-        open();
-
-        return VisibleObservationVariableDao.Companion.getDetail(trait);
-
-//        TraitObject data = new TraitObject();
-//
-//        data.setTrait("");
-//        data.setFormat("");
-//        data.setDefaultValue("");
-//        data.setMinimum("");
-//        data.setMaximum("");
-//        data.setDetails("");
-//        data.setCategories("");
-//
-//        Cursor cursor = db.query(TRAITS, new String[]{"trait", "format", "defaultValue", "minimum",
-//                        "maximum", "details", "categories", "id", "external_db_id"}, "trait like ? and isVisible like ?",
-//                new String[]{trait, "true"}, null, null, null
-//        );
-//
-//        if (cursor.moveToFirst()) {
-//            data.setTrait(cursor.getString(0));
-//            data.setFormat(cursor.getString(1));
-//            data.setDefaultValue(cursor.getString(2));
-//            data.setMinimum(cursor.getString(3));
-//            data.setMaximum(cursor.getString(4));
-//            data.setDetails(cursor.getString(5));
-//            data.setCategories(cursor.getString(6));
-//            data.setId(cursor.getString(7));
-//            data.setExternalDbId(cursor.getString(8));
-//        }
-//
-//        if (!cursor.isClosed()) {
-//            cursor.close();
-//        }
-//
-//        return data;
-    }
-
-    /**
      * Returns saved data based on plot_id
      * v1.6 - Amended to consider both trait and format
      */
@@ -1492,24 +1386,6 @@ public class DataHelper {
 
         return ObservationDao.Companion.getUserDetail(studyId, plotId);
 
-//        HashMap data = new HashMap();
-//
-//        Cursor cursor = db.query(USER_TRAITS, new String[]{"parent", "trait",
-//                        "userValue", "rid"}, "rid like ?", new String[]{plotId},
-//                null, null, null
-//        );
-//
-//        if (cursor.moveToFirst()) {
-//            do {
-//                data.put(cursor.getString(0), cursor.getString(2));
-//            } while (cursor.moveToNext());
-//        }
-//
-//        if (!cursor.isClosed()) {
-//            cursor.close();
-//        }
-//
-//        return data;
     }
 
     /**

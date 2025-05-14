@@ -299,7 +299,7 @@ class ObservationUnitPropertyDao {
             val orderByClause = getSortOrderClause(context, expId.toString())
             //                SELECT units.internal_id_observation_unit AS id, $combinedSelection
             val query = """
-                SELECT $combinedSelection
+                SELECT $combinedSelection, internal_id_observation_variable
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
@@ -329,7 +329,8 @@ class ObservationUnitPropertyDao {
             getExportTableData(context, expId, traits)?.use { cursor ->
 
                 val requiredTraits = traits.map { it.name }.toTypedArray()
-                val requiredColumns = arrayOf(uniqueName) + requiredTraits
+                val traitIdCol = "internal_id_observation_variable"
+                val requiredColumns = arrayOf(uniqueName, traitIdCol) + requiredTraits
                 val matrixCursor = MatrixCursor(requiredColumns)
                 val traitStartIndex = cursor.columnCount - requiredTraits.size
 
@@ -339,6 +340,9 @@ class ObservationUnitPropertyDao {
 
                     //add the unique id
                     rowData.add(cursor.getStringOrNull(0))
+
+                    //add the trait id
+                    rowData.add(cursor.getStringOrNull(1))
 
                     //skip ahead to the traits and add all trait values
                     requiredTraits.forEachIndexed { index, s ->

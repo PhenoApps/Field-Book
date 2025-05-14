@@ -224,17 +224,7 @@ class ObservationVariableDao {
             db.rawQuery(query, null).use { cursor ->
                 while (cursor.moveToNext()) {
                     val trait = TraitObject().apply {
-                        name = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name")) ?: ""
-                        format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format")) ?: ""
-                        defaultValue = cursor.getString(cursor.getColumnIndexOrThrow("default_value")) ?: ""
-                        details = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_details")) ?: ""
-                        id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariable.PK)).toString()
-                        externalDbId = cursor.getString(cursor.getColumnIndexOrThrow("external_db_id")) ?: ""
-                        realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("position"))
-                        visible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()
-                        additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
-
-                        this.loadAttributeAndValues()
+                        loadFromCursor(cursor)
                     }
                     traits.add(trait)
                 }
@@ -251,51 +241,10 @@ class ObservationVariableDao {
             }
         } ?: ArrayList()
 
+        fun getAllVisibleTraitObjects(sortOrder: String): ArrayList<TraitObject> = ArrayList(getAllTraitObjects(sortOrder).filter { it.visible })
+
         // Overload for Java compatibility
         fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("position")
-
-
-//        fun getAllTraitObjects(sortOrder: String): ArrayList<TraitObject> = withDatabase { db ->
-//
-//            ArrayList(db.query(ObservationVariable.tableName, orderBy = "position").toTable().map {
-//
-//                TraitObject().apply {
-//
-//                    name = (it["observation_variable_name"] as? String ?: "")
-//                    format = it["observation_variable_field_book_format"] as? String ?: ""
-//                    defaultValue = it["default_value"] as? String ?: ""
-//                    details = it["observation_variable_details"] as? String ?: ""
-//                    id = (it[ObservationVariable.PK] as? Int ?: -1).toString()
-//                    externalDbId = it["external_db_id"] as? String ?: ""
-//                    realPosition = (it["position"] as? Int ?: -1)
-//                    visible = (it["visible"] as String).toBoolean()
-//                    additionalInfo = it["additional_info"] as? String ?: ""
-//
-//                    //initialize these to the empty string or else they will be null
-//                    maximum = ""
-//                    minimum = ""
-//                    categories = ""
-//
-//                    ObservationVariableValueDao.getVariableValues(id.toInt()).also { values ->
-//
-//                        values?.forEach { value ->
-//
-//                            val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
-//
-//                            when (attrName) {
-//                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                                "category" -> categories = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                            }
-//                        }
-//                    }
-//                }
-//            })
-//
-//        } ?: ArrayList()
 
         fun getTraitVisibility(): HashMap<String, String> = withDatabase { db ->
 
