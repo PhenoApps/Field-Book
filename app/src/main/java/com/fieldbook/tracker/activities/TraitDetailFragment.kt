@@ -75,16 +75,8 @@ class TraitDetailFragment : Fragment() {
     private lateinit var visibilityChip: Chip
     private lateinit var resourceChip: Chip
     private lateinit var brapiLabelChip: Chip
-
-    private lateinit var dateFormatContainer: LinearLayout
-    private lateinit var dateFormatText: TextView
-    private lateinit var dayOfYearFormatText: TextView
-    private lateinit var dateFormatSwitch: SwitchCompat
-
-    private lateinit var brapiLabelValueContainer: LinearLayout
-    private lateinit var brapiLabelText: TextView
-    private lateinit var brapiValueText: TextView
-    private lateinit var brapiLabelValueSwitch: SwitchCompat
+    private lateinit var dateFormatChip: Chip
+    private lateinit var brapiLabelValueChip: Chip
     private var traitHasBrapiCategories = false
 
     private lateinit var detailRecyclerView: RecyclerView
@@ -109,16 +101,8 @@ class TraitDetailFragment : Fragment() {
         visibilityChip = rootView.findViewById(R.id.visibilityChip)
         resourceChip = rootView.findViewById(R.id.resourceChip)
         brapiLabelChip = rootView.findViewById(R.id.brapiLabelChip)
-
-        dateFormatContainer = rootView.findViewById(R.id.dateFormatContainer)
-        dateFormatText = rootView.findViewById(R.id.dateFormatText)
-        dayOfYearFormatText = rootView.findViewById(R.id.dayOfYearFormatText)
-        dateFormatSwitch = rootView.findViewById(R.id.dateFormatSwitch)
-
-         brapiLabelValueContainer = rootView.findViewById(R.id.brapiLabelValueContainer)
-        brapiLabelText = rootView.findViewById(R.id.brapiLabelText)
-        brapiValueText = rootView.findViewById(R.id.brapiValueText)
-        brapiLabelValueSwitch = rootView.findViewById(R.id.brapiLabelValueSwitch)
+        dateFormatChip = rootView.findViewById(R.id.dateFormatChip)
+        brapiLabelValueChip = rootView.findViewById(R.id.brapiLabelValueChip)
 
         // Initialize data card views
         fieldCountChip = rootView.findViewById(R.id.fieldCountChip)
@@ -174,16 +158,12 @@ class TraitDetailFragment : Fragment() {
            // Set brapi label behavior for this trait
         }
 
-        dateFormatSwitch.setOnCheckedChangeListener { _, isChecked ->
-            preferences.edit().putBoolean("UseDay", isChecked).apply()
-            updateDateFormatDisplay(isChecked)
+        dateFormatChip.setOnClickListener {
+            showDateFormatDialog()
         }
 
-        brapiLabelValueSwitch.setOnCheckedChangeListener { _, isChecked ->
-            // Save the preference for this specific trait
-            val traitSpecificKey = "LABELVAL_CUSTOMIZE_${traitId}"
-            preferences.edit().putString(traitSpecificKey, if (isChecked) "label" else "value").apply()
-            updateBrapiLabelValueDisplay(isChecked)
+        brapiLabelValueChip.setOnClickListener {
+            showBrapiLabelValueDialog()
         }
 
         Log.d(TAG, "onCreateView End")
@@ -257,42 +237,6 @@ class TraitDetailFragment : Fragment() {
         }
     }
 
-    // fun loadTraitDetails() {
-    //     traitId?.let { idString ->
-    //         try {
-    //             // Convert the string ID to an integer
-    //             val idInt = idString.toInt()
-    //             CoroutineScope(Dispatchers.IO).launch {
-    //                 val trait = database.getTraitById(idInt)
-                    
-    //                 withContext(Dispatchers.Main) {
-    //                     traitObject = trait  // Store the trait object
-                        
-    //                     if (trait != null) {
-    //                         updateTraitData(trait)
-    //                         setupToolbar(trait)
-                            
-    //                         if (detailRecyclerView.adapter == null) { // initial load
-    //                             detailRecyclerView.layoutManager = LinearLayoutManager(context)
-    //                             val detailItems = createTraitDetailItems(trait)
-    //                             adapter = TraitDetailAdapter(detailItems.toMutableList())
-    //                             detailRecyclerView.adapter = adapter
-    //                         } else { // reload after data change
-    //                             val newItems = createTraitDetailItems(trait)
-    //                             adapter?.updateItems(newItems)
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         } catch (e: NumberFormatException) {
-    //             // Handle the case where the ID string cannot be converted to an integer
-    //             Log.e(TAG, "Invalid trait ID format: $idString", e)
-    //             parentFragmentManager.popBackStack()
-    //         }
-    //     } ?: Log.e(TAG, "Trait ID is null")
-    // }
-
-    // Modify loadTraitDetails to update the data card directly
     fun loadTraitDetails() {
         traitId?.let { idString ->
             try {
@@ -354,16 +298,15 @@ class TraitDetailFragment : Fragment() {
         brapiLabelChip.visibility = if (isBrapiTrait) View.VISIBLE else View.GONE
         brapiLabelChip.text = getString(R.string.trait_brapi_label_chip_title)
 
-        if (trait.format == "date") {
-            dateFormatContainer.visibility = View.VISIBLE
+         if (trait.format == "date") {
+            dateFormatChip.visibility = View.VISIBLE
             val isUseDayOfYear = preferences.getBoolean("UseDay", false)
-            dateFormatSwitch.isChecked = isUseDayOfYear
-            updateDateFormatDisplay(isUseDayOfYear)
+            updateDateFormatChip(isUseDayOfYear)
         } else {
-            dateFormatContainer.visibility = View.GONE
+            dateFormatChip.visibility = View.GONE
         }
 
-        // Show/hide BrAPI label/value container based on trait source and format
+        // Show/hide BrAPI label/value chip based on trait source and format
         // A trait is from BrAPI if it has an external ID or the data source contains "brapi"
         
         traitHasBrapiCategories = isBrapiTrait && 
@@ -372,69 +315,106 @@ class TraitDetailFragment : Fragment() {
         
         // For BrAPI label/value toggle
         if (traitHasBrapiCategories) {
-            brapiLabelValueContainer.visibility = View.VISIBLE
-            
+            brapiLabelValueChip.visibility = View.VISIBLE
             // Check if there's a trait-specific preference, otherwise use the global one
             val traitSpecificKey = "LABELVAL_CUSTOMIZE_${trait.id}"
             val defaultValue = preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "label")
             val useValues = preferences.getString(traitSpecificKey, defaultValue) == "value"
             
-            brapiLabelValueSwitch.isChecked = useValues
-            updateBrapiLabelValueDisplay(useValues)
+            updateBrapiLabelValueChip(useValues)
         } else {
-            brapiLabelValueContainer.visibility = View.GONE
+            brapiLabelValueChip.visibility = View.GONE
         }
     }
 
-    private fun updateDateFormatDisplay(useDayOfYear: Boolean) {
-        val calendar = Calendar.getInstance()
+    // private fun showDateFormatDialog() {
+    //     val options = arrayOf(
+    //         getString(R.string.trait_date_format_option),
+    //         getString(R.string.trait_day_format_option)
+    //     )
         
-        // Format as standard date (YYYY-MM-DD)
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-        val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
+    //     val currentSelection = if (preferences.getBoolean("UseDay", false)) 1 else 0
         
-        // Format as day of year
-        val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+    //     AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+    //         .setTitle(getString(R.string.trait_date_format_dialog_title))
+    //         .setSingleChoiceItems(options, currentSelection) { dialog, which ->
+    //             // Save the preference
+    //             preferences.edit().putBoolean("UseDay", which == 1).apply()
+    //             // Update the chip text
+    //             updateDateFormatChip(which == 1)
+    //             dialog.dismiss()
+    //         }
+    //         .setNegativeButton(R.string.dialog_cancel, null)
+    //         .show()
+    // }
+
+    // private fun showBrapiLabelValueDialog() {
+    //     val options = arrayOf(
+    //         getString(R.string.trait_brapi_label_option),
+    //         getString(R.string.trait_brapi_value_option)
+    //     )
         
-        // Set the text for both formats
-        dateFormatText.text = getString(R.string.trait_date_format_example, formattedDate)
-        dayOfYearFormatText.text = getString(R.string.trait_day_format_example, dayOfYear)
+    //     // Get trait-specific preference or fall back to global preference
+    //     val traitSpecificKey = "LABELVAL_CUSTOMIZE_${traitId}"
+    //     val defaultValue = preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "label")
+    //     val currentSelection = if (preferences.getString(traitSpecificKey, defaultValue) == "value") 1 else 0
         
-        // Update styling based on which format is active
-        if (useDayOfYear) {
-            // Day of Year is active
-            dateFormatText.alpha = 0.5f
-            dateFormatText.setTypeface(null, Typeface.NORMAL)
-            
-            dayOfYearFormatText.alpha = 1.0f
-            dayOfYearFormatText.setTypeface(null, Typeface.BOLD)
-        } else {
-            // Date is active
-            dateFormatText.alpha = 1.0f
-            dateFormatText.setTypeface(null, Typeface.BOLD)
-            
-            dayOfYearFormatText.alpha = 0.5f
-            dayOfYearFormatText.setTypeface(null, Typeface.NORMAL)
-        }
-    }
-    
-    // private fun updateBrapiLabelValueDisplay(useLabels: Boolean) {
+    //     AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+    //         .setTitle(getString(R.string.trait_brapi_display_dialog_title))
+    //         .setSingleChoiceItems(options, currentSelection) { dialog, which ->
+    //             // Save the preference
+    //             val value = if (which == 1) "value" else "label"
+    //             preferences.edit().putString(traitSpecificKey, value).apply()
+    //             // Update the chip text
+    //             updateBrapiLabelValueChip(which == 1)
+    //             dialog.dismiss()
+    //         }
+    //         .setNegativeButton(R.string.dialog_cancel, null)
+    //         .show()
+    // }
+
+    // // Update the existing methods to work with chips instead of switches
+    // private fun updateDateFormatDisplay(useDayOfYear: Boolean) {
+    //     updateDateFormatChip(useDayOfYear)
+    // }
+
+    // private fun updateDateFormatChip(useDayOfYear: Boolean) {
+    //     val calendar = Calendar.getInstance()
+        
+    //     // Format as standard date (YYYY-MM-DD)
+    //     val year = calendar.get(Calendar.YEAR)
+    //     val month = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
+    //     val day = calendar.get(Calendar.DAY_OF_MONTH)
+    //     val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
+        
+    //     // Format as day of year
+    //     val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+        
+    //     // Set the chip text based on the selected format
+    //     if (useDayOfYear) {
+    //         dateFormatChip.text = getString(R.string.trait_day_format_display, dayOfYear)
+    //     } else {
+    //         dateFormatChip.text = getString(R.string.trait_date_format_display, formattedDate)
+    //     }
+    // }
+
+    // private fun updateBrapiLabelValueDisplay(useValues: Boolean) {
+    //     updateBrapiLabelValueChip(useValues)
+    // }
+
+    // private fun updateBrapiLabelValueChip(useValues: Boolean) {
     //     if (!traitHasBrapiCategories) return
-        
+
     //     // Get the first category from the trait to use as an example
     //     val categories = traitObject?.categories ?: return
-        
+
     //     // Parse the categories - they could be in JSON format or simple format
     //     val firstCategory = try {
     //         if (categories.startsWith("[")) {
     //             // JSON format
     //             val parsedCategories = CategoryJsonUtil.decode(categories)
     //             if (parsedCategories.isNotEmpty()) {
-    //                 // Access the label and value properties correctly
     //                 val firstItem = parsedCategories[0]
-    //                 // Use reflection to access the label property
     //                 val labelField = firstItem.javaClass.getDeclaredField("label")
     //                 labelField.isAccessible = true
     //                 val label = labelField.get(firstItem)?.toString() ?: "Label"
@@ -456,44 +436,87 @@ class TraitDetailFragment : Fragment() {
     //         Log.e(TAG, "Failed to parse categories: $categories", e)
     //         Pair("Example", "Value")
     //     }
-        
-    //     // Set the text for both formats
-    //     brapiLabelText.text = getString(R.string.trait_brapi_label_example, firstCategory.first)
-    //     brapiValueText.text = getString(R.string.trait_brapi_value_example, firstCategory.second)
-        
-    //     // Update styling based on which format is active
-    //     if (useLabels) {
-    //         // Label is active
-    //         brapiLabelText.alpha = 1.0f
-    //         brapiLabelText.setTypeface(null, Typeface.BOLD)
-            
-    //         brapiValueText.alpha = 0.5f
-    //         brapiValueText.setTypeface(null, Typeface.NORMAL)
+
+    //     // Set the chip text based on the selected format
+    //     if (useValues) {
+    //         brapiLabelValueChip.text = getString(R.string.trait_brapi_value_display, firstCategory.second)
     //     } else {
-    //         // Value is active
-    //         brapiLabelText.alpha = 0.5f
-    //         brapiLabelText.setTypeface(null, Typeface.NORMAL)
-            
-    //         brapiValueText.alpha = 1.0f
-    //         brapiValueText.setTypeface(null, Typeface.BOLD)
+    //         brapiLabelValueChip.text = getString(R.string.trait_brapi_label_display, firstCategory.first)
     //     }
     // }
 
-    private fun updateBrapiLabelValueDisplay(useValues: Boolean) {
+    private fun showDateFormatDialog() {
+        val calendar = Calendar.getInstance()
+        
+        // Format as standard date (YYYY-MM-DD)
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+        val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
+        
+        // Format as day of year
+        val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+        
+        val options = arrayOf(
+            getString(R.string.trait_date_format_display, formattedDate),
+            getString(R.string.trait_day_format_display, dayOfYear)
+        )
+        
+        val currentSelection = if (preferences.getBoolean("UseDay", false)) 1 else 0
+        
+        AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+            .setTitle(getString(R.string.trait_date_format_dialog_title))
+            .setSingleChoiceItems(options, currentSelection) { dialog, which ->
+                // Save the preference
+                preferences.edit().putBoolean("UseDay", which == 1).apply()
+                // Update the chip text
+                updateDateFormatChip(which == 1)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .show()
+    }
+
+    // Update the showBrapiLabelValueDialog method
+    private fun showBrapiLabelValueDialog() {
         if (!traitHasBrapiCategories) return
 
-        // Get the first category from the trait to use as an example
+        // Get the first category example
         val categories = traitObject?.categories ?: return
+        val firstCategory = parseCategoryExample(categories)
+        
+        val options = arrayOf(
+            getString(R.string.trait_brapi_label_display, firstCategory.first),
+            getString(R.string.trait_brapi_value_display, firstCategory.second)
+        )
+        
+        // Get trait-specific preference or fall back to global preference
+        val traitSpecificKey = "LABELVAL_CUSTOMIZE_${traitId}"
+        val defaultValue = preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "label")
+        val currentSelection = if (preferences.getString(traitSpecificKey, defaultValue) == "value") 1 else 0
+        
+        AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+            .setTitle(getString(R.string.trait_brapi_display_dialog_title))
+            .setSingleChoiceItems(options, currentSelection) { dialog, which ->
+                // Save the preference
+                val value = if (which == 1) "value" else "label"
+                preferences.edit().putString(traitSpecificKey, value).apply()
+                // Update the chip text
+                updateBrapiLabelValueChip(which == 1)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .show()
+    }
 
-        // Parse the categories - they could be in JSON format or simple format
-        val firstCategory = try {
+    // Add a helper method to parse category examples
+    private fun parseCategoryExample(categories: String): Pair<String, String> {
+        return try {
             if (categories.startsWith("[")) {
                 // JSON format
                 val parsedCategories = CategoryJsonUtil.decode(categories)
                 if (parsedCategories.isNotEmpty()) {
-                    // Access the label and value properties correctly
                     val firstItem = parsedCategories[0]
-                    // Use reflection to access the label property
                     val labelField = firstItem.javaClass.getDeclaredField("label")
                     labelField.isAccessible = true
                     val label = labelField.get(firstItem)?.toString() ?: "Label"
@@ -515,26 +538,42 @@ class TraitDetailFragment : Fragment() {
             Log.e(TAG, "Failed to parse categories: $categories", e)
             Pair("Example", "Value")
         }
+    }
 
-        // Set the text for both formats
-        brapiLabelText.text = getString(R.string.trait_brapi_label_example, firstCategory.first)
-        brapiValueText.text = getString(R.string.trait_brapi_value_example, firstCategory.second)
+    // Update the updateDateFormatChip method
+    private fun updateDateFormatChip(useDayOfYear: Boolean) {
+        val calendar = Calendar.getInstance()
         
-        // Update styling based on which format is active
-        if (useValues) {
-            // Value is active (switch is ON)
-            brapiLabelText.alpha = 0.5f
-            brapiLabelText.setTypeface(null, Typeface.NORMAL)
-            
-            brapiValueText.alpha = 1.0f
-            brapiValueText.setTypeface(null, Typeface.BOLD)
+        // Format as standard date (YYYY-MM-DD)
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+        val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
+        
+        // Format as day of year
+        val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+        
+        // Set the chip text based on the selected format
+        if (useDayOfYear) {
+            dateFormatChip.text = getString(R.string.trait_day_format_display, dayOfYear)
         } else {
-            // Label is active (switch is OFF)
-            brapiLabelText.alpha = 1.0f
-            brapiLabelText.setTypeface(null, Typeface.BOLD)
-            
-            brapiValueText.alpha = 0.5f
-            brapiValueText.setTypeface(null, Typeface.NORMAL)
+            dateFormatChip.text = getString(R.string.trait_date_format_display, formattedDate)
+        }
+    }
+
+    // Update the updateBrapiLabelValueChip method
+    private fun updateBrapiLabelValueChip(useValues: Boolean) {
+        if (!traitHasBrapiCategories) return
+
+        // Get the first category from the trait to use as an example
+        val categories = traitObject?.categories ?: return
+        val firstCategory = parseCategoryExample(categories)
+
+        // Set the chip text based on the selected format
+        if (useValues) {
+            brapiLabelValueChip.text = getString(R.string.trait_brapi_value_display, firstCategory.second)
+        } else {
+            brapiLabelValueChip.text = getString(R.string.trait_brapi_label_display, firstCategory.first)
         }
     }
 
@@ -548,60 +587,6 @@ class TraitDetailFragment : Fragment() {
         visibilityChip.chipIcon = ContextCompat.getDrawable(requireContext(),
             if (trait.visible) R.drawable.ic_eye else R.drawable.ic_eye_off)
     }
-
-    // private fun createTraitDetailItems(trait: TraitObject): List<TraitDetailItem> {
-    //     val items = mutableListOf<TraitDetailItem>()
-        
-    //     // Add format details item
-    //     val formatIcon = Formats.entries
-    //         .find { it.getDatabaseName() == trait.format }?.getIcon()
-    //         ?: R.drawable.ic_trait_categorical
-            
-    //     items.add(TraitDetailItem(
-    //         id = trait.id,
-    //         title = getString(R.string.trait_format_details),
-    //         subtitle = trait.format,
-    //         format = trait.format,
-    //         categories = trait.categories ?: "",
-    //         icon = ContextCompat.getDrawable(requireContext(), formatIcon),
-    //         defaultValue = trait.defaultValue,
-    //         minimum = trait.minimum,
-    //         maximum = trait.maximum,
-    //         details = trait.details
-    //     ))
-        
-    //     // Get observation data for this trait
-    //     CoroutineScope(Dispatchers.IO).launch {
-    //         val observations = database.getAllObservationsOfVariable(trait.id)
-            
-    //         withContext(Dispatchers.Main) {
-    //             if (observations.isNotEmpty()) {
-    //                 val observationValues = observations.map { it.value }
-    //                 // val completeness = observations.size.toFloat() / 
-    //                     // (database.getTotalPossibleObservationsForTrait(trait.name) ?: 1).toFloat()
-    //                 val totalPossible = 100 // Placeholder value
-    //                 val completeness = if (observations.isNotEmpty()) 
-    //                     observations.size.toFloat() / totalPossible.toFloat() 
-    //                 else 0f
-
-    //                 val dataItem = TraitDetailItem(
-    //                     id = trait.id,
-    //                     title = getString(R.string.trait_observation_data),
-    //                     subtitle = getString(R.string.trait_observation_count, observations.size),
-    //                     format = trait.format,
-    //                     categories = trait.categories ?: "",
-    //                     icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_chart_bar),
-    //                     observations = observationValues,
-    //                     completeness = completeness
-    //                 )
-                    
-    //                 adapter?.addOrUpdateItem(dataItem)
-    //             }
-    //         }
-    //     }
-        
-    //     return items
-    // }
 
     private fun loadObservationData(trait: TraitObject) {
         CoroutineScope(Dispatchers.IO).launch {
