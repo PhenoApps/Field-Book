@@ -442,6 +442,7 @@
     <!-- Trait Layout: Boolean -->
     <string name="trait_boolean_on">On</string>
     <string name="trait_boolean_off">Off</string>
+    <string name="trait_boolean_unset">Unset</string>
 
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Capture\n</string>

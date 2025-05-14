@@ -12,18 +12,11 @@ import androidx.annotation.Nullable;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-
-import java.util.Locale;
+import com.fieldbook.tracker.enums.ThreeState;
 
 public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSeekBarChangeListener {
 
     private SeekBar threeStateSeekBar;
-
-    private static class ThreeState {
-        static int OFF = 0;
-        static int NEUTRAL = -1;
-        static int ON = 1;
-    }
 
     public BooleanTraitLayout(Context context) {
         super(context);
@@ -56,21 +49,28 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
 
         String on = getContext().getString(R.string.trait_boolean_on);
         String off = getContext().getString(R.string.trait_boolean_off);
+        String unset = getContext().getString(R.string.trait_boolean_unset);
 
         threeStateSeekBar = act.findViewById(R.id.traitBooleanSeekBar);
         threeStateSeekBar.setOnSeekBarChangeListener(this);
 
         ImageView onImageView = act.findViewById(R.id.onImage);
         ImageView offImageView = act.findViewById(R.id.offImage);
+        ImageView unsetImageView = act.findViewById(R.id.unsetImage);
 
         onImageView.setOnClickListener((View v) -> {
             triggerTts(on);
-            threeStateSeekBar.setProgress(ThreeState.ON);
+            threeStateSeekBar.setProgress(ThreeState.ON.getValue());
         });
 
         offImageView.setOnClickListener((View v) -> {
             triggerTts(off);
-            threeStateSeekBar.setProgress(ThreeState.OFF);
+            threeStateSeekBar.setProgress(ThreeState.OFF.getValue());
+        });
+
+        unsetImageView.setOnClickListener((View v) -> {
+            triggerTts(unset);
+            threeStateSeekBar.setProgress(ThreeState.NEUTRAL.getValue());
         });
 
         threeStateSeekBar.requestFocus();
@@ -100,7 +100,9 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     @Override
     public Boolean validate(String data) {
         try {
-            return data.toLowerCase(Locale.ROOT).equals("true") || data.toLowerCase(Locale.ROOT).equals("false");
+            return data.equalsIgnoreCase(ThreeState.ON.getState()) ||
+                    data.equalsIgnoreCase(ThreeState.OFF.getState()) ||
+                    data.equalsIgnoreCase(ThreeState.NEUTRAL.getState());
         } catch (Exception e) {
             return false;
         }
@@ -124,12 +126,11 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
      */
     private void checkSet(String value) {
 
-        int state = threeStateSeekBar.getProgress();
+        ThreeState valueStringState = ThreeState.Companion.fromString(value);
 
-        boolean flag = (value.equalsIgnoreCase("true") && state == ThreeState.ON)
-                || (value.equalsIgnoreCase("false") && state == ThreeState.OFF);
+        int seekBarValue = threeStateSeekBar.getProgress();
 
-        if (flag) {
+        if (seekBarValue == valueStringState.getValue()) { // only update if the string and value are consistent
             updateObservation(getCurrentTrait(), value);
             getCollectInputView().setText(value);
         }
@@ -139,26 +140,24 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
 
         if (state.equalsIgnoreCase("true")) {
 
-            threeStateSeekBar.setProgress(ThreeState.ON);
+            threeStateSeekBar.setProgress(ThreeState.ON.getValue());
 
         } else if (state.equalsIgnoreCase("false")) {
 
-            threeStateSeekBar.setProgress(ThreeState.OFF);
+            threeStateSeekBar.setProgress(ThreeState.OFF.getValue());
 
-        } //else threeStateSeekBar.setProgress(ThreeState.NEUTRAL);
+        } else if (state.equalsIgnoreCase("unset")) {
 
+            threeStateSeekBar.setProgress(ThreeState.NEUTRAL.getValue());
+
+        }
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        ThreeState state = ThreeState.Companion.fromPosition(progress);
 
-        //every time the progress changes, update the database
-        int state = threeStateSeekBar.getProgress();
-
-        String newVal = "TRUE";
-
-        if (state == ThreeState.OFF) newVal = "FALSE";
-        //else if (state == ThreeState.NEUTRAL) newVal = "unset";
+        String newVal = state.getState();
 
         if (getCurrentTrait() != null) {
             updateObservation(getCurrentTrait(), newVal);
