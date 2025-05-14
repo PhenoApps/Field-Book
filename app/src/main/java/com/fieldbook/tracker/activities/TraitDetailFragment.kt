@@ -209,22 +209,18 @@ class TraitDetailFragment : Fragment() {
         traitId?.let { id ->
             try {
                 val idInt = id.toInt()
-                
-                // Extract just the filename from the URI
                 val fileObject = FieldFileObject.create(requireContext(), Uri.parse(fileUri), null, null)
-                val fileName = fileObject.fileStem
                 
                 CoroutineScope(Dispatchers.IO).launch {
                     val trait = database.getTraitById(idInt)
                     
                     if (trait != null) {
-                        // Update the resource file in the trait object with just the filename
-                        trait.resourceFile = fileName
+                        trait.resourceFile = fileUri
                         database.updateTrait(trait)
                         
                         withContext(Dispatchers.Main) {
                             // Update the UI with just the filename
-                            resourceChip.text = fileName
+                            resourceChip.text = fileObject.fileStem
                             Toast.makeText(requireContext(), 
                                 getString(R.string.trait_resource_file_updated), 
                                 Toast.LENGTH_SHORT).show()
@@ -281,10 +277,9 @@ class TraitDetailFragment : Fragment() {
         // Update visibility chip
         updateVisibilityChip(trait)
 
-        // resourceChip.text = getString(R.string.trait_resource_chip_title)
-            // Update resource chip text based on whether a resource file is set
         resourceChip.text = if (!trait.resourceFile.isNullOrEmpty()) {
-            trait.resourceFile // Show the resource file name if it exists
+            val fileObject = FieldFileObject.create(requireContext(), Uri.parse(trait.resourceFile), null, null)
+            fileObject.fileStem
         } else {
             getString(R.string.trait_resource_chip_title) // Show default text otherwise
         }
