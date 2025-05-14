@@ -65,36 +65,9 @@ class VisibleObservationVariableDao {
 
         //TODO 471 trait name is used instead of trait db id
         fun getDetail(trait: String): TraitObject? = withDatabase { db ->
-
-            //return a trait object but requires multiple queries to use the attr/values table.
-            ObservationVariableDao.getAllTraitObjects().first { it.name == trait }.apply {
-                ObservationVariableValueDao.getVariableValues(id.toInt()).also { values ->
-
-                    values?.forEach {
-
-                        val attrName =
-                            ObservationVariableAttributeDao.getAttributeNameById(it[ObservationVariableAttribute.FK] as Int)
-
-
-                        when (attrName) {
-                            "validValuesMin" -> minimum =
-                                it["observation_variable_attribute_value"] as? String ?: ""
-
-                            "validValuesMax" -> maximum =
-                                it["observation_variable_attribute_value"] as? String ?: ""
-
-                            "category" -> categories =
-                                it["observation_variable_attribute_value"] as? String ?: ""
-
-                            "closeKeyboardOnOpen" -> closeKeyboardOnOpen =
-                                (it["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
-
-                            "cropImage" -> cropImage =
-                                (it["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
-                        }
-                    }
-                }
-            }
+            val traitObject = ObservationVariableDao.getTraitByName(trait)
+            traitObject?.loadAttributeAndValues()
+            traitObject
         }
     }
 }

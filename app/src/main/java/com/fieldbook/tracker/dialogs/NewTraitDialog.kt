@@ -504,7 +504,7 @@ class NewTraitDialog(
 
             context?.let {
 
-                initialTraitObject?.format = adapter.selectedFormat?.getDatabaseName()
+                initialTraitObject?.format = adapter.selectedFormat?.getDatabaseName().toString()
 
                 showFormatParameters(adapter.selectedFormat ?: Formats.TEXT)
 
