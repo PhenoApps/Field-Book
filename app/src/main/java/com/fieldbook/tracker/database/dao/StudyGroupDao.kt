@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.database.dao
 
+import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.StudyGroupsTable
@@ -22,16 +23,22 @@ class StudyGroupDao {
         fun getAllStudyGroups(): List<StudyGroupModel>? = withDatabase { db ->
             val groups = mutableListOf<StudyGroupModel>()
 
-            db.query(
-                StudyGroupsTable.TABLE_NAME,
-                select = arrayOf(StudyGroupsTable.ID, "group_name", "is_expanded"),
-            ).use { cursor ->
-                while (cursor.moveToNext()) {
-                    val id = cursor.getInt(cursor.getColumnIndexOrThrow(StudyGroupsTable.ID))
-                    val name = cursor.getString(cursor.getColumnIndexOrThrow("group_name"))
-                    val expanded = cursor.getString(cursor.getColumnIndexOrThrow("is_expanded")) != "false"
-                    groups.add(StudyGroupModel(id, name, expanded))
+            try {
+                db.query(
+                    StudyGroupsTable.TABLE_NAME,
+                    select = arrayOf(StudyGroupsTable.ID, StudyGroupsTable.GROUP_NAME, StudyGroupsTable.IS_EXPANDED),
+                ).use { cursor ->
+                    while (cursor.moveToNext()) {
+                        val id = cursor.getInt(cursor.getColumnIndexOrThrow(StudyGroupsTable.ID))
+                        val name = cursor.getString(cursor.getColumnIndexOrThrow(StudyGroupsTable.GROUP_NAME))
+                        val expanded =
+                            cursor.getString(cursor.getColumnIndexOrThrow(StudyGroupsTable.IS_EXPANDED)) != "false"
+                        groups.add(StudyGroupModel(id, name, expanded))
+                    }
                 }
+            } catch (e: Exception) {
+                    Log.e(TAG, "Column not found in getAllStudyGroups: ${e.message}")
+                    return@withDatabase emptyList<StudyGroupModel>()
             }
 
             groups
@@ -47,7 +54,7 @@ class StudyGroupDao {
             db.query(
                 StudyGroupsTable.TABLE_NAME,
                 select = arrayOf(StudyGroupsTable.ID),
-                where = "group_name = ?",
+                where = "${StudyGroupsTable.GROUP_NAME} = ?",
                 whereArgs = arrayOf(groupName)
             ).toFirst()[StudyGroupsTable.ID] as? Int
         }
@@ -60,10 +67,10 @@ class StudyGroupDao {
 
             db.query(
                 StudyGroupsTable.TABLE_NAME,
-                select = arrayOf("group_name"),
+                select = arrayOf(StudyGroupsTable.GROUP_NAME),
                 where = "${StudyGroupsTable.ID} = ?",
                 whereArgs = arrayOf("$groupId")
-            ).toFirst()["group_name"] as? String
+            ).toFirst()[StudyGroupsTable.GROUP_NAME] as? String
         }
 
         /**
@@ -80,7 +87,7 @@ class StudyGroupDao {
             val id = db.insert(
                 StudyGroupsTable.TABLE_NAME,
                 null,
-                contentValuesOf("group_name" to groupName)
+                contentValuesOf(StudyGroupsTable.GROUP_NAME to groupName)
             )
 
             id.toInt()
@@ -103,8 +110,12 @@ class StudyGroupDao {
 
             db.rawQuery(query, null).use { cursor ->
                 while (cursor.moveToNext()) {
-                    val groupId = cursor.getInt(cursor.getColumnIndexOrThrow(StudyGroupsTable.ID))
-                    deleteStudyGroup(groupId)
+                    try {
+                        val groupId = cursor.getInt(cursor.getColumnIndexOrThrow(StudyGroupsTable.ID))
+                        deleteStudyGroup(groupId)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Column not found in deleteUnusedStudyGroups: ${e.message}")
+                    }
                 }
             }
         }
@@ -123,7 +134,7 @@ class StudyGroupDao {
         fun updateStudyGroupIsExpanded(groupId: Int, isExpanded: Boolean) = withDatabase { db ->
             db.update(
                 StudyGroupsTable.TABLE_NAME,
-                contentValuesOf("is_expanded" to if (isExpanded) "true" else "false"),
+                contentValuesOf(StudyGroupsTable.IS_EXPANDED to if (isExpanded) "true" else "false"),
                 "${StudyGroupsTable.ID} = ?",
                 arrayOf("$groupId")
             )
@@ -132,10 +143,10 @@ class StudyGroupDao {
         fun getIsExpanded(groupId: Int): Boolean = withDatabase { db ->
             val result = db.query(
                 StudyGroupsTable.TABLE_NAME,
-                select = arrayOf("is_expanded"),
+                select = arrayOf(StudyGroupsTable.IS_EXPANDED),
                 where = "${StudyGroupsTable.ID} = ?",
                 whereArgs = arrayOf("$groupId")
-            ).toFirst()["is_expanded"] as? String
+            ).toFirst()[StudyGroupsTable.IS_EXPANDED] as? String
 
             result != "false"
         } == true
