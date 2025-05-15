@@ -543,7 +543,7 @@ public class CollectActivity extends ThemedActivity
         traitLayouts = new LayoutCollections(this);
         rangeBox = findViewById(R.id.act_collect_range_box);
         traitBox = findViewById(R.id.act_collect_trait_box);
-        traitBox.connectRangeBox(rangeBox);
+        traitBox.connectRangeBox();
         rangeBox.connectTraitBox(traitBox);
 
         //setup infobar recycler view ui
@@ -844,7 +844,7 @@ public class CollectActivity extends ThemedActivity
             finish();
         }
 
-        traitBox.initialize(visibleTraits, rangeSuppress);
+        traitBox.initialize(visibleTraits);
     }
 
     /**

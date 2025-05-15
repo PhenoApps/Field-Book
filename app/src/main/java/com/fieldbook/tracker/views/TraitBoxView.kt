@@ -1,14 +1,12 @@
 package com.fieldbook.tracker.views
 
 import android.app.AlertDialog
-import android.app.Service
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -30,20 +28,24 @@ import com.fieldbook.tracker.activities.CollectActivity
 
 class TraitBoxView : ConstraintLayout {
 
+    enum class MoveDirection {
+        LEFT,
+        RIGHT
+    }
+
     private var controller: CollectTraitController
     private var prefixTraits: Array<String>
 
     private var traitTypeTv: TextView
     private var traitDetails: TextView
-    private var traitLeft: ImageView
-    private var traitRight: ImageView
+    private var traitLeft: ActionImageView
+    private var traitRight: ActionImageView
 
     private var traitsStatusBarRv: RecyclerView? = null
     private var traitBoxItemModels: List<TraitsStatusAdapter.TraitBoxItemModel>? = null
     private var visibleTraitsList: Array<TraitObject> = arrayOf()
 
     var currentTrait: TraitObject? = null
-    var rangeSuppress: Boolean? = null
 
     init {
 
@@ -72,47 +74,44 @@ class TraitBoxView : ConstraintLayout {
         defStyle
     )
 
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int, defStyleRes: Int) : super(
-        context,
-        attrs,
-        defStyle,
-        defStyleRes
-    )
-
-    fun connectRangeBox(rangeBoxView: RangeBoxView) {
+    fun connectRangeBox() {
 
         traitLeft = findViewById(R.id.traitLeft)
         traitRight = findViewById(R.id.traitRight)
         traitDetails = findViewById(R.id.traitDetails)
 
         traitLeft.setImageResource(R.drawable.trait_chevron_left)
-        traitLeft.setOnTouchListener(
-            createTraitOnTouchListener(
-                traitLeft, R.drawable.trait_chevron_left,
-                R.drawable.trait_chevron_left_pressed
-            )
-        )
+        traitLeft.setOnActionListener(object : ActionImageView.OnActionListener {
+            override fun onActionDown() {
+                traitLeft.setImageResource(R.drawable.trait_chevron_left_pressed)
+            }
 
-        // Go to previous trait
-        traitLeft.setOnClickListener { moveTrait("left") }
+            override fun onActionUp() {
+                traitLeft.setImageResource(R.drawable.trait_chevron_left)
+                // Go to previous trait
+                moveTrait(MoveDirection.LEFT)
+            }
+        })
 
         traitRight.setImageResource(R.drawable.trait_chevron_right)
-        traitRight.setOnTouchListener(
-            createTraitOnTouchListener(
-                traitRight, R.drawable.trait_chevron_right,
-                R.drawable.trait_chevron_right_pressed
-            )
-        )
+        traitRight.setOnActionListener(object : ActionImageView.OnActionListener {
+            override fun onActionDown() {
+                traitRight.setImageResource(R.drawable.trait_chevron_right_pressed)
+            }
 
-        // Go to next trait
-        traitRight.setOnClickListener { moveTrait("right") }
+            override fun onActionUp() {
+                traitRight.setImageResource(R.drawable.trait_chevron_right)
+                // Go to next trait
+                moveTrait(MoveDirection.RIGHT)
+            }
+        })
 
         traitsStatusBarRv?.adapter = TraitsStatusAdapter(this)
         traitsStatusBarRv?.layoutManager = getCenteredLayoutManager()
     }
 
     fun initTraitDetails() {
-        val traitDetails: TextView = findViewById(R.id.traitDetails)
+        val traitDetails: ActionTextView = findViewById(R.id.traitDetails)
         traitDetails.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> traitDetails.maxLines = 10
@@ -125,10 +124,8 @@ class TraitBoxView : ConstraintLayout {
 
     fun initialize(
         visibleTraits: Array<TraitObject>,
-        rangeSuppress: Boolean
     ) {
         this.visibleTraitsList = visibleTraits
-        this.rangeSuppress = rangeSuppress
 
         // navigate to the last used trait using preferences
         // if using for the first time, use the first element
@@ -143,7 +140,7 @@ class TraitBoxView : ConstraintLayout {
             }
         }
 
-        loadLayout(rangeSuppress)
+        loadLayout()
 
         traitTypeTv.setOnClickListener {
             // Display dialog or menu for trait selection
@@ -164,7 +161,7 @@ class TraitBoxView : ConstraintLayout {
         return visibleTraitsList.indexOf(currentTrait)
     }
 
-    fun loadLayout(rangeSuppress: Boolean, skipSelection: Boolean = false) {
+    fun loadLayout(skipSelection: Boolean = false) {
 
         val traitPosition = getSelectedItemPosition()
 
@@ -188,26 +185,7 @@ class TraitBoxView : ConstraintLayout {
         }
 
         traitTypeTv.text = currentTrait?.name
-
-        val imm =
-            context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
-
-        if (currentTrait?.format != "text") {
-
-            try {
-                imm.hideSoftInputFromWindow(controller.getInputView().windowToken, 0)
-            } catch (_: Exception) { }
-        }
-
         traitDetails.text = currentTrait?.details ?: ""
-
-        //TODO: move these to individual trait layouts, check how 'rangeSuppresse' is used
-        if (!rangeSuppress or (currentTrait?.format != "numeric")) {
-            if (controller.getInputView().visibility == VISIBLE) {
-                controller.getInputView().visibility = GONE
-                controller.getInputView().isEnabled = false
-            }
-        }
 
         //Get current layout object and make it visible
         val layoutCollections: LayoutCollections = controller.getTraitLayouts()
@@ -217,12 +195,7 @@ class TraitBoxView : ConstraintLayout {
         controller.inflateTrait(currentTraitLayout)
 
         //Call specific load layout code for the current trait layout
-        if (currentTraitLayout != null) {
-            currentTraitLayout.loadLayout()
-        } else {
-            controller.getInputView().visibility = VISIBLE
-            controller.getInputView().isEnabled = true
-        }
+        currentTraitLayout.loadLayout()
     }
 
     private fun showTraitPickerDialog(visibleTraits: Array<TraitObject>) {
@@ -233,7 +206,7 @@ class TraitBoxView : ConstraintLayout {
             .setSingleChoiceItems(visibleTraits.map { it.name }.toTypedArray(), getSelectedItemPosition()) { dialog, index ->
                 // Update selected trait
                 currentTrait = visibleTraits[index]
-                rangeSuppress?.let { loadLayout(it) }
+                loadLayout()
                 dialog.dismiss()
             }
             .setPositiveButton(
@@ -318,7 +291,7 @@ class TraitBoxView : ConstraintLayout {
         // pos = -1 if the last used trait was disabled
         currentTrait = visibleTraitsList[if (pos == -1) 0 else pos]
 
-        loadLayout(false, skipSelection = true)
+        loadLayout(skipSelection = true)
 
         (traitsStatusBarRv?.adapter as TraitsStatusAdapter).setCurrentSelection(pos)
     }
@@ -328,9 +301,8 @@ class TraitBoxView : ConstraintLayout {
     }
 
     /**
-     * Deletes all observation variables named traitName from the db.
-     * Also removes the trait from "newTraits"
-     * @param traitName the observation variable name
+     * Deletes all observation variables with traitDbId from the db.
+     * @param trait the observation variable
      * @param plotID the unique plot identifier to remove the observations from
      */
     fun remove(trait: TraitObject, plotID: String, rep: String) {
@@ -339,26 +311,7 @@ class TraitBoxView : ConstraintLayout {
         controller.getDatabase().deleteTrait(studyId, plotID, trait.id, rep)
     }
 
-    private fun createTraitOnTouchListener(
-        arrow: ImageView,
-        imageIdUp: Int, imageIdDown: Int
-    ): OnTouchListener {
-        return OnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    arrow.setImageResource(imageIdDown)
-                }
-                MotionEvent.ACTION_MOVE -> {}
-                MotionEvent.ACTION_UP -> arrow.setImageResource(imageIdUp)
-                MotionEvent.ACTION_CANCEL -> {}
-            }
-
-            // return true to prevent calling btn onClick handler
-            false
-        }
-    }
-
-    fun moveTrait(direction: String) {
+    fun moveTrait(direction: MoveDirection) {
 
         var pos = 0
         if (!controller.validateData(controller.getCurrentObservation()?.value)) {
@@ -366,7 +319,7 @@ class TraitBoxView : ConstraintLayout {
         }
 
         val rangeBox = controller.getRangeBox()
-        if (direction == "left") {
+        if (direction == MoveDirection.LEFT) {
             pos = getSelectedItemPosition() - 1
             if (pos < 0) {
                 pos = visibleTraitsList.count() - 1
@@ -377,7 +330,7 @@ class TraitBoxView : ConstraintLayout {
                     controller.getSoundHelper().playCycle()
                 }
             }
-        } else if (direction == "right") {
+        } else if (direction == MoveDirection.RIGHT) {
             pos = getSelectedItemPosition() + 1
             if (pos > visibleTraitsList.count() - 1) {
                 pos = 0
@@ -389,9 +342,9 @@ class TraitBoxView : ConstraintLayout {
                 }
             }
         }
-//        traitType.setSelection(pos)
+
         setSelection(pos)
-        rangeSuppress?.let { loadLayout(it) }
+        loadLayout()
         controller.refreshLock()
         controller.getCollectInputView().resetInitialIndex()
     }
@@ -401,7 +354,7 @@ class TraitBoxView : ConstraintLayout {
             controller.getSoundHelper().playCycle()
         }
         setSelection(0)
-        rangeSuppress?.let { loadLayout(it) }
+        loadLayout()
         controller.refreshLock()
         controller.getCollectInputView().resetInitialIndex()
     }

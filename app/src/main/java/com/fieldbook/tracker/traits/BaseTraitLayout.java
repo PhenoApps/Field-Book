@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -110,6 +111,19 @@ public abstract class BaseTraitLayout extends LinearLayout {
             toggleVisibility(View.GONE);
         } else {
             toggleVisibility(View.VISIBLE);
+        }
+
+        //hide soft input if it is not the text format
+        if (!type().equals(TextTraitLayout.type)) {
+
+            InputMethodManager imm =
+                    (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+            try {
+                imm.hideSoftInputFromWindow(getCollectInputView().getWindowToken(), 0);
+            } catch (Exception e) {
+                // Handle exception
+            }
         }
 
         CollectActivity act = (CollectActivity) getContext();
