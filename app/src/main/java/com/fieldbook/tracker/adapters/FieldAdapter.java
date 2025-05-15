@@ -134,9 +134,13 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
     public void selectAll() {
         for (FieldObject field : fullFieldList) {
-            if (isArchivedFieldsActivity || !field.getIs_archived()) {
-                // for FieldEditorActivity, add all non archived fields
-                // for FieldArchivedActivity, add all archived fields
+            boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
+            if (isArchivedFieldsActivity) { // for FieldArchivedActivity, add all the fields
+                selectedIds.add(field.getExp_id());
+            } else if (!groupingEnabled || !field.getIs_archived()) {
+                // for FieldEditorActivity if grouping is
+                // enabled: add non-archived fields
+                // disabled: add all fields
                 selectedIds.add(field.getExp_id());
             }
         }

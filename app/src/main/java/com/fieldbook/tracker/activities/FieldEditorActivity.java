@@ -223,6 +223,7 @@ public class FieldEditorActivity extends ThemedActivity
         } else {
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle(getString(R.string.settings_fields));
+                mAdapter.exitSelectionMode();
             }
         }
 
