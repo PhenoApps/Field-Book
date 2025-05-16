@@ -170,8 +170,14 @@ open class AttributeChooserDialog(
             })
 
             //manually select the first tab based on preferences
-            val tabIndex = PreferenceManager.getDefaultSharedPreferences(requireActivity())
+            var tabIndex = PreferenceManager.getDefaultSharedPreferences(requireActivity())
                 .getInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, 0)
+
+            if (!showTraits && tabIndex == 1) {
+                tabIndex = 0
+            } else if (!showOther && tabIndex == 2) {
+                tabIndex = 0
+            }
 
             tabLayout.selectTab(tabLayout.getTabAt(tabIndex))
 
