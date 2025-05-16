@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.adapters.AttributeAdapter;
 import com.fieldbook.tracker.adapters.SearchAdapter;
 import com.fieldbook.tracker.adapters.SearchResultsAdapter;
 import com.fieldbook.tracker.database.models.ObservationModel;
@@ -139,8 +140,8 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
     }
 
     @Override
-    public void onAttributeSelected(String selectedAttribute) {
-        dataSet.add(new SearchDialogDataModel(selectedAttribute, R.drawable.ic_tb_equal, ""));
+    public void onAttributeSelected(@NonNull AttributeAdapter.AttributeModel model) {
+        dataSet.add(new SearchDialogDataModel(model, R.drawable.ic_tb_equal, ""));
         searchAdapter.notifyItemInserted(dataSet.size() - 1);
     }
 
@@ -164,7 +165,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
     }
 
     public void createSearchResultsDialog () {
-        String searchQuery = originActivity.getDatabase().getSearchQuery(originActivity, dataSet);
+        String searchQuery = originActivity.getDatabase().getSearchQuery(dataSet);
         final SearchData[] data = originActivity.getDatabase().getRangeBySql(searchQuery);
 
         if (data != null) {
@@ -178,7 +179,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
 
             for (int i = 0; i < dataSet.size(); i++) {
 
-                String c = dataSet.get(i).getAttribute();
+                String c = dataSet.get(i).getAttribute().getLabel();
 
                 if (!columnsList.contains(c)) {
                     columnsList.add(c);

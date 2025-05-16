@@ -352,7 +352,7 @@ class ObservationDao {
             rep: String? = (getRep(studyId, plotId, traitDbId) + 1).toString()
         ): Long = withDatabase { db ->
 
-            val traitObj = ObservationVariableDao.getTraitById(traitDbId.toInt())
+            val traitObj = ObservationVariableDao.getTraitById(traitDbId)
             val internalTraitId = if (traitObj == null) {
                 -1
             } else {

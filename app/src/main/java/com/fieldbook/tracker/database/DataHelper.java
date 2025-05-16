@@ -95,12 +95,16 @@ public class DataHelper {
 
     private Bitmap missingPhoto;
 
+    private SearchQueryBuilder queryBuilder;
+
     @Inject
     public DataHelper(@ActivityContext Context context) {
         try {
             this.context = context;
 
             preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+            queryBuilder = new SearchQueryBuilder(preferences, this);
 
             openHelper = new OpenHelper(this);
             db = openHelper.getWritableDatabase();
@@ -353,9 +357,8 @@ public class DataHelper {
         return ObservationVariableDao.Companion.getById(id);
     }
 
-    public String getSearchQuery(CollectActivity originActivity, List<SearchDialogDataModel> dataSet) {
-        SearchQueryBuilder queryBuilder = new SearchQueryBuilder(originActivity, dataSet);
-        return queryBuilder.buildSearchQuery();
+    public String getSearchQuery(List<SearchDialogDataModel> dataSet) {
+        return queryBuilder.buildSearchQuery(dataSet);
     }
 
     /**
@@ -2033,6 +2036,13 @@ public class DataHelper {
         open();
 
         return ObservationVariableDao.Companion.getTraitByName(name);
+    }
+
+    public TraitObject getTraitById(String id) {
+
+        open();
+
+        return ObservationVariableDao.Companion.getTraitById(id);
     }
 
     //TODO 471 used by brapi but might check if there is an alternative way to use trait db id as well

@@ -31,19 +31,17 @@ class ObservationVariableDao {
             }
         } ?: 0
 
-        fun getTraitById(id: Int): TraitObject? = withDatabase { db ->
+        fun getTraitById(id: String): TraitObject? = withDatabase { db ->
 
             db.query(ObservationVariable.tableName,
-//                    select = arrayOf("observation_variable_name"),
                 where = "internal_id_observation_variable = ?",
-                whereArgs = arrayOf("$id")).toFirst().toTraitObject()
+                whereArgs = arrayOf(id)).toFirst().toTraitObject()
 
         }
 
         fun getTraitByName(name: String): TraitObject? = withDatabase { db ->
 
             db.query(ObservationVariable.tableName,
-//                    select = arrayOf("observation_variable_name"),
                     where = "observation_variable_name = ? COLLATE NOCASE",
                     whereArgs = arrayOf(name)).toFirst().toTraitObject()
 

@@ -27,6 +27,7 @@ import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.Utils
 import java.util.*
 import androidx.core.content.edit
+import com.fieldbook.tracker.adapters.AttributeAdapter
 
 class RangeBoxView : ConstraintLayout {
 
@@ -173,9 +174,14 @@ class RangeBoxView : ConstraintLayout {
         primaryNameTv.setOnClickListener {
             attributeChooserDialog.setOnAttributeSelectedListener(object :
                 AttributeChooserDialog.OnAttributeSelectedListener {
-                override fun onAttributeSelected(label: String) {
+                override fun onAttributeSelected(model: AttributeAdapter.AttributeModel) {
                     //update preference primary name
-                    controller.getPreferences().edit().putString(GeneralKeys.PRIMARY_NAME, label).apply()
+                    controller.getPreferences().edit {
+                        putString(
+                            GeneralKeys.PRIMARY_NAME,
+                            model.label
+                        )
+                    }
                     setName()
                     refresh()
                 }
@@ -189,9 +195,14 @@ class RangeBoxView : ConstraintLayout {
         secondaryNameTv.setOnClickListener {
             attributeChooserDialog.setOnAttributeSelectedListener(object :
                 AttributeChooserDialog.OnAttributeSelectedListener {
-                override fun onAttributeSelected(label: String) {
+                override fun onAttributeSelected(model: AttributeAdapter.AttributeModel) {
                     //update preference primary name
-                    controller.getPreferences().edit().putString(GeneralKeys.SECONDARY_NAME, label).apply()
+                    controller.getPreferences().edit {
+                        putString(
+                            GeneralKeys.SECONDARY_NAME,
+                            model.label
+                        )
+                    }
                     setName()
                     refresh()
                 }
