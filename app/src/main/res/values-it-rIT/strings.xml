@@ -146,9 +146,19 @@
     <string name="name_conflict_import_name">importa nome</string>
     <string name="name_conflict_display_name">visualizza nome</string>
     <string name="dialog_att_chooser_title_default">Seleziona attributo</string>
+    <string name="search_attribute_dialog_title">Imposta ID di ricerca</string>
+    <string name="search_attribute_apply_to_all">Applica la scelta a tutti i campi idonei</string>
+    <string name="search_multiple_matches_found">Trovati %1$d appezzamenti corrispondenti. Visualizzazione del primo.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
+    <string name="field_trait_observation_total">\"%d\" osservazioni</string>
     <!-- Field Detail Charts -->
+    <string name="field_trait_chart_no_data">Nessun dato da visualizzare</string>
+    <string name="field_trait_chart_incompatible_format">Il formato di questo tratto non può essere tracciato nel grafico</string>
+    <string name="field_trait_chart_excess_data">Troppi valori diversi da tracciare nel grafico</string>
     <!-- Semantic dates -->
+    <string name="today">Oggi</string>
+    <string name="yesterday">Ieri</string>
+    <string name="no_activity">Nessuna attività</string>
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_sort_name">Nome del carattere</string>
