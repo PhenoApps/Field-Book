@@ -350,7 +350,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         // Determine if this field is active
         int activeStudyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-        Log.d("FieldAdapter", "Field is is " + field.getExp_id() + " and active field is is "+activeStudyId);
+        Log.d("FieldAdapter", "Field id is " + field.getExp_id() + " and active field id is "+activeStudyId);
         if (field.getExp_id() == activeStudyId) {
             // Indicate active state
             Log.d("FieldAdapter", "Setting icon background for active field " + name);
