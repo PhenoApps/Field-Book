@@ -214,7 +214,14 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
             db.deleteField(fieldId)
         }
 
-        // Check if the active field is among those deleted in order to reset related shared preferences
+        resetActiveField(fieldIds)
+
+        queryAndLoadFields()
+        mAdapter.exitSelectionMode()
+    }
+
+    protected fun resetActiveField(fieldIds: List<Int>) {
+        // Check if the active field is among those deleted/archived in order to reset related shared preferences
         val activeFieldId = mPrefs.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
         if (fieldIds.contains(activeFieldId)) {
             mPrefs.edit().apply {
@@ -231,9 +238,6 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
             }
             CollectActivity.reloadData = true
         }
-
-        queryAndLoadFields()
-        mAdapter.exitSelectionMode()
     }
 
     override fun queryAndLoadFields() {
@@ -243,7 +247,7 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
 
             invalidateOptionsMenu() // invokes onPrepareOptionsMenu
 
-            if (isArchivedMode() && fieldList.isEmpty()) {
+            if (isArchivedMode() && fieldList.isEmpty()) { // if in archive activity and no fields, finish
                 finish()
                 return
             }

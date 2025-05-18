@@ -50,8 +50,6 @@ import org.phenoapps.utils.BaseDocumentTreeUtil
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
 import java.util.ArrayList
 import java.util.LinkedHashMap
 import java.util.NoSuchElementException
@@ -204,7 +202,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         collapseGroupsItem.isVisible = isGroupingEnabled
         expandGroupsItem.isVisible = isGroupingEnabled
 
-        mAdapter.resetFieldsList(fieldList);
+        mAdapter.resetFieldsList(fieldList)
 
         if (mAdapter.selectedItemCount > 0) { // in selection mode
             standardMenuItems.forEach { toggleMenuItem(it, false) }
@@ -287,12 +285,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             }
 
             R.id.menu_archive_fields -> {
-                for (fieldId in mAdapter.selectedItems) {
-                    db.setIsArchived(fieldId, true)
-                }
-                queryAndLoadFields()
-                mAdapter.exitSelectionMode()
-                invalidateOptionsMenu()
+                archiveSelectedFields(mAdapter.selectedItems)
                 true
             }
 
@@ -348,7 +341,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         fieldSwitcher.switchField(studyId)
         CollectActivity.reloadData = true
 
-        mAdapter.resetFieldsList(fieldList); // reset to update active icon indication
+        mAdapter.resetFieldsList(fieldList) // reset to update active icon indication
 
         // Check if this is a BrAPI field and show BrAPI info dialog if so
         // if (field.getImport_format() == ImportFormat.BRAPI) {
@@ -1043,5 +1036,48 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         }
 
         dialog.show()
+    }
+
+    private fun archiveSelectedFields(fieldIds: List<Int>) {
+        val activeFieldId = mPrefs.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
+        val activeFieldInArchiveList = fieldIds.contains(activeFieldId)
+
+        if (!activeFieldInArchiveList) { // active field isn't selected, archive all
+            archiveFields(fieldIds)
+            return
+        }
+
+        val builder = AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(R.string.archive_active_field_title)
+            .setMessage(R.string.archive_active_field_message)
+            .setPositiveButton(R.string.dialog_yes) { _, _ ->
+                // archive fields and deselect active field
+                archiveFields(fieldIds)
+                resetActiveField(fieldIds)
+            }
+            .setNegativeButton(R.string.dialog_cancel) { dialog, _ ->
+                dialog.dismiss()
+                mAdapter.exitSelectionMode()
+                invalidateOptionsMenu()
+            }
+
+        val nonActiveFields = fieldIds.filter { it != activeFieldId }
+        if (nonActiveFields.isNotEmpty()) {
+            builder.setNeutralButton(R.string.archive_others) { _, _ ->
+                // archive only the non-active fields
+                archiveFields(nonActiveFields)
+            }
+        }
+
+        builder.show()
+    }
+
+    private fun archiveFields(fieldIds: List<Int>) {
+        for (fieldId in fieldIds) {
+            db.setIsArchived(fieldId, true)
+        }
+        queryAndLoadFields()
+        mAdapter.exitSelectionMode()
+        invalidateOptionsMenu()
     }
 }
