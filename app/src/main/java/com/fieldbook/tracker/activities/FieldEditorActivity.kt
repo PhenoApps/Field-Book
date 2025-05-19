@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.BrapiActivity
@@ -64,18 +65,12 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
 
     companion object {
         private const val TAG = "FieldEditor"
-        private const val REQUEST_FILE_EXPLORER_CODE = 1
-        private const val REQUEST_CLOUD_FILE_CODE = 5
-        private const val REQUEST_BRAPI_IMPORT_ACTIVITY = 10
         private const val PERMISSIONS_REQUEST_STORAGE = 998
-        private val REQUEST_CODE_BRAPI_TRAIT_ACTIVITY =
-            TraitEditorActivity.REQUEST_CODE_BRAPI_TRAIT_ACTIVITY
     }
 
     private lateinit var fieldFile: FieldFileObject.FieldFileBase
     private lateinit var unique: Spinner
     private lateinit var mGpsTracker: GPSTracker
-    private lateinit var trait: EditText
 
     private val importRunnable = Runnable {
         ImportRunnableTask(
@@ -85,6 +80,60 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             unique.selectedItem.toString()
         ).execute(0)
     }
+
+    private val fileExplorerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                val chosenFile = result.data?.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY)
+                chosenFile?.let { showFieldFileDialog(it, null) }
+            }
+        }
+
+    private val cloudFileLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK && result.data?.data != null) {
+                val contentDescriber = result.data?.data ?: return@registerForActivityResult
+                val chosenFile = getFileName(contentDescriber) ?: return@registerForActivityResult
+
+                val extension = FieldFileObject.getExtension(chosenFile)
+                if (extension != "csv" && extension != "xls" && extension != "xlsx") {
+                    Utils.makeToast(this, getString(R.string.import_error_format_field))
+                    return@registerForActivityResult
+                }
+
+                try { // copy the file to dir_field_import directory
+                    contentResolver.openInputStream(contentDescriber)?.use { input ->
+                        BaseDocumentTreeUtil.getFileOutputStream(
+                            this,
+                            R.string.dir_field_import,
+                            chosenFile
+                        )?.use { output -> // copy file contents
+                            val buffer = ByteArray(1024)
+                            var bytesRead: Int
+                            while (input.read(buffer).also { bytesRead = it } != -1) {
+                                output.write(buffer, 0, bytesRead)
+                            }
+                        } ?: throw IOException()
+                    } ?: throw IOException()
+
+                } catch (e: IOException) {
+                    Log.e(TAG, "Error while copying the file to field_import: ${e.message}", e)
+                }
+                showFieldFileDialog(contentDescriber.toString(), true)
+            }
+        }
+
+    private val brapiImportLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                val fieldId = result.data?.getIntExtra("fieldId", -1) ?: -1
+                if (fieldId != -1) {
+                    fieldSwitcher.switchField(fieldId)
+                    val dialogFragment = BrapiInfoDialogFragment().newInstance(resources.getString(R.string.brapi_info_message))
+                    dialogFragment.show(this.supportFragmentManager, "brapiInfoDialogFragment")
+                }
+            }
+        }
 
     override fun getLayoutResourceId(): Int = R.layout.activity_fields
 
@@ -500,12 +549,11 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         try {
             val importDir = BaseDocumentTreeUtil.getDirectory(this, R.string.dir_field_import)
             if (importDir != null && importDir.exists()) {
-                val intent = Intent()
-                intent.setClassName(this@FieldEditorActivity, FileExploreActivity::class.java.name)
-                intent.putExtra("path", importDir.uri.toString())
-                intent.putExtra("include", arrayOf("csv", "xls", "xlsx"))
-                intent.putExtra("title", getString(R.string.fields_new_dialog_title))
-                startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE)
+                fileExplorerLauncher.launch(FileExploreActivity.getIntent(this).apply {
+                    putExtra("path", importDir.uri.toString())
+                    putExtra("include", arrayOf("csv", "xls", "xlsx"))
+                    putExtra("title", getString(R.string.fields_new_dialog_title))
+                })
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -513,15 +561,11 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     fun loadCloud() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "*/*"
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-
         try {
-            startActivityForResult(
-                Intent.createChooser(intent, "cloudFile"),
-                REQUEST_CLOUD_FILE_CODE
-            )
+            cloudFileLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "*/*"
+                addCategory(Intent.CATEGORY_OPENABLE)
+            })
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -530,13 +574,10 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     fun loadBrAPI() {
         if (Utils.isConnected(this)) {
             if (mPrefs.getBoolean(PreferenceKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)) {
-                val intent = Intent(this, BrapiStudyFilterActivity::class.java)
                 BrapiFilterCache.checkClearCache(this)
-                startActivityForResult(intent, REQUEST_BRAPI_IMPORT_ACTIVITY)
+                brapiImportLauncher.launch(BrapiStudyFilterActivity.getIntent(this))
             } else {
-                val intent = Intent()
-                intent.setClassName(this, BrapiActivity::class.java.name)
-                startActivityForResult(intent, REQUEST_CODE_BRAPI_TRAIT_ACTIVITY)
+                brapiImportLauncher.launch(BrapiActivity.getIntent(this))
             }
         } else {
             Toast.makeText(this, R.string.opening_brapi_no_network_error, Toast.LENGTH_SHORT).show()
@@ -756,16 +797,14 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         unique = layout.findViewById(R.id.uniqueSpin)
         setSpinner(unique, columns)
 
-        val builder = AlertDialog.Builder(this, R.style.AppAlertDialog)
-        builder.setTitle(R.string.fields_new_dialog_title)
+        AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(R.string.fields_new_dialog_title)
             .setCancelable(true)
             .setView(layout)
-
-        builder.setPositiveButton(getString(R.string.dialog_import)) { _, _ ->
-            Handler().post(importRunnable)
-        }
-
-        builder.show()
+            .setPositiveButton(getString(R.string.dialog_import)) { _, _ ->
+                Handler().post(importRunnable)
+            }
+            .show()
     }
 
     // Helper function to set spinner adapter and listener
@@ -779,65 +818,6 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             )
         )
         spinner.setSelection(spinnerPosition)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == REQUEST_FILE_EXPLORER_CODE) {
-            if (resultCode == RESULT_OK && data != null) {
-                val chosenFile = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY)
-                chosenFile?.let { showFieldFileDialog(it, null) }
-            }
-        }
-
-        if (requestCode == REQUEST_BRAPI_IMPORT_ACTIVITY) {
-            if (resultCode == RESULT_OK && data != null) {
-                val fieldId = data.getIntExtra("fieldId", -1)
-                if (fieldId != -1) {
-                    fieldSwitcher.switchField(fieldId)
-                    val dialogFragment =
-                        BrapiInfoDialogFragment().newInstance(resources.getString(R.string.brapi_info_message))
-                    dialogFragment.show(this.supportFragmentManager, "brapiInfoDialogFragment")
-                }
-            }
-        }
-
-        if (requestCode == REQUEST_CLOUD_FILE_CODE && resultCode == RESULT_OK && data?.data != null) {
-            val contentDescriber = data.data ?: return
-            val chosenFile = getFileName(contentDescriber) ?: return
-
-            val extension = FieldFileObject.getExtension(chosenFile)
-            if (extension != "csv" && extension != "xls" && extension != "xlsx") {
-                Toast.makeText(
-                    this@FieldEditorActivity,
-                    getString(R.string.import_error_format_field),
-                    Toast.LENGTH_LONG
-                ).show()
-                return
-            }
-
-            try { // copy the file to dir_field_import directory
-                contentResolver.openInputStream(contentDescriber)?.use { input ->
-                    BaseDocumentTreeUtil.getFileOutputStream(
-                        this,
-                        R.string.dir_field_import,
-                        chosenFile
-                    )?.use { output ->
-                        val buffer = ByteArray(1024)
-                        var bytesRead: Int
-                        while (input.read(buffer).also { bytesRead = it } != -1) {
-                            output.write(buffer, 0, bytesRead)
-                        }
-                    } ?: throw IOException()
-                } ?: throw IOException()
-
-                showFieldFileDialog(contentDescriber.toString(), true)
-            } catch (e: IOException) {
-                Log.e(TAG, "Error processing file: ${e.message}", e)
-                Utils.makeToast(this, getString(R.string.act_field_editor_load_file_failed));
-            }
-        }
     }
 
     override fun onRequestPermissionsResult(
