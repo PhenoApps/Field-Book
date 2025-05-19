@@ -102,10 +102,17 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
                 }
 
                 try { // copy the file to dir_field_import directory
+                    val importDir = R.string.dir_field_import
+                    var file = BaseDocumentTreeUtil.getDirectory(this, importDir)?.findFile(chosenFile)
+
+                    if (file == null || !file.exists()) { // create the file
+                        file = BaseDocumentTreeUtil.getDirectory(this, importDir)?.createFile("*/*", chosenFile)
+                    }
+
                     contentResolver.openInputStream(contentDescriber)?.use { input ->
                         BaseDocumentTreeUtil.getFileOutputStream(
                             this,
-                            R.string.dir_field_import,
+                            importDir,
                             chosenFile
                         )?.use { output -> // copy file contents
                             val buffer = ByteArray(1024)
