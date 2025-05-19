@@ -89,7 +89,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                             && oldItem.isExpanded == newItem.isExpanded
                             && oldItem.groupSize == newItem.groupSize;
                 } else { // field
-                    return oldItem.field.getExp_alias().equals(newItem.field.getExp_alias());
+                    return oldItem.field.getExp_alias().equals(newItem.field.getExp_alias())
+                            && oldItem.isActive == newItem.isActive;
                 }
             }
 
@@ -466,10 +467,13 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     private List<FieldViewItem> buildFieldsList(List<FieldObject> fieldsList) {
         List<FieldViewItem> arrayList = new ArrayList<>();
         boolean groupingEnabled = preferences.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false);
+        int activeFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
 
         if (!groupingEnabled) {
             for (FieldObject field : fieldsList) {
-                arrayList.add(new FieldViewItem(field, fieldGroupController));
+                FieldViewItem item = new FieldViewItem(field, fieldGroupController);
+                item.updateIsActive(activeFieldId);
+                arrayList.add(item);
             }
             return arrayList;
         }
@@ -619,6 +623,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         public long groupSize;
         public FieldObject field;
         public boolean isExpanded = true;
+        public boolean isActive = false;
 
         public FieldViewItem(String groupName, long groupSize, boolean isArchive) {
             this.viewType = isArchive? FieldViewType.TYPE_ARCHIVE_HEADER : FieldViewType.TYPE_GROUP_HEADER;
@@ -642,6 +647,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         public boolean isFieldItem() {
             return viewType == FieldViewType.TYPE_FIELD;
+        }
+
+        public void updateIsActive(int activeFieldId) {
+            this.isActive = (field != null && field.getExp_id() == activeFieldId);
         }
     }
 
