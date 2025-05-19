@@ -363,6 +363,14 @@ public class DataHelper {
     }
 
     @Nullable
+    public StudyModel getStudyByDbId(String id) {
+
+        open();
+
+        return StudyDao.Companion.getStudyByDbId(id);
+    }
+
+    @Nullable
     public ObservationModel getObservationById(String id) {
 
         open();

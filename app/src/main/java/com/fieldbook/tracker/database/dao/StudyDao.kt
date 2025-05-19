@@ -646,6 +646,19 @@ class StudyDao {
         }
 
         /**
+         * Returns study by its study_db_id
+         */
+        fun getStudyByDbId(studyDbId: String) = withDatabase { db ->
+            StudyModel(
+                db.query(
+                    Study.tableName,
+                    where = "study_db_id = ?",
+                    whereArgs = arrayOf(studyDbId)
+                ).toFirst()
+            )
+        }
+
+        /**
          * Updates the group_id for a study
          */
         fun updateStudyGroup(studyId: Int, groupId: Int?) = withDatabase { db ->
