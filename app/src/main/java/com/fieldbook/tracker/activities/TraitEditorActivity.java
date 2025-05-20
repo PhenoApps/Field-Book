@@ -221,7 +221,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
             FieldObject field = database.getFieldObject(studyId);
 
-            if (!field.getExp_name().equals("") && field.getImport_format() == ImportFormat.BRAPI) {
+            if (!field.getName().equals("") && field.getDataSourceFormat() == ImportFormat.BRAPI) {
 
                 // noCheckTrait is used when the trait should not be checked, but the dialog
                 // should be shown.

@@ -23,7 +23,6 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 
@@ -56,11 +55,11 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
         super(new DiffUtil.ItemCallback<FieldObject>() {
             @Override
             public boolean areItemsTheSame(@NonNull FieldObject oldItem, @NonNull FieldObject newItem) {
-                return oldItem.getExp_id() == newItem.getExp_id();
+                return oldItem.getStudyId() == newItem.getStudyId();
             }
             @Override
             public boolean areContentsTheSame(@NonNull FieldObject oldItem, @NonNull FieldObject newItem) {
-                return oldItem.getExp_alias().equals(newItem.getExp_alias());
+                return oldItem.getAlias().equals(newItem.getAlias());
             }
         });
         this.context = context;
@@ -100,7 +99,7 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
     public void selectAll() {
         List<FieldObject> currentList = getCurrentList();
         for (FieldObject item : currentList) {
-            selectedIds.add(item.getExp_id());
+            selectedIds.add(item.getStudyId());
         }
         notifyDataSetChanged();
         isInSelectionMode = true;
@@ -134,9 +133,9 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
                 if (position != RecyclerView.NO_POSITION) {
                     FieldObject field = getItem(position);
                     if (field != null && isInSelectionMode) {
-                        toggleSelection(field.getExp_id());
+                        toggleSelection(field.getStudyId());
                     } else if (field != null && context instanceof FieldEditorActivity) {
-                        ((FieldEditorActivity) context).setActiveField(field.getExp_id());
+                        ((FieldEditorActivity) context).setActiveField(field.getStudyId());
                     }
                 }
             });
@@ -148,9 +147,9 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
                     if (position != RecyclerView.NO_POSITION) {
                         FieldObject field = getItem(position);
                         if (field != null && isInSelectionMode) {
-                            toggleSelection(field.getExp_id());
+                            toggleSelection(field.getStudyId());
                         } else if (field != null && listener != null) {
-                            listener.onFieldSelected(field.getExp_id());
+                            listener.onFieldSelected(field.getStudyId());
                         }
                     }
                 }
@@ -162,7 +161,7 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
                 if (position != RecyclerView.NO_POSITION) {
                     FieldObject field = getItem(position);
                     if (field != null) {
-                        toggleSelection(field.getExp_id());
+                        toggleSelection(field.getStudyId());
                         isInSelectionMode = true;
                         return true;
                     }
@@ -181,12 +180,12 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         FieldObject field = getItem(position);
-        holder.itemView.setActivated(selectedIds.contains(field.getExp_id()));
-        String name = field.getExp_alias();
+        holder.itemView.setActivated(selectedIds.contains(field.getStudyId()));
+        String name = field.getAlias();
         holder.name.setText(name);
-        String count = field.getCount();
+        String count = field.getEntryCount();
         String genericLevel = context.getString(R.string.field_generic_observation_level);
-        String specificLevel = field.getObservation_level();
+        String specificLevel = field.getObservationLevel();
 
         // Include the specific observation level if defined, otherwise, fallback to just the generic level
         String level = !TextUtils.isEmpty(specificLevel) ? specificLevel + " " + genericLevel : genericLevel;
@@ -195,7 +194,7 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
         holder.count.setText(formattedCount);
 
         // Set source icon
-        ImportFormat importFormat = field.getImport_format();
+        ImportFormat importFormat = field.getDataSourceFormat();
         Log.d("FieldAdapter", "Import format for field " + name + ": " + importFormat);
         switch (importFormat) {
             case CSV:
@@ -218,8 +217,8 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
 
         // Determine if this field is active
         int activeStudyId = ((FieldEditorActivity) context).getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-        Log.d("FieldAdapter", "Field is is " + field.getExp_id() + " and active field is is "+activeStudyId);
-        if (field.getExp_id() == activeStudyId) {
+        Log.d("FieldAdapter", "Field is is " + field.getStudyId() + " and active field is is "+activeStudyId);
+        if (field.getStudyId() == activeStudyId) {
             // Indicate active state
             Log.d("FieldAdapter", "Setting icon background for active field " + name);
 //            holder.sourceIcon.setBackgroundResource(R.drawable.custom_round_button);
@@ -244,7 +243,7 @@ public class FieldAdapter extends ListAdapter<FieldObject, FieldAdapter.ViewHold
         this.filterText = filter;
         List<FieldObject> filterFields = new ArrayList<>(fullFieldList);
         for (FieldObject field : fullFieldList) {
-            if (!filter.isEmpty() && !field.getExp_name().toLowerCase().contains(filter.toLowerCase())) {
+            if (!filter.isEmpty() && !field.getName().toLowerCase().contains(filter.toLowerCase())) {
                 filterFields.remove(field);
             }
         }

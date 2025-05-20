@@ -380,15 +380,15 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
                     Log.d("FieldCreatorDialog", "Inserting new field in the database.")
 
                     val field = FieldObject().apply {
-                        unique_id = "plot_id"
-                        primary_id = "Row"
-                        secondary_id = "Column"
-                        exp_sort = "Plot"
-                        exp_name = name
-                        exp_alias = name
-                        exp_source = activity.getString(R.string.field_book)
-                        import_format = ImportFormat.INTERNAL
-                        count = (rows * cols).toString()
+                        uniqueId = "plot_id"
+                        primaryId = "Row"
+                        secondaryId = "Column"
+                        sortColumnsStringArray = "Plot"
+                        this.name = name
+                        alias = name
+                        dataSource = activity.getString(R.string.field_book)
+                        dataSourceFormat = ImportFormat.INTERNAL
+                        entryCount = (rows * cols).toString()
                     }
 
                     val fieldColumns = listOf("Row", "Column", "Plot", "plot_id")

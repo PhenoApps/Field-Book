@@ -428,7 +428,7 @@ public class ConfigActivity extends ThemedActivity {
 
         int studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
-        int newStudyId = f.getExp_id();
+        int newStudyId = f.getStudyId();
 
         if (studyId != newStudyId) {
 
@@ -453,7 +453,7 @@ public class ConfigActivity extends ThemedActivity {
         int selectedField = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
         FieldObject field = database.getFieldObject(selectedField);
 
-        if (field != null && field.getDate_import() != null && !field.getDate_import().isEmpty()) {
+        if (field != null && field.getDateImport() != null && !field.getDateImport().isEmpty()) {
             Intent intent = new Intent(this, CollectActivity.class);
             startActivity(intent);
         }
@@ -467,7 +467,7 @@ public class ConfigActivity extends ThemedActivity {
         // first, search to try and match study alias
         for (FieldObject f : fields) {
 
-            if (f != null && f.getExp_alias() != null && f.getExp_alias().equals(barcode)) {
+            if (f != null && f.getAlias() != null && f.getAlias().equals(barcode)) {
 
                 return f;
 
@@ -477,7 +477,7 @@ public class ConfigActivity extends ThemedActivity {
         // second, if field is not found search for study name
         for (FieldObject f : fields) {
 
-            if (f != null && f.getExp_name() != null && f.getExp_name().equals(barcode)) {
+            if (f != null && f.getName() != null && f.getName().equals(barcode)) {
 
                 return f;
 
@@ -714,7 +714,7 @@ public class ConfigActivity extends ThemedActivity {
 
             if (fs.length > 0) {
 
-                switchField(fs[0].getExp_id());
+                switchField(fs[0].getStudyId());
             }
 
         } catch (Exception e) {

@@ -680,7 +680,7 @@ public class DataHelper {
 
             if (!fields.isEmpty()) {
 
-                StudyDao.Companion.switchField(fields.get(0).getExp_id());
+                StudyDao.Companion.switchField(fields.get(0).getStudyId());
 
             }
         }
@@ -798,7 +798,7 @@ public class DataHelper {
 
             if (!fields.isEmpty()) {
 
-                StudyDao.Companion.switchField(fields.get(0).getExp_id());
+                StudyDao.Companion.switchField(fields.get(0).getStudyId());
 
             }
         }

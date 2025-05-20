@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
-import androidx.fragment.app.FragmentActivity;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.ThemedActivity;
@@ -27,7 +26,6 @@ import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.BrapiExportUtil;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -792,7 +790,7 @@ public class BrapiExportActivity extends ThemedActivity {
         FieldObject field = dataHelper.getFieldObject(fieldId);
 
         runOnUiThread(() -> {
-            ((TextView) findViewById(R.id.brapistudyValue)).setText(field.getExp_alias());
+            ((TextView) findViewById(R.id.brapistudyValue)).setText(field.getAlias());
             ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));
             ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
             ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(numEditedObservations));

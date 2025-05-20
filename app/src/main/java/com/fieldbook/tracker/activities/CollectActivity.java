@@ -448,7 +448,7 @@ public class CollectActivity extends ThemedActivity
 
                                 FieldObject fo = database.getFieldObject(model.getStudy_id());
 
-                                if (fo != null && fo.getExp_name() != null) {
+                                if (fo != null && fo.getName() != null) {
 
                                     switchField(model.getStudy_id(), barcode);
 
@@ -1009,22 +1009,22 @@ public class CollectActivity extends ThemedActivity
 
         for (FieldObject field : allFields) {
             // Skip the current field
-            if (field.getExp_id() == currentFieldId) {
+            if (field.getStudyId() == currentFieldId) {
                 continue;
             }
 
-            Log.d("Field Book", "Checking field: " + field.getExp_id() + " (" + field.getExp_name() + ")");
+            Log.d("Field Book", "Checking field: " + field.getStudyId() + " (" + field.getName() + ")");
 
             ObservationUnitModel[] matchingUnits = database.getObservationUnitsBySearchAttribute(
-                    field.getExp_id(), searchValue);
+                    field.getStudyId(), searchValue);
 
-            Log.d("Field Book", "Found " + matchingUnits.length + " matches in field " + field.getExp_id());
+            Log.d("Field Book", "Found " + matchingUnits.length + " matches in field " + field.getStudyId());
 
             if (matchingUnits.length > 0) {
                 studyObj = field;
                 String oldPlotId = inputPlotId;
                 inputPlotId = matchingUnits[0].getObservation_unit_db_id();
-                Log.d("Field Book", "Match found! Field: " + field.getExp_name() +
+                Log.d("Field Book", "Match found! Field: " + field.getName() +
                         ", unit ID updated from " + oldPlotId + " to " + inputPlotId);
                 found = true;
                 break;
@@ -1040,10 +1040,10 @@ public class CollectActivity extends ThemedActivity
             for (ObservationUnitModel m : models) {
                 if (m.getObservation_unit_db_id().equals(searchValue)) {
                     FieldObject study = database.getFieldObject(m.getStudy_id());
-                    if (study != null && study.getExp_name() != null) {
+                    if (study != null && study.getName() != null) {
                         studyObj = study;
                         found = true;
-                        Log.d("Field Book", "Direct match found in study: " + study.getExp_name());
+                        Log.d("Field Book", "Direct match found in study: " + study.getName());
                         break;
                     }
                 }
@@ -1051,9 +1051,9 @@ public class CollectActivity extends ThemedActivity
         }
         
         // Handle the result of the search
-        if (found && studyObj != null && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
-            int studyId = studyObj.getExp_id();
-            String fieldName = studyObj.getExp_alias();
+        if (found && studyObj != null && studyObj.getName() != null && studyObj.getStudyId() != -1) {
+            int studyId = studyObj.getStudyId();
+            String fieldName = studyObj.getAlias();
             
             // Save the matching observation unit ID from the matched unit, not the search value
             final String matchedObsUnitId = inputPlotId; // This should be the one set earlier from matchingUnits[0]
@@ -2969,15 +2969,15 @@ public class CollectActivity extends ThemedActivity
             int count = 0;
             FieldObject[] fieldObjects = database.getAllFieldObjects().toArray(new FieldObject[0]);
             for (FieldObject fo : fieldObjects) {
-                Log.e(TAG, "Field ID: " + count + " " + fo.getExp_id());
-                Log.e(TAG, "Field Name: " + count + " " + fo.getExp_name());
-                Log.e(TAG, "Field Unique ID: " + count + " " + fo.getUnique_id());
+                Log.e(TAG, "Field ID: " + count + " " + fo.getStudyId());
+                Log.e(TAG, "Field Name: " + count + " " + fo.getName());
+                Log.e(TAG, "Field Unique ID: " + count + " " + fo.getUniqueId());
 
-                builder.putString("Field ID " + count, Integer.toString(fo.getExp_id()));
-                builder.putString("Field Name " + count, fo.getExp_name());
-                builder.putString("Field Unique ID " + count, fo.getUnique_id());
+                builder.putString("Field ID " + count, Integer.toString(fo.getStudyId()));
+                builder.putString("Field Name " + count, fo.getName());
+                builder.putString("Field Unique ID " + count, fo.getUniqueId());
 
-                List<String> attributes = Arrays.asList(database.getAllObservationUnitAttributeNames(fo.getExp_id()));
+                List<String> attributes = Arrays.asList(database.getAllObservationUnitAttributeNames(fo.getStudyId()));
                 Log.e(TAG, attributes.toString());
                 builder.putString("Observation Unit Attributes " + count, attributes.toString());
 

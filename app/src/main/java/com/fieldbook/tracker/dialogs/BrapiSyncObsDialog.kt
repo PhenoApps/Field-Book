@@ -24,7 +24,6 @@ import com.fieldbook.tracker.database.dao.ObservationVariableDao
 import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 
 data class StudyObservations(var fieldBookStudyDbId:Int=0, val traitList: MutableList<TraitObject> = mutableListOf(), val observationList: MutableList<Observation> = mutableListOf()) {
@@ -92,7 +91,7 @@ class BrapiSyncObsDialog(context: Context, private val syncController: FieldSync
         //Hide the error message in case no observations are downloaded.
         noObsLabel?.visibility = View.GONE
 
-        fieldNameLbl?.text = fieldObject.exp_name
+        fieldNameLbl?.text = fieldObject.name
 
         //need to call the load code
         loadObservations()
@@ -102,8 +101,8 @@ class BrapiSyncObsDialog(context: Context, private val syncController: FieldSync
      * Function to load the observations from a specific study
      */
     private fun loadObservations() {
-        val brapiStudyDbId = fieldObject.study_db_id
-        val fieldBookStudyDbId = fieldObject.exp_id
+        val brapiStudyDbId = fieldObject.studyDbId
+        val fieldBookStudyDbId = fieldObject.studyId
         Log.d("BrapiSyncObsDialog", "brapiStudyDbId is $brapiStudyDbId and fieldBookStudyDbId is $fieldBookStudyDbId")
         val brAPIService = BrAPIServiceFactory.getBrAPIService(this.context)
 
