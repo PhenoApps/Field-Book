@@ -825,14 +825,9 @@ public class CollectActivity extends ThemedActivity
     // to show based on the current trait data
     @Override
     public void initWidgets(final boolean rangeSuppress) {
+
         // Reset dropdowns
-
-        if (!database.isRangeTableEmpty()) {
-
-            Log.d(TAG, "init widgets refreshing info bar");
-
-            refreshInfoBarAdapter();
-        }
+        refreshInfoBarAdapter();
 
         traitBox.initTraitDetails();
 

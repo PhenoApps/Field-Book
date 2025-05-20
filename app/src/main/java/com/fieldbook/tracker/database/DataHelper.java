@@ -1194,28 +1194,6 @@ public class DataHelper {
         return false;
     }
 
-    //TODO replace with ObservationUnitPropertyDao call
-    //copy of the above function, its only called once
-    public boolean isRangeTableEmpty() {
-
-        open();
-
-        boolean empty = true;
-
-        if (!isTableExists("ObservationUnitProperty")) {
-            return empty;
-        }
-
-        Cursor cur = db.rawQuery("SELECT COUNT(*) FROM ObservationUnitProperty", null);
-        if (cur != null) {
-            if (cur != null && cur.moveToFirst()) {
-                empty = (cur.getInt(0) == 0);
-            }
-            cur.close();
-        }
-        return empty;
-    }
-
     public void updateStudySort(String sortString, int studyId) {
 
         open();
