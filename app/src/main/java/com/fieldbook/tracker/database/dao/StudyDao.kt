@@ -375,68 +375,62 @@ class StudyDao {
          * This function uses a field object to create a exp/study row in the database.
          * Columns are new observation unit attribute names that are inserted as well.
          */
-        //TODO 471 checkFieldNameAndObsLvl uses e.exp_name instead of studyDbId
-        fun createField(e: FieldObject, timestamp: String, columns: List<String>, fromBrapi: Boolean): Int = withDatabase { db ->
+        fun createField(field: FieldObject, timestamp: String, columns: List<String>, fromBrapi: Boolean): Int = withDatabase { db ->
 
-            when (val sid = if (fromBrapi) checkBrapiStudyUnique(
-                e.observationLevel,
-                e.studyDbId
-            ) else checkFieldNameAndObsLvl(e.name, e.observationLevel)) {
+            val sid = if (fromBrapi) checkBrapiStudyUnique(
+                field.observationLevel,
+                field.studyDbId
+            ) else -1
 
-                -1 -> {
+            if (sid == -1) {
 
-                    db.beginTransaction()
+                db.beginTransaction()
 
-                    //insert new study row into table
-                    val rowid = db.insert(Study.tableName, null, ContentValues().apply {
-                        put("study_db_id", e.studyDbId)
-                        put("study_name", e.name)
-                        put("study_alias", e.alias)
-                        put("study_unique_id_name", e.uniqueId)
-                        put("study_primary_id_name", e.primaryId)
-                        put("study_secondary_id_name", e.secondaryId)
-                        put("experimental_design", e.layout)
-                        put("common_crop_name", e.species)
-                        put("study_sort_name", e.sortColumnsStringArray)
-                        put("date_import", timestamp)
-                        put("date_export", e.dateExport)
-                        put("date_edit", e.dateEdit)
-                        put("date_sync", e.dateSync)
-                        put("import_format", e.dataSourceFormat?.toString() ?: "")
-                        put("study_source", e.dataSource)
-                        put("count", e.entryCount)
-                        put("observation_levels", e.observationLevel)
-                        put("trial_name", e.trialName)
-                    }).toInt()
+                //insert new study row into table
+                val rowId = db.insert(Study.tableName, null, ContentValues().apply {
+                    put("study_db_id", field.studyDbId)
+                    put("study_name", field.name)
+                    put("study_alias", field.alias)
+                    put("study_unique_id_name", field.uniqueId)
+                    put("study_primary_id_name", field.primaryId)
+                    put("study_secondary_id_name", field.secondaryId)
+                    put("experimental_design", field.layout)
+                    put("common_crop_name", field.species)
+                    put("study_sort_name", field.sortColumnsStringArray)
+                    put("date_import", timestamp)
+                    put("date_export", field.dateExport)
+                    put("date_edit", field.dateEdit)
+                    put("date_sync", field.dateSync)
+                    put("import_format", field.dataSourceFormat?.toString() ?: "")
+                    put("study_source", field.dataSource)
+                    put("count", field.entryCount)
+                    put("observation_levels", field.observationLevel)
+                    put("trial_name", field.trialName)
+                }).toInt()
 
-                    try {
-                        //TODO remove when we handle primary/secondary ids better
-                        val actualColumns = columns.toMutableList()
-                        //insert observation unit attributes using columns parameter
-                        if (e.primaryId !in columns) actualColumns += e.primaryId
-                        if (e.secondaryId !in columns) actualColumns += e.secondaryId
-                        actualColumns.forEach {
+                try {
+
+                    columns.forEach {
+                        if (it.isNotEmpty()) {
                             db.insert(ObservationUnitAttribute.tableName, null, contentValuesOf(
-                                    "observation_unit_attribute_name" to it,
-                                    Study.FK to rowid
-                            ))
+                                "observation_unit_attribute_name" to it))
                         }
-
-                        db.setTransactionSuccessful()
-
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    } finally {
-
-                        db.endTransaction()
                     }
 
-                    rowid
+                    db.setTransactionSuccessful()
 
+                } catch (e: Exception) {
+
+                    e.printStackTrace()
+
+                } finally {
+
+                    db.endTransaction()
                 }
 
-                else -> sid
-            }
+                rowId
+
+            } else sid
 
         } ?: -1
 

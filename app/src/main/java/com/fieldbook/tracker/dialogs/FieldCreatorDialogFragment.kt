@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.Group
 import androidx.fragment.app.DialogFragment
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.FieldEditorActivity
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
@@ -41,7 +42,7 @@ import java.util.UUID
 class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     DialogFragment(), CoroutineScope by MainScope() {
 
-    private val helper by lazy { DataHelper(context) }
+    private val helper by lazy { (activity as FieldEditorActivity).getDatabase() }
 
     private val scope by lazy { CoroutineScope(Dispatchers.IO) }
 
@@ -133,29 +134,18 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
                 //check that the text can be parsed as a whole number and is greater than 0
                 try {
 
-                    //use database to check if the field name is unique
-                    if (helper.checkFieldName(nameText.toString()) == -1) {
+                    val rows = rowsText.toString().toInt()
 
-                        val rows = rowsText.toString().toInt()
+                    val cols = colsText.toString().toInt()
 
-                        val cols = colsText.toString().toInt()
+                    if (rows < 1 || cols < 1
+                        || rows > Int.MAX_VALUE
+                        || cols > Int.MAX_VALUE) throw java.lang.NumberFormatException()
 
-                        if (rows < 1 || cols < 1
-                            || rows > Int.MAX_VALUE
-                            || cols > Int.MAX_VALUE) throw java.lang.NumberFormatException()
+                    //change current group visibility before setting up next group
+                    sizeGroup?.visibility = View.GONE
 
-                        //change current group visibility before setting up next group
-                        sizeGroup?.visibility = View.GONE
-
-                        setupRadioGroup(nameText.toString(), rows, cols)
-
-                    } else {
-
-                        Toast.makeText(activity, R.string.dialog_field_creator_field_name_not_unique, Toast.LENGTH_LONG).show()
-
-                        nameText.clear()
-                    }
-
+                    setupRadioGroup(nameText.toString(), rows, cols)
 
                 } catch (e: NumberFormatException) {
 
@@ -375,6 +365,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
         scope.launch {
             // Database operation might be time-consuming, so we run it on the IO dispatcher
             val createdFieldId = withContext(Dispatchers.IO) {
+                helper.open()
                 DataHelper.db.beginTransaction()
                 try {
                     Log.d("FieldCreatorDialog", "Inserting new field in the database.")

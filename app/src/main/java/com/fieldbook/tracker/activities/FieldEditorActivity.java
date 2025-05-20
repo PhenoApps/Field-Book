@@ -839,15 +839,6 @@ public class FieldEditorActivity extends ThemedActivity
                         e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
                         e.apply();
 
-                        if (database.checkFieldName(fieldFileName) >= 0) {
-                            Utils.makeToast(getApplicationContext(), getString(R.string.fields_study_exists_message));
-                            SharedPreferences.Editor ed = preferences.edit();
-                            ed.putString(GeneralKeys.FIELD_FILE, null);
-                            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
-                            ed.apply();
-                            return;
-                        }
-
                         if (fieldFile.isOther()) {
                             Utils.makeToast(getApplicationContext(), getString(R.string.import_error_unsupported));
                         }

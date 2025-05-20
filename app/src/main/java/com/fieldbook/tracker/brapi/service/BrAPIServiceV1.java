@@ -1163,12 +1163,6 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             field.setSecondaryId(secondaryId);
             field.setSortColumnsStringArray(sortOrder);
 
-            // Do a pre-check to see if the field exists so we can show an error
-            int FieldUniqueStatus = dataHelper.checkFieldName(field.getName());
-            if (FieldUniqueStatus != -1) {
-                return new BrapiControllerResponse(false, this.notUniqueFieldMessage);
-            }
-
             // Check that there are not duplicate unique ids in the database
             HashMap<String, String> checkMap = new HashMap<>();
 

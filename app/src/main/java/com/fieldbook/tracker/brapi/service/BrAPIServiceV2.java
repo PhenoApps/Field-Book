@@ -1578,8 +1578,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             DataHelper.db.beginTransaction();
             // All checks finished, insert our data.
-            int expId = dataHelper.createField(field, studyDetails.getAttributes(), true);
-            field.setStudyId(expId);
+            int studyId = dataHelper.createField(field, studyDetails.getAttributes(), true);
+            field.setStudyId(studyId);
 
             boolean fail = false;
             String failMessage = "";
@@ -1593,7 +1593,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 System.out.println("Size of study details: " + studyDetails.getValues().size());
 
                 for (List<String> dataRow : studyDetails.getValues()) {
-                    dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
+                    dataHelper.createFieldData(studyId, studyDetails.getAttributes(), dataRow);
                     Log.d("BrAPIServiceV2", "Saving: Attributes: " + studyDetails.getAttributes());
                     Log.d("BrAPIServiceV2", "Saving: dataRow: " + dataRow);
                 }
@@ -1611,10 +1611,10 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 //                    System.out.println("Saving: unitDBId: "+obs.getUnitDbId());
 //                    System.out.println("Saving: varDbId: "+obs.getVariableDbId());
 //                    System.out.println("Saving: StudyId: "+studyDetails.getStudyDbId());
-//                    System.out.println("Saving: expId: "+expId);
+//                    System.out.println("Saving: studyId: "+studyId);
 //                    TraitObject trait = ObservationVariableDao.Companion.getTraitByName(obs.getVariableName());
 ////                    System.out.println("SavingL TraitId: "+trait.getId());
-//                    dataHelper.setTraitObservations(expId, obs);
+//                    dataHelper.setTraitObservations(studyId, obs);
 //                }
 
                 // If we haven't thrown an error by now, we are good.
