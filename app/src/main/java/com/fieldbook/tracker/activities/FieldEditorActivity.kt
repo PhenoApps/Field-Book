@@ -18,6 +18,7 @@ import android.view.MenuItem
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -1056,7 +1057,14 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             }
         }
 
-        builder.show()
+        val dialog = builder.create()
+        dialog.setOnShowListener {
+            val params = dialog.window?.attributes
+            params?.width = LinearLayout.LayoutParams.MATCH_PARENT
+            dialog.window?.attributes = params
+        }
+
+        dialog.show()
     }
 
     private fun archiveFields(fieldIds: List<Int>) {
