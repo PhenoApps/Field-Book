@@ -26,10 +26,6 @@ class ObservationUnitPropertyDao {
 
     companion object {
 
-//        internal fun selectAllRange(): Array<Map<String, Any?>>? = withDatabase { db ->
-//            db.query(sObservationUnitPropertyViewName).toTable().toTypedArray()
-//        }
-
         fun getObservationUnitPropertyByUniqueId(uniqueName: String, column: String, uniqueId: String): String = withDatabase { db ->
             db.query(sObservationUnitPropertyViewName, select = arrayOf(column), where = "`${uniqueName}` = ?", whereArgs = arrayOf(uniqueId))
                     .toFirst()[column].toString()
@@ -99,8 +95,7 @@ class ObservationUnitPropertyDao {
         fun getRangeColumnNames(): Array<String?> = withDatabase { db ->
 
             val cursor = db.rawQuery("SELECT * FROM $sObservationUnitPropertyViewName limit 1", null)
-            //Cursor cursor = db.rawQuery("SELECT * from range limit 1", null);
-            //Cursor cursor = db.rawQuery("SELECT * from range limit 1", null);
+
             var data: Array<String?>? = null
 
             if (cursor.moveToFirst()) {
@@ -142,8 +137,6 @@ class ObservationUnitPropertyDao {
             }
 
             data
-//    db.query(sObservationUnitPropertyViewName).toFirst().keys
-//            .filter { it != "id" }.toTypedArray()
 
         } ?: emptyArray<String?>()
 
@@ -432,31 +425,6 @@ class ObservationUnitPropertyDao {
             db.rawQuery(query, null)
         }
 
-
-//        private fun getSortOrderClause(context: Context, studyId: String): String = withDatabase { db ->
-//            val sortOrder = if (PreferenceManager.getDefaultSharedPreferences(context)
-//                    .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
-//
-//            var sortCols = "internal_id_observation_unit" // Default sort column
-//            try {
-//                val sortName = db.query(
-//                    Study.tableName,
-//                    select = arrayOf("study_sort_name"),
-//                    where = "${Study.PK} = ?",
-//                    whereArgs = arrayOf(studyId)
-//                ).toFirst()["study_sort_name"]?.toString()
-//
-//                if (!sortName.isNullOrEmpty() && sortName != "null") {
-//                    sortCols = sortName.split(',')
-//                        .joinToString(",") { col -> "cast(`$col` as integer), `$col`" } + ", internal_id_observation_unit"
-//                }
-//            } catch (e: Exception) {
-//                Log.e("ObsUnitPropertyDao", "Error fetching sort order for study: $e")
-//            }
-//
-//            "$sortCols $sortOrder"
-//        } ?: "internal_id_observation_unit ASC" // Provide a default non-null value
-
         private fun getSortOrderClause(context: Context, studyId: String): String? = withDatabase { db ->
             val sortOrder = if (PreferenceManager.getDefaultSharedPreferences(context)
                     .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
@@ -476,8 +444,5 @@ class ObservationUnitPropertyDao {
 
             if (sortCols.isNotEmpty()) "ORDER BY $sortCols COLLATE NOCASE $sortOrder" else ""
         }
-
-
-
     }
 }

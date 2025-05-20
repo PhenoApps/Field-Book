@@ -142,15 +142,6 @@ class StudyDao {
         """.trimMargin()
 
             db.execSQL(query)
-
-//            println("$exp_id $query")
-//
-//            println("New switch field time: ${
-//                measureTimeMillis {
-//                    db.execSQL(query)
-//                }.toLong()
-//            }")
-
         }
 
         fun deleteField(exp_id: Int) = withDatabase { db ->
@@ -178,12 +169,12 @@ class StudyDao {
         /**
          * Function that queries the field/study table for the imported unique/primary/secondary names.
          */
-        fun getNames(exp_id: Int): FieldPreferenceNames? = withDatabase { db ->
+        fun getNames(studyId: Int): FieldPreferenceNames? = withDatabase { db ->
 
             val fieldNames = db.query(Study.tableName,
                     select = arrayOf("study_primary_id_name", "study_secondary_id_name", "study_unique_id_name"),
                     where = "${Study.PK} = ?",
-                    whereArgs = arrayOf(exp_id.toString()))
+                    whereArgs = arrayOf(studyId.toString()))
                     .toFirst()
 
             FieldPreferenceNames(
@@ -192,16 +183,6 @@ class StudyDao {
                     secondary = fieldNames["study_secondary_id_name"].toString())
 
         }
-
-//        fun getAllStudyModels(): Array<StudyModel> = withDatabase { db ->
-//
-//            db.query(Study.tableName,
-//                    orderBy = Study.PK)
-//                    .toTable().map {
-//                        StudyModel(it)
-//                    }.toTypedArray()
-//
-//        } ?: arrayOf()
 
         private fun Map<String, Any?>.toFieldObject() = FieldObject().also {
 

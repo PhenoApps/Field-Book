@@ -342,17 +342,5 @@ class ObservationVariableDao {
                 arrayOf(traitDbId)
             )
         }
-
-        fun writeNewPosition(queryColumn: String, id: String, position: String) = withDatabase { db ->
-
-            db.update(ObservationVariable.tableName,
-                    ContentValues().apply {
-                        put("position", position)
-                    }, "$queryColumn = ?", arrayOf(id))
-
-        }
-
-//        fun getTraitColumnsAsString() = getAllTraits().joinToString(",")
-
     }
 }

@@ -701,7 +701,6 @@ public class DataHelper {
     /**
      * V2 - Execute a custom sql query, returning the result as SearchData objects
      * Used for user search function
-     *
      * TODO: When is this used and what queries are sent to this ?
      */
     //TODO 471 double check the sql parameter

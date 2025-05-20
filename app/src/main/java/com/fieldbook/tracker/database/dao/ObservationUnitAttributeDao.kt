@@ -2,7 +2,6 @@ package com.fieldbook.tracker.database.dao
 
 import android.util.Log
 import com.fieldbook.tracker.database.*
-import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 
