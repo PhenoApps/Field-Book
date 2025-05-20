@@ -68,10 +68,8 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/traitsStatusBarRv"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
         android:orientation="horizontal"
         android:foregroundGravity="center"
         app:layout_constraintTop_toBottomOf="@id/traitDetails"

@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.preferences;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -181,7 +182,16 @@ public class GeneralKeys {
 
     @NotNull
     public static final String TRAITS_LIST_SORT_ORDER = "com.fieldbook.tracker.traits_list_sort_order";
-    
+
+    // stores the state of whether field grouping functionality is enabled/disabled
+    public static final String FIELD_GROUPING_ENABLED = "com.fieldbook.tracker.field_grouping_enabled";
+
+    // field grouping can be toggled by the user, or can be forced to toggle programmatically
+    // this key tracks if the user has toggled the grouping
+    public static final String USER_TOGGLED_FIELD_GROUPING = "com.fieldbook.tracker.user_toggled_field_grouping";
+
+    // simply store the state of whether the "Ungrouped" fields is expanded or not
+    public static final String UNGROUPED_FIELDS_EXPANDED = "com.fieldbook.tracker.ungrouped_fields_expanded";
     // app intro
     public static final String LOAD_SAMPLE_DATA = "com.fieldbook.tracker.load_sample_data";
 
@@ -202,6 +212,22 @@ public class GeneralKeys {
     public static String getCropCoordinatesKey(int traitId) {
         return "com.fieldbook.tracker.crop_coordinates." + traitId;
     }
+
+    /**
+     * InnoSpectra Nano
+     */
+
+    @NonNull
+    public static final String INNOSPECTRA_NANO_CONFIG_INDEX = "com.fieldbook.tracker.traits.innospectra_nano.INDEX";
+
+    @NonNull
+    public static final String NIX_NAME = "com.fieldbook.tracker.traits.nix.NAME";
+
+    @NonNull
+    public static final String NIX_ADDRESS = "com.fieldbook.tracker.traits.nix.ADDRESS";
+
+    @NonNull
+    public static final String SPECTRAL_MODE = "com.fieldbook.tracker.traits.spectral.MODE";
 
     private GeneralKeys() {
 

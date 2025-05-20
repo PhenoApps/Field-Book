@@ -7,7 +7,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.View.OnTouchListener
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.TextView
@@ -115,11 +115,7 @@ class TraitBoxView : ConstraintLayout {
         traitRight.setOnClickListener { moveTrait("right") }
 
         traitsStatusBarRv?.adapter = TraitsStatusAdapter(this)
-        traitsStatusBarRv?.layoutManager = object : LinearLayoutManager(context, HORIZONTAL, false) {
-            override fun canScrollHorizontally(): Boolean {
-                return false
-            }
-        }
+        traitsStatusBarRv?.layoutManager = getCenteredLayoutManager()
     }
 
     fun initTraitDetails() {
@@ -282,11 +278,15 @@ class TraitBoxView : ConstraintLayout {
         (traitsStatusBarRv?.adapter as TraitsStatusAdapter).submitList(traitBoxItemModels)
 
         // the recyclerView height was 0 initially, so calculate the icon size again
+        recalculateTraitStatusBarSizes()
+    }
+
+    fun recalculateTraitStatusBarSizes() {
         traitsStatusBarRv?.post {
-            for (pos in visibleTraits.indices) {
+            for (pos in 0 until (traitsStatusBarRv?.adapter?.itemCount ?: 0)) {
                 val viewHolder = traitsStatusBarRv?.findViewHolderForAdapterPosition(pos) as? TraitsStatusAdapter.ViewHolder
                 viewHolder?.let {
-                    (traitsStatusBarRv?.adapter as TraitsStatusAdapter).calculateAndSetItemSize(it)
+                    (traitsStatusBarRv?.adapter as? TraitsStatusAdapter)?.calculateAndSetItemSize(it)
                 }
             }
         }
@@ -463,5 +463,33 @@ class TraitBoxView : ConstraintLayout {
             newTraits.remove(parent)
         }
         newTraits[parent] = value
+    }
+
+    private fun getCenteredLayoutManager(): LinearLayoutManager {
+        return object : LinearLayoutManager(context, HORIZONTAL, false) {
+            override fun canScrollHorizontally(): Boolean { // disable scrolling
+                return false
+            }
+
+            // center all the items
+            override fun onLayoutChildren(recycler: RecyclerView.Recycler?, state: RecyclerView.State?) {
+                super.onLayoutChildren(recycler, state)
+
+                if (childCount > 0 && width > 0) {
+                    val totalWidthNeeded = getChildAt(0)?.let { getDecoratedMeasurementHorizontal(it) * childCount }
+
+                    if (totalWidthNeeded != null && totalWidthNeeded < width) {
+                        val leftPadding = (width - totalWidthNeeded) / 2 // equal padding on left and right
+                        offsetChildrenHorizontal(leftPadding) // offset from left
+                    }
+                }
+            }
+
+            // get the full horizontal measurement
+            private fun getDecoratedMeasurementHorizontal(child: View): Int {
+                val params = child.layoutParams as RecyclerView.LayoutParams
+                return getDecoratedMeasuredWidth(child) + params.leftMargin + params.rightMargin
+            }
+        }
     }
 }

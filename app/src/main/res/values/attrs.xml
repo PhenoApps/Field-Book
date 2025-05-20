@@ -316,6 +316,10 @@
 
     <attr name="fb_inverse_crop_region_color" format="color"/>
 
+    <attr name="fb_graph_item_selected_color" format="color"/>
+    <attr name="fb_graph_item_unselected_color" format="color"/>
+    <attr name="fb_graph_item_text_color" format="color"/>
+
     <!-- data grid colors -->
     <attr name="dataFilledColor" format="color"/>
     <attr name="emptyCellColor" format="color"/>
