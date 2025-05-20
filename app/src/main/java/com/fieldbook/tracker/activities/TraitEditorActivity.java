@@ -27,7 +27,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
@@ -384,7 +383,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                             //Todo add overflow menu action
                     );
 
-            if (database.getTraitColumnData("trait") != null) {
+            ArrayList<TraitObject> traits = database.getAllTraitObjects();
+            if (traits != null && !traits.isEmpty()) {
                 sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
                 sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
             }
@@ -723,9 +723,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                                        @Nullable DialogInterface.OnClickListener onNegative,
                                        @Nullable DialogInterface.OnDismissListener onDismiss) {
 
-        String[] allTraits = database.getTraitColumnData("trait");
+        ArrayList<TraitObject> traits = database.getAllTraitObjects();
 
-        if (allTraits == null) {
+        if (traits == null || traits.isEmpty()) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing_modify));
             return;
         }

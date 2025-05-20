@@ -3,11 +3,9 @@ package com.fieldbook.tracker.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -18,7 +16,6 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
@@ -43,16 +40,13 @@ import com.fieldbook.tracker.utilities.ZipUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
-import org.threeten.bp.format.DateTimeFormatter;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -571,17 +565,6 @@ public class DataHelper {
         String sortColumn = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
 
         return ObservationVariableDao.Companion.getAllVisibleTraitObjects(sortColumn);
-
-    }
-
-    /**
-     * Get data from specific column of trait table to reorder
-     */
-    public String[] getTraitColumnData(String column) {
-
-        open();
-
-        return ObservationVariableDao.Companion.getTraitColumnData(column);
 
     }
 

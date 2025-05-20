@@ -118,34 +118,6 @@ class ObservationVariableDao {
 
         } ?: arrayOf()
 
-        //TODO 471 refactor and remove unused column when statement, it always searches for "trait"/observation_variable_name replace with trait db id
-        fun getTraitColumnData(column: String): Array<String> = withDatabase { db ->
-
-            val queryColumn = when(column) {
-                "isVisible" -> "visible"
-                "format" -> "observation_variable_field_book_format"
-                else -> "observation_variable_name"
-            }
-
-            db.query(ObservationVariable.tableName,
-                    arrayOf(queryColumn)).use {
-
-                it.toTable().mapNotNull { row ->
-                    row[queryColumn].toString()
-                }.toTypedArray()
-            }
-
-        } ?: arrayOf()
-
-        fun getTraitColumns(): Array<String> = withDatabase { db ->
-
-            db.query(ObservationVariable.tableName).use {
-
-                (it.toTable().first().keys - setOf("id", "external_db_id", "trait_data_source")).toTypedArray()
-            }
-
-        } ?: arrayOf()
-
         fun getAllTraitsForExport(): Cursor {
 
             val requiredFields = arrayOf("trait", "format", "defaultValue", "minimum",
