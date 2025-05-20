@@ -267,16 +267,16 @@ class ObservationUnitPropertyDao {
          * Where the column observation_variable_name value will be the observation value.
          * All observation_units are captured, even if they did not make an observation.
          * Inputs:
-         * @param expId the field/study id
+         * @param studyId the field/study id
          * @param traits the list of traits to print, either all traits or just the active ones
          * @return a cursor that is used in CSVWriter and closed elsewhere
          */
         fun getExportTableData(
             context: Context,
-            expId: Int,
+            studyId: Int,
             traits: ArrayList<TraitObject>
         ): Cursor? = withDatabase { db ->
-            val headers = ObservationUnitAttributeDao.getAllNames(expId)
+            val headers = ObservationUnitAttributeDao.getAllNames(studyId)
 
             val selectAttributes = headers.joinToString(", ") { attributeName ->
                 "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
@@ -289,16 +289,16 @@ class ObservationUnitPropertyDao {
 
             val combinedSelection = listOf(selectAttributes, selectObservations).filter { it.isNotEmpty() }.joinToString(", ")
 
-            val orderByClause = getSortOrderClause(context, expId.toString())
+            val orderByClause = getSortOrderClause(context, studyId.toString())
             //                SELECT units.internal_id_observation_unit AS id, $combinedSelection
             val query = """
                 SELECT $combinedSelection, internal_id_observation_variable
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
-                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = $expId
+                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = $studyId
                 LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
-                WHERE units.study_id = $expId
+                WHERE units.study_id = $studyId
                 GROUP BY units.internal_id_observation_unit
                 $orderByClause
             """.trimIndent()
@@ -314,12 +314,12 @@ class ObservationUnitPropertyDao {
 
         fun getExportTableDataShort(
             context: Context,
-            expId: Int,
+            studyId: Int,
             uniqueName: String,
             traits: ArrayList<TraitObject>
         ): Cursor? {
 
-            getExportTableData(context, expId, traits)?.use { cursor ->
+            getExportTableData(context, studyId, traits)?.use { cursor ->
 
                 val requiredTraits = traits.map { it.name }.toTypedArray()
                 val traitIdCol = "internal_id_observation_variable"
@@ -370,7 +370,7 @@ class ObservationUnitPropertyDao {
          * Same as above but filters by obs unit and trait format
          */
         fun convertDatabaseToTable(
-            expId: Int,
+            studyId: Int,
             uniqueName: String,
             unit: String,
             col: Array<String?>,
@@ -393,7 +393,7 @@ class ObservationUnitPropertyDao {
                 SELECT $select,
                 ${maxStatements.joinToString(",\n")}
                 FROM ObservationUnitProperty as props
-                LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $expId
+                LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $studyId
                 LEFT JOIN ${ObservationVariable.tableName} AS vars ON vars.${ObservationVariable.PK} = o.${ObservationVariable.FK}
                 WHERE props.`${uniqueName}` = "$unit"
                 GROUP BY props.id

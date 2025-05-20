@@ -1411,31 +1411,31 @@ public class CollectActivity extends ThemedActivity
 
     public void insertRep(String value, String rep) {
 
-        String expId = getStudyId();
+        String studyId = getStudyId();
         String obsUnit = getObservationUnit();
         String person = getPerson();
         String traitDbId = getTraitDbId();
 
         database.insertObservation(obsUnit, traitDbId, value, person,
-                getLocationByPreferences(), "", expId, null, null, rep);
+                getLocationByPreferences(), "", studyId, null, null, rep);
     }
 
     public void deleteRep(String rep) {
 
-        String expId = getStudyId();
+        String studyId = getStudyId();
         String obsUnit = getObservationUnit();
         String traitDbId = getTraitDbId();
 
-        database.deleteTrait(expId, obsUnit, traitDbId, rep);
+        database.deleteTrait(studyId, obsUnit, traitDbId, rep);
     }
 
     public String getLocationByPreferences() {
 
-        String expId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         String obsUnit = rangeBox.getPlotID();
 
         return LocationCollectorUtil.Companion
-                .getLocationByCollectMode(this, preferences, expId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
+                .getLocationByCollectMode(this, preferences, studyId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
     }
 
     private void brapiDelete(TraitObject trait, Boolean hint) {
