@@ -186,6 +186,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                     }
                     Integer groupId = fieldGroupController.getStudyGroupIdByName(headerItem.groupName);
                     selectAllFieldsInGroup(groupId);
+                    isInSelectionMode = true;
                 }
                 return false;
             });
