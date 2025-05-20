@@ -317,7 +317,7 @@ abstract class AbstractCameraTrait :
                             saver.invoke(file.uri)
 
                             database.insertObservation(
-                                plot, traitDbId, format, file.uri.toString(),
+                                plot, traitDbId, file.uri.toString(),
                                 person,
                                 location, "", studyId,
                                 null,
@@ -622,7 +622,6 @@ abstract class AbstractCameraTrait :
         database.insertObservation(
             currentRange.uniqueId,
             currentTrait.id,
-            currentTrait.format,
             "NA",
             (activity as? CollectActivity)?.person,
             (activity as? CollectActivity)?.locationByPreferences,

@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -25,7 +23,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.arch.core.util.Function;
 import androidx.fragment.app.DialogFragment;
 
 import com.fieldbook.tracker.R;
@@ -492,7 +489,7 @@ public class BrapiLoadDialog extends DialogFragment {
                 // Finish our BrAPI import activity
                 FieldObject field = (FieldObject) brapiControllerResponse.getData();
                 Intent returnIntent = new Intent();
-                returnIntent.putExtra("fieldId", field.getExp_id());
+                returnIntent.putExtra("fieldId", field.getStudyId());
                 ((Activity) context).setResult(Activity.RESULT_OK, returnIntent);
                 ((Activity) context).finish();
             } else {

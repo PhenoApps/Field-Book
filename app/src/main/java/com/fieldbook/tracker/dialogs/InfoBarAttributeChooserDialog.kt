@@ -9,6 +9,8 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
+import androidx.core.content.edit
+import com.fieldbook.tracker.adapters.AttributeAdapter
 
 /**
  * Dialog to choose an attribute for an InfoBar. Extends the AttributeChooserDialog
@@ -58,10 +60,15 @@ class InfobarAttributeChooserDialog : AttributeChooserDialog() {
     }
 
     /** Saves newly selected attribute to preferences and refreshes the InfoBars. */
-    override fun onAttributeClicked(label: String, position: Int) {
+    override fun onAttributeClicked(model: AttributeAdapter.AttributeModel, position: Int) {
         val infoBarPosition = requireArguments().getInt(ARG_INFO_BAR_POSITION)
-        super.onAttributeClicked(label, position)
-        PreferenceManager.getDefaultSharedPreferences(requireActivity()).edit().putString("DROP$infoBarPosition", label).apply()
+        super.onAttributeClicked(model, position)
+        PreferenceManager.getDefaultSharedPreferences(requireActivity()).edit {
+            putString(
+                "DROP$infoBarPosition",
+                model.label
+            )
+        }
         (activity as? CollectActivity)?.refreshInfoBarAdapter()
     }
 }

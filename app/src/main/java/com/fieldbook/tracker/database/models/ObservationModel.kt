@@ -15,7 +15,9 @@ data class ObservationModel(val map: Row) {
         val observation_variable_field_book_format: String? by map
         val observation_variable_name: String? by map
         var value: String = if ("value" in map) (map["value"] ?: "NA").toString()
-                        else if ("observation_variable_db_id" in map.keys) ObservationVariableDao.getTraitById(observation_variable_db_id)?.defaultValue ?: "NA"
+                        else if ("observation_variable_db_id" in map.keys) ObservationVariableDao.getTraitById(
+            observation_variable_db_id.toString()
+        )?.defaultValue ?: "NA"
                         else "NA"
         val observation_time_stamp: String? by map
         val collector: String? by map

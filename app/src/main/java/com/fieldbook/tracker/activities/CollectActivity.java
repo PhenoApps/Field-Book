@@ -128,7 +128,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -449,7 +448,7 @@ public class CollectActivity extends ThemedActivity
 
                                 FieldObject fo = database.getFieldObject(model.getStudy_id());
 
-                                if (fo != null && fo.getExp_name() != null) {
+                                if (fo != null && fo.getName() != null) {
 
                                     switchField(model.getStudy_id(), barcode);
 
@@ -544,7 +543,7 @@ public class CollectActivity extends ThemedActivity
         traitLayouts = new LayoutCollections(this);
         rangeBox = findViewById(R.id.act_collect_range_box);
         traitBox = findViewById(R.id.act_collect_trait_box);
-        traitBox.connectRangeBox(rangeBox);
+        traitBox.connectRangeBox();
         rangeBox.connectTraitBox(traitBox);
 
         //setup infobar recycler view ui
@@ -666,7 +665,6 @@ public class CollectActivity extends ThemedActivity
     public void refreshMain() {
         rangeBox.saveLastPlot();
         rangeBox.refresh();
-        traitBox.setNewTraits(rangeBox.getPlotID());
 
         Log.d(TAG, "Refresh main.");
 
@@ -822,38 +820,26 @@ public class CollectActivity extends ThemedActivity
         //gets the minimum default index
     }
 
-    // This update should only be called after repeating keypress ends
-    private void repeatUpdate() {
-        if (rangeBox.getRangeID() == null)
-            return;
-
-        traitBox.setNewTraits(rangeBox.getPlotID());
-
-        initWidgets(true);
-    }
-
     // This is central to the application
     // Calling this function resets all the controls for traits, and picks one
     // to show based on the current trait data
     @Override
     public void initWidgets(final boolean rangeSuppress) {
+
         // Reset dropdowns
-
-        if (!database.isRangeTableEmpty()) {
-
-            Log.d(TAG, "init widgets refreshing info bar");
-
-            refreshInfoBarAdapter();
-        }
+        refreshInfoBarAdapter();
 
         traitBox.initTraitDetails();
 
-        String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-        // trait is unique, format is not
-        String[] traits = database.getVisibleTrait(currentSortOrder);
-        if (traits != null) {
-            traitBox.initTraitType(traits, rangeSuppress);
+        TraitObject[] visibleTraits = database.getVisibleTraits().toArray(new TraitObject[] {});
+
+        if (visibleTraits.length == 0) {
+            Utils.makeToast(this, getString(R.string.act_trait_editor_no_traits_exist));
+            setResult(RESULT_CANCELED);
+            finish();
         }
+
+        traitBox.initialize(visibleTraits);
     }
 
     /**
@@ -1023,22 +1009,22 @@ public class CollectActivity extends ThemedActivity
 
         for (FieldObject field : allFields) {
             // Skip the current field
-            if (field.getExp_id() == currentFieldId) {
+            if (field.getStudyId() == currentFieldId) {
                 continue;
             }
 
-            Log.d("Field Book", "Checking field: " + field.getExp_id() + " (" + field.getExp_name() + ")");
+            Log.d("Field Book", "Checking field: " + field.getStudyId() + " (" + field.getName() + ")");
 
             ObservationUnitModel[] matchingUnits = database.getObservationUnitsBySearchAttribute(
-                    field.getExp_id(), searchValue);
+                    field.getStudyId(), searchValue);
 
-            Log.d("Field Book", "Found " + matchingUnits.length + " matches in field " + field.getExp_id());
+            Log.d("Field Book", "Found " + matchingUnits.length + " matches in field " + field.getStudyId());
 
             if (matchingUnits.length > 0) {
                 studyObj = field;
                 String oldPlotId = inputPlotId;
                 inputPlotId = matchingUnits[0].getObservation_unit_db_id();
-                Log.d("Field Book", "Match found! Field: " + field.getExp_name() +
+                Log.d("Field Book", "Match found! Field: " + field.getName() +
                         ", unit ID updated from " + oldPlotId + " to " + inputPlotId);
                 found = true;
                 break;
@@ -1054,10 +1040,10 @@ public class CollectActivity extends ThemedActivity
             for (ObservationUnitModel m : models) {
                 if (m.getObservation_unit_db_id().equals(searchValue)) {
                     FieldObject study = database.getFieldObject(m.getStudy_id());
-                    if (study != null && study.getExp_name() != null) {
+                    if (study != null && study.getName() != null) {
                         studyObj = study;
                         found = true;
-                        Log.d("Field Book", "Direct match found in study: " + study.getExp_name());
+                        Log.d("Field Book", "Direct match found in study: " + study.getName());
                         break;
                     }
                 }
@@ -1065,9 +1051,9 @@ public class CollectActivity extends ThemedActivity
         }
         
         // Handle the result of the search
-        if (found && studyObj != null && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
-            int studyId = studyObj.getExp_id();
-            String fieldName = studyObj.getExp_alias();
+        if (found && studyObj != null && studyObj.getName() != null && studyObj.getStudyId() != -1) {
+            int studyId = studyObj.getStudyId();
+            String fieldName = studyObj.getAlias();
             
             // Save the matching observation unit ID from the matched unit, not the search value
             final String matchedObsUnitId = inputPlotId; // This should be the one set earlier from matchingUnits[0]
@@ -1095,10 +1081,6 @@ public class CollectActivity extends ThemedActivity
         // Reload traits based on selected plot
         rangeBox.display();
 
-        String pid = rangeBox.getPlotID();
-
-        traitBox.setNewTraits(pid);
-
         Log.d(TAG, "Move to result core: " + j);
 
         initWidgets(false);
@@ -1117,15 +1099,20 @@ public class CollectActivity extends ThemedActivity
         // Reload traits based on selected plot
         rangeBox.display();
 
-        traitBox.setNewTraits(rangeBox.getPlotID());
-
         traitBox.setSelection(traitIndex);
-        if (traitBox.getCurrentTrait() != null)
-            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
+
+        saveLastTrait();
 
         Log.d(TAG, "Move to result core: " + j + "with trait index "+ traitIndex);
 
         initWidgets(false);
+    }
+
+    private void saveLastTrait() {
+        TraitObject lastTrait = traitBox.getCurrentTrait();
+        if (lastTrait != null) {
+            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, lastTrait.getId()).apply();
+        }
     }
 
     @Override
@@ -1168,9 +1155,7 @@ public class CollectActivity extends ThemedActivity
 
         gnssThreadHelper.stop();
 
-        //save the last used trait
-        if (traitBox.getCurrentTrait() != null)
-            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
+        saveLastTrait();
 
         preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
 
@@ -1315,32 +1300,38 @@ public class CollectActivity extends ThemedActivity
 
     /**
      * LAST_USED_TRAIT is a preference saved in CollectActivity.onPause
-     *
      * This function is called to use that preference and navigate to the corresponding trait.
      */
     private void navigateToLastOpenedTrait() {
 
         //navigate to the last used trait using preferences
-        String trait = preferences.getString(GeneralKeys.LAST_USED_TRAIT, null);
+        String traitId = preferences.getString(GeneralKeys.LAST_USED_TRAIT, "-1");
 
-        navigateToTrait(trait);
+        navigateToTrait(traitId);
     }
 
-    public void navigateToTrait(String trait) {
+    public void navigateToTrait(String traitId) {
 
-        if (trait != null) {
+        if (!traitId.equals("-1")) {
 
-            String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-            //get all traits, filter the preference trait and check it's visibility
-            String[] traits = database.getVisibleTrait(currentSortOrder);
+            ArrayList<TraitObject> traits = database.getVisibleTraits();
 
             try {
 
-                traitBox.setSelection(Arrays.asList(traits).indexOf(trait));
+                //find trait position of the traitId param
+                int index = 0;
+                for (int i = 0; i < traits.size(); i++) {
+                    if (traits.get(i).getId().equals(traitId)) {
+                        index = i;
+                        break;
+                    }
+                }
+
+                traitBox.setSelection(index);
 
             } catch (NullPointerException e) {
 
-                e.printStackTrace();
+                Log.e(TAG, "Error while navigating to trait: " + traitId);
 
             }
         }
@@ -1369,8 +1360,6 @@ public class CollectActivity extends ThemedActivity
         if (rangeBox.isEmpty()) {
             return;
         }
-
-        traitBox.update(trait.getName(), value);
 
         String studyId = getStudyId();
         String obsUnit = getObservationUnit();
@@ -1407,7 +1396,7 @@ public class CollectActivity extends ThemedActivity
             }
 
             if (!pass) {
-                database.insertObservation(obsUnit, trait.getId(), trait.getFormat(), value, person,
+                database.insertObservation(obsUnit, trait.getId(), value, person,
                         getLocationByPreferences(), "", studyId, observationDbId,
                         lastSyncedTime, rep);
 
@@ -1422,31 +1411,31 @@ public class CollectActivity extends ThemedActivity
 
     public void insertRep(String value, String rep) {
 
-        String expId = getStudyId();
+        String studyId = getStudyId();
         String obsUnit = getObservationUnit();
         String person = getPerson();
         String traitDbId = getTraitDbId();
 
-        database.insertObservation(obsUnit, traitDbId, getTraitFormat(), value, person,
-                getLocationByPreferences(), "", expId, null, null, rep);
+        database.insertObservation(obsUnit, traitDbId, value, person,
+                getLocationByPreferences(), "", studyId, null, null, rep);
     }
 
     public void deleteRep(String rep) {
 
-        String expId = getStudyId();
+        String studyId = getStudyId();
         String obsUnit = getObservationUnit();
         String traitDbId = getTraitDbId();
 
-        database.deleteTrait(expId, obsUnit, traitDbId, rep);
+        database.deleteTrait(studyId, obsUnit, traitDbId, rep);
     }
 
     public String getLocationByPreferences() {
 
-        String expId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         String obsUnit = rangeBox.getPlotID();
 
         return LocationCollectorUtil.Companion
-                .getLocationByCollectMode(this, preferences, expId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
+                .getLocationByCollectMode(this, preferences, studyId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
     }
 
     private void brapiDelete(TraitObject trait, Boolean hint) {
@@ -2038,19 +2027,6 @@ public class CollectActivity extends ThemedActivity
         goToId.getWindow().setAttributes(langParams);
     }
 
-    public void nextEmptyPlot() {
-        try {
-            final int id = rangeBox.nextEmptyPlot();
-            rangeBox.setRange(id);
-            rangeBox.display();
-            rangeBox.setLastRange();
-            traitBox.setNewTraits(rangeBox.getPlotID());
-            initWidgets(true);
-        } catch (Exception e) {
-
-        }
-    }
-
     private void showSummary() {
 
         SummaryFragment fragment = new SummaryFragment();
@@ -2191,7 +2167,6 @@ public class CollectActivity extends ThemedActivity
                             String uri = data.getStringExtra(ScannerActivity.EXTRA_PHOTO_URI);
                             database.insertObservation(getObservationUnit(),
                                     getCurrentTrait().getId(),
-                                    getCurrentTrait().getFormat(),
                                     uri,
                                     getPerson(),
                                     getLocationByPreferences(),
@@ -2418,8 +2393,7 @@ public class CollectActivity extends ThemedActivity
      */
     @Override
     public int existsAllTraits(final int traitIndex, final int plotId) {
-        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects(sortOrder);
+        final ArrayList<TraitObject> traits = database.getVisibleTraits();
         for (int i = 0; i < traits.size(); i++) {
             if (i != traitIndex
                     && !database.getTraitExists(plotId, traits.get(i).getId())) return i;
@@ -2430,22 +2404,13 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public List<Integer> getNonExistingTraits(final int plotId) {
-        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects(sortOrder);
+        final ArrayList<TraitObject> traits = database.getVisibleTraits();
         final ArrayList<Integer> indices = new ArrayList<>();
         for (int i = 0; i < traits.size(); i++) {
             if (!database.getTraitExists(plotId, traits.get(i).getId()))
                 indices.add(i);
         }
         return indices;
-    }
-
-    public Map<String, String> getNewTraits() {
-        return traitBox.getNewTraits();
-    }
-
-    public void setNewTraits(Map<String, String> newTraits) {
-        traitBox.setNewTraits(newTraits);
     }
 
     public TraitObject getCurrentTrait() {
@@ -2526,7 +2491,7 @@ public class CollectActivity extends ThemedActivity
     public void insertPrintObservation(String plotID, String traitID, String traitFormat, String labelNumber) {
         String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertObservation(plotID, traitID, traitFormat, labelNumber,
+        database.insertObservation(plotID, traitID, labelNumber,
                 getPerson(),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);
@@ -3004,15 +2969,15 @@ public class CollectActivity extends ThemedActivity
             int count = 0;
             FieldObject[] fieldObjects = database.getAllFieldObjects().toArray(new FieldObject[0]);
             for (FieldObject fo : fieldObjects) {
-                Log.e(TAG, "Field ID: " + count + " " + fo.getExp_id());
-                Log.e(TAG, "Field Name: " + count + " " + fo.getExp_name());
-                Log.e(TAG, "Field Unique ID: " + count + " " + fo.getUnique_id());
+                Log.e(TAG, "Field ID: " + count + " " + fo.getStudyId());
+                Log.e(TAG, "Field Name: " + count + " " + fo.getName());
+                Log.e(TAG, "Field Unique ID: " + count + " " + fo.getUniqueId());
 
-                builder.putString("Field ID " + count, Integer.toString(fo.getExp_id()));
-                builder.putString("Field Name " + count, fo.getExp_name());
-                builder.putString("Field Unique ID " + count, fo.getUnique_id());
+                builder.putString("Field ID " + count, Integer.toString(fo.getStudyId()));
+                builder.putString("Field Name " + count, fo.getName());
+                builder.putString("Field Unique ID " + count, fo.getUniqueId());
 
-                List<String> attributes = Arrays.asList(database.getAllObservationUnitAttributeNames(fo.getExp_id()));
+                List<String> attributes = Arrays.asList(database.getAllObservationUnitAttributeNames(fo.getStudyId()));
                 Log.e(TAG, attributes.toString());
                 builder.putString("Observation Unit Attributes " + count, attributes.toString());
 
