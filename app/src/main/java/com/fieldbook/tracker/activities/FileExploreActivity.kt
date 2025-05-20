@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -27,6 +28,8 @@ class FileExploreActivity : ActivityDialog(), CoroutineScope by MainScope() {
     companion object {
         const val EXTRA_RESULT_KEY: String =
             "com.fieldbook.tracker.activities.FieldEditorActivity.extras.RESULT"
+
+        fun getIntent(context: Context): Intent = Intent(context, FileExploreActivity::class.java)
     }
 
     private var mainListView: ListView? = null
