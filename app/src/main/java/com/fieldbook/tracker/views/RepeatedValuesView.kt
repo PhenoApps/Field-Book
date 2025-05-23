@@ -37,6 +37,10 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
     data class ObservationModelViewHolder(var model: ObservationModel, val color: Int)
 
+    interface RepeatedValuesController {
+        fun updateNumberOfObservations()
+    }
+
     class SimplePageTransformer : ViewPager.PageTransformer {
 
         override fun transformPage(view: View, position: Float) {
