@@ -190,7 +190,7 @@ open class AttributeChooserDialog(
     }
 
     /** Placeholder method; overridden in infoBar class where selection is needed. */
-    protected open fun getSelected(): String? = null
+    protected open fun getSelected(): AttributeAdapter.AttributeModel? = null
 
     /** Handles loading data into the recycler view adapter. */
     protected fun loadTab(label: String) {

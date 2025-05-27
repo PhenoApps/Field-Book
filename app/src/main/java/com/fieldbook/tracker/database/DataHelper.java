@@ -769,18 +769,20 @@ public class DataHelper {
     }
 
     /**
-     * Returns saved data based on trait, range and plot Meant for the on screen
-     * drop downs
+     * Returns the string value for a given obs. unit / column pair in the obs unit property table
+     *
+     * @param column the column name to select such as "plot_id" or "row"
+     * @param plotId the obs unit id to filter by such as 13RPN0001
+     * @return the value for the given column/plotId pair
      */
-    //TODO 471 check this method, it uses trait name in select statement, might be a better way to do this with trait db id
-    public String[] getDropDownRange(String trait, String plotId) {
+    @NonNull
+    public String getObservationUnitPropertyValues(String column, String plotId) {
 
         open();
 
-        if (trait.isEmpty())
-            return null;
+        String uniqueName = preferences.getString(GeneralKeys.UNIQUE_NAME, "");
 
-        return ObservationUnitPropertyDao.Companion.getDropDownRange(preferences.getString(GeneralKeys.UNIQUE_NAME, ""), trait, plotId);
+        return ObservationUnitPropertyDao.Companion.getObservationUnitPropertyValues(uniqueName, column, plotId);
     }
 
     /**
@@ -998,14 +1000,6 @@ public class DataHelper {
         db.execSQL("DROP TABLE IF EXISTS ObservationUnitProperty");
 
         StudyDao.Companion.switchField(studyId);
-    }
-
-    //TODO 471, check if this is necessary anymore
-    public int checkFieldName(String name) {
-
-        open();
-
-        return StudyDao.Companion.checkFieldName(name);
     }
 
     public int checkBrapiStudyUnique(String observationLevel, String brapiId) {

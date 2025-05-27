@@ -76,22 +76,28 @@ class ObservationUnitPropertyDao {
         }
 
         /**
-         * This function's parameter trait is not always a trait and can be an observation unit property column.
-         * For example this is used when selecting the top-left drop down in the collect activity.
+         * Returns all string values for a given column in the observation unit property table.
          */
-        fun getDropDownRange(uniqueName: String, trait: String, plotId: String): Array<String>? = withDatabase { db ->
+        fun getObservationUnitPropertyValues(uniqueName: String, column: String, plotId: String): String = withDatabase { db ->
 
-            //added sanitation to the uniqueName in case it has a space
-            val unique = if ("`" in uniqueName) uniqueName else "`$uniqueName`"
-            db.query(sObservationUnitPropertyViewName,
-                    select = arrayOf(trait),
-                    where = "$unique LIKE ?",
-                    whereArgs = arrayOf(plotId)).toTable().map {
-                it[trait].toString()
-            }.toTypedArray()
+            val sanitizedUniqueName = "`${DataHelper.replaceIdentifiers(uniqueName)}`"
+            val sanitizedColumn = "`${DataHelper.replaceIdentifiers(column)}`"
+            db.rawQuery(
+                """
+                    SELECT $sanitizedColumn 
+                    FROM $sObservationUnitPropertyViewName 
+                    WHERE $sanitizedUniqueName = ? 
+                    LIMIT 1
+                """.trimIndent(),
+                arrayOf(plotId)
+            ).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    cursor.getString(0)
+                } else String()
+            }
+        } ?: String()
 
-        }
-
+        //TODO 471 remove if can getAllObservationUnitAttributeNames
         fun getRangeColumnNames(): Array<String?> = withDatabase { db ->
 
             val cursor = db.rawQuery("SELECT * FROM $sObservationUnitPropertyViewName limit 1", null)
@@ -116,6 +122,7 @@ class ObservationUnitPropertyDao {
 
         } ?: emptyArray()
 
+        //TODO 471 remove if can getAllObservationUnitAttributeNames
         fun getRangeColumns(): Array<String?> = withDatabase { db ->
 
             val cursor = db.rawQuery("SELECT * from $sObservationUnitPropertyViewName limit 1", null)

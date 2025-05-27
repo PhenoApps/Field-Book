@@ -14,7 +14,7 @@ import com.fieldbook.tracker.objects.TraitObject
  * Reference:
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
-class AttributeAdapter(private val controller: AttributeAdapterController, private val selected: String?) :
+class AttributeAdapter(private val controller: AttributeAdapterController, private val selected: AttributeModel?) :
     ListAdapter<AttributeAdapter.AttributeModel, AttributeAdapter.ViewHolder>(DiffCallback()) {
 
     interface AttributeAdapterController {
@@ -43,7 +43,7 @@ class AttributeAdapter(private val controller: AttributeAdapterController, priva
             setViewHolderText(holder, this.label)
 
             holder.attributeTv.setBackgroundResource(
-                if (selected == this.label) R.drawable.table_cell_selected else R.drawable.cell)
+                if (selected == this) R.drawable.table_cell_selected else R.drawable.cell)
 
         }
     }

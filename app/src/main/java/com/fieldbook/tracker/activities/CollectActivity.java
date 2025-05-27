@@ -43,6 +43,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.adapters.AttributeAdapter;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.adapters.TraitsStatusAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
@@ -56,7 +57,11 @@ import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
 import com.fieldbook.tracker.dialogs.SearchDialog;
 import com.fieldbook.tracker.fragments.CropImageFragment;
+import com.fieldbook.tracker.interfaces.CollectController;
+import com.fieldbook.tracker.interfaces.CollectRangeController;
+import com.fieldbook.tracker.interfaces.CollectTraitController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
+import com.fieldbook.tracker.interfaces.GeoNavController;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.InfoBarModel;
@@ -146,9 +151,10 @@ import dagger.hilt.android.AndroidEntryPoint;
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends ThemedActivity
         implements SummaryFragment.SummaryOpenListener,
-        com.fieldbook.tracker.interfaces.CollectController,
-        com.fieldbook.tracker.interfaces.CollectRangeController,
-        com.fieldbook.tracker.interfaces.CollectTraitController,
+        CollectController,
+        CollectRangeController,
+        CollectTraitController,
+        GeoNavController,
         InfoBarAdapter.InfoBarController,
         GPSTracker.GPSTrackerListener,
         SearchDialog.onSearchResultsClickedListener,
@@ -338,7 +344,7 @@ public class CollectActivity extends ThemedActivity
         secureBluetooth.initialize();
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        geoNavHelper = new GeoNavHelper(this);
+        geoNavHelper = new GeoNavHelper(this, this);
 
         ttsHelper = new TextToSpeechHelper(this, () -> {
             String lang = mPrefs.getString(PreferenceKeys.TTS_LANGUAGE, "-1");
@@ -2596,51 +2602,57 @@ public class CollectActivity extends ThemedActivity
         return secureBluetooth;
     }
 
+    @NonNull
     @Override
-    public String queryForLabelValue(
-            String plotId, String label, Boolean isAttribute
-    ) {
-        Context context = this;
+    public String queryForLabelValue(@NonNull String plotId, @NonNull AttributeAdapter.AttributeModel attribute) {
 
-        String dataMissingString = context.getString(R.string.main_infobar_data_missing);
+        String dataMissingString = getString(R.string.main_infobar_data_missing);
 
-        if (isAttribute) {
+        String label = attribute.getLabel();
 
-            if (label.equals(context.getString(R.string.field_name_attribute))) {
-                String fieldName = ((CollectActivity) context).getPreferences().getString(GeneralKeys.FIELD_ALIAS, "");
-                return (fieldName == null || fieldName.isEmpty()) ? dataMissingString : fieldName;
+        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+
+        if (attribute.getTrait() == null) {
+
+            if (label.equals(getString(R.string.field_name_attribute))) {
+                String fieldName = getPreferences().getString(GeneralKeys.FIELD_ALIAS, "");
+                return fieldName.isEmpty() ? dataMissingString : fieldName;
             }
 
-            String[] values = database.getDropDownRange(label, plotId);
-            if (values == null || values.length == 0) {
-                return dataMissingString;
-            } else {
-                if (label.equals("geo_coordinates") && JsonUtil.Companion.isJsonValid(values[0])) {
+            String value = database.getObservationUnitPropertyValues(label, plotId);
 
-                    return GeoJsonUtil.Companion.decode(values[0]).toCoordinateString(";");
+            if (value.isEmpty()) {
+
+                return dataMissingString;
+
+            } else {
+
+                if (label.equals("geo_coordinates") && JsonUtil.Companion.isJsonValid(value)) {
+
+                    return GeoJsonUtil.Companion.decode(value).toCoordinateString(";");
 
                 } else {
 
-                    return values[0];
+                    return value;
 
                 }
             }
 
         } else {
 
-            String value = database.getUserDetail(plotId).get(label);
-            if (value == null) {
-                value = dataMissingString;
+            ObservationModel[] observations = database.getAllObservations(studyId, plotId, attribute.getTrait().getId());
+
+            int size = observations.length;
+
+            if (size == 0) {
+                return dataMissingString;
             }
+
+            String value = observations[size-1].getValue();
 
             try {
 
-                String labelValPref = ((CollectActivity) context).getPreferences()
-                        .getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value");
-                if (labelValPref == null) {
-                    labelValPref = "value";
-                }
-
+                String labelValPref = getPreferences().getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value");
                 StringJoiner joiner = new StringJoiner(":");
                 ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
                 for (BrAPIScaleValidValuesCategories s : scale) {
@@ -2659,35 +2671,35 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
+    @NonNull
     @Override
-    public ArrayList<String> getGeoNavPopupSpinnerItems () {
+    public List<AttributeAdapter.AttributeModel> getGeoNavPopupSpinnerItems () {
+
+        ArrayList<AttributeAdapter.AttributeModel> items = new ArrayList<>();
+
         //query database for attributes/traits to use
         try {
-            List<String> attributes = Arrays.asList(getDatabase().getAllObservationUnitAttributeNames(Integer.parseInt(getStudyId())));
-            TraitObject[] traits = getDatabase().getAllTraitObjects().toArray(new TraitObject[0]);
 
-            ArrayList<TraitObject> visibleTraits = new ArrayList<>();
+            //add all obs unit attribute metadata
+            String[] attributes = getDatabase().getAllObservationUnitAttributeNames(Integer.parseInt(getStudyId()));
+            for (String attribute : attributes) {
+                items.add(new AttributeAdapter.AttributeModel(attribute, null));
+            }
+
+            //add all visible traits
+            TraitObject[] traits = getDatabase().getVisibleTraits().toArray(new TraitObject[0]);
             for (TraitObject traitObject : traits) {
-                if (traitObject.getVisible()) {
-                    visibleTraits.add(traitObject);
-                }
+                items.add(new AttributeAdapter.AttributeModel(traitObject.getName(), traitObject));
             }
 
-            // Map traits to their names
-            List<String> traitNames = new ArrayList<>();
-            for (TraitObject traitObject : visibleTraits) {
-                traitNames.add(traitObject.getName());
-            }
+            return items;
 
-            // Combine attributes and trait names
-            ArrayList<String> result = new ArrayList<>(attributes);
-            result.addAll(traitNames);
-
-            return result;
         } catch (Exception e) {
-            Log.d(TAG, "Error occurred when querying for attributes in GeoNavCollectDialog.");
-            e.printStackTrace();
+
+            Log.e(TAG, "Error occurred when querying for attributes in GeoNavCollectDialog.", e);
+
         }
+
         return new ArrayList<>();
     }
     
