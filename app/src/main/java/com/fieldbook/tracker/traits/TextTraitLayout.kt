@@ -14,6 +14,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.views.TraitBoxView
 import org.phenoapps.utils.SoftKeyboardUtil.Companion.closeKeyboard
 import org.phenoapps.utils.SoftKeyboardUtil.Companion.showKeyboard
 
@@ -143,7 +144,7 @@ class TextTraitLayout : BaseTraitLayout {
                     }
 
                     if (actionOnScanLineFeed == "1") {
-                        controller.getTraitBox().moveTrait("right")
+                        controller.getTraitBox().moveTrait(TraitBoxView.MoveDirection.RIGHT)
                     }
 
                     "" //reset the scan

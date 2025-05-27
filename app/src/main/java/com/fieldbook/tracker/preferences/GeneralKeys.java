@@ -1,7 +1,11 @@
 package com.fieldbook.tracker.preferences;
 
+import androidx.annotation.NonNull;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import kotlin.Pair;
 
 public class GeneralKeys {
     // @formatter:off
@@ -48,7 +52,9 @@ public class GeneralKeys {
 
     public static final String GEONAV_CONFIG_DEGREE_PRECISION       = GEONAV_PREFIX + "DEGREE_PRECISION";
   
-    public static final String GEONAV_POPUP_DISPLAY       = GEONAV_PREFIX + "POPUP_DISPLAY";
+    public static final String GEONAV_POPUP_DISPLAY                 = GEONAV_PREFIX + "POPUP_DISPLAY";
+
+    public static final String GEONAV_POPUP_TRAIT                   = GEONAV_PREFIX + "POPUP_TRAIT";
     // @formatter:on
 
     // GNSS
@@ -201,6 +207,29 @@ public class GeneralKeys {
     @NotNull
     public static String getCropCoordinatesKey(int traitId) {
         return "com.fieldbook.tracker.crop_coordinates." + traitId;
+    }
+
+    @NotNull
+    private static String getDropDownAttributeKey(int index) {
+        return "DROP" + index;
+    }
+
+    @NotNull
+    private static String getDropDownTraitKey(int index) {
+        return "DROP.TRAIT" + index;
+    }
+
+    @NotNull
+    public static String getIsInfoBarWordWrapped(int index) {
+        return "INFOBAR_WORD_WRAP_" + index;
+    }
+
+    @NotNull
+    public static DropDownKeyModel getDropDownKeys(int index) {
+        return new DropDownKeyModel(
+                getDropDownAttributeKey(index),
+                getDropDownTraitKey(index)
+        );
     }
 
     private GeneralKeys() {

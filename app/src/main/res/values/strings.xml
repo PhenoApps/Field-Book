@@ -351,6 +351,7 @@
     <string name="main_toolbar_resources">Resources</string>
     <string name="main_trait_details">Trait details</string>
     <string name="main_infobar_data_missing">No data</string>
+    <string name="main_infobar_select_data">Select</string>
     <string name="main_toolbar_next_entry_no_data">Next entry with no data</string>
 
     <!-- InfoBars -->

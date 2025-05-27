@@ -7,10 +7,8 @@ import android.database.MatrixCursor
 import android.util.Log
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
-import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
 import com.fieldbook.tracker.database.models.ObservationVariableModel
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.traits.formats.parameters.Parameters
 
 class ObservationVariableDao {
 
@@ -33,19 +31,17 @@ class ObservationVariableDao {
             }
         } ?: 0
 
-        fun getTraitById(id: Int): TraitObject? = withDatabase { db ->
+        fun getTraitById(id: String): TraitObject? = withDatabase { db ->
 
             db.query(ObservationVariable.tableName,
-//                    select = arrayOf("observation_variable_name"),
                 where = "internal_id_observation_variable = ?",
-                whereArgs = arrayOf("$id")).toFirst().toTraitObject()
+                whereArgs = arrayOf(id)).toFirst().toTraitObject()
 
         }
 
         fun getTraitByName(name: String): TraitObject? = withDatabase { db ->
 
             db.query(ObservationVariable.tableName,
-//                    select = arrayOf("observation_variable_name"),
                     where = "observation_variable_name = ? COLLATE NOCASE",
                     whereArgs = arrayOf(name)).toFirst().toTraitObject()
 
@@ -118,33 +114,6 @@ class ObservationVariableDao {
                 it.toTable().map { row ->
                     row["observation_variable_name"] as String
                 }.toTypedArray()
-            }
-
-        } ?: arrayOf()
-
-        fun getTraitColumnData(column: String): Array<String> = withDatabase { db ->
-
-            val queryColumn = when(column) {
-                "isVisible" -> "visible"
-                "format" -> "observation_variable_field_book_format"
-                else -> "observation_variable_name"
-            }
-
-            db.query(ObservationVariable.tableName,
-                    arrayOf(queryColumn)).use {
-
-                it.toTable().mapNotNull { row ->
-                    row[queryColumn].toString()
-                }.toTypedArray()
-            }
-
-        } ?: arrayOf()
-
-        fun getTraitColumns(): Array<String> = withDatabase { db ->
-
-            db.query(ObservationVariable.tableName).use {
-
-                (it.toTable().first().keys - setOf("id", "external_db_id", "trait_data_source")).toTypedArray()
             }
 
         } ?: arrayOf()
@@ -225,34 +194,7 @@ class ObservationVariableDao {
             db.rawQuery(query, null).use { cursor ->
                 while (cursor.moveToNext()) {
                     val trait = TraitObject().apply {
-                        name = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name")) ?: ""
-                        format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format")) ?: ""
-                        defaultValue = cursor.getString(cursor.getColumnIndexOrThrow("default_value")) ?: ""
-                        details = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_details")) ?: ""
-                        id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariable.PK)).toString()
-                        externalDbId = cursor.getString(cursor.getColumnIndexOrThrow("external_db_id")) ?: ""
-                        realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("position"))
-                        visible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()
-                        additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
-
-                        // Initialize these to the empty string or else they will be null
-                        maximum = ""
-                        minimum = ""
-                        categories = ""
-                        closeKeyboardOnOpen = false
-                        cropImage = false
-
-                        val values = ObservationVariableValueDao.getVariableValues(id.toInt())
-                        values?.forEach { value ->
-                            val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
-                            when (attrName) {
-                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "category" -> categories = value["observation_variable_attribute_value"] as? String ?: ""
-                                "closeKeyboardOnOpen" -> closeKeyboardOnOpen = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
-                                "cropImage" -> cropImage = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
-                            }
-                        }
+                        loadFromCursor(cursor)
                     }
                     traits.add(trait)
                 }
@@ -269,51 +211,10 @@ class ObservationVariableDao {
             }
         } ?: ArrayList()
 
+        fun getAllVisibleTraitObjects(sortOrder: String): ArrayList<TraitObject> = ArrayList(getAllTraitObjects(sortOrder).filter { it.visible })
+
         // Overload for Java compatibility
         fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("position")
-
-
-//        fun getAllTraitObjects(sortOrder: String): ArrayList<TraitObject> = withDatabase { db ->
-//
-//            ArrayList(db.query(ObservationVariable.tableName, orderBy = "position").toTable().map {
-//
-//                TraitObject().apply {
-//
-//                    name = (it["observation_variable_name"] as? String ?: "")
-//                    format = it["observation_variable_field_book_format"] as? String ?: ""
-//                    defaultValue = it["default_value"] as? String ?: ""
-//                    details = it["observation_variable_details"] as? String ?: ""
-//                    id = (it[ObservationVariable.PK] as? Int ?: -1).toString()
-//                    externalDbId = it["external_db_id"] as? String ?: ""
-//                    realPosition = (it["position"] as? Int ?: -1)
-//                    visible = (it["visible"] as String).toBoolean()
-//                    additionalInfo = it["additional_info"] as? String ?: ""
-//
-//                    //initialize these to the empty string or else they will be null
-//                    maximum = ""
-//                    minimum = ""
-//                    categories = ""
-//
-//                    ObservationVariableValueDao.getVariableValues(id.toInt()).also { values ->
-//
-//                        values?.forEach { value ->
-//
-//                            val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
-//
-//                            when (attrName) {
-//                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                                "category" -> categories = value["observation_variable_attribute_value"] as? String
-//                                        ?: ""
-//                            }
-//                        }
-//                    }
-//                }
-//            })
-//
-//        } ?: ArrayList()
 
         fun getTraitVisibility(): HashMap<String, String> = withDatabase { db ->
 
@@ -325,6 +226,7 @@ class ObservationVariableDao {
 
         } ?: hashMapOf()
 
+        //TODO 471 remove getTraitByName if not required
         //TODO missing obs. vars. for min/max/categories
         fun insertTraits(t: TraitObject) = withDatabase { db ->
 
@@ -354,23 +256,17 @@ class ObservationVariableDao {
 
                 // Log additional values: min, max, categories
                 Log.d("ObservationVariableDao", "And additional attributes:")
-                Log.d("ObservationVariableDao", "minimum: ${t.minimum.orEmpty()}")
-                Log.d("ObservationVariableDao", "maximum: ${t.maximum.orEmpty()}")
-                Log.d("ObservationVariableDao", "categories: ${t.categories.orEmpty()}")
-                Log.d("ObservationVariableDao", "closeKeyboardOnOpen: ${t.closeKeyboardOnOpen ?: "false"}")
-                Log.d("ObservationVariableDao", "cropImage: ${t.cropImage ?: "false"}")
+                Log.d("ObservationVariableDao", "minimum: ${t.minimum}")
+                Log.d("ObservationVariableDao", "maximum: ${t.maximum}")
+                Log.d("ObservationVariableDao", "categories: ${t.categories}")
+                Log.d("ObservationVariableDao", "closeKeyboardOnOpen: ${t.closeKeyboardOnOpen}")
+                Log.d("ObservationVariableDao", "cropImage: ${t.cropImage}")
 
                 val varRowId = db.insert(ObservationVariable.tableName, null, contentValues)
 
                 if (varRowId != -1L) {
-                    ObservationVariableValueDao.insert(
-                        t.minimum.orEmpty(),
-                        t.maximum.orEmpty(),
-                        t.categories.orEmpty(),
-                        (t.closeKeyboardOnOpen ?: "false").toString(),
-                        (t.cropImage ?: "false").toString(),
-                        varRowId.toString()
-                    )
+                    t.id = varRowId.toString()
+                    t.saveAttributeValues()
                     Log.d("ObservationVariableDao", "Trait ${t.name} inserted successfully with row ID: $varRowId")
                 } else {
                     Log.e("ObservationVariableDao", "Failed to insert trait ${t.name}")
@@ -398,40 +294,39 @@ class ObservationVariableDao {
         }
 
         //TODO need to edit min/max/category obs. var. val/attrs
+        //TODO 471, uses getAttributeByName, but probably unnecessary to change
         fun editTraits(id: String, trait: String, format: String, defaultValue: String,
                        minimum: String, maximum: String, details: String, categories: String,
                        closeKeyboardOnOpen: Boolean,
                        cropImage: Boolean): Long = withDatabase { db ->
 
-            val rowid = db.update(ObservationVariable.tableName, ContentValues().apply {
-                put("observation_variable_name", trait)
-                put("observation_variable_field_book_format", format)
-                put("default_value", defaultValue)
-                put("observation_variable_details", details)
-            }, "${ObservationVariable.PK} = ?", arrayOf(id)).toLong()
+           val contentValues = ContentValues().apply {
+               put("observation_variable_name", trait)
+               put("observation_variable_field_book_format", format)
+               put("default_value", defaultValue)
+               put("observation_variable_details", details)
+           }
+
+            val rowid = db.update(
+                ObservationVariable.tableName,
+                contentValues,
+                "${ObservationVariable.PK} = ?",
+                arrayOf(id)
+            ).toLong()
 
 
-            Parameters.System.forEach {
-
-                val attrId = ObservationVariableAttributeDao.getAttributeIdByName(it)
-
-                when(it) {
-                    "validValuesMin" -> {
-                        ObservationVariableValueDao.update(id, attrId.toString(), minimum)
-                    }
-                    "validValuesMax" -> {
-                        ObservationVariableValueDao.update(id, attrId.toString(), maximum)
-                    }
-                    "category" -> {
-                        ObservationVariableValueDao.update(id, attrId.toString(), categories)
-                    }
-                    "closeKeyboardOnOpen" -> {
-                        ObservationVariableValueDao.insertAttributeValue(it, closeKeyboardOnOpen.toString(), id)
-                    }
-                    "cropImage" -> {
-                        ObservationVariableValueDao.insertAttributeValue(it, cropImage.toString(), id)
-                    }
+            if (rowid > 0) {
+                // save attributes and their values
+                val traitObj = TraitObject().apply {
+                    this.id = id
+                    this.minimum = minimum
+                    this.maximum = maximum
+                    this.categories = categories
+                    this.closeKeyboardOnOpen = closeKeyboardOnOpen
+                    this.cropImage = cropImage
                 }
+
+                traitObj.saveAttributeValues()
             }
 
             rowid
@@ -447,17 +342,5 @@ class ObservationVariableDao {
                 arrayOf(traitDbId)
             )
         }
-
-        fun writeNewPosition(queryColumn: String, id: String, position: String) = withDatabase { db ->
-
-            db.update(ObservationVariable.tableName,
-                    ContentValues().apply {
-                        put("position", position)
-                    }, "$queryColumn = ?", arrayOf(id))
-
-        }
-
-//        fun getTraitColumnsAsString() = getAllTraits().joinToString(",")
-
     }
 }

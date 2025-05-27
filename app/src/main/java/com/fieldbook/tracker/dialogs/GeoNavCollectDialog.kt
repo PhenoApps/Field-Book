@@ -13,6 +13,10 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
+import androidx.core.content.edit
+import com.fieldbook.tracker.adapters.AttributeAdapter
+import com.fieldbook.tracker.adapters.AttributeAdapter.AttributeModel
+import com.fieldbook.tracker.preferences.DropDownKeyModel
 
 class GeoNavCollectDialog(private val activity: CollectActivity) :
     AlertDialog.Builder(activity, R.style.AppAlertDialog) {
@@ -28,25 +32,50 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
     private var auto
         get() = preferences.getBoolean(GeneralKeys.GEONAV_AUTO, false)
         set(value) {
-            preferences.edit().putBoolean(GeneralKeys.GEONAV_AUTO, value).apply()
+            preferences.edit { putBoolean(GeneralKeys.GEONAV_AUTO, value) }
         }
 
     private var audioOnDrop
         get() = preferences.getBoolean(GeneralKeys.GEONAV_CONFIG_AUDIO_ON_DROP, false)
         set(value) {
-            preferences.edit().putBoolean(GeneralKeys.GEONAV_CONFIG_AUDIO_ON_DROP, value).apply()
+            preferences.edit { putBoolean(GeneralKeys.GEONAV_CONFIG_AUDIO_ON_DROP, value) }
         }
 
     private var degreeOfPrecision
         get() = preferences.getString(GeneralKeys.GEONAV_CONFIG_DEGREE_PRECISION, "Any")
         set(value) {
-            preferences.edit().putString(GeneralKeys.GEONAV_CONFIG_DEGREE_PRECISION, value).apply()
+            preferences.edit { putString(GeneralKeys.GEONAV_CONFIG_DEGREE_PRECISION, value) }
         }
 
-    private var geoNavPopupDisplay
-        get() = preferences.getString(GeneralKeys.GEONAV_POPUP_DISPLAY, "plot_id")
+    private var geoNavPopupDisplay: AttributeModel
+        get() {
+            if (geoNavPopupTrait == DropDownKeyModel.DEFAULT_TRAIT_ID) {
+                return AttributeModel(geoNavPopupAttribute)
+            } else {
+                val trait = activity.getDatabase().getTraitById(geoNavPopupTrait)
+                return AttributeModel(trait.name, trait)
+            }
+        }
         set(value) {
-            preferences.edit().putString(GeneralKeys.GEONAV_POPUP_DISPLAY, value).apply()
+            if (value.trait == null) {
+                geoNavPopupAttribute = value.label
+                geoNavPopupTrait = DropDownKeyModel.DEFAULT_TRAIT_ID
+            } else {
+                geoNavPopupAttribute = value.label
+                geoNavPopupTrait = value.trait.id
+            }
+        }
+
+    private var geoNavPopupAttribute
+        get() = preferences.getString(GeneralKeys.GEONAV_POPUP_DISPLAY, DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL) ?: DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL
+        set(value) {
+            preferences.edit { putString(GeneralKeys.GEONAV_POPUP_DISPLAY, value) }
+        }
+
+    private var geoNavPopupTrait
+        get() = preferences.getString(GeneralKeys.GEONAV_POPUP_TRAIT, DropDownKeyModel.DEFAULT_TRAIT_ID) ?: DropDownKeyModel.DEFAULT_TRAIT_ID
+        set(value) {
+            preferences.edit { putString(GeneralKeys.GEONAV_POPUP_TRAIT, value) }
         }
 
     private var autoNavigateCb: CheckBox? = null
@@ -72,7 +101,7 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
         geoNavPopupDisplaySp = view.findViewById(R.id.dialog_geonav_popup_display)
 
         // fetching spinner items
-        val geoNavPopupDisplayAdapter = ArrayAdapter<String>(activity, android.R.layout.simple_spinner_item)
+        val geoNavPopupDisplayAdapter = ArrayAdapter<AttributeModel>(activity, android.R.layout.simple_spinner_item)
         geoNavPopupDisplayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         geoNavPopupDisplayAdapter.addAll(activity.getGeoNavPopupSpinnerItems())
 
@@ -141,9 +170,10 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
     }
 
     private fun saveUiToPreferences() {
-        auto = autoNavigateCb?.isChecked ?: false
-        audioOnDrop = audioOnDropCb?.isChecked ?: false
+        auto = autoNavigateCb?.isChecked == true
+        audioOnDrop = audioOnDropCb?.isChecked == true
         degreeOfPrecision = degreeOfPrecisionSp?.selectedItem.toString()
-        geoNavPopupDisplay = geoNavPopupDisplaySp?.selectedItem.toString()
+        //TODO 471 update Spinner to use AttributeModel and update preferences
+        //geoNavPopupDisplay = geoNavPopupDisplaySp?.selectedItem.toString()
     }
 }

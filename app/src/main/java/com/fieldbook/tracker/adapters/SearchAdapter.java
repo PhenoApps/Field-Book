@@ -66,7 +66,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
 
     @Override
     public void onBindViewHolder(@NonNull SearchViewHolder holder, int position) {
-        holder.c.setText(dataSet.get(position).getAttribute());
+        holder.c.setText(dataSet.get(position).getAttribute().getLabel());
         holder.l.setImageResource(dataSet.get(position).getImageResourceId());
         holder.e.setText(dataSet.get(position).getText());
         holder.e.addTextChangedListener(new TextWatcher() {
