@@ -242,10 +242,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         if (!isGroupingPossible) { // if grouping is not possible, force disable grouping state
             mPrefs.edit {
                 putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false)
-                putBoolean(
-                    GeneralKeys.USER_TOGGLED_FIELD_GROUPING,
-                    false
-                ) // set user toggle to false since forced
+                putBoolean(GeneralKeys.USER_TOGGLED_FIELD_GROUPING, false) // set user toggle to false since forced
             }
         } else if (!isGroupingEnabled && !userHasToggledGrouping) { // grouping was disabled AND user did not toggle it, enable grouping
             mPrefs.edit { putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, true) }
@@ -255,14 +252,14 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
 
         isGroupingEnabled = mPrefs.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false)
 
-        // set collapse/expand visibility
-        collapseGroupsItem.isVisible = isGroupingEnabled
-        expandGroupsItem.isVisible = isGroupingEnabled
-
         mAdapter.resetFieldsList(fieldList)
 
         if (mAdapter.selectedItemCount > 0) { // in selection mode
             standardMenuItems.forEach { toggleMenuItem(it, false) }
+
+            toggleMenuItem(groupToggleItem, false)
+            toggleMenuItem(collapseGroupsItem, false)
+            toggleMenuItem(expandGroupsItem, false)
 
             toggleMenuItem(groupFieldsItem, true)
             toggleMenuItem(archiveFieldsItem, true)
@@ -270,7 +267,11 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             toggleMenuItem(helpItem, mPrefs.getBoolean(PreferenceKeys.TIPS, false))
             toggleMenuItem(nearestPlotItem, true)
             toggleMenuItem(sortFieldsItem, true)
+
+            // show these items only if grouping is possible or enabled
             toggleMenuItem(groupToggleItem, isGroupingPossible)
+            toggleMenuItem(collapseGroupsItem, isGroupingEnabled)
+            toggleMenuItem(expandGroupsItem, isGroupingEnabled)
 
             toggleMenuItem(groupFieldsItem, false)
             toggleMenuItem(archiveFieldsItem, false)
