@@ -237,8 +237,6 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         val userHasToggledGrouping =
             mPrefs.getBoolean(GeneralKeys.USER_TOGGLED_FIELD_GROUPING, false)
 
-        groupToggleItem.isVisible = isGroupingPossible // change icon visibility
-
         if (!isGroupingPossible) { // if grouping is not possible, force disable grouping state
             mPrefs.edit {
                 putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false)
@@ -251,6 +249,8 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         }
 
         isGroupingEnabled = mPrefs.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false)
+
+        groupToggleItem.setIcon(if (isGroupingEnabled) R.drawable.ic_ungroup else R.drawable.ic_existing_group)
 
         mAdapter.resetFieldsList(fieldList)
 
