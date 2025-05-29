@@ -389,24 +389,6 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         sequence.start()
     }
 
-    fun setActiveField(studyId: Int) {
-        // get current field id and compare the input, only switch if they are different
-        val currentFieldId = mPrefs.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
-
-        if (currentFieldId == studyId) return
-
-        fieldSwitcher.switchField(studyId)
-        CollectActivity.reloadData = true
-
-        mAdapter.resetFieldsList(fieldList) // reset to update active icon indication
-
-        // Check if this is a BrAPI field and show BrAPI info dialog if so
-        // if (field.getImport_format() == ImportFormat.BRAPI) {
-        //     val brapiInfo = BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
-        //     brapiInfo.show();
-        // }
-    }
-
     private fun fieldsListItemLocation(item: Int): Rect {
         val v = recyclerView.getChildAt(item)
         val location = IntArray(2)

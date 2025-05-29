@@ -528,9 +528,12 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         // add children if expanded
         if (isExpanded) {
+            int activeFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
             for (FieldObject f : groupFields) {
                 if (!f.getIs_archived()) {
-                    arrayList.add(new FieldViewItem(f, fieldGroupController));
+                    FieldViewItem item = new FieldViewItem(f, fieldGroupController);
+                    item.updateIsActive(activeFieldId);
+                    arrayList.add(item);
                 }
             }
         }

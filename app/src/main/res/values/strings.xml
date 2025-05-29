@@ -120,6 +120,9 @@
     <string name="archive_active_field_message">You have selected the active field to archive. If you continue, there will be no active field. Do you want to continue?</string>
     <string name="archive_others">Archive Others</string>
 
+    <string name="dialog_unarchive_field_title">Unarchive Field?</string>
+    <string name="dialog_unarchive_field_message">This field is currently archived. If you continue, this field will be unarchived and become the active field. Do you want to continue?</string>
+
 
     <!-- FIELDS -->
     <!-- General -->
