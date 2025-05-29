@@ -462,8 +462,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
     /**
      * Builds a list of field items for the FieldEditorActivity
-     * Groups fields by their group name and includes group headers
-     * Attaches archived list item at the end
+     * When grouping is
+     *  - disabled: show all fields that are not archived
+     *  - enabled: groups fields by their group name and includes group headers
+     * Attaches archived list item at the end (regardless of grouping state)
      */
     private List<FieldViewItem> buildFieldsList(List<FieldObject> fieldsList) {
         List<FieldViewItem> arrayList = new ArrayList<>();
@@ -472,10 +474,15 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         if (!groupingEnabled) {
             for (FieldObject field : fieldsList) {
-                FieldViewItem item = new FieldViewItem(field, fieldGroupController);
-                item.updateIsActive(activeFieldId);
-                arrayList.add(item);
+                if (!field.getIs_archived()) {
+                    FieldViewItem item = new FieldViewItem(field, fieldGroupController);
+                    item.updateIsActive(activeFieldId);
+                    arrayList.add(item);
+                }
             }
+
+            addArchivedHeaderToList(arrayList, fieldsList);
+
             return arrayList;
         }
 
@@ -502,12 +509,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             addGroupToList(arrayList, null, ungroupedExpanded, ungroupedFields);
         }
 
-        long archivedCount = fieldsList.stream().filter(FieldObject::getIs_archived).count();
-        if (archivedCount > 0) { // add archived list item at the bottom
-            String archivedVal = context.getString(R.string.group_archived_value);
-            FieldViewItem archiveHeader = new FieldViewItem(archivedVal, archivedCount, true);
-            arrayList.add(archiveHeader);
-        }
+        addArchivedHeaderToList(arrayList, fieldsList);
 
         return arrayList;
     }
@@ -536,6 +538,15 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                     arrayList.add(item);
                 }
             }
+        }
+    }
+
+    private void addArchivedHeaderToList(List<FieldViewItem> arrayList, List<FieldObject> fieldsList) {
+        long archivedCount = fieldsList.stream().filter(FieldObject::getIs_archived).count();
+        if (archivedCount > 0) { // add archived list item at the bottom
+            String archivedVal = context.getString(R.string.group_archived_value);
+            FieldViewItem archiveHeader = new FieldViewItem(archivedVal, archivedCount, true);
+            arrayList.add(archiveHeader);
         }
     }
 
