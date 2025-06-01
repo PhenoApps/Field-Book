@@ -322,124 +322,6 @@ class TraitDetailFragment : Fragment() {
         }
     }
 
-    // private fun showDateFormatDialog() {
-    //     val options = arrayOf(
-    //         getString(R.string.trait_date_format_option),
-    //         getString(R.string.trait_day_format_option)
-    //     )
-        
-    //     val currentSelection = if (preferences.getBoolean("UseDay", false)) 1 else 0
-        
-    //     AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-    //         .setTitle(getString(R.string.trait_date_format_dialog_title))
-    //         .setSingleChoiceItems(options, currentSelection) { dialog, which ->
-    //             // Save the preference
-    //             preferences.edit().putBoolean("UseDay", which == 1).apply()
-    //             // Update the chip text
-    //             updateDateFormatChip(which == 1)
-    //             dialog.dismiss()
-    //         }
-    //         .setNegativeButton(R.string.dialog_cancel, null)
-    //         .show()
-    // }
-
-    // private fun showBrapiLabelValueDialog() {
-    //     val options = arrayOf(
-    //         getString(R.string.trait_brapi_label_option),
-    //         getString(R.string.trait_brapi_value_option)
-    //     )
-        
-    //     // Get trait-specific preference or fall back to global preference
-    //     val traitSpecificKey = "LABELVAL_CUSTOMIZE_${traitId}"
-    //     val defaultValue = preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "label")
-    //     val currentSelection = if (preferences.getString(traitSpecificKey, defaultValue) == "value") 1 else 0
-        
-    //     AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-    //         .setTitle(getString(R.string.trait_brapi_display_dialog_title))
-    //         .setSingleChoiceItems(options, currentSelection) { dialog, which ->
-    //             // Save the preference
-    //             val value = if (which == 1) "value" else "label"
-    //             preferences.edit().putString(traitSpecificKey, value).apply()
-    //             // Update the chip text
-    //             updateBrapiLabelValueChip(which == 1)
-    //             dialog.dismiss()
-    //         }
-    //         .setNegativeButton(R.string.dialog_cancel, null)
-    //         .show()
-    // }
-
-    // // Update the existing methods to work with chips instead of switches
-    // private fun updateDateFormatDisplay(useDayOfYear: Boolean) {
-    //     updateDateFormatChip(useDayOfYear)
-    // }
-
-    // private fun updateDateFormatChip(useDayOfYear: Boolean) {
-    //     val calendar = Calendar.getInstance()
-        
-    //     // Format as standard date (YYYY-MM-DD)
-    //     val year = calendar.get(Calendar.YEAR)
-    //     val month = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
-    //     val day = calendar.get(Calendar.DAY_OF_MONTH)
-    //     val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
-        
-    //     // Format as day of year
-    //     val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
-        
-    //     // Set the chip text based on the selected format
-    //     if (useDayOfYear) {
-    //         dateFormatChip.text = getString(R.string.trait_day_format_display, dayOfYear)
-    //     } else {
-    //         dateFormatChip.text = getString(R.string.trait_date_format_display, formattedDate)
-    //     }
-    // }
-
-    // private fun updateBrapiLabelValueDisplay(useValues: Boolean) {
-    //     updateBrapiLabelValueChip(useValues)
-    // }
-
-    // private fun updateBrapiLabelValueChip(useValues: Boolean) {
-    //     if (!traitHasBrapiCategories) return
-
-    //     // Get the first category from the trait to use as an example
-    //     val categories = traitObject?.categories ?: return
-
-    //     // Parse the categories - they could be in JSON format or simple format
-    //     val firstCategory = try {
-    //         if (categories.startsWith("[")) {
-    //             // JSON format
-    //             val parsedCategories = CategoryJsonUtil.decode(categories)
-    //             if (parsedCategories.isNotEmpty()) {
-    //                 val firstItem = parsedCategories[0]
-    //                 val labelField = firstItem.javaClass.getDeclaredField("label")
-    //                 labelField.isAccessible = true
-    //                 val label = labelField.get(firstItem)?.toString() ?: "Label"
-                    
-    //                 Pair(label, firstItem.value)
-    //             } else {
-    //                 Pair("Example", "Value")
-    //             }
-    //         } else {
-    //             // Simple format (values only)
-    //             val values = categories.split("/").map { it.trim() }
-    //             if (values.isNotEmpty()) {
-    //                 Pair(values[0], values[0])
-    //             } else {
-    //                 Pair("Example", "Value")
-    //             }
-    //         }
-    //     } catch (e: Exception) {
-    //         Log.e(TAG, "Failed to parse categories: $categories", e)
-    //         Pair("Example", "Value")
-    //     }
-
-    //     // Set the chip text based on the selected format
-    //     if (useValues) {
-    //         brapiLabelValueChip.text = getString(R.string.trait_brapi_value_display, firstCategory.second)
-    //     } else {
-    //         brapiLabelValueChip.text = getString(R.string.trait_brapi_label_display, firstCategory.first)
-    //     }
-    // }
-
     private fun showDateFormatDialog() {
         val calendar = Calendar.getInstance()
         
@@ -598,6 +480,16 @@ class TraitDetailFragment : Fragment() {
                 observations.size.toFloat() / totalObservations.toFloat() 
             else 0f
             
+            // Process observation values using CategoryJsonUtil and handle nullable values
+            val processedObservations = observations.map { obs ->
+                CategoryJsonUtil.processValue(
+                    buildMap {
+                        put("observation_variable_field_book_format", trait.format)
+                        put("value", obs.value)
+                    }
+                ) ?: "" // Convert null to empty string
+            }
+            
             withContext(Dispatchers.Main) {
                 // Update chips
                 fieldCountChip.text = fieldsWithObservations.size.toString()
@@ -609,7 +501,7 @@ class TraitDetailFragment : Fragment() {
                 
                 // Setup observation chart if there are observations
                 if (observations.isNotEmpty()) {
-                    setupObservationChart(trait, observations.map { it.value }, chartTextSize)
+                    setupObservationChart(trait, processedObservations, chartTextSize)
                 } else {
                     showNoChartMessage(getString(R.string.field_trait_chart_no_data))
                 }
