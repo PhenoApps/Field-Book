@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- BrAPI min/max values are now imported correctly
 - MLKit library no longer causes crashes on certain devices
 
 ## [v6.2.2] - 2025-04-16
