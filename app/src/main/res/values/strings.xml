@@ -748,6 +748,12 @@
     <string name="preferences_appearance_quickgoto">Quick GoTo</string>
     <string name="preferences_appearance_quickgoto_description">Change the middle section of main screen to the legacy Quick GoTo</string>
 
+    <string name="preferences_appearance_range_progress_bar">Range progress bar</string>
+    <string name="preferences_appearance_range_progress_bar_description">Shows your current position in the field</string>
+
+    <string name="preferences_appearance_traits_progress_bar">Traits progress bar</string>
+    <string name="preferences_appearance_traits_progress_bar_description">Shows whether the active traits have observations for a plot, and highlights the current trait</string>
+
     <!-- Behavior -->
     <string name="preferences_behavior_title">Behavior</string>
     <string name="preferences_behavior_movement_title">Movement</string>

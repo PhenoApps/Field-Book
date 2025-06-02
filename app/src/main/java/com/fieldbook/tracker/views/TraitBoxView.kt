@@ -114,8 +114,13 @@ class TraitBoxView : ConstraintLayout {
         // Go to next trait
         traitRight.setOnClickListener { moveTrait("right") }
 
-        traitsStatusBarRv?.adapter = TraitsStatusAdapter(this)
-        traitsStatusBarRv?.layoutManager = getCenteredLayoutManager()
+        if (controller.getPreferences().getBoolean(PreferenceKeys.TRAITS_PROGRESS_BAR, true)) {
+            traitsStatusBarRv?.adapter = TraitsStatusAdapter(this)
+            traitsStatusBarRv?.layoutManager = getCenteredLayoutManager()
+            traitsStatusBarRv?.visibility = VISIBLE
+        } else {
+            traitsStatusBarRv?.visibility = GONE
+        }
     }
 
     fun initTraitDetails() {
@@ -173,8 +178,10 @@ class TraitBoxView : ConstraintLayout {
 
         setSelection(traitPosition)
 
-        traitsStatusBarRv?.adapter?.notifyItemChanged(previousSelection)
-        traitsStatusBarRv?.adapter?.notifyItemChanged(traitPosition)
+        if (controller.getPreferences().getBoolean(PreferenceKeys.TRAITS_PROGRESS_BAR, true)) {
+            traitsStatusBarRv?.adapter?.notifyItemChanged(previousSelection)
+            traitsStatusBarRv?.adapter?.notifyItemChanged(traitPosition)
+        }
 
         previousSelection = traitPosition
 
@@ -260,6 +267,11 @@ class TraitBoxView : ConstraintLayout {
 
     private fun updateTraitsStatusBar() {
 
+        if (!controller.getPreferences().getBoolean(PreferenceKeys.TRAITS_PROGRESS_BAR, true)) {
+            traitsStatusBarRv?.visibility = GONE
+            return
+        }
+
         val currentSortOrder = controller.getPreferences().getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
         val visibleTraits: Array<String> = controller.getDatabase().getVisibleTrait(currentSortOrder)
 
@@ -282,6 +294,12 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun recalculateTraitStatusBarSizes() {
+
+        if (!controller.getPreferences().getBoolean(PreferenceKeys.TRAITS_PROGRESS_BAR, true)) {
+            traitsStatusBarRv?.visibility = GONE
+            return
+        }
+
         traitsStatusBarRv?.post {
             for (pos in 0 until (traitsStatusBarRv?.adapter?.itemCount ?: 0)) {
                 val viewHolder = traitsStatusBarRv?.findViewHolderForAdapterPosition(pos) as? TraitsStatusAdapter.ViewHolder
@@ -336,7 +354,10 @@ class TraitBoxView : ConstraintLayout {
             traitTypeTv.text
                 .toString()
         )
-        (traitsStatusBarRv?.adapter as TraitsStatusAdapter).setCurrentSelection(pos)
+
+        if (controller.getPreferences().getBoolean(PreferenceKeys.TRAITS_PROGRESS_BAR, true)) {
+            (traitsStatusBarRv?.adapter as TraitsStatusAdapter).setCurrentSelection(pos)
+        }
     }
 
     private fun getSelectedItemPosition(): Int {
