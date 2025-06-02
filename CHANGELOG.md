@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v6.2.3] - 2025-06-02
+
+### Added
 - New option to disable progress bars in Collect
 
 ### Changed
@@ -695,3 +703,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.0
 [v6.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.1
 [v6.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.2
+[v6.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.3
