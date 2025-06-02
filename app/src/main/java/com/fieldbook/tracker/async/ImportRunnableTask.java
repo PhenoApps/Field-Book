@@ -121,7 +121,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             }
 
             FieldObject f = mFieldFile.createFieldObject();
-            f.setUnique_id(unique);
+            f.setUniqueId(unique);
 
             controller.getDatabase().beginTransaction();
 

@@ -3,15 +3,12 @@ package com.fieldbook.tracker.fragments
 import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Html
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -132,7 +129,7 @@ class ImportDBFragment : Fragment(){
         try {
             val fs = database.getAllFieldObjects().toTypedArray<FieldObject>()
             if (fs.isNotEmpty()) {
-                switchField(fs[0].exp_id)
+                switchField(fs[0].studyId)
             }
         } catch (e: java.lang.Exception) {
             e.printStackTrace()

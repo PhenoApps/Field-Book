@@ -8,7 +8,7 @@ import android.util.Log
 import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
-import com.fieldbook.tracker.database.migrators.ExampleMigratorVersionN
+import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13
 import com.fieldbook.tracker.objects.TraitObject
 
 /**
@@ -26,13 +26,6 @@ class Migrator {
     companion object {
 
         const val TAG = "Migrator"
-
-        const val sVisibleObservationVariableViewName = "VisibleObservationVariable"
-        val sVisibleObservationVariableView = """
-            CREATE VIEW IF NOT EXISTS $sVisibleObservationVariableViewName 
-            AS SELECT ${ObservationVariable.PK}, observation_variable_name, observation_variable_field_book_format, observation_variable_details, default_value, position
-            FROM ${ObservationVariable.tableName} WHERE visible LIKE "true" ORDER BY position
-        """.trimIndent()
 
         const val sObservationUnitPropertyViewName = "ObservationUnitProperty"
 
@@ -96,7 +89,6 @@ class Migrator {
                 ObservationUnitValue.tableName)
 
         private val sViewNames = arrayOf(
-                sVisibleObservationVariableViewName,
                 sNonImageObservationsViewName,
                 sLocalImageObservationsViewName,
                 sRemoteImageObservationsViewName,
@@ -225,8 +217,6 @@ class Migrator {
 //                        }
                     }
                 }
-
-                db.execSQL(sVisibleObservationVariableView)
 
                 db.execSQL(sLocalImageObservationsView)
 
@@ -390,14 +380,13 @@ class Migrator {
 
         }
 
-        fun migrateToVersionExampleN(db: SQLiteDatabase) {
-
-            ExampleMigratorVersionN().migrate(db)
+        fun migrateToVersion13(db: SQLiteDatabase) {
+            RefactorMigratorVersion13().migrate(db)
                 .onFailure {
-                    Log.e(TAG, "Failed to migrate to version N", it)
+                    Log.e(TAG, "Failed to migrate to version 13", it)
                 }
                 .onSuccess {
-                    Log.d(TAG, "Migrated to version N")
+                    Log.d(TAG, "Migrated to version 13")
                 }
         }
     }
@@ -482,8 +471,11 @@ class Migrator {
     class ObservationUnitAttribute private constructor() {
 
         companion object Schema {
-            const val PK = "internal_id_observation_unit_attribute"
-            const val FK = "observation_unit_attribute_db_id"
+            const val INTERNAL_ID_OBSERVATION_UNIT_ATTRIBUTE = "internal_id_observation_unit_attribute"
+            const val OBSERVATION_UNIT_ATTRIBUTE_NAME = "observation_unit_attribute_name"
+            const val OBSERVATION_UNIT_ATTRIBUTE_DB_ID = "observation_unit_attribute_db_id"
+            const val PK = INTERNAL_ID_OBSERVATION_UNIT_ATTRIBUTE
+            const val FK = OBSERVATION_UNIT_ATTRIBUTE_DB_ID
             const val migrateFromTableName = "plot_attributes"
             const val tableName = "observation_units_attributes"
             val columnDefs by lazy {
@@ -502,7 +494,12 @@ class Migrator {
     class ObservationUnitValue private constructor() {
 
         companion object Schema {
-            const val PK = "internal_id_observation_unit_value"
+            const val INTERNAL_ID_OBSERVATION_UNIT_VALUE = "internal_id_observation_unit_value"
+            const val OBSERVATION_UNIT_VALUE_NAME = "observation_unit_value_name"
+            const val OBSERVATION_UNIT_ATTRIBUTE_DB_ID = "observation_unit_attribute_db_id"
+            const val OBSERVATION_UNIT_ID = "observation_unit_id"
+            const val STUDY_ID = "study_id"
+            const val PK = INTERNAL_ID_OBSERVATION_UNIT_VALUE
             const val FK = "observation_unit_value_db_id"
             const val migrateFromTableName = "plot_values"
             const val tableName = "observation_units_values"

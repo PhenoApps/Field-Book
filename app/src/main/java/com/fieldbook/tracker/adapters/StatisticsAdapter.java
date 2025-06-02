@@ -201,8 +201,8 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         List<String> fieldNames = new ArrayList<>();
         for (String field : fields) {
             FieldObject f = database.getFieldObject(Integer.valueOf(field));
-            if (f != null && f.getExp_name() != null) {
-                fieldNames.add(f.getExp_name());
+            if (f != null && f.getName() != null) {
+                fieldNames.add(f.getName());
             }
         }
 
