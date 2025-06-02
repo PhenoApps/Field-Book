@@ -65,7 +65,7 @@ import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
-import com.fieldbook.tracker.utilities.ExportUtil;
+import com.fieldbook.tracker.utilities.export.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -115,7 +115,6 @@ public class FieldEditorActivity extends ThemedActivity
     private GPSTracker mGpsTracker;
     private ActionMode actionMode;
     private TextView customTitleView;
-    public ExportUtil exportUtil;
     private SearchBar searchBar;
 
     @Inject
@@ -126,6 +125,10 @@ public class FieldEditorActivity extends ThemedActivity
 
     @Inject
     SharedPreferences preferences;
+
+    @Inject
+    ExportUtil exportUtil;
+
     RecyclerView recyclerView;
 
     // Creates a new thread to do importing
@@ -144,7 +147,6 @@ public class FieldEditorActivity extends ThemedActivity
         setContentView(R.layout.activity_fields);
         Toolbar toolbar = findViewById(R.id.field_toolbar);
         setSupportActionBar(toolbar);
-        exportUtil = new ExportUtil(this, database);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.settings_fields));
