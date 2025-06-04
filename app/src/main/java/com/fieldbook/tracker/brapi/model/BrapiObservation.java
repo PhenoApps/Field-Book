@@ -13,6 +13,7 @@ public class BrapiObservation {
     private OffsetDateTime lastSyncedTime;
     private String fieldbookDbId;
     private String variableName;
+    private String variableDetails;
 
     public String getFieldbookDbId() {
         return fieldbookDbId;
@@ -134,6 +135,14 @@ public class BrapiObservation {
 
     public void setVariableName(String variableName) {
         this.variableName = variableName;
+    }
+
+    public String getVariableDetails() {
+        return variableDetails;
+    }
+
+    public void setVariableDetails(String variableDetails) {
+        this.variableDetails = variableDetails;
     }
 
     public String getFieldBookDbId() {
