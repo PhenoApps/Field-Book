@@ -34,8 +34,8 @@ Press the arrow icon in the upper righthand corner of a card to export an image 
 ## Heatmap
 
 The heatmap view can be accessed through the icon on the toolbar.
-The heatmap view shows your collection activy overlayed on a calendar.
-Each circle on a date represents collection acvtity on that date, with the color intensity corresponding to the number of observations.
+The heatmap view shows your collection activity overlayed on a calendar.
+Each circle on a date represents collection activity on that date, with the color intensity corresponding to the number of observations.
 
 Use the up and down arrows in the toolbar to scroll through the calendar.
 Use the calendar icon to set a custom range of dates.
