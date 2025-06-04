@@ -48,7 +48,7 @@
     <string name="app_intro_high_contrast_summary">Abilita il tema ad alto contrasto per una migliore visibilità sui dispositivi elnk.</string>
     <!-- Storage Definer -->
     <string name="storage_definer_title">Posizione di archiviazione</string>
-    <string name="define_button_text">Scegli la cartella</string>
+    <string name="define_button_text">Scegli la Cartella</string>
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_storage_export">L\'esportazione dei dati richiede l\'accesso ai file del dispositivo.</string>
@@ -82,8 +82,8 @@
     <string name="menu_fields_sort_list">Ordina per elenco di campi</string>
     <string name="fields_sort_reset">Ripristina</string>
     <string name="fields_sort_by_name">Nome</string>
-    <string name="fields_sort_by_import_format">Importa formato</string>
-    <string name="fields_sort_by_import_date">Importa data</string>
+    <string name="fields_sort_by_import_format">Formato Di Importazione</string>
+    <string name="fields_sort_by_import_date">Data Di Importazione</string>
     <string name="fields_sort_by_edit_date">Modifica date</string>
     <string name="fields_sort_by_sync_date">Sincronizza date</string>
     <string name="fields_sort_by_export_date">Esporta date</string>
