@@ -28,6 +28,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.BackgroundUiTask;
 import com.fieldbook.tracker.utilities.BrapiExportUtil;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -57,10 +58,14 @@ public class BrapiExportActivity extends ThemedActivity {
     private static final String FLOW_TAG = "BrapiExportFlow";
 
     private BrAPIService brAPIService;
+    private FieldObject fieldObject;
+    private int userCreatedTraitsCount;
+    private int wrongSourceCount;
+    private int userCreatedImagesCount;
+    private int wrongSourceImagesCount;
     private List<Observation> newObservations;
     private List<Observation> editedObservations;
     private List<Observation> newImageObservations;
-    private List<Observation> syncedImageObservations;
     private List<Observation> editedImageObservations;
     private List<Observation> incompleteImageObservations;
     private List<FieldBookImage> imagesNew;
@@ -838,67 +843,110 @@ public class BrapiExportActivity extends ThemedActivity {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadStatistics() {
         Log.d(TAG, "Starting loadStatistics");
-        long startTime = System.currentTimeMillis();
+        
+        // Disable the export button during loading
+        final Button exportBtn = findViewById(R.id.brapi_export_btn);
+        if (exportBtn != null) {
+            exportBtn.setEnabled(false);
+        }
+        
+        // Use BackgroundUiTask to move the database operations off the main thread
+        BackgroundUiTask.Companion.execute(
+            // Background work - using lambda instead of method reference
+            continuation -> {
+                try {
+                    Log.d(TAG, "Starting loadStatistics in background");
+                    long startTime = System.currentTimeMillis();
+                    
+                    String hostURL = BrAPIService.getHostUrl(this);
+                    
+                    // Get all categorized observations in a single query
+                    Map<String, List<Observation>> exportData = dataHelper.getBrAPIExportData(fieldId, hostURL);
+                    
+                    // Get the lists from the map
+                    newObservations = exportData.get("newObservations");
+                    List<Observation> syncedObservations = exportData.get("syncedObservations");
+                    editedObservations = exportData.get("editedObservations");
+                    newImageObservations = exportData.get("newImageObservations");
+                    List<Observation> syncedImageObservations = exportData.get("syncedImageObservations");
+                    editedImageObservations = exportData.get("editedImageObservations");
+                    incompleteImageObservations = exportData.get("incompleteImageObservations");
+                    List<Observation> userCreatedTraitObservations = exportData.get("userCreatedTraitObservations");
+                    List<Observation> wrongSourceObservations = exportData.get("wrongSourceObservations");
+                    List<Observation> userCreatedImageObservations = exportData.get("userCreatedImageObservations");
+                    List<Observation> wrongSourceImageObservations = exportData.get("wrongSourceImageObservations");
+                    
+                    // Set counts based on list sizes
+                    numNewObservations = newObservations != null ? newObservations.size() : 0;
+                    numSyncedObservations = syncedObservations != null ? syncedObservations.size() : 0;
+                    numEditedObservations = editedObservations != null ? editedObservations.size() : 0;
+                    numNewImages = newImageObservations != null ? newImageObservations.size() : 0;
+                    numSyncedImages = syncedImageObservations != null ? syncedImageObservations.size() : 0;
+                    numEditedImages = editedImageObservations != null ? editedImageObservations.size() : 0;
+                    numIncompleteImages = incompleteImageObservations != null ? incompleteImageObservations.size() : 0;
+                    
+                    // Clear image lists since we don't need them yet
+                    imagesNew.clear();
+                    imagesEditedIncomplete.clear();
+                    
+                    // Get field object for display
+                    fieldObject = dataHelper.getFieldObject(fieldId);
+                    
+                    // Store counts for user created and wrong source items
+                    userCreatedTraitsCount = userCreatedTraitObservations != null ? userCreatedTraitObservations.size() : 0;
+                    wrongSourceCount = wrongSourceObservations != null ? wrongSourceObservations.size() : 0;
+                    userCreatedImagesCount = userCreatedImageObservations != null ? userCreatedImageObservations.size() : 0;
+                    wrongSourceImagesCount = wrongSourceImageObservations != null ? wrongSourceImageObservations.size() : 0;
+                    
+                    Log.d(TAG, "loadStatistics background completed in " + (System.currentTimeMillis() - startTime) + "ms");
+                } catch (Exception e) {
+                    Log.e(TAG, "Error in background task", e);
+                    throw e; // Re-throw to trigger onCanceled
+                }
+                return null;
+            },
+            // UI update - using lambda instead of method reference
+            continuation -> {
+                Log.d(TAG, "Updating statistics UI");
+                
+                if (fieldObject != null) {
+                    ((TextView) findViewById(R.id.brapistudyValue)).setText(fieldObject.getExp_alias());
+                }
+                
+                ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));
+                ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
+                ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(numEditedObservations));
+                ((TextView) findViewById(R.id.brapiUserCreatedValue)).setText(String.valueOf(userCreatedTraitsCount));
+                ((TextView) findViewById(R.id.brapiWrongSource)).setText(String.valueOf(wrongSourceCount));
 
-        String hostURL = BrAPIService.getHostUrl(this);
-        
-        // Get all categorized observations in a single query
-        Map<String, List<Observation>> exportData = dataHelper.getBrAPIExportData(fieldId, hostURL);
-        
-        // Get the lists from the map
-        newObservations = exportData.get("newObservations");
-        List<Observation> syncedObservations = exportData.get("syncedObservations");
-        editedObservations = exportData.get("editedObservations");
-        newImageObservations = exportData.get("newImageObservations");
-        syncedImageObservations = exportData.get("syncedImageObservations");
-        editedImageObservations = exportData.get("editedImageObservations");
-        incompleteImageObservations = exportData.get("incompleteImageObservations");
-        List<Observation> userCreatedTraitObservations = exportData.get("userCreatedTraitObservations");
-        List<Observation> wrongSourceObservations = exportData.get("wrongSourceObservations");
-        List<Observation> userCreatedImageObservations = exportData.get("userCreatedImageObservations");
-        List<Observation> wrongSourceImageObservations = exportData.get("wrongSourceImageObservations");
-        
-        // Set counts based on list sizes
-        numNewObservations = newObservations.size();
-        numSyncedObservations = syncedObservations.size();
-        numEditedObservations = editedObservations.size();
-        numNewImages = newImageObservations.size();
-        numSyncedImages = syncedImageObservations.size();
-        numEditedImages = editedImageObservations.size();
-        numIncompleteImages = incompleteImageObservations.size();
-        
-        // Store the image observation lists for later use
-        this.newImageObservations = newImageObservations;
-        this.editedImageObservations = editedImageObservations;
-        this.incompleteImageObservations = incompleteImageObservations;
-        
-        // Clear image lists since we don't need them yet
-        imagesNew.clear();
-        imagesEditedIncomplete.clear();
-        
-        FieldObject field = dataHelper.getFieldObject(fieldId);
-        
-        Log.d(TAG, "loadStatistics completed in " + (System.currentTimeMillis() - startTime) + "ms");
+                ((TextView) findViewById(R.id.brapiNumNewImagesValue)).setText(String.valueOf(numNewImages));
+                ((TextView) findViewById(R.id.brapiNumSyncedImagesValue)).setText(String.valueOf(numSyncedImages));
+                ((TextView) findViewById(R.id.brapiNumEditedImagesValue)).setText(String.valueOf(numEditedImages));
+                ((TextView) findViewById(R.id.brapiNumIncompleteImagesValue)).setText(String.valueOf(numIncompleteImages));
 
-        runOnUiThread(() -> {
-            ((TextView) findViewById(R.id.brapistudyValue)).setText(field.getExp_alias());
-            ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));
-            ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
-            ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(numEditedObservations));
-            ((TextView) findViewById(R.id.brapiUserCreatedValue)).setText(String.valueOf(userCreatedTraitObservations.size()));
-            ((TextView) findViewById(R.id.brapiWrongSource)).setText(String.valueOf(wrongSourceObservations.size()));
-
-            ((TextView) findViewById(R.id.brapiNumNewImagesValue)).setText(String.valueOf(numNewImages));
-            ((TextView) findViewById(R.id.brapiNumSyncedImagesValue)).setText(String.valueOf(numSyncedImages));
-            ((TextView) findViewById(R.id.brapiNumEditedImagesValue)).setText(String.valueOf(numEditedImages));
-            ((TextView) findViewById(R.id.brapiNumIncompleteImagesValue)).setText(String.valueOf(numIncompleteImages));
-
-            ((TextView) findViewById(R.id.brapiUserCreatedImagesValue)).setText(String.valueOf(userCreatedImageObservations.size()));
-            ((TextView) findViewById(R.id.brapiWrongSourceImages)).setText(String.valueOf(wrongSourceImageObservations.size()));
-        });
+                ((TextView) findViewById(R.id.brapiUserCreatedImagesValue)).setText(String.valueOf(userCreatedImagesCount));
+                ((TextView) findViewById(R.id.brapiWrongSourceImages)).setText(String.valueOf(wrongSourceImagesCount));
+                
+                // Re-enable the export button if there's data to export
+                if (exportBtn != null) {
+                    exportBtn.setEnabled(numNewObservations > 0 || numEditedObservations > 0 || 
+                                        numNewImages > 0 || numEditedImages > 0 || numIncompleteImages > 0);
+                }
+                return null;
+            },
+            // On canceled/error - using lambda
+            continuation -> {
+                Log.e(TAG, "Background task for loading statistics was canceled");
+                // Re-enable the export button
+                if (exportBtn != null) {
+                    exportBtn.setEnabled(true);
+                }
+                Toast.makeText(this, R.string.brapi_export_load_stats_error, Toast.LENGTH_SHORT).show();
+                return null;
+            }
+        );
     }
 
     @Override

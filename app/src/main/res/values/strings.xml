@@ -1144,6 +1144,7 @@
     <string name="brapi_warning_select_program">Please select a program</string>
     <string name="brapi_warning_select_trial">Please select a trial</string>
     <string name="brapi_warning_select_study">Please select a field</string>
+    <string name="brapi_export_load_stats_error">Error loading export statistics</string>
     <string name="brapi_export_failed">BrAPI Export Failed</string>
     <string name="brapi_export_permission_deny">ERROR: You do not have the permissions to send data to the specified system.</string>
     <string name="brapi_export_not_supported">ERROR: Target system does not support sending observations via BrAPI.</string>
