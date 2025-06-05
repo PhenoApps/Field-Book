@@ -1193,6 +1193,16 @@
     <string name="brapi_delete_message">Cannot delete synced BrAPI observation, using NA instead</string>
     <string name="act_brapi_export_image_load_failed">Image load failed.</string>
 
+    <string name="brapi_export_progress_title">Exporting to BrAPI</string>
+    <string name="brapi_export_status">Status</string>
+    <string name="brapi_export_current_operation">Current Operation</string>
+    <string name="brapi_export_preparing">Preparing export...</string>
+    <string name="brapi_export_new_observations_pending">New Observations</string>
+    <string name="brapi_export_edited_observations_pending">Edited Observations</string>
+    <string name="brapi_export_new_images_pending">New Images</string>
+    <string name="brapi_export_edited_images_pending">Edited/Incomplete Images</string>
+    <string name="cancelling">Cancelling...</string>
+
     <!-- Pagination -->
     <string name="next">Next</string>
     <string name="prev">Prev</string>
