@@ -1039,6 +1039,7 @@
     <string name="brapi_pagination">Page Size</string>
     <string name="brapi_timeout">Server Timeout</string>
     <string name="brapi_chunk_size">Chunk Size</string>
+    <string name="brapi_max_concurrent_image_content">Max Concurrent Image Export</string>
 
     <string name="preferences_brapi_authorization_title">Authorization</string>
     <string name="preferences_brapi_advanced_title">Advanced</string>
@@ -1202,6 +1203,12 @@
     <string name="brapi_export_new_images_pending">New Images</string>
     <string name="brapi_export_edited_images_pending">Edited/Incomplete Images</string>
     <string name="cancelling">Cancelling...</string>
+    <string name="brapi_export_uploading_new_observations">Uploading new observations...</string>
+    <string name="brapi_export_uploading_edited_observations">Uploading edited observations...</string>
+    <string name="brapi_export_uploading_new_images">Uploading new images...</string>
+    <string name="brapi_export_uploading_edited_images">Uploading edited/incomplete images...</string>
+    <string name="brapi_export_complete">Export complete</string>
+    <string name="cancel">Cancel</string>
 
     <!-- Pagination -->
     <string name="next">Next</string>

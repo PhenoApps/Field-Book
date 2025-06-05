@@ -26,7 +26,9 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.dialogs.BrapiExportProgressDialog;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.BackgroundUiTask;
 import com.fieldbook.tracker.utilities.BrapiExportUtil;
@@ -35,6 +37,13 @@ import com.fieldbook.tracker.utilities.Utils;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -59,6 +68,13 @@ public class BrapiExportActivity extends ThemedActivity {
 
     private BrAPIService brAPIService;
     private FieldObject fieldObject;
+    private BrapiExportProgressDialog progressDialog;
+    private ExecutorService imageContentExecutor;
+    private final BlockingQueue<FieldBookImage> imageContentQueue = new LinkedBlockingQueue<>();
+    private final AtomicInteger activeImageContentUploads = new AtomicInteger(0);
+    private final AtomicInteger completedImageContentUploads = new AtomicInteger(0);
+    private volatile boolean exportCancelled = false;
+
     private int userCreatedTraitsCount;
     private int wrongSourceCount;
     private int userCreatedImagesCount;
@@ -192,11 +208,12 @@ public class BrapiExportActivity extends ThemedActivity {
         }
     }
 
-    private void logMemoryUsage(String location) {
+    private void logMemoryUsage(String context) {
         Runtime runtime = Runtime.getRuntime();
-        long usedMemoryMB = (runtime.totalMemory() - runtime.freeMemory()) / 1048576L;
-        long maxMemoryMB = runtime.maxMemory() / 1048576L;
-        Log.d(MEMORY_TAG, location + " - Memory used: " + usedMemoryMB + "MB / Max: " + maxMemoryMB + "MB (" + (usedMemoryMB * 100 / maxMemoryMB) + "%)");
+        long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
+        long maxMemory = runtime.maxMemory() / (1024 * 1024);
+        int percentUsed = (int) ((usedMemory * 100) / maxMemory);
+        Log.d(MEMORY_TAG, context + " - Memory used: " + usedMemory + "MB / Max: " + maxMemory + "MB (" + percentUsed + "%)");
     }
 
     @Override
@@ -251,6 +268,10 @@ public class BrapiExportActivity extends ThemedActivity {
     }
 
     // private void sendData() {
+    //     Log.d(FLOW_TAG, "Starting data export process");
+    //     Log.d(FLOW_TAG, "Observations to create: " + numNewObservations + ", to update: " + numEditedObservations);
+    //     Log.d(FLOW_TAG, "Images to create: " + numNewImages + ", to update: " + (numEditedImages + numIncompleteImages));
+    //     logMemoryUsage("Before sendData");
     //     AsyncTask.execute(() -> {
     //         if (numNewObservations > 0) {
     //             try {
@@ -304,47 +325,266 @@ public class BrapiExportActivity extends ThemedActivity {
     //     });
     // }
 
+    // private void sendData() {
+    //     Log.d(FLOW_TAG, "Starting data export process");
+    //     Log.d(FLOW_TAG, "Observations to create: " + numNewObservations + ", to update: " + numEditedObservations);
+    //     Log.d(FLOW_TAG, "Images to create: " + numNewImages + ", to update: " + (numEditedImages + numIncompleteImages));
+    //     logMemoryUsage("Before sendData");
+        
+    //     AsyncTask.execute(() -> {
+    //         if (numNewObservations > 0) {
+    //             Log.d(FLOW_TAG, "Starting observation creation");
+    //             try {
+    //                 createObservations();
+    //             } catch (InterruptedException e) {
+    //                 Log.w(TAG, "Saving observations was interrupted", e);
+    //             }
+    //         } else {
+    //             createObservationsComplete = true;
+    //             uploadComplete();
+    //         }
+
+    //         if (numEditedObservations > 0) {
+    //             Log.d(FLOW_TAG, "Starting observation updates");
+    //             updateObservations();
+    //         } else {
+    //             updateObservationsComplete = true;
+    //             uploadComplete();
+    //         }
+
+    //         if (numNewImages > 0) {
+    //             Log.d(FLOW_TAG, "Loading " + imagesNew.size() + " new images");
+    //             loadNewImages();
+    //             Log.d(FLOW_TAG, "Starting upload of " + imagesNew.size() + " new images");
+    //             postImages(imagesNew);
+    //         }
+            
+    //         if (numEditedImages > 0 || numIncompleteImages > 0) {
+    //             Log.d(FLOW_TAG, "Loading " + imagesEditedIncomplete.size() + " edited/incomplete images");
+    //             loadEditedIncompleteImages();
+    //             Log.d(FLOW_TAG, "Starting update of " + imagesEditedIncomplete.size() + " edited/incomplete images");
+    //             putImages();
+    //         }
+    //     });
+    // }
+
     private void sendData() {
         Log.d(FLOW_TAG, "Starting data export process");
         Log.d(FLOW_TAG, "Observations to create: " + numNewObservations + ", to update: " + numEditedObservations);
         Log.d(FLOW_TAG, "Images to create: " + numNewImages + ", to update: " + (numEditedImages + numIncompleteImages));
         logMemoryUsage("Before sendData");
         
+        // Get max concurrent operations from preferences
+        int maxConcurrentImageUploads = Integer.parseInt(preferences.getString(
+                PreferenceKeys.BRAPI_MAX_CONCURRENT_IMAGE_CONTENT, "3"));
+        
+        // Initialize the executor service for image content uploads
+        imageContentExecutor = Executors.newFixedThreadPool(maxConcurrentImageUploads);
+        
+        // Reset counters
+        completedImageContentUploads.set(0);
+        activeImageContentUploads.set(0);
+        exportCancelled = false;
+        
         AsyncTask.execute(() -> {
-            if (numNewObservations > 0) {
-                Log.d(FLOW_TAG, "Starting observation creation");
-                try {
-                    createObservations();
-                } catch (InterruptedException e) {
-                    Log.w(TAG, "Saving observations was interrupted", e);
-                }
-            } else {
-                createObservationsComplete = true;
-                uploadComplete();
-            }
-
-            if (numEditedObservations > 0) {
-                Log.d(FLOW_TAG, "Starting observation updates");
-                updateObservations();
-            } else {
-                updateObservationsComplete = true;
-                uploadComplete();
-            }
-
-            if (numNewImages > 0) {
-                Log.d(FLOW_TAG, "Loading " + imagesNew.size() + " new images");
-                loadNewImages();
-                Log.d(FLOW_TAG, "Starting upload of " + imagesNew.size() + " new images");
-                postImages(imagesNew);
-            }
+            // Process observations in batches
+            processObservations();
             
-            if (numEditedImages > 0 || numIncompleteImages > 0) {
-                Log.d(FLOW_TAG, "Loading " + imagesEditedIncomplete.size() + " edited/incomplete images");
-                loadEditedIncompleteImages();
-                Log.d(FLOW_TAG, "Starting update of " + imagesEditedIncomplete.size() + " edited/incomplete images");
-                putImages();
-            }
+            // Process image metadata in batches
+            processImageMetadata();
+            
+            // Queue image content uploads and process with limited concurrency
+            startImageContentUploads(maxConcurrentImageUploads);
         });
+    }
+
+    private void processObservations() {
+        if (numNewObservations > 0) {
+            Log.d(FLOW_TAG, "Starting to create " + numNewObservations + " observations");
+            progressDialog.setCurrentOperation("Creating new observations");
+            try {
+                createObservations();
+            } catch (InterruptedException e) {
+                Log.w(TAG, "Saving observations was interrupted", e);
+            }
+        } else {
+            createObservationsComplete = true;
+            uploadComplete();
+        }
+
+        if (numEditedObservations > 0) {
+            Log.d(FLOW_TAG, "Starting to update " + numEditedObservations + " observations");
+            progressDialog.setCurrentOperation("Updating edited observations");
+            updateObservations();
+        } else {
+            updateObservationsComplete = true;
+            uploadComplete();
+        }
+    }
+
+    private void processImageMetadata() {
+        // Process new image metadata in batches
+        if (numNewImages > 0) {
+            Log.d(FLOW_TAG, "Processing metadata for " + numNewImages + " new images");
+            progressDialog.setCurrentOperation("Uploading metadata for new images");
+            
+            // No need to load images for metadata operations
+            postImages(imagesNew);
+        }
+        
+        // Process edited/incomplete image metadata in batches
+        if (numEditedImages > 0 || numIncompleteImages > 0) {
+            Log.d(FLOW_TAG, "Processing metadata for " + (numEditedImages + numIncompleteImages) + " edited/incomplete images");
+            progressDialog.setCurrentOperation("Uploading metadata for edited images");
+            
+            // No need to load images for metadata operations
+            putImages();
+        }
+    }
+
+    private void startImageContentUploads(int maxConcurrentUploads) {
+    // Queue all images that need content upload
+    imageContentQueue.clear();
+    
+    // Wait for metadata operations to complete before starting content uploads
+    while (!exportCancelled && 
+           (postImageMetaDataUpdatesCount < numNewImages || 
+            putImageMetaDataUpdatesCount < (numEditedImages + numIncompleteImages))) {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return;
+        }
+    }
+    
+    // Add all images with successful metadata operations to the content upload queue
+    for (FieldBookImage image : imagesNew) {
+        if (image.getDbId() != null) {
+            imageContentQueue.add(image);
+        }
+    }
+    
+    for (FieldBookImage image : imagesEditedIncomplete) {
+        if (image.getDbId() != null) {
+            imageContentQueue.add(image);
+        }
+    }
+    
+    Log.d(FLOW_TAG, "Queued " + imageContentQueue.size() + " images for content upload");
+    
+    // Start worker threads for content uploads
+    for (int i = 0; i < maxConcurrentUploads; i++) {
+        imageContentExecutor.submit(this::processNextImageContent);
+    }
+}
+
+    private void processNextImageContent() {
+        try {
+            while (!Thread.currentThread().isInterrupted() && !exportCancelled && !progressDialog.isExportCancelled()) {
+                // Get next image from queue with timeout
+                FieldBookImage image = imageContentQueue.poll(500, TimeUnit.MILLISECONDS);
+                
+                if (image == null) {
+                    // If no more images and no active operations, this worker can exit
+                    if (activeImageContentUploads.get() == 0 && imageContentQueue.isEmpty()) {
+                        break;
+                    }
+                    continue;
+                }
+                
+                // Increment active operations counter
+                activeImageContentUploads.incrementAndGet();
+                
+                try {
+                    // Process image content upload
+                    uploadImageContent(image);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error uploading image content: " + e.getMessage(), e);
+                } finally {
+                    // Decrement active operations counter
+                    activeImageContentUploads.decrementAndGet();
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void uploadImageContent(FieldBookImage image) {
+        // First load the image
+        progressDialog.setCurrentOperation("Loading image: " + image.getFileName());
+        
+        try {
+            loadImage(image);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to load image: " + image.getFileName(), e);
+            completedImageContentUploads.incrementAndGet();
+            updateProgressDialog();
+            return;
+        }
+        
+        // Then upload the content
+        final CountDownLatch contentLatch = new CountDownLatch(1);
+        
+        progressDialog.setCurrentOperation("Uploading content: " + image.getFileName());
+        
+        Log.d(FLOW_TAG, "Uploading image content: " + image.getFileName());
+        long startTime = System.currentTimeMillis();
+        logMemoryUsage("Before uploading image content " + image.getFileName());
+        
+        brAPIService.putImageContent(image,
+            responseImage -> {
+                Log.d(PERFORMANCE_TAG, "Uploaded image content for " + image.getFileName() + " in " + (System.currentTimeMillis() - startTime) + "ms");
+                
+                runOnUiThread(() -> {
+                    String fieldBookId = image.getFieldBookDbId();
+                    processPutImageContentResponse(responseImage, fieldBookId);
+                    putImageContentUpdatesCount++;
+                    completedImageContentUploads.incrementAndGet();
+                    updateProgressDialog();
+                    uploadComplete();
+                });
+                
+                contentLatch.countDown();
+                return null;
+            },
+            code -> {
+                Log.e(TAG, "Failed to upload image content for " + image.getFileName() + ": error code " + code);
+                
+                runOnUiThread(() -> {
+                    putImageContentError = processErrorCode(code);
+                    putImageContentUpdatesCount++;
+                    completedImageContentUploads.incrementAndGet();
+                    updateProgressDialog();
+                    uploadComplete();
+                });
+                
+                contentLatch.countDown();
+                return null;
+            });
+        
+        try {
+            // Wait for content upload to complete
+            if (!contentLatch.await(60, TimeUnit.SECONDS)) {
+                Log.e(TAG, "Content upload timed out for: " + image.getFileName());
+                completedImageContentUploads.incrementAndGet();
+                updateProgressDialog();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
+        // Clear image data to free memory
+        clearImageData(image);
+        System.gc();
+    }
+
+    private void clearImageData(FieldBookImage image) {
+        // Set the image data to null to free memory
+        image.setBytes(null);
+        // Force garbage collection to reclaim memory
+        System.gc();
     }
 
     private void loadImage(FieldBookImage image) {
@@ -361,13 +601,6 @@ public class BrapiExportActivity extends ThemedActivity {
         }
         
         logMemoryUsage("After loading image " + image.getFileName());
-    }
-
-    private void postImages(List<FieldBookImage> newImages) {
-        Log.d(FLOW_TAG, "Starting to post metadata for " + newImages.size() + " images");
-        for (FieldBookImage image : newImages) {
-            postImage(image);
-        }
     }
 
     private void postImage(final FieldBookImage imageData) {
@@ -451,13 +684,6 @@ public class BrapiExportActivity extends ThemedActivity {
         logMemoryUsage("After initiating image content upload " + image.getFileName());
     }
 
-    private void putImages() {
-        Log.d(FLOW_TAG, "Starting to update metadata for " + imagesEditedIncomplete.size() + " images");
-        for (FieldBookImage image : imagesEditedIncomplete) {
-            putImage(image);
-        }
-    }
-
     private void putImage(final FieldBookImage imageData) {
         Log.d(FLOW_TAG, "Updating image metadata: " + imageData.getFileName());
         long startTime = System.currentTimeMillis();
@@ -535,21 +761,57 @@ public class BrapiExportActivity extends ThemedActivity {
     //     }
     // }
 
+    // private void showSaving() {
+    //     // Disable the export button so that can't click it again
+    //     Button exportBtn = this.findViewById(R.id.brapi_export_btn);
+    //     exportBtn.setEnabled(false);
+    //     // Show our saving wheel
+    //     this.findViewById(R.id.saving_panel).setVisibility(View.VISIBLE);
+    // }
+
     private void showSaving() {
         // Disable the export button so that can't click it again
         Button exportBtn = this.findViewById(R.id.brapi_export_btn);
         exportBtn.setEnabled(false);
-        // Show our saving wheel
-        this.findViewById(R.id.saving_panel).setVisibility(View.VISIBLE);
+        
+        // Show progress dialog
+        progressDialog = new BrapiExportProgressDialog(this, () -> {
+            exportCancelled = true;
+            if (imageContentExecutor != null) {
+                imageContentExecutor.shutdownNow();
+            }
+        });
+        progressDialog.show();
+        
+        // Update initial progress
+        updateProgressDialog();
+    }
+
+    private void updateProgressDialog() {
+        if (progressDialog != null && !isFinishing()) {
+            runOnUiThread(() -> {
+                int totalObservations = numNewObservations + numEditedObservations;
+                int completedObservations = totalObservations - newObservations.size() - editedObservations.size();
+                
+                progressDialog.updateProgress(
+                    numNewObservations - newObservations.size(), numNewObservations,
+                    numEditedObservations - editedObservations.size(), numEditedObservations,
+                    completedImageContentUploads.get(), numNewImages,
+                    0, numEditedImages + numIncompleteImages
+                );
+            });
+        }
     }
 
     private void hideSaving() {
-        // Re-enable our login button
-        // Disable the export button so that can't click it again
         runOnUiThread(() -> {
-            Button exportBtn = this.findViewById(R.id.brapi_export_btn);
+            Button exportBtn = findViewById(R.id.brapi_export_btn);
             exportBtn.setEnabled(true);
-            this.findViewById(R.id.saving_panel).setVisibility(View.GONE);
+            
+            if (progressDialog != null) {
+                progressDialog.dismiss();
+                progressDialog = null;
+            }
         });
     }
 
@@ -623,6 +885,55 @@ public class BrapiExportActivity extends ThemedActivity {
 
             return null;
         });
+    }
+
+    private void postImages(List<FieldBookImage> newImages) {
+        Log.d(FLOW_TAG, "Starting to post metadata for " + newImages.size() + " images");
+        
+        // Process in batches of 10 (or another reasonable size)
+        int batchSize = 10;
+        for (int i = 0; i < newImages.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, newImages.size());
+            List<FieldBookImage> batch = newImages.subList(i, end);
+            
+            Log.d(FLOW_TAG, "Posting metadata batch " + (i/batchSize + 1) + " with " + batch.size() + " images");
+            progressDialog.setCurrentOperation("Posting metadata batch " + (i/batchSize + 1) + "/" + ((newImages.size() + batchSize - 1)/batchSize));
+            
+            for (FieldBookImage image : batch) {
+                postImage(image);
+            }
+        }
+    }
+
+    private void putImages() {
+        Log.d(FLOW_TAG, "Starting to update metadata for " + imagesEditedIncomplete.size() + " images");
+        
+        // Process in batches of 10 (or another reasonable size)
+        int batchSize = 10;
+        for (int i = 0; i < imagesEditedIncomplete.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, imagesEditedIncomplete.size());
+            List<FieldBookImage> batch = imagesEditedIncomplete.subList(i, end);
+            
+            Log.d(FLOW_TAG, "Updating metadata batch " + (i/batchSize + 1) + " with " + batch.size() + " images");
+            progressDialog.setCurrentOperation("Updating metadata batch " + (i/batchSize + 1) + "/" + ((imagesEditedIncomplete.size() + batchSize - 1)/batchSize));
+            
+            for (FieldBookImage image : batch) {
+                putImage(image);
+            }
+        }
+    }
+
+    private Boolean imagesComplete() {
+        boolean metadataComplete = postImageMetaDataUpdatesCount == numNewImages &&
+                                putImageMetaDataUpdatesCount == (numEditedImages + numIncompleteImages);
+        boolean contentComplete = putImageContentUpdatesCount == (numNewImages + numEditedImages + numIncompleteImages);
+        
+        Log.d(FLOW_TAG, "Images complete check: " + (metadataComplete && contentComplete) + 
+            " (PostMeta: " + postImageMetaDataUpdatesCount + "/" + numNewImages + 
+            ", PutContent: " + putImageContentUpdatesCount + "/" + (numNewImages + numEditedImages + numIncompleteImages) + 
+            ", PutMeta: " + putImageMetaDataUpdatesCount + "/" + (numEditedImages + numIncompleteImages) + ")");
+        
+        return metadataComplete && contentComplete;
     }
 
     // private void postImages(List<FieldBookImage> newImages) {
@@ -892,19 +1203,6 @@ public class BrapiExportActivity extends ThemedActivity {
         }
     }
 
-    private Boolean imagesComplete() {
-        boolean complete = postImageMetaDataUpdatesCount == numNewImages &&
-                putImageContentUpdatesCount == (numNewImages + numEditedImages + numIncompleteImages) &&
-                putImageMetaDataUpdatesCount == (numEditedImages + numIncompleteImages);
-        
-        Log.d(FLOW_TAG, "Images complete check: " + complete + 
-            " (PostMeta: " + postImageMetaDataUpdatesCount + "/" + numNewImages + 
-            ", PutContent: " + putImageContentUpdatesCount + "/" + (numNewImages + numEditedImages + numIncompleteImages) + 
-            ", PutMeta: " + putImageMetaDataUpdatesCount + "/" + (numEditedImages + numIncompleteImages) + ")");
-        
-        return complete;
-    }
-
     private Boolean observationsComplete() {
         boolean complete = createObservationsComplete && updateObservationsComplete;
         Log.d(FLOW_TAG, "Observations complete check: " + complete + 
@@ -936,6 +1234,15 @@ public class BrapiExportActivity extends ThemedActivity {
         super.onDestroy();
         if (brapiAuth != null && brapiAuth.isAdded() && brapiAuth.isVisible()) {
             brapiAuth.dismiss();
+        }
+        
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+        
+        if (imageContentExecutor != null && !imageContentExecutor.isShutdown()) {
+            imageContentExecutor.shutdownNow();
         }
     }
 
