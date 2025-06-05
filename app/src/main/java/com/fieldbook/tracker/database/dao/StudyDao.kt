@@ -11,22 +11,15 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.Study
+import com.fieldbook.tracker.database.StudyGroupsTable
 import com.fieldbook.tracker.database.getTime
 import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
 import com.fieldbook.tracker.database.toFirst
-import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 
 
 class StudyDao {
@@ -268,6 +261,8 @@ class StudyDao {
             it.observation_count = this["observation_count"]?.toString()
             it.trial_name = this["trial_name"]?.toString()
             it.search_attribute = this["observation_unit_search_attribute"]?.toString()
+            it.groupId = this["group_id"]?.toString()?.toIntOrNull()
+            it.is_archived = this["is_archived"].toString() == "true"
         }
 
         fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
@@ -319,6 +314,8 @@ class StudyDao {
                     trial_name,
                     count,
                     observation_unit_search_attribute,
+                    is_archived,
+                    group_id,
                     (SELECT COUNT(*) FROM observation_units_attributes WHERE study_id = Studies.${Study.PK}) AS attribute_count,
                     (SELECT COUNT(DISTINCT observation_variable_name) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS trait_count,
                     (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
@@ -645,6 +642,42 @@ class StudyDao {
                     where = "internal_id_study = ?",
                     whereArgs = arrayOf(id)
                 ).toFirst()
+            )
+        }
+
+        /**
+         * Returns study by its study_db_id
+         */
+        fun getStudyByDbId(studyDbId: String) = withDatabase { db ->
+            StudyModel(
+                db.query(
+                    Study.tableName,
+                    where = "study_db_id = ?",
+                    whereArgs = arrayOf(studyDbId)
+                ).toFirst()
+            )
+        }
+
+        /**
+         * Updates the group_id for a study
+         */
+        fun updateStudyGroup(studyId: Int, groupId: Int?) = withDatabase { db ->
+            db.update(
+                Study.tableName,
+                contentValuesOf(StudyGroupsTable.FK to groupId),
+                "${Study.PK} = ?", arrayOf("$studyId")
+            )
+        }
+
+        /**
+         * Updates the is_archived flag of a study
+         */
+        fun setIsArchived(studyId: Int, isArchived: Boolean) = withDatabase { db ->
+            val value = if (isArchived) "true" else "false"
+            db.update(
+                Study.tableName,
+                contentValuesOf("is_archived" to value),
+                "${Study.PK} = ?", arrayOf("$studyId")
             )
         }
     }
