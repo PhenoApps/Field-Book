@@ -1,22 +1,20 @@
 package com.fieldbook.tracker.dialogs
 
 import android.app.AlertDialog
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.Spinner
+import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.utilities.Utils
-import androidx.core.content.edit
-import com.fieldbook.tracker.adapters.AttributeAdapter
 import com.fieldbook.tracker.adapters.AttributeAdapter.AttributeModel
 import com.fieldbook.tracker.preferences.DropDownKeyModel
+import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.Utils
 
 class GeoNavCollectDialog(private val activity: CollectActivity) :
     AlertDialog.Builder(activity, R.style.AppAlertDialog) {
@@ -82,6 +80,7 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
     private var audioOnDropCb: CheckBox? = null
     private var degreeOfPrecisionSp: Spinner? = null
     private var geoNavPopupDisplaySp: Spinner? = null
+    private var geoNavAttributeModels: List<AttributeModel> = emptyList()
 
     private val view by lazy {
         LayoutInflater.from(context).inflate(R.layout.dialog_geonav_collect, null, false)
@@ -101,9 +100,10 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
         geoNavPopupDisplaySp = view.findViewById(R.id.dialog_geonav_popup_display)
 
         // fetching spinner items
-        val geoNavPopupDisplayAdapter = ArrayAdapter<AttributeModel>(activity, android.R.layout.simple_spinner_item)
+        val geoNavPopupDisplayAdapter = ArrayAdapter<String>(activity, android.R.layout.simple_spinner_item)
         geoNavPopupDisplayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        geoNavPopupDisplayAdapter.addAll(activity.getGeoNavPopupSpinnerItems())
+        geoNavAttributeModels = activity.getGeoNavPopupSpinnerItems()
+        geoNavPopupDisplayAdapter.addAll(geoNavAttributeModels.map { it.label })
 
         // Set the ArrayAdapter to the Spinner
         geoNavPopupDisplaySp?.adapter = geoNavPopupDisplayAdapter
@@ -173,7 +173,6 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
         auto = autoNavigateCb?.isChecked == true
         audioOnDrop = audioOnDropCb?.isChecked == true
         degreeOfPrecision = degreeOfPrecisionSp?.selectedItem.toString()
-        //TODO 471 update Spinner to use AttributeModel and update preferences
-        //geoNavPopupDisplay = geoNavPopupDisplaySp?.selectedItem.toString()
+        geoNavPopupDisplay = geoNavAttributeModels[geoNavPopupDisplaySp?.selectedItemPosition ?: 0]
     }
 }
