@@ -7,10 +7,8 @@ import android.database.MatrixCursor
 import android.util.Log
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
-import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
 import com.fieldbook.tracker.database.models.ObservationVariableModel
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.traits.formats.parameters.Parameters
 
 class ObservationVariableDao {
 
@@ -235,24 +233,7 @@ class ObservationVariableDao {
                         visible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()
                         additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
 
-                        // Initialize these to the empty string or else they will be null
-                        maximum = ""
-                        minimum = ""
-                        categories = ""
-                        closeKeyboardOnOpen = false
-                        cropImage = false
-
-                        val values = ObservationVariableValueDao.getVariableValues(id.toInt())
-                        values?.forEach { value ->
-                            val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
-                            when (attrName) {
-                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "category" -> categories = value["observation_variable_attribute_value"] as? String ?: ""
-                                "closeKeyboardOnOpen" -> closeKeyboardOnOpen = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
-                                "cropImage" -> cropImage = (value["observation_variable_attribute_value"] as? String ?: "false").toBoolean()
-                            }
-                        }
+                        this.loadAttributeAndValues()
                     }
                     traits.add(trait)
                 }
@@ -354,23 +335,17 @@ class ObservationVariableDao {
 
                 // Log additional values: min, max, categories
                 Log.d("ObservationVariableDao", "And additional attributes:")
-                Log.d("ObservationVariableDao", "minimum: ${t.minimum.orEmpty()}")
-                Log.d("ObservationVariableDao", "maximum: ${t.maximum.orEmpty()}")
-                Log.d("ObservationVariableDao", "categories: ${t.categories.orEmpty()}")
-                Log.d("ObservationVariableDao", "closeKeyboardOnOpen: ${t.closeKeyboardOnOpen ?: "false"}")
-                Log.d("ObservationVariableDao", "cropImage: ${t.cropImage ?: "false"}")
+                Log.d("ObservationVariableDao", "minimum: ${t.minimum}")
+                Log.d("ObservationVariableDao", "maximum: ${t.maximum}")
+                Log.d("ObservationVariableDao", "categories: ${t.categories}")
+                Log.d("ObservationVariableDao", "closeKeyboardOnOpen: ${t.closeKeyboardOnOpen}")
+                Log.d("ObservationVariableDao", "cropImage: ${t.cropImage}")
 
                 val varRowId = db.insert(ObservationVariable.tableName, null, contentValues)
 
                 if (varRowId != -1L) {
-                    ObservationVariableValueDao.insert(
-                        t.minimum.orEmpty(),
-                        t.maximum.orEmpty(),
-                        t.categories.orEmpty(),
-                        (t.closeKeyboardOnOpen ?: "false").toString(),
-                        (t.cropImage ?: "false").toString(),
-                        varRowId.toString()
-                    )
+                    t.id = varRowId.toString()
+                    t.saveAttributeValues()
                     Log.d("ObservationVariableDao", "Trait ${t.name} inserted successfully with row ID: $varRowId")
                 } else {
                     Log.e("ObservationVariableDao", "Failed to insert trait ${t.name}")
@@ -403,35 +378,33 @@ class ObservationVariableDao {
                        closeKeyboardOnOpen: Boolean,
                        cropImage: Boolean): Long = withDatabase { db ->
 
-            val rowid = db.update(ObservationVariable.tableName, ContentValues().apply {
-                put("observation_variable_name", trait)
-                put("observation_variable_field_book_format", format)
-                put("default_value", defaultValue)
-                put("observation_variable_details", details)
-            }, "${ObservationVariable.PK} = ?", arrayOf(id)).toLong()
+           val contentValues = ContentValues().apply {
+               put("observation_variable_name", trait)
+               put("observation_variable_field_book_format", format)
+               put("default_value", defaultValue)
+               put("observation_variable_details", details)
+           }
+
+            val rowid = db.update(
+                ObservationVariable.tableName,
+                contentValues,
+                "${ObservationVariable.PK} = ?",
+                arrayOf(id)
+            ).toLong()
 
 
-            Parameters.System.forEach {
-
-                val attrId = ObservationVariableAttributeDao.getAttributeIdByName(it)
-
-                when(it) {
-                    "validValuesMin" -> {
-                        ObservationVariableValueDao.update(id, attrId.toString(), minimum)
-                    }
-                    "validValuesMax" -> {
-                        ObservationVariableValueDao.update(id, attrId.toString(), maximum)
-                    }
-                    "category" -> {
-                        ObservationVariableValueDao.update(id, attrId.toString(), categories)
-                    }
-                    "closeKeyboardOnOpen" -> {
-                        ObservationVariableValueDao.insertAttributeValue(it, closeKeyboardOnOpen.toString(), id)
-                    }
-                    "cropImage" -> {
-                        ObservationVariableValueDao.insertAttributeValue(it, cropImage.toString(), id)
-                    }
+            if (rowid > 0) {
+                // save attributes and their values
+                val traitObj = TraitObject().apply {
+                    this.id = id
+                    this.minimum = minimum
+                    this.maximum = maximum
+                    this.categories = categories
+                    this.closeKeyboardOnOpen = closeKeyboardOnOpen
+                    this.cropImage = cropImage
                 }
+
+                traitObj.saveAttributeValues()
             }
 
             rowid
