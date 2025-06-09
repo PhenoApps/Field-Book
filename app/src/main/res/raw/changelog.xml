@@ -1,5 +1,8 @@
 <changelog>
 
+    <release date="2025-06-09" versionCode="60204" versionName="v6.2.4">
+    </release>
+
     <release date="2025-06-02" versionCode="60203" versionName="v6.2.3">
         <new>New option to disable progress bars in Collect</new>
         <bugfix>BrAPI min/max values are now imported correctly</bugfix>
