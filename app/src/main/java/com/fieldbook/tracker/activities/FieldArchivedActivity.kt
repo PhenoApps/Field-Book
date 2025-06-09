@@ -34,18 +34,7 @@ class FieldArchivedActivity : BaseFieldActivity() {
     override fun initializeAdapter() {
         mAdapter = FieldAdapter(this, this, fieldGroupController, true)
         mAdapter.setOnFieldSelectedListener { fieldId ->
-            val fragment = FieldDetailFragment()
-            val args = Bundle()
-            args.putInt("fieldId", fieldId)
-            fragment.arguments = args
-
-            // Disable touch events on the RecyclerView
-            recyclerView.isEnabled = false
-
-            supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, fragment, "FieldDetailFragmentTag")
-                .addToBackStack(null)
-                .commit()
+            startFieldDetailFragment(fieldId)
         }
         recyclerView.adapter = mAdapter
     }
