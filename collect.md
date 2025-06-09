@@ -2,7 +2,7 @@
 
 # Collect
 
-Field Book increases data collection speed be collected by optimizing and simplifying data input.
+Field Book increases data collection speed by optimizing and simplifying data input.
 Only a single entry and trait are visible for data input which reduces the risk of error and allows custom trait-specific layouts.
 
 ## Overview
@@ -126,11 +126,27 @@ The bar at the top of the section shows progress through all entries in the fiel
 Pressing and holding the an arrow will continuously scroll through the entries.
 The longer the arrows are pressed, the faster the scrolling becomes.
 
+Primary and secondary IDs are displayed between the entry arrows. Different attributes can be selected to be displayed by pressing the labels.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/collect/collect_choose_id_framed.png" width="325px"> 
+  <figcaption class="screenshot-caption"><i>Modifying which attribute is used as primary id</i></figcaption> 
+</figure>
+
+The values can be pressed to open the new Quick GoTo dialog (The legacy Quick GoTo setting has been removed now that the feature is available by default). Enter a new value to jump to the first matching entry.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/collect/collect_quick_go_to.png" width="325px"> 
+  <figcaption class="screenshot-caption"><i>The Quick GoTo dialog</i></figcaption> 
+</figure>
+
 #### Data input
 
 The bottom half of the screen is used to input data.
 The elements and layout of this area change based on the trait that is currently active.
 Information for each specific trait format can be found in the Trait Formats pages.
+
+Newly input or edited values are colored black and displayed with italic font. Saved values are colored red and displayed in normal font. The font difference can be used to distinguish between the two even on black and white screens.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_framed.png" width="350px"> 
