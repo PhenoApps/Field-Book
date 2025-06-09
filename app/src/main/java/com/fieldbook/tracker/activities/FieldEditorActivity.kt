@@ -210,11 +210,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         }
     }
 
-    override fun loadFields(): ArrayList<FieldObject> {
-        db.deleteUnusedStudyGroups()
-
-        return db.allFieldObjects
-    }
+    override fun loadFields(): ArrayList<FieldObject> = db.allFieldObjects
 
     override fun updateMenuItemsForSelectionMode(menu: Menu) {
         // call super to handle common items
@@ -891,6 +887,8 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     private fun showGroupAssignmentDialog(fieldIds: List<Int>) {
+        db.deleteUnusedStudyGroups()
+
         val allStudyGroups = db.allStudyGroups
         val hasStudyGroups = allStudyGroups != null && allStudyGroups.isNotEmpty()
 
@@ -943,6 +941,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
                     }
                     queryAndLoadFields()
                     mAdapter.exitSelectionMode()
+                    db.deleteUnusedStudyGroups()
                 }
             }
         }
@@ -970,6 +969,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
                 }
                 mAdapter.exitSelectionMode()
                 queryAndLoadFields()
+                db.deleteUnusedStudyGroups()
             }
             .setNegativeButton(R.string.dialog_cancel) { dialog, _ -> dialog.dismiss() }
             .show()
