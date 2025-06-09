@@ -19,7 +19,8 @@ This information is stored as metadata for each collected observation and is inc
   <figcaption class="screenshot-caption"><i>Set Person dialog</i></figcaption> 
 </figure>
 
-If person name needs to be changed, Field Book will present a list of previously used names as options to choose from (to save time and reduce mistakes). If the list does not yet include the correct name press `New Person` to enter a new name manually.
+If person name needs to be changed, Field Book will present a list of previously used names as options to choose from (to save time and reduce mistakes).
+If the list does not yet include the correct name press `New Person` to enter a new name manually.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/settings/profile/settings_profile_previous_names.png" width="325px"> 

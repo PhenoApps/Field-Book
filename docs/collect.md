@@ -126,7 +126,7 @@ The bar at the top of the section shows progress through all entries in the fiel
 Pressing and holding the an arrow will continuously scroll through the entries.
 The longer the arrows are pressed, the faster the scrolling becomes.
 
-Primary and secondary ids are displayed between the entry arrows. Like the Infobars the labels can be pressed to modify which attributes are displayed as the primary and secondary id.
+Primary and secondary IDs are displayed between the entry arrows. Different attributes can be selected to be displayed by pressing the labels.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_choose_id_framed.png" width="325px"> 
@@ -146,7 +146,7 @@ The bottom half of the screen is used to input data.
 The elements and layout of this area change based on the trait that is currently active.
 Information for each specific trait format can be found in the Trait Formats pages.
 
-Newly input values are colored black and displayed with italic font. Saved values are colored red and displayed in red font. The font difference can be used to distinguish between the two even on black and white screens.
+Newly input or edited values are colored black and displayed with italic font. Saved values are colored red and displayed in normal font. The font difference can be used to distinguish between the two even on black and white screens.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_framed.png" width="350px"> 
