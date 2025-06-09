@@ -26,3 +26,27 @@ The <img class="icon" src="_static/icons/collect/magnify.png"> **Search Bar** at
   <img class="screenshot" src="_static/images/settings/settings_search_example.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Searching for a specific setting</i></figcaption> 
 </figure>
+
+The <img class="icon" src="_static/icons/settings/swap-horizontal-circle-outline.png"> **Nearby Share** icon in the top right of the toolbar can be used to quickly copy all settings from one device to another.
+
+
+First, press the <img class="icon" src="_static/icons/settings/swap-horizontal-circle-outline.png"> icon and choose whether the device will be importing or exporting settings.
+If this is the first time using the feature you will also have to give permission to use nearby share.
+After these choices the app will indicate it is looking for a nearby device.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/settings/settings_share_joined_1.png" width="1100px"> 
+  <figcaption class="screenshot-caption"><i>Initial steps to share settings with nearby share</i></figcaption> 
+</figure>
+
+Follow the same steps on the other device you are importing from/exporting to.
+The importing device will then display a list of devices it sees nearby that are trying to share data.
+Select the desired device, confirm the pairing codes match, and accept the connection on both devices.
+Once accepted the transfer will occur and indicate it is finished with a "Transfer completed" message. 
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/settings/settings_share_joined_2.png" width="1100px"> 
+  <figcaption class="screenshot-caption"><i>Final steps to share settings with nearby share</i></figcaption> 
+</figure>
+
+

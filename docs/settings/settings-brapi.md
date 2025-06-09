@@ -23,7 +23,7 @@ Set the server URL when importing via BrAPI.
   <figcaption class="screenshot-caption"><i>BrAPI Base URL setting</i></figcaption> 
 </figure>
 
-#### <img class="icon" src="_static/icons/settings/brapi/rename-outline.png"> BrAPI Base URL
+#### <img class="icon" src="_static/icons/settings/brapi/rename-outline.png"> BrAPI Display Name
 
 Set the display name Field Book should use when referring to the BrAPI server.
 
