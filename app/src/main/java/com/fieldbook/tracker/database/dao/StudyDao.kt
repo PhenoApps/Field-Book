@@ -11,7 +11,7 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.Study
-import com.fieldbook.tracker.database.StudyGroupsTable
+import com.fieldbook.tracker.database.GroupsTable
 import com.fieldbook.tracker.database.getTime
 import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
@@ -664,7 +664,7 @@ class StudyDao {
         fun updateStudyGroup(studyId: Int, groupId: Int?) = withDatabase { db ->
             db.update(
                 Study.tableName,
-                contentValuesOf(StudyGroupsTable.FK to groupId),
+                contentValuesOf(GroupsTable.FK to groupId),
                 "${Study.PK} = ?", arrayOf("$studyId")
             )
         }

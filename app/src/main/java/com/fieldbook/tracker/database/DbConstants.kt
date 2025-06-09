@@ -37,11 +37,23 @@ object SpectralFactTable {
     const val CREATED_AT = "created_at"
 }
 
-object StudyGroupsTable {
-    const val TABLE_NAME = "study_groups"
+object GroupsTable {
+    const val TABLE_NAME = "groups"
     const val ID = "id"
     const val GROUP_NAME = "group_name"
     const val IS_EXPANDED = "is_expanded"
+    const val GROUP_TYPE = "group_type"
 
     const val FK = "group_id"
+
+    object Type {
+        const val STUDY = "study"
+
+        fun getTableName(groupType: String): String {
+            return when (groupType) {
+                STUDY -> "studies"
+                else -> throw IllegalArgumentException("Unknown group type: $groupType")
+            }
+        }
+    }
 }

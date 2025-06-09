@@ -21,7 +21,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
-import com.fieldbook.tracker.database.dao.StudyGroupDao;
+import com.fieldbook.tracker.database.dao.GroupDao;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
@@ -36,7 +36,7 @@ import com.fieldbook.tracker.database.dao.spectral.UriDao;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
-import com.fieldbook.tracker.database.models.StudyGroupModel;
+import com.fieldbook.tracker.database.models.GroupModel;
 import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.database.repository.SpectralRepository;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -112,6 +112,8 @@ public class DataHelper {
     private final SpectralFileProcessor spectralFileProcessor = new SpectralFileProcessor(proto);
 
     private ValueProcessorFormatAdapter processor;
+
+    private final GroupDao studyGroupDao = new GroupDao(GroupsTable.Type.STUDY);
 
     @Inject
     public DataHelper(@ActivityContext Context context) {
@@ -2266,30 +2268,30 @@ public class DataHelper {
     /**
      * Get all study group names
      */
-    public List<StudyGroupModel> getAllStudyGroups() {
-        return StudyGroupDao.Companion.getAllStudyGroups();
+    public List<GroupModel> getAllStudyGroups() {
+        return studyGroupDao.getAllGroups();
     }
 
     /**
      * Delete the unassigned study groups
      */
     public void deleteUnusedStudyGroups() {
-        StudyGroupDao.Companion.deleteUnusedStudyGroups();
+        studyGroupDao.deleteUnusedGroups();
     }
 
     /**
      * Create a study group
      */
     public Integer createOrGetStudyGroup(String groupName) {
-        return StudyGroupDao.Companion.createOrGetStudyGroup(groupName);
+        return studyGroupDao.createOrGetGroup(groupName);
     }
 
     public String getStudyGroupNameById(Integer groupId) {
-        return StudyGroupDao.Companion.getStudyGroupNameById(groupId);
+        return studyGroupDao.getGroupNameById(groupId);
     }
 
     public Integer getStudyGroupIdByName(String groupName) {
-        return StudyGroupDao.Companion.getStudyGroupIdByName(groupName);
+        return studyGroupDao.getGroupIdByName(groupName);
     }
 
     /**
@@ -2307,11 +2309,11 @@ public class DataHelper {
     }
 
     public boolean getStudyGroupIsExpanded(int studyId) {
-        return StudyGroupDao.Companion.getIsExpanded(studyId);
+        return studyGroupDao.getIsExpanded(studyId);
     }
 
     public void updateStudyGroupIsExpanded(int studyId, boolean value) {
-        StudyGroupDao.Companion.updateStudyGroupIsExpanded(studyId, value);
+        studyGroupDao.updateGroupIsExpanded(studyId, value);
     }
 
     public void deleteField(int studyId) {
@@ -3194,7 +3196,7 @@ public class DataHelper {
             }
 
             if (oldVersion <= 13 && newVersion >= 14) {
-                // add study_groups table to add field grouping functionality
+                // add groups table to add field grouping functionality
                 Migrator.Companion.migrateToVersion14(db);
             }
         }

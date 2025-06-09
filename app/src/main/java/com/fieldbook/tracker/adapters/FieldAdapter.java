@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.FieldArchivedActivity;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
-import com.fieldbook.tracker.database.models.StudyGroupModel;
+import com.fieldbook.tracker.database.models.GroupModel;
 import com.fieldbook.tracker.interfaces.FieldGroupController;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
@@ -562,9 +562,9 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         groupedFields.put(null, new ArrayList<>());
 
         // add all study group names
-        List<StudyGroupModel> allStudyGroups = fieldGroupController.getAllStudyGroups();
+        List<GroupModel> allStudyGroups = fieldGroupController.getAllStudyGroups();
         if (allStudyGroups != null && !allStudyGroups.isEmpty()) {
-            for (StudyGroupModel group : allStudyGroups) {
+            for (GroupModel group : allStudyGroups) {
                 groupedFields.put(group.getGroupName(), new ArrayList<>());
             }
         }
@@ -621,9 +621,9 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     public void changeStateOfAllGroups(boolean isExpanded) {
-        List<StudyGroupModel> allStudyGroups = fieldGroupController.getAllStudyGroups();
+        List<GroupModel> allStudyGroups = fieldGroupController.getAllStudyGroups();
         if (allStudyGroups != null) {
-            for (StudyGroupModel group : allStudyGroups) {
+            for (GroupModel group : allStudyGroups) {
                 fieldGroupController.updateIsExpanded(group.getId(), isExpanded);
             }
         }
