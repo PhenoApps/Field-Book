@@ -1478,4 +1478,5 @@
     <string name="preferences_preferences_title">Preferences</string>
     <string name="nearby_share_export_preferences">Export Preferences</string>
     <string name="nearby_share_import_preferences">Import Preferences</string>
+    <string name="logging_out_please_wait">Logging out, please wait.</string>
 </resources>
