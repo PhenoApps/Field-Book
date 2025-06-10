@@ -157,6 +157,20 @@
                             app:chipBackgroundColor="?attr/defaultChipBackground" />
 
                         <com.google.android.material.chip.Chip
+                            tools:visibility="visible"
+                            android:visibility="gone"
+                            android:id="@+id/studyGroupName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIcon="@drawable/ic_existing_group"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+
+                        <com.google.android.material.chip.Chip
                             android:id="@+id/originalNameChip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
