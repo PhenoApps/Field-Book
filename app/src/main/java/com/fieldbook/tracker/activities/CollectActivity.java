@@ -2683,13 +2683,13 @@ public class CollectActivity extends ThemedActivity
             //add all obs unit attribute metadata
             String[] attributes = getDatabase().getAllObservationUnitAttributeNames(Integer.parseInt(getStudyId()));
             for (String attribute : attributes) {
-                items.add(new AttributeAdapter.AttributeModel(attribute, null));
+                items.add(new AttributeAdapter.AttributeModel(attribute, null, null));
             }
 
             //add all visible traits
             TraitObject[] traits = getDatabase().getVisibleTraits().toArray(new TraitObject[0]);
             for (TraitObject traitObject : traits) {
-                items.add(new AttributeAdapter.AttributeModel(traitObject.getName(), traitObject));
+                items.add(new AttributeAdapter.AttributeModel(traitObject.getName(), null, traitObject));
             }
 
             return items;

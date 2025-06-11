@@ -149,6 +149,7 @@ public class GeneralKeys {
 
     //summary filter
     public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";
+    public static final String SUMMARY_FILTER_TRAITS = "com.fieldbook.tracker.summary.SUMMARY_FILTER_TRAITS";
 
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";

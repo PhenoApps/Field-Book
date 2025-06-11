@@ -74,8 +74,8 @@ class ObservationVariableDao {
             }
 
             it.visible = this["visible"].toString() == "true"
-            it.externalDbId = this["external_db_id"].toString()
-            it.traitDataSource = this["trait_data_source"].toString()
+            it.externalDbId = this["external_db_id"] as? String ?: ""
+            it.traitDataSource = this["trait_data_source"] as? String ?: ""
 
         }
         }

@@ -70,7 +70,7 @@ class InfobarAttributeChooserDialog : AttributeChooserDialog() {
         } else {
             (activity as CollectActivity).getDatabase().getTraitById(traitId)
         }
-        return AttributeModel(attributeLabel, trait)
+        return AttributeModel(attributeLabel, trait = trait)
     }
 
     /** Saves newly selected attribute to preferences and refreshes the InfoBars. */

@@ -137,16 +137,16 @@ class TraitObject {
             return
         }
 
-        name = cursor.getString(nameIndex)
-        format = cursor.getString(formatIndex)
-        defaultValue = cursor.getString(defaultValueIndex)
-        details = cursor.getString(detailsIndex)
-        id = cursor.getString(idIndex)
-        externalDbId = cursor.getString(externalDbIdIndex)
+        name = cursor.getString(nameIndex) ?: ""
+        format = cursor.getString(formatIndex) ?: ""
+        defaultValue = cursor.getString(defaultValueIndex) ?: ""
+        details = cursor.getString(detailsIndex) ?: ""
+        id = cursor.getString(idIndex) ?: ""
+        externalDbId = cursor.getString(externalDbIdIndex) ?: ""
         realPosition = cursor.getInt(realPositionIndex)
         visible = cursor.getString(visibleIndex) == "true"
-        additionalInfo = cursor.getString(additionalInfoIndex)
-        traitDataSource = cursor.getString(traitDataSourceIndex)
+        additionalInfo = cursor.getString(additionalInfoIndex) ?: ""
+        traitDataSource = cursor.getString(traitDataSourceIndex) ?: ""
 
         loadAttributeAndValues()
     }

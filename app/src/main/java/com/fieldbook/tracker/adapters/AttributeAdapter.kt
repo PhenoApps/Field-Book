@@ -23,6 +23,7 @@ class AttributeAdapter(private val controller: AttributeAdapterController, priva
 
     data class AttributeModel(
         val label: String,
+        val value: String? = null,
         val trait: TraitObject? = null
     )
 

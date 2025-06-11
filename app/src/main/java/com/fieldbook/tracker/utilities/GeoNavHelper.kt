@@ -640,7 +640,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                         database.getTraitById(it)
                                     }
 
-                                tv.text = getPopupInfo(id, AttributeModel(popupHeader, popupTrait))
+                                tv.text = getPopupInfo(id, AttributeModel(popupHeader, trait = popupTrait))
 
                                 // if the value saved in GEONAV_POPUP_DISPLAY was disabled in traits
                                 // GEONAV_POPUP_DISPLAY will default back to plot_id
