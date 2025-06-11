@@ -48,14 +48,21 @@ class RefactorMigratorVersion13: FieldBookMigrator {
         db.execSQL("DROP TABLE IF EXISTS traits")
 
         //drop unused columns
-        db.execSQL("ALTER TABLE observation_units DROP COLUMN position_coordinate_x")
-        db.execSQL("ALTER TABLE observation_units DROP COLUMN position_coordinate_y")
-        db.execSQL("ALTER TABLE observation_units DROP COLUMN position_coordinate_x_type")
-        db.execSQL("ALTER TABLE observation_units DROP COLUMN position_coordinate_y_type")
-        db.execSQL("ALTER TABLE observation_units DROP COLUMN additional_info")
-        db.execSQL("ALTER TABLE observation_units DROP COLUMN germplasm_db_id")
-        db.execSQL("ALTER TABLE observation_units DROP COLUMN germplasm_name")
-        db.execSQL("ALTER TABLE observation_units DROP COLUMN observation_level")
+        //Creates table schema without data
+        db.execSQL("""
+            CREATE TABLE observation_units_temp AS
+                SELECT internal_id_observation_unit, study_id, observation_unit_db_id, primary_id, secondary_id, geo_coordinates
+                FROM observation_units 
+        """.trimIndent())
+
+        //drop old table and rename new table
+        db.execSQL("""
+            DROP TABLE observation_units;
+        """.trimIndent())
+
+        db.execSQL("""
+            ALTER TABLE observation_units_temp RENAME TO observation_units;
+        """.trimIndent())
 
         //update unit values to the first occurrence of an attribute name
         db.execSQL("""
@@ -94,22 +101,56 @@ class RefactorMigratorVersion13: FieldBookMigrator {
                     JOIN observation_units_attributes AS A ON A.internal_id_observation_unit_attribute = V.observation_unit_attribute_db_id));
         """.trimIndent())
 
-        //drop unnecessary study_id column from unit attributes
-        db.execSQL("ALTER TABLE observation_units_attributes DROP COLUMN study_id")
+        //drop unused study_id column from observation_units_attributes using temporary table method
+        db.execSQL("""
+            CREATE TABLE observation_units_attributes_temp AS
+                SELECT internal_id_observation_unit_attribute, observation_unit_attribute_name
+                FROM observation_units_attributes;
+        """.trimIndent())
 
-        //drop unused observation variable columns
-        db.execSQL("ALTER TABLE observation_variables DROP COLUMN observation_variable_db_id")
+        db.execSQL("DROP TABLE observation_units_attributes")
 
-        //drop unused studies columns
-        db.execSQL("ALTER TABLE studies DROP COLUMN study_type")
-        db.execSQL("ALTER TABLE studies DROP COLUMN study_description")
-        db.execSQL("ALTER TABLE studies DROP COLUMN study_code")
-        db.execSQL("ALTER TABLE studies DROP COLUMN start_date")
-        db.execSQL("ALTER TABLE studies DROP COLUMN location_name")
-        db.execSQL("ALTER TABLE studies DROP COLUMN location_db_id")
+        db.execSQL("""
+            ALTER TABLE observation_units_attributes_temp RENAME TO observation_units_attributes;
+        """.trimIndent())
 
-        //drop observation variable name from observations table
-        db.execSQL("ALTER TABLE observations DROP COLUMN observation_variable_name")
-        db.execSQL("ALTER TABLE observations DROP COLUMN observation_variable_field_book_format")
+        //drop unused observation_variable_db_id column from observation_variables using temporary table method
+        db.execSQL("""
+            CREATE TABLE observation_variables_temp AS
+                SELECT internal_id_observation_variable, observation_variable_name, observation_variable_field_book_format, default_value, visible, position, external_db_id, trait_data_source, additional_info, common_crop_name, language, data_type, ontology_db_id, ontology_name, observation_variable_details
+                FROM observation_variables;
+        """.trimIndent())
+
+        db.execSQL("DROP TABLE observation_variables")
+
+        db.execSQL("""
+            ALTER TABLE observation_variables_temp RENAME TO observation_variables;
+        """.trimIndent())
+
+        //drop unused study columns from studies table using temporary table method
+        db.execSQL("""
+            CREATE TABLE studies_temp AS
+                SELECT internal_id_study, study_db_id, study_name, study_alias, study_unique_id_name, study_primary_id_name, study_secondary_id_name, experimental_design, common_crop_name, study_sort_name, date_import, date_edit, date_export, study_source, additional_info, observation_levels, seasons, trial_db_id, trial_name, count, import_format, date_sync, observation_unit_search_attribute
+                FROM studies;
+        """.trimIndent())
+
+        db.execSQL("DROP TABLE studies")
+
+        db.execSQL("""
+            ALTER TABLE studies_temp RENAME TO studies;
+        """.trimIndent())
+
+        //drop unused columns from observations table using temporary table method
+        db.execSQL("""
+            CREATE TABLE observations_temp AS
+                SELECT internal_id_observation, observation_db_id, observation_unit_id, study_id, observation_variable_db_id, value, observation_time_stamp, collector, geoCoordinates, last_synced_time, additional_info, rep, notes
+                FROM observations;
+        """.trimIndent())
+
+        db.execSQL("DROP TABLE observations")
+
+        db.execSQL("""
+            ALTER TABLE observations_temp RENAME TO observations;
+        """.trimIndent())
     }
 }
