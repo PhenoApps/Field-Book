@@ -130,7 +130,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         spectralDataList.clear()
 
-        loadSpectralFactsList()
+        loadSpectralFactsList(firstLoad = true)
 
         if (!establishConnection()) {
             setupConnectUi()
@@ -158,7 +158,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         setupConnectButton()
     }
 
-    private fun loadSpectralFactsList() {
+    private fun loadSpectralFactsList(firstLoad: Boolean = false) {
 
         spectralDataList.clear()
 
@@ -178,6 +178,19 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
             withContext(Dispatchers.Main) {
 
                 submitList()
+
+                if (firstLoad) {
+
+                    val index = spectralDataList.size - 1
+
+                    selected = index
+
+                    listOf(recycler, colorRecycler).forEachIndexed { i, r ->
+                        r?.postDelayed({
+                            r.scrollToPosition(index)
+                        }, i*50L)
+                    }
+                }
             }
         }
     }
