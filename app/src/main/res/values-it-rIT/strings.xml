@@ -43,9 +43,12 @@
     <string name="app_intro_load_sample_data_title">Carica dati campione</string>
     <string name="app_intro_load_sample_data_summary">Importa un database campione che comprenda campi e caratteri d\'esempio.</string>
     <string name="app_intro_tutorial_title">Guida</string>
+    <string name="app_intro_tutorial_summary">Aggiungi un\'icona d\'aiuto alla barra degli strumenti in cima, che descriva le varie funzionalità dell\'applicazione.</string>
     <string name="app_intro_high_contrast_title">Modalità a contrasto elevato</string>
+    <string name="app_intro_high_contrast_summary">Abilita il tema ad alto contrasto per una migliore visibilità sui dispositivi elnk.</string>
     <!-- Storage Definer -->
-    <string name="define_button_text">Scegli la cartella</string>
+    <string name="storage_definer_title">Posizione di archiviazione</string>
+    <string name="define_button_text">Scegli la Cartella</string>
     <!-- Permissions  -->
     <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_storage_export">L\'esportazione dei dati richiede l\'accesso ai file del dispositivo.</string>
@@ -79,8 +82,8 @@
     <string name="menu_fields_sort_list">Ordina per elenco di campi</string>
     <string name="fields_sort_reset">Ripristina</string>
     <string name="fields_sort_by_name">Nome</string>
-    <string name="fields_sort_by_import_format">Importa formato</string>
-    <string name="fields_sort_by_import_date">Importa data</string>
+    <string name="fields_sort_by_import_format">Formato Di Importazione</string>
+    <string name="fields_sort_by_import_date">Data Di Importazione</string>
     <string name="fields_sort_by_edit_date">Modifica date</string>
     <string name="fields_sort_by_sync_date">Sincronizza date</string>
     <string name="fields_sort_by_export_date">Esporta date</string>
@@ -132,11 +135,30 @@
     <string name="act_field_editor_load_file_failed">Si è verificato un errore durante il caricamento del file.</string>
     <string name="act_field_editor_file_open_failed">Impossibile aprire il file.</string>
     <!-- Field Creator  -->
+    <string name="dialog_field_creator_ask_name_hint">Nome</string>
+    <string name="dialog_field_creator_ask_row_hint">File</string>
+    <string name="dialog_field_creator_ask_columns_hint">Colonne</string>
     <!-- Geo-Navigate to Field -->
+    <string name="menu_fields_plot_by_distance_title">Seleziona il campo più vicino</string>
+    <string name="activity_field_editor_no_field_found">Nessuna coordinata trovata.</string>
     <!-- Field Details -->
+    <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
+    <string name="name_conflict_import_name">importa nome</string>
+    <string name="name_conflict_display_name">visualizza nome</string>
+    <string name="dialog_att_chooser_title_default">Seleziona attributo</string>
+    <string name="search_attribute_dialog_title">Imposta ID di ricerca</string>
+    <string name="search_attribute_apply_to_all">Applica la scelta a tutti i campi idonei</string>
+    <string name="search_multiple_matches_found">Trovati %1$d appezzamenti corrispondenti. Visualizzazione del primo.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
+    <string name="field_trait_observation_total">\"%d\" osservazioni</string>
     <!-- Field Detail Charts -->
+    <string name="field_trait_chart_no_data">Nessun dato da visualizzare</string>
+    <string name="field_trait_chart_incompatible_format">Il formato di questo tratto non può essere tracciato nel grafico</string>
+    <string name="field_trait_chart_excess_data">Troppi valori diversi da tracciare nel grafico</string>
     <!-- Semantic dates -->
+    <string name="today">Oggi</string>
+    <string name="yesterday">Ieri</string>
+    <string name="no_activity">Nessuna attività</string>
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_sort_name">Nome del carattere</string>
@@ -170,6 +192,7 @@
     <string name="traits_format_barcode">Codice a barre</string>
     <string name="traits_format_labelprint">Stampa etichetta Zebra</string>
     <!-- Trait Creation Dialog -->
+    <string name="traits_create_name">Nome</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Impostazioni predefinite</string>
     <string name="traits_create_value_minimum">Minimo</string>

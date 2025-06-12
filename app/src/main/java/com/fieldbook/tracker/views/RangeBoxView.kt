@@ -395,11 +395,16 @@ class RangeBoxView : ConstraintLayout {
 
                 cRange = controller.getDatabase().getRange(primaryId, secondaryId, uniqueId, id)
 
-                // RangeID is a sorted list of obs unit ids for the current field.
-                // Set bar maximum to number of obs units in the field
-                // Set bar progress to position of current obs unit within the sorted list
-                plotsProgressBar.max = rangeID.size
-                plotsProgressBar.progress = rangeID.indexOf(id)
+                if (controller.getPreferences().getBoolean(PreferenceKeys.RANGE_PROGRESS_BAR, true)) {
+                    // RangeID is a sorted list of obs unit ids for the current field.
+                    // Set bar maximum to number of obs units in the field
+                    // Set bar progress to position of current obs unit within the sorted list
+                    plotsProgressBar.max = rangeID.size
+                    plotsProgressBar.progress = rangeID.indexOf(id)
+                    plotsProgressBar.visibility = VISIBLE
+                } else {
+                    plotsProgressBar.visibility = GONE
+                }
 
             } catch (e: Exception) {
 
@@ -420,10 +425,19 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
+    private fun updateProgressBarVisibility() {
+        if (controller.getPreferences().getBoolean(PreferenceKeys.RANGE_PROGRESS_BAR, true)) {
+            plotsProgressBar.visibility = VISIBLE
+        } else {
+            plotsProgressBar.visibility = GONE
+        }
+    }
+
     fun reload() {
         setName()
         paging = 1
         setAllRangeID()
+        updateProgressBarVisibility()
         if (rangeID.isNotEmpty()) {
             updateCurrentRange(rangeID[0])
             lastRange = cRange.primaryId
