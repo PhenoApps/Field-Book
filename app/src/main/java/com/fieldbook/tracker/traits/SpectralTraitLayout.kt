@@ -573,7 +573,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         background.launch(Dispatchers.Main) {
 
-            progressBar?.visibility = if (flag) VISIBLE else INVISIBLE
+            //progressBar?.visibility = if (flag) VISIBLE else INVISIBLE
 
         }
     }

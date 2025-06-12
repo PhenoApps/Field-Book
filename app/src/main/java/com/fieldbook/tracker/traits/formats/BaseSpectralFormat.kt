@@ -7,7 +7,7 @@ import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 
 open class BaseSpectralFormat(
     format: Formats = Formats.BASE_SPECTRAL,
-    defaultLayoutId: Int = R.layout.trait_spectral,
+    defaultLayoutId: Int = R.layout.traits_spectral,
     layoutView: android.view.View? = null,
     databaseName: String = "spectral",
     nameStringResourceId: Int = R.string.traits_format_spectral,
