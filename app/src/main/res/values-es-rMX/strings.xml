@@ -623,6 +623,8 @@
     <string name="preferences_appearance_quickgoto_description">Cambia la sección central de la pantalla principal al legado \"Rapido Ir a\"</string>
     <string name="preferences_appearance_range_progress_bar">Barra de progreso de entradas</string>
     <string name="preferences_appearance_range_progress_bar_description">Muestra su posición actual en el campo</string>
+    <string name="preferences_appearance_traits_progress_bar">Barra de progreso de variables</string>
+    <string name="preferences_appearance_traits_progress_bar_description">Muestra si las variables activas tienen datos y resalta la variable actual</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamiento</string>
     <string name="preferences_behavior_movement_title">Movimiento</string>
