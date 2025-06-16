@@ -621,6 +621,8 @@
     <string name="preferences_appearance_infobar_hide_prefix_description">El prefijo de infobar será reemplazado por un icono genérico</string>
     <string name="preferences_appearance_quickgoto">Rápido Ir a</string>
     <string name="preferences_appearance_quickgoto_description">Cambia la sección central de la pantalla principal al legado \"Rapido Ir a\"</string>
+    <string name="preferences_appearance_range_progress_bar">Barra de progreso de entradas</string>
+    <string name="preferences_appearance_range_progress_bar_description">Muestra su posición actual en el campo</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamiento</string>
     <string name="preferences_behavior_movement_title">Movimiento</string>
