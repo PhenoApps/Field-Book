@@ -368,11 +368,15 @@ class ObservationDao {
                 String()
             }
 
+            //remove null control characters which are added to strings by some devices (Samsung)
+            //when the user pastes clipboard data
+            val removeNullCharacters = value.replace("\u0000", "")
+
             db.insert(Observation.tableName, null, contentValuesOf(
                 "observation_variable_name" to traitObj?.name,
                 "observation_db_id" to observationDbId,
                 "observation_variable_field_book_format" to traitFormat,
-                "value" to value,
+                "value" to removeNullCharacters,
                 "observation_time_stamp" to timestamp,
                 "collector" to person,
                 "geoCoordinates" to location,
