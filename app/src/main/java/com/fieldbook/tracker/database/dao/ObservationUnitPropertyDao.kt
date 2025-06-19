@@ -31,10 +31,7 @@ class ObservationUnitPropertyDao {
                     .toFirst()[column].toString()
         }?: ""
 
-        //TODO 471 studyId should be sent as parameter
-        fun getAllRangeId(context: Context): Array<Int> {
-            val studyId = PreferenceManager.getDefaultSharedPreferences(context)
-                .getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        fun getAllRangeId(context: Context, studyId: Int): Array<Int> {
 
             getSortedObservationUnitData(context, studyId)?.use { cursor ->
                 val ids = mutableListOf<Int>()
@@ -176,7 +173,7 @@ class ObservationUnitPropertyDao {
                 }
 
                 val obsSelectAttributes =
-                    arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
+                    arrayOf("value", "observation_time_stamp", "collector", "geo_coordinates", "rep")
 
                 val varSelectAttributes =
                     arrayOf("observation_variable_name", "observation_variable_field_book_format")
@@ -205,7 +202,7 @@ class ObservationUnitPropertyDao {
                             "userValue" -> CategoryJsonUtil.processValue(row)
                             "timeTaken" -> row["observation_time_stamp"]
                             "person" -> row["collector"]
-                            "location" -> row["geoCoordinates"]
+                            "location" -> row["geo_coordinates"]
                             "rep" -> row["rep"]
                             else -> String()
                         }
@@ -405,6 +402,8 @@ class ObservationUnitPropertyDao {
                 WHERE props.`${uniqueName}` = "$unit"
                 GROUP BY props.id
             """.trimIndent()
+
+            Log.d("convertDatabaseToTable", "Executing query: $query")
 
             db.rawQuery(query, null)
         }

@@ -668,7 +668,7 @@ public class DataHelper {
     /**
      * Returns the primary key for all ranges
      */
-    public int[] getAllRangeID() {
+    public int[] getAllRangeID(int studyId) {
 
         open();
 
@@ -685,7 +685,7 @@ public class DataHelper {
             }
         }
 
-        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId(context);
+        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId(context, studyId);
 
         int[] data = new int[result.length];
 
@@ -858,11 +858,11 @@ public class DataHelper {
      * Inserting traits data. The last field isVisible determines if the trait
      * is visible when using the app
      */
-    public long insertTraits(TraitObject t) {
+    public long insertTraits(Context ctx, TraitObject t) {
 
         open();
 
-        return ObservationVariableDao.Companion.insertTraits(t);
+        return ObservationVariableDao.Companion.insertTraits(ctx, t);
     }
 
     /**
@@ -904,7 +904,6 @@ public class DataHelper {
         return ObservationVariableDao.Companion.getTraitById(id);
     }
 
-    //TODO 471 used by brapi but might check if there is an alternative way to use trait db id as well
     public TraitObject getTraitByExternalDbId(String externalDbId, String traitDataSource) {
 
         open();
@@ -951,7 +950,6 @@ public class DataHelper {
         close();
     }
 
-    //TODO 471, not name based but looks like deleteFieldSortOrder is unnecessarily called twice
     public void deleteField(int studyId) {
 
         open();
@@ -971,8 +969,6 @@ public class DataHelper {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        deleteFieldSortOrder(studyId);
     }
 
 
@@ -1212,15 +1208,6 @@ public class DataHelper {
 
     public void setTransactionSuccessfull() {
         openHelper.getWritableDatabase().setTransactionSuccessful();
-    }
-
-    //TODO 471 query that just returns trait names, check how it is being used
-    public String[] getAllTraitNames() {
-
-        open();
-
-        return ObservationVariableDao.Companion.getAllTraits();
-
     }
 
     public ObservationModel[] getAllObservations() {

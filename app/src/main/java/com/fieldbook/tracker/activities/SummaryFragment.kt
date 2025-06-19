@@ -131,14 +131,6 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
                     traits.map { AttributeAdapter.AttributeModel(it.name, trait = it) }
                 val models = attributeModels + traitAttributeModels
 
-                //if preference keys don't exist yet, create them and populate them with all attributes and traits
-                if (!PreferenceManager.getDefaultSharedPreferences(requireContext())
-                        .contains("${GeneralKeys.SUMMARY_FILTER_ATTRIBUTES}.${(activity as CollectActivity).studyId}")
-                ) {
-                    setPersistedFilter(collector, models)
-
-                }
-
                 loadData(collector, models)
 
                 setupToolbar(attributes, traits, collector)
@@ -168,10 +160,35 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
         val obsUnit = collector.observationUnit
 
+        val attributeSet = hashSetOf<AttributeAdapter.AttributeModel>()
+        val traitSet = hashSetOf<AttributeAdapter.AttributeModel>()
+
+        if (filter.first == null) {
+            //if no filter is set, use all attributes
+            attributeSet.addAll(models.filter { it.trait == null }.toSet())
+        } else {
+            //otherwise add all attributes
+            attributeSet.addAll((filter.first ?: setOf()).filter { it.trait == null })
+        }
+
+        if (filter.second == null) {
+            //if no trait filter is set, use all traits
+            traitSet.addAll(models.filter { it.trait != null }.toSet())
+        } else {
+            //otherwise fill with the filter traits
+            traitSet.addAll((filter.second ?: setOf()).filter { it.trait != null })
+        }
+
+        if ((attributeSet + traitSet).isEmpty()) {
+            return
+        }
+
         val data = database.convertDatabaseToTable(
-            models.filter { it.trait == null }.map { it.label }.toTypedArray(),
-            ArrayList(models.filter { it.trait != null }.map { it.trait }), obsUnit
+            attributeSet.map { it.label }.toTypedArray(),
+            ArrayList(traitSet.map { it.trait }), obsUnit
         )
+
+        val filters = attributeSet + traitSet
 
         val pairList = arrayListOf<AttributeAdapter.AttributeModel>()
 
@@ -181,7 +198,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
             try {
 
-                models.filter { it in filter }
+                models.filter { it in filters }
                     .forEach { model ->
 
                         val index = data.getColumnIndex(model.label)
@@ -240,40 +257,40 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
         }
     }
 
-    private fun getPersistedFilter(ctx: Context): List<AttributeAdapter.AttributeModel> {
-
-        val models = arrayListOf<AttributeAdapter.AttributeModel>()
+    private fun getPersistedFilter(ctx: Context): Pair<Set<AttributeAdapter.AttributeModel>?, Set<AttributeAdapter.AttributeModel>?> {
 
         val attributes = PreferenceManager.getDefaultSharedPreferences(ctx)
             .getStringSet(
                 "${GeneralKeys.SUMMARY_FILTER_ATTRIBUTES}.${(ctx as CollectActivity).studyId}",
                 null
-            ) ?: setOf()
+            )
 
-        models.addAll(attributes.map {
+        val attributeSet = if (attributes == null) null else hashSetOf<AttributeAdapter.AttributeModel>()
+
+        attributeSet?.addAll(attributes?.map {
             AttributeAdapter.AttributeModel(it)
-        })
+        }?.toTypedArray() ?: emptyArray())
 
         val traitIds = PreferenceManager.getDefaultSharedPreferences(ctx)
             .getStringSet(
                 "${GeneralKeys.SUMMARY_FILTER_TRAITS}.${ctx.studyId}",
                 null
-            ) ?: setOf()
+            )
 
-        models.addAll(traitIds.mapNotNull { traitId ->
-            ctx.database.getTraitById(traitId)?.let { trait ->
-                AttributeAdapter.AttributeModel(trait.name, trait = trait)
-            }
-        })
+        val traitSet = if (traitIds == null) null else hashSetOf<AttributeAdapter.AttributeModel>()
+        traitSet?.addAll(traitIds?.mapNotNull { traitId ->
+            val trait = ctx.database.getTraitById(traitId)
+            AttributeAdapter.AttributeModel(label = trait.name, trait = trait)
+        }?.toTypedArray() ?: emptyArray())
 
-        return models
+        return attributeSet?.toSet() to traitSet?.toSet()
     }
 
 
     private fun setPersistedFilter(ctx: Context, filter: List<AttributeAdapter.AttributeModel>) {
 
         val attributes = filter.filter { it.trait == null }.map { it.label }.toSet()
-        val traits = filter.filter { it.trait != null }.map { it.trait!!.id }.toSet()
+        val traits = filter.filter { it.trait != null }.mapNotNull { it.trait?.id }.toSet()
 
         PreferenceManager.getDefaultSharedPreferences(ctx).edit {
             putStringSet(
@@ -293,18 +310,25 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
         activity?.let { ctx ->
 
-            var filter: Set<AttributeAdapter.AttributeModel> =
-                getPersistedFilter(ctx).toMutableSet()
+            val (attributeFilters, traitFilters) = getPersistedFilter(collector)
 
-            val models = ArrayList<AttributeAdapter.AttributeModel>()
-            models.addAll(attributes.map { AttributeAdapter.AttributeModel(it) })
-            models.addAll(traits.map { AttributeAdapter.AttributeModel(it.name, trait = it) })
+            val attributeSet = hashSetOf<AttributeAdapter.AttributeModel>()
+            val traitSet = hashSetOf<AttributeAdapter.AttributeModel>()
+
+            val attributeModels = attributes.map { AttributeAdapter.AttributeModel(it) }
+            val traitAttributeModels =
+                traits.map { AttributeAdapter.AttributeModel(it.name, trait = it) }
+
+            val models = (attributeModels + traitAttributeModels).toMutableList()
 
             //initialize which attributes are checked, if no filter is saved then check all
-            val checked = models.map {
-                it in filter
+            val checked = attributeModels.map { model ->
+                if (attributeFilters == null) true
+                else model in attributeModels
+            }.toBooleanArray() + traitAttributeModels.map {
+                if (traitFilters == null) true
+                else it in traitFilters
             }.toBooleanArray()
-
 
             filterDialog =
                 AlertDialog.Builder(activity, R.style.AppAlertDialog)
@@ -314,18 +338,14 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
                         checked
                     ) { _, which, isChecked ->
                         val item = models[which]
-                        filter = (if (isChecked) {
-                            filter.plus(item)
+                        if (isChecked) {
+                            models.add(item)
                         } else {
-                            filter.minus(item)
-                        })
+                            models.remove(item)
+                        }
                     }.setPositiveButton(android.R.string.ok) { dialog, _ ->
-                        setPersistedFilter(ctx, filter.toList())
+                        setPersistedFilter(ctx, models)
                         dialog.dismiss()
-                        val attributeModels = attributes.map { AttributeAdapter.AttributeModel(it) }
-                        val traitAttributeModels =
-                            traits.map { AttributeAdapter.AttributeModel(it.name, trait = it) }
-                        val models = attributeModels + traitAttributeModels
                         loadData(collector, models)
                     }.setNegativeButton(android.R.string.cancel) { dialog, _ ->
                         dialog.dismiss()
@@ -342,13 +362,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                     list.choiceMode = ListView.CHOICE_MODE_MULTIPLE
 
-                    val toggle = (filter?.size ?: 0) < models.size
-
-                    filter = if (toggle) {
-
-                        filter.plus(models)
-
-                    } else setOf()
+                    val toggle = (attributeSet.size + traitSet.size) < models.size
 
                     models.forEachIndexed { index, _ ->
 
@@ -365,7 +379,6 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
     /**
      * Navigate to the clicked trait
      */
-    //TODO necessary to switch Name usage?
     override fun onAttributeClicked(attribute: AttributeAdapter.AttributeModel) {
 
         with(activity as? CollectActivity) {

@@ -2,6 +2,7 @@ package com.fieldbook.tracker.database.dao
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
+import android.content.Context
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.util.Log
@@ -80,30 +81,27 @@ class ObservationVariableDao {
         }
         }
 
-        /**
-         * TODO: Replace with View.
-         */
         @SuppressLint("Recycle")
         fun getTraitExists(uniqueName: String, id: Int, traitDbId: String): Boolean =
             withDatabase { db ->
 
                 val query = """
-                SELECT id, value
-                FROM observations, ObservationUnitProperty
-                WHERE observations.observation_unit_id = ObservationUnitProperty.'$uniqueName' 
-                    AND ObservationUnitProperty.id = ? 
-                    AND observations.observation_variable_db_id = ? 
-                """.trimIndent()
+                        SELECT id, value
+                        FROM observations, ObservationUnitProperty
+                        WHERE observations.observation_unit_id = ObservationUnitProperty.'$uniqueName' 
+                            AND ObservationUnitProperty.id = ? 
+                            AND observations.observation_variable_db_id = ? 
+                        """.trimIndent()
 
-//            println("$id $parent $trait")
-//            println(query)
+        //            println("$id $parent $trait")
+        //            println(query)
 
                 val columnNames =
                     db.rawQuery(query, arrayOf(id.toString(), traitDbId)).toFirst().keys
 
-            "value" in columnNames
+                "value" in columnNames
 
-        } ?: false
+            } == true
 
         fun getAllTraits(): Array<String> = withDatabase { db ->
 
@@ -228,7 +226,7 @@ class ObservationVariableDao {
 
         //TODO 471 remove getTraitByName if not required
         //TODO missing obs. vars. for min/max/categories
-        fun insertTraits(t: TraitObject) = withDatabase { db ->
+        fun insertTraits(ctx: Context, t: TraitObject) = withDatabase { db ->
 
             if (getTraitByName(t.name) != null) {
                 Log.d("ObservationVariableDao", "Trait ${t.name} already exists, skipping insertion.")

@@ -69,6 +69,8 @@ class RangeBoxView : ConstraintLayout {
 
     private var exportDataCursor: Cursor? = null
 
+    private val studyId: Int
+
     init {
 
         val v = inflate(context, R.layout.view_range_box, this)
@@ -83,7 +85,9 @@ class RangeBoxView : ConstraintLayout {
 
         this.controller = context as CollectRangeController
 
-        rangeID = this.controller.getDatabase().allRangeID
+        studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+
+        rangeID = this.controller.getDatabase().getAllRangeID(studyId)
         cRange = RangeObject()
         cRange.secondaryId = ""
         cRange.uniqueId = ""
@@ -490,7 +494,7 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun setAllRangeID() {
-        rangeID = controller.getDatabase().allRangeID
+        rangeID = controller.getDatabase().getAllRangeID(studyId)
     }
 
     fun setRange(id: Int) {
@@ -605,7 +609,6 @@ class RangeBoxView : ConstraintLayout {
 
     private fun moveToNextUncollectedObs(currentPos: Int, direction: Int, traits: ArrayList<TraitObject>): Int {
 
-        val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
         val exportDataCursor = controller.getDatabase().getExportTableDataShort(studyId, uniqueName, traits)
         val traitNames = traits.map { it.name }

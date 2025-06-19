@@ -63,7 +63,7 @@ class TraitAttributeValuesHelper(private val traitId: String) {
                             val rowsUpdated = ObservationVariableValueDao.update(traitId, attrId.toString(), attributeValue)
 
                             if (rowsUpdated != null && rowsUpdated == 0) { // if nothing was updated, insert a new value instead
-                                ObservationVariableValueDao.insertAttributeValue(attributeName, attributeValue, traitId)
+                                ObservationVariableValueDao.insertAttributeValue(attrId.toString(), attributeValue, traitId)
                             }
                         }
                     }

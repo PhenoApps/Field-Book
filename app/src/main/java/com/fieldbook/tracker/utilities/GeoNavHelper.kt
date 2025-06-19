@@ -678,8 +678,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         }
     }
 
-    //TODO 471 GeoNav Pop up choice shows AttributeModel class string and not label
-    //Update "plot_id" usage too
     private fun getPopupInfo(id: String, popupHeader: AttributeModel): String {
         
         var newPopupHeader = popupHeader

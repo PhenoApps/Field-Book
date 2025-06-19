@@ -236,7 +236,7 @@ class StudyDao {
                         FROM observations 
                         JOIN observation_variables AS ov ON ov.${ObservationVariable.PK} = observations.${ObservationVariable.FK}
                         WHERE study_id = Studies.${Study.PK} AND observations.observation_variable_db_id > 0) AS trait_count,
-                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observations.observation_variable_db_id > 0) AS observation_count
+                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
                 ORDER BY ${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ${if (isDateSort) "DESC" else "ASC"}
             """
@@ -439,15 +439,12 @@ class StudyDao {
         /**
          * This function should always be called within a transaction.
          */
-        //TODO 471 refactor if primary/secondary are not used
         fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) = withDatabase { db ->
 
             val names = getNames(studyId)!!
 
             //input data corresponds to original database column names
             val uniqueIndex = columns.indexOf(names.unique)
-            val primaryIndex = columns.indexOf(names.primary)
-            val secondaryIndex = columns.indexOf(names.secondary)
 
             //check if data size matches the columns size, on mismatch fill with dummy data
             //mainly fixes issues with BrAPI when xtype/ytype and row/col values are not given

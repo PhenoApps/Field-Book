@@ -181,13 +181,10 @@ class ObservationDao {
         } ?: emptyList()
 
         /**
-         * TODO: this can be replaced with a view
          * important note:  observationUnitDbId and observationUnitName are unit attributes that
          * are required to have for brapi fields; otherwise, this query will fail.
          */
         @SuppressLint("Recycle")
-
-
         fun getObservations(fieldId: Int, hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
             db.rawQuery("""
                 SELECT
@@ -305,7 +302,6 @@ class ObservationDao {
 
                 db.query(
                     sNonImageObservationsViewName,
-                    // TODO change study_db_id to match ${Study.FK} in db
                     where = "study_db_id = ? AND (trait_data_source = 'local' OR trait_data_source IS NULL)",
                     whereArgs = arrayOf(studyId)
                 ).toTable()
@@ -370,7 +366,7 @@ class ObservationDao {
                 "value" to value,
                 "observation_time_stamp" to timestamp,
                 "collector" to person,
-                "geoCoordinates" to location,
+                "geo_coordinates" to location,
                 "last_synced_time" to lastSyncedTime?.format(internalTimeFormatter),
                 "rep" to rep,
                 "notes" to notes,
@@ -400,14 +396,14 @@ class ObservationDao {
             }
             else {
                 //get observationVariableFieldbookformat based on the variableName
-                val variableFormat = traitIdToTypeMap[model.variableDbId]?: ObservationVariableDao.getTraitByName(model.variableName)!!.format
+                val variableFormat = traitIdToTypeMap[model.variableDbId] ?: return@withDatabase -1
                 val varRowId =  db.insert(Observation.tableName, null, contentValuesOf(
                     "observation_variable_field_book_format" to variableFormat,
                     "value" to model.value,
                     "observation_time_stamp" to model.timestamp?.format(internalTimeFormatter),
                     "collector" to model.collector,
 //                "geoCoordinates" to model.geo_coordinates,
-                    "geoCoordinates" to null,
+                    "geo_coordinates" to null,
                     "last_synced_time" to model.lastSyncedTime?.format(internalTimeFormatter),
 //                "additional_info" to model.additional_info,
                     "additional_info" to null,

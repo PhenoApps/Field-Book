@@ -396,6 +396,7 @@ class Migrator {
         companion object Schema {
             const val PK = "internal_id_observation_unit"
             const val FK = "observation_unit_id"
+            const val BRAPI_KEY = "observation_unit_db_id"
             const val migrateFromTableName = "plots"
             const val tableName = "observation_units"
             val columnDefs by lazy {
