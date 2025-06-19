@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- BrAPI Sync improved to avoid observation miscounts and other failures
 - 0x00 character now removed from pasted text values
 
 ## [v6.2.4] - 2025-06-09
