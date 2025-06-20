@@ -13,6 +13,7 @@ import com.fieldbook.tracker.database.basicTimeFormatter
 import com.fieldbook.tracker.database.saver.NixSpectralSaver
 import com.fieldbook.tracker.devices.spectrometers.Device
 import com.fieldbook.tracker.devices.spectrometers.SpectralFrame
+import com.fieldbook.tracker.devices.spectrometers.Spectrometer.ResultCallback
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.SpectralTraitLayout.State.Color
 import com.fieldbook.tracker.traits.formats.Formats
@@ -256,6 +257,8 @@ class NixTraitLayout : SpectralTraitLayout {
                     saveDevice(device)
                     enableCapture(device)
                     ensureSpectralCompat(nixDevice)
+                } else {
+                    setupConnectUi()
                 }
             }
         }
@@ -311,7 +314,7 @@ class NixTraitLayout : SpectralTraitLayout {
         }
     }
 
-    override fun capture(device: Device, entryId: String, traitId: String) {
+    override fun capture(device: Device, entryId: String, traitId: String, callback: ResultCallback) {
 
         getDevice(device)?.let { nixDevice ->
 
@@ -328,6 +331,8 @@ class NixTraitLayout : SpectralTraitLayout {
                 enableCapture(device)
                 return@let
             }
+
+            callback.onResult(true)
 
             nixDevice.measure(object : OnDeviceResultListener {
                 override fun onDeviceResult(

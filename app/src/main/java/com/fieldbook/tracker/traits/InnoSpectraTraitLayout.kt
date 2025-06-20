@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import com.fieldbook.tracker.devices.spectrometers.Device
 import com.fieldbook.tracker.devices.spectrometers.SpectralFrame
+import com.fieldbook.tracker.devices.spectrometers.Spectrometer.ResultCallback
 
 /**
  * TODO
@@ -46,7 +47,7 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         TODO("Not yet implemented")
     }
 
-    override fun capture(device: Device, entryId: String, traitId: String) {
+    override fun capture(device: Device, entryId: String, traitId: String, callback: ResultCallback) {
         TODO("Not yet implemented")
     }
 

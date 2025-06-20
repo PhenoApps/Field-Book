@@ -1,8 +1,6 @@
 package com.fieldbook.tracker.utilities
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import com.fieldbook.tracker.R
@@ -24,7 +22,7 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
 
     companion object {
         private const val TAG = "Nix"
-        private const val SCAN_PERIOD_MS = 30000L
+        //private const val SCAN_PERIOD_MS = 30000L
     }
 
     data class NixDevice(
@@ -221,6 +219,7 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
     }
 
     fun disconnect() {
+        stopScan()
         connectedDevice?.disconnect()
         connectedDevice = null
     }

@@ -1,9 +1,12 @@
 package com.fieldbook.tracker.adapters.spectral
 
+import android.graphics.Color
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -20,7 +23,17 @@ import com.fieldbook.tracker.R
 
 class LineGraphSelectableAdapter(private val listener: Listener? = null) : ListAdapter<LineGraphSelectableAdapter.LineColorData, LineGraphSelectableAdapter.ViewHolder>(DiffCallback()) {
 
-    data class LineColorData(val id: Int, val color: Int, val timestamp: String)
+    data class LineColorData(val id: Int, val color: Int, val timestamp: String) {
+        companion object {
+            fun placeholder(): LineColorData {
+                return LineColorData(
+                    id = -1,
+                    color = 0xFF000000.toInt(), // Default black color
+                    timestamp = ""
+                )
+            }
+        }
+    }
 
     interface Listener {
         fun onItemSelected(position: Int, onSelect: (() -> Unit)? = null)
@@ -37,20 +50,29 @@ class LineGraphSelectableAdapter(private val listener: Listener? = null) : ListA
 
         with(currentList[position]) {
             holder.itemView.tag = this
-            //val (day, time) = timestamp.split(" ")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                holder.colorView.tooltipText = timestamp
+            if (id == -1) {
+                holder.progressBar.visibility = View.VISIBLE
+                holder.imageView.visibility = View.VISIBLE
+                holder.colorView.setBackgroundColor(Color.BLACK)
+            } else {
+                holder.progressBar.visibility = View.GONE
+                holder.imageView.visibility = View.GONE
+                holder.colorView.visibility = View.VISIBLE
+                //val (day, time) = timestamp.split(" ")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    holder.colorView.tooltipText = timestamp
+                }
+                holder.colorView.setOnLongClickListener {
+                    listener?.onItemLongClick(position)
+                    //Toast.makeText(holder.itemView.context, timestamp, Toast.LENGTH_SHORT).show()
+                    true
+                }
+                holder.colorView.setBackgroundColor(color)
+                holder.colorView.setOnClickListener {
+                    listener?.onItemSelected(position)
+                }
+                holder.textView.text = (position + 1).toString()
             }
-            holder.colorView.setOnLongClickListener {
-                listener?.onItemLongClick(position)
-                //Toast.makeText(holder.itemView.context, timestamp, Toast.LENGTH_SHORT).show()
-                true
-            }
-            holder.colorView.setBackgroundColor(color)
-            holder.colorView.setOnClickListener {
-                listener?.onItemSelected(position)
-            }
-            holder.textView.text = (position + 1).toString()
         }
     }
 
@@ -61,6 +83,8 @@ class LineGraphSelectableAdapter(private val listener: Listener? = null) : ListA
     class ViewHolder(v: ConstraintLayout) : RecyclerView.ViewHolder(v) {
         var colorView: View = v.findViewById(R.id.line_selector_color)
         var textView: TextView = v.findViewById(R.id.line_selector_text)
+        var progressBar: ProgressBar = v.findViewById(R.id.progress_bar)
+        var imageView: ImageView = v.findViewById(R.id.image_view)
     }
 
     class DiffCallback : DiffUtil.ItemCallback<LineColorData>() {

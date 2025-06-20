@@ -1210,8 +1210,6 @@ public class CollectActivity extends ThemedActivity
 
         traitLayouts.unregisterAllReceivers();
 
-        nixSensorHelper.disconnect();
-
         super.onPause();
     }
 
@@ -1234,6 +1232,8 @@ public class CollectActivity extends ThemedActivity
         getTraitLayout().onExit();
 
         traitLayoutRefresh();
+
+        //nixSensorHelper.disconnect();
 
         usbCameraApi.onDestroy();
 
