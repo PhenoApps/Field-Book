@@ -44,6 +44,7 @@
         android:src="@drawable/ic_hourglass_empty_black_24dp"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:tint="@color/WHITE"
         app:layout_constraintStart_toStartOf="@id/progress_bar"
         app:layout_constraintEnd_toEndOf="@id/progress_bar"
         app:layout_constraintTop_toTopOf="@id/progress_bar"

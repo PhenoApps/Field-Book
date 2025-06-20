@@ -295,11 +295,13 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         return null
     }
 
-    protected fun writeSpectralDataToFile(deviceType: String, frame: SpectralFrame): String? {
+    protected fun writeSpectralDataToFile(deviceType: String, frame: SpectralFrame, providesSpectral: Boolean): String? {
 
         getSpectralUri(deviceType)?.let { uri ->
 
-            //bisectAndWriteSpectralData(uri, frame)
+            if (providesSpectral) {
+                bisectAndWriteSpectralData(uri, frame)
+            }
 
             return uri.toString()
         }

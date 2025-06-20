@@ -467,7 +467,7 @@ class NixTraitLayout : SpectralTraitLayout {
 
                     }
 
-                    writeSpectralDataToFile(data.deviceType.toString(), frame)?.let { spectralUri ->
+                    writeSpectralDataToFile(data.deviceType.toString(), frame, data.providesSpectral)?.let { spectralUri ->
 
                         writeSpectralDataToDatabase(frame, color, spectralUri, entryId, traitId)
 
