@@ -83,6 +83,8 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         controller.getSoundHelper()
     }
 
+    private var lastCapturedEntryId: String = String()
+
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -245,13 +247,18 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         withContext(Dispatchers.Main) {
 
+
             collectInputView.visibility = GONE
 
             spectralDataList.add(fact)
 
             val index = spectralDataList.indexOf(fact)
 
-            selected = index
+            if (currentRange.uniqueId == lastCapturedEntryId) {
+
+                selected = index
+
+            }
 
             submitList()
 
@@ -427,6 +434,8 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
             Log.d(TAG, "Capture button clicked")
 
+            lastCapturedEntryId = entryId
+
             capture(device, entryId, traitId) { result ->
 
                 if (result) {
@@ -508,7 +517,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
     private fun submitSpectralList(frames: List<SpectralFrame>, submitPlaceholder: Boolean = false) {
 
-        if (frames.isEmpty()) {
+        if (frames.isEmpty() && !submitPlaceholder) {
             lineChart?.visibility = GONE
             recycler?.visibility = GONE
         } else {
@@ -528,7 +537,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
                 it.traitId == currentTrait.id && it.entryId == currentRange.uniqueId
             }
 
-        if (frames.isEmpty()) {
+        if (frames.isEmpty() && !submitPlaceholder) {
             lineChart?.visibility = GONE
             recycler?.visibility = GONE
         } else {
