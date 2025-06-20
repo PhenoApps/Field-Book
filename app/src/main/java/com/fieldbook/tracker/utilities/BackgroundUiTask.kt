@@ -11,7 +11,7 @@ open class BackgroundUiTask {
     companion object {
 
         /**
-         * Executes a background tas kasynchronously and then updates the UI on the main thread.
+         * Executes a background task asynchronously and then updates the UI on the main thread.
          *
          * This function uses Kotlin coroutines to manage asynchronous operations. It launches a new coroutine
          * on the IO dispatcher to execute the background task, and then switches to the main dispatcher

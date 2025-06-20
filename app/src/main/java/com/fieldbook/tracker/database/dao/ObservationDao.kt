@@ -1,8 +1,10 @@
 package com.fieldbook.tracker.database.dao
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
 import androidx.core.content.contentValuesOf
@@ -182,6 +184,160 @@ class ObservationDao {
             }
 
         } ?: emptyList()
+
+
+        /**
+        * Get all BrAPI export data categorized by type and status
+        * @param studyId The study ID to get data for
+        * @param hostUrl The BrAPI host URL
+        * @return Map containing categorized observations
+        */
+        fun getBrAPIExportData(fieldId: String, hostUrl: String): Map<String, List<com.fieldbook.tracker.brapi.model.Observation>> = withDatabase { db ->
+            // Create result containers
+            val categories = mutableMapOf(
+                "newObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "syncedObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "editedObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "newImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "syncedImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "editedImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "incompleteImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "userCreatedTraitObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "wrongSourceObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "userCreatedImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "wrongSourceImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>()
+            )
+            
+            db.rawQuery("""
+                SELECT 
+                    obs.${Observation.PK} AS id,
+                    obs.value,
+                    obs.observation_time_stamp,
+                    obs.observation_unit_id,
+                    obs.observation_db_id,
+                    obs.last_synced_time,
+                    obs.collector,
+                    obs.rep,
+                    study.${Study.PK} AS ${Study.FK},
+                    study.study_db_id,
+                    vars.external_db_id,
+                    vars.observation_variable_name,
+                    vars.observation_variable_field_book_format,
+                    vars.trait_data_source,
+                    vars.observation_variable_details
+                FROM ${Observation.tableName} AS obs
+                JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK}
+                JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK}
+                WHERE obs.${Study.FK} = ?
+                AND obs.value <> ''
+            """.trimIndent(), arrayOf(fieldId)).use { cursor ->
+                while (cursor.moveToNext()) {
+                    val observation = com.fieldbook.tracker.brapi.model.Observation().apply {
+                        fieldBookDbId = getStringVal(cursor, "id")
+                        value = getStringVal(cursor, "value")
+                        setTimestamp(getStringVal(cursor, "observation_time_stamp"))
+                        unitDbId = getStringVal(cursor, "observation_unit_id")
+                        dbId = getStringVal(cursor, "observation_db_id")
+                        setLastSyncedTime(getStringVal(cursor, "last_synced_time"))
+                        collector = getStringVal(cursor, "collector") ?: ""
+                        studyId = getStringVal(cursor, "study_db_id")
+                        variableDbId = getStringVal(cursor, "external_db_id")
+                        variableName = getStringVal(cursor, "observation_variable_name")
+                        rep = getStringVal(cursor, "rep")
+                        variableDetails = getStringVal(cursor, "observation_variable_details")
+                    }
+                    
+                    val format = getStringVal(cursor, "observation_variable_field_book_format")
+                    val source = getStringVal(cursor, "trait_data_source")
+                    val isPhoto = format == "photo"
+                    
+                    // Determine the category for this observation
+                    val category = when {
+                        // Source-based categories
+                        source == "local" || source == null -> {
+                            if (isPhoto) "userCreatedImageObservations" else "userCreatedTraitObservations"
+                        }
+                        source != hostUrl -> {
+                            if (isPhoto) "wrongSourceImageObservations" else "wrongSourceObservations"
+                        }
+                        // Status-based categories
+                        observation.dbId == null -> {
+                            if (isPhoto) "newImageObservations" else "newObservations"
+                        }
+                        observation.lastSyncedTime == null -> {
+                            if (isPhoto) "incompleteImageObservations" else "editedObservations" // Non-photos without sync time are considered edited
+                        }
+                        else -> {
+                            val obsTimestamp = observation.timestamp
+                            val syncTimestamp = observation.lastSyncedTime
+                            
+                            if (obsTimestamp == null || obsTimestamp <= syncTimestamp) {
+                                if (isPhoto) "syncedImageObservations" else "syncedObservations"
+                            } else {
+                                if (isPhoto) "editedImageObservations" else "editedObservations"
+                            }
+                        }
+                    }
+                    
+                    // Add to the appropriate list
+                    categories[category]?.add(observation)
+                }
+            }
+            
+            categories
+        } ?: mapOf(
+            "newObservations" to emptyList(),
+            "syncedObservations" to emptyList(),
+            "editedObservations" to emptyList(),
+            "newImageObservations" to emptyList(),
+            "syncedImageObservations" to emptyList(),
+            "editedImageObservations" to emptyList(),
+            "incompleteImageObservations" to emptyList(),
+            "userCreatedTraitObservations" to emptyList(),
+            "wrongSourceObservations" to emptyList(),
+            "userCreatedImageObservations" to emptyList(),
+            "wrongSourceImageObservations" to emptyList()
+        )
+
+        /**
+        * Get image details for a list of observations
+        * @param ctx Context for file operations
+        * @param observations List of observations to get image details for
+        * @param missingPhoto Bitmap to use if image is missing
+        * @return List of FieldBookImage objects
+        */
+        fun getImageDetails(ctx: Context, observations: List<com.fieldbook.tracker.brapi.model.Observation>, missingPhoto: Bitmap): List<FieldBookImage> {
+            return observations.mapNotNull { observation ->
+                if (observation.value.isNullOrEmpty()) {
+                    Log.e("ObservationDao", "Empty image path for observation: ${observation.fieldBookDbId}")
+                    return@mapNotNull null
+                }
+                
+                try {
+                    // Create the FieldBookImage object with the missing photo fallback
+                    // The actual image loading will happen later in loadImage()
+                    FieldBookImage(ctx, observation.value, observation.variableName, missingPhoto).apply {
+                        rep = observation.rep
+                        unitDbId = observation.unitDbId
+                        descriptiveOntologyTerms = listOf(observation.variableDbId)
+                        description = observation.variableDetails
+                        setTimestamp(observation.timestamp)
+                        fieldBookDbId = observation.fieldBookDbId
+                        dbId = observation.dbId
+                        setLastSyncedTime(observation.lastSyncedTime)
+                    }
+                } catch (e: Exception) {
+                    Log.e("ObservationDao", "Error creating FieldBookImage for observation: ${observation.fieldBookDbId}", e)
+                    null
+                }
+            }
+        }
+
+        // Helper function to safely get string values from cursor
+        private fun getStringVal(cursor: Cursor, columnName: String): String? {
+            val columnIndex = cursor.getColumnIndex(columnName)
+            return if (columnIndex >= 0 && !cursor.isNull(columnIndex)) cursor.getString(columnIndex) else null
+        }
 
         /**
          * TODO: this can be replaced with a view
