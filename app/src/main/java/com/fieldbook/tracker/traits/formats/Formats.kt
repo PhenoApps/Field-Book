@@ -22,7 +22,7 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
 
         fun isExternalCameraTrait(format: String) = format in setOf("usb camera", "gopro", "canon")
 
-        fun getSpectralFormats() = entries.filter { it in setOf(NIX, INNO_SPECTRA) }
+        fun getSpectralFormats() = entries.filter { it in setOf(NIX) }
 
         fun getCameraFormats() = entries.filter { it.isCamera }
 
