@@ -32,6 +32,10 @@ public class TraitObject {
     private String additionalInfo;
     private Boolean closeKeyboardOnOpen = false;
     private Boolean cropImage = false;
+    private Boolean useDayOfYear = false;
+    private Boolean displayValue = false;
+    private String resourceFile = "";
+    
 
     /**
      * This is a BMS specific field. This will be populated when traits are imported from
@@ -190,12 +194,30 @@ public class TraitObject {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TraitObject that = (TraitObject) o;
-        return realPosition == that.realPosition && Objects.equals(name, that.name) && Objects.equals(format, that.format) && Objects.equals(defaultValue, that.defaultValue) && Objects.equals(minimum, that.minimum) && Objects.equals(maximum, that.maximum) && Objects.equals(details, that.details) && Objects.equals(categories, that.categories) && Objects.equals(id, that.id) && Objects.equals(visible, that.visible) && Objects.equals(externalDbId, that.externalDbId) && Objects.equals(traitDataSource, that.traitDataSource) && Objects.equals(additionalInfo, that.additionalInfo) && Objects.equals(observationLevelNames, that.observationLevelNames) && Objects.equals(closeKeyboardOnOpen, that.closeKeyboardOnOpen) && Objects.equals(cropImage, that.cropImage);
+        return realPosition == that.realPosition && 
+           Objects.equals(name, that.name) && 
+           Objects.equals(format, that.format) && 
+           Objects.equals(defaultValue, that.defaultValue) && 
+           Objects.equals(minimum, that.minimum) && 
+           Objects.equals(maximum, that.maximum) && 
+           Objects.equals(details, that.details) && 
+           Objects.equals(categories, that.categories) && 
+           Objects.equals(id, that.id) && 
+           Objects.equals(visible, that.visible) && 
+           Objects.equals(externalDbId, that.externalDbId) && 
+           Objects.equals(traitDataSource, that.traitDataSource) && 
+           Objects.equals(additionalInfo, that.additionalInfo) && 
+           Objects.equals(observationLevelNames, that.observationLevelNames) && 
+           Objects.equals(closeKeyboardOnOpen, that.closeKeyboardOnOpen) && 
+           Objects.equals(cropImage, that.cropImage) &&
+           Objects.equals(useDayOfYear, that.useDayOfYear) &&
+           Objects.equals(displayValue, that.displayValue) &&
+           Objects.equals(resourceFile, that.resourceFile);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, format, defaultValue, minimum, maximum, details, categories, realPosition, id, visible, externalDbId, traitDataSource, additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage);
+        return Objects.hash(name, format, defaultValue, minimum, maximum, details, categories, realPosition, id, visible, externalDbId, traitDataSource, additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage, useDayOfYear, displayValue, resourceFile);
     }
 
     public TraitObject clone() {
@@ -217,6 +239,9 @@ public class TraitObject {
         t.setObservationLevelNames(this.observationLevelNames);
         t.setCloseKeyboardOnOpen(this.closeKeyboardOnOpen);
         t.setCropImage(this.cropImage);
+        t.setUseDayOfYear(this.useDayOfYear);
+        t.setDisplayValue(this.displayValue);
+        t.setResourceFile(this.resourceFile);
 
         return t;
     }
@@ -235,5 +260,29 @@ public class TraitObject {
 
     public void setCropImage(Boolean cropImage) {
         this.cropImage = cropImage;
+    }
+
+    public Boolean getUseDayOfYear() {
+        return useDayOfYear;
+    }
+
+    public void setUseDayOfYear(Boolean useDayOfYear) {
+        this.useDayOfYear = useDayOfYear;
+    }
+
+    public Boolean getDisplayValue() {
+        return displayValue;
+    }
+
+    public void setDisplayValue(Boolean displayValue) {
+        this.displayValue = displayValue;
+    }
+
+    public String getResourceFile() {
+        return resourceFile;
+    }
+
+    public void setResourceFile(String resourceFile) {
+        this.resourceFile = resourceFile;
     }
 }

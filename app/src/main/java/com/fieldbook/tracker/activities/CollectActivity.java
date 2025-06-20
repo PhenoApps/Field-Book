@@ -1542,8 +1542,14 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
-    private void openSavedResourceFile() {
-        String fileString = preferences.getString(GeneralKeys.LAST_USED_RESOURCE_FILE, "");
+    /**
+     * Opens a saved resource file or a specific resource file if provided
+     * @param resourceFileName Optional resource file name to open
+     */
+    private void openSavedResourceFile(String resourceFileName) {
+        String fileString = resourceFileName != null ? resourceFileName : 
+                            preferences.getString(GeneralKeys.LAST_USED_RESOURCE_FILE, "");
+        Log.d(TAG, "fileString after selection: " + fileString);
         if (!fileString.isEmpty()) {
             try {
                 Uri resultUri = Uri.parse(fileString);
@@ -1560,6 +1566,11 @@ public class CollectActivity extends ThemedActivity
         } else {
             Utils.makeToast(this, "No file preference saved, select a file with a short press");
         }
+    }
+
+    // Overload for backward compatibility
+    private void openSavedResourceFile() {
+        openSavedResourceFile(null);
     }
 
     @Override
@@ -1633,12 +1644,23 @@ public class CollectActivity extends ThemedActivity
             SearchDialog searchdialog = new SearchDialog(this, this);
             searchdialog.show(getSupportFragmentManager(), "DialogTag");
         } else if (itemId == resourcesId) {
-            DocumentFile dir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
-            if (dir != null && dir.exists()) {
-                intent.setClassName(CollectActivity.this, FileExploreActivity.class.getName());
-                intent.putExtra("path", dir.getUri().toString());
-                intent.putExtra("title", getString(R.string.main_toolbar_resources));
-                startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
+            TraitObject currentTrait = getCurrentTrait();
+            if (currentTrait != null) {
+                Log.d(TAG, "Current trait: " + currentTrait.getName() + ", Resource file: " + currentTrait.getResourceFile());
+            } else {
+                Log.d(TAG, "Current trait is null");
+            }
+            if (currentTrait != null && currentTrait.getResourceFile() != null && !currentTrait.getResourceFile().isEmpty()) {
+                // Trait has a resource file defined, try to open it directly
+                openSavedResourceFile(currentTrait.getResourceFile());
+            } else {
+                DocumentFile dir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
+                if (dir != null && dir.exists()) {
+                    intent.setClassName(CollectActivity.this, FileExploreActivity.class.getName());
+                    intent.putExtra("path", dir.getUri().toString());
+                    intent.putExtra("title", getString(R.string.main_toolbar_resources));
+                    startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
+                }
             }
         } else if (itemId == nextEmptyPlotId) {
             rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, true));

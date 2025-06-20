@@ -31,7 +31,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
-import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -91,7 +90,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
-public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController, TraitAdapter.TraitSorter, NewTraitDialog.TraitDialogDismissListener {
+public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController, TraitAdapter.TraitSorter, NewTraitDialog.TraitDialogDismissListener, TraitAdapter.OnTraitSelectedListener {
 
     private enum ImportOptions {
         CREATE_NEW(R.drawable.ic_ruler, R.string.traits_dialog_create),
@@ -111,6 +110,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     public static int REQUEST_CLOUD_FILE_CODE = 5;
     public static int REQUEST_FILE_EXPLORER_CODE = 1;
     public static int REQUEST_CODE_BRAPI_TRAIT_ACTIVITY = 2;
+    public static int REQUEST_RESOURCE_FILE_CODE = 6;
     private RecyclerView traitList;
     public TraitAdapter traitAdapter;
     public static boolean brapiDialogShown = false;
@@ -340,6 +340,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         brapiDialogShown = false;
 
         traitAdapter = new TraitAdapter(this);
+        traitAdapter.setOnTraitSelectedListener(this);
         traitAdapter.submitList(database.getAllTraitObjects());
         traitList.setAdapter(traitAdapter);
 
@@ -347,6 +348,39 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         FloatingActionButton fab = findViewById(R.id.newTrait);
         fab.setOnClickListener(v -> showImportDialog());
+    }
+
+    // Implement the interface
+    @Override
+    public void onTraitSelected(String traitId) {
+        // Disable touch events on the RecyclerView
+        traitList.setEnabled(false);
+        
+        // Create and show the TraitDetailFragment
+        TraitDetailFragment fragment = new TraitDetailFragment();
+        Bundle args = new Bundle();
+        args.putString("traitId", traitId);
+        fragment.setArguments(args);
+        
+        getSupportFragmentManager().beginTransaction()
+            .replace(android.R.id.content, fragment, "TraitDetailFragmentTag")
+            .addToBackStack(null)
+            .commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            // Return to Traits screen if pressed in detail fragment
+            if (traitAdapter != null) {
+                traitAdapter.notifyDataSetChanged();
+            }
+            getSupportFragmentManager().popBackStack();
+            traitList.setEnabled(true); // Re-enable touch events
+        } else {
+            CollectActivity.reloadData = true;
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -742,12 +776,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         alert.show();
     }
 
-    public void onBackPressed() {
-        super.onBackPressed();
-        CollectActivity.reloadData = true;
-        finish();
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -757,6 +785,23 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 startImportCsv(Uri.parse(data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY)));
             } else {
                 Toast.makeText(this, R.string.act_file_explorer_no_file_error, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        // if (requestCode == REQUEST_RESOURCE_FILE_CODE) {
+        //     com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
+        // }
+        if (requestCode == REQUEST_RESOURCE_FILE_CODE && resultCode == RESULT_OK && data != null) {
+            String fileName = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
+            
+            // First, handle the ResourceFileParameter case (for trait creation/editing)
+            com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
+            
+            // Then, check if we're in the TraitDetailFragment and update it
+            TraitDetailFragment fragment = (TraitDetailFragment) getSupportFragmentManager()
+                    .findFragmentByTag("TraitDetailFragmentTag");
+            if (fragment != null && fileName != null) {
+                fragment.updateResourceFile(fileName);
             }
         }
 
@@ -891,45 +936,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         itemTouchHelper.startDrag(item);
     }
 
-    /**
-     * Interface implementation to delegate menu options: copy, delete, edit
-     * @param v view to anchor popup menu
-     * @param trait trait object to handle
-     */
-    @Override
-    public void onMenuItemClicked(View v, TraitObject trait) {
-
-        Context wrapper = new ContextThemeWrapper(this, R.style.PopupMenuStyle);
-        PopupMenu popupMenu = new PopupMenu(wrapper, v);
-
-        //Inflating the Popup using xml file
-        popupMenu.getMenuInflater().inflate(R.menu.menu_trait_list_item, popupMenu.getMenu());
-
-        //registering popup with OnMenuItemClickListener
-        popupMenu.setOnMenuItemClickListener((item) -> {
-
-                if (item.getTitle().equals(getString(R.string.traits_options_copy))) {
-
-                    copyTrait(trait);
-
-                } else if (item.getTitle().equals(getString(R.string.traits_options_delete))) {
-
-                    deleteTrait(trait);
-
-                } else if (item.getTitle().equals(getString(R.string.traits_options_edit))) {
-
-                    showTraitDialog(trait);
-
-                }
-
-                return false;
-            }
-        );
-
-        popupMenu.show(); //showing popup menu
-    }
-
-    private void showTraitDialog(@Nullable TraitObject traitObject) {
+    public void showTraitDialog(@Nullable TraitObject traitObject) {
         queryAndLoadTraits();
         NewTraitDialog traitDialog = new NewTraitDialog(this);
         traitDialog.setTraitObject(traitObject);
@@ -937,66 +944,21 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     // Delete trait
-    private void deleteTrait(TraitObject trait) {
+    public void deleteTrait(TraitObject trait) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        builder.setTitle(getString(R.string.traits_options_delete_title));
-        builder.setMessage(getString(R.string.traits_warning_delete));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-
-                preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(trait.getId()))).apply();
-
-                getDatabase().deleteTrait(trait.getId());
-
-                queryAndLoadTraits();
-
-                CollectActivity.reloadData = true;
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), (dialog, which) -> dialog.dismiss());
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    // Copy trait name
-    private String copyTraitName(String traitName) {
-        if (traitName.contains("-Copy")) {
-            traitName = traitName.substring(0, traitName.indexOf("-Copy"));
-        }
-
-        String newTraitName = "";
-
-        String[] allTraits = getDatabase().getAllTraitNames();
-
-        for (int i = 0; i < allTraits.length; i++) {
-            newTraitName = traitName + "-Copy-(" + i + ")";
-            if (!Arrays.asList(allTraits).contains(newTraitName)) {
-                return newTraitName;
-            }
-        }
-        return "";    // not come here
-    }
-
-    // Copy trait to new trait
-    private void copyTrait(TraitObject trait) {
-
-        int pos = getDatabase().getMaxPositionFromTraits() + 1;
-
-        final String newTraitName = copyTraitName(trait.getName());
-
-        trait.setName(newTraitName);
-        trait.setVisible(true);
-        trait.setRealPosition(pos);
-
-        getDatabase().insertTraits(trait);
+        preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(trait.getId()))).apply();
+        getDatabase().deleteTrait(trait.getId());
         queryAndLoadTraits();
 
         CollectActivity.reloadData = true;
+    }
+
+    private void refreshTraitDetailFragment() {
+        TraitDetailFragment fragment = (TraitDetailFragment) getSupportFragmentManager()
+                .findFragmentByTag("TraitDetailFragmentTag");
+        if (fragment != null) {
+            fragment.loadTraitDetails();
+        }
     }
 
     @Override
@@ -1005,5 +967,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, null, true);
         }
         queryAndLoadTraits();
+        refreshTraitDetailFragment();
     }
 }

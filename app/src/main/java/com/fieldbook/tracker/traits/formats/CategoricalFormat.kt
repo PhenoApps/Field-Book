@@ -6,6 +6,8 @@ import com.fieldbook.tracker.traits.formats.coders.StringCoder
 import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.DisplayValueParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.presenters.CategoricalValuePresenter
 import com.fieldbook.tracker.traits.formats.presenters.ValuePresenter
 
@@ -22,7 +24,9 @@ class CategoricalFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter(),
-    CategoriesParameter()
+    CategoriesParameter(),
+    DisplayValueParameter(),
+    ResourceFileParameter()
 ),
     StringCoder by CategoricalJsonCoder(),
     ValuePresenter by CategoricalValuePresenter(),
