@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" href="../_styles/styles.css">
 
-# <img width="64" height="64" src="../_static/images/traits/formats/spectral/icon.PNG"> Spectral Trait
+# <img width="64" height="64" src="../_static/icons/formats/diamond-stone.png"> Spectral Trait
 
 ## Overview
 
@@ -20,10 +20,10 @@ When creating a spectral trait, the user first chooses the "Spectral icon", then
 
 Currently the only spectral format available is "Nix".
 
-<figure class="image">
+<figure class="image" style="text-align: center">
     <p>
-      <img src="../_static/images/traits/formats/spectral/creation_1.png" width="256"  alt=""/>
-      <img src="../_static/images/traits/formats/spectral/creation_2.png" width="256"  alt=""/>
+      <img src="../_static/images/traits/formats/spectral/trait_creator_dialog.png" width="256"  alt=""/>
+      <img src="../_static/images/traits/formats/spectral/trait_creator_dialog_spectral_sub_layout.png" width="256"  alt=""/>
     </p>
 </figure>
 
@@ -33,10 +33,10 @@ When first loading the collect activity, the user must select the connect button
 
 Please wait a moment while the device listens for possible connections, at times hardware may automatically reconnect.
 
-<figure class="image">
+<figure class="image" style="text-align: center">
     <p>
-      <img src="../_static/images/traits/formats/spectral/connect_1.png" width="256"  alt=""/>
-      <img src="../_static/images/traits/formats/spectral/connect_2.png" width="256"  alt=""/>
+      <img src="../_static/images/traits/formats/spectral/trait_spectral_connect_ui.png" width="256"  alt=""/>
+      <img src="../_static/images/traits/formats/spectral/trait_spectral_connect_device_choice_dialog.png" width="256"  alt=""/>
     </p>
 </figure>
 
@@ -45,15 +45,15 @@ Please wait a moment while the device listens for possible connections, at times
 When a device is connected, the user is presented with a settings button and a capture button.
 <figure class="image">
     <p>
-      <img src="../_static/images/traits/formats/spectral/capture.png" width="256"  alt=""/>
+      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_capture_ui.png" width="256"  alt=""/>
     </p>
 </figure>
 
 When capturing the data, a loading icon is shown. For color data the user will see a preview of the color captured along with its hexadecimal value.
-<figure class="image">
+<figure class="image" style="text-align: center">
     <p>
-      <img src="../_static/images/traits/formats/spectral/collect.png" width="256"  alt=""/>
-      <img src="../_static/images/traits/formats/spectral/collect_2.png" width="256"  alt=""/>
+      <img src="../_static/images/traits/formats/spectral/trait_spectral_color_capture.png" width="256"  alt=""/>
+      <img src="../_static/images/traits/formats/spectral/trait_spectral_color_capture_loading.png" width="256"  alt=""/>
     </p>
 </figure>
 
@@ -61,16 +61,16 @@ For spectral data, the values will be graphed.
 
 <figure class="image">
     <p>
-      <img src="../_static/images/traits/formats/spectral/spectral_collect.png" width="256"  alt=""/>
+      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_capturing_line_graph.png" width="256"  alt=""/>
     </p>
 </figure>
 
 Users can click on the right-hand item selector to highlight the respective data.
 
-<figure class="image">
+<figure class="image" style="text-align: center">
     <p>
-      <img src="../_static/images/traits/formats/spectral/capture_2.png" width="256"  alt=""/>
-      <img src="../_static/images/traits/formats/spectral/capture_3.png" width="256"  alt=""/>
+      <img src="../_static/images/traits/formats/spectral/trait_spectral_plot.png" width="256"  alt=""/>
+      <img src="../_static/images/traits/formats/spectral/trait_spectral_plot_ui_selected_item.png" width="256"  alt=""/>
     </p>
 </figure>
 
@@ -78,7 +78,7 @@ The settings button opens a dialog that lets the user disconnect from the hardwa
 
 <figure class="image">
     <p>
-      <img src="../_static/images/traits/formats/spectral/settings.png" width="256"  alt=""/>
+      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_settings_dialog.png" width="256"  alt=""/>
     </p>
 </figure>
 
@@ -86,7 +86,7 @@ The settings button opens a dialog that lets the user disconnect from the hardwa
 So a user may not collect data with a Nix Mini 3 after capturing data with a Nix Spectro 2.
 <figure class="image">
     <p>
-      <img src="../_static/images/traits/formats/spectral/incompat.png" width="256"  alt=""/>
+      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_incompatible_device_capture_toast.png" width="256"  alt=""/>
     </p>
 </figure>
 
@@ -98,7 +98,7 @@ high dimensional data.
 
 <figure class="image">
     <p>
-      <img src="../_static/images/traits/formats/spectral/export.png" width="500"  alt=""/>
+      <img class="screenshot" src="../_static/images/traits/formats/spectral/export.png" width="500"  alt=""/>
     </p>
 </figure>
 
