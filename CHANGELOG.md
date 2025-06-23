@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+
+## [v6.2.5] - 2025-06-23
+
+### Added
+
+### Changed
+
+### Fixed
 - BrAPI Sync improved to avoid observation miscounts and other failures
 - 0x00 character now removed from pasted text values
 
@@ -715,3 +723,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.2
 [v6.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.3
 [v6.2.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.4
+[v6.2.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.5
