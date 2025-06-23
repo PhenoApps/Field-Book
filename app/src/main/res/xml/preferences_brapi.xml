@@ -134,6 +134,15 @@
             android:summary="%s"
             android:title="@string/brapi_timeout" />
 
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="5"
+            android:icon="@drawable/ic_pref_brapi_timeout"
+            android:inputType="number"
+            android:key="BRAPI_MAX_CONCURRENT_IMAGE_CONTENT"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/brapi_max_concurrent_image_content" />
+
         <ListPreference
             android:defaultValue="value"
             android:dialogTitle="@string/preferences_brapi_cache_invalidate_dialog_title"

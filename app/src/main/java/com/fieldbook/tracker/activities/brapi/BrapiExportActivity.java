@@ -27,12 +27,20 @@ import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.BrapiExportUtil;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -78,6 +86,11 @@ public class BrapiExportActivity extends ThemedActivity {
     private UploadError postImageMetaDataError;
     private UploadError putImageContentError;
     private UploadError putImageMetaDataError;
+
+    private ExecutorService imageContentExecutor;
+    private final BlockingQueue<FieldBookImage> contentQueue = new LinkedBlockingQueue<>();
+    private AtomicInteger pendingContentOperations = new AtomicInteger(0);
+    private boolean contentProcessingInitialized = false;
 
     private final BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
 
@@ -236,26 +249,139 @@ public class BrapiExportActivity extends ThemedActivity {
                 uploadComplete();
             }
 
+             // Initialize content processing if needed
+            if (!contentProcessingInitialized && (numNewImages > 0 || numEditedImages > 0 || numIncompleteImages > 0)) {
+                initializeContentProcessing();
+            }
+
             if (numNewImages > 0) {
                 loadNewImages();
-                postImages(imagesNew);
             }
+
             if (numEditedImages > 0 || numIncompleteImages > 0) {
                 loadEditedIncompleteImages();
-                putImages();
             }
         });
     }
 
+    private void initializeContentProcessing() {
+        int maxConcurrentContent = Integer.parseInt(preferences.getString(
+                PreferenceKeys.BRAPI_MAX_CONCURRENT_IMAGE_CONTENT, "5"));
+
+        imageContentExecutor = Executors.newFixedThreadPool(maxConcurrentContent);
+        
+        // Start content worker threads
+        for (int i = 0; i < maxConcurrentContent; i++) {
+            imageContentExecutor.submit(this::processContentFromQueue);
+        }
+        
+        contentProcessingInitialized = true;
+    }
+
+    private void processContentFromQueue() {
+        try {
+            while (!Thread.currentThread().isInterrupted()) {
+                // Try to take an image from the queue, with a timeout
+                FieldBookImage image = contentQueue.poll(500, TimeUnit.MILLISECONDS);
+                
+                // If no image and no pending operations, check again
+                if (image == null) {
+                    if (pendingContentOperations.get() == 0) {
+                        // Sleep briefly to avoid tight polling
+                        Thread.sleep(1000);
+                    }
+                    continue;
+                }
+                
+                try {
+                    // Process image content
+                    processImageContent(image);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error processing image content: " + e.getMessage(), e);
+                    
+                    // Update counters
+                    putImageContentError = processErrorCode(500); // Generic error code
+                    putImageContentUpdatesCount++;
+                    pendingContentOperations.decrementAndGet();
+                    
+                    runOnUiThread(this::uploadComplete);
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void processImageContent(final FieldBookImage image) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        
+        brAPIService.putImageContent(image, response -> {
+            runOnUiThread(() -> {
+                String fieldBookId = image.getFieldBookDbId();
+                processPutImageContentResponse(response, fieldBookId);
+                putImageContentUpdatesCount++;
+                
+                uploadComplete();
+            });
+            
+            pendingContentOperations.decrementAndGet();
+            latch.countDown();
+            return null;
+        }, code -> {
+            runOnUiThread(() -> {
+                putImageContentError = processErrorCode(code);
+                putImageContentUpdatesCount++;
+                
+                uploadComplete();
+            });
+            
+            pendingContentOperations.decrementAndGet();
+            latch.countDown();
+            return null;
+        });
+        
+        try {
+            // Wait for the operation to complete with a timeout
+            if (!latch.await(60, TimeUnit.SECONDS)) { // Longer timeout for content
+                Log.e(TAG, "Content operation timed out for image: " + image.getFieldBookDbId());
+                pendingContentOperations.decrementAndGet();
+                runOnUiThread(() -> {
+                    putImageContentError = UploadError.API_CALLBACK_ERROR;
+                    putImageContentUpdatesCount++;
+                    uploadComplete();
+                });
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    
     private void loadNewImages() {
         for (FieldBookImage image : imagesNew) {
-            loadImage(image);
+            try {
+                loadImage(image);
+                postImage(image);
+                
+                // Don't queue for content upload here - it will be queued in postImage callback
+            } catch (Exception e) {
+                Log.e(TAG, "Error loading image: " + e.getMessage(), e);
+                Utils.makeToast(this, getString(R.string.act_brapi_export_image_load_failed));
+            }
         }
     }
 
     private void loadEditedIncompleteImages() {
         for (FieldBookImage image : imagesEditedIncomplete) {
-            loadImage(image);
+            try {
+                loadImage(image);
+                putImage(image);
+                
+                // Don't queue for content upload here - it will be queued in putImage callback
+            } catch (Exception e) {
+                Log.e(TAG, "Error loading image: " + e.getMessage(), e);
+                Utils.makeToast(this, getString(R.string.act_brapi_export_image_load_failed));
+            }
         }
     }
 
@@ -354,13 +480,49 @@ public class BrapiExportActivity extends ThemedActivity {
         }
     }
 
-    private void postImage(final FieldBookImage imageData) {
+    // private void postImage(final FieldBookImage imageData) {
 
+    //     brAPIService.postImageMetaData(imageData,
+    //             new Function<FieldBookImage, Void>() {
+    //                 @Override
+    //                 public Void apply(final FieldBookImage image) {
+
+    //                     (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+    //                         @Override
+    //                         public void run() {
+    //                             String fieldBookId = imageData.getFieldBookDbId();
+    //                             processPostImageResponse(image, fieldBookId);
+    //                             postImageMetaDataUpdatesCount++;
+    //                             imageData.setDbId(image.getDbId());
+    //                             putImageContent(imageData, imagesNew);
+    //                             uploadComplete();
+    //                         }
+    //                     });
+    //                     return null;
+    //                 }
+    //             }, code -> {
+
+    //                 (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+    //                     @Override
+    //                     public void run() {
+    //                         postImageMetaDataError = processErrorCode(code);
+    //                         postImageMetaDataUpdatesCount++;
+    //                         putImageContentUpdatesCount++; //since we aren't calling this
+    //                         uploadComplete();
+    //                     }
+    //                 });
+
+    //                 return null;
+    //             }
+    //     );
+    // }
+
+    // Modify postImage to queue content upload after metadata is posted
+    private void postImage(final FieldBookImage imageData) {
         brAPIService.postImageMetaData(imageData,
                 new Function<FieldBookImage, Void>() {
                     @Override
                     public Void apply(final FieldBookImage image) {
-
                         (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -368,66 +530,68 @@ public class BrapiExportActivity extends ThemedActivity {
                                 processPostImageResponse(image, fieldBookId);
                                 postImageMetaDataUpdatesCount++;
                                 imageData.setDbId(image.getDbId());
-                                putImageContent(imageData, imagesNew);
+                                
+                                // Queue for content upload instead of direct call
+                                contentQueue.add(imageData);
+                                pendingContentOperations.incrementAndGet();
+                                
                                 uploadComplete();
                             }
                         });
                         return null;
                     }
                 }, code -> {
-
                     (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             postImageMetaDataError = processErrorCode(code);
                             postImageMetaDataUpdatesCount++;
-                            putImageContentUpdatesCount++; //since we aren't calling this
+                            putImageContentUpdatesCount++; // since we aren't calling this
                             uploadComplete();
                         }
                     });
-
                     return null;
                 }
         );
     }
 
-    private void putImageContent(final FieldBookImage image, final List<FieldBookImage> uploads) {
+    // private void putImageContent(final FieldBookImage image, final List<FieldBookImage> uploads) {
 
-        brAPIService.putImageContent(image,
-                new Function<FieldBookImage, Void>() {
-                    @Override
-                    public Void apply(final FieldBookImage responseImage) {
+    //     brAPIService.putImageContent(image,
+    //             new Function<FieldBookImage, Void>() {
+    //                 @Override
+    //                 public Void apply(final FieldBookImage responseImage) {
 
-                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                String fieldBookId = image.getFieldBookDbId();
-                                processPutImageContentResponse(responseImage, fieldBookId);
-                                putImageContentUpdatesCount++;
-                                uploadComplete();
-                            }
-                        });
-                        return null;
-                    }
-                }, new Function<Integer, Void>() {
+    //                     (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+    //                         @Override
+    //                         public void run() {
+    //                             String fieldBookId = image.getFieldBookDbId();
+    //                             processPutImageContentResponse(responseImage, fieldBookId);
+    //                             putImageContentUpdatesCount++;
+    //                             uploadComplete();
+    //                         }
+    //                     });
+    //                     return null;
+    //                 }
+    //             }, new Function<Integer, Void>() {
 
-                    @Override
-                    public Void apply(final Integer code) {
+    //                 @Override
+    //                 public Void apply(final Integer code) {
 
-                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                putImageContentError = processErrorCode(code);
-                                putImageContentUpdatesCount++;
-                                uploadComplete();
-                            }
-                        });
+    //                     (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+    //                         @Override
+    //                         public void run() {
+    //                             putImageContentError = processErrorCode(code);
+    //                             putImageContentUpdatesCount++;
+    //                             uploadComplete();
+    //                         }
+    //                     });
 
-                        return null;
-                    }
-                }
-        );
-    }
+    //                     return null;
+    //                 }
+    //             }
+    //     );
+    // }
 
     private void putImages() {
         for (FieldBookImage image : imagesEditedIncomplete) {
@@ -435,13 +599,53 @@ public class BrapiExportActivity extends ThemedActivity {
         }
     }
 
-    private void putImage(final FieldBookImage imageData) {
+    // private void putImage(final FieldBookImage imageData) {
 
+    //     brAPIService.putImage(imageData,
+    //             new Function<FieldBookImage, Void>() {
+    //                 @Override
+    //                 public Void apply(final FieldBookImage image) {
+
+    //                     (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+    //                         @Override
+    //                         public void run() {
+    //                             String fieldBookId = imageData.getFieldBookDbId();
+    //                             processPutImageResponse(image, fieldBookId);
+    //                             putImageMetaDataUpdatesCount++;
+    //                             imageData.setDbId(image.getDbId());
+    //                             putImageContent(imageData, imagesEditedIncomplete);
+    //                             uploadComplete();
+    //                         }
+    //                     });
+    //                     return null;
+    //                 }
+    //             }, new Function<Integer, Void>() {
+
+    //                 @Override
+    //                 public Void apply(final Integer code) {
+
+    //                     (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+    //                         @Override
+    //                         public void run() {
+    //                             putImageMetaDataError = processErrorCode(code);
+    //                             putImageMetaDataUpdatesCount++;
+    //                             putImageContentUpdatesCount++; // since we aren't calling this
+    //                             uploadComplete();
+    //                         }
+    //                     });
+
+    //                     return null;
+    //                 }
+    //             }
+    //     );
+    // }
+
+    // Modify putImage to queue content upload after metadata is updated
+    private void putImage(final FieldBookImage imageData) {
         brAPIService.putImage(imageData,
                 new Function<FieldBookImage, Void>() {
                     @Override
                     public Void apply(final FieldBookImage image) {
-
                         (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -449,17 +653,19 @@ public class BrapiExportActivity extends ThemedActivity {
                                 processPutImageResponse(image, fieldBookId);
                                 putImageMetaDataUpdatesCount++;
                                 imageData.setDbId(image.getDbId());
-                                putImageContent(imageData, imagesEditedIncomplete);
+                                
+                                // Queue for content upload instead of direct call
+                                contentQueue.add(imageData);
+                                pendingContentOperations.incrementAndGet();
+                                
                                 uploadComplete();
                             }
                         });
                         return null;
                     }
                 }, new Function<Integer, Void>() {
-
                     @Override
                     public Void apply(final Integer code) {
-
                         (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -469,7 +675,6 @@ public class BrapiExportActivity extends ThemedActivity {
                                 uploadComplete();
                             }
                         });
-
                         return null;
                     }
                 }
@@ -628,6 +833,10 @@ public class BrapiExportActivity extends ThemedActivity {
         super.onDestroy();
         if (brapiAuth != null && brapiAuth.isAdded() && brapiAuth.isVisible()) {
             brapiAuth.dismiss();
+        }
+
+        if (imageContentExecutor != null) {
+            imageContentExecutor.shutdownNow();
         }
     }
 
