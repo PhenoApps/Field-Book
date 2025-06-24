@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_select_all"
+        android:icon="@drawable/ic_tb_toggle_all"
+        android:title="@string/fields_select_all"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menu_unarchive_fields"
+        android:icon="@drawable/ic_archive_remove"
+        android:title="@string/menu_unarchive"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menu_export"
+        android:icon="@drawable/ic_file_export_outline"
+        android:title="@string/fields_export"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menu_delete"
+        android:icon="@drawable/ic_tb_delete"
+        android:title="@string/fields_delete"
+        app:showAsAction="ifRoom" />
+
+</menu>
