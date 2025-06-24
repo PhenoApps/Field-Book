@@ -8,23 +8,26 @@ import com.fieldbook.tracker.devices.camera.UsbCameraApi
 import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.devices.camera.CanonApi
 import com.fieldbook.tracker.location.GPSTracker
+import com.fieldbook.tracker.traits.SpectralController
 import com.fieldbook.tracker.utilities.CameraXFacade
 import com.fieldbook.tracker.utilities.BluetoothHelper
 import com.fieldbook.tracker.utilities.FfmpegHelper
 import com.fieldbook.tracker.utilities.GeoNavHelper
 import com.fieldbook.tracker.utilities.GnssThreadHelper
+import com.fieldbook.tracker.utilities.NixSensorHelper
 import com.fieldbook.tracker.utilities.SensorHelper
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import com.fieldbook.tracker.utilities.WifiHelper
 import com.fieldbook.tracker.views.CollectInputView
 import com.fieldbook.tracker.views.RangeBoxView
+import com.fieldbook.tracker.views.RepeatedValuesView
 import com.fieldbook.tracker.views.TraitBoxView
 import com.serenegiant.widget.UVCCameraTextureView
 import org.phenoapps.interfaces.security.SecureBluetooth
 import org.phenoapps.security.SecureBluetoothActivityImpl
 
-interface CollectController: FieldController {
+interface CollectController: FieldController, SpectralController, RepeatedValuesView.RepeatedValuesController {
     fun getContext(): Context
     fun getGps(): GPSTracker
     fun getLocation(): Location?
@@ -63,4 +66,5 @@ interface CollectController: FieldController {
     fun getCurrentObservation(): ObservationModel?
     fun getRotationRelativeToDevice(): SensorHelper.RotationModel?
     fun getDeviceTilt(): SensorHelper.RotationModel?
+    fun getNixSensorHelper(): NixSensorHelper
 }

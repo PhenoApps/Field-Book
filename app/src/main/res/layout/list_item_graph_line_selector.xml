@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/cell"
+    android:layout_margin="8dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:id="@+id/line_selector_text"
+        tools:text="1"
+        android:textColor="?attr/fb_graph_item_text_color"
+        android:elevation="2dp"
+        android:textSize="16sp"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="@id/line_selector_color"
+        app:layout_constraintStart_toStartOf="@id/line_selector_color"
+        app:layout_constraintEnd_toEndOf="@id/line_selector_color"
+        app:layout_constraintBottom_toBottomOf="@id/line_selector_color"/>
+
+    <ProgressBar style="@style/ProgressBarStyle"
+        android:visibility="gone"
+        android:elevation="2dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:id="@+id/progress_bar"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/WHITE"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <ImageView
+        android:visibility="gone"
+        android:elevation="2dp"
+        android:layout_margin="8dp"
+        android:id="@+id/image_view"
+        android:contentDescription="@string/list_item_color_placeholder_content_description"
+        android:src="@drawable/ic_hourglass_empty_black_24dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:tint="@color/WHITE"
+        app:layout_constraintStart_toStartOf="@id/progress_bar"
+        app:layout_constraintEnd_toEndOf="@id/progress_bar"
+        app:layout_constraintTop_toTopOf="@id/progress_bar"
+        app:layout_constraintBottom_toBottomOf="@id/progress_bar"/>
+
+    <View
+        android:background="@drawable/cell"
+        android:layout_width="@dimen/fb_trait_line_graph_selector_size"
+        android:layout_height="@dimen/fb_trait_line_graph_selector_size"
+        android:id="@+id/line_selector_color"
+        tools:backgroundTint="?fb_color_primary"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
