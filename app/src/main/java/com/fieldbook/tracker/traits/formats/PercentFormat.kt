@@ -6,6 +6,7 @@ import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.MaximumParameter
 import com.fieldbook.tracker.traits.formats.parameters.MinimumParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 
 /**
  * Values must be positive, values must be within bounds of minimum and maximum values.
@@ -27,5 +28,6 @@ class PercentFormat : NumericFormat(
         isInteger = true,
         isRequired = true
     ),
-    DetailsParameter()
+    DetailsParameter(),
+    ResourceFileParameter()
 ), Scannable by PercentageScannable()

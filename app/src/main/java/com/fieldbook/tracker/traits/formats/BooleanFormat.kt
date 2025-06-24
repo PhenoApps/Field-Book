@@ -4,6 +4,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.DefaultToggleValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 
 class BooleanFormat : TraitFormat(
     format = Formats.BOOLEAN,
@@ -16,4 +17,5 @@ class BooleanFormat : TraitFormat(
     NameParameter(),
     DefaultToggleValueParameter(),
     DetailsParameter(),
+    ResourceFileParameter()
 ), Scannable
