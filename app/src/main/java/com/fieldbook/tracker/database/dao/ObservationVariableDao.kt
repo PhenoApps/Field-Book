@@ -224,9 +224,7 @@ class ObservationVariableDao {
 
         } ?: hashMapOf()
 
-        //TODO 471 remove getTraitByName if not required
-        //TODO missing obs. vars. for min/max/categories
-        fun insertTraits(ctx: Context, t: TraitObject) = withDatabase { db ->
+        fun insertTraits(t: TraitObject) = withDatabase { db ->
 
             if (getTraitByName(t.name) != null) {
                 Log.d("ObservationVariableDao", "Trait ${t.name} already exists, skipping insertion.")
@@ -291,8 +289,6 @@ class ObservationVariableDao {
             }, "${ObservationVariable.PK} = ?", arrayOf(id))
         }
 
-        //TODO need to edit min/max/category obs. var. val/attrs
-        //TODO 471, uses getAttributeByName, but probably unnecessary to change
         fun editTraits(id: String, trait: String, format: String, defaultValue: String,
                        minimum: String, maximum: String, details: String, categories: String,
                        closeKeyboardOnOpen: Boolean,
@@ -311,7 +307,6 @@ class ObservationVariableDao {
                 "${ObservationVariable.PK} = ?",
                 arrayOf(id)
             ).toLong()
-
 
             if (rowid > 0) {
                 // save attributes and their values

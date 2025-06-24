@@ -539,7 +539,6 @@ public class DataHelper {
 
     /**
      * Convert EAV database to relational
-     * TODO add where statement for repeated values
      */
     public Cursor getExportTableDataShort(int fieldId,  String uniqueId, ArrayList<TraitObject> traits) {
 
@@ -701,9 +700,7 @@ public class DataHelper {
     /**
      * V2 - Execute a custom sql query, returning the result as SearchData objects
      * Used for user search function
-     * TODO: When is this used and what queries are sent to this ?
      */
-    //TODO 471 double check the sql parameter
     public SearchData[] getRangeBySql(String sql) {
 
         open();
@@ -858,11 +855,11 @@ public class DataHelper {
      * Inserting traits data. The last field isVisible determines if the trait
      * is visible when using the app
      */
-    public long insertTraits(Context ctx, TraitObject t) {
+    public long insertTraits(TraitObject t) {
 
         open();
 
-        return ObservationVariableDao.Companion.insertTraits(ctx, t);
+        return ObservationVariableDao.Companion.insertTraits(t);
     }
 
     /**
@@ -889,7 +886,14 @@ public class DataHelper {
                 minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage);
     }
 
-    //TODO 471 check if this is necessary
+    /**
+     * Warning: This method should be used cautiously when trait names are mutable.
+     * It is currently safe for checking trait name uniqueness.
+     * It is also used in SearchDialog, where renaming the trait would invalidate the search query.
+     * In general, avoid using this method in features where the trait name might change between invocations.
+     * @param name The name of the trait object (e.g., "Height").
+     * @return The trait object fetched from the database.
+     */
     public TraitObject getTraitByName(String name) {
 
         open();

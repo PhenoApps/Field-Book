@@ -236,7 +236,7 @@ class StudyDao {
                         FROM observations 
                         JOIN observation_variables AS ov ON ov.${ObservationVariable.PK} = observations.${ObservationVariable.FK}
                         WHERE study_id = Studies.${Study.PK} AND observations.observation_variable_db_id > 0) AS trait_count,
-                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observation_variable_db_id > 0) AS observation_count
+                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observations.observation_variable_db_id > 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
                 ORDER BY ${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ${if (isDateSort) "DESC" else "ASC"}
             """

@@ -288,7 +288,7 @@ class ObservationUnitPropertyDao {
 
             val selectObservations = traits.joinToString(", ") { trait ->
                 val traitName = DataHelper.replaceIdentifiers(trait.name)
-                "MAX(CASE WHEN vars.observation_variable_name='$traitName' THEN obs.value ELSE NULL END) AS \"$traitName\""
+                "MAX(CASE WHEN vars.internal_id_observation_variable='${trait.id}' THEN obs.value ELSE NULL END) AS \"$traitName\""
             }
 
             val combinedSelection = listOf(selectAttributes, selectObservations).filter { it.isNotEmpty() }.joinToString(", ")
@@ -296,7 +296,7 @@ class ObservationUnitPropertyDao {
             val orderByClause = getSortOrderClause(context, studyId.toString())
             //                SELECT units.internal_id_observation_unit AS id, $combinedSelection
             val query = """
-                SELECT $combinedSelection, internal_id_observation_variable
+                SELECT $combinedSelection
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
@@ -326,8 +326,7 @@ class ObservationUnitPropertyDao {
             getExportTableData(context, studyId, traits)?.use { cursor ->
 
                 val requiredTraits = traits.map { it.name }.toTypedArray()
-                val traitIdCol = "internal_id_observation_variable"
-                val requiredColumns = arrayOf(uniqueName, traitIdCol) + requiredTraits
+                val requiredColumns = arrayOf(uniqueName) + requiredTraits
                 val matrixCursor = MatrixCursor(requiredColumns)
                 val traitStartIndex = cursor.columnCount - requiredTraits.size
 
@@ -335,11 +334,10 @@ class ObservationUnitPropertyDao {
 
                     val rowData = mutableListOf<String?>()
 
-                    //add the unique id
-                    rowData.add(cursor.getStringOrNull(0))
+                    val uniqueIndex = cursor.getColumnIndex(uniqueName)
 
-                    //add the trait id
-                    rowData.add(cursor.getStringOrNull(1))
+                    //add the unique id
+                    rowData.add(cursor.getString(uniqueIndex))
 
                     //skip ahead to the traits and add all trait values
                     requiredTraits.forEachIndexed { index, s ->
@@ -368,10 +366,8 @@ class ObservationUnitPropertyDao {
             return null
         }
 
-
-        //TODO 471 max case statements could use trait db id instead of name
         /**
-         * Same as above but filters by obs unit and trait format
+         * Same as above but filters by obs unit
          */
         fun convertDatabaseToTable(
             studyId: Int,
@@ -382,14 +378,13 @@ class ObservationUnitPropertyDao {
         ): Cursor? = withDatabase { db ->
 
             val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
-            val sanitizeFormats = traits.map { DataHelper.replaceIdentifiers(it.format) }
 
             val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }
 
             val maxStatements = arrayListOf<String>()
             sanitizeTraits.forEachIndexed { index, it ->
                 maxStatements.add(
-                    "MAX (CASE WHEN vars.observation_variable_name='$it' AND vars.observation_variable_field_book_format='${sanitizeFormats[index]}' THEN o.value ELSE NULL END) AS '$it'"
+                    "MAX (CASE WHEN vars.internal_id_observation_variable = ${traits[index].id} THEN o.value ELSE NULL END) AS '$it'"
                 )
             }
 

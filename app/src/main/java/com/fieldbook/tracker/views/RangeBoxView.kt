@@ -640,15 +640,13 @@ class RangeBoxView : ConstraintLayout {
                 // Check for uncollected trait observations
                 for (i in 0 until cursor.columnCount) {
                     val traitName = cursor.getColumnName(i)
-                    val traitIdIndex = cursor.getColumnIndex("internal_id_observation_variable")
                     if (traitName in traitNames) {
                         val value = cursor.getString(i)
-                        val traitId = cursor.getString(traitIdIndex)
                         if (value == null) {
                             controller.getPreferences().edit {
                                 putString(
                                     GeneralKeys.LAST_USED_TRAIT,
-                                    traitId
+                                    traits.find { it.name == traitName }?.id ?: ""
                                 )
                             }
                             if (pos == currentPos) {
