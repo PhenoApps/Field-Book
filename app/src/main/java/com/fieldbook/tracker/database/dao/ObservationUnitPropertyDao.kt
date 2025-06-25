@@ -47,12 +47,8 @@ class ObservationUnitPropertyDao {
             return emptyArray()
         }
 
-
-        //TODO 471, check if possible to use sortedObservationUnitData query instead of the property view, check performance
         fun getRangeFromId(firstName: String, secondName: String, uniqueName: String, id: Int): RangeObject = withDatabase { db ->
-//            data.range = cursor.getString(0);
-//                data.plot = cursor.getString(1);
-//                data.plot_id = cursor.getString(2);
+
             RangeObject().apply {
 
                 val model = db.query(sObservationUnitPropertyViewName,
@@ -93,56 +89,6 @@ class ObservationUnitPropertyDao {
                 } else String()
             }
         } ?: String()
-
-        //TODO 471 remove if can getAllObservationUnitAttributeNames
-        fun getRangeColumnNames(): Array<String?> = withDatabase { db ->
-
-            val cursor = db.rawQuery("SELECT * FROM $sObservationUnitPropertyViewName limit 1", null)
-
-            var data: Array<String?>? = null
-
-            if (cursor.moveToFirst()) {
-                data = arrayOfNulls(cursor.columnCount - 1)
-                var k = 0
-                for (j in 0 until cursor.columnCount) {
-                    if (cursor.getColumnName(j) != "id") {
-                        data[k++] = cursor.getColumnName(j).replace("//", "/")
-                    }
-                }
-            }
-
-            if (!cursor.isClosed) {
-                cursor.close()
-            }
-
-            data
-
-        } ?: emptyArray()
-
-        //TODO 471 remove if can getAllObservationUnitAttributeNames
-        fun getRangeColumns(): Array<String?> = withDatabase { db ->
-
-            val cursor = db.rawQuery("SELECT * from $sObservationUnitPropertyViewName limit 1", null)
-
-            var data: Array<String?>? = null
-
-            if (cursor.moveToFirst()) {
-                data = arrayOfNulls(cursor.columnCount - 1)
-                var k = 0
-                for (j in 0 until cursor.columnCount) {
-                    if (cursor.getColumnName(j) != "id") {
-                        data[k++] = cursor.getColumnName(j)
-                    }
-                }
-            }
-
-            if (!cursor.isClosed) {
-                cursor.close()
-            }
-
-            data
-
-        } ?: emptyArray<String?>()
 
         /**
          * This function is used when database is checked on export.

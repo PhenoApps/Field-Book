@@ -1930,7 +1930,7 @@ public class CollectActivity extends ThemedActivity
         }
 
         TraitObject trait = getCurrentTrait();
-        if (trait != null && trait.getName() != null) {
+        if (trait != null) {
             traitLayouts.refreshLock(trait.getFormat());
         }
     }

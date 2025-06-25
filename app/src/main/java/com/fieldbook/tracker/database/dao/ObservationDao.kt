@@ -377,8 +377,6 @@ class ObservationDao {
 
         } ?: -1L
 
-
-        //TODO 471, query backs down to getTraitByName, should probably throw an error instead
         fun insertObservation(studyId: Int, model: BrapiObservation, traitIdToTypeMap:Map<String,String>): Int = withDatabase { db ->
 
             if (getObservation("$studyId", model.unitDbId, model.variableDbId, model.rep ?: "1")?.dbId != null) {

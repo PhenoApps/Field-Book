@@ -33,6 +33,8 @@ class TraitBoxView : ConstraintLayout {
         RIGHT
     }
 
+    private val studyId: Int
+
     private var controller: CollectTraitController
     private var prefixTraits: Array<String>
 
@@ -53,6 +55,8 @@ class TraitBoxView : ConstraintLayout {
 
         this.controller = context as CollectTraitController
 
+        this.studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+
         traitTypeTv = findViewById(R.id.traitTypeTv)
         traitDetails = v.findViewById(R.id.traitDetails)
         traitLeft = v.findViewById(R.id.traitLeft)
@@ -60,7 +64,7 @@ class TraitBoxView : ConstraintLayout {
 
         traitsStatusBarRv = v.findViewById(R.id.traitsStatusBarRv)
 
-        prefixTraits = controller.getDatabase().rangeColumnNames
+        prefixTraits = controller.getDatabase().getAllObservationUnitAttributeNames(studyId)
 
     }
 
@@ -283,7 +287,7 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun setPrefixTraits() {
-        prefixTraits = controller.getDatabase().rangeColumnNames
+        prefixTraits = controller.getDatabase().getAllObservationUnitAttributeNames(studyId)
     }
 
     fun setSelection(pos: Int) {

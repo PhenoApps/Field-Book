@@ -783,29 +783,6 @@ public class DataHelper {
     }
 
     /**
-     * Returns the column names for the range table
-     */
-    public String[] getRangeColumnNames() {
-
-        open();
-
-        if (!isTableExists("ObservationUnitProperty")) {
-
-            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects(
-                    preferences.getString(GeneralKeys.FIELDS_LIST_SORT_ORDER, "date_import")
-            );
-
-            if (!fields.isEmpty()) {
-
-                StudyDao.Companion.switchField(fields.get(0).getStudyId());
-
-            }
-        }
-
-        return ObservationUnitPropertyDao.Companion.getRangeColumnNames();
-    }
-
-    /**
      * Helper function
      * v1.6 - Amended to consider trait
      */
@@ -839,16 +816,6 @@ public class DataHelper {
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
-    }
-
-    /**
-     * Returns the column names for the range table
-     */
-    public String[] getRangeColumns() {
-
-        open();
-
-        return ObservationUnitPropertyDao.Companion.getRangeColumns();
     }
 
     /**

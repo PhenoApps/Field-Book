@@ -992,7 +992,7 @@ public class FieldEditorActivity extends ThemedActivity
                 this,
                 field,
                 sortOrderList.toArray(new String[]{}),
-                database.getRangeColumnNames()
+                database.getAllObservationUnitAttributeNames(field.getStudyId())
         );
 
         dialogFragment.show(this.getSupportFragmentManager(), "FieldSortDialogFragment");

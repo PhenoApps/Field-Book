@@ -298,7 +298,7 @@ abstract class AbstractCameraTrait :
         background.launch {
 
             //get current trait's trait name, use it as a plot_media directory
-            currentTrait.name?.let { traitName ->
+            currentTrait.name.let { traitName ->
 
                 val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
 
