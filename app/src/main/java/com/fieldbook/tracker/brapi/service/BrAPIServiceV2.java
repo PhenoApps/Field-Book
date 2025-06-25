@@ -983,7 +983,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         Map<String, String> extVariableDbIdMap = getExtVariableDbIdMapping();
                         // Result contains a list of observation variables
                         List<BrAPIObservation> brapiObservationList = response.getResult().getData();
-                        final List<Observation> observationList = mapObservations(brapiObservationList, extVariableDbIdMap);
+                        final List<Observation> observationList = mapObservations(brapiObservationList, extVariableDbIdMap, observationVariableDbIds);
 
                         function.apply(observationList);
 
@@ -1064,9 +1064,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
      * @param brapiObservationList
      * @return list of Fieldbook Observation objects
      */
-    private List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList, Map<String, String> extVariableDbIdMap) {
+    private List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList, Map<String, String> extVariableDbIdMap, List<String> validVariableDbIds) {
         List<Observation> outputList = new ArrayList<>();
         for (BrAPIObservation brapiObservation : brapiObservationList) {
+
+            if (!validVariableDbIds.contains(brapiObservation.getObservationVariableDbId())) {
+                continue;
+            }
 
             Observation newObservation = new Observation();
             newObservation.setStudyId(brapiObservation.getStudyDbId());
@@ -1135,7 +1139,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                             newObservations.addAll(
                                     mapObservations(
                                             phenotypesResponse.getResult().getData(),
-                                            getExtVariableDbIdMapping()
+                                            getExtVariableDbIdMapping(),
+                                            new ArrayList<>()
                                     )
                             );
                         }
@@ -1184,7 +1189,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                             newObservations.addAll(
                                     mapObservations(
                                             observationsResponse.getResult().getData(),
-                                            getExtVariableDbIdMapping()
+                                            getExtVariableDbIdMapping(),
+                                            new ArrayList<>()
                                     )
                             );
                         }

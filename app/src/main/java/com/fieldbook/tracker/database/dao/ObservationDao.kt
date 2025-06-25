@@ -94,6 +94,19 @@ class ObservationDao {
 
             } ?: emptyArray()
 
+//        fun getAllFromAYear(startDate: String, endDate: String): Array<ObservationModel> = withDatabase { db ->
+//
+//            db.query(
+//                    Observation.tableName,
+//                    where = "SUBSTR(observation_time_stamp, 1, 10) BETWEEN ? AND ? AND study_id > 0",
+//                    whereArgs = arrayOf(startDate, endDate)
+//            )
+//                    .toTable()
+//                    .map { ObservationModel(it) }
+//                    .toTypedArray()
+//
+//        } ?: emptyArray()
+
         fun getAllFromAYear(year: String): Array<ObservationModel> = withDatabase { db ->
 
             db.query(
@@ -361,9 +374,13 @@ class ObservationDao {
                 String()
             }
 
+            //remove null control characters which are added to strings by some devices (Samsung)
+            //when the user pastes clipboard data
+            val removeNullCharacters = value.replace("\u0000", "")
+
             db.insert(Observation.tableName, null, contentValuesOf(
                 "observation_db_id" to observationDbId,
-                "value" to value,
+                "value" to removeNullCharacters,
                 "observation_time_stamp" to timestamp,
                 "collector" to person,
                 "geo_coordinates" to location,
