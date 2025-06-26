@@ -43,6 +43,7 @@ import org.brapi.client.v2.model.queryParams.core.StudyQueryParams
 import org.brapi.client.v2.model.queryParams.core.TrialQueryParams
 import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.core.BrAPITrial
+import androidx.core.content.edit
 
 /**
  * List Filter activity base class for BrAPI filter activities
@@ -164,7 +165,12 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 chip.setOnCloseIconClickListener {
                     val currentTexts = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.toMutableSet()
                     currentTexts?.remove(text)
-                    prefs.edit().putStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", currentTexts).apply()
+                    prefs.edit {
+                        putStringSet(
+                            "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
+                            currentTexts
+                        )
+                    }
                     chipGroup.removeView(chip)
                     restoreModels()
                 }

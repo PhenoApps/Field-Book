@@ -87,7 +87,8 @@ abstract class ListFilterActivity : ThemedActivity(),
         return if (searchText.isNotBlank()) filter { model ->
             model.id.contains(searchText, ignoreCase = true) ||
                     model.label.contains(searchText, ignoreCase = true) ||
-                    model.subLabel.contains(searchText, ignoreCase = true)
+                    model.subLabel.contains(searchText, ignoreCase = true) ||
+                    model.searchableTexts.any { it.contains(searchText, ignoreCase = true) }
         } else this
     }
 
