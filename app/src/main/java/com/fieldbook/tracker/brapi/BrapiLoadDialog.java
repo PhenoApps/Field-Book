@@ -51,6 +51,8 @@ public class BrapiLoadDialog extends DialogFragment {
     private Boolean traitLoadStatus = false;
     private BrapiPaginationManager paginationManager;
 
+    private static String EXTRA_FIELD_ID = "fieldId";
+
     // Creates a new thread to do importing
     private final Runnable importRunnable = new Runnable() {
         public void run() {
@@ -489,7 +491,7 @@ public class BrapiLoadDialog extends DialogFragment {
                 // Finish our BrAPI import activity
                 FieldObject field = (FieldObject) brapiControllerResponse.getData();
                 Intent returnIntent = new Intent();
-                returnIntent.putExtra("fieldId", field.getStudyId());
+                returnIntent.putExtra(EXTRA_FIELD_ID, field.getStudyId());
                 ((Activity) context).setResult(Activity.RESULT_OK, returnIntent);
                 ((Activity) context).finish();
             } else {
