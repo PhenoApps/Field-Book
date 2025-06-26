@@ -351,6 +351,7 @@
     <string name="main_toolbar_resources">Resources</string>
     <string name="main_trait_details">Trait details</string>
     <string name="main_infobar_data_missing">No data</string>
+    <string name="main_infobar_select_data">Select</string>
     <string name="main_toolbar_next_entry_no_data">Next entry with no data</string>
 
     <!-- InfoBars -->
@@ -1478,4 +1479,5 @@
     <string name="preferences_preferences_title">Preferences</string>
     <string name="nearby_share_export_preferences">Export Preferences</string>
     <string name="nearby_share_import_preferences">Import Preferences</string>
+    <string name="all_fields_processed">All fields processed</string>
 </resources>

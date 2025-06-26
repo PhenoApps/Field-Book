@@ -342,8 +342,8 @@ public class FieldEditorActivity extends ThemedActivity
 
         List<String> fieldNames = fieldIds.stream()
                 .flatMap(id -> fieldList.stream()
-                        .filter(field -> field.getExp_id() == id)
-                        .map(field -> "<b>" + field.getExp_alias() + "</b>"))
+                        .filter(field -> field.getStudyId() == id)
+                        .map(field -> "<b>" + field.getAlias() + "</b>"))
                 .collect(Collectors.toList());
 
         return TextUtils.join(", ", fieldNames);
@@ -654,7 +654,7 @@ public class FieldEditorActivity extends ThemedActivity
 
                     FieldObject study = database.getFieldObject(studyId);
 
-                    String studyName = study.getExp_alias();
+                    String studyName = study.getAlias();
 
                     if (studyId == preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
 
@@ -839,15 +839,6 @@ public class FieldEditorActivity extends ThemedActivity
                         e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
                         e.apply();
 
-                        if (database.checkFieldName(fieldFileName) >= 0) {
-                            Utils.makeToast(getApplicationContext(), getString(R.string.fields_study_exists_message));
-                            SharedPreferences.Editor ed = preferences.edit();
-                            ed.putString(GeneralKeys.FIELD_FILE, null);
-                            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
-                            ed.apply();
-                            return;
-                        }
-
                         if (fieldFile.isOther()) {
                             Utils.makeToast(getApplicationContext(), getString(R.string.import_error_unsupported));
                         }
@@ -981,7 +972,7 @@ public class FieldEditorActivity extends ThemedActivity
     @Override
     public void showSortDialog(FieldObject field) {
 
-        String order = field.getExp_sort();
+        String order = field.getSortColumnsStringArray();
 
         ArrayList<String> sortOrderList = new ArrayList<>();
 
@@ -1001,7 +992,7 @@ public class FieldEditorActivity extends ThemedActivity
                 this,
                 field,
                 sortOrderList.toArray(new String[]{}),
-                database.getRangeColumnNames()
+                database.getAllObservationUnitAttributeNames(field.getStudyId())
         );
 
         dialogFragment.show(this.getSupportFragmentManager(), "FieldSortDialogFragment");
@@ -1013,13 +1004,13 @@ public class FieldEditorActivity extends ThemedActivity
         StringJoiner joiner = new StringJoiner(",");
         for (String a : attributes) joiner.add(a);
 
-        field.setExp_sort(joiner.toString());
+        field.setSortColumnsStringArray(joiner.toString());
 
         try {
 
-            database.updateStudySort(joiner.toString(), field.getExp_id());
+            database.updateStudySort(joiner.toString(), field.getStudyId());
 
-            if (preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.getExp_id()) {
+            if (preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.getStudyId()) {
 
                 fieldSwitcher.switchField(field);
                 CollectActivity.reloadData = true;

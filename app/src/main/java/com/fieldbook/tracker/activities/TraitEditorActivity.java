@@ -27,7 +27,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
@@ -222,7 +221,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
             FieldObject field = database.getFieldObject(studyId);
 
-            if (!field.getExp_name().equals("") && field.getImport_format() == ImportFormat.BRAPI) {
+            if (!field.getName().equals("") && field.getDataSourceFormat() == ImportFormat.BRAPI) {
 
                 // noCheckTrait is used when the trait should not be checked, but the dialog
                 // should be shown.
@@ -234,28 +233,28 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 }
 
                 // Check if this is a BrAPI trait
-                if (traitName != null) {
-
-                    // Just returns an empty trait object in the case the trait isn't found
-                    TraitObject trait = database.getDetail(traitName);
-                    if (trait.getName() == null) {
-                        return false;
-                    }
-
-                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
-
-                        // Show info dialog if a BrAPI field is selected.
-                        BrapiInfoDialogFragment dialogFragment = new BrapiInfoDialogFragment().newInstance(getResources().getString(R.string.brapi_info_message));
-                        dialogFragment.show(this.getSupportFragmentManager(), "brapiInfoDialogFragment");
-
-                        // Only show the info dialog on the first non-BrAPI trait selected.
-                        return true;
-
-                    } else {
-                        // Dialog was not shown
-                        return false;
-                    }
-                }
+//                if (traitName != null) {
+//
+//                    // Just returns an empty trait object in the case the trait isn't found
+//                    TraitObject trait = database.getDetail(traitName);
+//                    if (trait.getName() == null) {
+//                        return false;
+//                    }
+//
+//                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
+//
+//                        // Show info dialog if a BrAPI field is selected.
+//                        BrapiInfoDialogFragment dialogFragment = new BrapiInfoDialogFragment().newInstance(getResources().getString(R.string.brapi_info_message));
+//                        dialogFragment.show(this.getSupportFragmentManager(), "brapiInfoDialogFragment");
+//
+//                        // Only show the info dialog on the first non-BrAPI trait selected.
+//                        return true;
+//
+//                    } else {
+//                        // Dialog was not shown
+//                        return false;
+//                    }
+//                }
             }
         } catch (Exception e) {
             Log.e("error", e.toString());
@@ -384,7 +383,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                             //Todo add overflow menu action
                     );
 
-            if (database.getTraitColumnData("trait") != null) {
+            ArrayList<TraitObject> traits = database.getAllTraitObjects();
+            if (traits != null && !traits.isEmpty()) {
                 sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
                 sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
             }
@@ -723,9 +723,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                                        @Nullable DialogInterface.OnClickListener onNegative,
                                        @Nullable DialogInterface.OnDismissListener onDismiss) {
 
-        String[] allTraits = database.getTraitColumnData("trait");
+        ArrayList<TraitObject> traits = database.getAllTraitObjects();
 
-        if (allTraits == null) {
+        if (traits == null || traits.isEmpty()) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing_modify));
             return;
         }
@@ -971,9 +971,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         String newTraitName = "";
 
-        String[] allTraits = getDatabase().getAllTraitNames();
+        ArrayList<TraitObject> allTraits = getDatabase().getAllTraitObjects();
 
-        for (int i = 0; i < allTraits.length; i++) {
+        for (int i = 0; i < allTraits.size(); i++) {
             newTraitName = traitName + "-Copy-(" + i + ")";
             if (!Arrays.asList(allTraits).contains(newTraitName)) {
                 return newTraitName;

@@ -31,7 +31,6 @@ public class LayoutCollections {
     }
 
     /**
-     * Todo update this with trait name/dbid
      * @param traitFormat the trait layout's format
      * @return the trait layout corresponding to the format
      */
