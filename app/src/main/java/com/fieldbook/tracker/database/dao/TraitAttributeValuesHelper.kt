@@ -39,7 +39,7 @@ class TraitAttributeValuesHelper(private val traitId: String) {
                     attributeValueMap[attrName] = attrValue
                 }
                 isLoaded = true
-                Log.d(TAG, "Loaded ${attributeValueMap.size} attributes for trait ID: $traitId")
+                //Log.d(TAG, "Loaded ${attributeValueMap.size} attributes for trait ID: $traitId")
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading attributes for trait ID: $traitId", e)
             }

@@ -46,7 +46,6 @@ public class BrapiObservation {
         OffsetDateTime converted = null;
         try {
             if (time != null) {
-                //TODO: locale
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
                 converted = OffsetDateTime.parse(time, formatter);
             }
@@ -65,6 +64,7 @@ public class BrapiObservation {
     public void setLastSyncedTime(String timestamp) {
         this.lastSyncedTime = convertTime(timestamp);
     }
+
     public void setLastSyncedTime(OffsetDateTime timestamp) {
         this.lastSyncedTime = timestamp;
     }

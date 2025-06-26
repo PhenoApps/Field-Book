@@ -82,7 +82,7 @@ class ObservationDao {
                 WHERE study_id = ? AND observation_unit_id = ? AND observation_variable_db_id = ?
             """.trimIndent()
 
-            Log.d(TAG, query)
+            //Log.d(TAG, query)
 
             db.rawQuery(query, arrayOf(studyId, obsUnit, traitDbId.toString())).use {
 
@@ -198,7 +198,7 @@ class ObservationDao {
          * are required to have for brapi fields; otherwise, this query will fail.
          */
         @SuppressLint("Recycle")
-        fun getObservations(fieldId: Int, hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
+        fun getBrapiObservations(fieldId: Int, hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
             db.rawQuery("""
                 SELECT
                     DISTINCT obs.observation_unit_id AS unitDbId,
@@ -310,7 +310,7 @@ class ObservationDao {
 
         } ?: emptyList()
 
-        fun getUserTraitObservations(studyId: String): List<com.fieldbook.tracker.brapi.model.Observation> =
+        fun getLocalObservations(studyId: String): List<com.fieldbook.tracker.brapi.model.Observation> =
             withDatabase { db ->
 
                 db.query(
@@ -394,7 +394,7 @@ class ObservationDao {
 
         } ?: -1L
 
-        fun insertObservation(studyId: Int, model: BrapiObservation, traitIdToTypeMap:Map<String,String>): Int = withDatabase { db ->
+        fun insertObservation(studyId: Int, model: BrapiObservation): Int = withDatabase { db ->
 
             if (getObservation("$studyId", model.unitDbId, model.variableDbId, model.rep ?: "1")?.dbId != null) {
                 println(
@@ -411,9 +411,7 @@ class ObservationDao {
             }
             else {
                 //get observationVariableFieldbookformat based on the variableName
-                val variableFormat = traitIdToTypeMap[model.variableDbId] ?: return@withDatabase -1
                 val varRowId =  db.insert(Observation.tableName, null, contentValuesOf(
-                    "observation_variable_field_book_format" to variableFormat,
                     "value" to model.value,
                     "observation_time_stamp" to model.timestamp?.format(internalTimeFormatter),
                     "collector" to model.collector,
@@ -448,7 +446,7 @@ class ObservationDao {
                     WHERE obs.${ObservationUnit.FK} = ? AND obs.${Study.FK} = ?
                 """.trimIndent()
 
-                Log.d(TAG, query)
+                //Log.d(TAG, query)
 
                 db.rawQuery(query, arrayOf(plotId, studyId)).use {
                     hashMapOf(*it.toTable().map { row ->
@@ -483,7 +481,7 @@ class ObservationDao {
                     WHERE study_id = ? AND observation_variable_db_id = ? AND ${ObservationUnit.FK} = ? AND rep = ?
                 """.trimIndent()
 
-                Log.d(TAG, query)
+                //Log.d(TAG, query)
 
                 db.rawQuery(query, arrayOf(studyId, traitDbId, plotId, rep)).use {
                     it.toFirst().let { row ->
@@ -614,7 +612,7 @@ class ObservationDao {
                 WHERE study_id = ? AND observation_unit_id = ? AND observation_variable_db_id = ?
             """.trimIndent()
 
-            Log.d(TAG, query)
+            //Log.d(TAG, query)
 
             db.rawQuery(query, arrayOf(studyId, plotId, traitDbId)).use { cursor ->
                 cursor.toTable().size

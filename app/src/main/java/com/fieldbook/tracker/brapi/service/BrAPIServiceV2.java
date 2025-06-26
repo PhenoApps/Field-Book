@@ -1127,6 +1127,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public void createObservations(List<Observation> observations,
                                    final Function<List<Observation>, Void> function,
                                    final Function<Integer, Void> failFunction) {
+
+        ArrayList<String> validObservationVariableDbIds = new ArrayList<>();
+        for (Observation observation : observations) {
+            if (observation.getVariableDbId() != null && !observation.getVariableDbId().isEmpty()) {
+                validObservationVariableDbIds.add(observation.getVariableDbId());
+            }
+        }
+
         try {
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
@@ -1140,7 +1148,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                     mapObservations(
                                             phenotypesResponse.getResult().getData(),
                                             getExtVariableDbIdMapping(),
-                                            new ArrayList<>()
+                                            validObservationVariableDbIds
                                     )
                             );
                         }
@@ -1180,6 +1188,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                    final Function<Integer, Void> failFunction) {
         try {
 
+            ArrayList<String> validObservationVariableDbIds = new ArrayList<>();
+            for (Observation observation : observations) {
+                if (observation.getVariableDbId() != null && !observation.getVariableDbId().isEmpty()) {
+                    validObservationVariableDbIds.add(observation.getVariableDbId());
+                }
+            }
+
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
                 public void onSuccess(BrAPIObservationListResponse observationsResponse, int i, Map<String, List<String>> map) {
@@ -1190,7 +1205,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                     mapObservations(
                                             observationsResponse.getResult().getData(),
                                             getExtVariableDbIdMapping(),
-                                            new ArrayList<>()
+                                            validObservationVariableDbIds
                                     )
                             );
                         }
@@ -1324,15 +1339,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         for (BrAPIObservationVariable var : variables) {
 
             TraitObject trait = new TraitObject();
-            trait.setDefaultValue(var.getDefaultValue());
+
+            if (var.getDefaultValue() != null) {
+                trait.setDefaultValue(var.getDefaultValue());
+            }
 
             // Get the synonyms for easier reading. Set it as the trait name.
-            String synonym = var.getSynonyms().size() > 0 ? var.getSynonyms().get(0) : null;
+            String synonym = !var.getSynonyms().isEmpty() ? var.getSynonyms().get(0) : null;
             trait.setName(getPrioritizedValue(synonym, var.getObservationVariableName())); //This will default to the Observation Variable Name if available.
 
             //v5.1.0 bugfix branch update, getPrioritizedValue can return null, trait name should never be null
             // Skip the trait if there brapi trait field isn't present
-            if (var.getTrait() == null || trait.getName() == null) {
+            if (var.getTrait() == null) {
                 variablesMissingTrait += 1;
                 continue;
             }
@@ -1344,7 +1362,10 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             // Need to set where we are getting the data from so we don't push to a different
             // external link than where the trait was retrieved from.
             if (BrAPIService.getHostUrl(context) != null) {
-                trait.setTraitDataSource(BrAPIService.getHostUrl(context));
+                String hostUrl = BrAPIService.getHostUrl(context);
+                if (hostUrl != null) {
+                    trait.setTraitDataSource(hostUrl);
+                }
             } else {
                 // return null to indicate we couldn't process the traits
                 return null;

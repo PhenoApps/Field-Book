@@ -54,7 +54,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -358,20 +357,20 @@ public class DataHelper {
         return ObservationDao.Companion.isBrapiSynced(studyId, plotId, traitDbId, rep);
     }
 
-    public void setTraitObservations(Integer studyId, Observation observation, Map<String,String> traitIdToTypeMap) {
-        ObservationDao.Companion.insertObservation(studyId, observation, traitIdToTypeMap);
+    public void setTraitObservations(Integer studyId, Observation observation) {
+        ObservationDao.Companion.insertObservation(studyId, observation);
     }
 
     /**
-     * Get user created trait observations for currently selected study
+     * Fetch all locally created observations (excluding images) and convert them to BrAPI observations
      */
-    public List<Observation> getUserTraitObservations(int fieldId) {
+    public List<Observation> getLocalObservations(int fieldId) {
 
         open();
 
         String studyId = Integer.toString(fieldId);
 
-        return ObservationDao.Companion.getUserTraitObservations(studyId);
+        return ObservationDao.Companion.getLocalObservations(studyId);
     }
 
     /**
@@ -403,11 +402,11 @@ public class DataHelper {
     /**
      * Get the data for brapi export to external system
      */
-    public List<Observation> getObservations(int fieldId, String hostUrl) {
+    public List<Observation> getBrapiObservations(int fieldId, String hostUrl) {
 
         open();
 
-        return ObservationDao.Companion.getObservations(fieldId, hostUrl);
+        return ObservationDao.Companion.getBrapiObservations(fieldId, hostUrl);
     }
 
     /**

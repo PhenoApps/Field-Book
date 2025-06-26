@@ -222,8 +222,10 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     override fun startSync(field: FieldObject) {
-        val syncDialog = BrapiSyncObsDialog(requireActivity(), this, field)
-        syncDialog.show()
+        activity?.runOnUiThread {
+            val syncDialog = BrapiSyncObsDialog(requireActivity(), this, field)
+            syncDialog.show()
+        }
     }
 
     private fun disableDataChipRipples() {
