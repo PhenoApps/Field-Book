@@ -8,6 +8,7 @@ import android.text.Html;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.CSVReader;
 import com.fieldbook.tracker.utilities.Utils;
@@ -64,6 +65,10 @@ public class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
                 String[] data;
                 String[] columns;
 
+                // Use methods from FieldFileObject to get the file info
+                FieldFileObject.FieldFileBase fileObject = FieldFileObject.create(ctx.get(), file, null, null);
+                String sourceString = fileObject.getFileStem();
+
                 InputStream inputStream = BaseDocumentTreeUtil.Companion.getUriInputStream(ctx.get(), this.file);
                 InputStreamReader fr = new InputStreamReader(inputStream);
 
@@ -111,6 +116,7 @@ public class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
                         //t.visible = data[7].toLowerCase();
                         t.setRealPosition(positionOffset + Integer.parseInt(data[8]));
                         t.setVisible(data[7].equalsIgnoreCase("true"));
+                        t.setTraitDataSource(sourceString);
                         database.insertTraits(t);
                     }
                 }

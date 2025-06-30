@@ -3,6 +3,7 @@ package com.fieldbook.tracker.traits.formats
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 
 class ZebraLabelPrintFormat : TraitFormat(
     format = Formats.LABEL_PRINT,
@@ -14,4 +15,5 @@ class ZebraLabelPrintFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter(),
+    ResourceFileParameter()
 )
