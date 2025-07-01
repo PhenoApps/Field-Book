@@ -3,6 +3,7 @@ package com.fieldbook.tracker.utilities
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import com.fieldbook.tracker.BuildConfig
 import com.fieldbook.tracker.R
 import com.nixsensor.universalsdk.DeviceCompat
 import com.nixsensor.universalsdk.DeviceScanner
@@ -53,9 +54,7 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
 
     private fun readNixLicense(): NixLicense? {
         return try {
-            val jsonString = context.assets.open("nix/license.json").bufferedReader().use {
-                it.readText()
-            }
+            val jsonString = BuildConfig.NIX_LICENSE
             Json.decodeFromString<NixLicense>(jsonString)
         } catch (e: IOException) {
             e.printStackTrace()
