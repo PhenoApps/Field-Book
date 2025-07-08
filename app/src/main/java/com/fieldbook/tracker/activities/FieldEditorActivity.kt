@@ -599,7 +599,10 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             for (model in units) {
                 val latlng = model.geo_coordinates
                 if (latlng != null && latlng.isNotEmpty()) {
-                    coordinates.add(model)
+                    val study = db.getFieldObject(model.study_id)
+                    if (study != null && !study.is_archived) { // do not add archived field coordinates
+                        coordinates.add(model)
+                    }
                 }
             }
 
