@@ -397,7 +397,12 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                 if (!field.getIs_archived()) {
                     if ((headerName == null && fieldGroupName == null) || // ungrouped
                             (headerName != null && headerName.equals(fieldGroupName))) { // grouped
-                        currentList.add(insertPosition++, new FieldViewItem(field, fieldGroupController));
+
+                        FieldViewItem fieldItem = new FieldViewItem(field, fieldGroupController);
+                        int activeFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+                        fieldItem.updateIsActive(activeFieldId); // update active state
+
+                        currentList.add(insertPosition++, fieldItem);
                     }
                 }
             }
@@ -411,6 +416,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         submitList(currentList);
     }
+
     private void selectAllFieldsInGroup(Integer groupId) {
         for (FieldObject field : fullFieldList) {
             if (!field.getIs_archived()) { // make sure we are not selecting archived fields
