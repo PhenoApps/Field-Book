@@ -44,7 +44,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     private final Context context;
     private AdapterCallback callback;
     private final FieldGroupController fieldGroupController;
-    private OnFieldSelectedListener listener;
+    private OnFieldActionListener listener;
     private String filterText = "";
     private final List<FieldObject> fullFieldList = new ArrayList<>();
     private final SharedPreferences preferences;
@@ -53,8 +53,9 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         TYPE_GROUP_HEADER, TYPE_FIELD, TYPE_ARCHIVE_HEADER
     }
 
-    public interface OnFieldSelectedListener {
-        void onFieldSelected(int itemId);
+    public interface OnFieldActionListener {
+        void onFieldDetailSelected(int fieldId);
+        void onFieldSetActive(int fieldId);
     }
 
     public interface AdapterCallback {
@@ -105,7 +106,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public void setOnFieldSelectedListener(OnFieldSelectedListener listener) {
+    public void setOnFieldActionListener(OnFieldActionListener listener) {
         this.listener = listener;
     }
 
@@ -130,7 +131,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     public void selectItem(int itemId) {
-        listener.onFieldSelected(itemId);
+        listener.onFieldDetailSelected(itemId);
     }
 
     public void selectAll() {
@@ -226,8 +227,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                         FieldObject field = fieldViewItem.field;
                         if (field != null && isInSelectionMode) {
                             toggleSelection(field.getExp_id());
-                        } else if (field != null && context instanceof FieldEditorActivity) {
-                            ((FieldEditorActivity) context).setActiveField(field.getExp_id());
+                        } else if (field != null) {
+                            listener.onFieldSetActive(field.getExp_id());
                         }
                     }
                 }
@@ -244,7 +245,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                             if (field != null && isInSelectionMode) {
                                 toggleSelection(field.getExp_id());
                             } else if (field != null && listener != null) {
-                                listener.onFieldSelected(field.getExp_id());
+                                listener.onFieldDetailSelected(field.getExp_id());
                             }
                         }
                     }
