@@ -192,7 +192,7 @@ Fields that are no longer actively used can be archived to reduce clutter in the
 - Since archived fields cannot be set as active, you will be prompted to unarchive the field when trying to set it active.
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/fields/archived_field_active.png" width="350px"> 
+  <img class="screenshot" src="_static/images/fields/archived_field_active.png" width="700px"> 
   <figcaption class="screenshot-caption"><i>Setting an archived field as active</i></figcaption> 
 </figure>
 
