@@ -16,9 +16,9 @@ class TraitObject {
     var realPosition: Int = 0
     var id: String = ""
     var visible: Boolean = true
-    var externalDbId: String = ""
+    var externalDbId: String? = null
     var traitDataSource: String = ""
-    var additionalInfo: String = ""
+    var additionalInfo: String? = null
 
     var observationLevelNames: List<String>? = null
 

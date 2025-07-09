@@ -116,7 +116,7 @@ class BrapiSyncObsDialog(context: Context, private val syncController: FieldSync
                 for (obj in input.traits) {
                     println("Trait:" + obj.name)
                     println("ObsIds: " + obj.externalDbId)
-                    observationVariableDbIds.add(obj.externalDbId)
+                    obj.externalDbId?.let { observationVariableDbIds.add(it) }
                 }
                 val traitStudy =
                     StudyObservations(fieldBookStudyDbId, input.traits, mutableListOf())

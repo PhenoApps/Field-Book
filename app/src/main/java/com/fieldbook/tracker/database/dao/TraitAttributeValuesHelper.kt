@@ -3,8 +3,10 @@ package com.fieldbook.tracker.database.dao
 import android.util.Log
 import com.fieldbook.tracker.database.withDatabase
 import androidx.core.database.sqlite.transaction
-import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
+import com.fieldbook.tracker.database.ObservationVariableAttributeDetailsView
 import com.fieldbook.tracker.database.models.AttributeDefinition
+import com.fieldbook.tracker.database.models.TraitAttributes
+import com.fieldbook.tracker.objects.TraitObject
 
 /**
  * Helper class to access ObservationVariableAttribute and ObservationVariableValue tables in a cleaner way
@@ -13,6 +15,33 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
 
     companion object {
         const val TAG = "TraitAttributeValues"
+
+        private const val GET_ATTRIBUTE_VALUE_FROM_VIEW = """
+            SELECT 
+                * 
+            FROM ${ObservationVariableAttributeDetailsView.VIEW_NAME}
+            WHERE ${ObservationVariableAttributeDetailsView.INTERNAL_ID} = ?
+        """
+
+        /**
+         * Load all attribute values for ALL traits
+         */
+        fun loadAttributeValuesForAllTraits(traits: List<TraitObject>) {
+            if (traits.isEmpty()) return
+
+            val traitIds = traits.map { it.id }
+            val attributeDetails = ObservationVariableDetailsView.getAttributeDetailsForTraits(traitIds)
+
+            traits.forEach { trait ->
+                attributeDetails[trait.id]?.let { attributes ->
+                    attributes["validValuesMin"]?.let { trait.minimum = it }
+                    attributes["validValuesMax"]?.let { trait.maximum = it }
+                    attributes["category"]?.let { trait.categories = it }
+                    attributes["closeKeyboardOnOpen"]?.let { trait.closeKeyboardOnOpen = it.toBoolean() }
+                    attributes["cropImage"]?.let { trait.cropImage = it.toBoolean() }
+                }
+            }
+        }
     }
 
     private val attributeValueMap = mutableMapOf<String, String>()
@@ -32,12 +61,17 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
 
             withDatabase { db ->
                 try {
-                    val values = ObservationVariableValueDao.getVariableValues(traitId.toInt())
-                    values?.forEach { value ->
-                        val attrId = value[ObservationVariableAttribute.FK] as? Int ?: return@forEach
-                        val attrName = ObservationVariableAttributeDao.getAttributeNameById(attrId).toString()
-                        val attrValue = value["observation_variable_attribute_value"] as? String ?: ""
-                        attributeValueMap[attrName] = attrValue
+                    val cursor = db.rawQuery(GET_ATTRIBUTE_VALUE_FROM_VIEW, arrayOf(traitId))
+                    cursor.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            TraitAttributes.ALL.forEach { attribute ->
+                                cursor.getString(cursor.getColumnIndexOrThrow(attribute.key))?.let { value ->
+                                    if (value.isNotEmpty()) {
+                                        attributeValueMap[attribute.key] = value
+                                    }
+                                }
+                            }
+                        }
                     }
                     Log.d(TAG, "Loaded ${attributeValueMap.size} attributes for trait ID: $traitId")
                 } catch (e: Exception) {

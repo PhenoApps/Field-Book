@@ -232,11 +232,11 @@ class ObservationVariableDao {
                         realPosition = cursor.getInt(cursor.getColumnIndexOrThrow("position"))
                         visible = cursor.getString(cursor.getColumnIndexOrThrow("visible")).toBoolean()
                         additionalInfo = cursor.getString(cursor.getColumnIndexOrThrow("additional_info")) ?: ""
-
-                        this.loadAttributeAndValues()
                     }
                     traits.add(trait)
                 }
+
+                TraitAttributeValuesHelper.loadAttributeValuesForAllTraits(traits)
             }
 
             if (sortOrder == "visible") {

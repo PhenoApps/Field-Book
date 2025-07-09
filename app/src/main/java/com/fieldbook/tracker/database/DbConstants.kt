@@ -45,3 +45,14 @@ object StudyGroupsTable {
 
     const val FK = "group_id"
 }
+
+object ObservationVariableAttributeDetailsView {
+    const val VIEW_NAME = "observation_variable_attribute_details_view"
+    const val INTERNAL_ID = "internal_id_observation_variable"
+    const val VARIABLE_NAME = "observation_variable_name"
+    const val VALID_VALUES_MAX = "validValuesMax"
+    const val VALID_VALUES_MIN = "validValuesMin"
+    const val CATEGORY = "category"
+    const val CLOSE_KEYBOARD_ON_OPEN = "closeKeyboardOnOpen"
+    const val CROP_IMAGE = "cropImage"
+}
