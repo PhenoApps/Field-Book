@@ -4,34 +4,27 @@
 
 ## Overview
 
-Users can collect data using spectrometer hardware using the Spectral trait format. Currently, the only supported spectral format is "Nix". 
+The spectral trait format is used to capture data from external spectrometers and color sensors.
+This trait format currently supporst [Nix](https://www.nixsensor.com/) color sensors and spectrometers.
 
-https://www.nixsensor.com/
-
-Currently, spectral collection has two modalities:
-1. **Color**: this captures a hexadecimal representation of the color reflected by the hardware. 
-2. **Spectral**: this is a high-dimensional phenotype that writes the wavelength and reflectance to a file.
-
-**Note** Modalities can be swapped on the fly during collection.
+Spectral data can be collected in two ways depending on the sensor:
+1. **Color**: captures a hexadecimal representation of the color being scanned 
+2. **Spectral**: collects reflectance data from many wavelenths
 
 ## Creation
 
-When creating a spectral trait, the user first chooses the "Spectral icon", then the sub-trait type.
-
-Currently the only spectral format available is "Nix".
-
-<figure class="image" style="text-align: center">
-    <p>
-      <img src="../_static/images/traits/formats/spectral/trait_creator_dialog.png" width="256"  alt=""/>
-      <img src="../_static/images/traits/formats/spectral/trait_creator_dialog_spectral_sub_layout.png" width="256"  alt=""/>
+<figure class="image">
+    <p style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: nowrap;">
+      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_creator_dialog.png" width="250" />
+      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_creator_dialog_spectral_sub_layout.png" width="250" />
+      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_creator_dialog_spectral_options.png" width="250" />
     </p>
 </figure>
 
 ## Connect
 
-When first loading the collect activity, the user must select the connect button to choose a device.
-
-Please wait a moment while the device listens for possible connections, at times hardware may automatically reconnect.
+Press the connect button to scan for compatible devices.
+The desired device can be selected from the dialog that is dispalyed.
 
 <figure class="image" style="text-align: center">
     <p>
@@ -42,14 +35,15 @@ Please wait a moment while the device listens for possible connections, at times
 
 ## Collect
 
-When a device is connected, the user is presented with a settings button and a capture button.
+Once a device is connected, a settings button and capture button are displayed.
+
 <figure class="image">
-    <p>
-      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_capture_ui.png" width="256"  alt=""/>
-    </p>
+    <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_capture_ui.png" width="256"  alt=""/>
 </figure>
 
-When capturing the data, a loading icon is shown. For color data the user will see a preview of the color captured along with its hexadecimal value.
+Color data is shown as a preview of the color along with its hexadecimal value.
+When capturing the data, a loading icon is displayed.
+
 <figure class="image" style="text-align: center">
     <p>
       <img src="../_static/images/traits/formats/spectral/trait_spectral_color_capture.png" width="256"  alt=""/>
@@ -57,65 +51,40 @@ When capturing the data, a loading icon is shown. For color data the user will s
     </p>
 </figure>
 
-For spectral data, the values will be graphed.
+Spectral scans are visually displayed on a graph.
+Selecting an individual scan will highlight the corresponding line on the graph.
 
 <figure class="image">
-    <p>
       <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_capturing_line_graph.png" width="256"  alt=""/>
-    </p>
 </figure>
 
-Users can click on the right-hand item selector to highlight the respective data.
-
-<figure class="image" style="text-align: center">
-    <p>
-      <img src="../_static/images/traits/formats/spectral/trait_spectral_plot.png" width="256"  alt=""/>
-      <img src="../_static/images/traits/formats/spectral/trait_spectral_plot_ui_selected_item.png" width="256"  alt=""/>
-    </p>
-</figure>
-
-The settings button opens a dialog that lets the user disconnect from the hardware, and also view various device settings.
+The settings button opens a dialog that shows device settings and allows the hardware to be disconnected.
+This dialog also allows data visualization to be toggled between the spectral and color choices.
+Only one sensor model may be used for each trait:entry combination.
 
 <figure class="image">
-    <p>
       <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_settings_dialog.png" width="256"  alt=""/>
-    </p>
 </figure>
 
-**Caveat**: Each observation unit (plot entry) may only collect data from one device type at a time. 
-So a user may not collect data with a Nix Mini 3 after capturing data with a Nix Spectro 2.
-<figure class="image">
-    <p>
-      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_incompatible_device_capture_toast.png" width="256"  alt=""/>
-    </p>
-</figure>
 
 ## Export
 
-Exporting spectral high dimensional data is similar to exporting images in Field Book. To get the actual high dimensional data for the spectral modality,
-the user must export with media bundled. This will create a folder structure shown below. In this example the field_sample has a SPECTRO2_spectral_file.csv that has the actual
-high dimensional data.
+
+| plot_id    | trait                      | trait |
+|------------|----------------------------|-------|
+| 13RPN00001 | #432D28                    | nix   |
+| 13RPN00001 | #432D28                    | nix   |
+| 13RPN00002 | SPECTRO2_spectral_file.csv | nix   |
+| 13RPN00002 | SPECTRO2_spectral_file.csv | nix   |
+| 13RPN00002 | SPECTRO2_spectral_file.csv | nix   |
+
+While color scans are stored as hexadecimal values, spectral scans are stored in a secondary file with the spectral wavelengths as headers and reflectance values in the rows.
+This file can be automatically included in the exported file by exporting with media bundled which will create a folder sctructure similar to below.
+In this example, the `SPECTRO2_spectral_file.csv` contains the reflectance values for the scans that were collected in `field_sample`.
 
 <figure class="image">
-    <p>
-      <img class="screenshot" src="../_static/images/traits/formats/spectral/export.png" width="500"  alt=""/>
-    </p>
+    <img class="screenshot" src="../_static/images/traits/formats/spectral/spectral_export_folder_structure_example.png" width="500"  alt=""/>
 </figure>
-
-Color data is exported normally as a hexadecimal value in the typical CSV files. High dimensional spectral data will just reference the file name.
-
-| plot_id     | trait                      | trait            |
-|-------------|----------------------------|------------------|
-| 13RPN00001  | #432D28                    | Nix Spectrometer |
-| 13RPN00001  | #432D28                    | Nix Spectrometer                 |
-| 13RPN00002  | SPECTRO2_spectral_file.csv | Nix Spectrometer                 |
-| 13RPN00002  | SPECTRO2_spectral_file.csv | Nix Spectrometer                 |
-| 13RPN00002  | SPECTRO2_spectral_file.csv | Nix Spectrometer                 |
-
-
-### Spectral Data Example (shortened)
-
-Spectral data is exported with the spectral wavelengths as headers and their reflectance values in the rows (per observation).
 
 | 400.0 | 410.0 | 420.0 | 430.0 | 440.0 | 450.0 | 460.0 | 470.0 | 480.0 | 490.0 | 500.0 | 510.0 | 520.0 | 530.0 | 540.0 | 550.0 | 560.0 | 570.0 | 580.0 | 590.0 | 600.0 | 610.0 | 620.0 | 630.0 | 640.0 | 650.0 | 660.0 | 670.0 | 680.0 | 690.0 | 700.0 |
 |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
