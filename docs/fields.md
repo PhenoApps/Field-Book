@@ -135,10 +135,17 @@ A confirmation dialog message will be displayed prior to field deletion.
 
 ### Grouping
 
-Fields can be organized into named groups for better organization. When grouping is enabled, fields are displayed under expandable group headers in the fields list. The field count is indicated in parentheses in the group header. Once a group exists, using the <img class="icon" src="_static/icons/fields/group.png"> grouping on or <img class="icon" src="_static/icons/fields/ungroup.png"> grouping off icon in the toolbar will toggle the organization of fields within groups. Use the expand all or collapse all options from the overflow menu to quickly manage the field visibility within each group. Individual groups can be expanded or collapsed by tapping the group header. Long pressing the group header will expand the group and select all the fields within the group.
+Fields can be grouped for better organization.
+When grouping is enabled, fields are displayed under expandable group headers in the fields list.
+The number of fields in each group is displayed in parentheses in the group header.
+
+Once a group exists, using the <img class="icon" src="_static/icons/fields/group.png"> grouping on or <img class="icon" src="_static/icons/fields/ungroup.png"> grouping off icon in the toolbar will toggle the organization of fields within groups.
+Use the expand all or collapse all options from the overflow menu to quickly manage the field visibility within each group.
+Individual groups can be expanded or collapsed by tapping the group header.
+Long pressing the group header will expand the group and select all fields within the group.
 
 #### Assigning and managing groups:
-- Select one or more fields using long press, then tap the <img class="icon" src="_static/icons/fields/grouping-options.png"> grouping options icon.
+- Select one or more fields with a long press, then tap the <img class="icon" src="_static/icons/fields/grouping-options.png"> grouping options icon.
 - Choose to assign fields to an existing group or create a new group.
 
 <figure class="image">
@@ -151,24 +158,25 @@ Fields can be organized into named groups for better organization. When grouping
   <figcaption class="screenshot-caption"><i>Assign an existing group</i></figcaption> 
 </figure>
 
-- Fields imported from BrAPI will automatically be assigned a group with their trial name.
+- Fields imported via BrAPI will automatically be assigned a group with their trial name.
 - Fields can be removed from groups by selecting them and choosing the "Remove from group" option.
-- Groups that do not have any fields assigned to them will automatically be deleted.
+- Groups that do not have any fields assigned to them are automatically deleted.
 - Fields without an assigned group appear under an "Ungrouped" header when grouping is enabled.
 
 ### Archiving
 
-Fields that are no longer actively used can be archived to reduce clutter in the main fields list while preserving all data. Archived fields cannot be set as the active field, nor will their location data be searched when the <img class="icon" src="_static/icons/fields/compass-outline.png"> icon is pressed to find the nearest field.
+Fields that are no longer actively used can be archived to reduce clutter in the main fields list while preserving all data.
+Archived fields cannot be set as the active field, nor will their location data be searched when the <img class="icon" src="_static/icons/fields/compass-outline.png"> icon is pressed to find the nearest field.
 
 #### Archiving and accessing archived fields:
-- Select one or more fields and tap the <img class="icon" src="_static/icons/fields/archive.png"> archive icon. If the currently active field is selected for archiving, you'll be prompted to confirm or select which fields to archive.
+- Select one or more fields and tap the <img class="icon" src="_static/icons/fields/archive.png"> archive icon. If the currently active field is selected for archiving, a prompt will be displayed to confirm or select which fields to archive.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/archive_active_field_warning.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Archive active field warning</i></figcaption> 
 </figure>
 
-- Archived fields are moved out of the main fields list and an archived header at the bottom of the fields list shows with the count of archived studies.
+- Archived fields are moved to an archived header at the bottom of the fields list which shows the number of archived studies in parentheses.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/archived_header.png" width="350px"> 
@@ -182,7 +190,7 @@ Fields that are no longer actively used can be archived to reduce clutter in the
   <figcaption class="screenshot-caption"><i>Archived fields screen</i></figcaption> 
 </figure>
 
-- From the archived fields screen, you can unarchive, export, or permanently delete archived fields. Unarchived fields return to their original group (if they were previously assigned a group).
+- From the archived screen, fields can be unarchived, exported, or permanently deleted. Unarchived fields return to their original group if they were previously assigned a group.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/archived_screen_options.png" width="350px"> 
