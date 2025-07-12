@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -24,12 +25,34 @@
         android:layout_height="wrap_content"
         app:errorEnabled="false">
 
-        <ToggleButton
-            android:id="@+id/dialog_new_trait_default_toggle_btn"
+        <RadioGroup
+            android:id="@+id/dialog_new_trait_default_radio_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textOff="@string/traits_create_false"
-            android:textOn="@string/traits_create_true" />
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radio_false"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/traits_create_false" />
+
+            <RadioButton
+                android:id="@+id/radio_unset"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/traits_create_unset" />
+
+            <RadioButton
+                android:id="@+id/radio_true"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/traits_create_true" />
+
+        </RadioGroup>
 
     </com.google.android.material.textfield.TextInputLayout>
 

@@ -303,6 +303,7 @@
     <string name="traits_create_photo_maximum">Maximum number of photos</string>
     <string name="traits_create_true">True</string>
     <string name="traits_create_false">False</string>
+    <string name="traits_create_unset">Unset</string>
     <string name="traits_create_categories_text">Use / to separate categories</string>
     <string name="traits_create_camera">Camera</string>
     <string name="traits_create_close_keyboard">Close Keyboard</string>

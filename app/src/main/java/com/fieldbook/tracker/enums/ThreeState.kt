@@ -11,8 +11,8 @@ enum class ThreeState(val state: String, val value: Int) {
     companion object {
         fun fromString(value: String?): ThreeState {
             return when(value?.lowercase()) {
-                ON.state -> ON
-                OFF.state -> OFF
+                ON.state.lowercase() -> ON
+                OFF.state.lowercase() -> OFF
                 else -> NEUTRAL
             }
         }
