@@ -144,7 +144,10 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
 
     private void updateSeekBarState(String state) {
         ThreeState threeState = ThreeState.Companion.fromString(state);
+
+        threeStateSeekBar.setOnSeekBarChangeListener(null);
         threeStateSeekBar.setProgress(threeState.getValue());
+        threeStateSeekBar.setOnSeekBarChangeListener(this);
     }
 
     @Override
