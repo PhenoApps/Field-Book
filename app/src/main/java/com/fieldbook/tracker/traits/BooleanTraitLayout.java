@@ -3,6 +3,7 @@ package com.fieldbook.tracker.traits;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -13,6 +14,7 @@ import androidx.annotation.Nullable;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.enums.ThreeState;
+import com.fieldbook.tracker.objects.TraitObject;
 
 public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSeekBarChangeListener {
 
@@ -91,6 +93,7 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     @Override
     public void deleteTraitListener() {
         ((CollectActivity) getContext()).removeTrait();
+        threeStateSeekBar.setProgress(ThreeState.NEUTRAL.getValue());
         super.deleteTraitListener();
 
         //resetToDefault();
@@ -101,8 +104,7 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     public Boolean validate(String data) {
         try {
             return data.equalsIgnoreCase(ThreeState.ON.getState()) ||
-                    data.equalsIgnoreCase(ThreeState.OFF.getState()) ||
-                    data.equalsIgnoreCase(ThreeState.NEUTRAL.getState());
+                    data.equalsIgnoreCase(ThreeState.OFF.getState());
         } catch (Exception e) {
             return false;
         }
@@ -116,8 +118,12 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
             value = getCurrentObservation().getValue();
         }
 
-        checkSet(value);
-        updateSeekBarState(value);
+        if (!value.equals(ThreeState.NEUTRAL.getState())) {
+            checkSet(value);
+            updateSeekBarState(value);
+        } else {
+            deleteTraitListener();
+        }
     }
 
     /**
@@ -137,31 +143,22 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     }
 
     private void updateSeekBarState(String state) {
-
-        if (state.equalsIgnoreCase("true")) {
-
-            threeStateSeekBar.setProgress(ThreeState.ON.getValue());
-
-        } else if (state.equalsIgnoreCase("false")) {
-
-            threeStateSeekBar.setProgress(ThreeState.OFF.getValue());
-
-        } else if (state.equalsIgnoreCase("unset")) {
-
-            threeStateSeekBar.setProgress(ThreeState.NEUTRAL.getValue());
-
-        }
+        ThreeState threeState = ThreeState.Companion.fromString(state);
+        threeStateSeekBar.setProgress(threeState.getValue());
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         ThreeState state = ThreeState.Companion.fromPosition(progress);
 
-        String newVal = state.getState();
-
         if (getCurrentTrait() != null) {
-            updateObservation(getCurrentTrait(), newVal);
-            getCollectInputView().setText(newVal);
+            if (state == ThreeState.NEUTRAL) {
+                deleteTraitListener();
+            } else {
+                String newVal = state.getState();
+                updateObservation(getCurrentTrait(), newVal);
+                getCollectInputView().setText(newVal);
+            }
         }
     }
 
@@ -173,5 +170,16 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         //not implemented
+    }
+
+    /**
+     * Overriding the BaseTraitLayout's method to avoid storing "UNSET"
+     */
+    @Override
+    public void updateObservation(TraitObject trait, String value) {
+        if (value.equals(ThreeState.NEUTRAL.getState()))  return;
+        Log.d("TAG", "updateObservation: " + value);
+
+        super.updateObservation(trait, value);
     }
 }

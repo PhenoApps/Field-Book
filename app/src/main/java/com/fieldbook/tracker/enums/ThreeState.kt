@@ -2,6 +2,7 @@ package com.fieldbook.tracker.enums
 
 /**
  * Represents the three possible states for boolean traits in the application.
+ * No observation is stored / observation is deleted during UNSET state
  */
 enum class ThreeState(val state: String, val value: Int) {
     OFF("FALSE", 0),
@@ -10,9 +11,9 @@ enum class ThreeState(val state: String, val value: Int) {
 
     companion object {
         fun fromString(value: String?): ThreeState {
-            return when(value?.lowercase()) {
-                ON.state.lowercase() -> ON
-                OFF.state.lowercase() -> OFF
+            return when(value?.uppercase()) {
+                ON.state -> ON
+                OFF.state -> OFF
                 else -> NEUTRAL
             }
         }

@@ -3,12 +3,11 @@ package com.fieldbook.tracker.traits.formats.parameters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ToggleButton
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.enums.ThreeState
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
-import com.fieldbook.tracker.views.ThreeStateToggleButton
 
 class DefaultToggleValueParameter(private val initialDefaultValue: Boolean? = null) :
     BaseFormatParameter(
@@ -16,6 +15,11 @@ class DefaultToggleValueParameter(private val initialDefaultValue: Boolean? = nu
         defaultLayoutId = R.layout.list_item_trait_parameter_default_toggle_value,
         parameter = Parameters.DEFAULT_VALUE
     ) {
+
+    companion object {
+        const val TRUE = "true"
+        const val FALSE = "false"
+    }
 
     override fun createViewHolder(
         parent: ViewGroup,
@@ -27,23 +31,20 @@ class DefaultToggleValueParameter(private val initialDefaultValue: Boolean? = nu
 
     inner class ViewHolder(itemView: View) : BaseFormatParameter.ViewHolder(itemView) {
 
-        val defaultValueToggle: ThreeStateToggleButton? =
-            itemView.findViewById<ThreeStateToggleButton>(R.id.dialog_new_trait_default_toggle_btn).also {
+        val defaultValueToggle =
+            itemView.findViewById<ToggleButton>(R.id.dialog_new_trait_default_toggle_btn).also {
                 initialDefaultValue?.let { value ->
-                    it.setState(if (value) ThreeState.ON.state else ThreeState.OFF.state)
-                } ?: run {// if initialDefaultValue is null
-                    it.setState(ThreeState.NEUTRAL.state)
+                    it.isChecked = value
                 }
             }
 
         override fun merge(traitObject: TraitObject) = traitObject.apply {
-            defaultValue = defaultValueToggle?.getState()
+            defaultValue = defaultValueToggle.isChecked.toString()
         }
 
         override fun load(traitObject: TraitObject?): Boolean {
             try {
-                defaultValueToggle?.setState(traitObject?.defaultValue)
-                return true
+                defaultValueToggle.isChecked = traitObject?.defaultValue == TRUE
             } catch (e: Exception) {
                 e.printStackTrace()
                 return false
