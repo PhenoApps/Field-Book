@@ -177,8 +177,8 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
                 deleteTraitListener();
             } else {
                 String newVal = state.getState();
-                updateObservation(getCurrentTrait(), newVal);
                 getCollectInputView().setText(newVal);
+                updateObservation(getCurrentTrait(), newVal);
             }
         }
     }
