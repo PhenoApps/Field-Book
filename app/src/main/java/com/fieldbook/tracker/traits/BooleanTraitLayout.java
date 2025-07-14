@@ -79,6 +79,24 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     }
 
     @Override
+    public void refreshLayout(Boolean onNew) {
+        threeStateSeekBar.setOnSeekBarChangeListener(null);
+        threeStateSeekBar.setProgress(ThreeState.NEUTRAL.getValue());
+        threeStateSeekBar.setOnSeekBarChangeListener(this);
+
+        ObservationModel model = getCurrentObservation();
+        if (model != null) {
+            if (model.getValue().equals("NA")) {
+                getCollectInputView().setText("NA");
+            } else if (!model.getValue().isEmpty()) {
+                updateSeekBarState(model.getValue());
+            } else {
+                super.refreshLayout(onNew);
+            }
+        }
+    }
+
+    @Override
     public void afterLoadExists(CollectActivity act, @Nullable String value) {
         super.afterLoadExists(act, value);
         updateSeekBarState(value);
