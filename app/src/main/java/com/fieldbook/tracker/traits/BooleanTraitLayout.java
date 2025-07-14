@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.enums.ThreeState;
 import com.fieldbook.tracker.objects.TraitObject;
 
@@ -199,7 +200,6 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     @Override
     public void updateObservation(TraitObject trait, String value) {
         if (value.equals(ThreeState.NEUTRAL.getState()))  return;
-        Log.d("TAG", "updateObservation: " + value);
 
         super.updateObservation(trait, value);
     }
