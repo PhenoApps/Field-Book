@@ -18,7 +18,7 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
-import com.fieldbook.tracker.database.dao.StudyGroupDao;
+import com.fieldbook.tracker.database.dao.GroupDao;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
@@ -28,13 +28,12 @@ import com.fieldbook.tracker.database.dao.spectral.DeviceDao;
 import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
-import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
 import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
-import com.fieldbook.tracker.database.models.StudyGroupModel;
+import com.fieldbook.tracker.database.models.GroupModel;
 import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.database.repository.SpectralRepository;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -57,7 +56,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,7 +63,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -102,6 +99,8 @@ public class DataHelper {
     private ValueProcessorFormatAdapter processor;
 
     private SearchQueryBuilder queryBuilder;
+
+    private final GroupDao studyGroupDao = new GroupDao(GroupsTable.Type.STUDY);
 
     @Inject
     public DataHelper(@ActivityContext Context context) {
@@ -974,30 +973,30 @@ public class DataHelper {
     /**
      * Get all study group names
      */
-    public List<StudyGroupModel> getAllStudyGroups() {
-        return StudyGroupDao.Companion.getAllStudyGroups();
+    public List<GroupModel> getAllStudyGroups() {
+        return studyGroupDao.getAllGroups();
     }
 
     /**
      * Delete the unassigned study groups
      */
     public void deleteUnusedStudyGroups() {
-        StudyGroupDao.Companion.deleteUnusedStudyGroups();
+        studyGroupDao.deleteUnusedGroups();
     }
 
     /**
      * Create a study group
      */
     public Integer createOrGetStudyGroup(String groupName) {
-        return StudyGroupDao.Companion.createOrGetStudyGroup(groupName);
+        return studyGroupDao.createOrGetGroup(groupName);
     }
 
     public String getStudyGroupNameById(Integer groupId) {
-        return StudyGroupDao.Companion.getStudyGroupNameById(groupId);
+        return studyGroupDao.getGroupNameById(groupId);
     }
 
     public Integer getStudyGroupIdByName(String groupName) {
-        return StudyGroupDao.Companion.getStudyGroupIdByName(groupName);
+        return studyGroupDao.getGroupIdByName(groupName);
     }
 
     /**
@@ -1015,11 +1014,11 @@ public class DataHelper {
     }
 
     public boolean getStudyGroupIsExpanded(int studyId) {
-        return StudyGroupDao.Companion.getIsExpanded(studyId);
+        return studyGroupDao.getIsExpanded(studyId);
     }
 
     public void updateStudyGroupIsExpanded(int studyId, boolean value) {
-        StudyGroupDao.Companion.updateStudyGroupIsExpanded(studyId, value);
+        studyGroupDao.updateGroupIsExpanded(studyId, value);
     }
 
     public void deleteField(int studyId) {

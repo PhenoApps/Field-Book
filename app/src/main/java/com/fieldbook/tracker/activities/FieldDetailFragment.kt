@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -29,7 +31,6 @@ import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.SearchAttributeChooserDialog
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
-import com.fieldbook.tracker.interfaces.FieldAdapterController
 import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
@@ -49,10 +50,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
+import androidx.core.view.isGone
+import androidx.core.content.edit
 
 
 @AndroidEntryPoint
 class FieldDetailFragment : Fragment(), FieldSyncController {
+
+    companion object {
+        const val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
+    }
 
     @Inject
     lateinit var database: DataHelper
@@ -66,7 +73,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private var toolbar: Toolbar? = null
     private var fieldId: Int? = null
     private var fieldObject: FieldObject? = null
-    private val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
 
     private lateinit var rootView: View
     private lateinit var fieldDisplayNameTextView: TextView
@@ -127,14 +133,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         overviewExpandCollapseIcon.setImageResource(if (overviewIsCollapsed) R.drawable.ic_chevron_down else R.drawable.ic_chevron_up)
 
         overviewCollapsibleHeader.setOnClickListener { v: View? ->
-            if (overviewCollapsibleContent.visibility == View.GONE) {
+            if (overviewCollapsibleContent.isGone) {
                 overviewCollapsibleContent.visibility = View.VISIBLE
                 overviewExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
-                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_OVERVIEW_COLLAPSED, false).apply()
+                preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_OVERVIEW_COLLAPSED, false) }
             } else {
                 overviewCollapsibleContent.visibility = View.GONE
                 overviewExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
-                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_OVERVIEW_COLLAPSED, true).apply()
+                preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_OVERVIEW_COLLAPSED, true) }
             }
         }
 
@@ -145,8 +151,11 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             fieldId?.let { id ->
                 checkTraitsExist { result ->
                     if (result >= 0) {
-                        (activity as? FieldEditorActivity)?.setActiveField(id)
-                        startCollectActivity()
+                        if (fieldObject?.archived == true) {
+                            showUnarchiveDialog() // give a warning for archived fields
+                        } else {
+                            setAsActiveField()
+                        }
                     }
                 }
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot collect data")
@@ -172,14 +181,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         dataExpandCollapseIcon.setImageResource(if (dataIsCollapsed) R.drawable.ic_chevron_down else R.drawable.ic_chevron_up)
 
         dataCollapsibleHeader.setOnClickListener { v: View? ->
-            if (dataCollapsibleContent.visibility == View.GONE) {
+            if (dataCollapsibleContent.isGone) {
                 dataCollapsibleContent.visibility = View.VISIBLE
                 dataExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
-                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, false).apply()
+                preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, false) }
             } else {
                 dataCollapsibleContent.visibility = View.GONE
                 dataExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
-                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, true).apply()
+                preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, true) }
             }
         }
 
@@ -210,7 +219,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         rootView.setOnTouchListener { v, event ->
-            // Consume touch event to prevent propagation to FieldEditor RecyclerView
+            // Consume touch event to prevent propagation to FieldEditor/FieldArchived RecyclerView
             true
         }
     }
@@ -307,7 +316,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     Toast.makeText(context, getString(R.string.brapi_enable_before_sync), Toast.LENGTH_LONG).show()
                 }
             }
-            entryCount = "${entryCount} ${field.observationLevel}"
+            entryCount = "$entryCount ${field.observationLevel}"
 
             trialNameChip.visibility = View.GONE
             trialNameChip.text = field.trialName
@@ -367,7 +376,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
-        field.getTraitDetails()?.let { traitDetails ->
+        field.traitDetails?.let { traitDetails ->
             return traitDetails.map { traitDetail ->
                 val iconRes = Formats.entries
                     .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
@@ -407,7 +416,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     parentFragmentManager.popBackStack()
                 }
                 R.id.delete -> {
-                    (activity as? FieldEditorActivity)?.showDeleteConfirmationDialog(listOf(field.studyId), true)
+                    (activity as? BaseFieldActivity)?.showDeleteConfirmationDialog(listOf(field.studyId), true)
                 }
             }
 
@@ -457,7 +466,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                                     withContext(Dispatchers.Main) {
                                         fieldDisplayNameTextView.text = newName
                                         field.alias = newName
-                                        (activity as? FieldAdapterController)?.queryAndLoadFields()
+                                        (activity as? BaseFieldActivity)?.queryAndLoadFields()
                                         dialog.dismiss() // Only dismiss if everything is fine
                                     }
                                 }
@@ -479,7 +488,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     private fun showChangeSearchAttributeDialog(field: FieldObject) {
-        (activity as? FieldEditorActivity)?.setActiveField(field.studyId)
+        (activity as? BaseFieldActivity)?.setActiveField(field.studyId)
         
         val dialog = SearchAttributeChooserDialog()
         dialog.setOnSearchAttributeSelectedListener(object : SearchAttributeChooserDialog.OnSearchAttributeSelectedListener {
@@ -514,7 +523,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                         
                         // If apply to all was selected, refresh the parent activity's field list
                         if (applyToAll) {
-                            (activity as? FieldAdapterController)?.queryAndLoadFields()
+                            (activity as? BaseFieldActivity)?.queryAndLoadFields()
                         }
                     }
                 }
@@ -595,6 +604,35 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 this, getString(R.string.permission_rationale_trait_features),
                 PERMISSIONS_REQUEST_TRAIT_DATA, *perms
             )
+        }
+    }
+
+    private fun showUnarchiveDialog() {
+        AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+            .setTitle(getString(R.string.dialog_unarchive_field_title))
+            .setMessage(getString(R.string.dialog_unarchive_field_message))
+            .setPositiveButton(getString(R.string.dialog_yes)) { d, _ ->
+                fieldId?.let { database.setIsArchived(it, false) }
+                fieldObject?.archived = false
+                setAsActiveField()
+            }
+            .setNegativeButton(getString(R.string.dialog_no)) { d, _ ->
+                d.dismiss()
+            }
+            .show()
+    }
+
+    private fun setAsActiveField() {
+        fieldId?.let { id ->
+            (activity as? BaseFieldActivity)?.apply {
+                setActiveField(id)
+                queryAndLoadFields()
+            }
+            (activity as? FieldArchivedActivity)?.finish()
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                startCollectActivity()
+            }, 100)
         }
     }
 

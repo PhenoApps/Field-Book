@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.FieldArchivedActivity;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
-import com.fieldbook.tracker.database.models.StudyGroupModel;
+import com.fieldbook.tracker.database.models.GroupModel;
 import com.fieldbook.tracker.interfaces.FieldGroupController;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
@@ -44,7 +44,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     private final Context context;
     private AdapterCallback callback;
     private final FieldGroupController fieldGroupController;
-    private OnFieldSelectedListener listener;
+    private OnFieldActionListener listener;
     private String filterText = "";
     private final List<FieldObject> fullFieldList = new ArrayList<>();
     private final SharedPreferences preferences;
@@ -53,8 +53,9 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         TYPE_GROUP_HEADER, TYPE_FIELD, TYPE_ARCHIVE_HEADER
     }
 
-    public interface OnFieldSelectedListener {
-        void onFieldSelected(int itemId);
+    public interface OnFieldActionListener {
+        void onFieldDetailSelected(int fieldId);
+        void onFieldSetActive(int fieldId);
     }
 
     public interface AdapterCallback {
@@ -105,7 +106,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public void setOnFieldSelectedListener(OnFieldSelectedListener listener) {
+    public void setOnFieldActionListener(OnFieldActionListener listener) {
         this.listener = listener;
     }
 
@@ -130,7 +131,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     public void selectItem(int itemId) {
-        listener.onFieldSelected(itemId);
+        listener.onFieldDetailSelected(itemId);
     }
 
     public void selectAll() {
@@ -226,8 +227,8 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                         FieldObject field = fieldViewItem.field;
                         if (field != null && isInSelectionMode) {
                             toggleSelection(field.getStudyId());
-                        } else if (field != null && context instanceof FieldEditorActivity) {
-                            ((FieldEditorActivity) context).setActiveField(field.getStudyId());
+                        } else if (field != null) {
+                            listener.onFieldSetActive(field.getStudyId());
                         }
                     }
                 }
@@ -244,7 +245,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                             if (field != null && isInSelectionMode) {
                                 toggleSelection(field.getStudyId());
                             } else if (field != null && listener != null) {
-                                listener.onFieldSelected(field.getStudyId());
+                                listener.onFieldDetailSelected(field.getStudyId());
                             }
                         }
                     }
@@ -397,7 +398,12 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
                 if (!field.getArchived()) {
                     if ((headerName == null && fieldGroupName == null) || // ungrouped
                             (headerName != null && headerName.equals(fieldGroupName))) { // grouped
-                        currentList.add(insertPosition++, new FieldViewItem(field, fieldGroupController));
+
+                        FieldViewItem fieldItem = new FieldViewItem(field, fieldGroupController);
+                        int activeFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+                        fieldItem.updateIsActive(activeFieldId); // update active state
+
+                        currentList.add(insertPosition++, fieldItem);
                     }
                 }
             }
@@ -411,6 +417,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         submitList(currentList);
     }
+
     private void selectAllFieldsInGroup(Integer groupId) {
         for (FieldObject field : fullFieldList) {
             if (!field.getArchived()) { // make sure we are not selecting archived fields
@@ -462,8 +469,10 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
     /**
      * Builds a list of field items for the FieldEditorActivity
-     * Groups fields by their group name and includes group headers
-     * Attaches archived list item at the end
+     * When grouping is
+     *  - disabled: show all fields that are not archived
+     *  - enabled: groups fields by their group name and includes group headers
+     * Attaches archived list item at the end (regardless of grouping state)
      */
     private List<FieldViewItem> buildFieldsList(List<FieldObject> fieldsList) {
         List<FieldViewItem> arrayList = new ArrayList<>();
@@ -472,10 +481,15 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         if (!groupingEnabled) {
             for (FieldObject field : fieldsList) {
-                FieldViewItem item = new FieldViewItem(field, fieldGroupController);
-                item.updateIsActive(activeFieldId);
-                arrayList.add(item);
+                if (!field.getArchived()) {
+                    FieldViewItem item = new FieldViewItem(field, fieldGroupController);
+                    item.updateIsActive(activeFieldId);
+                    arrayList.add(item);
+                }
             }
+
+            addArchivedHeaderToList(arrayList, fieldsList);
+
             return arrayList;
         }
 
@@ -502,12 +516,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
             addGroupToList(arrayList, null, ungroupedExpanded, ungroupedFields);
         }
 
-        long archivedCount = fieldsList.stream().filter(FieldObject::getArchived).count();
-        if (archivedCount > 0) { // add archived list item at the bottom
-            String archivedVal = context.getString(R.string.group_archived_value);
-            FieldViewItem archiveHeader = new FieldViewItem(archivedVal, archivedCount, true);
-            arrayList.add(archiveHeader);
-        }
+        addArchivedHeaderToList(arrayList, fieldsList);
 
         return arrayList;
     }
@@ -528,11 +537,23 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
 
         // add children if expanded
         if (isExpanded) {
+            int activeFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
             for (FieldObject f : groupFields) {
                 if (!f.getArchived()) {
-                    arrayList.add(new FieldViewItem(f, fieldGroupController));
+                    FieldViewItem item = new FieldViewItem(f, fieldGroupController);
+                    item.updateIsActive(activeFieldId);
+                    arrayList.add(item);
                 }
             }
+        }
+    }
+
+    private void addArchivedHeaderToList(List<FieldViewItem> arrayList, List<FieldObject> fieldsList) {
+        long archivedCount = fieldsList.stream().filter(FieldObject::getArchived).count();
+        if (archivedCount > 0) { // add archived list item at the bottom
+            String archivedVal = context.getString(R.string.group_archived_value);
+            FieldViewItem archiveHeader = new FieldViewItem(archivedVal, archivedCount, true);
+            arrayList.add(archiveHeader);
         }
     }
 
@@ -548,9 +569,9 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         groupedFields.put(null, new ArrayList<>());
 
         // add all study group names
-        List<StudyGroupModel> allStudyGroups = fieldGroupController.getAllStudyGroups();
+        List<GroupModel> allStudyGroups = fieldGroupController.getAllStudyGroups();
         if (allStudyGroups != null && !allStudyGroups.isEmpty()) {
-            for (StudyGroupModel group : allStudyGroups) {
+            for (GroupModel group : allStudyGroups) {
                 groupedFields.put(group.getGroupName(), new ArrayList<>());
             }
         }
@@ -607,9 +628,9 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     public void changeStateOfAllGroups(boolean isExpanded) {
-        List<StudyGroupModel> allStudyGroups = fieldGroupController.getAllStudyGroups();
+        List<GroupModel> allStudyGroups = fieldGroupController.getAllStudyGroups();
         if (allStudyGroups != null) {
-            for (StudyGroupModel group : allStudyGroups) {
+            for (GroupModel group : allStudyGroups) {
                 fieldGroupController.updateIsExpanded(group.getId(), isExpanded);
             }
         }
