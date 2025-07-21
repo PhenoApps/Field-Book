@@ -382,7 +382,9 @@ class StudyDao {
                 field.studyDbId
             ) else -1
 
-            if (sid == -1) {
+            val nameExists = getAllFieldObjects("study_name").any { it.name == field.name }
+
+            if (sid == -1 && !nameExists) {
 
                 db.beginTransaction()
 

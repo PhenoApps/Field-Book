@@ -1480,4 +1480,5 @@
     <string name="nearby_share_export_preferences">Export Preferences</string>
     <string name="nearby_share_import_preferences">Import Preferences</string>
     <string name="all_fields_processed">All fields processed</string>
+    <string name="import_runnable_field_name_exists">Field name already exists.</string>
 </resources>

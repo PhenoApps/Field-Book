@@ -35,6 +35,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
     boolean fail;
     boolean uniqueFail;
     boolean containsDuplicates = false;
+    boolean fieldNameExists = false;
 
     public ImportRunnableTask(Context context, FieldFileObject.FieldFileBase fieldFile,
                               int idColPosition, String unique) {
@@ -127,6 +128,11 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
             studyId = controller.getDatabase().createField(f, nonEmptyColumns, false);
 
+            if (studyId == -1) {
+                fieldNameExists = true;
+                throw new RuntimeException();
+            }
+
             //start iterating over all the rows of the csv file only if we found the u/p/s indices
             if (uniqueIndex > -1) {
 
@@ -214,10 +220,14 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
             ed.apply();
         }
+
         if (containsDuplicates) {
             Utils.makeToast(context, context.getString(R.string.import_runnable_duplicates_skipped));
         }
-        if (fail) {
+
+        if (fieldNameExists) {
+            Utils.makeToast(context, context.getString(R.string.import_runnable_field_name_exists));
+        } else if (fail) {
             Utils.makeToast(context, context.getString(R.string.import_runnable_create_field_data_failed, lineFail));
             //makeToast(getString(R.string.import_error_general));
         } else if (uniqueFail && context != null) {
