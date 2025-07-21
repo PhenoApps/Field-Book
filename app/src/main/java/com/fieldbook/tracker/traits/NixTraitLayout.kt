@@ -2,6 +2,7 @@ package com.fieldbook.tracker.traits
 
 import android.app.AlertDialog
 import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
@@ -30,6 +31,7 @@ import com.serenegiant.bluetooth.BluetoothManager
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
 
+
 /**
  * https://nixsensor.github.io/nix-universal-sdk-android-doc/device-operations/
  */
@@ -56,6 +58,39 @@ class NixTraitLayout : SpectralTraitLayout {
 
     override fun type(): String {
         return Formats.NIX.getDatabaseName()
+    }
+
+    override fun loadLayout() {
+        super.loadLayout()
+
+        //check if device is connected to a network, if not show an error message
+        //the nix requires internet access to verify license
+        if (!isNetworkConnected()) {
+            Toast.makeText(
+                context,
+                R.string.nix_error_no_network,
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+    }
+
+    //https://stackoverflow.com/questions/4238921/detect-whether-there-is-an-internet-connection-available-on-android
+    private fun isNetworkConnected(): Boolean {
+        var hasWifi = false
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+        val networkInfo = connectivityManager?.allNetworks ?: return false
+        for (network in networkInfo) {
+            val info = connectivityManager.getNetworkInfo(network)
+            if (info != null && info.isConnected) {
+                when (info.type) {
+                    ConnectivityManager.TYPE_WIFI -> hasWifi = true
+                }
+            }
+        }
+
+        return hasWifi
     }
 
     override fun establishConnection(): Boolean {

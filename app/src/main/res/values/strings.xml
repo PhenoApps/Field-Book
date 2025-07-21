@@ -1519,5 +1519,6 @@
     <string name="nix_error_bluetooth_disabled">Bluetooth is disabled on the device.</string>
     <string name="list_item_color_placeholder_content_description">Placeholder for new scan</string>
     <string name="loading">Loading</string>
+    <string name="nix_error_no_network">Nix may require internet to work properly.</string>
 
 </resources>

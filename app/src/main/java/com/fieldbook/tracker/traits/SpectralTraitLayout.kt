@@ -306,9 +306,9 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         getSpectralUri(deviceType)?.let { uri ->
 
-            if (providesSpectral) {
-                bisectAndWriteSpectralData(uri, frame)
-            }
+//            if (providesSpectral) {
+//                bisectAndWriteSpectralData(uri, frame)
+//            }
 
             return uri.toString()
         }

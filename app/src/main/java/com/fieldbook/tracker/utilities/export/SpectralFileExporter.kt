@@ -94,7 +94,7 @@ class SpectralFileExporter @Inject constructor(
         val header = "$metadataHeader, ${frameReference.wavelengths.replace(" ", ", ")}\n"
 
         try {
-            context.contentResolver.openOutputStream(uri, "w")?.bufferedWriter()?.use { writer ->
+            context.contentResolver.openOutputStream(uri, "wt")?.bufferedWriter()?.use { writer ->
                 writer.write(header)
 
                 for (fact in spectralFacts) {
